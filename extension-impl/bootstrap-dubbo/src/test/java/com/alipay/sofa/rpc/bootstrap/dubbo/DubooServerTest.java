@@ -42,9 +42,11 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -68,7 +70,7 @@ public class DubooServerTest {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
             .setStopTimeout(60000)
-            .setPort(22222)
+            .setPort(20880)
             .setProtocol("dubbo")
             .setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
@@ -88,7 +90,7 @@ public class DubooServerTest {
         clientApplication.setAppName("client");
         consumerConfig = new ConsumerConfig<DemoService>()
             .setInterfaceId(DemoService.class.getName())
-            .setDirectUrl("dubbo://127.0.0.1:22222")
+            .setDirectUrl("dubbo://127.0.0.1:20880")
             .setBootstrap("dubbo")
             .setTimeout(30000)
             .setRegister(false).setProtocol("dubbo").setApplication(clientApplication);
@@ -105,7 +107,7 @@ public class DubooServerTest {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
             .setStopTimeout(60000)
-            .setPort(22222)
+            .setPort(20880)
             .setProtocol("dubbo")
             .setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
@@ -133,7 +135,7 @@ public class DubooServerTest {
         methodConfigs.add(methodConfig);
         consumerConfig = new ConsumerConfig<DemoService>()
             .setInterfaceId(DemoService.class.getName())
-            .setDirectUrl("dubbo://127.0.0.1:22222")
+            .setDirectUrl("dubbo://127.0.0.1:20880")
             .setTimeout(30000)
             .setRegister(false)
             .setProtocol("dubbo")
@@ -153,7 +155,7 @@ public class DubooServerTest {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
             .setStopTimeout(60000)
-            .setPort(22222)
+            .setPort(20880)
             .setProtocol("dubbo")
             .setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
@@ -178,7 +180,7 @@ public class DubooServerTest {
         methodConfig.setName("sayHello");
         consumerConfig = new ConsumerConfig<DemoService>()
             .setInterfaceId(DemoService.class.getName())
-            .setDirectUrl("dubbo://127.0.0.1:22222")
+            .setDirectUrl("dubbo://127.0.0.1:20880")
             .setTimeout(30000)
             .setRegister(false).setProtocol("dubbo")
             .setBootstrap("dubbo")
@@ -206,8 +208,14 @@ public class DubooServerTest {
 
     }
 
+    @BeforeClass
+    public static void adBeforeClass() {
+        RpcRunningState.setUnitTestMode(true);
+    }
+
     @After
-    public void aferMethod() {
+    public void afterMethod() {
+        DubboSingleton.destroyAll();
         RpcRuntimeContext.destroy();
         RpcInternalContext.removeAllContext();
         RpcInvokeContext.removeContext();

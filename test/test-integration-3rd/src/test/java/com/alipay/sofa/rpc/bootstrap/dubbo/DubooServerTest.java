@@ -39,11 +39,13 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -61,7 +63,7 @@ public class DubooServerTest {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
             .setStopTimeout(60000)
-            .setPort(22222)
+            .setPort(20880)
             .setProtocol("dubbo")
             .setQueues(100).setCoreThreads(1).setMaxThreads(2).setHost(SystemInfo.getLocalHost());
 
@@ -106,8 +108,14 @@ public class DubooServerTest {
         Assert.assertNotNull(result);
     }
 
+    @BeforeClass
+    public static void adBeforeClass() {
+        RpcRunningState.setUnitTestMode(true);
+    }
+
     @After
     public void aferMethod() {
+        DubboSingleton.destroyAll();
         RpcRuntimeContext.destroy();
         RpcInternalContext.removeAllContext();
         RpcInvokeContext.removeContext();
