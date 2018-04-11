@@ -116,7 +116,6 @@
                 <configuration>
                     <encoding>${project.build.sourceEncoding}</encoding>
                     <detectOfflineLinks>true</detectOfflineLinks>
-                    <additionalparam>-Xdoclint:none</additionalparam>
                     <breakiterator>true</breakiterator>
                     <author>false</author>
                     <keywords>true</keywords>
@@ -216,4 +215,16 @@
         </plugins>
     </build>
 
+    <profiles>
+        <profile>
+            <id>jdk8</id>
+            <activation>
+                <jdk>[1.8,)</jdk>
+            </activation>
+            <properties>
+                <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
+                <maven.javadoc.quiet>true</maven.javadoc.quiet>
+            </properties>
+        </profile>
+    </profiles>
 </project>

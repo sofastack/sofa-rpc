@@ -20,6 +20,7 @@ import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -39,4 +40,12 @@ public class DubboSingleton {
      */
     final static ConcurrentHashMap<RegistryConfig, com.alibaba.dubbo.config.RegistryConfig> REGISTRY_MAP = new ConcurrentHashMap<RegistryConfig, com.alibaba.dubbo.config.RegistryConfig>();
 
+    /**
+     * Destroy all dubbo resources
+     */
+    public static void destroyAll() {
+        for (Map.Entry<ServerConfig, ProtocolConfig> entry : SERVER_MAP.entrySet()) {
+            entry.getValue().destory();
+        }
+    }
 }
