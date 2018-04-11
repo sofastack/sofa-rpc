@@ -27,8 +27,8 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com:alipay/sofa-rpc.git</connection>
-        <developerConnection>scm:git:ssh://github.com:alipay/sofa-rpc.git</developerConnection>
+        <connection>scm:git:git://github.com/alipay/sofa-rpc.git</connection>
+        <developerConnection>scm:git:ssh://github.com/alipay/sofa-rpc.git</developerConnection>
         <url>http://github.com/alipay/sofa-rpc/tree/master</url>
     </scm>
     
