@@ -1,0 +1,5 @@
+com.alipay.sofa.rpc.client.lb.ConsistentHashLoadBalancer
+com.alipay.sofa.rpc.client.lb.LocalPreferenceLoadBalancer
+com.alipay.sofa.rpc.client.lb.RandomLoadBalancer
+com.alipay.sofa.rpc.client.lb.RoundRobinLoadBalancer
+com.alipay.sofa.rpc.client.lb.WeightRoundRobinLoadBalancer

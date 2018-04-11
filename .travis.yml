@@ -1,0 +1,35 @@
+#.travis.yml
+language: java
+
+addons:
+  apt:
+    packages:
+      - openjdk-6-jdk
+
+jdk:
+  - oraclejdk8
+  - openjdk7
+  - openjdk6
+
+before_install:
+  - echo "Downloading Maven 3.2.5" 
+   && wget https://archive.apache.org/dist/maven/maven-3/3.2.5/binaries/apache-maven-3.2.5-bin.zip 
+   && unzip -qq apache-maven-3.2.5-bin.zip 
+   && export M2_HOME=$PWD/apache-maven-3.2.5 
+   && export PATH=$M2_HOME/bin:$PATH 
+   && mvn -version
+  - echo "Install Zookeeper 3.4.11"
+   && wget http://www-us.apache.org/dist/zookeeper/zookeeper-3.4.11/zookeeper-3.4.11.tar.gz
+   && tar -zxf zookeeper-3.4.11.tar.gz
+   && mv zookeeper-3.4.11/conf/zoo_sample.cfg zookeeper-3.4.11/conf/zoo.cfg
+   && /bin/bash zookeeper-3.4.11/bin/zkServer.sh start
+
+install:
+  - mvn clean install -DskipTests=true -Dmaven.javadoc.skip=true -B -U -e
+
+script:
+  - sh ./tools/check_format.sh
+  - mvn test -Plocal
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

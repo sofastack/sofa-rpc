@@ -1,0 +1,2 @@
+directUrl=com.alipay.sofa.rpc.client.router.DirectUrlRouter
+registry=com.alipay.sofa.rpc.client.router.RegistryRouter

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <!--  logback appenders -->
+
+    <!-- 按照每天生成日志文件 -->
+    <appender name="ERROR-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <!-- 过滤器，只记录 error 级别的日志 -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>error</level>
+        </filter>
+        <!-- 日志名称 -->
+        <file>${logging.path}/rpc/${appname}/common-error.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/common-error.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="ROOT-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/common-default.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/common-default.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="TR-SERIALIZE-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/taobao-remoting-serialization.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/taobao-remoting-serialization.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="REGISTRY-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/sofa-registry.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/sofa-registry.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="SOFA-ROUTER-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/sofa-router.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/sofa-router.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="SOFA-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/sofa-default.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/sofa-default.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="TAOBAO-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/taobao-default.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/taobao-default.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="TR-CONNECTION-DIGEST-APPENDER" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/tr-connection-digest.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/tr-connection-digest.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="TR-LOG-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/taobao-remoting.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/taobao-remoting.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%n%d %-5p %c{2} - %n%m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <appender name="REMOTING-LOG-FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <append>true</append>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>${logging.level.com.alipay.sofa.rpc}</level>
+        </filter>
+        <file>${logging.path}/rpc/${appname}/sofa-remoting.log</file>
+        <!-- 每天生成一个日志文件，保存30天的日志文件 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--日志文件输出的文件名:按天回滚 daily -->
+            <FileNamePattern>${logging.path}/rpc/${appname}/sofa-remoting.log.%d{yyyy-MM-dd}</FileNamePattern>
+            <!--日志文件保留天数-->
+            <MaxHistory>30</MaxHistory>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>%d %-5p %-32t %c{2} - %m%n</pattern>
+            <!-- 编码 -->
+            <charset>${file.encoding}</charset>
+        </encoder>
+    </appender>
+
+    <!--  logback loggers -->
+    <logger name="TR-CONNECTION-POOL-DIGEST" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="TR-CONNECTION-DIGEST-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="RPC-REGISTRY" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="REGISTRY-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+
+    <logger name="SOFA-ROUTER" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="SOFA-ROUTER-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa.rpc.codec" level="${logging.level.com.alipay.sofa.rpc}"
+            additivity="false">
+        <appender-ref ref="TR-SERIALIZE-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.taobao.remoting" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="TR-LOG-FILE"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.remoting" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="REMOTING-LOG-FILE"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="SOFA-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.taobao" level="${logging.level.com.alipay.sofa.rpc}" additivity="false">
+        <appender-ref ref="TAOBAO-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <root level="${logging.level.com.alipay.sofa.rpc}">
+        <appender-ref ref="ROOT-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </root>
+
+</configuration>

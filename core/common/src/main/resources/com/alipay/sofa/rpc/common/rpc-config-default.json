@@ -1,0 +1,292 @@
+/*
+本文件为SOFA RPC客户端内置的默认配置文件。
+用户可以在自己的工程中自定义rpc-config.json进行默认配置覆盖。
+所有的属性均可配置。（通过-D或者setProperty）
+
+PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支持的，这属于宽松的的json格式
+*/
+{
+  /*-------------RPC框架内部使用配置项-------------*/
+  // 本配置文件加载顺序，越大越后加载
+  "rpc.config.order": 0,
+  // 日志实现，日志早于配置加载，所以不能适应Extension机制
+  "logger.impl": "com.alipay.sofa.rpc.log.SLF4JLoggerImpl",
+  // 扩展点加载的路径
+  "extension.load.path": [
+    "META-INF/services/sofa-rpc/",
+    "META-INF/services/"
+  ],
+  // 需要被加载的模块列表，多个用逗号隔开
+  "module.load.list" : "*",
+  /*-------------RPC框架内部使用配置项-------------*/
+
+
+  /*-------------系统运行时相关配置开始-------------*/
+  // 0代表自动判断，也可以自定义注入，或者启动参数注入
+  "system.cpu.cores": 0,
+  // 是否允许线程上下文携带自定义参数，默认true，关闭后，可能tracer等会失效，但是会提高性能
+  "context.attachment.enable": true,
+  // 是否启动事件总线，关闭后，可能tracer等会失效，但是可以提高性能
+  "event.bus.enable": true,
+  // 主动监听JVM关闭事件，默认true，如果有外部管理框架，可以由外部开启回收
+  "jvm.shutdown.hook": true,
+  // 是否增加序列化安全黑名单，关闭后可提供性能
+  "serialize.blacklist.enable": false,
+  // 是否支持多ClassLoader支持，如果是单ClassLoader环境，可以关闭提高性能
+  "multiple.classloader.enable": false,
+  // 是否允许请求和响应透传数据，关闭后，会提高性能
+  "invoke.baggage.enable": false,
+  /*-------------系统运行时相关配置开始-------------*/
+
+
+  /*-------------默认配置值开始-------------*/
+  // 默认Provider启动器
+  "default.provider.bootstrap": "bolt",
+  // 默认Consumer启动器
+  "default.consumer.bootstrap": "bolt",
+  // 默认uniqueId 做为服务唯一标识
+  "default.uniqueId": "",
+  // 默认version 做为服务唯一标识
+  "default.version": "1.0",
+  // 默认分组 不做为服务唯一标识
+  "default.group": "",
+  // 默认注册中心
+  "default.registry": "zookeeper",
+  // 默认协议
+  "default.protocol": "bolt",
+  // 默认序列化
+  "default.serialization": "hessian2",
+  // 默认压缩算法
+  "default.compress": "snappy",
+  // 默认代理类
+  "default.proxy": "javassist",
+  // 默认字符集
+  "default.charset": "UTF-8",
+  // 默认网络层
+  "default.transport": "netty4",
+  // 默认tracer实现
+  "default.tracer": "",
+  /*-------------默认配置值结束-------------*/
+
+
+  /*-------------Registry相关配置开始-------------*/
+  // 注册中心地址发现服务 的地址
+  "registry.index.address": "",
+  /* 默认连注册中心的超时时间*/
+  "registry.connect.timeout": 20000,
+  // 注册中心等待结果的超时时间
+  "registry.disconnect.timeout": 10000,
+  // 注册中心调用超时时间
+  "registry.invoke.timeout": 10000,
+  // 注册中心心跳发送间隔
+  "registry.heartbeat.period": 30000,
+  // 注册中心重建连接的间隔
+  "registry.reconnect.period": 30000,
+  // 是否开启有注册中心的批量注册/反注册  boolean  默认true，重连或者销毁时采用批量的方式。配为false则采取旧方式。  1.6.0
+  "registry.batch": false,
+  // 如果开启，批量的条数
+  "registry.batch.size": 10,
+  /*-------------Registry相关配置开始-------------*/
+
+  /*-------------Server相关配置开始-------------*/
+  // 默认绑定网卡
+  "server.host": "0.0.0.0",
+  // 端口段开始
+  "server.port.start": 22000,
+  // 端口段结束
+  "server.port.end": 65535,
+  // 默认contextPath
+  "server.context.path": "",
+  // 默认io线程大小，推荐自动设置
+  "server.ioThreads": 0,
+  // 默认业务线程池类型
+  "server.pool.type": "cached",
+  // 默认业务线程池最小
+  "server.pool.core": 20,
+  // 默认业务线程池最大
+  "server.pool.max": 200,
+  // 是否允许telnet，针对自定义协议
+  "server.telnet": true,
+  // 默认普通业务线程池队列
+  "server.pool.queue.type": "normal",
+  // 默认业务线程池队列大小
+  "server.pool.queue": 0,
+  //  默认业务线程池回收时间
+  "server.pool.aliveTime": 60000,
+  // 默认业务线程池是否初始化核心线程
+  "server.pool.pre.start": false,
+  // 最大支持长连接
+  "server.accepts": 100000,
+  // 是否启动epoll
+  "server.epoll": false,
+  // 是否hold住端口，true的话随主线程退出而退出，false的话则要主动退出
+  "server.daemon": true,
+  // 端口是否自适应，如果端口被占用，自动+1
+  "server.adaptive.port": false,
+  // 服务端是否自动启动
+  "server.auto.start": true,
+  // 服务端关闭超时时间
+  "server.stop.timeout": 20000,
+  /*-------------Server相关配置结束-------------*/
+
+
+  /*-------------Provider&Consumer公共配置开始-------------*/
+  //默认服务是否注册
+  "service.register": true,
+  //默认服务是否订阅
+  "service.subscribe": true,
+  /*-------------Provider&Consumer公共配置公共配置结束-------------*/
+
+
+  /*-------------Provider相关配置开始-------------*/
+  //默认服务端权重
+  "provider.weight": 100,
+  // 默认发布延迟，代表spring启动后触发
+  "provider.delay": -1,
+  // 默认发布方法：全部
+  "provider.include": "*",
+  // 默认不发布方法
+  "provider.exclude": "",
+  // 默认动态注册，false代表不主动发布
+  "provider.dynamic": true,
+  // 接口优先级
+  "provider.priority": 0,
+  //服务端调用超时， 不打断执行。0表示不判断
+  "provider.invoke.timeout": 0,
+  //接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
+  "provider.concurrents": 0,
+  // 同一个服务（接口协议uniqueId相同）的最大发布次数，防止由于代码bug导致重复发布。注意：后面的发布可能会覆盖前面的实现
+  "provider.repeated.export.limit": 1,
+  /*-------------Provider相关配置结束-------------*/
+
+
+  /*-------------Consumer相关配置开始-------------*/
+  // 集群策略
+  "consumer.cluster": "failover",
+  // 默认连接全部建立长连接
+  "consumer.connectionHolder": "all",
+  // 默认单分组
+  "consumer.addressHolder": "singleGroup",
+  // 负载均衡
+  "consumer.loadBalancer": "random",
+  //默认失败重试次数
+  "consumer.retries": 0,
+  //接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
+  "consumer.concurrents": 0,
+  // 默认是否异步
+  "consumer.invokeType": "sync",
+  // 默认不延迟加载
+  "consumer.lazy": false,
+  // 默认粘滞连接
+  "consumer.sticky": false,
+  // 是否jvm内部调用（provider和consumer配置在同一个jvm内，则走本地jvm内部，不走远程）
+  "consumer.inJVM": true,
+  // 是否强依赖（即没有服务节点就启动失败）
+  "consumer.check": false,
+  // 默认长连接数
+  "consumer.connection.num": 1,
+  // 默认consumer连provider超时时间
+  "consumer.connect.timeout": 5000,
+  // 默认consumer断开时等待结果的超时时间
+  "consumer.disconnect.timeout": 10000,
+  // 默认consumer调用provider超时时间
+  "consumer.invoke.timeout": 5000,
+  // 心跳发送间隔
+  "consumer.heartbeat.period": 30000,
+  // 重建连接间隔
+  "consumer.reconnect.period": 10000,
+  // 等待地址时间，-1表示一直等
+  "consumer.address.wait": -1,
+  // 同一个服务（接口协议uniqueId相同）的最大引用次数，防止由于代码bug导致重复引用，每次引用都会生成一个代理类对象
+  "consumer.repeated.reference.limit": 3,
+  // 本地缓存的StreamObserver最大实例数
+  "stream.observer.max.size": 10000,
+  // 本地缓存的Callback最大实例数
+  "callback.max.size": 1000,
+  /*-------------Consumer相关配置结束-------------*/
+
+
+  /*-------------异步队列相关配置开始-------------*/
+  // 默认回调线程池最小
+  "async.pool.core": 10,
+  // 默认回调线程池最大
+  "async.pool.max": 200,
+  // 默认回调线程池队列
+  "async.pool.queue": 256,
+  //  默认回调线程池回收时间
+  "async.pool.time": 60000,
+  /*-------------异步队列相关配置结束-------------*/
+
+
+  /*-------------Transport层相关配置开始-------------*/
+  // 使用epoll
+  "transport.use.epoll": false,
+  //默认数据包大小 8*1024*1024
+  "transport.payload.max": 8388608,
+  // 客户端io线程数，默认 max(4,cpu+1)
+  "transport.client.io.threads": 0,
+  // 即I/O操作和用户自定义任务的执行时间比为1：1
+  "transport.client.io.ratio": 50,
+  "transport.server.backlog": 35536,
+  "transport.server.reuseAddr": true,
+  "transport.server.keepAlive": true,
+  "transport.server.tcpNoDelay": true,
+  "transport.server.io.ratio": 50,
+  // boss线程，默认max(4,cpu/2)
+  "transport.server.boss.threads": 0,
+  // 服务端IO线程 max(8,cpu+1)
+  "transport.server.io.threads": 0,
+  // 最大长连接
+  //"transport.server.max.connection" : 65536,
+  // 是否允许telnet
+  //"transport.server.telnet" : true,
+  // 是否守护线程，true随主线程退出而退出，false需要主动退出
+  //"transport.server.daemon" : true,
+  // 线程方法模型
+  "transport.server.dispatcher": "",
+  // 是否一个端口支持多协议
+  "transport.server.protocol.adaptive": true,
+  // buffer默认大小
+  "transport.buffer.size": 8192,
+  // 写入的buffer水位最大值
+  "transport.buffer.max": 32768,
+  // 写入的buffer水位最小值
+  "transport.buffer.min": 1024,
+  // 是否跨接口长链接复用
+  "transport.connection.reuse": true,
+  // 是否开启压缩
+  "compress.open": false,
+  // 开启压缩的大小基线
+  "compress.size.baseline": 2048,
+  /*-------------Transport层相关配置结束-------------*/
+
+  /*
+   *其它 TODO
+   */
+  //  Consumer调用时是否发生信息  boolean  默认true，服务端拿到调用端的自动部署应用信息。配为false，服务端拿不到调用者信息  1.6.0
+  "invoke.send.app": false,
+  //  序列化时是否检查父子类（声明参数和传入值是父子类）  boolean  默认true，如果业务不存在这种情况可以配置为false，提高性能  1.0.0
+  "serialize.check.class": false,
+  //  序列化是否检测循环引用类型  string  默认true，针对c++等调用者进行关闭  1.6.0
+  "serialize.check.reference": false,
+  //  客户端是否使用epoll（针对linux）  boolean  默认false，Linux开启epoll可提高性能  1.0.3
+  "transport.consumer.epoll": false,
+  // 是否检测系统时间，需要filter配合
+  "check.system.time": false,
+  //计数器服务调用步长  int  默认1，每次丢调用计数器，调大可以提高性能但会减低精准  1.2.0
+  "counter.batch": false,
+  //json序列化是否返回null字段。  boolean  默认false，默认只返回有属性的字段。打开会降低效率。  1.5.1
+  "json.serialize.fill.empty": false,
+  //  consumer的服务端列表是否可被清空  boolean  默认false，默认不能被清空（最后的清空请求被忽略），防止删全部节点等误操作，但是会影响列表的准确性。  1.6.0
+  "consumer.provider.nullable": false,
+  //  json序列化的时候，开启的特性  string  默认空，参见fastjson.serializer.SerializerFeature，多个逗号分隔  1.6.0
+  "json.serializer.features": false,
+  //  json解析的时候，开启的特性  string  默认空，参见fastjson.parser.Feature，多个逗号分隔  1.6.0
+  "json.parser.features": false,
+  // 心跳在IO线程吗？ TODO
+  "transport.heart.io": true,
+  // 协商请求在IO线程执行吗？ TODO
+  "transport.negotiator.async": false,
+  //是否所有客户端共享一个重连线程
+  "consumer.share.reconnect.thread": false
+}

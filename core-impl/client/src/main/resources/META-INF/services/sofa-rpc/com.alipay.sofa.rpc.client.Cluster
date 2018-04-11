@@ -1,0 +1,2 @@
+failfast=com.alipay.sofa.rpc.client.FailFastCluster
+failover=com.alipay.sofa.rpc.client.FailoverCluster

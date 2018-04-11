@@ -1,0 +1,50 @@
+{
+  /*-------------RPC框架内部使用配置项-------------*/
+  // 本配置文件加载顺序，越大越后加载
+  "rpc.config.order": 200,
+  // 日志实现，日志早于配置加载，所以不能适应Extension机制
+  "logger.impl": "com.alipay.sofa.rpc.log.MiddlewareLoggerImpl",
+  /*-------------RPC框架内部使用配置项-------------*/
+
+  /*-------------系统运行时相关配置开始-------------*/
+  // 是否增加序列化安全黑名单，关闭后可提供性能
+  "serialize.blacklist.enable": true,
+  // 是否支持多ClassLoader支持，如果是单ClassLoader环境，可以关闭提高性能
+  "multiple.classloader.enable": true,
+  // 是否允许请求和响应透传数据，关闭后，会提高性能
+  "invoke.baggage.enable": true,
+  /*-------------系统运行时相关配置开始-------------*/
+  
+  
+  /*-------------默认配置值开始-------------*/
+  // 默认Provider启动器
+  "default.provider.bootstrap": "bolt",
+  // 默认Consumer启动器
+  "default.consumer.bootstrap": "bolt",
+  // 默认代理类型
+  "default.proxy" : "jdk",
+  // 默认网络层
+  "default.transport": "bolt",
+  // 默认tracer实现
+  "default.tracer": "",
+  /*-------------默认配置值结束-------------*/
+
+
+  /*-------------Server相关配置开始-------------*/
+  //  默认业务线程池回收时间
+  "server.pool.aliveTime": 300000,
+  // 服务端关闭超时时间
+  "server.stop.timeout": 10000,
+  /*-------------Server相关配置结束-------------*/
+
+
+  /*-------------Consumer相关配置开始-------------*/
+  //默认consumer连provider超时时间
+  "consumer.connect.timeout": 3000,
+  //默认consumer断开时等待结果的超时时间
+  "consumer.disconnect.timeout": 5000,
+  // 默认consumer调用provider超时时间
+  "consumer.invoke.timeout": 3000
+  
+  /*-------------Consumer相关配置结束-------------*/
+}

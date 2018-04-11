@@ -1,0 +1,407 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.alipay.sofa.rpc.registry.local;
+
+import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.LogConstants;
+import com.alipay.sofa.rpc.common.struct.MapDifference;
+import com.alipay.sofa.rpc.common.struct.ScheduledService;
+import com.alipay.sofa.rpc.common.struct.ValueDifference;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.alipay.sofa.rpc.log.LogCodes;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.registry.Registry;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
+
+/**
+ * Local registry
+ *
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ */
+@Extension("local")
+public class LocalRegistry extends Registry {
+
+    /**
+     * Logger
+     */
+    private static final Logger                 LOGGER          = LoggerFactory.getLogger(LocalRegistry.class);
+
+    /**
+     * 注册中心单独的日志输出
+     */
+    private static final Logger                 LOGGER_REGISTRY = LoggerFactory
+                                                                    .getLogger(LogConstants.LOG_NAME_REGISTRY);
+
+    /**
+     * 定时加载
+     */
+    private ScheduledService                    scheduledExecutorService;
+
+    /**
+     * 内存里的服务列表 {service : [provider...]}
+     */
+    protected Map<String, ProviderGroup>        memoryCache     = new ConcurrentHashMap<String, ProviderGroup>();
+
+    /**
+     * 内存发生了变化，如果为true，则将触发写入文件动作
+     */
+    private boolean                             needBackup      = false;
+
+    /**
+     * 是否订阅通知（即扫描文件变化），默认为true
+     * 如果FileRegistry是被动加载（例如作为注册中心备份的）的，建议false，防止重复通知
+     */
+    private boolean                             subscribe       = true;
+
+    /**
+     * 订阅者通知列表（key为订阅者关键字，value为ConsumerConfig列表）
+     */
+    protected Map<String, List<ConsumerConfig>> notifyListeners = new ConcurrentHashMap<String, List<ConsumerConfig>>();
+
+    /**
+     * 最后一次扫描文件时间
+     */
+    private long                                lastLoadTime;
+
+    /**
+     * 扫描周期，毫秒
+     */
+    private int                                 scanPeriod      = 2000;
+    /**
+     * 输出和备份文件目录
+     */
+    private String                              regFile;
+
+    /**
+     * 注册中心配置
+     *
+     * @param registryConfig 注册中心配置
+     */
+    protected LocalRegistry(RegistryConfig registryConfig) {
+        super(registryConfig);
+    }
+
+    @Override
+    public void init() {
+        this.regFile = registryConfig.getFile();
+        if (regFile == null) {
+            throw new SofaRpcRuntimeException("File of LocalRegistry is null");
+        }
+        // 先加载一些
+        lastLoadTime = LocalRegistryHelper.loadBackupFileToCache(regFile, memoryCache);
+        // 开始扫描
+        this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.local.scan.period"),
+            scanPeriod);
+        Runnable task = new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    // 如果要求备份，那么说明内存中为最新的，无需加载
+                    doWriteFile();
+
+                    // 订阅变化（默认是不订阅的）
+                    // 检查最后修改时间，如果有有变，则自动重新加载
+                    if (subscribe && LocalRegistryHelper.checkModified(regFile, lastLoadTime)) {
+                        // 加载到内存
+                        Map<String, ProviderGroup> tempCache = new ConcurrentHashMap<String, ProviderGroup>();
+                        long currentTime = LocalRegistryHelper.loadBackupFileToCache(regFile, tempCache);
+                        // 比较旧列表和新列表，通知订阅者变化部分
+                        notifyConsumer(tempCache);
+
+                        // 通知完保存到内存
+                        memoryCache = tempCache;
+                        // 如果有文件更新,将上一次更新时间保持为当前时间
+                        lastLoadTime = currentTime;
+                    }
+                } catch (Throwable e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
+        };
+        //启动扫描线程
+        scheduledExecutorService = new ScheduledService("LocalRegistry-Back-Load",
+            ScheduledService.MODE_FIXEDDELAY,
+            task, //定时load任务
+            scanPeriod, // 延迟一个周期
+            scanPeriod, // 一个周期循环
+            TimeUnit.MILLISECONDS
+                ).start();
+
+    }
+
+    /**
+     * 写文件
+     */
+    protected void doWriteFile() {
+        if (needBackup) {
+            if (LocalRegistryHelper.backup(regFile, memoryCache)) {
+                needBackup = false;
+            }
+        }
+    }
+
+    @Override
+    public boolean start() {
+        return false;
+    }
+
+    @Override
+    public void register(ProviderConfig config) {
+        String appName = config.getAppName();
+        if (!registryConfig.isRegister()) {
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+            }
+            return;
+        }
+        if (!config.isRegister()) { // 注册中心不注册或者服务不注册
+            return;
+        }
+        List<ServerConfig> serverConfigs = config.getServer();
+        if (CommonUtils.isNotEmpty(serverConfigs)) {
+            for (ServerConfig server : serverConfigs) {
+                String serviceName = LocalRegistryHelper.buildListDataId(config, server.getProtocol());
+                ProviderInfo providerInfo = LocalRegistryHelper.convertProviderToProviderInfo(config, server);
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
+                }
+                doRegister(serviceName, providerInfo);
+
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
+                    LOGGER_REGISTRY.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB,
+                        serviceName));
+                }
+            }
+        }
+    }
+
+    /**
+     * 注册单条服务信息
+     *
+     * @param serviceName  服务关键字
+     * @param providerInfo 服务提供者数据
+     */
+    protected void doRegister(String serviceName, ProviderInfo providerInfo) {
+        //{service : [provider...]}
+        ProviderGroup oldGroup = memoryCache.get(serviceName);
+        if (oldGroup != null) { // 存在老的key
+            oldGroup.add(providerInfo);
+        } else { // 没有老的key，第一次加入
+            List<ProviderInfo> news = new ArrayList<ProviderInfo>();
+            news.add(providerInfo);
+            memoryCache.put(serviceName, new ProviderGroup(news));
+        }
+        // 备份到文件 改为定时写
+        needBackup = true;
+        doWriteFile();
+
+        if (subscribe) {
+            notifyConsumerListeners(serviceName, memoryCache.get(serviceName));
+        }
+    }
+
+    @Override
+    public void unRegister(ProviderConfig config) {
+        String appName = config.getAppName();
+        if (!registryConfig.isRegister()) { // 注册中心不注册
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+            }
+            return;
+        }
+        if (!config.isRegister()) { // 服务不注册
+            return;
+        }
+        List<ServerConfig> serverConfigs = config.getServer();
+        if (CommonUtils.isNotEmpty(serverConfigs)) {
+            for (ServerConfig server : serverConfigs) {
+                String serviceName = LocalRegistryHelper.buildListDataId(config, server.getProtocol());
+                ProviderInfo providerInfo = LocalRegistryHelper.convertProviderToProviderInfo(config, server);
+                try {
+                    doUnRegister(serviceName, providerInfo);
+                    if (LOGGER.isInfoEnabled(appName)) {
+                        LOGGER_REGISTRY.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
+                            serviceName, "1"));
+                    }
+                } catch (Exception e) {
+                    LOGGER_REGISTRY.errorWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
+                        serviceName, "0"), e);
+                }
+            }
+        }
+    }
+
+    /**
+     * 反注册服务信息
+     *
+     * @param serviceName  服务关键字
+     * @param providerInfo 服务提供者数据
+     */
+    protected void doUnRegister(String serviceName, ProviderInfo providerInfo) {
+        //{service : [provider...]}
+        ProviderGroup oldGroup = memoryCache.get(serviceName);
+        if (oldGroup != null) { // 存在老的key
+            oldGroup.remove(providerInfo);
+        } else {
+            return;
+        }
+        // 备份到文件 改为定时写
+        needBackup = true;
+        doWriteFile();
+
+        if (subscribe) {
+            notifyConsumerListeners(serviceName, memoryCache.get(serviceName));
+        }
+    }
+
+    @Override
+    public void batchUnRegister(List<ProviderConfig> configs) {
+        for (ProviderConfig config : configs) {
+            String appName = config.getAppName();
+            try {
+                unRegister(config);
+            } catch (Exception e) {
+                LOGGER.errorWithApp(appName, "Error when batch unregistry", e);
+            }
+        }
+    }
+
+    @Override
+    public List<ProviderGroup> subscribe(ConsumerConfig config) {
+        String key = LocalRegistryHelper.buildListDataId(config, config.getProtocol());
+        List<ConsumerConfig> listeners = notifyListeners.get(key);
+        if (listeners == null) {
+            listeners = new ArrayList<ConsumerConfig>();
+            notifyListeners.put(key, listeners);
+        }
+        listeners.add(config);
+        // 返回已经加载到内存的列表（可能不是最新的)
+        ProviderGroup group = memoryCache.get(key);
+        if (group == null) {
+            group = new ProviderGroup();
+            memoryCache.put(key, group);
+        }
+        return Collections.singletonList(group);
+    }
+
+    @Override
+    public void unSubscribe(ConsumerConfig config) {
+        String key = LocalRegistryHelper.buildListDataId(config, config.getProtocol());
+        // 取消注册订阅关系，监听文件修改变化
+        List<ConsumerConfig> listeners = notifyListeners.get(key);
+        if (listeners != null) {
+            listeners.remove(config);
+            if (listeners.size() == 0) {
+                notifyListeners.remove(key);
+            }
+        }
+    }
+
+    @Override
+    public void batchUnSubscribe(List<ConsumerConfig> configs) {
+        // 不支持批量反注册，那就一个个来吧
+        for (ConsumerConfig config : configs) {
+            String appName = config.getAppName();
+            try {
+                unSubscribe(config);
+            } catch (Exception e) {
+                LOGGER.errorWithApp(appName, "Error when batch unSubscribe", e);
+            }
+        }
+    }
+
+    @Override
+    public void destroy() {
+        // 销毁前备份一下
+        // LocalRegistryHelper.backup(regFile, memoryCache);
+        try {
+            if (scheduledExecutorService != null) {
+                scheduledExecutorService.shutdown();
+                scheduledExecutorService = null;
+            }
+        } catch (Throwable t) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warn(t.getMessage(), t);
+            }
+        }
+    }
+
+    /**
+     * Notify consumer.
+     *
+     * @param newCache the new cache
+     */
+    private void notifyConsumer(Map<String, ProviderGroup> newCache) {
+        Map<String, ProviderGroup> oldCache = memoryCache;
+        // 比较两个map的差异
+        MapDifference<String, ProviderGroup> difference =
+                new MapDifference<String, ProviderGroup>(newCache, oldCache);
+        // 新的有，旧的没有，通知
+        Map<String, ProviderGroup> onlynew = difference.entriesOnlyOnLeft();
+        for (Map.Entry<String, ProviderGroup> entry : onlynew.entrySet()) {
+            notifyConsumerListeners(entry.getKey(), entry.getValue());
+        }
+        // 旧的有，新的没有，全部干掉
+        Map<String, ProviderGroup> onlyold = difference.entriesOnlyOnRight();
+        for (Map.Entry<String, ProviderGroup> entry : onlyold.entrySet()) {
+            notifyConsumerListeners(entry.getKey(), new ProviderGroup());
+        }
+
+        // 新旧都有，而且有变化
+        Map<String, ValueDifference<ProviderGroup>> changed = difference.entriesDiffering();
+        for (Map.Entry<String, ValueDifference<ProviderGroup>> entry : changed.entrySet()) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("{} has differente", entry.getKey());
+            }
+            ValueDifference<ProviderGroup> differentValue = entry.getValue();
+            ProviderGroup innew = differentValue.rightValue();
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("new(right) is {}", innew);
+            }
+            // 只通知变化部分内容
+            notifyConsumerListeners(entry.getKey(), innew);
+        }
+    }
+
+    private void notifyConsumerListeners(String serviceName, ProviderGroup providerGroup) {
+        List<ConsumerConfig> consumerConfigs = notifyListeners.get(serviceName);
+        if (consumerConfigs != null) {
+            for (ConsumerConfig config : consumerConfigs) {
+                ProviderInfoListener listener = config.getProviderInfoListener();
+                if (listener != null) {
+                    listener.updateProviders(providerGroup); // 更新分组
+                }
+            }
+        }
+    }
+}

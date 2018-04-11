@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="ERROR-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/common-error.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="error"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="ROOT-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/common-default.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="TR-SERIALIZE-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/taobao-remoting-serialization.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="REGISTRY-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/sofa-registry.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="SOFA-ROUTER-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/sofa-router.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="SOFA-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/sofa-default.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="TAOBAO-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/taobao-default.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="TR-CONNECTION-DIGEST-APPENDER" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/tr-connection-digest.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t - %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="TR-LOG-FILE" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/taobao-remoting.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%n%d %-5p %c{2} - %n%m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="REMOTING-LOG-FILE" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="${logging.path}/rpc/${appname}/sofa-remoting.log"/>
+        <param name="append" value="true"/>
+        <param name="encoding" value="${file.encoding}"/>
+        <param name="threshold" value="${logging.level.com.alipay.sofa.rpc}"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d %-5p %-32t %c{2} - %m%n"/>
+        </layout>
+    </appender>
+
+    <logger name="TR-CONNECTION-POOL-DIGEST" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="TR-CONNECTION-DIGEST-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="RPC-REGISTRY" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="REGISTRY-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+
+    <logger name="SOFA-ROUTER" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="SOFA-ROUTER-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa.rpc.codec" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="TR-SERIALIZE-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.taobao.remoting" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="TR-LOG-FILE"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.remoting" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="REMOTING-LOG-FILE"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.alipay.sofa" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="SOFA-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <logger name="com.taobao" additivity="false">
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="TAOBAO-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </logger>
+
+    <root>
+        <level value="${logging.level.com.alipay.sofa.rpc}"/>
+        <appender-ref ref="ROOT-APPENDER"/>
+        <appender-ref ref="ERROR-APPENDER"/>
+    </root>
+
+</log4j:configuration>

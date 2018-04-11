@@ -1,0 +1,2 @@
+jdk=com.alipay.sofa.rpc.proxy.JDKProxy
+javassist=com.alipay.sofa.rpc.proxy.JavassistProxy

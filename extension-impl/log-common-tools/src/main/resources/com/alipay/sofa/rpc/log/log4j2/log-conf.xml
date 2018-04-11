@@ -1,0 +1,185 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+
+    <Properties>
+        <!-- 将系统属性进行一次本地转换 -->
+        <Property name="RPC_LOG_LEVEL">${sys:logging.level.com.alipay.sofa.rpc}</Property>
+        <Property name="RPC_LOG_PATH">${sys:logging.path}</Property>
+        <Property name="RPC_FILE_ENCODING">${sys:file.encoding}</Property>
+        <Property name="APP_NAME">${sys:appname}</Property>
+    </Properties>
+
+    <appenders>
+
+        <RollingFile name="ERROR-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-error.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-error.log.%d{yyyy-MM-dd}">
+            <!-- only print error log -->
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="ROOT-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-default.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-default.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="TR-SERIALIZE-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting-serialization.log"
+                     append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting-serialization.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="REGISTRY-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-registry.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-registry.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="SOFA-ROUTER-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-router.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-router.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="SOFA-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-default.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-default.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="TAOBAO-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-default.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-default.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="TR-CONNECTION-DIGEST-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/tr-connection-digest.log"
+                     append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/tr-connection-digest.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="TR-LOG-FILE" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%n%d %-5p %c{2} - %n%m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="REMOTING-LOG-FILE" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-remoting.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-remoting.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c{2} - %m%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+    </appenders>
+
+    <loggers>
+        <logger name="TR-CONNECTION-POOL-DIGEST" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="TR-CONNECTION-DIGEST-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <logger name="RPC-REGISTRY" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="REGISTRY-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+
+        <logger name="SOFA-ROUTER" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="SOFA-ROUTER-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <logger name="com.alipay.sofa.rpc.codec" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="TR-SERIALIZE-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <logger name="com.taobao.remoting" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="TR-LOG-FILE"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <logger name="com.alipay.remoting" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="REMOTING-LOG-FILE"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <logger name="com.alipay.sofa" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="SOFA-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <logger name="com.taobao" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="TAOBAO-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </logger>
+
+        <root level="${RPC_LOG_LEVEL}">
+            <appender-ref ref="ROOT-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </root>
+    </loggers>
+</configuration>
