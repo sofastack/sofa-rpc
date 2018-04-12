@@ -222,9 +222,8 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
         Assert.assertTrue(invocationStat.getExceptionRate() == 0.2);
 
         /**第一个窗口时间到达，被降级*/
-        Thread.sleep(2600);
-        int appWeight = ProviderInfoWeightManager.getWeight(providerInfo);
-        Assert.assertEquals(50, appWeight);
+        // 第一个窗口结束
+        Assert.assertTrue(50 == delayGetWeight(providerInfo, 50, 52));
         InvocationStatFactory.removeInvocationStat(invocationStat);
 
     }

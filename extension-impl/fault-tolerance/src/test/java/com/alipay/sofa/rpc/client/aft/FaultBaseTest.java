@@ -145,7 +145,8 @@ public abstract class FaultBaseTest {
             public Integer call() throws Exception {
                 return ProviderInfoWeightManager.getWeight(providerInfo);
             }
-        }, expect, 50, n50ms);
+        }, expect, 70, n50ms);
+        // 本来应该是50ms，我们把50改为70。是因为如果测试机器性能太差，间隔太小会等不到数据
     }
 
     /**
