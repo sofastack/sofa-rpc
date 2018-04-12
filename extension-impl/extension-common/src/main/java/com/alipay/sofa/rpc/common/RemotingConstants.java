@@ -65,6 +65,15 @@ public class RemotingConstants {
     public static final byte   SERIALIZE_CODE_JAVA               = 2;
 
     /**
+     * hessian2  对应bolt固定同步里的codec字段
+     *
+     * @see com.alipay.sofa.rpc.common.RpcConstants#SERIALIZE_HESSIAN2
+     * @deprecated use {@link #SERIALIZE_CODE_HESSIAN}
+     */
+    @Deprecated
+    public static final byte   SERIALIZE_CODE_HESSIAN2           = 4;
+
+    /**
      * protobuf  对应bolt固定同步里的codec字段
      *
      * @see com.alipay.sofa.rpc.common.RpcConstants#SERIALIZE_PROTOBUF

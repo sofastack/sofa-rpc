@@ -40,7 +40,7 @@ public class CustomFilterClientMain {
 
     public static void main(String[] args) throws InterruptedException {
 
-        Filter customEchoFilter = new CustomEchoFilter();
+        Filter customEchoFilter2 = new CustomEchoFilter2();
 
         ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
 
@@ -48,8 +48,8 @@ public class CustomFilterClientMain {
             .setApplication(application)
             .setInterfaceId(HelloService.class.getName())
             .setDirectUrl("bolt://127.0.0.1:22000")
-            //                .setFilterRef(Arrays.asList(customEchoFilter))
             .setFilter(Arrays.asList("customEcho"))
+            .setFilterRef(Arrays.asList(customEchoFilter2))
             .setRegister(false)
             .setTimeout(3000);
         HelloService helloService = consumerConfig.refer();

@@ -32,12 +32,12 @@ import com.alipay.sofa.rpc.test.HelloServiceImpl;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class DubboServerTest {
+public class DubboServerMain {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(DubboServerTest.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(DubboServerMain.class);
 
     public static void main(String[] args) {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("dubbo-server");
@@ -74,10 +74,10 @@ public class DubboServerTest {
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
 
-        synchronized (DubboServerTest.class) {
+        synchronized (DubboServerMain.class) {
             while (true) {
                 try {
-                    DubboServerTest.class.wait();
+                    DubboServerMain.class.wait();
                 } catch (InterruptedException e) {
 
                 }
