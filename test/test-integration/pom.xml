@@ -146,11 +146,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-transmit-ip</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
 
         <!-- dependencies for rest begin -->
         <dependency>
