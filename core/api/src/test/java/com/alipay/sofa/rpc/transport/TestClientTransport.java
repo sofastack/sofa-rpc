@@ -36,6 +36,8 @@ public class TestClientTransport extends ClientTransport {
 
     AbstractChannel       channel;
 
+    private boolean       available;
+
     private AtomicInteger currentRequest = new AtomicInteger(0);
 
     public void setRequest(int request) {
@@ -53,6 +55,7 @@ public class TestClientTransport extends ClientTransport {
             transportConfig.getProviderInfo().getPort()),
             InetSocketAddress.createUnresolved(transportConfig.getProviderInfo().getHost(),
                 new Random().nextInt(65535)));
+        available = true;
     }
 
     @Override
@@ -67,12 +70,12 @@ public class TestClientTransport extends ClientTransport {
 
     @Override
     public void destroy() {
-
+        available = false;
     }
 
     @Override
     public boolean isAvailable() {
-        return true;
+        return available;
     }
 
     @Override
