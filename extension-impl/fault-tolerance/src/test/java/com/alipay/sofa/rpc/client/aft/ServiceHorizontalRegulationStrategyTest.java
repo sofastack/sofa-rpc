@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.client.ProviderInfo;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.concurrent.Callable;
+
 /**
  *
  *
@@ -51,12 +53,16 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
         }
         Thread.sleep(100);
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
-        InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
+        final InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
         InvocationStat invocationStat = InvocationStatFactory.ALL_STATS.get(statDimension);
         Assert.assertNotNull(invocationStat);
 
-        Thread.sleep(8000);
-        invocationStat = InvocationStatFactory.ALL_STATS.get(statDimension);
-        Assert.assertNull(invocationStat);
+        // 最多等10000ms 到了下一个周期
+        Assert.assertNull(delayGet(new Callable<InvocationStat>() {
+            @Override
+            public InvocationStat call() throws Exception {
+                return InvocationStatFactory.ALL_STATS.get(statDimension);
+            }
+        }, null, 100, 100));
     }
 }

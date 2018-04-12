@@ -54,10 +54,8 @@ public class RecoverStrategyTest extends FaultBaseServiceTest {
         Assert.assertEquals(2, invocationStat.getExceptionCount());
         Assert.assertTrue(0.2D == invocationStat.getExceptionRate());
 
-        Thread.sleep(2100);//第一个窗口结束
-
-        int appWeight = ProviderInfoWeightManager.getWeight(providerInfo);
-        Assert.assertEquals(50, appWeight);
+        //第一个窗口结束
+        Assert.assertEquals(50, delayGetWeight(providerInfo, 50, 42));
 
         /**test recover normal*/
         config.setLeastWindowCount(6L);
@@ -76,10 +74,8 @@ public class RecoverStrategyTest extends FaultBaseServiceTest {
         Assert.assertTrue(invocationStat.getExceptionCount() == 1);
         Assert.assertTrue(invocationStat.getExceptionRate() == 0.13);
 
-        Thread.sleep(3100);//第二个窗口结束
-
-        int appWeight2 = ProviderInfoWeightManager.getWeight(providerInfo);
-        Assert.assertTrue(appWeight2 == 90);
+        //第二个窗口结束
+        Assert.assertTrue(90 == delayGetWeight(providerInfo, 90, 62));
 
         /**test recover max*/
         for (int i = 0; i < 7; i++) {
@@ -95,10 +91,7 @@ public class RecoverStrategyTest extends FaultBaseServiceTest {
         Assert.assertTrue(invocationStat.getExceptionRate() == 0.29);
 
         Thread.sleep(2100);//第三个窗口结束
-
-        Integer appWeight3 = ProviderInfoWeightManager.getWeight(providerInfo);
-        Assert.assertEquals(appWeight3.intValue(), 100);
+        Assert.assertTrue(100 == delayGetWeight(providerInfo, 100, 42));
         InvocationStatFactory.removeInvocationStat(invocationStat);
-
     }
 }
