@@ -31,12 +31,12 @@ import com.alipay.sofa.rpc.test.HelloService;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class DubboClientTest {
+public class DubboClientMain {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(DubboClientTest.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(DubboClientMain.class);
 
     public static void main(String[] args) throws InterruptedException {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("dubbo-client");
@@ -82,9 +82,9 @@ public class DubboClientTest {
             LOGGER.error("", e);
         }
 
-        synchronized (DubboClientTest.class) {
+        synchronized (DubboClientMain.class) {
             while (true) {
-                DubboClientTest.class.wait();
+                DubboClientMain.class.wait();
             }
         }
     }

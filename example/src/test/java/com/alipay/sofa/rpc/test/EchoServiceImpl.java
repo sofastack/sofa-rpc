@@ -33,7 +33,6 @@ public class EchoServiceImpl implements EchoService {
 
     @Override
     public String echoStr(String arg) {
-        LOGGER.info("server receive {}", arg);
         return arg;
     }
 }

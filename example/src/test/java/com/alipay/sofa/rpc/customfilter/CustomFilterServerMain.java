@@ -42,7 +42,7 @@ public class CustomFilterServerMain {
 
     public static void main(String[] args) {
 
-        Filter customEchoFilter = new CustomEchoFilter();
+        Filter customEchoFilter2 = new CustomEchoFilter2();
 
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
@@ -54,8 +54,8 @@ public class CustomFilterServerMain {
             .setApplication(application)
             .setRef(new HelloServiceImpl())
             .setServer(serverConfig)
-            //                .setFilterRef(Arrays.asList(customEchoFilter))
             .setFilter(Arrays.asList("customEcho"))
+            .setFilterRef(Arrays.asList(customEchoFilter2))
             .setRegister(false);
 
         providerConfig.export();

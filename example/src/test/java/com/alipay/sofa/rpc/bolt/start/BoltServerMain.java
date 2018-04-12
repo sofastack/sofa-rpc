@@ -64,9 +64,7 @@ public class BoltServerMain {
         providerConfig.export();
         providerConfig2.export();
 
-        providerConfig2.unExport();
-
-        LOGGER.error("started at pid {}", RpcRuntimeContext.PID);
+        LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
     }
 
 }

@@ -180,7 +180,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认粘滞连接
   "consumer.sticky": false,
   // 是否jvm内部调用（provider和consumer配置在同一个jvm内，则走本地jvm内部，不走远程）
-  "consumer.inJVM": true,
+  "consumer.inJVM": false,
   // 是否强依赖（即没有服务节点就启动失败）
   "consumer.check": false,
   // 默认长连接数
