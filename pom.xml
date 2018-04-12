@@ -48,6 +48,9 @@
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
+        <maven.javadoc.skip>true</maven.javadoc.skip>
+        <module.jacoco.skip>true</module.jacoco.skip>
+        <dependency.test.skip>true</dependency.test.skip>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
@@ -124,6 +127,7 @@
                     <breakiterator>true</breakiterator>
                     <author>false</author>
                     <keywords>true</keywords>
+                    <skip>${maven.javadoc.skip}</skip>
                 </configuration>
                 <executions>
                     <execution>
@@ -220,6 +224,9 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
+                <configuration>
+                    <skip>${module.jacoco.skip}</skip>
+                </configuration>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
@@ -248,6 +255,34 @@
             <properties>
                 <maven.javadoc.failOnError>false</maven.javadoc.failOnError>
                 <maven.javadoc.quiet>true</maven.javadoc.quiet>
+            </properties>
+        </profile>
+        <profile>
+            <id>ci-install</id>
+            <properties>
+                <skipTests>true</skipTests>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
+                <module.jacoco.skip>true</module.jacoco.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>ci-test</id>
+            <properties>
+                <dependency.test.skip>false</dependency.test.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
+                <module.jacoco.skip>false</module.jacoco.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>it-test</id>
+            <properties>
+                <dependency.test.skip>false</dependency.test.skip>
+            </properties>
+        </profile>
+        <profile>
+            <id>release</id>
+            <properties>
+                <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
         </profile>
     </profiles>
