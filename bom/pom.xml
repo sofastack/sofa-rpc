@@ -35,7 +35,7 @@
         <!-- Test libs -->
         <junit.version>4.10</junit.version>
         <!-- alipay libs -->
-        <bolt.version>1.4.0</bolt.version>
+        <bolt.version>1.4.1</bolt.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <lookout.version>1.1.0</lookout.version>
         <tracer.version>2.0.1</tracer.version>
@@ -299,12 +299,6 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>bolt</artifactId>
                 <version>${bolt.version}</version>
-                <exclusions>
-                    <exclusion>
-                        <groupId>hessian</groupId>
-                        <artifactId>hessian</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa.common</groupId>

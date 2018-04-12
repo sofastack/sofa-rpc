@@ -67,7 +67,7 @@ public class RestServerMain {
 
         providerConfig.export();
 
-        LOGGER.error("started at pid {}", RpcRuntimeContext.PID);
+        LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
     }
 
 }

@@ -14,25 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test;
+package com.alipay.sofa.rpc.transport;
 
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.base.Destroyable;
 
 /**
+ * Holder of client transport
  *
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class EchoServiceImpl implements EchoService {
+public interface ClientTransportHolder extends Destroyable {
 
     /**
-     * slf4j Logger for this class
+     * 通过配置获取长连接
+     *
+     * @param config 传输层配置
+     * @return 传输层
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(EchoServiceImpl.class);
+    ClientTransport getClientTransport(ClientTransportConfig config);
 
-    @Override
-    public String echoStr(String arg) {
-        return arg;
-    }
+    /**
+     * 销毁长连接
+     *
+     * @param clientTransport   ClientTransport
+     * @return need close client transport
+     */
+    boolean removeClientTransport(ClientTransport clientTransport);
+
+    /**
+     * 长连接数量
+     *
+     * @return size of client transport
+     */
+    int size();
 }

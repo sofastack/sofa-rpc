@@ -25,11 +25,11 @@ before_install:
    && /bin/bash zookeeper-3.4.11/bin/zkServer.sh start
 
 install:
-  - mvn clean install -DskipTests=true -B -U -e
+  - mvn clean install -Pci-install -B -U -e
   - sh ./tools/check_format.sh
 
 script:
-  - mvn clean package -Plocal -Dmaven.javadoc.skip=true 
+  - mvn clean package -Pci-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
