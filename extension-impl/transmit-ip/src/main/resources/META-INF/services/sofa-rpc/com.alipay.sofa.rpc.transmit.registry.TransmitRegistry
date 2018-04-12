@@ -1,1 +1,0 @@
-zookeeper=com.alipay.sofa.rpc.transmit.registry.impl.ZookeeperIpTransmitRegistry

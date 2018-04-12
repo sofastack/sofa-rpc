@@ -25,7 +25,6 @@
         <module>remoting-resteasy</module>
         <module>registry-local</module>
         <module>registry-zk</module>
-        <module>transmit-ip</module>
     </modules>
 
     <dependencyManagement>
