@@ -11,10 +11,6 @@
 
     <artifactId>sofa-rpc-registry-local</artifactId>
 
-    <properties>
-        <dependency.test.skip>true</dependency.test.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>

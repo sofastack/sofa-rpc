@@ -12,10 +12,6 @@
 
     <artifactId>sofa-rpc-registry-zk</artifactId>
 
-    <properties>
-        <dependency.test.skip>true</dependency.test.skip>
-    </properties>
-
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
@@ -102,12 +98,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>local</id>
-            <properties>
-                <dependency.test.skip>false</dependency.test.skip>
-            </properties>
-        </profile>
-    </profiles>
 </project>
