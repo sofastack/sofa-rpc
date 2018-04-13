@@ -8,6 +8,18 @@
     <artifactId>sofa-rpc-all</artifactId>
     <version>5.3.0</version>
 
+    <name>${project.groupId}:${project.artifactId}</name>
+    <url>http://github.com/alipay/sofa-rpc</url>
+    <description>A high-performance, high-extensibility, production-level Java RPC framework.</description>
+
+    <inceptionYear>2008</inceptionYear>
+    <licenses>
+        <license>
+            <name>The Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+        </license>
+    </licenses>
+    
     <organization>
         <name>The Ant Financial</name>
         <url>http://www.antfin.com/</url>
@@ -357,6 +369,7 @@
                             <breakiterator>true</breakiterator>
                             <author>false</author>
                             <keywords>true</keywords>
+                            <quiet>true</quiet>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.alipay.sofa:sofa-rpc-*</dependencySourceInclude>
