@@ -1,2 +1,0 @@
-dubbo1compatible=com.alibaba.dubbo.rpc.protocol.dubbo.DubboCountCodec
-#tracer=com.alibaba.dubbo.remoting.sofa.DataSizeCodecWrapper
