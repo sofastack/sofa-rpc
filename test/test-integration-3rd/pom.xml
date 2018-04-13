@@ -13,6 +13,7 @@
     <artifactId>sofa-rpc-test-integration-3rd</artifactId>
 
     <dependencies>
+        <!-- add all transitive dependencies for calculate code coverage -->
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-test-common</artifactId>
@@ -29,23 +30,11 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-dubbo</artifactId>
             <version>${project.parent.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.alibaba</groupId>
-                    <artifactId>dubbo</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-zk</artifactId>
             <version>${project.parent.version}</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.curator</groupId>
-                    <artifactId>curator-recipes</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <dependency>
@@ -57,13 +46,7 @@
             <artifactId>zkclient</artifactId>
             <scope>test</scope>
         </dependency>
-        
-        <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-recipes</artifactId>
-            <scope>test</scope>
-        </dependency>
-        
+ 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

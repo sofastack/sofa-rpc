@@ -282,6 +282,7 @@
         <profile>
             <id>release</id>
             <properties>
+                <maven.javadoc.quite>true</maven.javadoc.quite>
                 <maven.javadoc.skip>false</maven.javadoc.skip>
             </properties>
         </profile>
