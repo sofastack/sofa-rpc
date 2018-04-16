@@ -274,7 +274,6 @@
                             <promoteTransitiveDependencies>false</promoteTransitiveDependencies>
                             <keepDependenciesWithProvidedScope>false</keepDependenciesWithProvidedScope>
                             <createDependencyReducedPom>true</createDependencyReducedPom>
-                            <dependencyReducedPomLocation>${basedir}/target/dependency-reduced-pom.xml</dependencyReducedPomLocation>
                             <artifactSet>
                                 <includes>
                                     <include>com.alipay.sofa:sofa-rpc-common</include>
