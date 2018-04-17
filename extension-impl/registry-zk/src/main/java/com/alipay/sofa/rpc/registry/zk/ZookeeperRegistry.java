@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
@@ -234,18 +235,34 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void register(ProviderConfig config) {
+        String appName = config.getAppName();
+        if (!registryConfig.isRegister()) {
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+            }
+            return;
+        }
         if (config.isRegister()) {
             // 注册服务端节点
             try {
                 List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls(config);
                 if (CommonUtils.isNotEmpty(urls)) {
                     String providerPath = buildProviderPath(rootPath, config);
+                    if (LOGGER.isInfoEnabled(appName)) {
+                        LOGGER.infoWithApp(appName,
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
+                    }
                     for (String url : urls) {
                         url = URLEncoder.encode(url, "UTF-8");
+                        String providerUrl = providerPath + CONTEXT_SEP + url;
                         getAndCheckZkClient().create().creatingParentContainersIfNeeded()
                             .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
-                            .forPath(providerPath + CONTEXT_SEP + url,
-                                config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
+                            .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
+                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
+                    }
+                    if (LOGGER.isInfoEnabled(appName)) {
+                        LOGGER.infoWithApp(appName,
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
                     }
                 }
             } catch (Exception e) {
@@ -303,6 +320,14 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void unRegister(ProviderConfig config) {
+        String appName = config.getAppName();
+        if (!registryConfig.isRegister()) {
+            // 注册中心不注册
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+            }
+            return;
+        }
         // 反注册服务端节点
         if (config.isRegister()) {
             try {
@@ -312,6 +337,10 @@ public class ZookeeperRegistry extends Registry {
                     for (String url : urls) {
                         url = URLEncoder.encode(url, "UTF-8");
                         getAndCheckZkClient().delete().forPath(providerPath + CONTEXT_SEP + url);
+                    }
+                    if (LOGGER.isInfoEnabled(appName)) {
+                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
+                            providerPath, "1"));
                     }
                 }
             } catch (Exception e) {
@@ -343,6 +372,14 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public List<ProviderGroup> subscribe(final ConsumerConfig config) {
+        String appName = config.getAppName();
+        if (!registryConfig.isSubscribe()) {
+            // 注册中心不订阅
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+            }
+            return null;
+        }
         // 注册Consumer节点
         if (config.isRegister()) {
             try {
@@ -369,7 +406,9 @@ public class ZookeeperRegistry extends Registry {
                     providerObserver = new ZookeeperProviderObserver();
                 }
                 final String providerPath = buildProviderPath(rootPath, config);
-
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_SUB, providerPath));
+                }
                 // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
                 providerObserver.addProviderListener(config, providerInfoListener);
