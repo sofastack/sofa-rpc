@@ -45,6 +45,10 @@ public final class ProviderInfoAttrs {
      */
     public static final String ATTR_APP_NAME              = RpcConstants.CONFIG_KEY_APP_NAME;
     /**
+     * 静态配置key:uniqueId
+     */
+    public static final String ATTR_UNIQUEID              = RpcConstants.CONFIG_KEY_UNIQUEID;
+    /**
      * 静态配置key:source 来源
      */
     public static final String ATTR_SOURCE                = "source";

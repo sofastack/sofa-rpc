@@ -258,7 +258,9 @@ public class ZookeeperRegistry extends Registry {
                         getAndCheckZkClient().create().creatingParentContainersIfNeeded()
                             .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
                             .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
-                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
+                        if (LOGGER.isInfoEnabled(appName)) {
+                            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
+                        }
                     }
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
@@ -439,8 +441,8 @@ public class ZookeeperRegistry extends Registry {
                 pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
                 List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(
                     providerPath, pathChildrenCache.getCurrentData());
-
-                return Collections.singletonList(new ProviderGroup().addAll(providerInfos));
+                List<ProviderInfo> matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
+                return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to subscribe provider from zookeeperRegistry!", e);
             }
