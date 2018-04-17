@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
@@ -105,8 +106,16 @@ public class BoltServer implements Server {
             }
             // 生成Server对象
             remotingServer = initRemotingServer();
-            remotingServer.start(serverConfig.getBoundHost());
-            started = true;
+            try {
+                if (!remotingServer.start(serverConfig.getBoundHost())) {
+                    throw new SofaRpcRuntimeException("Failed to start bolt server, see more detail from bolt log.");
+                }
+                started = true;
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
+            } catch (Exception e) {
+                throw new SofaRpcRuntimeException("Failed to start bolt server!", e);
+            }
         }
     }
 
