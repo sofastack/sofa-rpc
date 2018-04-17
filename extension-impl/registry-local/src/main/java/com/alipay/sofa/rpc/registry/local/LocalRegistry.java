@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.registry.local;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.LogConstants;
 import com.alipay.sofa.rpc.common.struct.MapDifference;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.struct.ValueDifference;
@@ -54,12 +53,6 @@ public class LocalRegistry extends Registry {
      * Logger
      */
     private static final Logger                 LOGGER          = LoggerFactory.getLogger(LocalRegistry.class);
-
-    /**
-     * 注册中心单独的日志输出
-     */
-    private static final Logger                 LOGGER_REGISTRY = LoggerFactory
-                                                                    .getLogger(LogConstants.LOG_NAME_REGISTRY);
 
     /**
      * 定时加载
@@ -194,12 +187,10 @@ public class LocalRegistry extends Registry {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
                 }
-                doRegister(serviceName, providerInfo);
+                doRegister(appName, serviceName, providerInfo);
 
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
-                    LOGGER_REGISTRY.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB,
-                        serviceName));
                 }
             }
         }
@@ -208,10 +199,14 @@ public class LocalRegistry extends Registry {
     /**
      * 注册单条服务信息
      *
+     * @param appName      应用名
      * @param serviceName  服务关键字
      * @param providerInfo 服务提供者数据
      */
-    protected void doRegister(String serviceName, ProviderInfo providerInfo) {
+    protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo) {
+        if (LOGGER.isInfoEnabled(appName)) {
+            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, serviceName));
+        }
         //{service : [provider...]}
         ProviderGroup oldGroup = memoryCache.get(serviceName);
         if (oldGroup != null) { // 存在老的key
@@ -250,12 +245,12 @@ public class LocalRegistry extends Registry {
                 try {
                     doUnRegister(serviceName, providerInfo);
                     if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER_REGISTRY.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                            serviceName, "1"));
+                        LOGGER.infoWithApp(appName,
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
                     }
                 } catch (Exception e) {
-                    LOGGER_REGISTRY.errorWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                        serviceName, "0"), e);
+                    LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "0"),
+                        e);
                 }
             }
         }

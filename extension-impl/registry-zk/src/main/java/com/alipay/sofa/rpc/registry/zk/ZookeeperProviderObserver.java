@@ -73,8 +73,8 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
 
     public void updateProvider(ConsumerConfig config, String providerPath, ChildData data)
         throws UnsupportedEncodingException {
-        if (LOGGER.isDebugEnabled(config.getAppName())) {
-            LOGGER.debugWithApp(config.getAppName(), "Receive update provider: path=[" + data.getPath() + "]"
+        if (LOGGER.isInfoEnabled(config.getAppName())) {
+            LOGGER.infoWithApp(config.getAppName(), "Receive update provider: path=[" + data.getPath() + "]"
                 + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
                 + ", stat=[" + data.getStat() + "]");
         }
@@ -91,8 +91,8 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
 
     public void removeProvider(ConsumerConfig config, String providerPath, ChildData data)
         throws UnsupportedEncodingException {
-        if (LOGGER.isDebugEnabled(config.getAppName())) {
-            LOGGER.debugWithApp(config.getAppName(), "Receive remove provider: path=[" + data.getPath() + "]"
+        if (LOGGER.isInfoEnabled(config.getAppName())) {
+            LOGGER.infoWithApp(config.getAppName(), "Receive remove provider: path=[" + data.getPath() + "]"
                 + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
                 + ", stat=[" + data.getStat() + "]");
         }
@@ -109,8 +109,8 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
 
     public void addProvider(ConsumerConfig config, String providerPath, ChildData data)
         throws UnsupportedEncodingException {
-        if (LOGGER.isDebugEnabled(config.getAppName())) {
-            LOGGER.debugWithApp(config.getAppName(), "Receive add provider: path=[" + data.getPath() + "]"
+        if (LOGGER.isInfoEnabled(config.getAppName())) {
+            LOGGER.infoWithApp(config.getAppName(), "Receive add provider: path=[" + data.getPath() + "]"
                 + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
                 + ", stat=[" + data.getStat() + "]");
         }

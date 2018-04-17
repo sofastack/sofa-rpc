@@ -36,9 +36,8 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="TR-SERIALIZE-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting-serialization.log"
-                     append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting-serialization.log.%d{yyyy-MM-dd}">
+        <RollingFile name="RPC-CODEC-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-codec.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-codec.log.%d{yyyy-MM-dd}">
             <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout charset="${RPC_FILE_ENCODING}">
                 <pattern>%d %-5p %-32t - %m%n</pattern>
@@ -49,8 +48,8 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="REGISTRY-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-registry.log" append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-registry.log.%d{yyyy-MM-dd}">
+        <RollingFile name="RPC-REGISTRY-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-registry.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-registry.log.%d{yyyy-MM-dd}">
             <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout charset="${RPC_FILE_ENCODING}">
                 <pattern>%d %-5p %-32t %c - %m%n</pattern>
@@ -61,8 +60,8 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="SOFA-ROUTER-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-router.log" append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-router.log.%d{yyyy-MM-dd}">
+        <RollingFile name="RPC-CLIENT-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-client.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-client.log.%d{yyyy-MM-dd}">
             <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout charset="${RPC_FILE_ENCODING}">
                 <pattern>%d %-5p %-32t %c - %m%n</pattern>
@@ -73,8 +72,8 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="SOFA-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-default.log" append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-default.log.%d{yyyy-MM-dd}">
+        <RollingFile name="RPC-SERVER-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-server.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-server.log.%d{yyyy-MM-dd}">
             <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout charset="${RPC_FILE_ENCODING}">
                 <pattern>%d %-5p %-32t %c - %m%n</pattern>
@@ -85,8 +84,8 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="TAOBAO-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-default.log" append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-default.log.%d{yyyy-MM-dd}">
+        <RollingFile name="RPC-TRANSPORT-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-transport.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-transport.log.%d{yyyy-MM-dd}">
             <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout charset="${RPC_FILE_ENCODING}">
                 <pattern>%d %-5p %-32t %c - %m%n</pattern>
@@ -97,83 +96,31 @@
             </Policies>
         </RollingFile>
 
-        <RollingFile name="TR-CONNECTION-DIGEST-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/tr-connection-digest.log"
-                     append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/tr-connection-digest.log.%d{yyyy-MM-dd}">
-            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout charset="${RPC_FILE_ENCODING}">
-                <pattern>%d %-5p %-32t - %m%n</pattern>
-            </PatternLayout>
-            <Policies>
-                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-            </Policies>
-        </RollingFile>
-
-        <RollingFile name="TR-LOG-FILE" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting.log" append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/taobao-remoting.log.%d{yyyy-MM-dd}">
-            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout charset="${RPC_FILE_ENCODING}">
-                <pattern>%n%d %-5p %c{2} - %n%m%n</pattern>
-            </PatternLayout>
-            <Policies>
-                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-            </Policies>
-        </RollingFile>
-
-        <RollingFile name="REMOTING-LOG-FILE" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-remoting.log" append="true"
-                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/sofa-remoting.log.%d{yyyy-MM-dd}">
-            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
-            <PatternLayout charset="${RPC_FILE_ENCODING}">
-                <pattern>%d %-5p %-32t %c{2} - %m%n</pattern>
-            </PatternLayout>
-            <Policies>
-                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
-                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
-            </Policies>
-        </RollingFile>
     </appenders>
 
     <loggers>
-        <logger name="TR-CONNECTION-POOL-DIGEST" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="TR-CONNECTION-DIGEST-APPENDER"/>
-            <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
-
-        <logger name="RPC-REGISTRY" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="REGISTRY-APPENDER"/>
-            <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
-
-
-        <logger name="SOFA-ROUTER" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="SOFA-ROUTER-APPENDER"/>
+        <logger name="com.alipay.sofa.rpc.registry" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-REGISTRY-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
         </logger>
 
         <logger name="com.alipay.sofa.rpc.codec" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="TR-SERIALIZE-APPENDER"/>
+            <appender-ref ref="RPC-CODEC-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
         </logger>
 
-        <logger name="com.taobao.remoting" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="TR-LOG-FILE"/>
+        <logger name="com.alipay.sofa.rpc.client" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-CLIENT-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
         </logger>
 
-        <logger name="com.alipay.remoting" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="REMOTING-LOG-FILE"/>
+        <logger name="com.alipay.sofa.rpc.server" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-SERVER-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
         </logger>
 
-        <logger name="com.alipay.sofa" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="SOFA-APPENDER"/>
-            <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
-
-        <logger name="com.taobao" level="${RPC_LOG_LEVEL}" additivity="false">
-            <appender-ref ref="TAOBAO-APPENDER"/>
+        <logger name="com.alipay.sofa.rpc.transport" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-TRANSPORT-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
         </logger>
 
