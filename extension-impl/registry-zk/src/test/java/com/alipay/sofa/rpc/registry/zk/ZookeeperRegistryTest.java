@@ -55,11 +55,6 @@ public class ZookeeperRegistryTest {
             .setSubscribe(true)
             .setAddress("127.0.0.1:2181")
             .setRegister(true);
-        //.setConnectTimeout(5000)
-        //.setHeartbeatPeriod(60000)
-        //.setReconnectPeriod(15000)
-        //.setBatch(true)
-        //.setBatchSize(10);
 
         registry = (ZookeeperRegistry) RegistryFactory.getRegistry(registryConfig);
         registry.init();
@@ -117,6 +112,23 @@ public class ZookeeperRegistryTest {
         Map<String, ProviderInfo> ps = providerInfoListener.getData();
         Assert.assertTrue(ps.size() == 1);
 
+        // 订阅 错误的uniqueId
+        ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
+        consumerNoUniqueId.setInterfaceId("com.alipay.xxx.TestService")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setProxy("javassist")
+            .setSubscribe(true)
+            .setSerialization("java")
+            .setInvokeType("sync")
+            .setTimeout(4444);
+        latch = new CountDownLatch(1);
+        providerInfoListener.setCountDownLatch(latch);
+        consumerNoUniqueId.setProviderInfoListener(providerInfoListener);
+        all = registry.subscribe(consumerNoUniqueId);
+        providerInfoListener.updateAllProviders(all);
+        ps = providerInfoListener.getData();
+        Assert.assertTrue(ps.size() == 0);
+
         // 反注册
         latch = new CountDownLatch(1);
         providerInfoListener.setCountDownLatch(latch);
@@ -154,12 +166,9 @@ public class ZookeeperRegistryTest {
 
         Map<String, ProviderInfo> ps2 = providerInfoListener2.getData();
         Assert.assertTrue(ps2.size() == 2);
-        //        Assert.assertTrue(registry.subscribers.size() == 2);
 
         // 取消订阅者1
         registry.unSubscribe(consumer);
-        //        Assert.assertFalse(callback.providerInfoListeners.contains(consumer));
-        //        Assert.assertTrue(registry.subscribers.size() == 2);
 
         // 批量反注册，判断订阅者2的数据
         latch = new CountDownLatch(2);
@@ -170,14 +179,12 @@ public class ZookeeperRegistryTest {
 
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
         Assert.assertTrue(ps2.size() == 0);
-        //        Assert.assertTrue(registry.subscribers.size() == 2); // 1个服务 订阅服务列表和服务配置 2个dataId
 
         // 批量取消订阅
         List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
         consumerConfigList.add(consumer2);
         registry.batchUnSubscribe(consumerConfigList);
 
-        //        Assert.assertTrue(registry.subscribers.size() == 0);
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {

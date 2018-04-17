@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -180,5 +181,18 @@ public class ZookeeperRegistryHelper {
 
     static String buildConfigPath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/configs";
+    }
+
+    static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
+        String protocol = consumerConfig.getProtocol();
+        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
+        for (ProviderInfo providerInfo : providerInfos) {
+            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
+                && StringUtils.equals(consumerConfig.getUniqueId(),
+                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
+                result.add(providerInfo);
+            }
+        }
+        return result;
     }
 }
