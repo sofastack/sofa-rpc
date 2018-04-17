@@ -30,7 +30,7 @@ public class StringUtils {
     /**
      * The empty String {@code ""}.
      *
-     * @since 2.0
+     * @since 5.0.0
      */
     public static final String   EMPTY              = "";
 
@@ -38,6 +38,20 @@ public class StringUtils {
      * The context path separator String {@code "/"}.
      */
     public static final String   CONTEXT_SEP        = "/";
+
+    /**
+     * The string {@code "*"}.
+     *
+     * @since 5.3.1
+     */
+    public static final String   ALL                = "*";
+
+    /**
+     * The string {@code "default"}.
+     *
+     * @since 5.3.1
+     */
+    public static final String   DEFAULT            = "default";
 
     /**
      * 空数组
