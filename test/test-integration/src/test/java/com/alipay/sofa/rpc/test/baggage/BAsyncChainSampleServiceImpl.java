@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.test.baggage;
 
-import com.alipay.sofa.rpc.client.bolt.AsyncSofaResponseCallback;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -50,7 +50,7 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
         context.putResponseBaggage("respBaggageB_useful1", "在返A之前写入有用");
         final CountDownLatch latch = new CountDownLatch(1);
         try {
-            RpcInvokeContext.getContext().setResponseCallback(new AsyncSofaResponseCallback() {
+            RpcInvokeContext.getContext().setResponseCallback(new BoltSendableResponseCallback() {
                 @Override
                 public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                     // 返回一定要写在这里

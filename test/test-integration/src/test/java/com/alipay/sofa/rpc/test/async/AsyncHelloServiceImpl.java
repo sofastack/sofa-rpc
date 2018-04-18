@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.test.async;
 
-import com.alipay.sofa.rpc.client.bolt.AsyncSofaResponseCallback;
+import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
@@ -44,7 +44,7 @@ public class AsyncHelloServiceImpl implements AsyncHelloService {
         // 模拟A-->B-->C场景
         RpcInvokeContext context = RpcInvokeContext.getContext();
         context.setTimeout(2000);
-        context.setResponseCallback(new AsyncSofaResponseCallback() {
+        context.setResponseCallback(new BoltSendableResponseCallback() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                 // 此时C-异步返回->B

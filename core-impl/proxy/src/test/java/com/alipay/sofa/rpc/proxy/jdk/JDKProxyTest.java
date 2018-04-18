@@ -14,8 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.proxy;
+package com.alipay.sofa.rpc.proxy.jdk;
 
+import com.alipay.sofa.rpc.proxy.AbstractTestClass;
+import com.alipay.sofa.rpc.proxy.TestInterface;
+import com.alipay.sofa.rpc.proxy.TestInvoker;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -26,10 +29,10 @@ import java.lang.reflect.Proxy;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class JavassistProxyTest {
+public class JDKProxyTest {
     @Test
     public void getProxy() throws Exception {
-        JavassistProxy proxy = new JavassistProxy();
+        JDKProxy proxy = new JDKProxy();
         AbstractTestClass testClass = null;
         try {
             testClass = proxy.getProxy(AbstractTestClass.class, new TestInvoker());
@@ -46,7 +49,7 @@ public class JavassistProxyTest {
         Assert.assertEquals(TestInterface.class, clazz);
 
         Assert.assertTrue(Proxy.class.isAssignableFrom(testInterface.getClass()));
-        Assert.assertFalse(Proxy.isProxyClass(testInterface.getClass()));
+        Assert.assertTrue(Proxy.isProxyClass(testInterface.getClass()));
 
         Assert.assertEquals(proxy.getInvoker(testInterface).getClass(), TestInvoker.class);
         Assert.assertEquals(testInterface.toString(), invoker.toString());

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.proxy;
+package com.alipay.sofa.rpc.proxy.javassist;
 
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.MessageBuilder;
+import com.alipay.sofa.rpc.proxy.Proxy;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
