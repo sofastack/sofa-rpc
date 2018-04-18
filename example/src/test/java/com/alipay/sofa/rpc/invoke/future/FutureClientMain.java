@@ -23,7 +23,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.message.BoltResponseFuture;
+import com.alipay.sofa.rpc.message.bolt.BoltResponseFuture;
 import com.alipay.sofa.rpc.test.EchoService;
 import com.alipay.sofa.rpc.test.HelloService;
 

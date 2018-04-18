@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.asynchain;
 
-import com.alipay.sofa.rpc.client.bolt.AsyncSofaResponseCallback;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 
 import java.util.Random;
 
@@ -39,7 +39,7 @@ public class ServiceBImpl implements ServiceB {
 
     @Override
     public int getInt(int num) {
-        RpcInvokeContext.getContext().setResponseCallback(new AsyncSofaResponseCallback() {
+        RpcInvokeContext.getContext().setResponseCallback(new BoltSendableResponseCallback() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                 // 此时C-异步返回->B
