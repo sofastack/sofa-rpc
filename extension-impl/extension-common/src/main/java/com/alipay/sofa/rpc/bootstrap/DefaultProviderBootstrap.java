@@ -403,7 +403,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      */
     protected boolean inList(String includeMethods, String excludeMethods, String methodName) {
         //判断是否在白名单中
-        if (includeMethods != null && !"*".equals(includeMethods)) {
+        if (includeMethods != null && !StringUtils.ALL.equals(includeMethods)) {
             includeMethods = includeMethods + ",";
             boolean inWhite = includeMethods.contains(methodName + ",");
             if (!inWhite) {

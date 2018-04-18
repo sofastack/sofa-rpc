@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.server.rest;
 
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
@@ -182,7 +183,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     @Override
     public void setRootResourcePath(String rootResourcePath) {
         root = rootResourcePath;
-        if (root != null && "/".equals(root)) {
+        if (root != null && StringUtils.CONTEXT_SEP.equals(root)) {
             root = "";
         }
     }

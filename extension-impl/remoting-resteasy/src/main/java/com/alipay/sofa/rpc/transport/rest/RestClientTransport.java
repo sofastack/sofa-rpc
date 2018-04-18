@@ -58,7 +58,7 @@ public class RestClientTransport extends AbstractProxyClientTransport {
 
         ProviderInfo provider = transportConfig.getProviderInfo();
         String url = "http://" + provider.getHost() + ":" + provider.getPort()
-            + "/" + StringUtils.trimToEmpty(provider.getPath());
+            + StringUtils.CONTEXT_SEP + StringUtils.trimToEmpty(provider.getPath());
         ResteasyWebTarget target = client.target(url);
         return target.proxy(ClassUtils.forName(transportConfig.getConsumerConfig().getInterfaceId()));
     }

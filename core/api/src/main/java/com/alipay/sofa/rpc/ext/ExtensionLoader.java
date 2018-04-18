@@ -250,7 +250,7 @@ public class ExtensionLoader<T> {
             }
         }
         // 不可以是default和*
-        if ("default".equals(alias) || "*".equals(alias)) {
+        if (StringUtils.DEFAULT.equals(alias) || StringUtils.ALL.equals(alias)) {
             throw new IllegalArgumentException("Error when load extension of extensible " + interfaceName +
                 " from file:" + url + ", alias of @Extension must not \"default\" and \"*\" at " + className + ".");
         }
