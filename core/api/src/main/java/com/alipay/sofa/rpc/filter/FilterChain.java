@@ -172,7 +172,7 @@ public class FilterChain implements Invoker {
             }
         }
         // 解析自动加载的过滤器
-        if (!excludes.contains("*") && !excludes.contains("default")) { // 配了-*和-default表示不加载内置
+        if (!excludes.contains(StringUtils.ALL) && !excludes.contains(StringUtils.DEFAULT)) { // 配了-*和-default表示不加载内置
             for (Map.Entry<String, ExtensionClass<Filter>> entry : PROVIDER_AUTO_ACTIVES.entrySet()) {
                 if (!excludes.contains(entry.getKey())) {
                     extensionFilters.add(entry.getValue());
@@ -234,7 +234,7 @@ public class FilterChain implements Invoker {
             }
         }
         // 解析自动加载的过滤器
-        if (!excludes.contains("*") && !excludes.contains("default")) { // 配了-*和-default表示不加载内置
+        if (!excludes.contains(StringUtils.ALL) && !excludes.contains(StringUtils.DEFAULT)) { // 配了-*和-default表示不加载内置
             for (Map.Entry<String, ExtensionClass<Filter>> entry : CONSUMER_AUTO_ACTIVES.entrySet()) {
                 if (!excludes.contains(entry.getKey())) {
                     extensionFilters.add(entry.getValue());

@@ -783,7 +783,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
         if (configValueCache != null && !rebuild) {
             return configValueCache;
         }
-        Map<String, Object> context = new HashMap<String, Object>();
+        Map<String, Object> context = new HashMap<String, Object>(32);
         Map<String, String> providerParams = getParameters();
         if (providerParams != null) {
             context.putAll(providerParams); // 复制接口的自定义参数
@@ -892,7 +892,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 }
                 if (changed && overwrite) {
                     BeanUtils.setProperty(methodConfig, methodProperty, propertyClazz, newValue);// 覆盖属性
-                    if (LOGGER.isWarnEnabled()) {
+                    if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Property \"" + methodName + "." + methodProperty + "\" changed from {} to {}",
                             oldValue, newValueStr);
                     }
@@ -913,7 +913,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 }
                 if (changed && overwrite) {
                     BeanUtils.setProperty(this, property, propertyClazz, newValue);// 覆盖属性
-                    if (LOGGER.isWarnEnabled()) {
+                    if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Property \"" + property + "\" changed from {} to {}", oldValue, newValueStr);
                     }
                 }

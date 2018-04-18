@@ -39,8 +39,7 @@ public class CustomerInjectorFactory extends InjectorFactoryImpl {
                                                   Type genericType,
                                                   Annotation[] annotations, boolean useDefault,
                                                   ResteasyProviderFactory providerFactory) {
-        CustomerAnnotation customerAnnotation;
-        if ((customerAnnotation = findAnnotation(annotations, CustomerAnnotation.class)) != null) {
+        if (findAnnotation(annotations, CustomerAnnotation.class) != null) {
             return new CustomerInject();
         }
 

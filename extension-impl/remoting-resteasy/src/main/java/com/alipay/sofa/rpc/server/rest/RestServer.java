@@ -141,7 +141,9 @@ public class RestServer implements Server {
             try {
                 httpServer = buildServer();
                 httpServer.start();
-                LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
+                }
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(
                     "Failed to start jetty server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(), e);
@@ -167,7 +169,9 @@ public class RestServer implements Server {
         }
         try {
             // 关闭端口，不关闭线程池
-            LOGGER.info("Stop the http rest server at port {}", serverConfig.getPort());
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Stop the http rest server at port {}", serverConfig.getPort());
+            }
             httpServer.stop();
             httpServer = null;
         } catch (Exception e) {
@@ -182,8 +186,10 @@ public class RestServer implements Server {
             start();
         }
         // 在httpserver中注册此jaxrs服务
-        LOGGER.info("Register jaxrs service to base url http://" + serverConfig.getHost() + ":"
-            + serverConfig.getPort() + serverConfig.getContextPath());
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Register jaxrs service to base url http://" + serverConfig.getHost() + ":"
+                + serverConfig.getPort() + serverConfig.getContextPath());
+        }
         try {
             httpServer.getDeployment().getRegistry()
                 .addResourceFactory(new SofaResourceFactory(providerConfig), serverConfig.getContextPath());
@@ -199,8 +205,10 @@ public class RestServer implements Server {
         if (!isStarted()) {
             return;
         }
-        LOGGER.info("Unregister jaxrs service to port {} and base path is {}", serverConfig.getPort(),
-            serverConfig.getContextPath());
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("Unregister jaxrs service to port {} and base path is {}", serverConfig.getPort(),
+                serverConfig.getContextPath());
+        }
         try {
             httpServer.getDeployment().getRegistry()
                 .removeRegistrations(providerConfig.getRef().getClass(), serverConfig.getContextPath());

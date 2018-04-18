@@ -43,8 +43,6 @@ public class DubboServerMain {
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("dubbo-server");
 
         ServerConfig serverConfig = new ServerConfig()
-            //        .setHost("0.0.0.0")
-            //        .setPort(22222)
             .setProtocol("dubbo")
             .setHost("127.0.0.1")
             .setPort(20080)
