@@ -16,11 +16,11 @@
  */
 package com.alipay.sofa.rpc.test.async;
 
-import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 import com.alipay.sofa.rpc.test.HelloService;
 
 /**
