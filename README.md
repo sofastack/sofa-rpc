@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/alipay/sofa-rpc.svg?branch=master)](https://travis-ci.org/alipay/sofa-rpc)
 [![Coverage Status](https://codecov.io/gh/alipay/sofa-rpc/branch/master/graph/badge.svg)](https://codecov.io/gh/alipay/sofa-rpc)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
-[![Maven](https://img.shields.io/badge/maven-5.3.1-green.svg)](http://central.maven.org/maven2/com/alipay/sofa/sofa-rpc-all/5.3.1)
+[![Maven](https://img.shields.io/github/release/alipay/sofa-rpc.svg)](https://github.com/alipay/sofa-rpc/releases)
 
 ## 概述
 
