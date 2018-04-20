@@ -41,6 +41,10 @@ SOFARPC 是一个高可扩展性、高性能、生产级的 Java RPC 框架。�
 
 [如何参与 SOFARPC 代码贡献](https://github.com/alipay/sofa-rpc/wiki/Contributing)
 
+## 致谢
+
+SOFARPC 最早源于阿里内部的 HSF，非常感谢毕玄创造了 HSF，使 SOFARPC 的发展有了良好的基础，也非常感谢寒泉子，独明，世范在 SOFARPC 发展过程中作出的贡献，😄。
+
 ## 开源许可
 
 SOFARPC 基于 [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE) 协议，SOFARPC 依赖了一些三方组件，它们的开源协议参见[依赖组件版权说明](https://github.com/alipay/sofa-rpc/wiki/NOTICE)。
