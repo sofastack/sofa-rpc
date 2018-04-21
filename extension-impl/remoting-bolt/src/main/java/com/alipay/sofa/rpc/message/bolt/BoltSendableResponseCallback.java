@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.client.bolt;
+package com.alipay.sofa.rpc.message.bolt;
 
 import com.alipay.remoting.AsyncContext;
 import com.alipay.sofa.rpc.context.BaggageResolver;
@@ -35,7 +35,7 @@ import com.alipay.sofa.rpc.event.ServerSendEvent;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public abstract class AsyncSofaResponseCallback<T> implements SendableResponseCallback<T> {
+public abstract class BoltSendableResponseCallback<T> implements SendableResponseCallback<T> {
 
     /**
      * 请求对应的上下文
@@ -52,7 +52,7 @@ public abstract class AsyncSofaResponseCallback<T> implements SendableResponseCa
      */
     private boolean        sent;
 
-    public AsyncSofaResponseCallback() {
+    public BoltSendableResponseCallback() {
         init();
     }
 

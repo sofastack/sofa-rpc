@@ -16,12 +16,11 @@
  */
 package com.alipay.sofa.rpc.server.bolt;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
@@ -43,6 +42,21 @@ public class BoltServerTest {
         server.start();
         Assert.assertTrue(server.started);
         Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
+
+        // start use bound port will throw exception
+        ServerConfig serverConfig2 = new ServerConfig();
+        serverConfig2.setBoundHost(host);
+        serverConfig2.setPort(port);
+        serverConfig2.setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+        BoltServer server2 = new BoltServer();
+        server2.init(serverConfig2);
+        boolean error = false;
+        try {
+            server2.start();
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
 
         server.stop();
         Assert.assertFalse(server.started);

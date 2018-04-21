@@ -417,12 +417,12 @@ public class NetUtils {
      */
     public static boolean isMatchIPByPattern(String whiteList, String localIP) {
         if (StringUtils.isNotBlank(whiteList)) {
-            if ("*".equals(whiteList)) {
+            if (StringUtils.ALL.equals(whiteList)) {
                 return true;
             }
             for (String ips : whiteList.replace(',', ';').split(";", -1)) {
                 try {
-                    if (ips.contains("*")) { // 带通配符
+                    if (ips.contains(StringUtils.ALL)) { // 带通配符
                         String regex = ips.trim().replace(".", "\\.").replace("*", ".*");
                         Pattern pattern = Pattern.compile(regex);
                         if (pattern.matcher(localIP).find()) {

@@ -1,2 +1,1 @@
-lzma=com.alipay.sofa.rpc.codec.lzma.QuickLZCompressor
 snappy=com.alipay.sofa.rpc.codec.snappy.SnappyRpcCompressor
