@@ -181,7 +181,7 @@ public class CommonUtils {
      * @param defaultLong 默认值
      * @return long
      */
-    public static long parseLong(String num, long defaultLong){
+    public static long parseLong(String num, long defaultLong) {
         if (num == null) {
             return defaultLong;
         } else {

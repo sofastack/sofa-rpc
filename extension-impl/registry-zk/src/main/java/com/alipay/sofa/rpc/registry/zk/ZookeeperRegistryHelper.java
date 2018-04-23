@@ -62,17 +62,26 @@ public class ZookeeperRegistryHelper {
                         host = SystemInfo.getLocalHost();
                     }
                 }
-                sb.append(server.getProtocol()).append("://").append(host)
-                    .append(":").append(server.getPort()).append(server.getContextPath())
-                    .append("?uniqueId=").append(providerConfig.getUniqueId())
+                sb.append(server.getProtocol())
+                    .append("://")
+                    .append(host)
+                    .append(":")
+                    .append(server.getPort())
+                    .append(server.getContextPath())
+                    .append("?uniqueId=")
+                    .append(providerConfig.getUniqueId())
                     .append(getKeyPairs("version", "1.0"))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
                     .append(getKeyPairs("delay", providerConfig.getDelay()))
                     .append(getKeyPairs("id", providerConfig.getId()))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
                     .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME, providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
+                    .append(
+                        getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
+                            providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
+                    .append(
+                        getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
+                            providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
                     .append(getKeyPairs("crossLang", providerConfig.getParameter("crossLang")))
                     .append(getKeyPairs("accepts", server.getAccepts()))
                     .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME))
