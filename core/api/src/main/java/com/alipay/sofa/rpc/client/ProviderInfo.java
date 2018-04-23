@@ -26,7 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 抽象的服务提供列表
+ * A list of abstract service provides .
  * <p>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
@@ -36,7 +36,7 @@ public class ProviderInfo implements Serializable {
     private static final long                                 serialVersionUID = -6438690329875954051L;
 
     /**
-     * 原始地址
+     * The original address
      */
     private transient String                                  originUrl;
 
@@ -61,7 +61,7 @@ public class ProviderInfo implements Serializable {
     private String                                            path;
 
     /**
-     * 序列化方式，服务端指定，以服务端的为准
+     * The serialization mode, which is specified on the server side, is subject to the server.
      */
     private String                                            serializationType;
 
@@ -71,28 +71,28 @@ public class ProviderInfo implements Serializable {
     private int                                               rpcVersion;
 
     /**
-     * 权重
+     * Weight
      *
-     * @see ProviderInfoAttrs#ATTR_WEIGHT 原始权重
-     * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT 预热权重
+     * @see ProviderInfoAttrs#ATTR_WEIGHT The original weight
+     * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT Preheat the weight
      */
     private transient volatile int                            weight           = RpcConfigs
                                                                                    .getIntValue(RpcOptions.PROVIDER_WEIGHT);
 
     /**
-     * 服务状态
+     * service status
      */
     private transient volatile ProviderStatus                 status           = ProviderStatus.AVAILABLE;
 
     /**
-     * 静态属性，不会变的
+     * static properties, immutable.
      */
     private final ConcurrentHashMap<String, String>           staticAttrs      = new ConcurrentHashMap<String, String>();
 
     /**
-     * 动态属性，会动态变的 <br />
+     * dynamic properties change dynamically. <br />
      * <p>
-     * 例如动态权重，是否启用，预热标记等  invocationOptimizing
+     * For example dynamic weight, whether to enable, preheating mark, etc.  invocationOptimizing
      */
     private final transient ConcurrentHashMap<String, Object> dynamicAttrs     = new ConcurrentHashMap<String, Object>();
 
@@ -160,7 +160,7 @@ public class ProviderInfo implements Serializable {
                     remainUrl = "";
                 }
             }
-            String[] ipAndPort = address.split(":", -1); // TODO 不支持ipv6
+            String[] ipAndPort = address.split(":", -1); // TODO Does not support ipv6
             this.setHost(ipAndPort[0]);
             if (ipAndPort.length > 1) {
                 this.setPort(CommonUtils.parseInt(ipAndPort[1], port));
@@ -220,7 +220,9 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * 读取预热权重参数，决定是否切换状态到预热期，如果切换到预热期设置相应参数。
+     * Read the preheating weight parameter,
+     * decide whether to switch the state to the preheating period,
+     * and set the corresponding parameters during the preheating period.
      */
     private void processWarmUpWeight() {
 
@@ -239,17 +241,17 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * 从thrift://10.12.120.121:9090 得到Provider
+     * Get Provider from thrift://10.12.120.121:9090
      *
-     * @param url url地址
-     * @return Provider对象 provider
+     * @param url url address
+     * @return Provider object provider
      */
     public static ProviderInfo valueOf(String url) {
         return new ProviderInfo(url);
     }
 
     /**
-     * 序列化到url.
+     * Serialize to the url.
      *
      * @return the string
      */
@@ -586,7 +588,7 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * gets dynamic attribute.
+     * Gets dynamic attribute.
      *
      * @param dynamicAttrKey the dynamic attribute key
      * @return the dynamic attribute Value
@@ -617,10 +619,12 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * 得到属性值，先去动态属性，再取静态属性
+     * Get the attribute value,
+     * first go to the dynamic property,
+     * then take the static property.
      *
-     * @param key 属性Key
-     * @return 属性值
+     * @param key The Key attributes
+     * @return Attribute values
      */
     public String getAttr(String key) {
         String val = (String) dynamicAttrs.get(key);

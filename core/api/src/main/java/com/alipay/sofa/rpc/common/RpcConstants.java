@@ -318,10 +318,6 @@ public class RpcConstants {
      */
     public static final String  CONFIG_KEY_WEIGHT                  = "weight";
 
-    public static final String  CONFIG_KEY_WARM_UP_TIME            = "warmupTime";
-
-    public static final String  CONFIG_KEY_WARM_UP_WEIGHT          = "warmupWeight";
-
     /**
      * 配置key:interface | interfaceId
      */

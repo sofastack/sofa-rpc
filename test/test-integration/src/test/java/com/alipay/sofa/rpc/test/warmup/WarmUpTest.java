@@ -65,7 +65,7 @@ public class WarmUpTest {
             .setParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, "100000")
             .setWeight(0);
 
-        // 设置正确的startTime
+        // Set the correct startTime.
         Field field = RpcRuntimeContext.class.getField("START_TIME");
         field.setAccessible(true);
 
@@ -95,14 +95,14 @@ public class WarmUpTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
-        // 5s 之前 流量全部到22222
+        // Before the 5s, all the traffic goes to 22222.
         for (int i = 0; i < 300; i++) {
             Assert.assertEquals(22222, warmUpService.getPort());
         }
 
         Thread.sleep(5000);
 
-        // 5s 之后 流量全部到22111
+        // After 5s, all the traffic goes to 22111.
         for (int i = 0; i < 300; i++) {
             Assert.assertEquals(22111, warmUpService.getPort());
         }
@@ -127,9 +127,6 @@ public class WarmUpTest {
             .setWeight(0);
         providerConfig.export();
 
-        // 记录start时间
-        long startTime = System.currentTimeMillis();
-
         ServerConfig serverConfig2 = new ServerConfig()
             .setPort(11333)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
@@ -147,19 +144,15 @@ public class WarmUpTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
-        // 5s 之前 流量全部到11333
-
-        while (true) {
+        // Before the 5s, all the traffic goes to 11333.
+        for (int i = 0; i < 300; i++) {
             Assert.assertEquals(11333, warmUpService.getPort());
-            if (System.currentTimeMillis() - startTime >= 4000) {
-                break;
-            }
         }
 
-        Thread.sleep(1000);
+        Thread.sleep(5000);
 
-        // 5s 之后 流量还是到11333
-        for (int i = 0; i < 100; i++) {
+        // After 5s, all the traffic goes to 11333.
+        for (int i = 0; i < 300; i++) {
             Assert.assertEquals(11333, warmUpService.getPort());
         }
     }
@@ -182,9 +175,6 @@ public class WarmUpTest {
             .setWeight(0);
         providerConfig.export();
 
-        // 记录start时间
-        long startTime = System.currentTimeMillis();
-
         ServerConfig serverConfig2 = new ServerConfig()
             .setPort(11777)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
@@ -202,19 +192,15 @@ public class WarmUpTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
-        // 5s 之前 流量全部到11777
-
-        while (true) {
+        // Before the 5s, all the traffic goes to 11777.
+        for (int i = 0; i < 300; i++) {
             Assert.assertEquals(11777, warmUpService.getPort());
-            if (System.currentTimeMillis() - startTime >= 4000) {
-                break;
-            }
         }
 
-        Thread.sleep(1000);
+        Thread.sleep(5000);
 
-        // 5s 之后 流量还是到11777
-        for (int i = 0; i < 100; i++) {
+        // After 5s, all the traffic goes to 11777.
+        for (int i = 0; i < 300; i++) {
             Assert.assertEquals(11777, warmUpService.getPort());
         }
     }

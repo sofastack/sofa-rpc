@@ -176,9 +176,9 @@ public class CommonUtils {
     }
 
     /**
-     * 字符串Long
-     * @param num         数字
-     * @param defaultLong 默认值
+     * String Long turn number.
+     * @param num         The number of strings.
+     * @param defaultLong The default value
      * @return long
      */
     public static long parseLong(String num, long defaultLong) {
