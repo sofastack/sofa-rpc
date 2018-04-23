@@ -38,6 +38,79 @@ public class ProviderInfoTest {
     }
 
     @Test
+    public void testWarmUp() throws InterruptedException {
+
+        //effect
+        long now = System.currentTimeMillis();
+        String src = "bolt://10.15.233.114:12200?weight=123&warmupTime=5000&warmupWeight=300&startTime="+ now +"&serialization=hessian2";
+        ProviderInfo providerInfo = ProviderInfo.valueOf(src);
+
+        Assert.assertEquals(now + "", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME));
+        Assert.assertEquals(300, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
+        Assert.assertEquals(5000L, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
+        Assert.assertEquals(now + 5000 , providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
+
+        Assert.assertEquals(ProviderStatus.WARMING_UP, providerInfo.getStatus());
+        Assert.assertEquals(300, providerInfo.getWeight());
+
+
+        Thread.sleep(3000);
+        Assert.assertEquals(ProviderStatus.WARMING_UP, providerInfo.getStatus());
+        Assert.assertEquals(300, providerInfo.getWeight());
+
+
+        Thread.sleep(2000);
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
+        Assert.assertEquals(123, providerInfo.getWeight());
+
+
+        //no warmupTime
+        long now2 = System.currentTimeMillis();
+        String src2 = "bolt://10.15.233.114:12200?weight=240&warmupWeight=600&startTime="+ now2 +"&serialization=hessian2";
+        ProviderInfo providerInfo2 = ProviderInfo.valueOf(src2);
+
+        Assert.assertEquals(now2 + "", providerInfo2.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME));
+        Assert.assertEquals(600, providerInfo2.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
+        Assert.assertEquals(null, providerInfo2.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
+        Assert.assertEquals(null , providerInfo2.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
+
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo2.getStatus());
+        Assert.assertEquals(240, providerInfo2.getWeight());
+
+        Thread.sleep(3000);
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo2.getStatus());
+        Assert.assertEquals(240, providerInfo2.getWeight());
+
+
+        Thread.sleep(2000);
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo2.getStatus());
+        Assert.assertEquals(240, providerInfo2.getWeight());
+
+
+        //no warmupWeight
+        long now3 = System.currentTimeMillis();
+        String src3 = "bolt://10.15.233.114:12200?weight=360&warmupTime=5000&startTime="+ now3 +"&serialization=hessian2";
+        ProviderInfo providerInfo3 = ProviderInfo.valueOf(src3);
+
+        Assert.assertEquals(now3 + "", providerInfo3.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME));
+        Assert.assertEquals(null, providerInfo3.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
+        Assert.assertEquals(5000L, providerInfo3.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
+        Assert.assertEquals(null , providerInfo3.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
+
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo3.getStatus());
+        Assert.assertEquals(360, providerInfo3.getWeight());
+
+        Thread.sleep(3000);
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo3.getStatus());
+        Assert.assertEquals(360, providerInfo3.getWeight());
+
+
+        Thread.sleep(2000);
+        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo3.getStatus());
+        Assert.assertEquals(360, providerInfo3.getWeight());
+    }
+
+    @Test
     public void toUrl() throws Exception {
         {
             String src = "10.15.233.114:12200";

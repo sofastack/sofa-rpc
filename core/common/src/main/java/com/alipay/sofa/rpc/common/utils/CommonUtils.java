@@ -176,6 +176,24 @@ public class CommonUtils {
     }
 
     /**
+     * 字符串Long
+     * @param num         数字
+     * @param defaultLong 默认值
+     * @return long
+     */
+    public static long parseLong(String num, long defaultLong){
+        if (num == null) {
+            return defaultLong;
+        } else {
+            try {
+                return Long.parseLong(num);
+            } catch (Exception e) {
+                return defaultLong;
+            }
+        }
+    }
+
+    /**
      * 字符串转布尔
      *
      * @param bool       数字
