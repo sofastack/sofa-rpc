@@ -185,7 +185,7 @@ public class ZookeeperRegistryHelper {
     }
 
     /**
-     * Read the preheating weight parameter,
+     * Read the warmup weight parameter,
      * decide whether to switch the state to the preheating period,
      * and set the corresponding parameters during the preheating period.
      *
@@ -201,7 +201,7 @@ public class ZookeeperRegistryHelper {
             StringUtils.isNotBlank(startTimeStr)) {
 
             long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
-            int warmupWeight = CommonUtils.parseInt(warmupWeightStr, providerInfo.getOriginWeight());
+            int warmupWeight = CommonUtils.parseInt(warmupWeightStr, Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
             long startTime = CommonUtils.parseLong(startTimeStr, 0);
             long warmupEndTime = startTime + warmupTime;
 

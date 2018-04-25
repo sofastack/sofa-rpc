@@ -38,13 +38,14 @@ public class ZookeeperRegistryHelperTest {
 
         ProviderInfo providerInfo = new ProviderInfo()
             .setWeight(200)
+            .setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, "200")
             .setStaticAttr(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(now))
             .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, String.valueOf(30))
             .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, String.valueOf(700));
 
         ZookeeperRegistryHelper.processWarmUpWeight(providerInfo);
 
-        Assert.assertEquals(200, providerInfo.getOriginWeight());
+        Assert.assertEquals("200", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT));
         Assert.assertEquals(now + "", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
@@ -54,7 +55,7 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(ProviderStatus.WARMING_UP, providerInfo.getStatus());
         Assert.assertEquals(700, providerInfo.getWeight());
 
-        Thread.sleep(30);
+        Thread.sleep(50);
 
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(200, providerInfo.getWeight());
@@ -66,12 +67,13 @@ public class ZookeeperRegistryHelperTest {
 
         ProviderInfo providerInfo = new ProviderInfo()
             .setWeight(300)
+            .setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, "300")
             .setStaticAttr(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(now))
             .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, String.valueOf(800));
 
         ZookeeperRegistryHelper.processWarmUpWeight(providerInfo);
 
-        Assert.assertEquals(300, providerInfo.getOriginWeight());
+        Assert.assertEquals("300", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT));
         Assert.assertEquals(now + "", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
@@ -93,12 +95,13 @@ public class ZookeeperRegistryHelperTest {
 
         ProviderInfo providerInfo = new ProviderInfo()
             .setWeight(600)
+            .setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, "600")
             .setStaticAttr(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(now))
             .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, String.valueOf(30));
 
         ZookeeperRegistryHelper.processWarmUpWeight(providerInfo);
 
-        Assert.assertEquals(600, providerInfo.getOriginWeight());
+        Assert.assertEquals("600", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT));
         Assert.assertEquals(now + "", providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));

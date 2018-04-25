@@ -428,15 +428,6 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * Get the origin weight
-     *
-     * @return the weight
-     */
-    public int getOriginWeight() {
-        return weight;
-    }
-
-    /**
      * Sets weight.
      *
      * @param weight the weight
