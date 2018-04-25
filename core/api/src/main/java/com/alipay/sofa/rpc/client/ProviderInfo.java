@@ -26,7 +26,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * A list of abstract service provides .
+ * ProviderInfo contains all the information of the service provider,
+ * including the main info, static attributes, and dynamic attributes.
  * <p>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
@@ -74,7 +75,7 @@ public class ProviderInfo implements Serializable {
      * Weight
      *
      * @see ProviderInfoAttrs#ATTR_WEIGHT The original weight
-     * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT Preheat the weight
+     * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT warmup weight
      */
     private transient volatile int                            weight           = RpcConfigs
                                                                                    .getIntValue(RpcOptions.PROVIDER_WEIGHT);
@@ -92,7 +93,7 @@ public class ProviderInfo implements Serializable {
     /**
      * dynamic properties change dynamically. <br />
      * <p>
-     * For example dynamic weight, whether to enable, preheating mark, etc.  invocationOptimizing
+     * For example warmup weight, warmup time, etc.  invocationOptimizing
      */
     private final transient ConcurrentHashMap<String, Object> dynamicAttrs     = new ConcurrentHashMap<String, Object>();
 
@@ -182,18 +183,6 @@ public class ProviderInfo implements Serializable {
                             int weight = CommonUtils.parseInt(kvpair[1], this.weight);
                             this.setWeight(weight);
                             this.setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, String.valueOf(weight));
-                        } else if (ProviderInfoAttrs.ATTR_WARMUP_TIME.equals(kvpair[0]) &&
-                            StringUtils.isNotEmpty(kvpair[1])) {
-
-                            long warmupTime = CommonUtils.parseLong(kvpair[1], 0);
-                            this.setDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, warmupTime);
-
-                        } else if (ProviderInfoAttrs.ATTR_WARMUP_WEIGHT.equals(kvpair[0]) &&
-                            StringUtils.isNotEmpty(kvpair[1])) {
-
-                            int warmupWeight = CommonUtils.parseInt(kvpair[1], this.weight);
-                            this.setDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, warmupWeight);
-
                         } else if (ProviderInfoAttrs.ATTR_RPC_VERSION.equals(kvpair[0]) &&
                             StringUtils.isNotEmpty(kvpair[1])) {
                             this.setRpcVersion(CommonUtils.parseInt(kvpair[1], getRpcVersion()));
@@ -205,8 +194,6 @@ public class ProviderInfo implements Serializable {
                         }
                     }
 
-                    processWarmUpWeight();
-
                 } else {
                     String itf = remainUrl;
                     this.setPath(itf);
@@ -217,27 +204,6 @@ public class ProviderInfo implements Serializable {
         } catch (Exception e) {
             throw new IllegalArgumentException("Failed to convert url to provider, the wrong url is:" + url, e);
         }
-    }
-
-    /**
-     * Read the preheating weight parameter,
-     * decide whether to switch the state to the preheating period,
-     * and set the corresponding parameters during the preheating period.
-     */
-    private void processWarmUpWeight() {
-
-        Object warmupTime = getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME);
-        Object warmupWeight = getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
-        String startTime = staticAttrs.get(ProviderInfoAttrs.ATTR_START_TIME);
-
-        if (warmupTime != null && warmupWeight != null && StringUtils.isNotBlank(startTime)) {
-
-            long warmupEndTime = Long.parseLong(startTime) + (Long) warmupTime;
-
-            setDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME, warmupEndTime);
-            setStatus(ProviderStatus.WARMING_UP);
-        }
-
     }
 
     /**
@@ -458,6 +424,15 @@ public class ProviderInfo implements Serializable {
                 return weight;
             }
         }
+        return weight;
+    }
+
+    /**
+     * Get the origin weight
+     *
+     * @return the weight
+     */
+    public int getOriginWeight() {
         return weight;
     }
 

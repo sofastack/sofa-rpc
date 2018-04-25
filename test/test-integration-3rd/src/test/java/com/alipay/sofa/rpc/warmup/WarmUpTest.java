@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.warmup;
+package com.alipay.sofa.rpc.warmup;
 
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -61,7 +61,7 @@ public class WarmUpTest {
             .setRef(new WarmUpServiceImpl(22222))
             .setServer(serverConfig)
             .setRegistry(registryConfig)
-            .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "5000")
+            .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "2000")
             .setParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, "100000")
             .setWeight(0);
 
@@ -70,7 +70,7 @@ public class WarmUpTest {
         field.setAccessible(true);
 
         Field modifiersField = Field.class.getDeclaredField("modifiers");
-        modifiersField.setAccessible(true); //Field 的 modifiers 是私有的
+        modifiersField.setAccessible(true);
         modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
 
         long startTime = System.currentTimeMillis();
@@ -95,15 +95,15 @@ public class WarmUpTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
-        // Before the 5s, all the traffic goes to 22222.
-        for (int i = 0; i < 300; i++) {
+        // Before the 2000 ms, all the traffic goes to 22222.
+        for (int i = 0; i < 50; i++) {
             Assert.assertEquals(22222, warmUpService.getPort());
         }
 
-        Thread.sleep(5000);
+        Thread.sleep(2000);
 
-        // After 5s, all the traffic goes to 22111.
-        for (int i = 0; i < 300; i++) {
+        // After 2000 ms, all the traffic goes to 22111.
+        for (int i = 0; i < 50; i++) {
             Assert.assertEquals(22111, warmUpService.getPort());
         }
 
@@ -144,15 +144,15 @@ public class WarmUpTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
-        // Before the 5s, all the traffic goes to 11333.
-        for (int i = 0; i < 300; i++) {
+        // Before the 2000 ms, all the traffic goes to 11333.
+        for (int i = 0; i < 50; i++) {
             Assert.assertEquals(11333, warmUpService.getPort());
         }
 
-        Thread.sleep(5000);
+        Thread.sleep(2000);
 
-        // After 5s, all the traffic goes to 11333.
-        for (int i = 0; i < 300; i++) {
+        // After 2000 ms, all the traffic goes to 11333.
+        for (int i = 0; i < 50; i++) {
             Assert.assertEquals(11333, warmUpService.getPort());
         }
     }
@@ -171,7 +171,7 @@ public class WarmUpTest {
             .setRef(new WarmUpServiceImpl(11666))
             .setServer(serverConfig)
             .setRegistry(registryConfig)
-            .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "5000")
+            .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "2000")
             .setWeight(0);
         providerConfig.export();
 
@@ -192,15 +192,15 @@ public class WarmUpTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         WarmUpService warmUpService = consumerConfig.refer();
 
-        // Before the 5s, all the traffic goes to 11777.
-        for (int i = 0; i < 300; i++) {
+        // Before the 2000 ms, all the traffic goes to 11777.
+        for (int i = 0; i < 50; i++) {
             Assert.assertEquals(11777, warmUpService.getPort());
         }
 
-        Thread.sleep(5000);
+        Thread.sleep(2000);
 
-        // After 5s, all the traffic goes to 11777.
-        for (int i = 0; i < 300; i++) {
+        // After 2000 ms, all the traffic goes to 11777.
+        for (int i = 0; i < 50; i++) {
             Assert.assertEquals(11777, warmUpService.getPort());
         }
     }
