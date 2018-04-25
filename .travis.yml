@@ -19,7 +19,7 @@ before_install:
    && export PATH=$M2_HOME/bin:$PATH 
    && mvn -version
   - echo "Install Zookeeper 3.4.11"
-   && wget http://www-us.apache.org/dist/zookeeper/zookeeper-3.4.11/zookeeper-3.4.11.tar.gz
+   && wget http://archive.apache.org/dist/zookeeper/zookeeper-3.4.11/zookeeper-3.4.11.tar.gz
    && tar -zxf zookeeper-3.4.11.tar.gz
    && mv zookeeper-3.4.11/conf/zoo_sample.cfg zookeeper-3.4.11/conf/zoo.cfg
    && /bin/bash zookeeper-3.4.11/bin/zkServer.sh start
