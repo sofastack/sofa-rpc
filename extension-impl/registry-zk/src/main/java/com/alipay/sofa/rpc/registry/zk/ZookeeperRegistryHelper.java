@@ -201,7 +201,8 @@ public class ZookeeperRegistryHelper {
             StringUtils.isNotBlank(startTimeStr)) {
 
             long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
-            int warmupWeight = CommonUtils.parseInt(warmupWeightStr, Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
+            int warmupWeight = CommonUtils.parseInt(warmupWeightStr,
+                Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
             long startTime = CommonUtils.parseLong(startTimeStr, 0);
             long warmupEndTime = startTime + warmupTime;
 
