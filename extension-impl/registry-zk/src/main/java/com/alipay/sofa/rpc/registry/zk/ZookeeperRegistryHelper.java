@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
+import com.alipay.sofa.rpc.client.ProviderStatus;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.Version;
@@ -62,15 +63,26 @@ public class ZookeeperRegistryHelper {
                         host = SystemInfo.getLocalHost();
                     }
                 }
-                sb.append(server.getProtocol()).append("://").append(host)
-                    .append(":").append(server.getPort()).append(server.getContextPath())
-                    .append("?uniqueId=").append(providerConfig.getUniqueId())
+                sb.append(server.getProtocol())
+                    .append("://")
+                    .append(host)
+                    .append(":")
+                    .append(server.getPort())
+                    .append(server.getContextPath())
+                    .append("?uniqueId=")
+                    .append(providerConfig.getUniqueId())
                     .append(getKeyPairs("version", "1.0"))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
                     .append(getKeyPairs("delay", providerConfig.getDelay()))
                     .append(getKeyPairs("id", providerConfig.getId()))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
-                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_WEIGHT, providerConfig.getWeight()))
+                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
+                    .append(
+                        getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
+                            providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
+                    .append(
+                        getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
+                            providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
                     .append(getKeyPairs("crossLang", providerConfig.getParameter("crossLang")))
                     .append(getKeyPairs("accepts", server.getAccepts()))
                     .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME))
@@ -155,10 +167,7 @@ public class ZookeeperRegistryHelper {
         }
 
         for (ChildData childData : currentData) {
-            String url = childData.getPath().substring(providerPath.length() + 1); // 去掉头部
-            url = URLDecoder.decode(url, "UTF-8");
-            // byte[] data = childData.getData();
-            providerInfos.add(ProviderInfo.valueOf(url));
+            providerInfos.add(convertUrlToProvider(providerPath, childData));
         }
         return providerInfos;
     }
@@ -168,7 +177,45 @@ public class ZookeeperRegistryHelper {
         String url = childData.getPath().substring(providerPath.length() + 1); // 去掉头部
         url = URLDecoder.decode(url, "UTF-8");
         // byte[] data = childData.getData();
-        return ProviderInfo.valueOf(url);
+        ProviderInfo providerInfo = ProviderInfo.valueOf(url);
+
+        processWarmUpWeight(providerInfo);
+
+        return providerInfo;
+    }
+
+    /**
+     * Read the warmup weight parameter,
+     * decide whether to switch the state to the preheating period,
+     * and set the corresponding parameters during the preheating period.
+     *
+     * @param providerInfo
+     */
+    static void processWarmUpWeight(ProviderInfo providerInfo) {
+
+        String warmupTimeStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME);
+        String warmupWeightStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
+        String startTimeStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME);
+
+        if (StringUtils.isNotBlank(warmupTimeStr) && StringUtils.isNotBlank(warmupWeightStr) &&
+            StringUtils.isNotBlank(startTimeStr)) {
+
+            long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
+            int warmupWeight = CommonUtils.parseInt(warmupWeightStr,
+                Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
+            long startTime = CommonUtils.parseLong(startTimeStr, 0);
+            long warmupEndTime = startTime + warmupTime;
+
+            // set for dynamic
+            providerInfo.setDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, warmupWeight);
+            providerInfo.setDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME, warmupEndTime);
+            providerInfo.setStatus(ProviderStatus.WARMING_UP);
+        }
+
+        // remove from static
+        providerInfo.getStaticAttrs().remove(ProviderInfoAttrs.ATTR_WARMUP_TIME);
+        providerInfo.getStaticAttrs().remove(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
+
     }
 
     static String buildProviderPath(String rootPath, AbstractInterfaceConfig config) {
