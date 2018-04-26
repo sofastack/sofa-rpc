@@ -51,12 +51,10 @@ public class LocalBoltServerMain {
             .setFile(file);
 
         ServerConfig serverConfig = new ServerConfig()
-            //        .setHost("0.0.0.0")
             .setPort(22222)
             .setDaemon(false);
 
         ServerConfig serverConfig2 = new ServerConfig()
-            //        .setHost("0.0.0.0")
             .setPort(22200)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
             .setDaemon(false);
