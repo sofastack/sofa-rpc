@@ -26,8 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ProviderInfo contains all the information of the service provider,
- * including the main info, static attributes, and dynamic attributes.
+ * 抽象的服务提供列表
  * <p>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
@@ -37,7 +36,7 @@ public class ProviderInfo implements Serializable {
     private static final long                                 serialVersionUID = -6438690329875954051L;
 
     /**
-     * The original address
+     * 原始地址
      */
     private transient String                                  originUrl;
 
@@ -62,7 +61,7 @@ public class ProviderInfo implements Serializable {
     private String                                            path;
 
     /**
-     * The serialization mode, which is specified on the server side, is subject to the server.
+     * 序列化方式，服务端指定，以服务端的为准
      */
     private String                                            serializationType;
 
@@ -72,28 +71,28 @@ public class ProviderInfo implements Serializable {
     private int                                               rpcVersion;
 
     /**
-     * Weight
+     * 权重
      *
-     * @see ProviderInfoAttrs#ATTR_WEIGHT The original weight
-     * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT warmup weight
+     * @see ProviderInfoAttrs#ATTR_WEIGHT 原始权重
+     * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT 预热权重
      */
     private transient volatile int                            weight           = RpcConfigs
                                                                                    .getIntValue(RpcOptions.PROVIDER_WEIGHT);
 
     /**
-     * service status
+     * 服务状态
      */
     private transient volatile ProviderStatus                 status           = ProviderStatus.AVAILABLE;
 
     /**
-     * static properties, immutable.
+     * 静态属性，不会变的
      */
     private final ConcurrentHashMap<String, String>           staticAttrs      = new ConcurrentHashMap<String, String>();
 
     /**
-     * dynamic properties change dynamically. <br />
+     * 动态属性，会动态变的 <br />
      * <p>
-     * For example warmup weight, warmup time, etc.  invocationOptimizing
+     * 例如动态权重，是否启用，预热标记等  invocationOptimizing
      */
     private final transient ConcurrentHashMap<String, Object> dynamicAttrs     = new ConcurrentHashMap<String, Object>();
 
@@ -161,7 +160,7 @@ public class ProviderInfo implements Serializable {
                     remainUrl = "";
                 }
             }
-            String[] ipAndPort = address.split(":", -1); // TODO Does not support ipv6
+            String[] ipAndPort = address.split(":", -1); // TODO 不支持ipv6
             this.setHost(ipAndPort[0]);
             if (ipAndPort.length > 1) {
                 this.setPort(CommonUtils.parseInt(ipAndPort[1], port));
@@ -179,8 +178,7 @@ public class ProviderInfo implements Serializable {
                     for (String parm : params) {
                         String[] kvpair = parm.split("=", -1);
                         if (ProviderInfoAttrs.ATTR_WEIGHT.equals(kvpair[0]) && StringUtils.isNotEmpty(kvpair[1])) {
-
-                            int weight = CommonUtils.parseInt(kvpair[1], this.weight);
+                            int weight = CommonUtils.parseInt(kvpair[1], getWeight());
                             this.setWeight(weight);
                             this.setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, String.valueOf(weight));
                         } else if (ProviderInfoAttrs.ATTR_RPC_VERSION.equals(kvpair[0]) &&
@@ -192,8 +190,8 @@ public class ProviderInfo implements Serializable {
                         } else {
                             this.staticAttrs.put(kvpair[0], kvpair[1]);
                         }
-                    }
 
+                    }
                 } else {
                     String itf = remainUrl;
                     this.setPath(itf);
@@ -207,17 +205,17 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * Get Provider from thrift://10.12.120.121:9090
+     * 从thrift://10.12.120.121:9090 得到Provider
      *
-     * @param url url address
-     * @return Provider object provider
+     * @param url url地址
+     * @return Provider对象 provider
      */
     public static ProviderInfo valueOf(String url) {
         return new ProviderInfo(url);
     }
 
     /**
-     * Serialize to the url.
+     * 序列化到url.
      *
      * @return the string
      */
@@ -554,7 +552,7 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * Gets dynamic attribute.
+     * gets dynamic attribute.
      *
      * @param dynamicAttrKey the dynamic attribute key
      * @return the dynamic attribute Value
@@ -585,12 +583,10 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * Get the attribute value,
-     * first go to the dynamic property,
-     * then take the static property.
+     * 得到属性值，先去动态属性，再取静态属性
      *
-     * @param key The Key attributes
-     * @return Attribute values
+     * @param key 属性Key
+     * @return 属性值
      */
     public String getAttr(String key) {
         String val = (String) dynamicAttrs.get(key);
