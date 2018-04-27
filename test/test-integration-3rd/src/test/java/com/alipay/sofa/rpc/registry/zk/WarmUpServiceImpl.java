@@ -14,15 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.warmup;
+package com.alipay.sofa.rpc.registry.zk;
 
 /**
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: WarmUpService.java, v 0.1 2018年04月23日 上午11:05 LiWei.Liengen Exp $
+ * @version $Id: WamUpServiceImpl.java, v 0.1 2018年04月23日 上午11:06 LiWei.Liengen Exp $
  */
-public interface WarmUpService {
+public class WarmUpServiceImpl implements WarmUpService {
 
-    int getPort();
+    private final int port;
 
+    public WarmUpServiceImpl(int port) {
+        this.port = port;
+    }
+
+    @Override
+    public int getPort() {
+        return port;
+    }
 }

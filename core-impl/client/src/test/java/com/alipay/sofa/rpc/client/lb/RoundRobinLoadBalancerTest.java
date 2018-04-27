@@ -57,7 +57,6 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(avg == cnt.get(9000 + i));
             }
         }
@@ -80,22 +79,8 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
             // 忽略了权重
             int avg = total / size;
             for (int i = 0; i < size; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(avg == cnt.get(9000 + i));
             }
-            //            
-            //            int count = 0;
-            //            int sum = 0;
-            //            for (int i = 0; i < size; i++) {
-            //                count += i;
-            //                sum += cnt.get(9000 + i);
-            //            }
-            //            Assert.assertTrue(sum == total);
-            //
-            //            int per = total / count;
-            //            for (int i = 1; i < size; i++) {
-            //                Assert.assertTrue(per * i == cnt.get(9000 + i));
-            //            }
         }
 
     }
