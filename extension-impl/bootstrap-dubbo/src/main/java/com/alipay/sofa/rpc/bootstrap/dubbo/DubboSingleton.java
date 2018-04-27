@@ -47,5 +47,10 @@ public class DubboSingleton {
         for (Map.Entry<ServerConfig, ProtocolConfig> entry : SERVER_MAP.entrySet()) {
             entry.getValue().destory();
         }
+        try {
+            ProtocolConfig.destroyAll();
+        } catch (Exception e) {
+            // NOPMD
+        }
     }
 }
