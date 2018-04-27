@@ -47,6 +47,7 @@ public class CustomFilterServerMain {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
         ServerConfig serverConfig = new ServerConfig()
+            .setPort(22000)
             .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
