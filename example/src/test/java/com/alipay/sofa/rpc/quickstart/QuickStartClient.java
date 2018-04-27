@@ -28,7 +28,7 @@ public class QuickStartClient {
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName()) // 指定接口
             .setProtocol("bolt") // 指定协议
-            .setDirectUrl("bolt://127.0.0.1:9696"); // 指定直连地址
+            .setDirectUrl("bolt://127.0.0.1:12200"); // 指定直连地址
 
         HelloService helloService = consumerConfig.refer();
 

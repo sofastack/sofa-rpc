@@ -92,7 +92,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认绑定网卡
   "server.host": "0.0.0.0",
   // 端口段开始
-  "server.port.start": 22000,
+  "server.port.start": 12200,
   // 端口段结束
   "server.port.end": 65535,
   // 默认contextPath
