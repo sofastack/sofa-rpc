@@ -149,6 +149,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         referenceConfig.setTimeout(consumerConfig.getTimeout());
         referenceConfig.setUrl(consumerConfig.getDirectUrl());
         referenceConfig.setCheck(consumerConfig.isCheck());
+        referenceConfig.setLazy(consumerConfig.isLazy());
 
         String invokeType = consumerConfig.getInvokeType();
         if (invokeType != null) {
