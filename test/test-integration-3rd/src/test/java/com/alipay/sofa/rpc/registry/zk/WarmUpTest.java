@@ -78,8 +78,10 @@ public class WarmUpTest extends ActivelyDestroyTest {
 
         long elapsed = System.currentTimeMillis() - startTime;
         System.out.println("elapsed " + elapsed + "ms");
-        if (elapsed > 0) {
-            Thread.sleep(2050 - elapsed);
+
+        long sleepTime = 2100 - elapsed;
+        if (sleepTime >= 0) {
+            Thread.sleep(sleepTime);
         }
 
         // After 2000 ms, all the traffic goes to 22222 && 22111.
