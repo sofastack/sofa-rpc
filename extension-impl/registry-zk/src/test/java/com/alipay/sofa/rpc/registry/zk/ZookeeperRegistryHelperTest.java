@@ -40,7 +40,7 @@ public class ZookeeperRegistryHelperTest {
             .setWeight(200)
             .setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, "200")
             .setStaticAttr(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(now))
-            .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, String.valueOf(30))
+            .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, String.valueOf(80))
             .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, String.valueOf(700));
 
         ZookeeperRegistryHelper.processWarmUpWeight(providerInfo);
@@ -50,12 +50,12 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
 
-        Assert.assertEquals(now + 30, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
+        Assert.assertEquals(now + 80, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
         Assert.assertEquals(700, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
         Assert.assertEquals(ProviderStatus.WARMING_UP, providerInfo.getStatus());
         Assert.assertEquals(700, providerInfo.getWeight());
 
-        Thread.sleep(50);
+        Thread.sleep(100);
 
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(200, providerInfo.getWeight());
@@ -83,7 +83,7 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(300, providerInfo.getWeight());
 
-        Thread.sleep(30);
+        Thread.sleep(100);
 
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(300, providerInfo.getWeight());
@@ -111,7 +111,7 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(600, providerInfo.getWeight());
 
-        Thread.sleep(30);
+        Thread.sleep(100);
 
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(600, providerInfo.getWeight());

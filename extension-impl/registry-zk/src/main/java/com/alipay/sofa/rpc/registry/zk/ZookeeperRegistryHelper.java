@@ -77,15 +77,12 @@ public class ZookeeperRegistryHelper {
                     .append(getKeyPairs("id", providerConfig.getId()))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
                     .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
-                    .append(
-                        getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
-                            providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
-                    .append(
-                        getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
-                            providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
-                    .append(getKeyPairs("crossLang", providerConfig.getParameter("crossLang")))
+                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
+                        providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
+                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
+                        providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
                     .append(getKeyPairs("accepts", server.getAccepts()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME))
+                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()));
                 addCommonAttrs(sb);
                 urls.add(sb.toString());
@@ -104,19 +101,16 @@ public class ZookeeperRegistryHelper {
     static String convertConsumerToUrl(ConsumerConfig consumerConfig) {
         StringBuilder sb = new StringBuilder(200);
         String host = SystemInfo.getLocalHost();
-        sb.append(consumerConfig.getProtocol()).append("://").append(host).append("/")
-            .append(consumerConfig.getInterfaceId())
+        sb.append(consumerConfig.getProtocol()).append("://").append(host)
             .append("?uniqueId=").append(consumerConfig.getUniqueId())
             .append(getKeyPairs("version", "1.0"))
             .append(getKeyPairs("pid", RpcRuntimeContext.PID))
-            //.append(getKeyPairs("randomPort", server.isRandomPort()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
             .append(getKeyPairs("id", consumerConfig.getId()))
-            .append(getKeyPairs("crossLang", consumerConfig.getParameter("crossLang")))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION, consumerConfig.getSerialization()))
-            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME));
+            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()));
         addCommonAttrs(sb);
         return sb.toString();
     }
@@ -144,11 +138,7 @@ public class ZookeeperRegistryHelper {
     private static void addCommonAttrs(StringBuilder sb) {
         sb.append(getKeyPairs("pid", RpcRuntimeContext.PID));
         sb.append(getKeyPairs("language", "java"));
-        sb.append(getKeyPairs("appPath", RpcRuntimeContext.get(RpcRuntimeContext.KEY_APPAPTH)));
         sb.append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION + ""));
-        if (RpcRuntimeContext.get("reg.backfile") != null || RpcRuntimeContext.get("provider.backfile") != null) {
-            sb.append(getKeyPairs("backfile", "false"));
-        }
     }
 
     /**
@@ -176,7 +166,6 @@ public class ZookeeperRegistryHelper {
         throws UnsupportedEncodingException {
         String url = childData.getPath().substring(providerPath.length() + 1); // 去掉头部
         url = URLDecoder.decode(url, "UTF-8");
-        // byte[] data = childData.getData();
         ProviderInfo providerInfo = ProviderInfo.valueOf(url);
 
         processWarmUpWeight(providerInfo);
