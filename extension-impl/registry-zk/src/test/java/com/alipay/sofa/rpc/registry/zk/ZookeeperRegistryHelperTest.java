@@ -58,7 +58,7 @@ public class ZookeeperRegistryHelperTest {
         long elapsed = System.currentTimeMillis() - now;
         System.out.println("elapsed time: " + elapsed + "ms");
         if (elapsed > 0) {
-            Thread.sleep(500 - elapsed);
+            Thread.sleep(550 - elapsed);
         }
 
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
