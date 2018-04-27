@@ -40,7 +40,7 @@ public class ZookeeperRegistryHelperTest {
             .setWeight(200)
             .setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, "200")
             .setStaticAttr(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(now))
-            .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, String.valueOf(500))
+            .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, String.valueOf(200))
             .setStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, String.valueOf(700));
 
         ZookeeperRegistryHelper.processWarmUpWeight(providerInfo);
@@ -50,15 +50,17 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         Assert.assertEquals(null, providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
 
-        Assert.assertEquals(now + 500, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
+        Assert.assertEquals(now + 200, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
         Assert.assertEquals(700, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
         Assert.assertEquals(ProviderStatus.WARMING_UP, providerInfo.getStatus());
         Assert.assertEquals(700, providerInfo.getWeight());
 
         long elapsed = System.currentTimeMillis() - now;
         System.out.println("elapsed time: " + elapsed + "ms");
-        if (elapsed > 0) {
-            Thread.sleep(550 - elapsed);
+
+        long sleepTime = 300 - elapsed;
+        if (sleepTime >= 0) {
+            Thread.sleep(sleepTime);
         }
 
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
@@ -86,11 +88,6 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(null, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(300, providerInfo.getWeight());
-
-        Thread.sleep(100);
-
-        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
-        Assert.assertEquals(300, providerInfo.getWeight());
     }
 
     @Test
@@ -112,11 +109,6 @@ public class ZookeeperRegistryHelperTest {
 
         Assert.assertEquals(null, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME));
         Assert.assertEquals(null, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
-        Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
-        Assert.assertEquals(600, providerInfo.getWeight());
-
-        Thread.sleep(100);
-
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(600, providerInfo.getWeight());
     }
