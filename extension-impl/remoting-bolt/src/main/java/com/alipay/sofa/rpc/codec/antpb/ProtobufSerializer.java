@@ -19,7 +19,10 @@ package com.alipay.sofa.rpc.codec.antpb;
 import com.alipay.remoting.exception.CodecException;
 import com.alipay.remoting.exception.DeserializationException;
 import com.alipay.remoting.exception.SerializationException;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.google.protobuf.MessageLite;
 
 import java.lang.reflect.Method;
@@ -28,32 +31,92 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Protobuf serializer.
- * 
+ *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class ProtobufSerializer {
 
     /**
-     * 方法缓存下 
+     * Singleton instance
      */
-    private ConcurrentHashMap<Class, Method> parseMethodMap = new ConcurrentHashMap<Class, Method>();
+    private static final ProtobufSerializer  INSTANCE             = new ProtobufSerializer();
+    /**
+     * Encode method name
+     */
+    private static final String              METHOD_TOBYTEARRAY   = "toByteArray";
+    /**
+     * Decode method name
+     */
+    private static final String              METHOD_PARSEFROM     = "parseFrom";
+    /**
+     * Support multiple classloader?
+     */
+    private static final boolean             MULTIPLE_CLASSLOADER = RpcConfigs
+                                                                      .getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
 
-    private static ProtobufSerializer        instance       = new ProtobufSerializer();
+    /**
+     * Cache of parseFrom method
+     */
+    private ConcurrentHashMap<Class, Method> parseFromMethodMap   = new ConcurrentHashMap<Class, Method>();
 
+    /**
+     * Cache of toByteArray method
+     */
+    private ConcurrentHashMap<Class, Method> toByteArrayMethodMap = new ConcurrentHashMap<Class, Method>();
+
+    /**
+     * 请求参数类型缓存 {service+method:class}
+     */
+    private ConcurrentHashMap<String, Class> requestClassCache    = new ConcurrentHashMap<String, Class>();
+
+    /**
+     * 返回结果类型缓存 {service+method:class}
+     */
+    private ConcurrentHashMap<String, Class> responseClassCache   = new ConcurrentHashMap<String, Class>();
+
+    /**
+     * Can not be new instance.
+     */
     private ProtobufSerializer() {
-
     }
 
+    /**
+     * Get singleton instance
+     *
+     * @return Singleton ProtobufSerializer
+     */
     public static ProtobufSerializer getInstance() {
-        return instance;
+        return INSTANCE;
     }
 
+    /**
+     * Encode protobuf message to byte array.
+     *
+     * @param object protobuf message
+     * @return byte[]
+     * @throws SerializationException Serialization Exception
+     */
     public byte[] encode(Object object) throws SerializationException {
         if (object == null) {
-            throw new SerializationException("Unsupported null message");
-        } else if (object instanceof MessageLite) {
-            MessageLite lite = (MessageLite) object;
-            return lite.toByteArray();
+            throw new SerializationException("Unsupported null message!");
+        } else if (isProtoBufMessageObject(object)) {
+            Class clazz = object.getClass();
+            Method method = toByteArrayMethodMap.get(clazz);
+            if (method == null) {
+                try {
+                    method = clazz.getMethod(METHOD_TOBYTEARRAY);
+                    method.setAccessible(true);
+                    toByteArrayMethodMap.put(clazz, method);
+                } catch (Exception e) {
+                    throw new SerializationException("Cannot found method " + clazz.getName()
+                        + ".toByteArray(), please check the generated code.", e);
+                }
+            }
+            try {
+                return (byte[]) method.invoke(object);
+            } catch (Exception e) {
+                throw new SerializationException("Error when invoke " + clazz.getName() + ".toByteArray().", e);
+            }
         } else if (object instanceof String) {
             return ((String) object).getBytes(RpcConstants.DEFAULT_CHARSET);
         } else {
@@ -62,25 +125,37 @@ public class ProtobufSerializer {
         }
     }
 
+    /**
+     * Decode byte array to protobuf message.
+     *
+     * @param bytes byte[]
+     * @param clazz protobuf message class
+     * @return protobuf message
+     * @throws DeserializationException Deserialization Exception
+     */
     public Object decode(byte[] bytes, Class clazz) throws DeserializationException {
-        if (MessageLite.class.isAssignableFrom(clazz)) {
-            try {
-                Method method = parseMethodMap.get(clazz);
-                if (method == null) {
-                    method = clazz.getMethod("parseFrom", byte[].class);
+        if (clazz == null) {
+            throw new DeserializationException("class is null!");
+        } else if (isProtoBufMessageClass(clazz)) {
+            Method method = parseFromMethodMap.get(clazz);
+            if (method == null) {
+                try {
+                    method = clazz.getMethod(METHOD_PARSEFROM, byte[].class);
                     if (!Modifier.isStatic(method.getModifiers())) {
-                        throw new CodecException("Cannot found method " + clazz.getName()
+                        throw new DeserializationException("Cannot found static method " + clazz.getName()
                             + ".parseFrom(byte[]), please check the generated code");
                     }
                     method.setAccessible(true);
-                    parseMethodMap.put(clazz, method);
+                    parseFromMethodMap.put(clazz, method);
+                } catch (NoSuchMethodException e) {
+                    throw new DeserializationException("Cannot found method " + clazz.getName()
+                        + ".parseFrom(byte[]), please check the generated code", e);
                 }
+            }
+            try {
                 return method.invoke(null, bytes);
-            } catch (DeserializationException e) {
-                throw e;
             } catch (Exception e) {
-                throw new DeserializationException("Cannot found method " + clazz.getName()
-                    + ".parseFrom(byte[]), please check the generated code", e);
+                throw new DeserializationException("Error when invoke " + clazz.getName() + ".parseFrom(byte[]).", e);
             }
         } else if (clazz == String.class) {
             return new String(bytes, RpcConstants.DEFAULT_CHARSET);
@@ -91,16 +166,6 @@ public class ProtobufSerializer {
     }
 
     /**
-     * 请求参数类型缓存 {service+method:class}
-     */
-    private static ConcurrentHashMap<String, Class> REQUEST_CLASS_CACHE  = new ConcurrentHashMap<String, Class>();
-
-    /**
-     * 返回结果类型缓存 {service+method:class}
-     */
-    private static ConcurrentHashMap<String, Class> RESPONSE_CLASS_CACHE = new ConcurrentHashMap<String, Class>();
-
-    /**
      * 从缓存中获取请求值类
      *
      * @param service    接口名
@@ -109,20 +174,20 @@ public class ProtobufSerializer {
      * @throws ClassNotFoundException 无法找到该接口
      * @throws CodecException         其它序列化异常
      */
-    public static Class getReqClass(String service, String methodName, ClassLoader classLoader)
+    public Class getReqClass(String service, String methodName, ClassLoader classLoader)
         throws ClassNotFoundException, CodecException {
         if (classLoader == null) {
             classLoader = Thread.currentThread().getContextClassLoader();
         }
         String key = buildMethodKey(service, methodName);
-        Class reqClass = REQUEST_CLASS_CACHE.get(key);
+        Class reqClass = requestClassCache.get(key);
         if (reqClass == null) {
             // 读取接口里的方法参数和返回值
             String interfaceClass = service.contains(":") ? service.substring(0, service.indexOf(':')) : service;
             Class clazz = Class.forName(interfaceClass, true, classLoader);
             loadProtoClassToCache(key, clazz, methodName);
         }
-        return REQUEST_CLASS_CACHE.get(key);
+        return requestClassCache.get(key);
     }
 
     /**
@@ -134,20 +199,20 @@ public class ProtobufSerializer {
      * @throws ClassNotFoundException 无法找到该接口
      * @throws CodecException         其它序列化异常
      */
-    public static Class getResClass(String service, String methodName, ClassLoader classLoader)
+    public Class getResClass(String service, String methodName, ClassLoader classLoader)
         throws ClassNotFoundException, CodecException {
         if (classLoader == null) {
             classLoader = Thread.currentThread().getContextClassLoader();
         }
         String key = service + "#" + methodName;
-        Class reqClass = RESPONSE_CLASS_CACHE.get(key);
+        Class reqClass = responseClassCache.get(key);
         if (reqClass == null) {
             // 读取接口里的方法参数和返回值
             String interfaceClass = service.contains(":") ? service.substring(0, service.indexOf(':')) : service;
             Class clazz = Class.forName(interfaceClass, true, classLoader);
             loadProtoClassToCache(key, clazz, methodName);
         }
-        return RESPONSE_CLASS_CACHE.get(key);
+        return responseClassCache.get(key);
     }
 
     /**
@@ -157,7 +222,7 @@ public class ProtobufSerializer {
      * @param methodName  方法名
      * @return Key
      */
-    private static String buildMethodKey(String serviceName, String methodName) {
+    private String buildMethodKey(String serviceName, String methodName) {
         return serviceName + "#" + methodName;
     }
 
@@ -167,9 +232,9 @@ public class ProtobufSerializer {
      * @param key        缓存的key
      * @param clazz      接口名
      * @param methodName 方法名
-     * @throws CodecException         其它序列化异常
+     * @throws CodecException 其它序列化异常
      */
-    private static void loadProtoClassToCache(String key, Class clazz, String methodName) throws CodecException {
+    private void loadProtoClassToCache(String key, Class clazz, String methodName) throws CodecException {
         Method pbMethod = null;
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
@@ -184,17 +249,44 @@ public class ProtobufSerializer {
         Class[] parameterTypes = pbMethod.getParameterTypes();
         if (parameterTypes == null
             || parameterTypes.length != 1
-            || !MessageLite.class.isAssignableFrom(parameterTypes[0])) {
+            || isProtoBufMessageObject(parameterTypes[0])) {
             throw new CodecException("class based protobuf: " + clazz.getName()
                 + ", only support one protobuf parameter!");
         }
         Class reqClass = parameterTypes[0];
-        REQUEST_CLASS_CACHE.put(key, reqClass);
+        requestClassCache.put(key, reqClass);
         Class resClass = pbMethod.getReturnType();
-        if (resClass == void.class || !MessageLite.class.isAssignableFrom(resClass)) {
+        if (resClass == void.class || !isProtoBufMessageClass(resClass)) {
             throw new CodecException("class based protobuf: " + clazz.getName()
                 + ", only support return protobuf message!");
         }
-        RESPONSE_CLASS_CACHE.put(key, resClass);
+        responseClassCache.put(key, resClass);
+    }
+
+    /**
+     * Is this object instanceof MessageLite
+     *
+     * @param object unknown object
+     * @return instanceof MessageLite
+     */
+    boolean isProtoBufMessageObject(Object object) {
+        if (object == null) {
+            return false;
+        }
+        if (MULTIPLE_CLASSLOADER) {
+            return object instanceof MessageLite || isProtoBufMessageClass(object.getClass());
+        } else {
+            return object instanceof MessageLite;
+        }
+    }
+
+    /**
+     * Is this class is assignable from MessageLite
+     *
+     * @param clazz unknown class
+     * @return is assignable from MessageLite
+     */
+    boolean isProtoBufMessageClass(Class clazz) {
+        return clazz != null && ClassUtils.isAssignableFrom(MessageLite.class, clazz);
     }
 }

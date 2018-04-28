@@ -89,7 +89,7 @@
         <level value="${logging.level.com.alipay.sofa.rpc}"/>
         <appender-ref ref="RPC-CODEC-APPENDER"/>
         <appender-ref ref="ERROR-APPENDER"/>
-    </logger>`
+    </logger>
 
     <logger name="com.alipay.sofa.rpc.server" additivity="false">
         <level value="${logging.level.com.alipay.sofa.rpc}"/>

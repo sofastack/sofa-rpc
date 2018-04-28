@@ -14,27 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.quickstart;
-
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
+package com.alipay.sofa.rpc.registry.zk;
 
 /**
- * Quick Start Server
+ *
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
+ * @version $Id: WamUpServiceImpl.java, v 0.1 2018年04月23日 上午11:06 LiWei.Liengen Exp $
  */
-public class QuickStartServer {
+public class WarmUpServiceImpl implements WarmUpService {
 
-    public static void main(String[] args) {
-        ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("bolt") // 设置一个协议，默认bolt
-            .setPort(12200) // 设置一个端口，默认12200
-            .setDaemon(false); // 非守护线程
+    private final int port;
 
-        ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName()) // 指定接口
-            .setRef(new HelloServiceImpl()) // 指定实现
-            .setServer(serverConfig); // 指定服务端
+    public WarmUpServiceImpl(int port) {
+        this.port = port;
+    }
 
-        providerConfig.export(); // 发布服务
+    @Override
+    public int getPort() {
+        return port;
     }
 }

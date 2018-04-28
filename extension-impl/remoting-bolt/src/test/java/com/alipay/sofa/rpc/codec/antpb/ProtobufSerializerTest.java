@@ -50,11 +50,16 @@ public class ProtobufSerializerTest {
         EchoStrRes res1 = (EchoStrRes) ProtobufSerializer.getInstance().decode(src,
             EchoStrRes.class);
         Assert.assertEquals(res1.getS(), res.getS());
+
+        src = ProtobufSerializer.getInstance().encode("xxx");
+        String s = (String) ProtobufSerializer.getInstance().decode(src, String.class);
+        Assert.assertEquals("xxx", s);
+
     }
 
     @Test
     public void getReqClass() throws Exception {
-        Class req = ProtobufSerializer.getReqClass(
+        Class req = ProtobufSerializer.getInstance().getReqClass(
             "com.alipay.sofa.rpc.codec.antpb.ProtoService", "echoStr", Thread.currentThread()
                 .getContextClassLoader());
         Assert.assertTrue(req == EchoStrReq.class);
@@ -62,9 +67,31 @@ public class ProtobufSerializerTest {
 
     @Test
     public void getResClass() throws Exception {
-        Class res = ProtobufSerializer.getResClass(
+        Class res = ProtobufSerializer.getInstance().getResClass(
             "com.alipay.sofa.rpc.codec.antpb.ProtoService", "echoStr", Thread.currentThread()
                 .getContextClassLoader());
         Assert.assertTrue(res == EchoStrRes.class);
+    }
+
+    @Test
+    public void testJudgeProtoInterface() throws Exception {
+        EchoStrRes res = EchoStrRes.newBuilder().setS("xxxx").build();
+        boolean find = ProtobufSerializer.getInstance().isProtoBufMessageObject(res);
+        Assert.assertTrue(find);
+
+        find = ProtobufSerializer.getInstance().isProtoBufMessageObject(null);
+        Assert.assertFalse(find);
+
+        find = ProtobufSerializer.getInstance().isProtoBufMessageObject(new Object());
+        Assert.assertFalse(find);
+
+        find = ProtobufSerializer.getInstance().isProtoBufMessageClass(null);
+        Assert.assertFalse(find);
+
+        find = ProtobufSerializer.getInstance().isProtoBufMessageClass(EchoStrRes.class);
+        Assert.assertTrue(find);
+
+        find = ProtobufSerializer.getInstance().isProtoBufMessageClass(EchoStrRes.Builder.class);
+        Assert.assertFalse(find);
     }
 }
