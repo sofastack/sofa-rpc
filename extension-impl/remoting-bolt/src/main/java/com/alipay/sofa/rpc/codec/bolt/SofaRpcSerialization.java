@@ -43,6 +43,7 @@ import com.alipay.sofa.rpc.common.SofaConfigs;
 import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -331,6 +332,14 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                         Object object = hessianInput.readObject();
                         if (object instanceof SofaRequest) {
                             final SofaRequest sofaRequest = (SofaRequest) object;
+                            String targetServiceName = sofaRequest.getTargetServiceUniqueName();
+                            if (targetServiceName == null) {
+                                targetServiceName = service;
+                                sofaRequest.setTargetServiceUniqueName(service);
+                            }
+                            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
+                            sofaRequest.setInterfaceName(interfaceName);
+
                             String[] sig = sofaRequest.getMethodArgSigs();
                             Class<?>[] classSig = new Class[sig.length];
                             generateArgTypes(sig, classSig, serviceClassLoader);
@@ -368,7 +377,14 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                         // 解析request信息
                         sofaRequest.setMethodName(headerMap.remove(RemotingConstants.HEAD_METHOD_NAME));
                         sofaRequest.setTargetAppName(headerMap.remove(RemotingConstants.HEAD_TARGET_APP));
-                        sofaRequest.setTargetServiceUniqueName(headerMap.remove(RemotingConstants.HEAD_TARGET_SERVICE));
+                        String targetServiceName = headerMap.remove(RemotingConstants.HEAD_TARGET_SERVICE);
+                        if (targetServiceName == null) {
+                            targetServiceName = service;
+                            sofaRequest.setTargetServiceUniqueName(service);
+                        }
+                        String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
+                        sofaRequest.setTargetServiceUniqueName(targetServiceName);
+                        sofaRequest.setInterfaceName(interfaceName);
 
                         // 解析trace信息
                         Map<String, String> traceMap = new HashMap<String, String>(16);
