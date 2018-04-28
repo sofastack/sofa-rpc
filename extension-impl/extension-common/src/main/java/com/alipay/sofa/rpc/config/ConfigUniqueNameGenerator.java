@@ -54,6 +54,20 @@ public class ConfigUniqueNameGenerator {
     }
 
     /**
+     * 解析唯一标识UniqueName得到接口名
+     *
+     * @param uniqueName 服务唯一标识
+     * @return 接口名
+     */
+    public static String getInterfaceName(String uniqueName) {
+        if (StringUtils.isEmpty(uniqueName)) {
+            return uniqueName;
+        }
+        int index = uniqueName.indexOf(':');
+        return index < 0 ? uniqueName : uniqueName.substring(0, index);
+    }
+
+    /**
      * 唯一标识UniqueName的产生方法，主要用于外部服务发现等
      *
      * @param consumerConfig 服务端调用者配置
