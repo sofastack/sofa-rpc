@@ -258,7 +258,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                         if (args.length > 1) {
                             throw new SerializationException("Protobuf only support one parameter!");
                         }
-                        request.setContent(ProtobufSerializer.getInstance().encode(args[0]));
+                        ProtobufSerializer protobufSerializer = ProtobufSerializer.getInstance();
+                        request.setContent(protobufSerializer.encode(args[0]));
                         return true;
                     } catch (SerializationException e) {
                         throw e;
@@ -379,7 +380,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                         }
 
                         // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
-                        Class requestClass = ProtobufSerializer.getReqClass(service,
+                        ProtobufSerializer protobufSerializer = ProtobufSerializer.getInstance();
+                        Class requestClass = protobufSerializer.getReqClass(service,
                             sofaRequest.getMethodName(), serviceClassLoader);
                         byte[] content = requestCommand.getContent();
                         if (content == null || content.length == 0) {
@@ -387,7 +389,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                             constructor.setAccessible(true);
                             sofaRequest.setMethodArgs(new Object[] { constructor.newInstance() });
                         } else {
-                            Object pbReq = ProtobufSerializer.getInstance().decode(content, requestClass);
+                            Object pbReq = protobufSerializer.decode(content, requestClass);
                             sofaRequest.setMethodArgs(new Object[] { pbReq });
                         }
                         sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
@@ -455,19 +457,19 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 try {
                     if (responseCommand.getResponseObject() instanceof SofaResponse) {
                         SofaResponse sofaResponse = (SofaResponse) responseCommand.getResponseObject();
+                        ProtobufSerializer protobufSerializer = ProtobufSerializer.getInstance();
                         if (sofaResponse.isError()) {
                             // 框架异常：错误则body序列化的是错误字符串
-                            byte[] content = ProtobufSerializer.getInstance().encode(sofaResponse.getErrorMsg());
+                            byte[] content = protobufSerializer.encode(sofaResponse.getErrorMsg());
                             response.setContent(content);
                         } else {
                             // 正确返回则解析序列化的protobuf返回对象
                             Object appResponse = sofaResponse.getAppResponse();
                             if (appResponse instanceof Throwable) {
                                 // 业务异常序列化的是错误字符串
-                                response.setContent(ProtobufSerializer.getInstance()
-                                    .encode(((Throwable) appResponse).getMessage()));
+                                response.setContent(protobufSerializer.encode(((Throwable) appResponse).getMessage()));
                             } else {
-                                response.setContent(ProtobufSerializer.getInstance().encode(appResponse));
+                                response.setContent(protobufSerializer.encode(appResponse));
                             }
                         }
                     }
@@ -562,14 +564,15 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                             sofaResponse.setResponseProps(header);
                         }
                     }
+                    ProtobufSerializer protobufSerializer = ProtobufSerializer.getInstance();
                     if (isError) {
-                        String errorMessage = (String) ProtobufSerializer.getInstance().decode(
+                        String errorMessage = (String) protobufSerializer.decode(
                             responseCommand.getContent(), String.class);
                         sofaResponse.setErrorMsg(errorMessage);
                         responseCommand.setResponseObject(sofaResponse);
                     } else {
                         // 根据接口+方法名找到参数类型
-                        Class responseClass = ProtobufSerializer.getResClass(service, methodName,
+                        Class responseClass = protobufSerializer.getResClass(service, methodName,
                             Thread.currentThread().getContextClassLoader());
                         byte[] content = responseCommand.getContent();
                         if (content == null || content.length == 0) {
@@ -577,7 +580,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                             constructor.setAccessible(true);
                             sofaResponse.setAppResponse(constructor.newInstance());
                         } else {
-                            Object pbRes = ProtobufSerializer.getInstance().decode(content, responseClass);
+                            Object pbRes = protobufSerializer.decode(content, responseClass);
                             sofaResponse.setAppResponse(pbRes);
                         }
                         responseCommand.setResponseObject(sofaResponse);

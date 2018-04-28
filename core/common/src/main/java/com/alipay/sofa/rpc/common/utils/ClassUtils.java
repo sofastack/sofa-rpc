@@ -194,10 +194,10 @@ public final class ClassUtils {
     /**
      * 实例化一个对象(根据参数自动检测构造方法）
      *
-     * @param clazz 对象类
-     * @param argTypes  构造函数需要的参数
-     * @param args  构造函数需要的参数
-     * @param <T>   对象具体类
+     * @param clazz    对象类
+     * @param argTypes 构造函数需要的参数
+     * @param args     构造函数需要的参数
+     * @param <T>      对象具体类
      * @return 对象实例
      * @throws SofaRpcRuntimeException 没有找到方法，或者无法处理，或者初始化方法异常等
      */
@@ -282,5 +282,52 @@ public final class ClassUtils {
      */
     public static String getMethodKey(String interfaceName, String methodName) {
         return interfaceName + "#" + methodName;
+    }
+
+    /**
+     * The isAssignableFrom method which can cross multiple classloader.
+     *
+     * @param interfaceClass 接口类
+     * @param implementClass 实现类
+     * @return 是否指定类型的实现类
+     * @see Class#isAssignableFrom(Class) 
+     */
+    public static boolean isAssignableFrom(Class<?> interfaceClass, Class<?> implementClass) {
+        if (interfaceClass.isAssignableFrom(implementClass)) {
+            return true;
+        }
+        // 跨ClassLoader的情况
+        String interfaceName = interfaceClass.getCanonicalName();
+        return implementClass.getCanonicalName().equals(interfaceName)
+            || isImplementOrSubclass(interfaceName, implementClass);
+    }
+
+    private static boolean isImplementOrSubclass(String interfaceName, Class<?> implementClass) {
+        // First, get all direct interface
+        Class<?>[] interfaces = implementClass.getInterfaces();
+        if (interfaces.length > 0) {
+            for (Class<?> oneInterface : interfaces) {
+                if (interfaceName.equals(oneInterface.getCanonicalName())) {
+                    return true;
+                }
+                if (isImplementOrSubclass(interfaceName, oneInterface)) {
+                    return true;
+                }
+            }
+        }
+        while (!Object.class.equals(implementClass)) {
+            // Add the super class
+            Class<?> superClass = implementClass.getSuperclass();
+            // Interfaces does not have java.lang.Object as superclass, they have null, so break the cycle and return
+            if (superClass == null) {
+                break;
+            }
+            // Now inspect the superclass
+            implementClass = superClass;
+            if (isImplementOrSubclass(interfaceName, implementClass)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
