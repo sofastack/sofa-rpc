@@ -176,6 +176,24 @@ public class CommonUtils {
     }
 
     /**
+     * String Long turn number.
+     * @param num         The number of strings.
+     * @param defaultLong The default value
+     * @return long
+     */
+    public static long parseLong(String num, long defaultLong) {
+        if (num == null) {
+            return defaultLong;
+        } else {
+            try {
+                return Long.parseLong(num);
+            } catch (Exception e) {
+                return defaultLong;
+            }
+        }
+    }
+
+    /**
      * 字符串转布尔
      *
      * @param bool       数字
