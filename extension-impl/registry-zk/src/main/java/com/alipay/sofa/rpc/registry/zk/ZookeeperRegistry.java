@@ -44,6 +44,7 @@ import org.apache.curator.framework.state.ConnectionState;
 import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.KeeperException;
 
 import java.net.URLEncoder;
 import java.util.Collections;
@@ -350,11 +351,19 @@ public class ZookeeperRegistry extends Registry {
                 for (String url : urls) {
                     url = URLEncoder.encode(url, "UTF-8");
                     String providerUrl = providerPath + CONTEXT_SEP + url;
-                    getAndCheckZkClient().create().creatingParentContainersIfNeeded()
-                        .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
-                        .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
+
+                    try {
+                        getAndCheckZkClient().create().creatingParentContainersIfNeeded()
+                            .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
+                            .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
+                        if (LOGGER.isInfoEnabled(appName)) {
+                            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
+                        }
+                    } catch (KeeperException.NodeExistsException nodeExistsException) {
+                        if (LOGGER.isWarnEnabled(appName)) {
+                            LOGGER.warnWithApp(appName,
+                                "provider has exists in zookeeper,provider=" + providerUrl);
+                        }
                     }
                 }
 
@@ -601,14 +610,13 @@ public class ZookeeperRegistry extends Registry {
      */
     protected void subscribeConsumerUrls(ConsumerConfig config) {
         // 注册Consumer节点
+        String url = null;
         if (config.isRegister()) {
             try {
                 String consumerPath = buildConsumerPath(rootPath, config);
-                String url;
                 if (consumerUrls.containsKey(config)) {
                     url = consumerUrls.get(config);
-                }
-                else {
+                } else {
                     url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
                     consumerUrls.put(config, url);
                 }
@@ -616,6 +624,11 @@ public class ZookeeperRegistry extends Registry {
                 getAndCheckZkClient().create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
                     .forPath(consumerPath + CONTEXT_SEP + encodeUrl);
+
+            } catch (KeeperException.NodeExistsException nodeExistsException) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("consumer has exists in zookeeper,consumer=" + url);
+                }
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to register consumer to zookeeperRegistry!", e);
             }
