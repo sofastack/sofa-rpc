@@ -16,54 +16,35 @@
  */
 package com.alipay.sofa.rpc.tracer.sofatracer.log.stat;
 
-import com.alipay.common.tracer.core.appender.builder.JsonStringBuilder;
-import com.alipay.common.tracer.core.reporter.stat.model.StatKey;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
+
+import java.util.Map;
 
 /**
- * The type Rpc server stat json reporter.
+ * RpcServerStatReporter
  *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href=mailto:guanchao.ygc@antfin.com>GuanChao Yang</a>
  */
-public class RpcServerStatJsonReporter extends RpcServerStatReporter {
-    /**
-     * Instantiates a new Rpc server stat json reporter.
-     *
-     * @param statTracerName   the stat tracer name
-     * @param rollingPolicy    the rolling policy
-     * @param logReserveConfig the log reserve config
-     */
+public class RpcServerStatJsonReporter extends AbstractRpcStatJsonReporter {
+
     public RpcServerStatJsonReporter(String statTracerName, String rollingPolicy, String logReserveConfig) {
         super(statTracerName, rollingPolicy, logReserveConfig);
     }
 
-    private JsonStringBuilder buffer = new JsonStringBuilder();
+    @Override
+    public String getFromApp(Map<String, String> tagsWithStr) {
+        return tagsWithStr.get(RpcSpanTags.REMOTE_APP);
+    }
 
     @Override
-    public void print(StatKey statKey, long[] values) {
-        if (this.isClosePrint.get()) {
-            //关闭统计日志输出
-            return;
-        }
-        super.print(statKey, values);
-        //        buffer.reset();
-        //        buffer.append(Timestamp.currentTime()).append(statKey.getKey());
-        //        int i = 0;
-        //        for (; i < values.length - 1; i++) {
-        //            buffer.append(values[i]);
-        //        }
-        //        buffer.append(values[i]);
-        //        buffer.append(statKey.getResult());
-        //        buffer.appendEnd(statKey.getEnd());
-        //        try {
-        //            if (appender instanceof LoadTestAwareAppender) {
-        //                ((LoadTestAwareAppender) appender).append(buffer.toString(), statKey.isLoadTest());
-        //            } else {
-        //                appender.append(buffer.toString());
-        //            }
-        //            // 这里强制刷一次
-        //            appender.flush();
-        //        } catch (Throwable t) {
-        //            SelfLog.error("统计日志<" + statTracerName + ">输出异常", t);
-        //        }
+    public String getToApp(Map<String, String> tagsWithStr) {
+        return tagsWithStr.get(RpcSpanTags.LOCAL_APP);
     }
+
+    @Override
+    public String getZone(Map<String, String> tagsWithStr) {
+        //服务端统计的是来源 zone
+        return tagsWithStr.get(RpcSpanTags.REMOTE_ZONE);
+    }
+
 }

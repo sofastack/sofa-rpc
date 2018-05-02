@@ -43,9 +43,10 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.code.TracerResultCode;
+import com.alipay.sofa.rpc.tracer.sofatracer.factory.ReporterFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcClientDigestSpanJsonEncoder;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcServerDigestSpanJsonEncoder;
-import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcClientStatReporter;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcClientStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcServerStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.type.RpcTracerLogEnum;
@@ -107,7 +108,7 @@ public class RpcSofaTracer extends Tracer {
         String statLogReserveConfig = SofaTracerConfiguration.getLogReserveConfig(statRpcTracerLogEnum
             .getLogReverseKey());
         //client
-        return new RpcClientStatReporter(statLog, statRollingPolicy, statLogReserveConfig);
+        return new RpcClientStatJsonReporter(statLog, statRollingPolicy, statLogReserveConfig);
     }
 
     protected SofaTracerStatisticReporter generateServerStatReporter(RpcTracerLogEnum statRpcTracerLogEnum) {
@@ -129,7 +130,7 @@ public class RpcSofaTracer extends Tracer {
         String digestLogReserveConfig = SofaTracerConfiguration.getLogReserveConfig(digestRpcTracerLogEnum
             .getLogReverseKey());
         //构造实例
-        DiskReporterImpl reporter = new DiskReporterImpl(digestLog, digestRollingPolicy,
+        Reporter reporter = ReporterFactory.build(digestLog, digestRollingPolicy,
             digestLogReserveConfig, spanEncoder, statReporter);
         return reporter;
     }

@@ -17,12 +17,21 @@
 package com.alipay.sofa.rpc.tracer.sofatracer.base;
 
 import com.alipay.common.tracer.core.appender.TracerLogRootDeamon;
+import com.alipay.common.tracer.core.appender.manager.AsyncCommonDigestAppenderManager;
+import com.alipay.common.tracer.core.reporter.digest.manager.SofaTracerDigestReporterAsyncManager;
+import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterCycleTimesManager;
+import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterManager;
 import com.alipay.sofa.rpc.common.utils.FileUtils;
+import com.alipay.sofa.rpc.tracer.Tracer;
+import com.alipay.sofa.rpc.tracer.Tracers;
+import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
+import java.util.Map;
 
 /**
  * AbstractTracerBase
@@ -53,5 +62,26 @@ public abstract class AbstractTracerBase {
             return;
         }
         FileUtils.cleanDirectory(traceLogDirectory);
+    }
+
+    protected void reflectSetNewTracer() throws Exception {
+        removeRpcDigestStatLogType();
+        Tracer newTracerInstance = new RpcSofaTracer();
+        Field tracerField = Tracers.class.getDeclaredField("tracer");
+        tracerField.setAccessible(true);
+        tracerField.set(null, newTracerInstance);
+    }
+
+    protected void removeRpcDigestStatLogType() throws Exception {
+
+        AsyncCommonDigestAppenderManager asyncDigestManager = SofaTracerDigestReporterAsyncManager
+            .getSofaTracerDigestReporterAsyncManager();
+        //stat
+        Map<Long, SofaTracerStatisticReporterManager> cycleTimesManager = SofaTracerStatisticReporterCycleTimesManager
+            .getCycleTimesManager();
+        for (Map.Entry<Long, SofaTracerStatisticReporterManager> entry : cycleTimesManager.entrySet()) {
+            SofaTracerStatisticReporterManager manager = entry.getValue();
+            manager.getStatReporters().clear();
+        }
     }
 }

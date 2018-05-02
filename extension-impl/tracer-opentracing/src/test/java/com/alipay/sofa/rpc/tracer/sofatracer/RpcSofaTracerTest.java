@@ -27,8 +27,8 @@ import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.tracer.sofatracer.base.AbstractTracerBase;
-import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcClientStatReporter;
-import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcServerStatReporter;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcClientStatJsonReporter;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcServerStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.type.RpcTracerLogEnum;
 import org.junit.After;
 import org.junit.Before;
@@ -78,7 +78,7 @@ public class RpcSofaTracerTest extends AbstractTracerBase {
         assertTrue(clientReporter instanceof DiskReporterImpl);
         DiskReporterImpl clientDisk = (DiskReporterImpl) clientReporter;
         assertEquals(clientDisk.getDigestReporterType(), RpcTracerLogEnum.RPC_CLIENT_DIGEST.getDefaultLogName());
-        assertTrue(clientDisk.getStatReporter() instanceof RpcClientStatReporter);
+        assertTrue(clientDisk.getStatReporter() instanceof RpcClientStatJsonReporter);
         //修改为 lazy 初始化了
         //assertFalse(asyncDigestManager.isAppenderAndEncoderExist(clientDisk.getDigestReporterType()));
         SofaRequest sofaRequest = new SofaRequest();
@@ -102,7 +102,7 @@ public class RpcSofaTracerTest extends AbstractTracerBase {
         TimeUnit.SECONDS.sleep(1);
         assertTrue(asyncDigestManager.isAppenderAndEncoderExist(serverDisk.getDigestReporterType()));
 
-        assertTrue(serverDisk.getStatReporter() instanceof RpcServerStatReporter);
+        assertTrue(serverDisk.getStatReporter() instanceof RpcServerStatJsonReporter);
     }
 
     /**

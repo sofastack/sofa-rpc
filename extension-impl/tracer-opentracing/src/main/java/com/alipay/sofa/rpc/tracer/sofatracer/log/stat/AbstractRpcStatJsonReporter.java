@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.tracer.sofatracer.log.stat;
 
-import com.alipay.common.tracer.core.appender.builder.XStringBuilder;
 import com.alipay.common.tracer.core.reporter.stat.AbstractSofaTracerStatisticReporter;
 import com.alipay.common.tracer.core.reporter.stat.model.StatKey;
+import com.alipay.common.tracer.core.reporter.stat.model.StatMapKey;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.common.tracer.core.utils.TracerUtils;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
@@ -28,11 +28,11 @@ import java.util.Map;
 /**
  * AbstractRpcStatReporter
  *
- * @author <a href=mailto:guanchao.ygc@antfin.com>GuanChao Yang</a>
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
-public abstract class AbstractRpcStatReporter extends AbstractSofaTracerStatisticReporter {
+public abstract class AbstractRpcStatJsonReporter extends AbstractSofaTracerStatisticReporter {
 
-    public AbstractRpcStatReporter(String statTracerName, String rollingPolicy, String logReserveConfig) {
+    public AbstractRpcStatJsonReporter(String statTracerName, String rollingPolicy, String logReserveConfig) {
         super(statTracerName, rollingPolicy, logReserveConfig);
     }
 
@@ -45,7 +45,7 @@ public abstract class AbstractRpcStatReporter extends AbstractSofaTracerStatisti
         //tags
         Map<String, String> tagsWithStr = sofaTracerSpan.getTagsWithStr();
 
-        StatKey statKey = new StatKey();
+        StatMapKey statKey = new StatMapKey();
 
         String fromApp = getFromApp(tagsWithStr);
         String toApp = getToApp(tagsWithStr);
@@ -61,6 +61,11 @@ public abstract class AbstractRpcStatReporter extends AbstractSofaTracerStatisti
         statKey.setResult(isSuccess(resultCode) ? "Y" : "N");
         statKey.setEnd(buildString(new String[] { getLoadTestMark(sofaTracerSpan), zone }));
         statKey.setLoadTest(TracerUtils.isLoadTest(sofaTracerSpan));
+
+        statKey.addKey(RpcSpanTags.LOCAL_APP, tagsWithStr.get(RpcSpanTags.LOCAL_APP));
+        statKey.addKey(RpcSpanTags.REMOTE_APP, tagsWithStr.get(RpcSpanTags.REMOTE_APP));
+        statKey.addKey(RpcSpanTags.SERVICE, serviceName);
+        statKey.addKey(RpcSpanTags.METHOD, methodName);
         //次数和耗时，最后一个耗时是单独打印的字段
         long duration = sofaTracerSpan.getEndTime() - sofaTracerSpan.getStartTime();
         long[] values = new long[] { 1, duration };
@@ -91,17 +96,6 @@ public abstract class AbstractRpcStatReporter extends AbstractSofaTracerStatisti
      */
     public abstract String getZone(Map<String, String> tagsWithStr);
 
-    @Override
-    protected String buildString(String[] keys) {
-        XStringBuilder sb = new XStringBuilder();
-        int i;
-        for (i = 0; i < keys.length - 1; i++) {
-            sb.append(keys[i] == null ? "" : keys[i]);
-        }
-        sb.appendRaw(keys[i] == null ? "" : keys[i]);
-        return sb.toString();
-    }
-
     protected boolean isSuccess(String resultCode) {
         //todo 需要判断成功失败的标识
         return "00".equals(resultCode) || "0".equals(resultCode)
@@ -114,5 +108,10 @@ public abstract class AbstractRpcStatReporter extends AbstractSofaTracerStatisti
         } else {
             return "F";
         }
+    }
+
+    @Override
+    public void print(StatKey statKey, long[] values) {
+        super.print(statKey, values);
     }
 }
