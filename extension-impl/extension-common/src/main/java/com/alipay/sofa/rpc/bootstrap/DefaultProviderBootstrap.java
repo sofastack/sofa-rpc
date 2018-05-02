@@ -153,6 +153,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
         }
 
+        //key  is the protocol of server,for concurrent safe
+        Map<String, Boolean> hasExportedInCurrent = new ConcurrentHashMap<String, Boolean>();
         try {
             // 构造请求调用器
             providerProxyInvoker = new ProviderProxyInvoker(providerConfig);
@@ -174,6 +176,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     if (serverConfig.isAutoStart()) {
                         server.start();
                     }
+                    hasExportedInCurrent.put(serverConfig.getProtocol(), true);
                 } catch (SofaRpcRuntimeException e) {
                     throw e;
                 } catch (Exception e) {
@@ -187,9 +190,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             register();
         } catch (Exception e) {
 
-            //once error, we decrementAndGet all counter
-            for (ServerConfig serverConfig : serverConfigs) {
-                String protocol = serverConfig.getProtocol();
+            //once error, we decrementAndGet the counter
+            for (Map.Entry<String, Boolean> entry : hasExportedInCurrent.entrySet()) {
+                String protocol = entry.getKey();
                 String key = providerConfig.buildKey() + ":" + protocol;
                 AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
                 if (cnt != null && cnt.get() > 0) {
@@ -202,6 +205,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             } else {
                 throw new SofaRpcRuntimeException("Build provider proxy error!", e);
             }
+        } finally {
+            //clear for next use
+            hasExportedInCurrent.clear();
         }
 
         // 记录一些缓存数据
