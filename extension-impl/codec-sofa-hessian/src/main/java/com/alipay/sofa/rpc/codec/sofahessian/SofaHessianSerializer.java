@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.codec.sofahessian;
 import com.alipay.hessian.ClassNameResolver;
 import com.alipay.hessian.NameBlackListFilter;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
-import com.alipay.sofa.rpc.codec.RpcSerializeObjector;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.RpcSerializeObjector;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
@@ -103,8 +103,9 @@ public class SofaHessianSerializer extends AbstractSerializer {
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) {
 
-        if (HessianDecodeManager.getSerializer(object.getClass()) != null) {
-            return HessianDecodeManager.getSerializer(object.getClass()).encodeObject(object, context);
+        final RpcSerializeObjector serializer = RpcSerializeObjectorManager.getSerializer(object.getClass());
+        if (serializer != null) {
+            return serializer.encodeObject(object, context);
         } else {
             UnsafeByteArrayOutputStream byteArray = new UnsafeByteArrayOutputStream();
             Hessian2Output output = new Hessian2Output(byteArray);
@@ -124,18 +125,21 @@ public class SofaHessianSerializer extends AbstractSerializer {
     public Object decode(AbstractByteBuf data, Class clazz, Map<String, String> context) throws SofaRpcException {
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
-        } else if (HessianDecodeManager.getSerializer(clazz) != null) {
-            return HessianDecodeManager.getSerializer(clazz).decodeObject(data, context);
         } else {
-            try {
-                UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
-                Hessian2Input input = new Hessian2Input(inputStream);
-                input.setSerializerFactory(serializerFactory);
-                Object object = input.readObject();
-                input.close();
-                return object;
-            } catch (IOException e) {
-                throw buildDeserializeError(e.getMessage(), e);
+            final RpcSerializeObjector serializer = RpcSerializeObjectorManager.getSerializer(clazz);
+            if (serializer != null) {
+                return serializer.decodeObject(data, context);
+            } else {
+                try {
+                    UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
+                    Hessian2Input input = new Hessian2Input(inputStream);
+                    input.setSerializerFactory(serializerFactory);
+                    Object object = input.readObject();
+                    input.close();
+                    return object;
+                } catch (IOException e) {
+                    throw buildDeserializeError(e.getMessage(), e);
+                }
             }
         }
     }
@@ -145,7 +149,7 @@ public class SofaHessianSerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         } else {
-            final RpcSerializeObjector serializer = HessianDecodeManager.getSerializer(template.getClass());
+            final RpcSerializeObjector serializer = RpcSerializeObjectorManager.getSerializer(template.getClass());
             if (serializer != null) {
                 serializer.decodeObjectByTemplate(data, context, template);
             } else {

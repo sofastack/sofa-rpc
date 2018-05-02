@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec.sofahessian;
 
-import com.alipay.sofa.rpc.codec.RpcSerializeObjector;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.RpcSerializeObjector;
 import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaRequestRpcSerializeObjector;
 import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaResponseRpcSerializeObjector;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -25,7 +25,10 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class HessianDecodeManager {
+/**
+ * for hessian
+ */
+public class RpcSerializeObjectorManager {
 
     private static Map<Class, RpcSerializeObjector> serializers = new ConcurrentHashMap<Class, RpcSerializeObjector>(2);
 

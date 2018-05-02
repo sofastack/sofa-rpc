@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.codec.sofahessian.serialize;
 
 import com.alipay.hessian.generic.model.GenericObject;
-import com.alipay.sofa.rpc.codec.RpcSerializeObjector;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
