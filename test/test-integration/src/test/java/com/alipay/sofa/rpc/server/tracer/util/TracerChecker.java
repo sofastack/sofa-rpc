@@ -142,11 +142,11 @@ public class TracerChecker {
             if (RpcConstants.PROTOCOL_TYPE_BOLT.equalsIgnoreCase(protocol)) {
                 return validateField(tracerId, spanId, timeStamp, service, router, resultCode, method, localApp,
                     threadName, invokeType, currentProtocol, respSize, localIp, localPort, reqSerializeTime,
-                    respDeserializeTime, remoteApp, clientElapseTime, clientConnTime);
+                    respDeserializeTime, remoteApp, clientElapseTime, clientConnTime, remoteIp);
 
             } else if (RpcConstants.PROTOCOL_TYPE_REST.equalsIgnoreCase(protocol)) {
                 return validateField(tracerId, spanId, timeStamp, service, router, resultCode, method, localApp,
-                    threadName, invokeType, currentProtocol);
+                    threadName, invokeType, currentProtocol, localPort, remoteIp, localIp, clientElapseTime);
 
             } else {
                 return false;
@@ -155,12 +155,12 @@ public class TracerChecker {
         } else if ("server".equalsIgnoreCase(type)) {
             if (RpcConstants.PROTOCOL_TYPE_BOLT.equalsIgnoreCase(protocol)) {
                 return validateField(tracerId, spanId, timeStamp, service, router, resultCode, method, localApp,
-                    threadName, bizTime, reqSize, respSize, invokeType, remoteIp, currentProtocol, remoteApp, remoteIp,
+                    threadName, bizTime, reqSize, respSize, invokeType, remoteIp, currentProtocol, remoteApp,
                     reqDeserializeTime, respSerializeTime, serverWaitTime);
 
             } else if (RpcConstants.PROTOCOL_TYPE_REST.equalsIgnoreCase(protocol)) {
                 return validateField(tracerId, spanId, timeStamp, service, router, resultCode, method, localApp,
-                    threadName, bizTime, reqSize, respSize, invokeType, remoteIp, currentProtocol);
+                    threadName, bizTime, reqSize, respSize, invokeType, remoteIp, currentProtocol, remoteApp);
             } else {
                 return false;
             }
