@@ -29,11 +29,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 import static com.alipay.sofa.rpc.common.json.JSON.getSerializeFields;
 
@@ -175,8 +175,9 @@ public class BeanSerializer {
                 if (isRequired && value == null) {
                     throw new NullPointerException("Field " + name + " can't be null");
                 }
+
                 Class fieldClazz = field.getType();
-                if (Collection.class.isAssignableFrom(fieldClazz)) {
+                if (value != null && Collection.class.isAssignableFrom(fieldClazz)) {
                     Class genericType = Object.class;
                     try {
                         genericType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
@@ -187,7 +188,7 @@ public class BeanSerializer {
                     } else if (value.getClass().isArray()) {
                         value = arrayToCollection((Object[]) value, fieldClazz, genericType);
                     } else {
-                        return null;
+                        throw new RuntimeException("value type is not supported,type=" + value.getClass());
                     }
                 } else {
                     value = deserializeByType(value, fieldClazz);
@@ -242,7 +243,7 @@ public class BeanSerializer {
      *
      * @param src   原始对象
      * @param clazz 期望的对象
-     * @param <T> 反序列化类型
+     * @param <T>   反序列化类型
      * @return 转换后结果
      */
     public static <T> T deserializeByType(Object src, Class<T> clazz) {
