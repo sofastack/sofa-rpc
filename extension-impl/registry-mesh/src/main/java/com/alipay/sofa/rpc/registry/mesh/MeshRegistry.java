@@ -249,7 +249,6 @@ public class MeshRegistry extends Registry {
     protected ApplicationInfoRequest buildApplicationRequest(ConsumerConfig config) {
         ApplicationInfoRequest applicationInfoRequest = new ApplicationInfoRequest();
         applicationInfoRequest.setAppName(config.getAppName());
-        applicationInfoRequest.setAntShareCloud(true);
         return applicationInfoRequest;
     }
 

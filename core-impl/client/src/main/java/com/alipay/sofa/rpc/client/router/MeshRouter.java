@@ -43,7 +43,7 @@ public class MeshRouter extends Router {
     /**
      * 路由路径：注册中心
      *
-     * @since 5.2.0
+     * @since 5.5.0
      */
     public static final String  RPC_MESH_ROUTER = "MESH";
 

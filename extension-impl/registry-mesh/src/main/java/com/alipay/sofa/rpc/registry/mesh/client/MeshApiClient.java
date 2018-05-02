@@ -90,7 +90,7 @@ public class MeshApiClient {
 
     public boolean registeApplication(ApplicationInfoRequest applicationInfoRequest) {
 
-        final String json = JSON.toJSONString(applicationInfoRequest);
+        final String json = applicationInfoRequest.toJson();
         String result = httpPost(MeshEndpoint.CONFIGS, json);
 
         if (!StringUtils.equals(result, errorMessage)) {

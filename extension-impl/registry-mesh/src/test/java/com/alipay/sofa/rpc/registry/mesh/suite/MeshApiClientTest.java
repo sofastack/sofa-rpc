@@ -47,10 +47,7 @@ public class MeshApiClientTest {
     @Test
     public void testApplicationInfo() {
         ApplicationInfoRequest request = new ApplicationInfoRequest();
-
-        request.setZone("GZ00A");
         request.setAppName("test");
-        request.setAntShareCloud(true);
         boolean result = meshApiClient.registeApplication(request);
 
         System.out.println(result);
