@@ -40,6 +40,8 @@ import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.curator.framework.state.ConnectionState;
+import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 
@@ -213,6 +215,29 @@ public class ZookeeperRegistry extends Registry {
             .retryPolicy(retryPolicy)
             .defaultData(null)
             .build();
+
+        zkClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
+            @Override
+            public void stateChanged(CuratorFramework client, ConnectionState newState) {
+                if (newState == ConnectionState.RECONNECTED) {
+                    recoverRegistryData();
+                }
+            }
+        });
+    }
+
+    //recover data when connect with zk again.
+
+    protected void recoverRegistryData() {
+
+        for (ProviderConfig providerConfig : providerUrls.keySet()) {
+            registerProviderUrls(providerConfig);
+        }
+
+        for (ConsumerConfig consumerConfig : consumerUrls.keySet()) {
+            subscribeConsumerUrls(consumerConfig);
+        }
+
     }
 
     @Override
@@ -277,35 +302,10 @@ public class ZookeeperRegistry extends Registry {
             }
             return;
         }
+
+        //发布
         if (config.isRegister()) {
-            // 注册服务端节点
-            try {
-                List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls(config);
-                if (CommonUtils.isNotEmpty(urls)) {
-                    String providerPath = buildProviderPath(rootPath, config);
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
-                    }
-                    for (String url : urls) {
-                        url = URLEncoder.encode(url, "UTF-8");
-                        String providerUrl = providerPath + CONTEXT_SEP + url;
-                        getAndCheckZkClient().create().creatingParentContainersIfNeeded()
-                            .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
-                            .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
-                        if (LOGGER.isInfoEnabled(appName)) {
-                            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
-                        }
-                    }
-                    providerUrls.put(config, urls);
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
-                    }
-                }
-            } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to register provider to zookeeperRegistry!", e);
-            }
+            registerProviderUrls(config);
         }
 
         if (config.isSubscribe()) {
@@ -314,6 +314,54 @@ public class ZookeeperRegistry extends Registry {
                 //订阅接口级配置
                 subscribeConfig(config, config.getConfigListener());
             }
+        }
+    }
+
+    /***
+     * 注册 服务信息
+     * @param config
+     * @return
+     * @throws Exception
+     */
+    protected void registerProviderUrls(ProviderConfig config) {
+        String appName = config.getAppName();
+
+        // 注册服务端节点
+        try {
+            // 避免重复计算
+            List<String> urls;
+            if (providerUrls.containsKey(config)) {
+                urls = providerUrls.get(config);
+            } else {
+                urls = ZookeeperRegistryHelper.convertProviderToUrls(config);
+                providerUrls.put(config, urls);
+            }
+            if (CommonUtils.isNotEmpty(urls)) {
+
+                String providerPath = buildProviderPath(rootPath, config);
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName,
+                        LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
+                }
+                for (String url : urls) {
+                    url = URLEncoder.encode(url, "UTF-8");
+                    String providerUrl = providerPath + CONTEXT_SEP + url;
+                    getAndCheckZkClient().create().creatingParentContainersIfNeeded()
+                        .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
+                        .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
+                    if (LOGGER.isInfoEnabled(appName)) {
+                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
+                    }
+                }
+
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName,
+                        LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
+                }
+
+            }
+        } catch (Exception e) {
+            throw new SofaRpcRuntimeException("Failed to register provider to zookeeperRegistry!", e);
         }
     }
 
@@ -473,20 +521,10 @@ public class ZookeeperRegistry extends Registry {
             }
             return null;
         }
-        // 注册Consumer节点
-        if (config.isRegister()) {
-            try {
-                String consumerPath = buildConsumerPath(rootPath, config);
-                String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
-                String encodeUrl = URLEncoder.encode(url, "UTF-8");
-                getAndCheckZkClient().create().creatingParentContainersIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
-                    .forPath(consumerPath + CONTEXT_SEP + encodeUrl);
-                consumerUrls.put(config, url);
-            } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to register consumer to zookeeperRegistry!", e);
-            }
-        }
+
+        //订阅如果有必要
+        subscribeConsumerUrls(config);
+
         if (config.isSubscribe()) {
             // 订阅配置
             if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
@@ -551,6 +589,33 @@ public class ZookeeperRegistry extends Registry {
             }
         }
         return null;
+    }
+
+    /***
+     * 订阅
+     * @param config
+     */
+    protected void subscribeConsumerUrls(ConsumerConfig config) {
+        // 注册Consumer节点
+        if (config.isRegister()) {
+            try {
+                String consumerPath = buildConsumerPath(rootPath, config);
+                String url;
+                if (consumerUrls.containsKey(config)) {
+                    url = consumerUrls.get(config);
+                }
+                else {
+                    url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
+                    consumerUrls.put(config, url);
+                }
+                String encodeUrl = URLEncoder.encode(url, "UTF-8");
+                getAndCheckZkClient().create().creatingParentContainersIfNeeded()
+                    .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
+                    .forPath(consumerPath + CONTEXT_SEP + encodeUrl);
+            } catch (Exception e) {
+                throw new SofaRpcRuntimeException("Failed to register consumer to zookeeperRegistry!", e);
+            }
+        }
     }
 
     @Override
