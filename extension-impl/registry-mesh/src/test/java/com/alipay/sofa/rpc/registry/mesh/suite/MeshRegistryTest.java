@@ -40,6 +40,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -112,6 +113,52 @@ public class MeshRegistryTest {
             // 清理数据
             HttpMockServer.stop();
         }
+    }
+
+    @Test
+    public void testOnlyPublish() {
+
+        Field registedAppField = null;
+        try {
+            registedAppField = MeshRegistry.class.getDeclaredField("registedApp");
+            registedAppField.setAccessible(true);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        Boolean registedAppValue = null;
+        try {
+            registedAppValue = (Boolean) registedAppField.get(registry);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        Assert.assertTrue(!registedAppValue.booleanValue());
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200);
+        ProviderConfig<?> provider = new ProviderConfig();
+        provider.setInterfaceId("com.alipay.xxx.TestService")
+            .setUniqueId("unique123Id")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setProxy("javassist")
+            .setRegister(true)
+            .setRegistry(registryConfig)
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setWeight(222)
+            .setTimeout(3000);
+
+        registry.register(provider);
+
+        try {
+            registedAppValue = (Boolean) registedAppField.get(registry);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        Assert.assertTrue(registedAppValue.booleanValue());
     }
 
     @Test
