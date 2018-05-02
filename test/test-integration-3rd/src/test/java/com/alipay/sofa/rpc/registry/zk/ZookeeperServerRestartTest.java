@@ -17,19 +17,16 @@
 package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.base.BaseZkTest;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.registry.Registry;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import com.alipay.sofa.rpc.transport.bolt.BoltClientTransport;
-import com.sun.tracing.dtrace.ProviderAttributes;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -40,7 +37,9 @@ import org.slf4j.LoggerFactory;
  */
 public class ZookeeperServerRestartTest extends BaseZkTest {
 
-    /** Logger for ZookeeperServerRestartTest **/
+    /**
+     * Logger for ZookeeperServerRestartTest
+     **/
     private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperServerRestartTest.class);
 
     @Test
