@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.mesh.MeshRegistry;
 import com.alipay.sofa.rpc.registry.mesh.MeshRegistryHelper;
 import com.alipay.sofa.rpc.registry.mesh.mock.HttpMockServer;
+import com.alipay.sofa.rpc.registry.mesh.model.ApplicationInfoResult;
 import com.alipay.sofa.rpc.registry.mesh.model.MeshEndpoint;
 import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceResult;
 import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceResult;
@@ -60,6 +61,10 @@ public class MeshRegistryTest {
 
         HttpMockServer.initSever(7654);
 
+        ApplicationInfoResult applicationInfoResult = new ApplicationInfoResult();
+        applicationInfoResult.setSuccess(true);
+        HttpMockServer.addMockPath(MeshEndpoint.CONFIGS, JSON.toJSONString(applicationInfoResult));
+
         PublishServiceResult publishServiceResult = new PublishServiceResult();
         publishServiceResult.setSuccess(true);
         HttpMockServer.addMockPath(MeshEndpoint.PUBLISH, JSON.toJSONString(publishServiceResult));
@@ -67,8 +72,8 @@ public class MeshRegistryTest {
         SubscribeServiceResult subscribeServiceResult = new SubscribeServiceResult();
         subscribeServiceResult.setSuccess(true);
         List<String> datas = new ArrayList<String>();
-        datas.add("127.0.0.1:12200");
-        datas.add("127.0.0.1:12201");
+        datas.add("127.0.0.1:12200?v=4.0&p=1");
+        datas.add("127.0.0.1:12201?v=4.0&p=1");
         subscribeServiceResult.setDatas(datas);
         HttpMockServer.addMockPath(MeshEndpoint.SUBCRIBE, JSON.toJSONString(subscribeServiceResult));
 
@@ -154,14 +159,15 @@ public class MeshRegistryTest {
         List<ProviderGroup> groups = registry.subscribe(consumer);
         providerInfoListener.updateAllProviders(groups);
         Map<String, ProviderGroup> ps = providerInfoListener.getData();
-        Assert.assertTrue(ps.size() == 0);
+        Assert.assertTrue(ps.size() == 1);
 
         // 反注册
         CountDownLatch latch = new CountDownLatch(1);
         providerInfoListener.setCountDownLatch(latch);
         registry.unRegister(provider);
         latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps.size() == 0);
+        //mesh 并不直接感知.
+        Assert.assertTrue(ps.size() == 1);
 
         // 一次发2个端口的再次注册
         latch = new CountDownLatch(1);
@@ -191,7 +197,7 @@ public class MeshRegistryTest {
         providerInfoListener2.updateAllProviders(groups2);
 
         Map<String, ProviderGroup> ps2 = providerInfoListener2.getData();
-        Assert.assertTrue(ps2.size() == 0);
+        Assert.assertTrue(ps2.size() == 1);
 
         // 取消订阅者1
         registry.unSubscribe(consumer);
@@ -204,7 +210,7 @@ public class MeshRegistryTest {
         registry.batchUnRegister(providerConfigList);
 
         latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps2.size() == 0);
+        Assert.assertTrue(ps2.size() == 1);
 
         // 批量取消订阅
         List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();

@@ -64,11 +64,13 @@ public class MeshRouter extends Router {
         final boolean isDirect = StringUtils.isNotBlank(consumerConfig.getDirectUrl());
         final List<RegistryConfig> registrys = consumerConfig.getRegistry();
         boolean isMesh = false;
-        for (RegistryConfig registry : registrys) {
 
-            if (registry.getProtocol().equalsIgnoreCase(RpcConstants.REGISTRY_PROTOCOL_MESH)) {
-                isMesh = true;
-                break;
+        if (registrys != null) {
+            for (RegistryConfig registry : registrys) {
+                if (registry.getProtocol().equalsIgnoreCase(RpcConstants.REGISTRY_PROTOCOL_MESH)) {
+                    isMesh = true;
+                    break;
+                }
             }
         }
 
