@@ -278,6 +278,11 @@ public class RpcSofaTracer extends Tracer {
             clientSpan.setTag(RpcSpanTags.CLIENT_CONN_TIME,
                 (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME));
 
+            Long ce = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE);
+            if (ce != null) {
+                clientSpan.setTag(RpcSpanTags.CLIENT_ELAPSE_TIME, ce);
+            }
+
             InetSocketAddress address = context.getLocalAddress();
             if (address != null) {
                 clientSpan.setTag(RpcSpanTags.LOCAL_IP, NetUtils.toIpString(address));

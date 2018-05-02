@@ -132,6 +132,11 @@ public class RpcSpanTags {
     public static final String CLIENT_CONN_TIME             = "client.conn.time";
 
     /***
+     * 客户端总耗时
+     */
+    public static final String CLIENT_ELAPSE_TIME           = "client.elapse.time";
+
+    /***
      * 客户端请求序列化时间
      */
     public static final String REQ_SERIALIZE_TIME           = "req.serialize.time";
