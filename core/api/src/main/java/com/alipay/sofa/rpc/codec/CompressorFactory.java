@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec;
 
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
@@ -75,7 +76,11 @@ public final class CompressorFactory {
      * @return Compressor
      */
     public static Compressor getCompressor(byte code) {
-        return TYPE_COMPRESSOR_MAP.get(code);
+        Compressor compressor = TYPE_COMPRESSOR_MAP.get(code);
+        if (compressor == null) {
+            throw new SofaRpcRuntimeException("Compressor Not Found :\"" + code + "\"!");
+        }
+        return compressor;
     }
 
     /**
