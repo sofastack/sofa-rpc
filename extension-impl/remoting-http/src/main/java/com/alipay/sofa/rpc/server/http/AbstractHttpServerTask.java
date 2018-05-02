@@ -102,7 +102,10 @@ public abstract class AbstractHttpServerTask extends AbstractTask {
             HttpResponseStatus status = null;
             ProviderConfig providerConfig = null;
             String serviceName = request.getTargetServiceUniqueName();
-            Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
+            Serializer serializer = null;
+            if (request.getSerializeType() > 0) {
+                serializer = SerializerFactory.getSerializer(request.getSerializeType());
+            }
 
             try { // 这个try-catch 保证一定有Response
                 invoke:
@@ -139,7 +142,6 @@ public abstract class AbstractHttpServerTask extends AbstractTask {
                             map.put(RemotingConstants.HEAD_TARGET_SERVICE, request.getTargetServiceUniqueName());
                             map.put(RemotingConstants.HEAD_METHOD_NAME, request.getMethodName());
                             map.put(RemotingConstants.HEAD_TARGET_APP, request.getTargetAppName());
-
                             serializer.decode(reqData, request, map);
                         } catch (Exception e) {
                             LOGGER.errorWithApp(appName, "Server deserialize error, request from "
