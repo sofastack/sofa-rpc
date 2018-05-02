@@ -160,11 +160,11 @@ public class ZookeeperRegistryHelper {
      */
     private static String convertMap2Pair(Map<String, String> map) {
 
-        StringBuilder sb = new StringBuilder();
-        if (map == null) {
-            return "";
+        if (CommonUtils.isEmpty(map)) {
+            return StringUtils.EMPTY;
         }
 
+        StringBuilder sb = new StringBuilder(128);
         for (Map.Entry<String, String> entry : map.entrySet()) {
             sb.append(getKeyPairs(entry.getKey(), entry.getValue()));
         }
