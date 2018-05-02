@@ -32,10 +32,7 @@ import com.alipay.sofa.rpc.tracer.Tracers;
 import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.base.AbstractTracerBase;
 import com.alipay.sofa.rpc.tracer.sofatracer.factory.MemoryReporterImpl;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -52,7 +49,7 @@ public class RpcClientStatTest extends AbstractTracerBase {
     @BeforeClass
     public static void beforeClass() {
         System.setProperty("stat_log_interval", "1");
-        //  System.setProperty("reporter_type", "MEMORY");
+        System.setProperty("reporter_type", "MEMORY");
     }
 
     @Before
@@ -67,98 +64,102 @@ public class RpcClientStatTest extends AbstractTracerBase {
     @Test
     public void testClientStat() {
 
-        Tracer rpcSofaTracer = Tracers.getTracer();
-
-        Field tracerField = null;
         try {
-            tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        tracerField.setAccessible(true);
+            Tracer rpcSofaTracer = Tracers.getTracer();
 
-        SofaTracer tracer = null;
-        //OpenTracing tracer 标准实现
-        try {
-            tracer = (SofaTracer) tracerField.get(rpcSofaTracer);
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
+            Field tracerField = null;
+            try {
+                tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
+            } catch (NoSuchFieldException e) {
+                e.printStackTrace();
+            }
+            tracerField.setAccessible(true);
 
-        Reporter clientReporter = tracer.getClientReporter();
-        assertNotNull(clientReporter);
-        //   assertTrue(clientReporter instanceof MemoryReporterImpl);
+            SofaTracer tracer = null;
+            //OpenTracing tracer 标准实现
+            try {
+                tracer = (SofaTracer) tracerField.get(rpcSofaTracer);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
 
-        final SofaRequest request = new SofaRequest();
-        request.setInterfaceName("a");
-        request.setTargetServiceUniqueName("app.service:1.0");
-        request.setMethodName("method");
+            Reporter clientReporter = tracer.getClientReporter();
+            assertNotNull(clientReporter);
+            assertTrue(clientReporter instanceof MemoryReporterImpl);
 
-        RpcInternalContext context = RpcInternalContext.getContext();
-        context.setAttachment(RpcConstants.INTERNAL_KEY_APP_NAME, "client");
+            final SofaRequest request = new SofaRequest();
+            request.setInterfaceName("a");
+            request.setTargetServiceUniqueName("app.service:1.0");
+            request.setMethodName("method");
 
-        //this will not be used, only in real invoke
-        final ProviderInfo providerInfo = new ProviderInfo();
-        providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME, "server");
-        context.setProviderInfo(providerInfo);
+            RpcInternalContext context = RpcInternalContext.getContext();
+            context.setAttachment(RpcConstants.INTERNAL_KEY_APP_NAME, "client");
 
-        for (int i = 0; i < 10; i++) {
-            rpcSofaTracer.startRpc(request);
+            //this will not be used, only in real invoke
+            final ProviderInfo providerInfo = new ProviderInfo();
+            providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME, "server");
+            context.setProviderInfo(providerInfo);
 
-            rpcSofaTracer.clientBeforeSend(request);
+            for (int i = 0; i < 10; i++) {
+                rpcSofaTracer.startRpc(request);
 
-            final SofaResponse response = new SofaResponse();
-            response.setAppResponse("b");
-            rpcSofaTracer.clientReceived(request, response, null);
-        }
+                rpcSofaTracer.clientBeforeSend(request);
 
-        //        MemoryReporterImpl MemoryReporterImpl = (MemoryReporterImpl) clientReporter;
-        //      Map<StatKey, StatValues> datas = MemoryReporterImpl.getStoreDatas();
-        /*
-                System.out.println("1" + datas);
+                final SofaResponse response = new SofaResponse();
+                response.setAppResponse("b");
+                rpcSofaTracer.clientReceived(request, response, null);
+            }
 
-                Assert.assertEquals(1, datas.size());
+            MemoryReporterImpl MemoryReporterImpl = (MemoryReporterImpl) clientReporter;
+            Map<StatKey, StatValues> datas = MemoryReporterImpl.getStoreDatas();
 
-                for (Map.Entry entry : datas.entrySet()) {
-                    final StatMapKey key = (StatMapKey) entry.getKey();
-                    final StatValues value = (StatValues) entry.getValue();
+            System.out.println("1" + datas);
 
-                    Assert.assertEquals("client,,app.service:1.0,method", key.getKey());
-                    Assert.assertEquals(10, value.getCurrentValue()[0]);
+            Assert.assertEquals(1, datas.size());
+
+            for (Map.Entry entry : datas.entrySet()) {
+                final StatMapKey key = (StatMapKey) entry.getKey();
+                final StatValues value = (StatValues) entry.getValue();
+
+                Assert.assertEquals("client,,app.service:1.0,method", key.getKey());
+                Assert.assertEquals(10, value.getCurrentValue()[0]);
+            }
+            request.setTargetServiceUniqueName("app.service:2.0");
+
+            for (int i = 0; i < 20; i++) {
+                rpcSofaTracer.startRpc(request);
+
+                rpcSofaTracer.clientBeforeSend(request);
+
+                final SofaResponse response = new SofaResponse();
+                response.setAppResponse("b");
+                rpcSofaTracer.clientReceived(request, response, null);
+            }
+
+            System.out.println("2" + datas);
+
+            int i = 0;
+            for (Map.Entry entry : datas.entrySet()) {
+
+                if (i == 0) {
+                    continue;
                 }
-            */request.setTargetServiceUniqueName("app.service:2.0");
+                final StatMapKey key = (StatMapKey) entry.getKey();
+                final StatValues value = (StatValues) entry.getValue();
 
-        for (int i = 0; i < 20; i++) {
-            rpcSofaTracer.startRpc(request);
+                Assert.assertEquals("client,,app.service:2.0,method", key.getKey());
+                Assert.assertEquals(20, value.getCurrentValue()[0]);
+            }
 
-            rpcSofaTracer.clientBeforeSend(request);
-
-            final SofaResponse response = new SofaResponse();
-            response.setAppResponse("b");
-            rpcSofaTracer.clientReceived(request, response, null);
-        }
-
-        /* System.out.println("2" + datas);
-
-         int i = 0;
-         for (Map.Entry entry : datas.entrySet()) {
-
-             if (i == 0) {
-                 continue;
-             }
-             final StatMapKey key = (StatMapKey) entry.getKey();
-             final StatValues value = (StatValues) entry.getValue();
-
-             Assert.assertEquals("client,,app.service:2.0,method", key.getKey());
-             Assert.assertEquals(20, value.getCurrentValue()[0]);
-         }
-
-         Assert.assertEquals(2, datas.size());*/
-
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
+            Assert.assertEquals(2, datas.size());
+        } catch (Throwable e) {
             e.printStackTrace();
+            Assert.assertTrue(false);
         }
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        System.setProperty("reporter_type", "DISK");
     }
 }

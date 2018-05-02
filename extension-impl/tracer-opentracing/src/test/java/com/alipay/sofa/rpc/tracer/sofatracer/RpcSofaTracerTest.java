@@ -37,9 +37,7 @@ import org.junit.Test;
 import java.lang.reflect.Field;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * SofaTracer Tester.
@@ -54,7 +52,13 @@ public class RpcSofaTracerTest extends AbstractTracerBase {
 
     @Before
     public void before() throws Exception {
+
         this.sofaRequest = new SofaRequest();
+        try {
+            reflectSetNewTracer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @After
@@ -64,45 +68,51 @@ public class RpcSofaTracerTest extends AbstractTracerBase {
 
     @Test
     public void testTracerInit() throws Exception {
-        //注册 digest
-        AsyncCommonDigestAppenderManager asyncDigestManager = SofaTracerDigestReporterAsyncManager
-            .getSofaTracerDigestReporterAsyncManager();
 
-        Field tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
-        tracerField.setAccessible(true);
-        //OpenTracing tracer 标准实现
-        SofaTracer tracer = (SofaTracer) tracerField.get(this.rpcSofaTracer);
-        assertTrue(tracer != null);
-        Reporter clientReporter = tracer.getClientReporter();
-        assertNotNull(clientReporter);
-        assertTrue(clientReporter instanceof DiskReporterImpl);
-        DiskReporterImpl clientDisk = (DiskReporterImpl) clientReporter;
-        assertEquals(clientDisk.getDigestReporterType(), RpcTracerLogEnum.RPC_CLIENT_DIGEST.getDefaultLogName());
-        assertTrue(clientDisk.getStatReporter() instanceof RpcClientStatJsonReporter);
-        //修改为 lazy 初始化了
-        //assertFalse(asyncDigestManager.isAppenderAndEncoderExist(clientDisk.getDigestReporterType()));
-        SofaRequest sofaRequest = new SofaRequest();
-        rpcSofaTracer.startRpc(sofaRequest);
-        rpcSofaTracer.clientBeforeSend(sofaRequest);
-        rpcSofaTracer.clientReceived(sofaRequest, new SofaResponse(), null);
-        //lazy 应该注册成功了
-        assertTrue(asyncDigestManager.isAppenderAndEncoderExist(clientDisk.getDigestReporterType()));
-        //print
-        TimeUnit.SECONDS.sleep(1);
-        Reporter serverReporter = tracer.getServerReporter();
-        assertTrue(serverReporter instanceof DiskReporterImpl);
-        assertNotNull(serverReporter);
+        try {
+            //注册 digest
+            AsyncCommonDigestAppenderManager asyncDigestManager = SofaTracerDigestReporterAsyncManager
+                .getSofaTracerDigestReporterAsyncManager();
 
-        DiskReporterImpl serverDisk = (DiskReporterImpl) serverReporter;
-        assertEquals(serverDisk.getDigestReporterType(), RpcTracerLogEnum.RPC_SERVER_DIGEST.getDefaultLogName());
-        //assertFalse(asyncDigestManager.isAppenderAndEncoderExist(serverDisk.getDigestReporterType()));
-        rpcSofaTracer.serverReceived(sofaRequest);
-        rpcSofaTracer.serverSend(sofaRequest, new SofaResponse(), null);
-        //print
-        TimeUnit.SECONDS.sleep(1);
-        assertTrue(asyncDigestManager.isAppenderAndEncoderExist(serverDisk.getDigestReporterType()));
+            Field tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
+            tracerField.setAccessible(true);
+            //OpenTracing tracer 标准实现
+            SofaTracer tracer = (SofaTracer) tracerField.get(this.rpcSofaTracer);
+            assertTrue(tracer != null);
+            Reporter clientReporter = tracer.getClientReporter();
+            assertNotNull(clientReporter);
+            assertTrue(clientReporter instanceof DiskReporterImpl);
+            DiskReporterImpl clientDisk = (DiskReporterImpl) clientReporter;
+            assertEquals(clientDisk.getDigestReporterType(), RpcTracerLogEnum.RPC_CLIENT_DIGEST.getDefaultLogName());
+            assertTrue(clientDisk.getStatReporter() instanceof RpcClientStatJsonReporter);
+            //修改为 lazy 初始化了
+            //assertFalse(asyncDigestManager.isAppenderAndEncoderExist(clientDisk.getDigestReporterType()));
+            SofaRequest sofaRequest = new SofaRequest();
+            rpcSofaTracer.startRpc(sofaRequest);
+            rpcSofaTracer.clientBeforeSend(sofaRequest);
+            rpcSofaTracer.clientReceived(sofaRequest, new SofaResponse(), null);
+            //lazy 应该注册成功了
+            assertTrue(asyncDigestManager.isAppenderAndEncoderExist(clientDisk.getDigestReporterType()));
+            //print
+            TimeUnit.SECONDS.sleep(1);
+            Reporter serverReporter = tracer.getServerReporter();
+            assertTrue(serverReporter instanceof DiskReporterImpl);
+            assertNotNull(serverReporter);
 
-        assertTrue(serverDisk.getStatReporter() instanceof RpcServerStatJsonReporter);
+            DiskReporterImpl serverDisk = (DiskReporterImpl) serverReporter;
+            assertEquals(serverDisk.getDigestReporterType(), RpcTracerLogEnum.RPC_SERVER_DIGEST.getDefaultLogName());
+            //assertFalse(asyncDigestManager.isAppenderAndEncoderExist(serverDisk.getDigestReporterType()));
+            rpcSofaTracer.serverReceived(sofaRequest);
+            rpcSofaTracer.serverSend(sofaRequest, new SofaResponse(), null);
+            //print
+            TimeUnit.SECONDS.sleep(1);
+            assertTrue(asyncDigestManager.isAppenderAndEncoderExist(serverDisk.getDigestReporterType()));
+
+            assertTrue(serverDisk.getStatReporter() instanceof RpcServerStatJsonReporter);
+        } catch (Throwable e) {
+            e.printStackTrace();
+            assertTrue(false);
+        }
     }
 
     /**
