@@ -53,7 +53,9 @@ public class MeshRegistry extends Registry {
     /**
      * Logger
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(MeshRegistry.class);
+    private static final Logger LOGGER  = LoggerFactory.getLogger(MeshRegistry.class);
+
+    private static final String VERSION = "4.0";
 
     private MeshApiClient       client;
 
@@ -138,6 +140,7 @@ public class MeshRegistry extends Registry {
         providerMetaInfo.setProtocol(providerInfo.getProtocolType());
         providerMetaInfo.setSerializeType(providerInfo.getSerializationType());
         providerMetaInfo.setAppName(appName);
+        providerMetaInfo.setVersion(VERSION);
         publishServiceRequest.setProviderMetaInfo(providerMetaInfo);
 
         client.publishService(publishServiceRequest);
@@ -216,8 +219,6 @@ public class MeshRegistry extends Registry {
 
         }
 
-        //对于 mesh 这个不重要
-
         List<ProviderGroup> providerGroups = new ArrayList<ProviderGroup>();
 
         ProviderGroup providerGroup = new ProviderGroup();
@@ -260,13 +261,20 @@ public class MeshRegistry extends Registry {
         return applicationInfoRequest;
     }
 
-    private String fillProtocolAndVersion(SubscribeServiceResult subscribeServiceResult, String targetURL,
-                                          String serviceName) {
-        for (String data : subscribeServiceResult.getDatas()) {
-            String param = data.substring(data.indexOf("?"));
+    protected String fillProtocolAndVersion(SubscribeServiceResult subscribeServiceResult, String targetURL,
+                                            String serviceName) {
+
+        final List<String> datas = subscribeServiceResult.getDatas();
+
+        if (datas == null) {
             targetURL = targetURL + ":" + MeshConstants.TCP_PORT;
-            targetURL = targetURL + "?" + param;
-            break;
+        } else {
+            for (String data : subscribeServiceResult.getDatas()) {
+                String param = data.substring(data.indexOf("?"));
+                targetURL = targetURL + ":" + MeshConstants.TCP_PORT;
+                targetURL = targetURL + param;
+                break;
+            }
         }
         return targetURL;
     }
