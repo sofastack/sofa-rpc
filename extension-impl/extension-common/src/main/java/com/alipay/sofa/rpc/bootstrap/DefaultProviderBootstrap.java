@@ -266,12 +266,16 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             if (!exported) {
                 return;
             }
-
-            String key = providerConfig.buildKey();
             String appName = providerConfig.getAppName();
-            if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, "Unexport provider config : {} {}", key, providerConfig.getId() != null
-                    ? "with bean id " + providerConfig.getId() : "");
+
+            List<ServerConfig> serverConfigs = providerConfig.getServer();
+            for (ServerConfig serverConfig : serverConfigs) {
+                String protocol = serverConfig.getProtocol();
+                String key = providerConfig.buildKey() + ":" + protocol;
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, "Unexport provider config : {} {}", key, providerConfig.getId() != null
+                        ? "with bean id " + providerConfig.getId() : "");
+                }
             }
 
             // 取消注册到注册中心
@@ -280,7 +284,6 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerProxyInvoker = null;
 
             // 取消将处理器注册到server
-            List<ServerConfig> serverConfigs = providerConfig.getServer();
             if (serverConfigs != null) {
                 for (ServerConfig serverConfig : serverConfigs) {
                     Server server = serverConfig.getServer();
@@ -301,10 +304,15 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerConfig.setConfigListener(null);
 
             // 清除缓存状态
-            AtomicInteger cnt = EXPORTED_KEYS.get(key);
-            if (cnt != null && cnt.decrementAndGet() <= 0) {
-                EXPORTED_KEYS.remove(key);
+            for (ServerConfig serverConfig : serverConfigs) {
+                String protocol = serverConfig.getProtocol();
+                String key = providerConfig.buildKey() + ":" + protocol;
+                AtomicInteger cnt = EXPORTED_KEYS.get(key);
+                if (cnt != null && cnt.decrementAndGet() <= 0) {
+                    EXPORTED_KEYS.remove(key);
+                }
             }
+
             RpcRuntimeContext.invalidateProviderConfig(this);
             exported = false;
         }
