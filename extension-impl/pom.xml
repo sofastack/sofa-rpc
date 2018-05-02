@@ -32,6 +32,7 @@
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
         <module>metrics-lookout</module>
+        <module>registry-mesh</module>
     </modules>
 
     <dependencyManagement>
