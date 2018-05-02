@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.codec.sofahessian;
 import com.alipay.hessian.ClassNameResolver;
 import com.alipay.hessian.NameBlackListFilter;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
-import com.alipay.sofa.rpc.codec.RpcDecoderObjector;
+import com.alipay.sofa.rpc.codec.RpcSerializeObjector;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
@@ -28,8 +28,6 @@ import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteStreamWrapperByteBuf;
@@ -104,10 +102,9 @@ public class SofaHessianSerializer extends AbstractSerializer {
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) {
-        if (object instanceof SofaRequest) {
-            return encodeSofaRequest((SofaRequest) object, context);
-        } else if (object instanceof SofaResponse) {
-            return encodeSofaResponse((SofaResponse) object, context);
+
+        if (HessianDecodeManager.getSerializer(object.getClass()) != null) {
+            return HessianDecodeManager.getSerializer(object.getClass()).encodeObject(object, context);
         } else {
             UnsafeByteArrayOutputStream byteArray = new UnsafeByteArrayOutputStream();
             Hessian2Output output = new Hessian2Output(byteArray);
@@ -120,62 +117,6 @@ public class SofaHessianSerializer extends AbstractSerializer {
                 throw buildSerializeError(e.getMessage(), e);
             }
 
-        }
-    }
-
-    /**
-     * Do encode SofaRequest
-     *
-     * @param sofaRequest 请求
-     * @param context     上下文
-     * @return byte数据 abstract byte buf
-     */
-    protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context) {
-        try {
-            UnsafeByteArrayOutputStream outputStream = new UnsafeByteArrayOutputStream();
-            Hessian2Output output = new Hessian2Output(outputStream);
-
-            // 根据SerializeType信息决定序列化器
-            boolean genericSerialize = context != null &&
-                isGenericRequest(context.get(RemotingConstants.HEAD_GENERIC_TYPE));
-            if (genericSerialize) {
-                output.setSerializerFactory(genericSerializerFactory);
-            } else {
-                output.setSerializerFactory(serializerFactory);
-            }
-
-            output.writeObject(sofaRequest);
-            final Object[] args = sofaRequest.getMethodArgs();
-            if (args != null) {
-                for (Object arg : args) {
-                    output.writeObject(arg);
-                }
-            }
-            output.close();
-
-            return new ByteStreamWrapperByteBuf(outputStream);
-        } catch (IOException e) {
-            throw buildSerializeError(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Do encode SofaResponse
-     *
-     * @param response 响应
-     * @param context  上下文
-     * @return byte数据 abstract byte buf
-     */
-    protected AbstractByteBuf encodeSofaResponse(SofaResponse response, Map<String, String> context) {
-        try {
-            UnsafeByteArrayOutputStream byteArray = new UnsafeByteArrayOutputStream();
-            Hessian2Output output = new Hessian2Output(byteArray);
-            output.setSerializerFactory(serializerFactory);
-            output.writeObject(response);
-            output.close();
-            return new ByteStreamWrapperByteBuf(byteArray);
-        } catch (IOException e) {
-            throw buildSerializeError(e.getMessage(), e);
         }
     }
 
@@ -204,11 +145,11 @@ public class SofaHessianSerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         } else {
-            final RpcDecoderObjector serializer = HessianDecodeManager.getSerializer(template.getClass());
+            final RpcSerializeObjector serializer = HessianDecodeManager.getSerializer(template.getClass());
             if (serializer != null) {
                 serializer.decodeObjectByTemplate(data, context, template);
             } else {
-                throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
+                throw buildDeserializeError(template.getClass() + " template is not supported");
             }
         }
     }

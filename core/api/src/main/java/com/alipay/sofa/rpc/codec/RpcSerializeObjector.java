@@ -25,11 +25,13 @@ import java.util.Map;
  * @author bystander
  * @version $Id: RpcDecoderObjector.java, v 0.1 2018年09月07日 4:27 PM bystander Exp $
  */
-public interface RpcDecoderObjector<T> {
+public interface RpcSerializeObjector<T> {
 
     public void decodeObjectByTemplate(AbstractByteBuf data, Map<String, String> context,
                                        T template) throws SofaRpcException;
 
     public Object decodeObject(AbstractByteBuf data, Map<String, String> context) throws SofaRpcException;
+
+    public AbstractByteBuf encodeObject(T sofaRequest, Map<String, String> context);
 
 }

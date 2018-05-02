@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.sofahessian;
 
-import com.alipay.sofa.rpc.codec.RpcDecoderObjector;
-import com.alipay.sofa.rpc.codec.sofahessian.decoder.SofaRequestRpcDecoderObjector;
-import com.alipay.sofa.rpc.codec.sofahessian.decoder.SofaResponseRpcDecoderObjector;
+import com.alipay.sofa.rpc.codec.RpcSerializeObjector;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaRequestRpcSerializeObjector;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaResponseRpcSerializeObjector;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 
@@ -27,18 +27,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class HessianDecodeManager {
 
-    private static Map<Class, RpcDecoderObjector> serializers = new ConcurrentHashMap<Class, RpcDecoderObjector>(2);
+    private static Map<Class, RpcSerializeObjector> serializers = new ConcurrentHashMap<Class, RpcSerializeObjector>(2);
 
     static {
-        addSerializer(SofaRequest.class, new SofaRequestRpcDecoderObjector());
-        addSerializer(SofaResponse.class, new SofaResponseRpcDecoderObjector());
+        addSerializer(SofaRequest.class, new SofaRequestRpcSerializeObjector());
+        addSerializer(SofaResponse.class, new SofaResponseRpcSerializeObjector());
     }
 
-    public static RpcDecoderObjector getSerializer(Class clazz) {
+    public static RpcSerializeObjector getSerializer(Class clazz) {
         return serializers.get(clazz);
     }
 
-    public static void addSerializer(Class clazz, RpcDecoderObjector serializerManager) {
+    public static void addSerializer(Class clazz, RpcSerializeObjector serializerManager) {
         serializers.put(clazz, serializerManager);
     }
 }
