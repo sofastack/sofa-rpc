@@ -110,36 +110,47 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         if (exported) {
             return;
         }
-        String key = providerConfig.buildKey();
-        String appName = providerConfig.getAppName();
+
         // 检查参数
         checkParameters();
-        if (LOGGER.isInfoEnabled(appName)) {
-            LOGGER.infoWithApp(appName, "Export provider config : {} with bean id {}", key, providerConfig.getId());
-        }
 
-        // 注意同一interface，同一uniqleId，不同server情况
-        AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
-        if (cnt == null) { // 没有发布过
-            cnt = CommonUtils.putToConcurrentMap(EXPORTED_KEYS, key, new AtomicInteger(0));
-        }
-        int c = cnt.incrementAndGet();
-        int maxProxyCount = providerConfig.getRepeatedExportLimit();
-        if (maxProxyCount > 0) {
-            if (c > maxProxyCount) {
-                cnt.decrementAndGet();
-                // 超过最大数量，直接抛出异常
-                throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
-                    + " has been exported more than " + maxProxyCount + " times!"
-                    + " Maybe it's wrong config, please check it."
-                    + " Ignore this if you did that on purpose!");
-            } else if (c > 1) {
-                if (LOGGER.isInfoEnabled(appName)) {
-                    LOGGER.infoWithApp(appName, "Duplicate provider config with key {} has been exported!"
+        String appName = providerConfig.getAppName();
+
+        // 将处理器注册到server
+        List<ServerConfig> serverConfigs = providerConfig.getServer();
+        for (ServerConfig serverConfig : serverConfigs) {
+            String protocol = serverConfig.getProtocol();
+
+            String key = providerConfig.buildKey() + ":" + protocol;
+
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, "Export provider config : {} with bean id {}", key, providerConfig.getId());
+            }
+
+            // 注意同一interface，同一uniqleId，不同server情况
+            AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
+            if (cnt == null) { // 没有发布过
+                cnt = CommonUtils.putToConcurrentMap(EXPORTED_KEYS, key, new AtomicInteger(0));
+            }
+            int c = cnt.incrementAndGet();
+            int maxProxyCount = providerConfig.getRepeatedExportLimit();
+            if (maxProxyCount > 0) {
+                if (c > maxProxyCount) {
+                    cnt.decrementAndGet();
+                    // 超过最大数量，直接抛出异常
+                    throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
+                        + " has been exported more than " + maxProxyCount + " times!"
                         + " Maybe it's wrong config, please check it."
-                        + " Ignore this if you did that on purpose!", key);
+                        + " Ignore this if you did that on purpose!");
+                } else if (c > 1) {
+                    if (LOGGER.isInfoEnabled(appName)) {
+                        LOGGER.infoWithApp(appName, "Duplicate provider config with key {} has been exported!"
+                            + " Maybe it's wrong config, please check it."
+                            + " Ignore this if you did that on purpose!", key);
+                    }
                 }
             }
+
         }
 
         try {
@@ -155,7 +166,6 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 }
             }
             // 将处理器注册到server
-            List<ServerConfig> serverConfigs = providerConfig.getServer();
             for (ServerConfig serverConfig : serverConfigs) {
                 try {
                     Server server = serverConfig.buildIfAbsent();
@@ -176,7 +186,17 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerConfig.setConfigListener(new ProviderAttributeListener());
             register();
         } catch (Exception e) {
-            cnt.decrementAndGet();
+
+            //once error, we decrementAndGet all counter
+            for (ServerConfig serverConfig : serverConfigs) {
+                String protocol = serverConfig.getProtocol();
+                String key = providerConfig.buildKey() + ":" + protocol;
+                AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
+                if (cnt != null && cnt.get() > 0) {
+                    cnt.decrementAndGet();
+                }
+            }
+
             if (e instanceof SofaRpcRuntimeException) {
                 throw (SofaRpcRuntimeException) e;
             } else {
