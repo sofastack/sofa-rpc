@@ -121,8 +121,6 @@ public class MultiProtolServerTest extends ActivelyDestroyTest {
 
             Assert.fail();
         } catch (Throwable e) {
-            Assert.assertTrue(true);
-
             //reflect to fetch export key
             ConcurrentHashMap<String, AtomicInteger> map = null;
 
