@@ -77,12 +77,8 @@ public class RestTracerTest extends ActivelyDestroyTest {
             .setPort(8583)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_REST);
 
-        ServerConfig boltServer = new ServerConfig()
-            .setPort(8993)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         List<ServerConfig> servers = new ArrayList<ServerConfig>(2);
         servers.add(restServer);
-        servers.add(boltServer);
 
         ProviderConfig<RestService> providerConfig = new ProviderConfig<RestService>()
             .setInterfaceId(RestService.class.getName())
@@ -100,16 +96,6 @@ public class RestTracerTest extends ActivelyDestroyTest {
             .setApplication(new ApplicationConfig().setAppName("TestClientRest"));
         final RestService restServiceRest = consumerConfigRest.refer();
 
-        //bolt服务
-        ConsumerConfig<RestService> consumerConfigBolt = new ConsumerConfig<RestService>()
-            .setInterfaceId(RestService.class.getName())
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-            .setDirectUrl("bolt://127.0.0.1:8993")
-            .setTimeout(1000)
-            .setConnectTimeout(3000)
-            .setApplication(new ApplicationConfig().setAppName("TestClientBolt"));
-        final RestService restServiceBolt = consumerConfigBolt.refer();
-
         restServiceRest.get("test");
 
         final int times = 10;
@@ -124,9 +110,6 @@ public class RestTracerTest extends ActivelyDestroyTest {
                             final String ok_rest = restServiceRest.get("ok_rest");
                             System.out.println("rest-xx" + ok_rest);
                             Assert.assertEquals("serverok_rest", ok_rest);
-                            final String ok_bolt = restServiceBolt.get("ok_bolt");
-                            Assert.assertEquals("serverok_bolt", ok_bolt);
-                            System.out.println("bolt-xx" + ok_bolt);
                             success.incrementAndGet();
                         }
                     } catch (Throwable e) {
@@ -168,9 +151,12 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
         //validate one rpc server and rpc client field
 
-        TracerChecker.validateTracerDigest(clientDigest.get(0), "client", RpcConstants.PROTOCOL_TYPE_REST);
+        boolean result = TracerChecker.validateTracerDigest(clientDigest.get(0), "client",
+            RpcConstants.PROTOCOL_TYPE_REST);
 
-        TracerChecker.validateTracerDigest(serverDigest.get(0), "server", RpcConstants.PROTOCOL_TYPE_REST);
+        Assert.assertTrue(result);
+        result = TracerChecker.validateTracerDigest(serverDigest.get(0), "server", RpcConstants.PROTOCOL_TYPE_REST);
+        Assert.assertTrue(result);
 
     }
 

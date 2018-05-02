@@ -21,6 +21,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
 
 import java.io.BufferedReader;
@@ -36,6 +38,8 @@ import java.util.List;
  * @version $Id: TracerChecker.java, v 0.1 2018年11月06日 10:20 AM bystander Exp $
  */
 public class TracerChecker {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TracerChecker.class);
 
     /**
      * readTracerDigest all rpc client and rpc server digest to jsonObject
@@ -154,12 +158,12 @@ public class TracerChecker {
 
         } else if ("server".equalsIgnoreCase(type)) {
             if (RpcConstants.PROTOCOL_TYPE_BOLT.equalsIgnoreCase(protocol)) {
-                return validateField(tracerId, spanId, timeStamp, service, router, resultCode, method, localApp,
+                return validateField(tracerId, spanId, timeStamp, service, resultCode, method,
                     threadName, bizTime, reqSize, respSize, invokeType, remoteIp, currentProtocol, remoteApp,
                     reqDeserializeTime, respSerializeTime, serverWaitTime);
 
             } else if (RpcConstants.PROTOCOL_TYPE_REST.equalsIgnoreCase(protocol)) {
-                return validateField(tracerId, spanId, timeStamp, service, router, resultCode, method, localApp,
+                return validateField(tracerId, spanId, timeStamp, service, resultCode, method,
                     threadName, bizTime, reqSize, respSize, invokeType, remoteIp, currentProtocol, remoteApp);
             } else {
                 return false;
@@ -171,6 +175,8 @@ public class TracerChecker {
     }
 
     private static boolean validateField(String... fileds) {
+
+        LOGGER.info("validateField,value=" + fileds);
 
         for (String field : fileds) {
             if (StringUtils.isEmpty(field)) {
