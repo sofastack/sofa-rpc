@@ -45,7 +45,7 @@ public class ZookeeperServerRestartTest extends BaseZkTest {
     @Test
     public void testAll() throws Exception {
         final RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
-            .setAddress("127.0.0.1:2181");
+            .setAddress("127.0.0.1:2181").setConnectTimeout(100);
         final ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
             .getRegistry(registryConfig);
         registry.start();
@@ -91,7 +91,7 @@ public class ZookeeperServerRestartTest extends BaseZkTest {
                 serverConfig2.getServer().start();
                 Registry registry1 = RegistryFactory.getRegistry(registryConfig);
                 // mock server restart and register provider
-                // if we don't unRegistry,create will fail
+                // if we don't unRegistry,create will fail,beacuse data is not clean quickly.
                 registry1.unRegister(providerConfig);
                 registry1.register(providerConfig);
             }

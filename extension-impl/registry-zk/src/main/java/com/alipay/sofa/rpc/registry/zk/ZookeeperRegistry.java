@@ -219,6 +219,10 @@ public class ZookeeperRegistry extends Registry {
         zkClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
             @Override
             public void stateChanged(CuratorFramework client, ConnectionState newState) {
+
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("reconnect to zookeeper,recover provider and consumer data");
+                }
                 if (newState == ConnectionState.RECONNECTED) {
                     recoverRegistryData();
                 }
