@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
+import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -30,7 +31,7 @@ import org.junit.Test;
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
-public class WarmUpTest extends ActivelyDestroyTest {
+public class WarmUpTest extends BaseZkTest {
 
     @Test
     public void testWarmUp() throws InterruptedException {
