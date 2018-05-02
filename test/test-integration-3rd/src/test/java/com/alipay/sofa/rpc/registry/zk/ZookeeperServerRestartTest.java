@@ -88,7 +88,9 @@ public class ZookeeperServerRestartTest extends BaseZkTest {
                 }
                 serverConfig2.getServer().start();
                 Registry registry1 = RegistryFactory.getRegistry(registryConfig);
-                // mock server restart and register provider 
+                // mock server restart and register provider
+                // if we don't unRegistry,create will fail
+                registry1.unRegister(providerConfig);
                 registry1.register(providerConfig);
             }
         });
