@@ -61,7 +61,7 @@ public class MeshRouter extends Router {
     public boolean needToLoad(ConsumerBootstrap consumerBootstrap) {
         ConsumerConfig consumerConfig = consumerBootstrap.getConsumerConfig();
         // 不是直连，且从注册中心订阅配置
-        final boolean isDirect = StringUtils.isEmpty(consumerConfig.getDirectUrl());
+        final boolean isDirect = StringUtils.isNotBlank(consumerConfig.getDirectUrl());
         final List<RegistryConfig> registrys = consumerConfig.getRegistry();
         boolean isMesh = false;
         for (RegistryConfig registry : registrys) {

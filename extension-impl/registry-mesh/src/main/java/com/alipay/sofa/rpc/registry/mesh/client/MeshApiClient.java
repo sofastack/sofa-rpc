@@ -77,10 +77,12 @@ public class MeshApiClient {
 
         final String json = JSON.toJSONString(publishServiceRequest);
         String result = httpPost(MeshEndpoint.PUBLISH, json);
-
-        final PublishServiceResult parse = JSON.parseObject(result, PublishServiceResult.class);
-        if (!StringUtils.equals(result, errorMessage) && parse.isSuccess()) {
-            return true;
+        if (!StringUtils.equals(result, errorMessage)) {
+            final PublishServiceResult parse = JSON.parseObject(result, PublishServiceResult.class);
+            if (parse.isSuccess()) {
+                return true;
+            }
+            return false;
         } else {
             return false;
         }
@@ -91,12 +93,16 @@ public class MeshApiClient {
         final String json = JSON.toJSONString(applicationInfoRequest);
         String result = httpPost(MeshEndpoint.CONFIGS, json);
 
-        final ApplicationInfoResult parse = JSON.parseObject(result, ApplicationInfoResult.class);
-        if (!StringUtils.equals(result, errorMessage) && parse.isSuccess()) {
-            return true;
+        if (!StringUtils.equals(result, errorMessage)) {
+            final ApplicationInfoResult parse = JSON.parseObject(result, ApplicationInfoResult.class);
+            if (parse.isSuccess()) {
+                return true;
+            }
+            return false;
         } else {
             return false;
         }
+
     }
 
     public int unPublishService(UnPublishServiceRequest request) {
@@ -104,9 +110,12 @@ public class MeshApiClient {
         final String json = JSON.toJSONString(request);
         String result = httpPost(MeshEndpoint.UN_PUBLISH, json);
 
-        final UnPublishServiceResult parse = JSON.parseObject(result, UnPublishServiceResult.class);
-        if (!StringUtils.equals(result, errorMessage) && parse.isSuccess()) {
-            return 1;
+        if (!StringUtils.equals(result, errorMessage)) {
+            final UnPublishServiceResult parse = JSON.parseObject(result, UnPublishServiceResult.class);
+            if (parse.isSuccess()) {
+                return 1;
+            }
+            return 0;
         } else {
             return 0;
         }
@@ -118,20 +127,29 @@ public class MeshApiClient {
 
         String result = httpPost(MeshEndpoint.SUBCRIBE, json);
 
-        SubscribeServiceResult ips = JSON.parseObject(result,
-            SubscribeServiceResult.class);
-
-        return ips;
+        SubscribeServiceResult subscribeServiceResult;
+        if (!StringUtils.equals(result, errorMessage)) {
+            subscribeServiceResult = JSON.parseObject(result,
+                SubscribeServiceResult.class);
+            return subscribeServiceResult;
+        } else {
+            subscribeServiceResult = new SubscribeServiceResult();
+            return subscribeServiceResult;
+        }
     }
 
     public boolean unSubscribeService(UnSubscribeServiceRequest request) {
         final String json = JSON.toJSONString(request);
 
         String result = httpPost(MeshEndpoint.UN_SUBCRIBE, json);
-        final UnSubscribeServiceResult parse = JSON.parseObject(result,
-            UnSubscribeServiceResult.class);
-        if (!StringUtils.equals(result, errorMessage) && parse.isSuccess()) {
-            return true;
+
+        if (!StringUtils.equals(result, errorMessage)) {
+            final UnSubscribeServiceResult parse = JSON.parseObject(result,
+                UnSubscribeServiceResult.class);
+            if (parse.isSuccess()) {
+                return true;
+            }
+            return false;
         } else {
             return false;
         }

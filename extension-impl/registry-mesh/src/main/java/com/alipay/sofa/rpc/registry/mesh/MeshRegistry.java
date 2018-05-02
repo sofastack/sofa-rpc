@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
 import com.alipay.sofa.rpc.registry.mesh.client.MeshApiClient;
+import com.alipay.sofa.rpc.registry.mesh.model.ApplicationInfoRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.MeshConstants;
 import com.alipay.sofa.rpc.registry.mesh.model.ProviderMetaInfo;
 import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceRequest;
@@ -54,7 +55,7 @@ public class MeshRegistry extends Registry {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MeshRegistry.class);
 
-    private MeshApiClient       client;
+    private MeshApiClient client;
 
     /**
      * 注册中心配置
@@ -65,10 +66,22 @@ public class MeshRegistry extends Registry {
         super(registryConfig);
     }
 
+    //init only once
+    private boolean inited;
+
+
+    //has registed app info
+    private boolean registedApp;
+
     @Override
     public void init() {
-        String address = registryConfig.getAddress();
-        client = new MeshApiClient(address);
+        synchronized (MeshRegistry.class) {
+            if (!inited) {
+                String address = registryConfig.getAddress();
+                client = new MeshApiClient(address);
+                inited = true;
+            }
+        }
     }
 
     @Override
@@ -149,11 +162,11 @@ public class MeshRegistry extends Registry {
                     doUnRegister(serviceName, providerInfo);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
+                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
                     }
                 } catch (Exception e) {
                     LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "0"),
-                        e);
+                            e);
                 }
             }
         }
@@ -187,6 +200,21 @@ public class MeshRegistry extends Registry {
 
     @Override
     public List<ProviderGroup> subscribe(ConsumerConfig config) {
+
+
+        synchronized (MeshRegistry.class) {
+            if (!registedApp) {
+                ApplicationInfoRequest applicationInfoRequest = new ApplicationInfoRequest();
+                applicationInfoRequest.setAppName(config.getAppName());
+                boolean registed = client.registeApplication(applicationInfoRequest);
+                if (!registed) {
+                    throw new RuntimeException("registe application occors error," + applicationInfoRequest);
+                } else {
+                    registedApp = true;
+                }
+            }
+        }
+
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
         subscribeRequest.setServiceName(key);
@@ -206,6 +234,7 @@ public class MeshRegistry extends Registry {
         providerInfos.add(providerInfo);
         providerGroup.setProviderInfos(providerInfos);
 
+        providerGroups.add(providerGroup);
         return providerGroups;
     }
 
