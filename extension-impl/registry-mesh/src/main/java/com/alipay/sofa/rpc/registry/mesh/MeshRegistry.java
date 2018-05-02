@@ -36,6 +36,7 @@ import com.alipay.sofa.rpc.registry.mesh.model.MeshConstants;
 import com.alipay.sofa.rpc.registry.mesh.model.ProviderMetaInfo;
 import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceRequest;
+import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceResult;
 import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceRequest;
 
@@ -55,7 +56,7 @@ public class MeshRegistry extends Registry {
      */
     private static final Logger LOGGER = LoggerFactory.getLogger(MeshRegistry.class);
 
-    private MeshApiClient client;
+    private MeshApiClient       client;
 
     /**
      * 注册中心配置
@@ -68,7 +69,6 @@ public class MeshRegistry extends Registry {
 
     //init only once
     private boolean inited;
-
 
     //has registed app info
     private boolean registedApp;
@@ -162,11 +162,11 @@ public class MeshRegistry extends Registry {
                     doUnRegister(serviceName, providerInfo);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
                     }
                 } catch (Exception e) {
                     LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "0"),
-                            e);
+                        e);
                 }
             }
         }
@@ -201,11 +201,9 @@ public class MeshRegistry extends Registry {
     @Override
     public List<ProviderGroup> subscribe(ConsumerConfig config) {
 
-
         synchronized (MeshRegistry.class) {
             if (!registedApp) {
-                ApplicationInfoRequest applicationInfoRequest = new ApplicationInfoRequest();
-                applicationInfoRequest.setAppName(config.getAppName());
+                ApplicationInfoRequest applicationInfoRequest = buildApplicationRequest(config);
                 boolean registed = client.registeApplication(applicationInfoRequest);
                 if (!registed) {
                     throw new RuntimeException("registe application occors error," + applicationInfoRequest);
@@ -218,7 +216,12 @@ public class MeshRegistry extends Registry {
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
         subscribeRequest.setServiceName(key);
-        client.subscribeService(subscribeRequest);
+        SubscribeServiceResult subscribeServiceResult = client.subscribeService(subscribeRequest);
+
+        if (subscribeServiceResult == null || !subscribeServiceResult.isSuccess()) {
+            throw new RuntimeException("regist consumer occors error," + subscribeRequest);
+
+        }
 
         //对于 mesh 这个不重要
 
@@ -238,6 +241,18 @@ public class MeshRegistry extends Registry {
         return providerGroups;
     }
 
+    /**
+     * can be extended
+     * @param config
+     * @return
+     */
+    protected ApplicationInfoRequest buildApplicationRequest(ConsumerConfig config) {
+        ApplicationInfoRequest applicationInfoRequest = new ApplicationInfoRequest();
+        applicationInfoRequest.setAppName(config.getAppName());
+        applicationInfoRequest.setAntShareCloud(true);
+        return applicationInfoRequest;
+    }
+
     private String fillProtocolAndVersion(String targetURL, String serviceName) {
         //for bolt
         String protocol = "1";
@@ -255,7 +270,6 @@ public class MeshRegistry extends Registry {
     @Override
     public void unSubscribe(ConsumerConfig config) {
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
-        //TODO 这里
         UnSubscribeServiceRequest unsubscribeRequest = new UnSubscribeServiceRequest();
 
         unsubscribeRequest.setServiceName(key);

@@ -187,7 +187,7 @@ public class BeanSerializer {
                     } else if (value != null && value.getClass().isArray()) {
                         value = arrayToCollection((Object[]) value, fieldClazz, genericType);
                     } else {
-                        return null;
+                        value = null;
                     }
                 } else {
                     value = deserializeByType(value, fieldClazz);
