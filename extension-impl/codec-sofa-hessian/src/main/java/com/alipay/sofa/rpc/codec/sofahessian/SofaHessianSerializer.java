@@ -18,8 +18,8 @@ package com.alipay.sofa.rpc.codec.sofahessian;
 
 import com.alipay.hessian.ClassNameResolver;
 import com.alipay.hessian.NameBlackListFilter;
-import com.alipay.hessian.generic.model.GenericObject;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.RpcDecoderObjector;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
@@ -27,8 +27,6 @@ import com.alipay.sofa.rpc.common.SofaConfigs;
 import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
-import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
-import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -185,10 +183,8 @@ public class SofaHessianSerializer extends AbstractSerializer {
     public Object decode(AbstractByteBuf data, Class clazz, Map<String, String> context) throws SofaRpcException {
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
-        } else if (SofaRequest.class.equals(clazz)) {
-            return decodeSofaRequest(data, context);
-        } else if (SofaResponse.class.equals(clazz)) {
-            return decodeSofaResponse(data, context);
+        } else if (HessianDecodeManager.getSerializer(clazz) != null) {
+            return HessianDecodeManager.getSerializer(clazz).decodeObject(data, context);
         } else {
             try {
                 UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
@@ -207,165 +203,13 @@ public class SofaHessianSerializer extends AbstractSerializer {
     public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
         if (template == null) {
             throw buildDeserializeError("template is null!");
-        } else if (template instanceof SofaRequest) {
-            decodeSofaRequestByTemplate(data, context, (SofaRequest) template);
-        } else if (template instanceof SofaResponse) {
-            decodeSofaResponseByTemplate(data, context, (SofaResponse) template);
         } else {
-            throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
-        }
-    }
-
-    /**
-     * Do decode  SofaRequest
-     *
-     * @param data    AbstractByteBuf
-     * @param context 上下文
-     * @return 请求 sofa request
-     * @throws SofaRpcException 序列化出现异常
-     */
-    protected SofaRequest decodeSofaRequest(AbstractByteBuf data, Map<String, String> context) throws SofaRpcException {
-        try {
-            UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
-            Hessian2Input input = new Hessian2Input(inputStream);
-            input.setSerializerFactory(serializerFactory);
-            Object object = input.readObject();
-            SofaRequest sofaRequest = (SofaRequest) object;
-            String targetServiceName = sofaRequest.getTargetServiceUniqueName();
-            if (targetServiceName == null) {
-                throw buildDeserializeError("Target service name of request is null!");
-            }
-            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
-            sofaRequest.setInterfaceName(interfaceName);
-
-            String[] sig = sofaRequest.getMethodArgSigs();
-            Class<?>[] classSig = ClassTypeUtils.getClasses(sig);
-
-            final Object[] args = new Object[sig.length];
-            for (int i = 0; i < sofaRequest.getMethodArgSigs().length; ++i) {
-                args[i] = input.readObject(classSig[i]);
-            }
-            sofaRequest.setMethodArgs(args);
-            input.close();
-            return sofaRequest;
-        } catch (IOException e) {
-            throw buildDeserializeError(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Do decode  SofaRequest
-     *
-     * @param data     AbstractByteBuf
-     * @param context  上下文
-     * @param template SofaRequest template
-     * @throws SofaRpcException 序列化出现异常
-     */
-    protected void decodeSofaRequestByTemplate(AbstractByteBuf data, Map<String, String> context,
-                                               SofaRequest template) throws SofaRpcException {
-        try {
-            UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
-            Hessian2Input input = new Hessian2Input(inputStream);
-            input.setSerializerFactory(serializerFactory);
-            Object object = input.readObject();
-            SofaRequest tmp = (SofaRequest) object;
-            String targetServiceName = tmp.getTargetServiceUniqueName();
-            if (targetServiceName == null) {
-                throw buildDeserializeError("Target service name of request is null!");
-            }
-            // copy values to template
-            template.setMethodName(tmp.getMethodName());
-            template.setMethodArgSigs(tmp.getMethodArgSigs());
-            template.setTargetServiceUniqueName(tmp.getTargetServiceUniqueName());
-            template.setTargetAppName(tmp.getTargetAppName());
-            template.addRequestProps(tmp.getRequestProps());
-
-            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
-            template.setInterfaceName(interfaceName);
-
-            // decode args
-            String[] sig = template.getMethodArgSigs();
-            Class<?>[] classSig = ClassTypeUtils.getClasses(sig);
-            final Object[] args = new Object[sig.length];
-            for (int i = 0; i < template.getMethodArgSigs().length; ++i) {
-                args[i] = input.readObject(classSig[i]);
-            }
-            template.setMethodArgs(args);
-            input.close();
-        } catch (IOException e) {
-            throw buildDeserializeError(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Do decode SofaResponse
-     *
-     * @param data    AbstractByteBuf
-     * @param context 上下文
-     * @return 响应 sofa response
-     * @throws SofaRpcException 序列化出现异常
-     */
-    protected SofaResponse decodeSofaResponse(AbstractByteBuf data, Map<String, String> context)
-        throws SofaRpcException {
-        try {
-            UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
-            Hessian2Input input = new Hessian2Input(inputStream);
-            // 根据SerializeType信息决定序列化器
-            Object object;
-            boolean genericSerialize = context != null && isGenericResponse(
-                context.get(RemotingConstants.HEAD_GENERIC_TYPE));
-            if (genericSerialize) {
-                input.setSerializerFactory(genericSerializerFactory);
-                GenericObject genericObject = (GenericObject) input.readObject();
-                SofaResponse sofaResponse = new SofaResponse();
-                sofaResponse.setErrorMsg((String) genericObject.getField("errorMsg"));
-                sofaResponse.setAppResponse(genericObject.getField("appResponse"));
-                sofaResponse.setResponseProps((Map<String, String>) genericObject.getField("responseProps"));
-                object = sofaResponse;
+            final RpcDecoderObjector serializer = HessianDecodeManager.getSerializer(template.getClass());
+            if (serializer != null) {
+                serializer.decodeObjectByTemplate(data, context, template);
             } else {
-                input.setSerializerFactory(serializerFactory);
-                object = input.readObject();
+                throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
             }
-            input.close();
-            return (SofaResponse) object;
-        } catch (IOException e) {
-            throw buildDeserializeError(e.getMessage(), e);
-        }
-    }
-
-    /**
-     * Do decode SofaResponse
-     *
-     * @param data     AbstractByteBuf
-     * @param context  上下文
-     * @param template SofaResponse template
-     * @throws SofaRpcException 序列化出现异常
-     */
-    protected void decodeSofaResponseByTemplate(AbstractByteBuf data, Map<String, String> context,
-                                                SofaResponse template) throws SofaRpcException {
-        try {
-            UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(data.array());
-            Hessian2Input input = new Hessian2Input(inputStream);
-            // 根据SerializeType信息决定序列化器
-            boolean genericSerialize = context != null && isGenericResponse(
-                context.get(RemotingConstants.HEAD_GENERIC_TYPE));
-            if (genericSerialize) {
-                input.setSerializerFactory(genericSerializerFactory);
-                GenericObject genericObject = (GenericObject) input.readObject();
-                template.setErrorMsg((String) genericObject.getField("errorMsg"));
-                template.setAppResponse(genericObject.getField("appResponse"));
-                template.setResponseProps((Map<String, String>) genericObject.getField("responseProps"));
-            } else {
-                input.setSerializerFactory(serializerFactory);
-                SofaResponse tmp = (SofaResponse) input.readObject();
-                // copy values to template
-                template.setErrorMsg(tmp.getErrorMsg());
-                template.setAppResponse(tmp.getAppResponse());
-                template.setResponseProps(tmp.getResponseProps());
-            }
-            input.close();
-        } catch (IOException e) {
-            throw buildDeserializeError(e.getMessage(), e);
         }
     }
 

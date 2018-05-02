@@ -211,7 +211,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      *
      * @param requestCommand 请求对象
      */
-    private void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext) {
+    protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext) {
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -257,7 +257,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                     Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory
                         .getSerializer(requestCommand.getSerializer());
-                    SofaRequest sofaRequest = new SofaRequest();
+                    Object sofaRequest = provideRequestObject();
                     rpcSerializer.decode(new ByteArrayWrapperByteBuf(requestCommand.getContent()),
                         sofaRequest, headerMap);
                     requestCommand.setRequestObject(sofaRequest);
@@ -273,6 +273,24 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             }
         }
         return false;
+    }
+
+    /**
+     * for extends to provide template
+     * @return
+     */
+    protected Object provideRequestObject() {
+
+        return new SofaRequest();
+    }
+
+    /**
+     * for extends to provide template
+     * @return
+     */
+    protected Object provideResponseObject() {
+
+        return new SofaResponse();
     }
 
     /**
@@ -346,7 +364,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 return false;
             }
             try {
-                SofaResponse sofaResponse = new SofaResponse();
+                Object sofaResponse = provideResponseObject();
                 Map<String, String> header = (Map<String, String>) responseCommand.getResponseHeader();
                 if (header == null) {
                     header = new HashMap<String, String>();
