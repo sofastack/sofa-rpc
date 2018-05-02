@@ -16,6 +16,10 @@
  */
 package com.alipay.sofa.rpc.tracer.sofatracer.log.stat;
 
+import com.alipay.common.tracer.core.appender.builder.JsonStringBuilder;
+import com.alipay.common.tracer.core.appender.file.LoadTestAwareAppender;
+import com.alipay.common.tracer.core.appender.self.SelfLog;
+import com.alipay.common.tracer.core.appender.self.Timestamp;
 import com.alipay.common.tracer.core.reporter.stat.AbstractSofaTracerStatisticReporter;
 import com.alipay.common.tracer.core.reporter.stat.model.StatKey;
 import com.alipay.common.tracer.core.reporter.stat.model.StatMapKey;
@@ -31,6 +35,8 @@ import java.util.Map;
  * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public abstract class AbstractRpcStatJsonReporter extends AbstractSofaTracerStatisticReporter {
+
+    private static JsonStringBuilder buffer = new JsonStringBuilder();
 
     public AbstractRpcStatJsonReporter(String statTracerName, String rollingPolicy, String logReserveConfig) {
         super(statTracerName, rollingPolicy, logReserveConfig);
@@ -112,6 +118,41 @@ public abstract class AbstractRpcStatJsonReporter extends AbstractSofaTracerStat
 
     @Override
     public void print(StatKey statKey, long[] values) {
-        super.print(statKey, values);
+        if (this.isClosePrint.get()) {
+            //关闭统计日志输出
+            return;
+        }
+
+        StatMapKey statMapKey = (StatMapKey) statKey;
+
+        buffer.reset();
+        buffer.appendBegin("time", Timestamp.currentTime());
+        buffer.append("stat.key", this.statKeySplit(statMapKey));
+        buffer.append("count", values[0]);
+        buffer.append("total.cost.milliseconds", values[1]);
+        buffer.append("success", statMapKey.getResult());
+        buffer.appendEnd();
+        try {
+            if (appender instanceof LoadTestAwareAppender) {
+                ((LoadTestAwareAppender) appender).append(buffer.toString(), statKey.isLoadTest());
+            } else {
+                appender.append(buffer.toString());
+            }
+            // 这里强制刷一次
+            appender.flush();
+        } catch (Throwable t) {
+            SelfLog.error("统计日志<" + statTracerName + ">输出异常", t);
+        }
+    }
+
+    private String statKeySplit(StatMapKey statKey) {
+        JsonStringBuilder jsonBufferKey = new JsonStringBuilder();
+        Map<String, String> keyMap = statKey.getKeyMap();
+        jsonBufferKey.appendBegin();
+        for (Map.Entry<String, String> entry : keyMap.entrySet()) {
+            jsonBufferKey.append(entry.getKey(), entry.getValue());
+        }
+        jsonBufferKey.appendEnd(false);
+        return jsonBufferKey.toString();
     }
 }

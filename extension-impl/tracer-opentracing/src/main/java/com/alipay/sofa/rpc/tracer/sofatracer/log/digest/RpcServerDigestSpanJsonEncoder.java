@@ -42,6 +42,7 @@ public class RpcServerDigestSpanJsonEncoder implements SpanEncoder<SofaTracerSpa
         jsb.appendBegin("timestamp", Timestamp.format(span.getEndTime()));
         //添加其他字段
         this.appendSlot(jsb, span);
+        jsb.appendEnd();
         return jsb.toString();
     }
 
