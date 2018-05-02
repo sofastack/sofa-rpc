@@ -81,21 +81,6 @@ public class RpcSpanTags {
     public static final String ROUTE_RECORD                 = "router.record";
 
     /***
-     * 弹性数据位
-     */
-    public static final String ELASTIC_ID                   = "elastic.id";
-
-    /***
-     * beElastic（表示没有被转发的处理）被转发服务端标示，"T"表示本次服务被转发
-     */
-    public static final String BE_ELASTIC                   = "is.elastic";
-
-    /***
-     * 这次调用是转发调用,转发的服务名称和方法名称
-     */
-    public static final String ELASTIC_SERVICE_NAME         = "elastic.service.name";
-
-    /***
      * 当前客户端ip地址
      */
     public static final String LOCAL_IP                     = "local.client.ip";
@@ -104,11 +89,6 @@ public class RpcSpanTags {
      * 当前客户端端口
      */
     public static final String LOCAL_PORT                   = "local.client.port";
-
-    /***
-     * 当前 zone
-     */
-    public static final String LOCAL_ZONE                   = "local.zone";
 
     //************************* Number 类型 ****************************
     /***
