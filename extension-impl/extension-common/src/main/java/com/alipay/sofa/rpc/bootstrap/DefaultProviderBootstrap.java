@@ -116,6 +116,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
         String appName = providerConfig.getAppName();
 
+        //key  is the protocol of server,for concurrent safe
+        Map<String, Boolean> hasExportedInCurrent = new ConcurrentHashMap<String, Boolean>();
         // 将处理器注册到server
         List<ServerConfig> serverConfigs = providerConfig.getServer();
         for (ServerConfig serverConfig : serverConfigs) {
@@ -133,10 +135,11 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 cnt = CommonUtils.putToConcurrentMap(EXPORTED_KEYS, key, new AtomicInteger(0));
             }
             int c = cnt.incrementAndGet();
+            hasExportedInCurrent.put(serverConfig.getProtocol(), true);
             int maxProxyCount = providerConfig.getRepeatedExportLimit();
             if (maxProxyCount > 0) {
                 if (c > maxProxyCount) {
-                    cnt.decrementAndGet();
+                    decrementCounter(hasExportedInCurrent);
                     // 超过最大数量，直接抛出异常
                     throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
                         + " has been exported more than " + maxProxyCount + " times!"
@@ -153,8 +156,6 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
         }
 
-        //key  is the protocol of server,for concurrent safe
-        Map<String, Boolean> hasExportedInCurrent = new ConcurrentHashMap<String, Boolean>();
         try {
             // 构造请求调用器
             providerProxyInvoker = new ProviderProxyInvoker(providerConfig);
@@ -176,7 +177,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     if (serverConfig.isAutoStart()) {
                         server.start();
                     }
-                    hasExportedInCurrent.put(serverConfig.getProtocol(), true);
+
                 } catch (SofaRpcRuntimeException e) {
                     throw e;
                 } catch (Exception e) {
@@ -189,30 +190,34 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerConfig.setConfigListener(new ProviderAttributeListener());
             register();
         } catch (Exception e) {
-
-            //once error, we decrementAndGet the counter
-            for (Map.Entry<String, Boolean> entry : hasExportedInCurrent.entrySet()) {
-                String protocol = entry.getKey();
-                String key = providerConfig.buildKey() + ":" + protocol;
-                AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
-                if (cnt != null && cnt.get() > 0) {
-                    cnt.decrementAndGet();
-                }
-            }
+            decrementCounter(hasExportedInCurrent);
 
             if (e instanceof SofaRpcRuntimeException) {
                 throw (SofaRpcRuntimeException) e;
             } else {
                 throw new SofaRpcRuntimeException("Build provider proxy error!", e);
             }
-        } finally {
-            //clear for next use
-            hasExportedInCurrent.clear();
         }
 
         // 记录一些缓存数据
         RpcRuntimeContext.cacheProviderConfig(this);
         exported = true;
+    }
+
+    /**
+     * decrease counter
+     * @param hasExportedInCurrent
+     */
+    private void decrementCounter(Map<String, Boolean> hasExportedInCurrent) {
+        //once error, we decrementAndGet the counter
+        for (Map.Entry<String, Boolean> entry : hasExportedInCurrent.entrySet()) {
+            String protocol = entry.getKey();
+            String key = providerConfig.buildKey() + ":" + protocol;
+            AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
+            if (cnt != null && cnt.get() > 0) {
+                cnt.decrementAndGet();
+            }
+        }
     }
 
     /**
