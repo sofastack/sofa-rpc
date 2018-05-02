@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -231,7 +230,7 @@ public class MeshRegistry extends Registry {
 
         List<ProviderInfo> providerInfos = new ArrayList<ProviderInfo>();
 
-        String url = fillProtocolAndVersion(client.getHost(), "");
+        String url = fillProtocolAndVersion(subscribeServiceResult, client.getHost(), "");
 
         ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
         providerInfos.add(providerInfo);
@@ -243,6 +242,7 @@ public class MeshRegistry extends Registry {
 
     /**
      * can be extended
+     *
      * @param config
      * @return
      */
@@ -253,17 +253,14 @@ public class MeshRegistry extends Registry {
         return applicationInfoRequest;
     }
 
-    private String fillProtocolAndVersion(String targetURL, String serviceName) {
-        //for bolt
-        String protocol = "1";
-        //FIXME this should fetch from mesh
-        if (StringUtils.isNotBlank(protocol)) {
+    private String fillProtocolAndVersion(SubscribeServiceResult subscribeServiceResult, String targetURL,
+                                          String serviceName) {
+        for (String data : subscribeServiceResult.getDatas()) {
+            String param = data.substring(data.indexOf("?"));
             targetURL = targetURL + ":" + MeshConstants.TCP_PORT;
-            targetURL += "?p=" + protocol;
-            targetURL += "&v=4.0";
-            targetURL += "&_SERIALIZETYPE=hessian2";
+            targetURL = targetURL + "?" + param;
+            break;
         }
-
         return targetURL;
     }
 
