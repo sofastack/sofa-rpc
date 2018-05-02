@@ -94,11 +94,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 Map<String, String> header = new HashMap<String, String>(16);
                 header.put(RemotingConstants.HEAD_SERVICE, service);
                 // 新序列化协议全部采用扁平化头部
-                byte serializer = requestCommand.getSerializer();
-                if (serializer != RemotingConstants.SERIALIZE_CODE_HESSIAN
-                    && serializer != RemotingConstants.SERIALIZE_CODE_JAVA) {
-                    putRequestMetadataToHeader(requestObject, header);
-                }
+                putRequestMetadataToHeader(requestObject, header);
                 requestCommand.setHeader(mapSerializer.encode(header));
             }
             return true;
