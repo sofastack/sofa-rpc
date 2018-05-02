@@ -329,13 +329,8 @@ public class ZookeeperRegistry extends Registry {
         // 注册服务端节点
         try {
             // 避免重复计算
-            List<String> urls;
-            if (providerUrls.containsKey(config)) {
-                urls = providerUrls.get(config);
-            } else {
-                urls = ZookeeperRegistryHelper.convertProviderToUrls(config);
-                providerUrls.put(config, urls);
-            }
+            List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls(config);
+            providerUrls.put(config, urls);
             if (CommonUtils.isNotEmpty(urls)) {
 
                 String providerPath = buildProviderPath(rootPath, config);
@@ -600,14 +595,8 @@ public class ZookeeperRegistry extends Registry {
         if (config.isRegister()) {
             try {
                 String consumerPath = buildConsumerPath(rootPath, config);
-                String url;
-                if (consumerUrls.containsKey(config)) {
-                    url = consumerUrls.get(config);
-                }
-                else {
-                    url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
-                    consumerUrls.put(config, url);
-                }
+                String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
+                consumerUrls.put(config, url);
                 String encodeUrl = URLEncoder.encode(url, "UTF-8");
                 getAndCheckZkClient().create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
