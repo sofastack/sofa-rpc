@@ -52,7 +52,7 @@ public class RpcSofaTracerTest extends AbstractTracerBase {
 
     @Before
     public void before() throws Exception {
-
+        System.setProperty("reporter_type", "DISK");
         this.sofaRequest = new SofaRequest();
         try {
             reflectSetNewTracer();
@@ -63,7 +63,7 @@ public class RpcSofaTracerTest extends AbstractTracerBase {
 
     @After
     public void after() throws Exception {
-
+        System.setProperty("reporter_type", "DISK");
     }
 
     @Test
