@@ -46,10 +46,9 @@ public class CompressorFactoryTest {
     @Test
     public void getCompressorNotExist() throws Exception {
         try {
-            Compressor compressor = CompressorFactory.getCompressor((byte) 999);
-            Assert.assertTrue(false);
+            CompressorFactory.getCompressor((byte) 999);
+            Assert.fail();
         } catch (SofaRpcRuntimeException e) {
-            Assert.assertTrue(true);
         }
     }
 }

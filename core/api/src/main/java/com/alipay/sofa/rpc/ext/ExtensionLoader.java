@@ -213,8 +213,7 @@ public class ExtensionLoader<T> {
                     className, interfaceName, ExceptionUtils.toShortString(e, 2));
             }
             if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Extension {} of extensible {} is disabled, cause by: {}",
-                    className, interfaceName, ExceptionUtils.toString(e));
+                LOGGER.debug("Extension " + className + " of extensible " + interfaceName + " is disabled.", e);
             }
             return;
         }
