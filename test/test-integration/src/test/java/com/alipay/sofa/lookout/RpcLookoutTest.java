@@ -290,7 +290,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
         for (Tag tag : metric.id().tags()) {
-            if (tag.key() == "method") {
+            if (tag.key().equalsIgnoreCase("method")) {
                 String methodName = tag.value();
 
                 if (methodName.equals("saySync")) {

@@ -17,6 +17,10 @@
 package com.alipay.sofa.rpc.server.rest;
 
 import com.alipay.common.tracer.core.appender.TracerLogRootDeamon;
+import com.alipay.common.tracer.core.appender.manager.AsyncCommonDigestAppenderManager;
+import com.alipay.common.tracer.core.reporter.digest.manager.SofaTracerDigestReporterAsyncManager;
+import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterCycleTimesManager;
+import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterManager;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.FileUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -25,29 +29,25 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
-import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.Tracers;
+import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.type.RpcTracerLogEnum;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class RestTracerTest extends ActivelyDestroyTest {
@@ -60,7 +60,9 @@ public class RestTracerTest extends ActivelyDestroyTest {
         if (!traceLogDirectory.exists()) {
             return;
         }
-        FileUtils.cleanDirectory(traceLogDirectory);
+        boolean cleanResult = FileUtils.cleanDirectory(traceLogDirectory);
+
+        Assert.assertTrue(cleanResult);
         reflectSetNewTracer();
     }
 
@@ -92,7 +94,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
             .setInterfaceId(RestService.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_REST)
             .setDirectUrl("rest://127.0.0.1:8583")
-            .setTimeout(30000)
+            .setTimeout(1000)
             .setApplication(new ApplicationConfig().setAppName("TestClientRest"));
         final RestService restServiceRest = consumerConfigRest.refer();
 
@@ -101,21 +103,29 @@ public class RestTracerTest extends ActivelyDestroyTest {
             .setInterfaceId(RestService.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
             .setDirectUrl("bolt://127.0.0.1:8993")
-            .setTimeout(30000)
+            .setTimeout(1000)
+            .setConnectTimeout(3000)
             .setApplication(new ApplicationConfig().setAppName("TestClientBolt"));
         final RestService restServiceBolt = consumerConfigBolt.refer();
+
+        restServiceRest.get("test");
+
         final int times = 10;
-        final CountDownLatch latch = new CountDownLatch(times * times);
-        final int[] success = { 0 };
+        final CountDownLatch latch = new CountDownLatch(times);
+        final AtomicInteger success = new AtomicInteger(0);
         for (int i = 0; i < times; i++) {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
                         for (int j = 0; j < times; j++) {
-                            Assert.assertEquals("serverok_rest", restServiceRest.get("ok_rest"));
-                            Assert.assertEquals("serverok_bolt", restServiceBolt.get("ok_bolt"));
-                            success[0]++;
+                            final String ok_rest = restServiceRest.get("ok_rest");
+                            System.out.println("rest-xx" + ok_rest);
+                            Assert.assertEquals("serverok_rest", ok_rest);
+                            final String ok_bolt = restServiceBolt.get("ok_bolt");
+                            Assert.assertEquals("serverok_bolt", ok_bolt);
+                            System.out.println("bolt-xx" + ok_bolt);
+                            success.incrementAndGet();
                         }
                     } catch (Throwable e) {
                         e.printStackTrace();
@@ -125,9 +135,13 @@ public class RestTracerTest extends ActivelyDestroyTest {
                 }
             }).start();
 
+            //     Thread.sleep(1000);
+
         }
-        latch.await(10000, TimeUnit.MILLISECONDS);
-        Assert.assertEquals(success[0], times * times);
+        latch.await();
+        Assert.assertEquals(times * times, success.get());
+
+        Thread.sleep(10000);
 
         //assret
         List<String> clientTraceIds = readTraceId(new File(logDirectory + File.separator
@@ -138,14 +152,15 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
         HashSet<String> hashSet = new HashSet<String>(200);
         for (String clientTraceId : clientTraceIds) {
-
-            Assert.assertEquals(true, hashSet.add(clientTraceId));
-            Assert.assertEquals(true, serverTraceIds.contains(clientTraceId));
+            //will not duplicate
+            Assert.assertTrue(!hashSet.contains(clientTraceId));
+            Assert.assertTrue(serverTraceIds.contains(clientTraceId));
 
         }
 
     }
 
+    //read TraceId and spanId
     public List<String> readTraceId(File file) throws IOException {
 
         List<String> traceIds = new ArrayList<String>();
@@ -156,8 +171,8 @@ public class RestTracerTest extends ActivelyDestroyTest {
             bufferedReader = new BufferedReader(reader);
             String lineText = null;
             while ((lineText = bufferedReader.readLine()) != null) {
-
-                traceIds.add(lineText.split(",")[2]);
+                //this is json format now
+                traceIds.add(lineText.split(",")[1] + lineText.split(",")[2]);
             }
 
             return traceIds;
@@ -172,10 +187,24 @@ public class RestTracerTest extends ActivelyDestroyTest {
     }
 
     protected void reflectSetNewTracer() throws Exception {
+        removeRpcDigestStatLogType();
         Tracer newTracerInstance = new RpcSofaTracer();
         Field tracerField = Tracers.class.getDeclaredField("tracer");
         tracerField.setAccessible(true);
         tracerField.set(null, newTracerInstance);
+    }
+
+    protected void removeRpcDigestStatLogType() throws Exception {
+
+        AsyncCommonDigestAppenderManager asyncDigestManager = SofaTracerDigestReporterAsyncManager
+            .getSofaTracerDigestReporterAsyncManager();
+        //stat
+        Map<Long, SofaTracerStatisticReporterManager> cycleTimesManager = SofaTracerStatisticReporterCycleTimesManager
+            .getCycleTimesManager();
+        for (Map.Entry<Long, SofaTracerStatisticReporterManager> entry : cycleTimesManager.entrySet()) {
+            SofaTracerStatisticReporterManager manager = entry.getValue();
+            manager.getStatReporters().clear();
+        }
     }
 
     @After
