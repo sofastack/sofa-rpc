@@ -207,7 +207,7 @@ public class RestTracerAdapter {
 
             RpcInternalContext context = RpcInternalContext.getContext();
 
-            if (serverSpan != null && context != null) {
+            if (serverSpan != null) {
                 serverSpan.setTag(RpcSpanTags.SERVER_BIZ_TIME,
                     (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE));
             }

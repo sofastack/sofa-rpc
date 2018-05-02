@@ -41,13 +41,11 @@ public class TraceResponseFilter implements ContainerResponseFilter {
         // 补充服务端request和response大小
         if (RpcInternalContext.isAttachmentEnable()) {
             RpcInternalContext context = RpcInternalContext.getContext();
-            if (context != null) {
-                context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestContext.getLength());
-                context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, responseContext.getLength());
-                Long startTime = (Long) context.removeAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME);
-                if (startTime != null) {
-                    context.setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE, RpcRuntimeContext.now() - startTime);
-                }
+            context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestContext.getLength());
+            context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, responseContext.getLength());
+            Long startTime = (Long) context.removeAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME);
+            if (startTime != null) {
+                context.setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE, RpcRuntimeContext.now() - startTime);
             }
         }
     }
