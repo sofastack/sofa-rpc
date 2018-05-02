@@ -16,18 +16,21 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.common.tracer.core.appender.TracerLogRootDeamon;
 import com.alipay.common.tracer.core.appender.manager.AsyncCommonDigestAppenderManager;
 import com.alipay.common.tracer.core.reporter.digest.manager.SofaTracerDigestReporterAsyncManager;
 import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterCycleTimesManager;
 import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterManager;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.FileUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.server.tracer.util.TracerChecker;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.Tracers;
@@ -38,11 +41,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -143,45 +143,51 @@ public class RestTracerTest extends ActivelyDestroyTest {
         Thread.sleep(10000);
 
         //assret
-        List<String> clientTraceIds = readTraceId(new File(logDirectory + File.separator
-            + RpcTracerLogEnum.RPC_CLIENT_DIGEST.getDefaultLogName()));
+        final File clientFile = new File(logDirectory + File.separator
+            + RpcTracerLogEnum.RPC_CLIENT_DIGEST.getDefaultLogName());
 
-        List<String> serverTraceIds = readTraceId(new File(logDirectory + File.separator
-            + RpcTracerLogEnum.RPC_SERVER_DIGEST.getDefaultLogName()));
+        List<JSONObject> clientDigest = readContent(clientFile);
+        List<String> clientTraceIds = readTraceId(clientDigest);
+
+        final File serverFile = new File(logDirectory + File.separator
+            + RpcTracerLogEnum.RPC_SERVER_DIGEST.getDefaultLogName());
+
+        List<JSONObject> serverDigest = readContent(serverFile);
+
+        List<String> serverTraceIds = readTraceId(serverDigest);
+
+        Assert.assertTrue(CommonUtils.isNotEmpty(clientTraceIds));
+        Assert.assertTrue(CommonUtils.isNotEmpty(serverTraceIds));
 
         HashSet<String> hashSet = new HashSet<String>(200);
         for (String clientTraceId : clientTraceIds) {
             //will not duplicate
             Assert.assertTrue(!hashSet.contains(clientTraceId));
             Assert.assertTrue(serverTraceIds.contains(clientTraceId));
-
         }
+
+        //validate one rpc server and rpc client field
+
+        TracerChecker.validateTracerDigest(clientDigest.get(0), "client", RpcConstants.PROTOCOL_TYPE_REST);
+
+        TracerChecker.validateTracerDigest(serverDigest.get(0), "server", RpcConstants.PROTOCOL_TYPE_REST);
+
     }
 
-    //read TraceId and spanId
-    public List<String> readTraceId(File file) throws IOException {
+    //readTracerDigest TraceId and spanId
+    public List<JSONObject> readContent(File file) throws IOException {
 
-        List<String> traceIds = new ArrayList<String>();
-        InputStreamReader reader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            reader = new FileReader(file);
-            bufferedReader = new BufferedReader(reader);
-            String lineText = null;
-            while ((lineText = bufferedReader.readLine()) != null) {
-                //this is json format now
-                traceIds.add(lineText.split(",")[1] + lineText.split(",")[2]);
-            }
+        List<JSONObject> jsonObjects = TracerChecker.readTracerDigest(file);
 
-            return traceIds;
-        } finally {
-            if (bufferedReader != null) {
-                bufferedReader.close();
-            }
-            if (reader != null) {
-                reader.close();
-            }
-        }
+        return jsonObjects;
+    }
+
+    //readTracerDigest TraceId and spanId
+    public List<String> readTraceId(List<JSONObject> jsonObjects) throws IOException {
+
+        List<String> result = TracerChecker.extractFields(jsonObjects, "tracerId");
+
+        return result;
     }
 
     protected void reflectSetNewTracer() throws Exception {
