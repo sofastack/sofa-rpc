@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -45,6 +46,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -519,7 +521,7 @@ public abstract class AbstractCluster extends Cluster {
                 long start = RpcRuntimeContext.now();
                 try {
                     transport.oneWaySend(request, timeout);
-                    response = new SofaResponse();
+                    response = buildEmptyResponse(request);
                 } finally {
                     if (RpcInternalContext.isAttachmentEnable()) {
                         long elapsed = RpcRuntimeContext.now() - start;
@@ -539,7 +541,7 @@ public abstract class AbstractCluster extends Cluster {
                     }
                 }
                 transport.asyncSend(request, timeout);
-                response = new SofaResponse();
+                response = buildEmptyResponse(request);
             }
             // Future调用
             else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
@@ -547,7 +549,7 @@ public abstract class AbstractCluster extends Cluster {
                 ResponseFuture future = transport.asyncSend(request, timeout);
                 // 放入线程上下文
                 RpcInternalContext.getContext().setFuture(future);
-                response = new SofaResponse();
+                response = buildEmptyResponse(request);
             } else {
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Unknown invoke type:" + invokeType);
             }
@@ -557,6 +559,15 @@ public abstract class AbstractCluster extends Cluster {
         } catch (Throwable e) { // 客户端其它异常
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
         }
+    }
+
+    private SofaResponse buildEmptyResponse(SofaRequest request) {
+        SofaResponse response = new SofaResponse();
+        Method method = request.getMethod();
+        if (method != null) {
+            response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
+        }
+        return response;
     }
 
     /**

@@ -16,10 +16,14 @@
  */
 package com.alipay.sofa.rpc.proxy;
 
+import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
+
+import java.lang.reflect.Method;
 
 /**
  *
@@ -27,13 +31,35 @@ import com.alipay.sofa.rpc.invoke.Invoker;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class TestInvoker implements Invoker {
+
+    private TestInterfaceImpl testInterface = new TestInterfaceImpl();
+    private SofaRequest       request;
+
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
-        return null;
+        this.request = request;
+        if ("throwRPC".equals(request.getMethodName())) {
+            throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, "xxxx");
+        }
+        SofaResponse response = new SofaResponse();
+        try {
+            Method method = TestInterface.class.getMethod(request.getMethodName(),
+                ClassTypeUtils.getClasses(request.getMethodArgSigs()));
+            Object ret = method.invoke(testInterface, request.getMethodArgs());
+            response = new SofaResponse();
+            response.setAppResponse(ret);
+        } catch (Exception e) {
+            response.setErrorMsg(e.getMessage());
+        }
+        return response;
     }
 
     @Override
     public String toString() {
         return "com.xxx:1.0:xsdsd@123";
+    }
+
+    public SofaRequest getRequest() {
+        return request;
     }
 }

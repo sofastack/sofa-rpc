@@ -130,22 +130,13 @@ public final class ClassUtils {
      * @throws SofaRpcRuntimeException 没有找到方法，或者无法处理，或者初始化方法异常等
      */
     public static <T> T newInstance(Class<T> clazz) throws SofaRpcRuntimeException {
-        if (clazz == Short.class || clazz == short.class) {
-            return (T) Short.valueOf((short) 0);
-        } else if (clazz == Integer.class || clazz == int.class) {
-            return (T) Integer.valueOf(0);
-        } else if (clazz == Long.class || clazz == long.class) {
-            return (T) Long.valueOf(0L);
-        } else if (clazz == Double.class || clazz == double.class) {
-            return (T) Double.valueOf(0d);
-        } else if (clazz == Float.class || clazz == float.class) {
-            return (T) Float.valueOf(0f);
-        } else if (clazz == Byte.class || clazz == byte.class) {
-            return (T) Byte.valueOf((byte) 0);
-        } else if (clazz == Character.class || clazz == char.class) {
-            return (T) Character.valueOf((char) 0);
-        } else if (clazz == Boolean.class || clazz == boolean.class) {
-            return (T) Boolean.FALSE;
+        if (clazz.isPrimitive()) {
+            return (T) getDefaultPrimitiveValue(clazz);
+        }
+
+        T t = getDefaultWrapperValue(clazz);
+        if (t != null) {
+            return t;
         }
 
         try {
@@ -181,7 +172,7 @@ public final class ClassUtils {
             Class<?>[] argTypes = constructor.getParameterTypes();
             Object[] args = new Object[argTypes.length];
             for (int i = 0; i < args.length; i++) {
-                args[i] = getDefaultArg(argTypes[i]);
+                args[i] = getDefaultPrimitiveValue(argTypes[i]);
             }
             return constructor.newInstance(args);
         } catch (SofaRpcRuntimeException e) {
@@ -251,26 +242,59 @@ public final class ClassUtils {
         }
     }
 
-    public static Object getDefaultArg(Class clazz) {
-        if (clazz == Short.class || clazz == short.class) {
-            return (short) 0;
-        } else if (clazz == Integer.class || clazz == int.class) {
+    /**
+     * 得到基本类型的默认值
+     * 
+     * @param clazz Class类
+     * @return 默认值
+     */
+    public static Object getDefaultPrimitiveValue(Class clazz) {
+        if (clazz == int.class) {
             return 0;
-        } else if (clazz == Long.class || clazz == long.class) {
+        } else if (clazz == boolean.class) {
+            return false;
+        } else if (clazz == long.class) {
             return 0L;
-        } else if (clazz == Double.class || clazz == double.class) {
-            return 0d;
-        } else if (clazz == Float.class || clazz == float.class) {
-            return 0f;
-        } else if (clazz == Byte.class || clazz == byte.class) {
+        } else if (clazz == byte.class) {
             return (byte) 0;
-        } else if (clazz == Character.class || clazz == char.class) {
+        } else if (clazz == double.class) {
+            return 0d;
+        } else if (clazz == short.class) {
+            return (short) 0;
+        } else if (clazz == float.class) {
+            return 0f;
+        } else if (clazz == char.class) {
             return (char) 0;
-        } else if (clazz == Boolean.class || clazz == boolean.class) {
-            return Boolean.FALSE;
         } else {
             return null;
         }
+    }
+
+    /**
+     * 得到包装类的默认值
+     *
+     * @param clazz Class类
+     * @return 默认值
+     */
+    public static <T> T getDefaultWrapperValue(Class<T> clazz) {
+        if (clazz == Short.class) {
+            return (T) Short.valueOf((short) 0);
+        } else if (clazz == Integer.class) {
+            return (T) Integer.valueOf(0);
+        } else if (clazz == Long.class) {
+            return (T) Long.valueOf(0L);
+        } else if (clazz == Double.class) {
+            return (T) Double.valueOf(0d);
+        } else if (clazz == Float.class) {
+            return (T) Float.valueOf(0f);
+        } else if (clazz == Byte.class) {
+            return (T) Byte.valueOf((byte) 0);
+        } else if (clazz == Character.class) {
+            return (T) Character.valueOf((char) 0);
+        } else if (clazz == Boolean.class) {
+            return (T) Boolean.FALSE;
+        }
+        return null;
     }
 
     /**

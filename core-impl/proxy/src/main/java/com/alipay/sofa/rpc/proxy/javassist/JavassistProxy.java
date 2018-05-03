@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.proxy.javassist;
 
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
+import com.alipay.sofa.rpc.common.utils.ReflectUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -68,6 +69,10 @@ public class JavassistProxy implements Proxy {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
+        StringBuilder debug = null;
+        if (LOGGER.isDebugEnabled()) {
+            debug = new StringBuilder();
+        }
         try {
             Class clazz = PROXY_CLASS_MAP.get(interfaceClass);
             if (clazz == null) {
@@ -89,22 +94,27 @@ public class JavassistProxy implements Proxy {
                 constructor.setBody("{super(new " + UselessInvocationHandler.class.getName() + "());}");
                 mCtc.addConstructor(constructor);
 
-                mCtc.addField(CtField.make("public " + Invoker.class.getCanonicalName() + " proxyInvoker = null;",
-                    mCtc));
-                StringBuilder sb = null;
-                if (LOGGER.isDebugEnabled()) {
-                    sb = new StringBuilder();
-                }
-                List<String> methodList = createMethod(interfaceClass);
-                for (String methodStr : methodList) {
-                    mCtc.addMethod(CtMethod.make(methodStr, mCtc));
+                List<String> fieldList = new ArrayList<String>();
+                List<String> methodList = new ArrayList<String>();
+
+                fieldList.add("public " + Invoker.class.getCanonicalName() + " proxyInvoker = null;");
+                createMethod(interfaceClass, fieldList, methodList);
+
+                for (String fieldStr : fieldList) {
                     if (LOGGER.isDebugEnabled()) {
-                        sb.append(methodStr).append("\n");
+                        debug.append(fieldStr).append("\n");
                     }
+                    mCtc.addField(CtField.make(fieldStr, mCtc));
+                }
+                for (String methodStr : methodList) {
+                    if (LOGGER.isDebugEnabled()) {
+                        debug.append(methodStr).append("\n");
+                    }
+                    mCtc.addMethod(CtMethod.make(methodStr, mCtc));
                 }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("javassist proxy of interface: {} \r\n{}", interfaceClass,
-                        sb != null ? sb.toString() : "");
+                        debug != null ? debug.toString() : "");
                 }
                 clazz = mCtc.toClass();
                 PROXY_CLASS_MAP.put(interfaceClass, clazz);
@@ -113,15 +123,20 @@ public class JavassistProxy implements Proxy {
             clazz.getField("proxyInvoker").set(instance, proxyInvoker);
             return (T) instance;
         } catch (Exception e) {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("javassist proxy of interface: {} \r\n{}", interfaceClass,
+                    debug != null ? debug.toString() : "");
+            }
             throw new SofaRpcRuntimeException("", e);
         }
     }
 
-    private List<String> createMethod(Class<?> interfaceClass) {
+    private void createMethod(Class<?> interfaceClass, List<String> fieldList, List<String> resultList) {
         Method[] methodAry = interfaceClass.getMethods();
         StringBuilder sb = new StringBuilder(512);
-        List<String> resultList = new ArrayList<String>();
+        int mi = 0;
         for (Method m : methodAry) {
+            mi++;
             if (Modifier.isNative(m.getModifiers()) || Modifier.isFinal(m.getModifiers())) {
                 continue;
             }
@@ -149,31 +164,37 @@ public class JavassistProxy implements Proxy {
             sb.append("{");
 
             sb.append(" Class clazz = " + interfaceClass.getCanonicalName() + ".class;");
-            sb.append(" String methodName = \"" + m.getName() + "\";");
+            sb.append(" " + Method.class.getCanonicalName() + " method =  method_" + mi + ";");
             sb.append(" Class[] paramTypes = new Class[" + c + "];");
             sb.append(" Object[] paramValues = new Object[" + c + "];");
+            StringBuilder methodSig = new StringBuilder();
             for (int i = 0; i < c; i++) {
                 sb.append("paramValues[" + i + "] = ($w)$" + (i + 1) + ";");
                 sb.append("paramTypes[" + i + "] = " + mType[i].getCanonicalName() + ".class;");
+                methodSig.append("," + mType[i].getCanonicalName() + ".class");
             }
+
+            fieldList.add("private " + Method.class.getCanonicalName() + " method_" + mi + " = "
+                + ReflectUtils.class.getCanonicalName() + ".getMethod("
+                + interfaceClass.getCanonicalName() + ".class, \"" + m.getName() + "\", "
+                + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");"
+                );
 
             sb.append(SofaRequest.class.getCanonicalName() + " request = " +
                 MessageBuilder.class.getCanonicalName() +
-                ".buildSofaRequest(clazz, methodName, paramTypes, paramValues);");
-            sb.append(SofaResponse.class.getCanonicalName() + " response = " +
-                "proxyInvoker.invoke(request);");
+                ".buildSofaRequest(clazz, method, paramTypes, paramValues);");
+            sb.append(SofaResponse.class.getCanonicalName() + " response = " + "proxyInvoker.invoke(request);");
             sb.append("if(response.isError()){");
             sb.append("  throw new " + SofaRpcException.class.getName() + "(" + RpcErrorType.class.getName() +
-                ".SERVER_UNDECLARED_ERROR," +
-                " response.getErrorMsg());");
+                ".SERVER_UNDECLARED_ERROR," + " response.getErrorMsg());");
             sb.append("}");
 
             if (returnType.equals(void.class)) {
                 sb.append(" return;");
             } else {
                 sb.append("Object ret = response.getAppResponse();");
-                sb.append("if(ret instanceof " + Throwable.class.getName() + ") {");
-                sb.append("    throw (" + Throwable.class.getName() + ") ret;");
+                sb.append("if (ret instanceof Throwable) {");
+                sb.append("    throw (Throwable) ret;");
                 sb.append("} else {");
                 sb.append("    return " + asArgument(returnType, "ret") + ";");
                 sb.append("}");
@@ -202,7 +223,6 @@ public class JavassistProxy implements Proxy {
             "&& proxyInvoker.equals(" + JavassistProxy.class.getName() + ".parseInvoker($1)));");
         sb.append("}");
         resultList.add(sb.toString());
-        return resultList;
     }
 
     private String asArgument(Class<?> cl, String name) {
