@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.proxy.javassist;
 
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.proxy.AbstractTestClass;
 import com.alipay.sofa.rpc.proxy.TestInterface;
 import com.alipay.sofa.rpc.proxy.TestInvoker;
@@ -23,6 +24,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Proxy;
+import java.util.HashMap;
 
 /**
  *
@@ -60,6 +62,42 @@ public class JavassistProxyTest {
         Assert.assertFalse(testInterface.equals(invoker));
         Assert.assertFalse(testInterface.equals(another2));
         Assert.assertEquals(testInterface, another1);
+
+        Assert.assertEquals(678, another1.sayNum(true));
+        SofaRequest request = invoker.getRequest();
+        Assert.assertEquals(TestInterface.class.getCanonicalName(), request.getInterfaceName());
+        Assert.assertEquals("sayNum", request.getMethodName());
+        Assert.assertEquals("boolean", request.getMethodArgSigs()[0]);
+        Assert.assertEquals(true, request.getMethodArgs()[0]);
+        Assert.assertNotNull(request.getMethod());
+
+        Assert.assertEquals("sayHello", another1.sayHello("xxxx"));
+        another1.sayNoting();
+        Assert.assertArrayEquals(new int[] { 6, 7, 8 }, another1.sayNums(null, new HashMap()));
+        Assert.assertNull(another1.sayNum2(1.2D));
+
+        boolean error = false;
+        try {
+            another1.throwbiz1();
+        } catch (Throwable e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+
+        error = false;
+        try {
+            another1.throwbiz2();
+        } catch (Throwable e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+
+        try {
+            another1.throwRPC();
+        } catch (Throwable e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
     }
 
 }
