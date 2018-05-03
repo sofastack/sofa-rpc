@@ -24,21 +24,45 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public interface TestInterface {
+public class TestInterfaceImpl implements TestInterface {
 
-    public String sayHello(String s);
+    @Override
+    public String sayHello(String s) {
+        return "sayHello";
+    }
 
-    public void sayNoting();
+    @Override
+    public void sayNoting() {
 
-    public int sayNum(boolean s);
+    }
 
-    public int[] sayNums(List list, HashMap map);
+    @Override
+    public int sayNum(boolean s) {
+        return 678;
+    }
 
-    public Float sayNum2(Double list);
+    @Override
+    public int[] sayNums(List list, HashMap map) {
+        return new int[] { 6, 7, 8 };
+    }
 
-    public String throwbiz1();
+    @Override
+    public Float sayNum2(Double list) {
+        return null;
+    }
 
-    public String throwbiz2() throws Throwable;
+    @Override
+    public String throwbiz1() {
+        throw new RuntimeException("RuntimeException");
+    }
 
-    public String throwRPC();
+    @Override
+    public String throwbiz2() throws Throwable {
+        throw new Throwable("Throwable");
+    }
+
+    @Override
+    public String throwRPC() {
+        return null;
+    }
 }

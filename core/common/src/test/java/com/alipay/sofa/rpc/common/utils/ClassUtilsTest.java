@@ -158,28 +158,35 @@ public class ClassUtilsTest {
     }
 
     @Test
-    public void getDefaultArg() throws Exception {
-        Assert.assertEquals((short) 0, ClassUtils.getDefaultArg(short.class));
-        Assert.assertEquals(0, ClassUtils.getDefaultArg(int.class));
-        Assert.assertEquals(0l, ClassUtils.getDefaultArg(long.class));
-        Assert.assertEquals(0d, ClassUtils.getDefaultArg(double.class));
-        Assert.assertEquals(0f, ClassUtils.getDefaultArg(float.class));
-        Assert.assertEquals((byte) 0, ClassUtils.getDefaultArg(byte.class));
-        Assert.assertEquals((char) 0, ClassUtils.getDefaultArg(char.class));
-        Assert.assertEquals(false, ClassUtils.getDefaultArg(boolean.class));
+    public void getDefaultPrimitiveValue() throws Exception {
+        Assert.assertEquals((short) 0, ClassUtils.getDefaultPrimitiveValue(short.class));
+        Assert.assertEquals(0, ClassUtils.getDefaultPrimitiveValue(int.class));
+        Assert.assertEquals(0l, ClassUtils.getDefaultPrimitiveValue(long.class));
+        Assert.assertEquals(0d, ClassUtils.getDefaultPrimitiveValue(double.class));
+        Assert.assertEquals(0f, ClassUtils.getDefaultPrimitiveValue(float.class));
+        Assert.assertEquals((byte) 0, ClassUtils.getDefaultPrimitiveValue(byte.class));
+        Assert.assertEquals((char) 0, ClassUtils.getDefaultPrimitiveValue(char.class));
+        Assert.assertEquals(false, ClassUtils.getDefaultPrimitiveValue(boolean.class));
 
-        Assert.assertEquals((short) 0, ClassUtils.getDefaultArg(Short.class));
-        Assert.assertEquals(0, ClassUtils.getDefaultArg(Integer.class));
-        Assert.assertEquals(0l, ClassUtils.getDefaultArg(Long.class));
-        Assert.assertEquals(0d, ClassUtils.getDefaultArg(Double.class));
-        Assert.assertEquals(0f, ClassUtils.getDefaultArg(Float.class));
-        Assert.assertEquals((byte) 0, ClassUtils.getDefaultArg(Byte.class));
-        Assert.assertEquals((char) 0, ClassUtils.getDefaultArg(Character.class));
-        Assert.assertEquals(false, ClassUtils.getDefaultArg(Boolean.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultPrimitiveValue(Void.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultPrimitiveValue(void.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultPrimitiveValue(String.class));
+    }
 
-        Assert.assertEquals(null, ClassUtils.getDefaultArg(Void.class));
-        Assert.assertEquals(null, ClassUtils.getDefaultArg(void.class));
-        Assert.assertEquals(null, ClassUtils.getDefaultArg(String.class));
+    @Test
+    public void getDefaultWrapperValue() throws Exception {
+        Assert.assertTrue((short) 0 == ClassUtils.getDefaultWrapperValue(Short.class));
+        Assert.assertTrue(0 == ClassUtils.getDefaultWrapperValue(Integer.class));
+        Assert.assertTrue(0l == ClassUtils.getDefaultWrapperValue(Long.class));
+        Assert.assertTrue(0d == ClassUtils.getDefaultWrapperValue(Double.class));
+        Assert.assertTrue(0f == ClassUtils.getDefaultWrapperValue(Float.class));
+        Assert.assertTrue((byte) 0 == ClassUtils.getDefaultWrapperValue(Byte.class));
+        Assert.assertTrue((char) 0 == ClassUtils.getDefaultWrapperValue(Character.class));
+        Assert.assertTrue(false == ClassUtils.getDefaultWrapperValue(Boolean.class));
+
+        Assert.assertEquals(null, ClassUtils.getDefaultWrapperValue(Void.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultWrapperValue(void.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultWrapperValue(String.class));
     }
 
     private static class TestMemberClass1 {
