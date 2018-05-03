@@ -22,7 +22,7 @@
   // 默认Consumer启动器
   "default.consumer.bootstrap": "bolt",
   // 默认代理类型
-  "default.proxy" : "jdk",
+  "default.proxy" : "javassist",
   // 默认网络层
   "default.transport": "bolt",
   // 默认tracer实现

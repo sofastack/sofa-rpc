@@ -49,6 +49,8 @@ public class ConfigUniqueNameGeneratorTest {
     @Test
     public void getUniqueNameProtocol() throws Exception {
         ProviderConfig providerConfig = (ProviderConfig) new ProviderConfig().setInterfaceId("com.xx");
+        Assert.assertEquals("com.xx:1.0", ConfigUniqueNameGenerator.getUniqueNameProtocol(providerConfig, null));
+        Assert.assertEquals("com.xx:1.0", ConfigUniqueNameGenerator.getUniqueNameProtocol(providerConfig, ""));
         Assert.assertEquals(ConfigUniqueNameGenerator.getUniqueNameProtocol(providerConfig, "bolt"),
             "com.xx:1.0@bolt");
 
@@ -81,4 +83,14 @@ public class ConfigUniqueNameGeneratorTest {
             "com.xx:2.0:ud@bolt");
     }
 
+    @Test
+    public void getInterfaceName() {
+        Assert.assertNull(ConfigUniqueNameGenerator.getInterfaceName(null));
+        Assert.assertEquals("", ConfigUniqueNameGenerator.getInterfaceName(""));
+        Assert.assertEquals("aaa", ConfigUniqueNameGenerator.getInterfaceName("aaa"));
+        Assert.assertEquals("bbb", ConfigUniqueNameGenerator.getInterfaceName("bbb:"));
+        Assert.assertEquals("ccc", ConfigUniqueNameGenerator.getInterfaceName("ccc:111"));
+        Assert.assertEquals("ddd", ConfigUniqueNameGenerator.getInterfaceName("ddd:111:222"));
+        Assert.assertEquals("", ConfigUniqueNameGenerator.getInterfaceName(":eee:111"));
+    }
 }

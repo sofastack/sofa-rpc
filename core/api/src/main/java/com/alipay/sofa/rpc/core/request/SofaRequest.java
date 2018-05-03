@@ -35,12 +35,13 @@ public class SofaRequest extends RequestBase {
     private static final long   serialVersionUID = 7329530374415722876L;
 
     /**
-     * 对方应用名称：例如`A进程`调`B进程`(B里面有B1,B2两个应用)，这里传递的是B1。
+     * Target app name. If progress of 'AppA' want to call the progress which contains two apps('AppB1' and 'AppB2'),
+     * You need specified the target app name here. such as 'AppB2'
      */
     private String              targetAppName;
 
     /**
-     * 扩展属性 extensional properties
+     * Extensional properties of request
      */
     private Map<String, Object> requestProps;
 

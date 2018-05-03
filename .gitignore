@@ -14,3 +14,7 @@ bin
 
 # OS X
 .DS_Store
+
+# log
+logs/
+*.log

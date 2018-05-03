@@ -16,10 +16,12 @@
  */
 package com.alipay.sofa.rpc.codec;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
 import org.junit.Test;
@@ -55,6 +57,7 @@ public class AllTypeServiceTest extends ActivelyDestroyTest {
     public void testAll() {
         ServerConfig serverConfig2 = new ServerConfig()
             .setPort(22222)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
             .setDaemon(false);
 
         ProviderConfig<AllTypeService> CProvider = new ProviderConfig<AllTypeService>()
@@ -184,5 +187,49 @@ public class AllTypeServiceTest extends ActivelyDestroyTest {
 
         Assert.assertEquals(obj, helloService.echoSubObj(obj));
         Assert.assertEquals(subObj, helloService.echoSubObj(subObj));
+
+        {
+            ConsumerConfig<AllTypeService> aConsumer = new ConsumerConfig<AllTypeService>()
+                .setInterfaceId(AllTypeService.class.getName())
+                .setTimeout(50000)
+                .setSerialization("hessian")
+                .setRepeatedReferLimit(-1)
+                .setProxy("javassist")
+                .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
+                .setDirectUrl("bolt://127.0.0.1:22222");
+            AllTypeService helloService2 = aConsumer.refer();
+            Assert.assertEquals(0, helloService2.echoInt(1));
+            boolean error = false;
+            Integer v = null;
+            try {
+                v = (Integer) RpcInvokeContext.getContext().getFuture().get();
+            } catch (Exception e) {
+                error = true;
+            }
+            Assert.assertFalse(error);
+            Assert.assertTrue(v == 1);
+        }
+
+        {
+            ConsumerConfig<AllTypeService> aConsumer = new ConsumerConfig<AllTypeService>()
+                .setInterfaceId(AllTypeService.class.getName())
+                .setTimeout(50000)
+                .setSerialization("hessian")
+                .setRepeatedReferLimit(-1)
+                .setProxy("jdk")
+                .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
+                .setDirectUrl("bolt://127.0.0.1:22222");
+            AllTypeService helloService2 = aConsumer.refer();
+            Assert.assertEquals(0, helloService2.echoInt(1));
+            boolean error = false;
+            Integer v = null;
+            try {
+                v = (Integer) RpcInvokeContext.getContext().getFuture().get();
+            } catch (Exception e) {
+                error = true;
+            }
+            Assert.assertFalse(error);
+            Assert.assertTrue(v == 1);
+        }
     }
 }

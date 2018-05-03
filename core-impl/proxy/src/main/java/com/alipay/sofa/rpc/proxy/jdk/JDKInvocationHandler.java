@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.proxy.jdk;
 
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -28,7 +29,6 @@ import java.lang.reflect.Method;
 
 /**
  * JDK代理处理器，拦截请求变为invocation进行调用
- * <p>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
@@ -79,6 +79,9 @@ public class JDKInvocationHandler implements InvocationHandler {
         if (ret instanceof Throwable) {
             throw (Throwable) ret;
         } else {
+            if (ret == null) {
+                return ClassUtils.getDefaultPrimitiveValue(method.getReturnType());
+            }
             return ret;
         }
     }
