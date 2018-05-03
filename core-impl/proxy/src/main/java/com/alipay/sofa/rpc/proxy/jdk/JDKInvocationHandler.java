@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.proxy.jdk;
 
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -79,6 +80,9 @@ public class JDKInvocationHandler implements InvocationHandler {
         if (ret instanceof Throwable) {
             throw (Throwable) ret;
         } else {
+            if (ret == null) {
+                return ClassUtils.getDefaultArg(method.getReturnType());
+            }
             return ret;
         }
     }
