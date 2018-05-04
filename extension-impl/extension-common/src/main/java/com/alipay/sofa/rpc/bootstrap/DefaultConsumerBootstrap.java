@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ClusterFactory;
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -295,7 +296,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @return ProviderInfo
      */
     protected ProviderInfo convertToProviderInfo(String providerStr) {
-        return ProviderInfo.valueOf(providerStr);
+        return ProviderHelper.toProviderInfo(providerStr);
     }
 
     /**

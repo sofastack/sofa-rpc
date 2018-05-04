@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
@@ -166,7 +167,7 @@ public class ZookeeperRegistryHelper {
         throws UnsupportedEncodingException {
         String url = childData.getPath().substring(providerPath.length() + 1); // 去掉头部
         url = URLDecoder.decode(url, "UTF-8");
-        ProviderInfo providerInfo = ProviderInfo.valueOf(url);
+        ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
 
         processWarmUpWeight(providerInfo);
 
