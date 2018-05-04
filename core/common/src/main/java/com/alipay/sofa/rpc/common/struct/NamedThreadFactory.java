@@ -55,22 +55,22 @@ public class NamedThreadFactory implements ThreadFactory {
     /**
      * 构造函数，默认非守护线程
      *
-     * @param prefix2 第二前缀，前面会自动加上第一前缀，后面会自动加上-T-
+     * @param secondPrefix 第二前缀，前面会自动加上第一前缀，后面会自动加上-T-
      */
-    public NamedThreadFactory(String prefix2) {
-        this(prefix2, false);
+    public NamedThreadFactory(String secondPrefix) {
+        this(secondPrefix, false);
     }
 
     /**
      * 构造函数
      *
-     * @param prefix2 第二前缀，前面会自动加上第一前缀，后面会自动加上-T-
+     * @param secondPrefix 第二前缀，前面会自动加上第一前缀，后面会自动加上-T-
      * @param daemon 是否守护线程，true的话随主线程退出而退出，false的话则要主动退出
      */
-    public NamedThreadFactory(String prefix2, boolean daemon) {
+    public NamedThreadFactory(String secondPrefix, boolean daemon) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        namePrefix = firstPrefix + prefix2 + "-" + POOL_COUNT.getAndIncrement() + "-T";
+        namePrefix = firstPrefix + secondPrefix + "-" + POOL_COUNT.getAndIncrement() + "-T";
         isDaemon = daemon;
     }
 
