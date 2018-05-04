@@ -50,7 +50,7 @@ public class NamedThreadFactory implements ThreadFactory {
     /**
      * 线程名第一前缀
      */
-    private final String              firstPrefix = "SOFA-";
+    private final String               firstPrefix = "SOFA-";
 
     /**
      * 构造函数，默认非守护线程
@@ -70,7 +70,7 @@ public class NamedThreadFactory implements ThreadFactory {
     public NamedThreadFactory(String prefix2, boolean daemon) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        namePrefix = firstPrefix+prefix2 + "-" + POOL_COUNT.getAndIncrement() + "-T";
+        namePrefix = firstPrefix + prefix2 + "-" + POOL_COUNT.getAndIncrement() + "-T";
         isDaemon = daemon;
     }
 
