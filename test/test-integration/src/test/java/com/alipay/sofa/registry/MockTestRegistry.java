@@ -17,13 +17,18 @@
 package com.alipay.sofa.registry;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.*;
+import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
@@ -36,7 +41,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.*;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_APP_NAME;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_RPC_VERSION;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_SERIALIZATION;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_START_TIME;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WARMUP_TIME;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WARMUP_WEIGHT;
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WEIGHT;
 
 /**
  *
@@ -86,7 +98,7 @@ public class MockTestRegistry extends Registry {
         List<ServerConfig> serverConfigs = config.getServer();
         if (CommonUtils.isNotEmpty(serverConfigs)) {
             for (ServerConfig server : serverConfigs) {
-                group.add(ProviderInfo.valueOf(convertProviderToUrls(config, server)));
+                group.add(ProviderHelper.toProviderInfo(convertProviderToUrls(config, server)));
             }
         }
         Map<ConsumerConfig, ProviderInfoListener> listeners = notifyListeners.get(key);
@@ -105,7 +117,7 @@ public class MockTestRegistry extends Registry {
             List<ServerConfig> serverConfigs = config.getServer();
             if (CommonUtils.isNotEmpty(serverConfigs)) {
                 for (ServerConfig server : serverConfigs) {
-                    group.remove(ProviderInfo.valueOf(convertProviderToUrls(config, server)));
+                    group.remove(ProviderHelper.toProviderInfo(convertProviderToUrls(config, server)));
                 }
             }
         }
@@ -227,8 +239,8 @@ public class MockTestRegistry extends Registry {
             sb.append(getKeyPairs(ATTR_TIMEOUT, providerConfig.getTimeout()));
         }
         sb.append(getKeyPairs(ATTR_APP_NAME, appName));
-        sb.append(getKeyPairs(ATTR_WARMUP_TIME, providerConfig.getParameter(ATTR_WARMUP_TIME)));
-        sb.append(getKeyPairs(ATTR_WARMUP_WEIGHT, providerConfig.getParameter(ATTR_WARMUP_WEIGHT)));
+        sb.append(getKeyPairs(ATTR_WARMUP_TIME, providerConfig.getParameter(ATTR_WARMUP_TIME.toString())));
+        sb.append(getKeyPairs(ATTR_WARMUP_WEIGHT, providerConfig.getParameter(ATTR_WARMUP_WEIGHT.toString())));
 
         Map<String, MethodConfig> methodConfigs = providerConfig.getMethods();
         if (CommonUtils.isNotEmpty(methodConfigs)) {
@@ -254,7 +266,7 @@ public class MockTestRegistry extends Registry {
      * @param value the value
      * @return the key pairs
      */
-    private static String getKeyPairs(String key, Object value) {
+    private static String getKeyPairs(CharSequence key, Object value) {
         if (value != null) {
             return "&" + key + "=" + value.toString();
         } else {

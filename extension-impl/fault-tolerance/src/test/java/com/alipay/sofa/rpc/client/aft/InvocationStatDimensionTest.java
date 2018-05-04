@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.client.aft;
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,9 +28,12 @@ public class InvocationStatDimensionTest extends FaultBaseTest {
 
     @Test
     public void testInvocation() {
-        InvocationStatDimension invocationA = new InvocationStatDimension(ProviderInfo.valueOf("ipA"), consumerConfig);
-        InvocationStatDimension invocationB = new InvocationStatDimension(ProviderInfo.valueOf("ipA"), consumerConfig);
-        InvocationStatDimension invocationC = new InvocationStatDimension(ProviderInfo.valueOf("ipC"), consumerConfig);
+        InvocationStatDimension invocationA = new InvocationStatDimension(ProviderHelper.toProviderInfo("ipA"),
+            consumerConfig);
+        InvocationStatDimension invocationB = new InvocationStatDimension(ProviderHelper.toProviderInfo("ipA"),
+            consumerConfig);
+        InvocationStatDimension invocationC = new InvocationStatDimension(ProviderHelper.toProviderInfo("ipC"),
+            consumerConfig);
 
         Assert.assertTrue(invocationA.hashCode() == invocationB.hashCode());
         Assert.assertTrue(invocationA.equals(invocationB));

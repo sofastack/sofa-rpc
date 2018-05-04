@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.transport.bolt;
 
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class BoltClientTransportTest {
     public void connect() throws Exception {
 
         ClientTransportConfig clientTransportConfig = new ClientTransportConfig();
-        ProviderInfo providerInfo = ProviderInfo.valueOf("127.0.0.1:12222");
+        ProviderInfo providerInfo = ProviderHelper.toProviderInfo("127.0.0.1:12222");
         clientTransportConfig.setProviderInfo(providerInfo);
 
         BoltClientTransport clientTransport = new BoltClientTransport(clientTransportConfig);
