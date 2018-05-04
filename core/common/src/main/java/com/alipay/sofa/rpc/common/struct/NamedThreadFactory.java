@@ -47,26 +47,30 @@ public class NamedThreadFactory implements ThreadFactory {
      * 是否守护线程，true的话随主线程退出而退出，false的话则要主动退出
      */
     private final boolean              isDaemon;
+    /**
+     * 线程名第一前缀
+     */
+    private final String              firstPrefix = "SOFA-";
 
     /**
      * 构造函数，默认非守护线程
      *
-     * @param prefix 前缀，后面会自动加上-T-
+     * @param prefix2 第二前缀，前面会自动加上第一前缀，后面会自动加上-T-
      */
-    public NamedThreadFactory(String prefix) {
-        this(prefix, false);
+    public NamedThreadFactory(String prefix2) {
+        this(prefix2, false);
     }
 
     /**
      * 构造函数
      *
-     * @param prefix 前缀，后面会自动加上-T-
+     * @param prefix2 第二前缀，前面会自动加上第一前缀，后面会自动加上-T-
      * @param daemon 是否守护线程，true的话随主线程退出而退出，false的话则要主动退出
      */
-    public NamedThreadFactory(String prefix, boolean daemon) {
+    public NamedThreadFactory(String prefix2, boolean daemon) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() : Thread.currentThread().getThreadGroup();
-        namePrefix = prefix + "-" + POOL_COUNT.getAndIncrement() + "-T";
+        namePrefix = firstPrefix+prefix2 + "-" + POOL_COUNT.getAndIncrement() + "-T";
         isDaemon = daemon;
     }
 
