@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.client.aft;
 
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.aft.impl.ServiceExceptionInvocationStat;
 import com.alipay.sofa.rpc.client.aft.impl.ServiceHorizontalMeasureStrategy;
@@ -42,12 +43,18 @@ public class MeasureStrategyTest extends FaultBaseTest {
         config.setLeastWindowExceptionRateMultiple(3D);
         FaultToleranceConfigManager.putAppConfig(APP_NAME1, config);
 
-        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig);
-        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderInfo.valueOf("ip2"), consumerConfig);
-        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderInfo.valueOf("ip3"), consumerConfig);
-        InvocationStatDimension invocation4 = new InvocationStatDimension(ProviderInfo.valueOf("ip4"), consumerConfig);
-        InvocationStatDimension invocation5 = new InvocationStatDimension(ProviderInfo.valueOf("ip5"), consumerConfig);
-        InvocationStatDimension invocation6 = new InvocationStatDimension(ProviderInfo.valueOf("ip6"), consumerConfig);
+        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig);
+        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip2"),
+            consumerConfig);
+        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip3"),
+            consumerConfig);
+        InvocationStatDimension invocation4 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip4"),
+            consumerConfig);
+        InvocationStatDimension invocation5 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip5"),
+            consumerConfig);
+        InvocationStatDimension invocation6 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip6"),
+            consumerConfig);
 
         InvocationStat InvocationStat1 = InvocationStatFactory.getInvocationStat(invocation1);
         InvocationStat InvocationStat2 = InvocationStatFactory.getInvocationStat(invocation2);
@@ -133,11 +140,14 @@ public class MeasureStrategyTest extends FaultBaseTest {
         config.setLeastWindowExceptionRateMultiple(1.5D);
         FaultToleranceConfigManager.putAppConfig(APP_NAME1, config);
 
-        ProviderInfo providerInfo4 = ProviderInfo.valueOf("ip4");
+        ProviderInfo providerInfo4 = ProviderHelper.toProviderInfo("ip4");
 
-        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig);
-        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderInfo.valueOf("ip2"), consumerConfig);
-        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderInfo.valueOf("ip3"), consumerConfig);
+        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig);
+        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip2"),
+            consumerConfig);
+        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip3"),
+            consumerConfig);
         InvocationStatDimension invocation4 = new InvocationStatDimension(providerInfo4, consumerConfig);
 
         InvocationStat InvocationStat1 = InvocationStatFactory.getInvocationStat(invocation1);
@@ -274,9 +284,12 @@ public class MeasureStrategyTest extends FaultBaseTest {
         config.setLeastWindowExceptionRateMultiple(3D);
         FaultToleranceConfigManager.putAppConfig(APP_NAME1, config);
 
-        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig);
-        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderInfo.valueOf("ip2"), consumerConfig);
-        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderInfo.valueOf("ip3"), consumerConfig);
+        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig);
+        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip2"),
+            consumerConfig);
+        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip3"),
+            consumerConfig);
 
         InvocationStat InvocationStat1 = InvocationStatFactory.getInvocationStat(invocation1);
         InvocationStat InvocationStat2 = InvocationStatFactory.getInvocationStat(invocation2);
@@ -332,10 +345,14 @@ public class MeasureStrategyTest extends FaultBaseTest {
         config.setLeastWindowExceptionRateMultiple(3D);
         FaultToleranceConfigManager.putAppConfig(APP_NAME1, config);
 
-        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig);
-        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderInfo.valueOf("ip2"), consumerConfig);
-        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderInfo.valueOf("ip3"), consumerConfig);
-        InvocationStatDimension invocation4 = new InvocationStatDimension(ProviderInfo.valueOf("ip4"), consumerConfig);
+        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig);
+        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip2"),
+            consumerConfig);
+        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip3"),
+            consumerConfig);
+        InvocationStatDimension invocation4 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip4"),
+            consumerConfig);
 
         InvocationStat InvocationStat1 = InvocationStatFactory.getInvocationStat(invocation1);
         InvocationStat InvocationStat2 = InvocationStatFactory.getInvocationStat(invocation2);
@@ -390,33 +407,37 @@ public class MeasureStrategyTest extends FaultBaseTest {
     public void testCreateMeasureModel() {
         MeasureStrategy measureStrategy = new ServiceHorizontalMeasureStrategy();
 
-        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig);
+        InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig);
         InvocationStat invocationStat1 = new ServiceExceptionInvocationStat(invocation1);
         MeasureModel measureModel1 = measureStrategy.buildMeasureModel(invocationStat1);
         Assert.assertTrue(measureModel1 != null);
 
         /**同一应用，不同服务*/
-        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig2);
+        InvocationStatDimension invocation2 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig2);
         InvocationStat invocationStat2 = new ServiceExceptionInvocationStat(invocation2);
         MeasureModel measureModel2 = measureStrategy.buildMeasureModel(invocationStat2);
         Assert.assertTrue(measureModel2 != null);
 
         /**不同应用，同一服务*/
-        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"),
+        InvocationStatDimension invocation3 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
             consumerConfigAnotherApp);
         InvocationStat invocationStat3 = new ServiceExceptionInvocationStat(invocation3);
         MeasureModel measureModel3 = measureStrategy.buildMeasureModel(invocationStat3);
         Assert.assertTrue(measureModel3 != null);
 
         /**同一应用，同一服务，不同IP*/
-        InvocationStatDimension invocation4 = new InvocationStatDimension(ProviderInfo.valueOf("ip2"), consumerConfig);
+        InvocationStatDimension invocation4 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip2"),
+            consumerConfig);
         InvocationStat invocationStat4 = new ServiceExceptionInvocationStat(invocation4);
         MeasureModel measureModel4 = measureStrategy.buildMeasureModel(invocationStat4);
         Assert.assertTrue(measureModel4 == null);
         Assert.assertTrue(measureModel1.getInvocationStats().contains(invocationStat4));
 
         /**同一应用，同一服务，相同IP*/
-        InvocationStatDimension invocation5 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"), consumerConfig);
+        InvocationStatDimension invocation5 = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip1"),
+            consumerConfig);
         InvocationStat invocationStat5 = new ServiceExceptionInvocationStat(invocation5);
         MeasureModel measureModel5 = measureStrategy.buildMeasureModel(invocationStat5);
         Assert.assertTrue(measureModel5 == null);
@@ -435,7 +456,8 @@ public class MeasureStrategyTest extends FaultBaseTest {
             new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    InvocationStatDimension invocation1 = new InvocationStatDimension(ProviderInfo.valueOf("ip1"),
+                    InvocationStatDimension invocation1 = new InvocationStatDimension(
+                        ProviderHelper.toProviderInfo("ip1"),
                         consumerConfig);
                     MeasureModel measureModel1 = measureStrategy.buildMeasureModel(new ServiceExceptionInvocationStat(
                         invocation1));
