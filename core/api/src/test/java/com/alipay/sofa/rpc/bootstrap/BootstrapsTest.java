@@ -33,14 +33,29 @@ public class BootstrapsTest {
         ProviderBootstrap bootstrap = Bootstraps.from(providerConfig);
         Assert.assertEquals(TestProviderBootstrap.class, bootstrap.getClass());
         Assert.assertEquals(providerConfig, bootstrap.getProviderConfig());
+        // if not set bootstrap
+        providerConfig = new ProviderConfig();
+        bootstrap = Bootstraps.from(providerConfig);
+        Assert.assertEquals(TestProviderBootstrap.class, bootstrap.getClass());
+        Assert.assertEquals(providerConfig, bootstrap.getProviderConfig());
     }
 
     @Test
     public void from1() throws Exception {
-        ConsumerConfig consumerConfig = new ConsumerConfig().setBootstrap("test");
+        ConsumerConfig consumerConfig = new ConsumerConfig().setProtocol("test")
+            .setBootstrap("test");
         ConsumerBootstrap bootstrap = Bootstraps.from(consumerConfig);
         Assert.assertEquals(TestConsumerBootstrap.class, bootstrap.getClass());
         Assert.assertEquals(consumerConfig, bootstrap.getConsumerConfig());
+        // if not set bootstrap
+        consumerConfig = new ConsumerConfig().setProtocol("test");
+        bootstrap = Bootstraps.from(consumerConfig);
+        Assert.assertEquals(TestConsumerBootstrap.class, bootstrap.getClass());
+        Assert.assertEquals(consumerConfig, bootstrap.getConsumerConfig());
+        // if not set bootstrap and not exist 
+        consumerConfig = new ConsumerConfig().setProtocol("xx");
+        bootstrap = Bootstraps.from(consumerConfig);
+        Assert.assertEquals(TestConsumerBootstrap.class, bootstrap.getClass());
+        Assert.assertEquals(consumerConfig, bootstrap.getConsumerConfig());
     }
-
 }

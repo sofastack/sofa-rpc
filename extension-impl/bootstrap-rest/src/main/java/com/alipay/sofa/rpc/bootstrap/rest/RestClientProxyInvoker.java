@@ -17,30 +17,25 @@
 package com.alipay.sofa.rpc.bootstrap.rest;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
-import com.alipay.sofa.rpc.client.ClientProxyInvoker;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.bootstrap.DefaultClientProxyInvoker;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 
 /**
- *
- * @author <a href="mailto:lw111072@antfin.com">liangen</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("rest")
-public class RestConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
-
+public class RestClientProxyInvoker extends DefaultClientProxyInvoker {
     /**
-     * 构造函数
+     * 构造执行链
      *
-     * @param consumerConfig 服务消费者配置
+     * @param bootstrap 调用端配置
      */
-    protected RestConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
-        super(consumerConfig);
+    public RestClientProxyInvoker(ConsumerBootstrap bootstrap) {
+        super(bootstrap);
     }
 
     @Override
-    protected ClientProxyInvoker buildClientProxyInvoker(ConsumerBootstrap bootstrap) {
-        return new RestClientProxyInvoker(bootstrap);
+    protected void cacheCommonData() {
+        // 缓存数据
+        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
     }
-
 }

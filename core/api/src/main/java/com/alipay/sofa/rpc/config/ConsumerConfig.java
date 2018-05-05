@@ -56,7 +56,6 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_RECONNECT_PERIOD;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_REPEATED_REFERENCE_LIMIT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_RETRIES;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_STICKY;
-import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_CONSUMER_BOOTSTRAP;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROTOCOL;
 
 /**
@@ -192,7 +191,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 启动器
      */
-    protected String                                bootstrap          = getStringValue(DEFAULT_CONSUMER_BOOTSTRAP);
+    protected String                                bootstrap;
 
     /**
      * 等待地址获取时间(毫秒)，-1表示等到拿到地址位置
