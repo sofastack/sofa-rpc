@@ -86,7 +86,7 @@ public final class SerializerFactory {
      * @param serializer 序列化的名字
      * @return 序列化编码
      */
-    public static byte getCodeByAlias(String serializer) {
+    public static Byte getCodeByAlias(String serializer) {
         return TYPE_CODE_MAP.get(serializer);
     }
 

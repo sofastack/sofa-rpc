@@ -41,9 +41,9 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
 
   /*-------------默认配置值开始-------------*/
   // 默认Provider启动器
-  "default.provider.bootstrap": "bolt",
+  "default.provider.bootstrap": "sofa",
   // 默认Consumer启动器
-  "default.consumer.bootstrap": "bolt",
+  "default.consumer.bootstrap": "sofa",
   // 默认uniqueId 做为服务唯一标识
   "default.uniqueId": "",
   // 默认version 做为服务唯一标识
