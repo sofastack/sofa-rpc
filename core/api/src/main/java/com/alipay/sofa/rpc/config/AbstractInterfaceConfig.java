@@ -85,7 +85,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * 不管普通调用和泛化调用，都是设置实际的接口类名称，
      *
      * @see #uniqueId
-     * @see #version
      */
     protected String                                 interfaceId;
 
@@ -93,7 +92,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * 服务标签：做为服务唯一标识的组成部分
      *
      * @see #interfaceId
-     * @see #version
      */
     protected String                                 uniqueId         = getStringValue(DEFAULT_UNIQUEID);
 
@@ -144,8 +142,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 版本：做为服务唯一标识的一部分
      *
-     * @see #version
      * @see #interfaceId
+     * @see #uniqueId
+     * @deprecated 从5.4.0开始，不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
     protected String                                 version          = getStringValue(DEFAULT_VERSION);
     /**
@@ -473,6 +472,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @return the version
      */
+    @Deprecated
     public String getVersion() {
         return version;
     }
@@ -482,7 +482,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param version the version
      * @return the version
+     * @deprecated Use {@link #setUniqueId(String)} 
      */
+    @Deprecated
     public S setVersion(String version) {
         this.version = version;
         return castThis();

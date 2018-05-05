@@ -66,7 +66,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
     protected void cacheCommonData() {
         // 缓存数据
-        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
+        this.serviceName = ConfigUniqueNameGenerator.getServiceName(consumerConfig);
         this.serializeType = parseSerializeType(consumerConfig.getSerialization());
     }
 
@@ -178,6 +178,6 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
     @Override
     public String toString() {
-        return consumerConfig != null ? ConfigUniqueNameGenerator.getUniqueName(consumerConfig) : super.toString();
+        return consumerConfig != null ? ConfigUniqueNameGenerator.getServiceName(consumerConfig) : super.toString();
     }
 }

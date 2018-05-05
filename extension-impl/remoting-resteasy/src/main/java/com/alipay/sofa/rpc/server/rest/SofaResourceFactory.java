@@ -35,7 +35,7 @@ public class SofaResourceFactory extends SingletonResource {
         super(providerConfig.getRef());
         this.providerConfig = providerConfig;
         // 缓存服务名计算和应用名计算
-        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
+        this.serviceName = ConfigUniqueNameGenerator.getServiceName(providerConfig);
         this.appName = providerConfig.getAppName();
     }
 
