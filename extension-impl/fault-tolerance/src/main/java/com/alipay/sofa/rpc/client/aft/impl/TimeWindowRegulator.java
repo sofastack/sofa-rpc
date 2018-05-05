@@ -63,7 +63,7 @@ public class TimeWindowRegulator implements Regulator {
     /**
      * 度量线程池
      */
-    private final ScheduledService                   measureScheduler   = new ScheduledService("SOFA-AFT-MEASURE",
+    private final ScheduledService                   measureScheduler   = new ScheduledService("AFT-MEASURE",
                                                                             ScheduledService.MODE_FIXEDRATE,
                                                                             new MeasureRunnable(), 1, 1,
                                                                             TimeUnit.SECONDS);
@@ -78,7 +78,7 @@ public class TimeWindowRegulator implements Regulator {
     private final ExecutorService                    regulationExecutor = ThreadPoolUtils.newFixedThreadPool(2,
                                                                             new LinkedBlockingQueue<Runnable>(16),
                                                                             new NamedThreadFactory(
-                                                                                "SOFA-AFT-REGULATION"));
+                                                                                "AFT-REGULATION"));
 
     /**
      * 度量模型
