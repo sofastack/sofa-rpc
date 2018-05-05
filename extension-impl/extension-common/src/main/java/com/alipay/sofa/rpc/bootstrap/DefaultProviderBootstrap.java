@@ -81,7 +81,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 延迟加载的线程名工厂
      */
-    private final ThreadFactory factory = new NamedThreadFactory("DELAY-EXPORT",true);
+    private final ThreadFactory                              factory       = new NamedThreadFactory("DELAY-EXPORT",
+                                                                               true);
 
     @Override
     public void export() {
