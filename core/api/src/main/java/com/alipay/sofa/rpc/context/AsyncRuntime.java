@@ -71,7 +71,7 @@ public class AsyncRuntime {
                     int keepAliveTime = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_TIME);
 
                     BlockingQueue<Runnable> queue = ThreadPoolUtils.buildQueue(queuesize);
-                    NamedThreadFactory threadFactory = new NamedThreadFactory("SOFA-RPC-CB", true);
+                    NamedThreadFactory threadFactory = new NamedThreadFactory("RPC-CB", true);
 
                     RejectedExecutionHandler handler = new RejectedExecutionHandler() {
                         private int i = 1;
