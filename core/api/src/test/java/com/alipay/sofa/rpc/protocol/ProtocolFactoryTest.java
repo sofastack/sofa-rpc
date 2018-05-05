@@ -41,7 +41,7 @@ public class ProtocolFactoryTest {
 
     @Test
     public void getCodeByAlias() throws Exception {
-        Assert.assertEquals(ProtocolFactory.getCodeByAlias("xx"), (byte) 121);
+        Assert.assertTrue(ProtocolFactory.getCodeByAlias("xx") == 121);
     }
 
     @Test

@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -47,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+@Extension("sofa")
 public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**

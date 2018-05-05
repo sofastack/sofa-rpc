@@ -34,7 +34,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROVIDER_BOOTSTRAP;
 import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_CONCURRENTS;
 import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_DELAY;
 import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_DYNAMIC;
@@ -103,7 +102,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * 启动器
      */
-    protected String                                                bootstrap           = getStringValue(DEFAULT_PROVIDER_BOOTSTRAP);
+    protected String                                                bootstrap;
 
     /**
      * 自定义线程池
