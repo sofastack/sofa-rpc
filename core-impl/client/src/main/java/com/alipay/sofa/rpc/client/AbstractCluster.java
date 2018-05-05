@@ -400,7 +400,7 @@ public abstract class AbstractCluster extends Cluster {
      * @return the provider
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
-        ProviderInfo tp = ProviderInfo.valueOf(targetIP);
+        ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getHost().equals(tp.getHost())
                 && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
