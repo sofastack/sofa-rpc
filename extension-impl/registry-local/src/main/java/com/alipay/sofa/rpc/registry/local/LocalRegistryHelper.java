@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.registry.local;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -218,7 +219,7 @@ public class LocalRegistryHelper {
                 if (CommonUtils.isNotEmpty(ps)) {
                     sb.append(entry.getKey()).append(SEPARATORSTR);
                     for (ProviderInfo providerInfo : ps) {
-                        sb.append(providerInfo.toUrl()).append(SEPARATORSTR);
+                        sb.append(ProviderHelper.toUrl(providerInfo)).append(SEPARATORSTR);
                     }
                     sb.append(FileUtils.LINE_SEPARATOR);
                 }
@@ -241,7 +242,7 @@ public class LocalRegistryHelper {
                 for (int i = 1; i < fields.length; i++) {
                     String pstr = fields[i];
                     if (StringUtils.isNotEmpty(pstr)) {
-                        ProviderInfo providerInfo = ProviderInfo.valueOf(pstr);
+                        ProviderInfo providerInfo = ProviderHelper.toProviderInfo(pstr);
                         providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_SOURCE, "local");
                         values.add(providerInfo);
                     }
