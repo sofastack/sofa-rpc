@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.bootstrap;
 
+import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -38,6 +39,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -76,10 +78,16 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      */
     protected final ConcurrentHashMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
 
+    /**
+     * 延迟加载的线程名工厂
+     */
+    private final ThreadFactory                              factory       = new NamedThreadFactory("DELAY-EXPORT",
+                                                                               true);
+
     @Override
     public void export() {
         if (providerConfig.getDelay() > 0) { // 延迟加载,单位毫秒
-            Thread thread = new Thread(new Runnable() {
+            Thread thread = factory.newThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -89,8 +97,6 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     doExport();
                 }
             });
-            thread.setDaemon(true);
-            thread.setName("DelayExportThread");
             thread.start();
         } else {
             doExport();
