@@ -136,11 +136,13 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected String                                 proxy            = getStringValue(DEFAULT_PROXY);
 
     /**
-     * 服务分组：不做为服务唯一标识
+     * 服务分组：不做为服务唯一标识的一部分
+     * @deprecated 不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
+    @Deprecated
     protected String                                 group            = getStringValue(DEFAULT_GROUP);
     /**
-     * 版本：做为服务唯一标识的一部分
+     * 服务版本：不做为服务唯一标识的一部分
      *
      * @see #interfaceId
      * @see #uniqueId
@@ -452,6 +454,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @return the group
      */
+    @Deprecated
     public String getGroup() {
         return group;
     }
@@ -461,7 +464,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param group the group
      * @return the group
+     * @deprecated Use {@link #setUniqueId(String)} 
      */
+    @Deprecated
     public S setGroup(String group) {
         this.group = group;
         return castThis();
