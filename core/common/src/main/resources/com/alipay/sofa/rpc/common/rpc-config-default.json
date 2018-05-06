@@ -46,8 +46,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "default.consumer.bootstrap": "sofa",
   // 默认uniqueId 做为服务唯一标识
   "default.uniqueId": "",
-  // 默认version 做为服务唯一标识
-  "default.version": "1.0",
+  // 默认version 不做为服务唯一标识
+  "default.version": "",
   // 默认分组 不做为服务唯一标识
   "default.group": "",
   // 默认注册中心

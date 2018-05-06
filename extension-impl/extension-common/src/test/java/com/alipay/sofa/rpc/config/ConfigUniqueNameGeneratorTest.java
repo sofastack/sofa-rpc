@@ -23,8 +23,33 @@ import org.junit.Test;
  *
  */
 public class ConfigUniqueNameGeneratorTest {
+
+    @Test
+    public void getServiceName() {
+        ProviderConfig providerConfig = (ProviderConfig) new ProviderConfig().setInterfaceId("com.xx");
+        Assert.assertEquals(ConfigUniqueNameGenerator.getServiceName(providerConfig), "com.xx");
+
+        providerConfig = (ProviderConfig) new ProviderConfig().setInterfaceId("com.xx").setVersion("2.0");
+        Assert.assertEquals(ConfigUniqueNameGenerator.getServiceName(providerConfig), "com.xx");
+
+        providerConfig = (ProviderConfig) new ProviderConfig().setInterfaceId("com.xx").setVersion("2.0")
+            .setUniqueId("ud");
+        Assert.assertEquals(ConfigUniqueNameGenerator.getServiceName(providerConfig), "com.xx:ud");
+
+        ConsumerConfig consumerConfig = (ConsumerConfig) new ConsumerConfig().setInterfaceId("com.xx");
+        Assert.assertEquals(ConfigUniqueNameGenerator.getServiceName(consumerConfig), "com.xx");
+
+        consumerConfig = (ConsumerConfig) new ConsumerConfig().setInterfaceId("com.xx").setVersion("2.0");
+        Assert.assertEquals(ConfigUniqueNameGenerator.getServiceName(consumerConfig), "com.xx");
+
+        consumerConfig = (ConsumerConfig) new ConsumerConfig().setInterfaceId("com.xx").setVersion("2.0")
+            .setUniqueId("ud");
+        Assert.assertEquals(ConfigUniqueNameGenerator.getServiceName(consumerConfig), "com.xx:ud");
+    }
+
     @Test
     public void getUniqueName() throws Exception {
+
         ProviderConfig providerConfig = (ProviderConfig) new ProviderConfig().setInterfaceId("com.xx");
         Assert.assertEquals(ConfigUniqueNameGenerator.getUniqueName(providerConfig), "com.xx:1.0");
 
