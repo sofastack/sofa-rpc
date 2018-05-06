@@ -41,7 +41,7 @@ public class SerializerFactoryTest {
 
     @Test
     public void getCodeByAlias() throws Exception {
-        Assert.assertEquals(SerializerFactory.getCodeByAlias("test"), (byte) 117);
+        Assert.assertTrue(SerializerFactory.getCodeByAlias("test") == 117);
     }
 
 }

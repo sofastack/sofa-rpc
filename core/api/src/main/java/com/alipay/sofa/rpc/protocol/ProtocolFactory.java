@@ -98,7 +98,7 @@ public class ProtocolFactory {
      * @param protocol 协议的名字
      * @return 协议编码
      */
-    public static byte getCodeByAlias(String protocol) {
+    public static Byte getCodeByAlias(String protocol) {
         return TYPE_CODE_MAP.get(protocol);
     }
 

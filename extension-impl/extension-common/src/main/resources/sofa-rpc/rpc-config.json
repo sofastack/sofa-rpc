@@ -17,10 +17,6 @@
   
   
   /*-------------默认配置值开始-------------*/
-  // 默认Provider启动器
-  "default.provider.bootstrap": "bolt",
-  // 默认Consumer启动器
-  "default.consumer.bootstrap": "bolt",
   // 默认代理类型
   "default.proxy" : "javassist",
   // 默认网络层
