@@ -30,7 +30,15 @@ public interface TestInterface {
 
     public void sayNoting();
 
+    public int sayNum(boolean s);
+
     public int[] sayNums(List list, HashMap map);
 
-    public float sayNum2(Double list);
+    public Float sayNum2(Double list);
+
+    public String throwbiz1();
+
+    public String throwbiz2() throws Throwable;
+
+    public String throwRPC();
 }

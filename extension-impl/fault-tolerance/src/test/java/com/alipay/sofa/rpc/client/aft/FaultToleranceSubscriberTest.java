@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.client.aft;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -41,7 +42,7 @@ public class FaultToleranceSubscriberTest extends FaultBaseTest {
     @Test
     public void onEvent() throws Exception {
 
-        ProviderInfo providerInfo = ProviderInfo.valueOf("127.0.0.1");
+        ProviderInfo providerInfo = ProviderHelper.toProviderInfo("127.0.0.1");
         FaultToleranceSubscriber subscriber = new FaultToleranceSubscriber();
 
         subscriber.onEvent(new ClientSyncReceiveEvent(consumerConfig, providerInfo,
@@ -79,11 +80,11 @@ public class FaultToleranceSubscriberTest extends FaultBaseTest {
         config.setRegulationEffective(true);
         FaultToleranceConfigManager.putAppConfig(APP_NAME1, config);
 
-        ProviderInfo providerInfo1 = ProviderInfo.valueOf("127.0.0.1");
-        ProviderInfo providerInfo2 = ProviderInfo.valueOf("127.0.0.2");
-        ProviderInfo providerInfo3 = ProviderInfo.valueOf("127.0.0.3");
-        ProviderInfo providerInfo4 = ProviderInfo.valueOf("127.0.0.4");
-        ProviderInfo providerInfo5 = ProviderInfo.valueOf("127.0.0.5");
+        ProviderInfo providerInfo1 = ProviderHelper.toProviderInfo("127.0.0.1");
+        ProviderInfo providerInfo2 = ProviderHelper.toProviderInfo("127.0.0.2");
+        ProviderInfo providerInfo3 = ProviderHelper.toProviderInfo("127.0.0.3");
+        ProviderInfo providerInfo4 = ProviderHelper.toProviderInfo("127.0.0.4");
+        ProviderInfo providerInfo5 = ProviderHelper.toProviderInfo("127.0.0.5");
         FaultToleranceSubscriber subscriber = new FaultToleranceSubscriber();
 
         subscriber.onEvent(new ClientSyncReceiveEvent(consumerConfig, providerInfo1,
@@ -98,18 +99,18 @@ public class FaultToleranceSubscriberTest extends FaultBaseTest {
         Assert.assertTrue(InvocationStatFactory.ALL_STATS.size() == 4);
 
         subscriber.onEvent(new ProviderInfoRemoveEvent(consumerConfig,
-            new ProviderGroup("x", Arrays.asList(ProviderInfo.valueOf("127.0.0.1")))));
+            new ProviderGroup("x", Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1")))));
         Assert.assertTrue(InvocationStatFactory.ALL_STATS.size() == 3);
 
         subscriber.onEvent(new ProviderInfoUpdateEvent(consumerConfig,
             new ProviderGroup("x", Arrays.asList(
-                ProviderInfo.valueOf("127.0.0.2"),
-                ProviderInfo.valueOf("127.0.0.3"),
-                ProviderInfo.valueOf("127.0.0.4"))),
+                ProviderHelper.toProviderInfo("127.0.0.2"),
+                ProviderHelper.toProviderInfo("127.0.0.3"),
+                ProviderHelper.toProviderInfo("127.0.0.4"))),
             new ProviderGroup("x", Arrays.asList(
-                ProviderInfo.valueOf("127.0.0.2"),
-                ProviderInfo.valueOf("127.0.0.4"),
-                ProviderInfo.valueOf("127.0.0.5")))
+                ProviderHelper.toProviderInfo("127.0.0.2"),
+                ProviderHelper.toProviderInfo("127.0.0.4"),
+                ProviderHelper.toProviderInfo("127.0.0.5")))
             ));
         Assert.assertTrue(InvocationStatFactory.ALL_STATS.size() == 2);
 
@@ -119,12 +120,12 @@ public class FaultToleranceSubscriberTest extends FaultBaseTest {
 
         subscriber.onEvent(new ProviderInfoUpdateAllEvent(consumerConfig,
             Arrays.asList(new ProviderGroup("x", Arrays.asList(
-                ProviderInfo.valueOf("127.0.0.2"),
-                ProviderInfo.valueOf("127.0.0.4"),
-                ProviderInfo.valueOf("127.0.0.5")))),
+                ProviderHelper.toProviderInfo("127.0.0.2"),
+                ProviderHelper.toProviderInfo("127.0.0.4"),
+                ProviderHelper.toProviderInfo("127.0.0.5")))),
             Arrays.asList(new ProviderGroup("x", Arrays.asList(
-                ProviderInfo.valueOf("127.0.0.1"),
-                ProviderInfo.valueOf("127.0.0.4"))))
+                ProviderHelper.toProviderInfo("127.0.0.1"),
+                ProviderHelper.toProviderInfo("127.0.0.4"))))
             ));
         Assert.assertTrue(InvocationStatFactory.ALL_STATS.size() == 1);
     }

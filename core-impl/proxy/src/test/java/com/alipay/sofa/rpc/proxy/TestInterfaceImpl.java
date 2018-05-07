@@ -14,34 +14,55 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec;
+package com.alipay.sofa.rpc.proxy;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  *
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class SerializerFactoryTest {
-    @Test
-    public void getSerializer() throws Exception {
-        Serializer serializer = SerializerFactory.getSerializer((byte) 117);
-        Assert.assertNotNull(serializer);
-        Assert.assertEquals(serializer.getClass(), TestSerializer.class);
+public class TestInterfaceImpl implements TestInterface {
+
+    @Override
+    public String sayHello(String s) {
+        return "sayHello";
     }
 
-    @Test
-    public void getSerializer1() throws Exception {
-        Serializer serializer = SerializerFactory.getSerializer("test");
-        Assert.assertNotNull(serializer);
-        Assert.assertEquals(serializer.getClass(), TestSerializer.class);
+    @Override
+    public void sayNoting() {
+
     }
 
-    @Test
-    public void getCodeByAlias() throws Exception {
-        Assert.assertTrue(SerializerFactory.getCodeByAlias("test") == 117);
+    @Override
+    public int sayNum(boolean s) {
+        return 678;
     }
 
+    @Override
+    public int[] sayNums(List list, HashMap map) {
+        return new int[] { 6, 7, 8 };
+    }
+
+    @Override
+    public Float sayNum2(Double list) {
+        return null;
+    }
+
+    @Override
+    public String throwbiz1() {
+        throw new RuntimeException("RuntimeException");
+    }
+
+    @Override
+    public String throwbiz2() throws Throwable {
+        throw new Throwable("Throwable");
+    }
+
+    @Override
+    public String throwRPC() {
+        return null;
+    }
 }

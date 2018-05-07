@@ -62,7 +62,7 @@ public class ProviderGroupTest {
         Assert.assertTrue(list != pg.getProviderInfos());
         Assert.assertTrue(newps == pg.getProviderInfos());
 
-        newps = Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12200"));
+        newps = Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12200"));
         pg.setProviderInfos(newps);
         Assert.assertNotNull(list);
         Assert.assertTrue(newps == pg.getProviderInfos());
@@ -77,7 +77,7 @@ public class ProviderGroupTest {
         pg = new ProviderGroup("xxx", new ArrayList<ProviderInfo>());
         Assert.assertTrue(pg.isEmpty());
 
-        pg = new ProviderGroup("xxx", Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12200")));
+        pg = new ProviderGroup("xxx", Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12200")));
         Assert.assertTrue(!pg.isEmpty());
     }
 
@@ -89,7 +89,7 @@ public class ProviderGroupTest {
         pg = new ProviderGroup("xxx", new ArrayList<ProviderInfo>());
         Assert.assertTrue(pg.size() == 0);
 
-        pg = new ProviderGroup("xxx", Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12200")));
+        pg = new ProviderGroup("xxx", Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12200")));
         Assert.assertTrue(pg.size() == 1);
     }
 
@@ -101,14 +101,14 @@ public class ProviderGroupTest {
         pg.add(null);
         Assert.assertTrue(pg.size() == 0);
 
-        pg.add(ProviderInfo.valueOf("127.0.0.1:12200"));
+        pg.add(ProviderHelper.toProviderInfo("127.0.0.1:12200"));
         Assert.assertTrue(pg.size() == 1);
 
-        pg.add(ProviderInfo.valueOf("127.0.0.1:12201"));
+        pg.add(ProviderHelper.toProviderInfo("127.0.0.1:12201"));
         Assert.assertTrue(pg.size() == 2);
 
         // 重复
-        pg.add(ProviderInfo.valueOf("127.0.0.1:12200"));
+        pg.add(ProviderHelper.toProviderInfo("127.0.0.1:12200"));
         Assert.assertTrue(pg.size() == 2);
     }
 
@@ -123,51 +123,54 @@ public class ProviderGroupTest {
         pg.addAll(new ArrayList<ProviderInfo>());
         Assert.assertTrue(pg.size() == 0);
 
-        pg.addAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12200"), ProviderInfo.valueOf("127.0.0.1:12201")));
+        pg.addAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12200"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12201")));
         Assert.assertTrue(pg.size() == 2);
 
-        pg.addAll(Collections.singleton(ProviderInfo.valueOf("127.0.0.1:12202")));
+        pg.addAll(Collections.singleton(ProviderHelper.toProviderInfo("127.0.0.1:12202")));
         Assert.assertTrue(pg.size() == 3);
 
         // 重复
-        pg.addAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12201"), ProviderInfo.valueOf("127.0.0.1:12203")));
+        pg.addAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12201"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12203")));
         Assert.assertTrue(pg.size() == 4);
 
         // 重复
-        pg.addAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12201"), ProviderInfo.valueOf("127.0.0.1:12202")));
+        pg.addAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12201"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12202")));
         Assert.assertTrue(pg.size() == 4);
     }
 
     @Test
     public void remove() throws Exception {
-        ProviderGroup pg = new ProviderGroup("xxx", Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12201"),
-            ProviderInfo.valueOf("127.0.0.1:12202"),
-            ProviderInfo.valueOf("127.0.0.1:12203")));
+        ProviderGroup pg = new ProviderGroup("xxx", Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12201"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12202"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12203")));
         Assert.assertTrue(pg.size() == 3);
 
         pg.remove(null);
         Assert.assertTrue(pg.size() == 3);
 
-        pg.remove(ProviderInfo.valueOf("127.0.0.1:12204"));
+        pg.remove(ProviderHelper.toProviderInfo("127.0.0.1:12204"));
         Assert.assertTrue(pg.size() == 3);
 
-        pg.remove(ProviderInfo.valueOf("127.0.0.1:12203"));
+        pg.remove(ProviderHelper.toProviderInfo("127.0.0.1:12203"));
         Assert.assertTrue(pg.size() == 2);
 
         // 重复
-        pg.remove(ProviderInfo.valueOf("127.0.0.1:12203"));
+        pg.remove(ProviderHelper.toProviderInfo("127.0.0.1:12203"));
         Assert.assertTrue(pg.size() == 2);
 
-        pg.remove(ProviderInfo.valueOf("127.0.0.1:12202"));
+        pg.remove(ProviderHelper.toProviderInfo("127.0.0.1:12202"));
         Assert.assertTrue(pg.size() == 1);
     }
 
     @Test
     public void removeAll() throws Exception {
-        ProviderGroup pg = new ProviderGroup("xxx", Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12201"),
-            ProviderInfo.valueOf("127.0.0.1:12202"),
-            ProviderInfo.valueOf("127.0.0.1:12203"),
-            ProviderInfo.valueOf("127.0.0.1:12204")));
+        ProviderGroup pg = new ProviderGroup("xxx", Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12201"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12202"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12203"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12204")));
         Assert.assertTrue(pg.size() == 4);
 
         pg.removeAll(null);
@@ -176,20 +179,20 @@ public class ProviderGroupTest {
         pg.removeAll(new ArrayList<ProviderInfo>());
         Assert.assertTrue(pg.size() == 4);
         // 删没有的
-        pg.removeAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12205"),
-            ProviderInfo.valueOf("127.0.0.1:12206")));
+        pg.removeAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12205"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12206")));
         Assert.assertTrue(pg.size() == 4);
         // 删部分有的
-        pg.removeAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12204"),
-            ProviderInfo.valueOf("127.0.0.1:12205")));
+        pg.removeAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12204"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12205")));
         Assert.assertTrue(pg.size() == 3);
         // 删都有的
-        pg.removeAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12202"),
-            ProviderInfo.valueOf("127.0.0.1:12203")));
+        pg.removeAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12202"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12203")));
         Assert.assertTrue(pg.size() == 1);
         // 重复删
-        pg.removeAll(Arrays.asList(ProviderInfo.valueOf("127.0.0.1:12202"),
-            ProviderInfo.valueOf("127.0.0.1:12203")));
+        pg.removeAll(Arrays.asList(ProviderHelper.toProviderInfo("127.0.0.1:12202"),
+            ProviderHelper.toProviderInfo("127.0.0.1:12203")));
         Assert.assertTrue(pg.size() == 1);
     }
 }
