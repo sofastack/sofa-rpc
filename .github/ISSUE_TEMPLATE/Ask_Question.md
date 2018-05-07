@@ -4,7 +4,7 @@ about: Ask a question about usage or feature
 
 ---
 
-### Your quesion
+### Your question
 
 describe your question clearly
 
