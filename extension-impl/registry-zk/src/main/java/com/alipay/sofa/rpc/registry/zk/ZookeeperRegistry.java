@@ -297,7 +297,7 @@ public class ZookeeperRegistry extends Registry {
     }
 
     protected void subscribeConfig(final AbstractInterfaceConfig config, ConfigListener listener) {
-        String configPath = buildConfigPath(rootPath, config);
+        final String configPath = buildConfigPath(rootPath, config);
         try {
             if (configObserver == null) { // 初始化
                 configObserver = new ZookeeperConfigObserver();
@@ -313,13 +313,13 @@ public class ZookeeperRegistry extends Registry {
                     }
                     switch (event.getType()) {
                         case CHILD_ADDED: //加了一个配置
-                            configObserver.addConfig(config, event.getData());
+                            configObserver.addConfig(config, configPath, event.getData());
                             break;
                         case CHILD_REMOVED: //删了一个配置
-                            configObserver.removeConfig(config, event.getData());
+                            configObserver.removeConfig(config, configPath, event.getData());
                             break;
-                        case CHILD_UPDATED:
-                            configObserver.updateConfig(config, event.getData());
+                        case CHILD_UPDATED:// 更新一个配置
+                            configObserver.updateConfig(config, configPath, event.getData());
                             break;
                         default:
                             break;
@@ -328,7 +328,7 @@ public class ZookeeperRegistry extends Registry {
             });
             pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             INTERFACE_CONFIG_CACHE.put(configPath, pathChildrenCache);
-            configObserver.updateConfigAll(config, pathChildrenCache.getCurrentData());
+            configObserver.updateConfigAll(config, configPath, pathChildrenCache.getCurrentData());
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
         }

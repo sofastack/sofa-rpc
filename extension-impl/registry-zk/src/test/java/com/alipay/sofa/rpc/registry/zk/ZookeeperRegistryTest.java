@@ -18,11 +18,13 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import org.junit.AfterClass;
@@ -31,6 +33,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,8 +70,13 @@ public class ZookeeperRegistryTest {
         registry = null;
     }
 
+    /**
+     * 测试Zookeeper Provider Observer
+     *
+     * @throws Exception
+     */
     @Test
-    public void testAll() throws Exception {
+    public void testProviderObserver() throws Exception {
 
         int timeoutPerSub = 1000;
 
@@ -184,7 +192,68 @@ public class ZookeeperRegistryTest {
         List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
         consumerConfigList.add(consumer2);
         registry.batchUnSubscribe(consumerConfigList);
+    }
 
+    /**
+     * 测试Zookeeper Config Observer
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testConfigObserver() {
+        ServerConfig serverConfig = new ServerConfig()
+                .setProtocol("bolt")
+                .setHost("0.0.0.0")
+                .setPort(12200);
+
+        ProviderConfig<?> providerConfig = new ProviderConfig();
+        providerConfig.setInterfaceId("com.alipay.xxx.TestService")
+                .setUniqueId("unique123Id")
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setProxy("javassist")
+                .setRegister(true)
+                .setRegistry(registryConfig)
+                .setSerialization("hessian2")
+                .setServer(serverConfig)
+                .setWeight(222)
+                .setTimeout(3000);
+
+        // 注册Provider Config
+        registry.register(providerConfig);
+
+        // 订阅Provider Config
+        CountDownLatch latch = new CountDownLatch(1);
+        MockConfigListener configListener = new MockConfigListener();
+        configListener.setCountDownLatch(latch);
+        registry.subscribeConfig(providerConfig, configListener);
+        configListener.attrUpdated(Collections.singletonMap("timeout", "2000"));
+        Map<String, String> ps = configListener.getData();
+        Assert.assertTrue(ps.size() == 1);
+        configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
+        ps = configListener.getData();
+        Assert.assertTrue(ps.size() == 2);
+
+        ConsumerConfig<?> consumerConfig = new ConsumerConfig();
+        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+                .setUniqueId("unique123Id")
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setProxy("javassist")
+                .setSubscribe(true)
+                .setSerialization("java")
+                .setInvokeType("sync")
+                .setTimeout(4444);
+
+        // 订阅Consumer Config
+        latch = new CountDownLatch(1);
+        configListener = new MockConfigListener();
+        configListener.setCountDownLatch(latch);
+        registry.subscribeConfig(consumerConfig, configListener);
+        configListener.attrUpdated(Collections.singletonMap("timeout", "3333"));
+        ps = configListener.getData();
+        Assert.assertTrue(ps.size() == 1);
+        configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
+        ps = configListener.getData();
+        Assert.assertTrue(ps.size() == 2);
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
@@ -235,6 +304,36 @@ public class ZookeeperRegistryTest {
 
         public Map<String, ProviderInfo> getData() {
             return ps;
+        }
+    }
+
+    private static class MockConfigListener implements ConfigListener {
+
+        ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<String, String>();
+
+        private CountDownLatch countDownLatch;
+
+        public void setCountDownLatch(CountDownLatch countDownLatch) {
+            this.countDownLatch = countDownLatch;
+        }
+
+        @Override
+        public void configChanged(Map newValue) {
+        }
+
+        @Override
+        public void attrUpdated(Map newValue) {
+            for (Object property : newValue.keySet()) {
+                concurrentHashMap.put(StringUtils.toString(property), StringUtils.toString(newValue.get(property)));
+                if (countDownLatch != null) {
+                    countDownLatch.countDown();
+                    countDownLatch = null;
+                }
+            }
+        }
+
+        public Map<String, String> getData() {
+            return concurrentHashMap;
         }
     }
 }

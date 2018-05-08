@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.Version;
@@ -31,12 +32,15 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.google.common.collect.Lists;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Helper for ZookeeperRegistry
@@ -172,6 +176,39 @@ public class ZookeeperRegistryHelper {
         processWarmUpWeight(providerInfo);
 
         return providerInfo;
+    }
+
+    /**
+     * Convert child data to attribute list.
+     *
+     * @param configPath
+     * @param currentData the current data
+     * @return the attribute list
+     */
+    static List<Map<String, String>> convertToAttributes(String configPath, List<ChildData> currentData) {
+        List<Map<String, String>> attributes = Lists.newArrayList();
+        if (CommonUtils.isEmpty(currentData)) {
+            return attributes;
+        }
+
+        for (ChildData childData : currentData) {
+            attributes.add(convertToAttribute(configPath, childData, false));
+        }
+        return attributes;
+    }
+
+    /**
+     * Convert child data to attribute.
+     *
+     * @param configPath
+     * @param childData  the child data
+     * @return the attribute
+     */
+    static Map<String, String> convertToAttribute(String configPath, ChildData childData, boolean remove) {
+        String property = childData.getPath().substring(configPath.length() + 1);
+        //If event type is CHILD_REMOVED, attribute should return to default value
+        return Collections.singletonMap(property,
+            remove ? RpcConfigs.getStringValue(property) : new String(childData.getData()));
     }
 
     /**
