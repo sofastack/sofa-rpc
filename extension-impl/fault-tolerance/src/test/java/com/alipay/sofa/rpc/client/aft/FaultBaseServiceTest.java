@@ -35,12 +35,15 @@ public abstract class FaultBaseServiceTest extends FaultBaseTest {
     public void beforeClass() throws Exception {
         providerConfig.setRef(new HelloServiceTimeOutImpl());
         providerConfig.export();
+        // test reuse client transport
+        consumerConfigNotUse.refer();
         helloService = consumerConfig.refer();
     }
 
     @After
     public void afterClass() {
         providerConfig.unExport();
+        consumerConfigNotUse.unRefer();
         consumerConfig.unRefer();
         consumerConfig = null;
         consumerConfig2 = null;
