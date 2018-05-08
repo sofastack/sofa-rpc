@@ -69,9 +69,9 @@ import java.util.Map;
  */
 public class SofaRpcSerialization extends DefaultCustomSerializer {
 
-    private static final Logger   LOGGER = LoggerFactory.getLogger(SofaRpcSerialization.class);
-    protected SerializerFactory   serializerFactory;
-    protected SerializerFactory   genericSerializerFactory;
+    private static final Logger LOGGER = LoggerFactory.getLogger(SofaRpcSerialization.class);
+    protected SerializerFactory serializerFactory;
+    protected SerializerFactory genericSerializerFactory;
     protected SimpleMapSerializer mapSerializer;
 
     public SofaRpcSerialization() {
@@ -91,7 +91,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             genericSerializerFactory = new GenericSingleClassLoaderSofaSerializerFactory();
         }
         if (RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) &&
-            SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
+                SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
             ClassNameResolver resolver = new ClassNameResolver();
             resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
             serializerFactory.setClassNameResolver(resolver);
@@ -101,7 +101,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean serializeHeader(Response response)
-        throws SerializationException {
+            throws SerializationException {
         if (response instanceof RpcResponseCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -120,7 +120,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean serializeHeader(Request request, InvokeContext invokeContext)
-        throws SerializationException {
+            throws SerializationException {
         if (request instanceof RpcRequestCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -133,7 +133,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 // 新序列化协议全部采用扁平化头部
                 byte serializer = requestCommand.getSerializer();
                 if (serializer != RemotingConstants.SERIALIZE_CODE_HESSIAN
-                    && serializer != RemotingConstants.SERIALIZE_CODE_JAVA) {
+                        && serializer != RemotingConstants.SERIALIZE_CODE_JAVA) {
                     putRequestMetadataToHeader(requestObject, header);
                 }
                 requestCommand.setHeader(mapSerializer.encode(header));
@@ -178,7 +178,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean deserializeHeader(Request request)
-        throws DeserializationException {
+            throws DeserializationException {
         if (request instanceof RpcRequestCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -199,7 +199,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean deserializeHeader(Response response, InvokeContext invokeContext)
-        throws DeserializationException {
+            throws DeserializationException {
         if (response instanceof RpcResponseCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -213,7 +213,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean serializeContent(Request request, InvokeContext invokeContext)
-        throws SerializationException {
+            throws SerializationException {
         if (request instanceof RpcRequestCommand) {
             RpcRequestCommand requestCommand = (RpcRequestCommand) request;
             Object requestObject = requestCommand.getRequestObject();
@@ -293,9 +293,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
         int cost = context.getStopWatch().tick().read();
         int requestSize = RpcProtocol.getRequestHeaderLength()
-            + requestCommand.getClazzLength()
-            + requestCommand.getContentLength()
-            + requestCommand.getHeaderLength();
+                + requestCommand.getClazzLength()
+                + requestCommand.getContentLength()
+                + requestCommand.getHeaderLength();
         // 记录请求序列化大小和请求序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME, cost);
@@ -303,7 +303,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean deserializeContent(Request request)
-        throws DeserializationException {
+            throws DeserializationException {
         if (request instanceof RpcRequestCommand) {
             RpcRequestCommand requestCommand = (RpcRequestCommand) request;
             Object header = requestCommand.getRequestHeader();
@@ -372,7 +372,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                         // 解析trace信息
                         Map<String, String> traceMap = new HashMap<String, String>(16);
                         ContextMapConverter.treeCopyTo(RemotingConstants.RPC_TRACE_NAME + ".", headerMap,
-                            traceMap, true);
+                                traceMap, true);
                         sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
                         for (Map.Entry<String, String> entry : headerMap.entrySet()) {
                             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
@@ -380,17 +380,17 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                         // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
                         Class requestClass = ProtobufSerializer.getReqClass(service,
-                            sofaRequest.getMethodName(), serviceClassLoader);
+                                sofaRequest.getMethodName(), serviceClassLoader);
                         byte[] content = requestCommand.getContent();
                         if (content == null || content.length == 0) {
                             Constructor constructor = requestClass.getDeclaredConstructor();
                             constructor.setAccessible(true);
-                            sofaRequest.setMethodArgs(new Object[] { constructor.newInstance() });
+                            sofaRequest.setMethodArgs(new Object[]{ constructor.newInstance() });
                         } else {
                             Object pbReq = ProtobufSerializer.getInstance().decode(content, requestClass);
-                            sofaRequest.setMethodArgs(new Object[] { pbReq });
+                            sofaRequest.setMethodArgs(new Object[]{ pbReq });
                         }
-                        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
+                        sofaRequest.setMethodArgSigs(new String[]{ requestClass.getName() });
 
                         requestCommand.setRequestObject(sofaRequest);
                     } finally {
@@ -421,9 +421,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         RpcInternalContext context = RpcInternalContext.getContext();
         int cost = context.getStopWatch().tick().read();
         int requestSize = RpcProtocol.getRequestHeaderLength()
-            + requestCommand.getClazzLength()
-            + requestCommand.getContentLength()
-            + requestCommand.getHeaderLength();
+                + requestCommand.getClazzLength()
+                + requestCommand.getContentLength()
+                + requestCommand.getHeaderLength();
         // 记录请求反序列化大小和请求反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME, cost);
@@ -431,7 +431,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean serializeContent(Response response)
-        throws SerializationException {
+            throws SerializationException {
         if (response instanceof RpcResponseCommand) {
             RpcResponseCommand responseCommand = (RpcResponseCommand) response;
             byte serializer = response.getSerializer();
@@ -465,7 +465,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                             if (appResponse instanceof Throwable) {
                                 // 业务异常序列化的是错误字符串
                                 response.setContent(ProtobufSerializer.getInstance()
-                                    .encode(((Throwable) appResponse).getMessage()));
+                                        .encode(((Throwable) appResponse).getMessage()));
                             } else {
                                 response.setContent(ProtobufSerializer.getInstance().encode(appResponse));
                             }
@@ -496,9 +496,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         RpcInternalContext context = RpcInternalContext.getContext();
         int cost = context.getStopWatch().tick().read();
         int respSize = RpcProtocol.getResponseHeaderLength()
-            + responseCommand.getClazzLength()
-            + responseCommand.getContentLength()
-            + responseCommand.getHeaderLength();
+                + responseCommand.getClazzLength()
+                + responseCommand.getContentLength()
+                + responseCommand.getHeaderLength();
         // 记录响应序列化大小和请求序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME, cost);
@@ -506,7 +506,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean deserializeContent(Response response, InvokeContext invokeContext)
-        throws DeserializationException {
+            throws DeserializationException {
         if (response instanceof RpcResponseCommand) {
             RpcResponseCommand responseCommand = (RpcResponseCommand) response;
             byte serializer = response.getSerializer();
@@ -517,7 +517,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 }
                 try {
                     ByteArrayInputStream input = new ByteArrayInputStream(
-                        responseCommand.getContent());
+                            responseCommand.getContent());
                     Hessian2Input hessianInput = new Hessian2Input(input);
 
                     // 根据SerializeType信息决定序列化器
@@ -564,13 +564,13 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     }
                     if (isError) {
                         String errorMessage = (String) ProtobufSerializer.getInstance().decode(
-                            responseCommand.getContent(), String.class);
+                                responseCommand.getContent(), String.class);
                         sofaResponse.setErrorMsg(errorMessage);
                         responseCommand.setResponseObject(sofaResponse);
                     } else {
                         // 根据接口+方法名找到参数类型
                         Class responseClass = ProtobufSerializer.getResClass(service, methodName,
-                            Thread.currentThread().getContextClassLoader());
+                                Thread.currentThread().getContextClassLoader());
                         byte[] content = responseCommand.getContent();
                         if (content == null || content.length == 0) {
                             Constructor constructor = responseClass.getDeclaredConstructor();
@@ -618,16 +618,16 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
         int cost = context.getStopWatch().tick().read();
         int respSize = RpcProtocol.getResponseHeaderLength()
-            + responseCommand.getClazzLength()
-            + responseCommand.getContentLength()
-            + responseCommand.getHeaderLength();
+                + responseCommand.getClazzLength()
+                + responseCommand.getContentLength()
+                + responseCommand.getHeaderLength();
         // 记录响应反序列化大小和响应反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME, cost);
     }
 
     protected void generateArgTypes(final String[] sig, final Class[] classSig,
-                                    ClassLoader appClassLoader) throws IOException {
+            ClassLoader appClassLoader) throws IOException {
         for (int x = 0; x < sig.length; x++) {
             String name = ClassTypeUtils.canonicalNameToJvmName(sig[x]);
             Class<?> signature = getPrimitiveType(name);
@@ -699,13 +699,13 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     private boolean genericSerializeResponse(InvokeContext invokeContext) {
         Integer serializeType = invokeContext == null ? null :
-            (Integer) invokeContext.get(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE);
+                (Integer) invokeContext.get(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE);
         return serializeType != null && serializeType == RemotingConstants.SERIALIZE_FACTORY_GENERIC;
     }
 
     protected boolean genericSerializeRequest(InvokeContext invokeContext) {
         Integer serializeType = invokeContext == null ? null :
-            (Integer) invokeContext.get(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE);
+                (Integer) invokeContext.get(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE);
         return serializeType != null && serializeType != RemotingConstants.SERIALIZE_FACTORY_NORMAL;
     }
 }

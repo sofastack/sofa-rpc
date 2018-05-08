@@ -41,7 +41,7 @@ public class ClassTypeUtils {
     /**
      * String-->Class 缓存，指定大小
      */
-    private final static Map<String, Class> CLASS_MAP    = new ConcurrentHashMap<String, Class>();
+    private final static Map<String, Class> CLASS_MAP = new ConcurrentHashMap<String, Class>();
 
     /**
      * String-->Class 缓存，指定大小
@@ -146,7 +146,7 @@ public class ClassTypeUtils {
      *
      * @param types Class[]
      * @return 对象描述
-     * @see #getClasses(String[]) 
+     * @see #getClasses(String[])
      */
     public static String[] getTypeStrs(Class[] types) {
         return getTypeStrs(types, false);

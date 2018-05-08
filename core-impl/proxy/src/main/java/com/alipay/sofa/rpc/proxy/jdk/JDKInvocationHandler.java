@@ -37,7 +37,7 @@ public class JDKInvocationHandler implements InvocationHandler {
     /**
      * 代理类
      */
-    private Class   proxyClass;
+    private Class proxyClass;
 
     /**
      * 代理调用器
@@ -57,7 +57,7 @@ public class JDKInvocationHandler implements InvocationHandler {
 
     @Override
     public Object invoke(Object proxy, Method method, Object[] paramValues)
-        throws Throwable {
+            throws Throwable {
         String methodName = method.getName();
         Class[] paramTypes = method.getParameterTypes();
         if ("toString".equals(methodName) && paramTypes.length == 0) {
@@ -67,10 +67,10 @@ public class JDKInvocationHandler implements InvocationHandler {
         } else if ("equals".equals(methodName) && paramTypes.length == 1) {
             Object another = paramValues[0];
             return proxy == another ||
-                (proxy.getClass().isInstance(another) && proxyInvoker.equals(JDKProxy.parseInvoker(another)));
+                    (proxy.getClass().isInstance(another) && proxyInvoker.equals(JDKProxy.parseInvoker(another)));
         }
         SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(method.getDeclaringClass(),
-            method, paramTypes, paramValues);
+                method, paramTypes, paramValues);
         SofaResponse response = proxyInvoker.invoke(sofaRequest);
         if (response.isError()) {
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, response.getErrorMsg());

@@ -41,18 +41,19 @@ public class RpcInternalContext implements Cloneable {
      * 是否允许携带上下文附件，关闭后只能传递"."开头的key，"_" 开头的Key将不被保持和传递。<br>
      * 在性能测试等场景可能关闭此传递功能。
      */
-    private static final boolean                                ATTACHMENT_ENABLE = RpcConfigs
-                                                                                      .getBooleanValue(RpcOptions.CONTEXT_ATTACHMENT_ENABLE);
+    private static final boolean ATTACHMENT_ENABLE = RpcConfigs
+            .getBooleanValue(RpcOptions.CONTEXT_ATTACHMENT_ENABLE);
 
     /**
      * The constant LOCAL.
      */
-    private static final ThreadLocal<RpcInternalContext>        LOCAL             = new ThreadLocal<RpcInternalContext>();
+    private static final ThreadLocal<RpcInternalContext> LOCAL = new ThreadLocal<RpcInternalContext>();
 
     /**
      * The constant DEQUE_LOCAL.
      */
-    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new ThreadLocal<Deque<RpcInternalContext>>();
+    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL =
+            new ThreadLocal<Deque<RpcInternalContext>>();
 
     /**
      * 设置上下文
@@ -148,17 +149,17 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The Future.
      */
-    private ResponseFuture<?>   future;
+    private ResponseFuture<?> future;
 
     /**
      * The Local address.
      */
-    private InetSocketAddress   localAddress;
+    private InetSocketAddress localAddress;
 
     /**
      * The Remote address.
      */
-    private InetSocketAddress   remoteAddress;
+    private InetSocketAddress remoteAddress;
 
     /**
      * 附带属性功能，遵循谁使用谁清理的原则。Key必须为 "_" 和 "."开头<br>
@@ -171,17 +172,17 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The Stopwatch
      */
-    private StopWatch           stopWatch   = new StopWatch();
+    private StopWatch stopWatch = new StopWatch();
 
     /**
      * The Provider side.
      */
-    private Boolean             providerSide;
+    private Boolean providerSide;
 
     /**
      * 要调用的服务端信息
      */
-    private ProviderInfo        providerInfo;
+    private ProviderInfo providerInfo;
 
     /**
      * Is provider side.
@@ -351,7 +352,7 @@ public class RpcInternalContext implements Cloneable {
         } else {
             if (!isValidInternalParamKey(key)) { // 打开附件传递功能，只能传 "_" 和 "." 开头的Key
                 throw new IllegalArgumentException("key must start with" + RpcConstants.INTERNAL_KEY_PREFIX
-                    + " or " + RpcConstants.HIDE_KEY_PREFIX);
+                        + " or " + RpcConstants.HIDE_KEY_PREFIX);
             }
         }
         if (value == null) {
@@ -423,7 +424,7 @@ public class RpcInternalContext implements Cloneable {
      */
     public void clear() {
         this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(false)
-            .setProviderInfo(null);
+                .setProviderInfo(null);
         this.attachments = new HashMap<String, Object>();
         this.stopWatch.reset();
     }
@@ -451,14 +452,14 @@ public class RpcInternalContext implements Cloneable {
     @Override
     public String toString() {
         return "RpcInternalContext{" +
-            "future=" + future +
-            ", localAddress=" + localAddress +
-            ", remoteAddress=" + remoteAddress +
-            ", attachments=" + attachments +
-            ", stopWatch=" + stopWatch +
-            ", providerSide=" + providerSide +
-            ", providerInfo=" + providerInfo +
-            '}';
+                "future=" + future +
+                ", localAddress=" + localAddress +
+                ", remoteAddress=" + remoteAddress +
+                ", attachments=" + attachments +
+                ", stopWatch=" + stopWatch +
+                ", providerSide=" + providerSide +
+                ", providerInfo=" + providerInfo +
+                '}';
     }
 
     @Override

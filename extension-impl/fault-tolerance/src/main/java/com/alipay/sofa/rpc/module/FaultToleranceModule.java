@@ -40,7 +40,7 @@ public class FaultToleranceModule implements Module {
     /**
      * Regulator
      */
-    private Regulator                regulator = new TimeWindowRegulator();
+    private Regulator regulator = new TimeWindowRegulator();
 
     @Override
     public boolean needLoad() {
