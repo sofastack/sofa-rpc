@@ -202,21 +202,21 @@ public class ZookeeperRegistryTest {
     @Test
     public void testConfigObserver() {
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol("bolt")
-                .setHost("0.0.0.0")
-                .setPort(12200);
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200);
 
         ProviderConfig<?> providerConfig = new ProviderConfig();
         providerConfig.setInterfaceId("com.alipay.xxx.TestService")
-                .setUniqueId("unique123Id")
-                .setApplication(new ApplicationConfig().setAppName("test-server"))
-                .setProxy("javassist")
-                .setRegister(true)
-                .setRegistry(registryConfig)
-                .setSerialization("hessian2")
-                .setServer(serverConfig)
-                .setWeight(222)
-                .setTimeout(3000);
+            .setUniqueId("unique123Id")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setProxy("javassist")
+            .setRegister(true)
+            .setRegistry(registryConfig)
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setWeight(222)
+            .setTimeout(3000);
 
         // 注册Provider Config
         registry.register(providerConfig);
@@ -235,13 +235,13 @@ public class ZookeeperRegistryTest {
 
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
         consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
-                .setUniqueId("unique123Id")
-                .setApplication(new ApplicationConfig().setAppName("test-server"))
-                .setProxy("javassist")
-                .setSubscribe(true)
-                .setSerialization("java")
-                .setInvokeType("sync")
-                .setTimeout(4444);
+            .setUniqueId("unique123Id")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setProxy("javassist")
+            .setSubscribe(true)
+            .setSerialization("java")
+            .setInvokeType("sync")
+            .setTimeout(4444);
 
         // 订阅Consumer Config
         latch = new CountDownLatch(1);
@@ -311,7 +311,7 @@ public class ZookeeperRegistryTest {
 
         ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<String, String>();
 
-        private CountDownLatch countDownLatch;
+        private CountDownLatch            countDownLatch;
 
         public void setCountDownLatch(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
