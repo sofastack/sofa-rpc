@@ -16,8 +16,17 @@
  */
 package com.alipay.sofa.rpc.context;
 
+import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.message.ResponseFuture;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -64,4 +73,63 @@ public class RpcInternalContextTest {
         Assert.assertEquals(RpcInternalContext.getContext().getRemoteAddress().toString(), "127.0.0.1:12200");
     }
 
+    @Test
+    public void testClear() {
+        RpcInternalContext context = RpcInternalContext.getContext();
+        context.setRemoteAddress("127.0.0.1", 1234);
+        context.setLocalAddress("127.0.0.1", 2345);
+        context.setFuture(new ResponseFuture<String>() {
+            @Override
+            public boolean cancel(boolean mayInterruptIfRunning) {
+                return false;
+            }
+
+            @Override
+            public boolean isCancelled() {
+                return false;
+            }
+
+            @Override
+            public boolean isDone() {
+                return false;
+            }
+
+            @Override
+            public String get() throws InterruptedException, ExecutionException {
+                return null;
+            }
+
+            @Override
+            public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+                TimeoutException {
+                return null;
+            }
+
+            @Override
+            public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
+                return null;
+            }
+
+            @Override
+            public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
+                return null;
+            }
+        });
+
+        context.setProviderInfo(ProviderInfo.valueOf("127.0.0.1:80"));
+        context.setInterfaceConfig(new ProviderConfig());
+        context.setAttachment("_xxxx", "yyyy");
+
+        context.clear();
+        Assert.assertNull(context.getRemoteAddress());
+        Assert.assertNull(context.getLocalAddress());
+        Assert.assertNull(context.getFuture());
+        Assert.assertFalse(context.isProviderSide());
+        Assert.assertFalse(context.isConsumerSide());
+        Assert.assertNull(context.getProviderInfo());
+        Assert.assertNull(context.getInterfaceConfig());
+        Assert.assertTrue(context.getAttachments().isEmpty());
+
+        RpcInternalContext.removeAllContext();
+    }
 }
