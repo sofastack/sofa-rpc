@@ -35,6 +35,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -82,11 +83,6 @@ public class BoltClientTransport extends ClientTransport {
     }
 
     /**
-     * 服务端提供者信息
-     */
-    protected final ProviderInfo     providerInfo;
-
-    /**
      * bolt需要的URL的缓存
      */
     protected final Url              url;
@@ -109,8 +105,7 @@ public class BoltClientTransport extends ClientTransport {
      */
     protected BoltClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
-        providerInfo = transportConfig.getProviderInfo();
-        url = convertProviderToUrl(transportConfig, providerInfo);
+        url = convertProviderToUrl(transportConfig, transportConfig.getProviderInfo());
     }
 
     /**
@@ -237,16 +232,18 @@ public class BoltClientTransport extends ClientTransport {
         SofaResponseCallback listener = request.getSofaResponseCallback();
         if (listener != null) {
             // callback调用
-            InvokeCallback callback = new BoltInvokerCallback(transportConfig.getConsumerConfig(), providerInfo,
-                listener, request, rpcContext, ClassLoaderUtils.getCurrentClassLoader());
+            InvokeCallback callback = new BoltInvokerCallback((ConsumerConfig) rpcContext.getInterfaceConfig(),
+                rpcContext.getProviderInfo(), listener, request, rpcContext,
+                ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
             return null;
         } else {
             // future 转为 callback
             BoltResponseFuture future = new BoltResponseFuture(request, timeoutMillis);
-            InvokeCallback callback = new BoltFutureInvokeCallback(transportConfig.getConsumerConfig(), providerInfo,
-                future, request, rpcContext, ClassLoaderUtils.getCurrentClassLoader());
+            InvokeCallback callback = new BoltFutureInvokeCallback((ConsumerConfig) rpcContext.getInterfaceConfig(),
+                rpcContext.getProviderInfo(), future, request, rpcContext,
+                ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
             // 记录到上下文 传递出去
@@ -273,8 +270,8 @@ public class BoltClientTransport extends ClientTransport {
         } finally {
             afterSend(context, boltInvokeContext, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                    providerInfo, request, response, throwable));
+                EventBus.post(new ClientSyncReceiveEvent((ConsumerConfig) context.getInterfaceConfig(),
+                    context.getProviderInfo(), request, response, throwable));
             }
         }
     }
@@ -310,8 +307,8 @@ public class BoltClientTransport extends ClientTransport {
         } finally {
             afterSend(context, invokeContext, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                    providerInfo, request, null, throwable));
+                EventBus.post(new ClientSyncReceiveEvent((ConsumerConfig) context.getInterfaceConfig(),
+                    context.getProviderInfo(), request, null, throwable));
             }
         }
     }
@@ -339,8 +336,11 @@ public class BoltClientTransport extends ClientTransport {
      */
     protected SofaRpcException convertToRpcException(Exception e) {
         SofaRpcException exception;
+        if (e instanceof SofaRpcException) {
+            exception = (SofaRpcException) e;
+        }
         // 超时
-        if (e instanceof InvokeTimeoutException) {
+        else if (e instanceof InvokeTimeoutException) {
             exception = new SofaTimeOutException(e);
         }
         // 服务器忙
