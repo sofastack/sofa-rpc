@@ -20,11 +20,8 @@ import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
-import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractProxyClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
@@ -67,19 +64,5 @@ public class RestClientTransport extends AbstractProxyClientTransport {
     protected Method getMethod(SofaRequest request) throws SofaRpcException {
         return ReflectCache.getOrInitServiceMethod(request.getTargetServiceUniqueName(), request.getMethodName(),
             request.getMethodArgSigs(), true, request.getInterfaceName());
-    }
-
-    /**
-     * 调用前设置一些属性
-     *
-     * @param context RPC上下文
-     * @param request 请求对象
-     */
-    @Override
-    protected void beforeSend(RpcInternalContext context, SofaRequest request) {
-        super.beforeSend(context, request);
-        if (EventBus.isEnable(ClientBeforeSendEvent.class)) {
-            EventBus.post(new ClientBeforeSendEvent(request));
-        }
     }
 }
