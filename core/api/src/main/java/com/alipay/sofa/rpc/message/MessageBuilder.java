@@ -37,7 +37,9 @@ public class MessageBuilder {
      * @param argTypes 方法参数类型
      * @param args     方法参数值
      * @return 远程调用请求
+     * @deprecated use {@link #buildSofaRequest(Class, Method, Class[], Object[])}
      */
+    @Deprecated
     public static SofaRequest buildSofaRequest(Class<?> clazz, String method, Class[] argTypes, Object[] args) {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(clazz.getName());

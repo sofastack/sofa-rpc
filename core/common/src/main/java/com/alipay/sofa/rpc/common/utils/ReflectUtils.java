@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -23,7 +25,6 @@ import java.net.URL;
 import java.security.CodeSource;
 import java.security.ProtectionDomain;
 import java.util.Date;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 反射工具类
@@ -84,91 +85,34 @@ public class ReflectUtils {
     }
 
     /**
-     * 方法对象缓存 {接口名#方法名#(参数列表):Method} <br>
-     * 用于用户传了参数列表
-     */
-    private final static ConcurrentHashMap<String, Method> METHOD_CACHE = new ConcurrentHashMap<String, Method>();
-
-    /**
-     * 加载Method方法，如果cache找不到，则新反射一个
+     * 加载Method方法
      *
      * @param clazzName  类名
      * @param methodName 方法名
      * @param argsType   参数列表
      * @return Method对象
-     * @throws ClassNotFoundException 如果指定的类加载器无法定位该类
-     * @throws NoSuchMethodException  如果找不到匹配的方法
      */
-    public static Method getMethod(String clazzName, String methodName, String[] argsType)
-        throws ClassNotFoundException, NoSuchMethodException {
-        StringBuilder sb = new StringBuilder(256);
-        sb.append(clazzName).append("#").append(methodName).append("(");
-        if (argsType != null && argsType.length > 0) {
-            for (String argType : argsType) {
-                sb.append(argType).append(",");
-            }
-            sb.deleteCharAt(sb.length() - 1);
-        }
-        sb.append(")");
-
-        String key = sb.toString();
-        // 先从缓存里取
-        Method method = METHOD_CACHE.get(key);
-        if (method == null) {
-            Class clazz = ClassUtils.forName(clazzName);
-            Class[] classes = ClassTypeUtils.getClasses(argsType);
-            method = clazz.getMethod(methodName, classes);
-            Method old = METHOD_CACHE.putIfAbsent(key, method);
-            if (old != null) {
-                method = old;
-            }
-        }
-        return method;
+    public static Method getMethod(String clazzName, String methodName, String[] argsType) {
+        Class clazz = ClassUtils.forName(clazzName);
+        Class[] classes = ClassTypeUtils.getClasses(argsType);
+        return getMethod(clazz, methodName, classes);
     }
 
     /**
-     * 加载Method方法，如果cache找不到，则新反射一个
+     * 加载Method方法
      *
      * @param clazz      类
      * @param methodName 方法名
      * @param argsType   参数列表
      * @return Method对象
-     * @throws ClassNotFoundException 如果指定的类加载器无法定位该类
-     * @throws NoSuchMethodException  如果找不到匹配的方法
+     * @since 5.4.0
      */
-    public static Method getMethod(Class clazz, String methodName, String[] argsType)
-        throws NoSuchMethodException, ClassNotFoundException {
-        return getMethod(clazz.getCanonicalName(), methodName, argsType);
-    }
-
-    /**
-     * 方法对象缓存 {接口名#方法名:Method}<br>
-     * 用于用户没传了参数列表
-     */
-    private final static ConcurrentHashMap<String, Class[]> METHOD_ARGS_TYPE_CACHE = new ConcurrentHashMap<String, Class[]>();
-
-    /**
-     * 缓存接口的方法，重载方法会被覆盖
-     *
-     * @param interfaceId 接口名
-     * @param methodName  方法名
-     * @param argsType    参数列表
-     */
-    public static void cacheMethodArgsType(String interfaceId, String methodName, Class[] argsType) {
-        String key = interfaceId + "#" + methodName;
-        METHOD_ARGS_TYPE_CACHE.put(key, argsType);
-    }
-
-    /**
-     * 缓存接口的方法，重载方法会被覆盖，没有则返回空
-     *
-     * @param interfaceId 接口类
-     * @param methodName  方法名
-     * @return 方法的参数列表，没有则返回空
-     */
-    public static Class[] getMethodArgsType(String interfaceId, String methodName) {
-        String key = interfaceId + "#" + methodName;
-        return METHOD_ARGS_TYPE_CACHE.get(key);
+    public static Method getMethod(Class clazz, String methodName, Class... argsType) {
+        try {
+            return clazz.getMethod(methodName, argsType);
+        } catch (NoSuchMethodException e) {
+            throw new SofaRpcRuntimeException(e.getMessage(), e);
+        }
     }
 
     /**
@@ -178,16 +122,13 @@ public class ReflectUtils {
      * @param property      属性
      * @param propertyClazz 属性
      * @return Method 方法对象
-     * @throws NoSuchMethodException 没找到
      */
-    public static Method getPropertySetterMethod(Class clazz, String property, Class propertyClazz)
-        throws NoSuchMethodException {
+    public static Method getPropertySetterMethod(Class clazz, String property, Class propertyClazz) {
         String methodName = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
         try {
-            Method method = clazz.getMethod(methodName, propertyClazz);
-            return method;
+            return clazz.getMethod(methodName, propertyClazz);
         } catch (NoSuchMethodException e) {
-            throw new NoSuchMethodException("No setter method for " + clazz.getName() + "#" + property);
+            throw new SofaRpcRuntimeException("No setter method for " + clazz.getName() + "#" + property, e);
         }
     }
 
@@ -197,9 +138,8 @@ public class ReflectUtils {
      * @param clazz    类
      * @param property 属性
      * @return Method 方法对象
-     * @throws NoSuchMethodException 没找到方法
      */
-    public static Method getPropertyGetterMethod(Class clazz, String property) throws NoSuchMethodException {
+    public static Method getPropertyGetterMethod(Class clazz, String property) {
         String methodName = "get" + property.substring(0, 1).toUpperCase() + property.substring(1);
         Method method;
         try {
@@ -209,7 +149,7 @@ public class ReflectUtils {
                 methodName = "is" + property.substring(0, 1).toUpperCase() + property.substring(1);
                 method = clazz.getMethod(methodName);
             } catch (NoSuchMethodException e1) {
-                throw new NoSuchMethodException("No getter method for " + clazz.getName() + "#" + property);
+                throw new SofaRpcRuntimeException("No getter method for " + clazz.getName() + "#" + property, e);
             }
         }
         return method;
@@ -223,7 +163,8 @@ public class ReflectUtils {
             && method.getDeclaringClass() != Object.class
             && method.getParameterTypes().length == 0
             && (method.getName().startsWith("get") || method.getName().startsWith("is"))
-            && (!"get".equals(method.getName()) && !"is".equals(method.getName())); // 排除就叫get和is的方法
+            // 排除就叫get和is的方法
+            && (!"get".equals(method.getName()) && !"is".equals(method.getName()));
     }
 
     protected static String getPropertyNameFromBeanReadMethod(Method method) {
@@ -247,7 +188,8 @@ public class ReflectUtils {
             && method.getDeclaringClass() != Object.class
             && method.getParameterTypes().length == 1
             && method.getName().startsWith("set")
-            && !"set".equals(method.getName()); // 排除就叫set的方法
+            // 排除就叫set的方法
+            && !"set".equals(method.getName());
     }
 
     protected static boolean isPublicInstanceField(Field field) {

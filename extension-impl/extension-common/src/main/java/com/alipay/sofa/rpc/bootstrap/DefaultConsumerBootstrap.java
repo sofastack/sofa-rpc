@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ClusterFactory;
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -31,6 +32,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
@@ -55,7 +57,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-
+@Extension("sofa")
 public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
 
     /**
@@ -295,7 +297,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @return ProviderInfo
      */
     protected ProviderInfo convertToProviderInfo(String providerStr) {
-        return ProviderInfo.valueOf(providerStr);
+        return ProviderHelper.toProviderInfo(providerStr);
     }
 
     /**
@@ -401,7 +403,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     }
 
     /**
-     * Wapper provider info listener to record the respond status of registry.
+     * Wrapper provider info listener to record the respond status of registry.
      */
     class WrapperClusterProviderInfoListener implements ProviderInfoListener {
 

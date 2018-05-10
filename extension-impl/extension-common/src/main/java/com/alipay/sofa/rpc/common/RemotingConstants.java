@@ -30,7 +30,7 @@ public class RemotingConstants {
      * 协议：tr，老协议
      * // com.taobao.remoting.TRConstants#PROCOCOL_VERSION;
      */
-    public static final byte   PROTOCOL_TR                       = 13;                        // 
+    public static final byte   PROTOCOL_TR                       = 13;
     /**
      * 协议：bolt
      * // RpcProtocol.PROTOCOL_CODE;

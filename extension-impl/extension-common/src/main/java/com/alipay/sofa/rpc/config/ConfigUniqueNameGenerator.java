@@ -26,6 +26,18 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 public class ConfigUniqueNameGenerator {
 
     /**
+     * 得到服务唯一名称，无需兼容之前的版本
+     * 
+     * @param interfaceConfig 服务提供者或者服务消费者配置
+     * @return 服务唯一名称
+     * @since 5.4.0
+     */
+    public static String getServiceName(AbstractInterfaceConfig interfaceConfig) {
+        String uniqueId = interfaceConfig.getUniqueId();
+        return interfaceConfig.getInterfaceId() + (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
+    }
+
+    /**
      * 唯一标识UniqueName的产生方法，主要用于内部找接口等，格式为interface:version[:uniqueId]
      *
      * @param interfaceConfig 服务提供者或者服务消费者配置
@@ -33,8 +45,10 @@ public class ConfigUniqueNameGenerator {
      */
     public static String getUniqueName(AbstractInterfaceConfig interfaceConfig) {
         // 加上 1.0 是为了兼容之前的版本
+        String version = interfaceConfig.getVersion();
         String uniqueId = interfaceConfig.getUniqueId();
-        return interfaceConfig.getInterfaceId() + ":" + interfaceConfig.getVersion()
+        return interfaceConfig.getInterfaceId()
+            + (StringUtils.isEmpty(version) ? ":1.0" : ":" + version)
             + (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
     }
 
@@ -51,6 +65,20 @@ public class ConfigUniqueNameGenerator {
         } else {
             return getUniqueName(providerConfig);
         }
+    }
+
+    /**
+     * 解析唯一标识UniqueName得到接口名
+     *
+     * @param uniqueName 服务唯一标识
+     * @return 接口名
+     */
+    public static String getInterfaceName(String uniqueName) {
+        if (StringUtils.isEmpty(uniqueName)) {
+            return uniqueName;
+        }
+        int index = uniqueName.indexOf(':');
+        return index < 0 ? uniqueName : uniqueName.substring(0, index);
     }
 
     /**

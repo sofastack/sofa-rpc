@@ -206,8 +206,8 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     @Override
     public void start() {
         // CHANGE: 增加线程名字
-        eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SOFA-REST-IO-" + port, daemon));
-        eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SOFA-REST-BIZ-" + port,
+        eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("REST-IO-" + port, daemon));
+        eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("REST-BIZ-" + port,
             daemon));
         // Configure the server.
         bootstrap.group(eventLoopGroup)

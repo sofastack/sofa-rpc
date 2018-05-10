@@ -24,9 +24,16 @@ import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
+import static com.alipay.sofa.rpc.common.utils.ReflectUtils.getPropertyGetterMethod;
+import static com.alipay.sofa.rpc.common.utils.ReflectUtils.getPropertyNameFromBeanReadMethod;
+import static com.alipay.sofa.rpc.common.utils.ReflectUtils.getPropertySetterMethod;
+import static com.alipay.sofa.rpc.common.utils.ReflectUtils.isBeanPropertyReadMethod;
+import static com.alipay.sofa.rpc.common.utils.ReflectUtils.isBeanPropertyWriteMethod;
+import static com.alipay.sofa.rpc.common.utils.ReflectUtils.isPublicInstanceField;
+
 public class ReflectUtilsTest {
     @Test
-    public void isPrimitives() throws Exception {
+    public void isPrimitives() {
         Assert.assertTrue(ReflectUtils.isPrimitives(int.class));
         Assert.assertTrue(ReflectUtils.isPrimitives(int[].class));
         Assert.assertTrue(ReflectUtils.isPrimitives(Integer.class));
@@ -39,46 +46,9 @@ public class ReflectUtilsTest {
     }
 
     @Test
-    public void getCodeBase() throws Exception {
-        String codeBase = ReflectUtils.getCodeBase(ReflectUtilsTest.class);
-        Assert.assertNotNull(codeBase);
-    }
+    public void getCodeBase() {
+        Assert.assertNull(ReflectUtils.getCodeBase(null));
 
-    @Test
-    public void cacheMethodArgsType() throws Exception {
-    }
-
-    @Test
-    public void getMethodArgsType() throws Exception {
-    }
-
-    @Test
-    public void getPropertySetterMethod() throws Exception {
-    }
-
-    @Test
-    public void getPropertyGetterMethod() throws Exception {
-    }
-
-    @Test
-    public void isBeanPropertyReadMethod() throws Exception {
-    }
-
-    @Test
-    public void getPropertyNameFromBeanReadMethod() throws Exception {
-    }
-
-    @Test
-    public void isBeanPropertyWriteMethod() throws Exception {
-    }
-
-    @Test
-    public void isPublicInstanceField() throws Exception {
-    }
-
-    @Test
-    public void testGetCodeBase() throws Exception {
-        String dir = System.getProperty("user.dir");
         String codebase = ReflectUtils.getCodeBase(ReflectUtils.class);
         System.out.println(codebase);
         Assert.assertNotNull(codebase);
@@ -86,6 +56,89 @@ public class ReflectUtilsTest {
         String codebase2 = ReflectUtils.getCodeBase(ReflectUtilsTest.class);
         System.out.println(codebase2);
         Assert.assertNotNull(codebase2);
+    }
+
+    @Test
+    public void testGetPropertySetterMethod() throws Exception {
+        Method method = TestReflect.class.getMethod("setS", int.class);
+        Assert.assertEquals(method, getPropertySetterMethod(TestReflect.class, "s", int.class));
+
+        method = TestReflect.class.getMethod("setB", boolean.class);
+        Assert.assertEquals(method, getPropertySetterMethod(TestReflect.class, "b", boolean.class));
+
+        boolean error = false;
+        try {
+            getPropertySetterMethod(TestReflect.class, "xxx", String.class);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+    }
+
+    @Test
+    public void testGetPropertyGetterMethod() throws Exception {
+        Method method = TestReflect.class.getMethod("getS");
+        Assert.assertEquals(method, getPropertyGetterMethod(TestReflect.class, "s"));
+
+        method = TestReflect.class.getMethod("isB");
+        Assert.assertEquals(method, getPropertyGetterMethod(TestReflect.class, "b"));
+
+        boolean error = false;
+        try {
+            getPropertyGetterMethod(TestReflect.class, "xxx");
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+    }
+
+    @Test
+    public void testIsBeanPropertyReadMethod() throws Exception {
+        Assert.assertFalse(isBeanPropertyReadMethod(null));
+        Assert.assertTrue(isBeanPropertyReadMethod(TestReflect.class.getMethod("getS")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("get")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("is")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getDeclaredMethod("get1")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("get2")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("get3")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("get4", String.class)));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("aget5")));
+        Assert.assertFalse(isBeanPropertyReadMethod(TestReflect.class.getMethod("ais5")));
+    }
+
+    @Test
+    public void testGetPropertyNameFromBeanReadMethod() throws Exception {
+        Method method = TestReflect.class.getMethod("getS");
+        Assert.assertEquals("s", getPropertyNameFromBeanReadMethod(method));
+
+        method = TestReflect.class.getMethod("getName");
+        Assert.assertEquals("name", getPropertyNameFromBeanReadMethod(method));
+
+        method = TestReflect.class.getMethod("isB");
+        Assert.assertEquals("b", getPropertyNameFromBeanReadMethod(method));
+
+        method = TestReflect.class.getMethod("is");
+        Assert.assertNull(getPropertyNameFromBeanReadMethod(method));
+    }
+
+    @Test
+    public void testIsBeanPropertyWriteMethod() throws Exception {
+        Assert.assertFalse(isBeanPropertyWriteMethod(null));
+        Assert.assertTrue(isBeanPropertyWriteMethod(TestReflect.class.getMethod("setS", int.class)));
+        Assert.assertFalse(isBeanPropertyWriteMethod(TestReflect.class.getMethod("set", int.class)));
+        Assert.assertFalse(isBeanPropertyWriteMethod(TestReflect.class.getDeclaredMethod("set1", int.class)));
+        Assert.assertFalse(isBeanPropertyWriteMethod(TestReflect.class.getMethod("set2", int.class)));
+        Assert.assertFalse(isBeanPropertyWriteMethod(TestReflect.class.getMethod("set3", int.class, int.class)));
+        Assert.assertFalse(isBeanPropertyWriteMethod(TestReflect.class.getMethod("aset4", int.class)));
+    }
+
+    @Test
+    public void testIsPublicInstanceField() throws Exception {
+        Assert.assertTrue(isPublicInstanceField(TestReflect.class.getField("f1")));
+        Assert.assertFalse(isPublicInstanceField(TestReflect.class.getDeclaredField("f2")));
+        Assert.assertFalse(isPublicInstanceField(TestReflect.class.getDeclaredField("f3")));
+        Assert.assertFalse(isPublicInstanceField(TestReflect.class.getDeclaredField("f4")));
+        Assert.assertFalse(isPublicInstanceField(TestReflect.class.getDeclaredField("f5")));
     }
 
     @Test
@@ -101,23 +154,16 @@ public class ReflectUtilsTest {
         Assert.assertFalse(method == method3);
         Assert.assertTrue(method.equals(method3));
 
-        int times = 1000000;
-        long start = System.nanoTime();
-        for (int i = 0; i < times; i++) {
-            ReflectUtils.getMethod(className, methodName, argsType1);
-        }
-        long end = System.nanoTime();
-        System.out.println("get method " + times / 10000 + "w times elaspe " + (end - start) / 1000 / 1000 + "ms");
+        Method method4 = ReflectUtils.getMethod(TestBean.class, "setAlias", String.class);
+        Assert.assertFalse(method == method4);
+        Assert.assertTrue(method3.equals(method4));
 
-        start = System.nanoTime();
-        for (int i = 0; i < times; i++) {
-            Class clazz = ClassUtils.forName(className);
-            Class[] classes = ClassTypeUtils.getClasses(argsType1);
-            method = clazz.getMethod(methodName, classes);
+        boolean error = false;
+        try {
+            ReflectUtils.getMethod(className, methodName + "xxx", argsType1);
+        } catch (Exception e) {
+            error = true;
         }
-        end = System.nanoTime();
-        System.out.println("get method " + times / 10000 + "w times with no cache elaspe " + (end - start) / 1000 /
-            1000 + "ms");
+        Assert.assertTrue(error);
     }
-
 }

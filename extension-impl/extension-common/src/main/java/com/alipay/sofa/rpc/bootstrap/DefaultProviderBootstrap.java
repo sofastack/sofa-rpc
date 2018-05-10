@@ -16,15 +16,16 @@
  */
 package com.alipay.sofa.rpc.bootstrap;
 
+import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
-import com.alipay.sofa.rpc.common.utils.ReflectUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -39,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -46,6 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+@Extension("sofa")
 public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**
@@ -77,10 +80,16 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      */
     protected final ConcurrentHashMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
 
+    /**
+     * 延迟加载的线程名工厂
+     */
+    private final ThreadFactory                              factory       = new NamedThreadFactory("DELAY-EXPORT",
+                                                                               true);
+
     @Override
     public void export() {
         if (providerConfig.getDelay() > 0) { // 延迟加载,单位毫秒
-            Thread thread = new Thread(new Runnable() {
+            Thread thread = factory.newThread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -90,8 +99,6 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     doExport();
                 }
             });
-            thread.setDaemon(true);
-            thread.setName("DelayExportThread");
             thread.start();
         } else {
             doExport();
@@ -225,7 +232,6 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 include = inList(providerConfig.getInclude(), providerConfig.getExclude(), methodName); // 检查是否在黑白名单中
                 methodsLimit.putIfAbsent(methodName, include);
             }
-            ReflectUtils.cacheMethodArgsType(providerConfig.getInterfaceId(), methodName, method.getParameterTypes());
             providerConfig.setMethodsLimit(methodsLimit);
         }
     }

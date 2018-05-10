@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -117,11 +118,17 @@ public class EventBus {
                 if (subscriber.isSync()) {
                     handleEvent(subscriber, event);
                 } else { // 异步
+                    final RpcInternalContext context = RpcInternalContext.peekContext();
                     AsyncRuntime.getAsyncThreadPool().execute(
                         new Runnable() {
                             @Override
                             public void run() {
-                                handleEvent(subscriber, event);
+                                try {
+                                    RpcInternalContext.setContext(context);
+                                    handleEvent(subscriber, event);
+                                } catch (Exception e) {
+                                    RpcInternalContext.removeContext();
+                                }
                             }
                         });
                 }

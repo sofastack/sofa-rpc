@@ -46,6 +46,7 @@ import org.apache.zookeeper.CreateMode;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
@@ -102,7 +103,7 @@ public class ZookeeperRegistry extends Registry {
     /**
      * 配置项：是否本地优先
      */
-    public final static String        PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
+    public final static String                PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
 
     /**
      * 配置项：是否使用临时节点。<br>
@@ -111,32 +112,32 @@ public class ZookeeperRegistry extends Registry {
      * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
      * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
      */
-    public final static String        PARAM_CREATE_EPHEMERAL  = "createEphemeral";
+    public final static String                PARAM_CREATE_EPHEMERAL  = "createEphemeral";
     /**
      * 服务被下线
      */
-    private final static byte[]       PROVIDER_OFFLINE        = new byte[] { 0 };
+    private final static byte[]               PROVIDER_OFFLINE        = new byte[] { 0 };
     /**
      * 正常在线服务
      */
-    private final static byte[]       PROVIDER_ONLINE         = new byte[] { 1 };
+    private final static byte[]               PROVIDER_ONLINE         = new byte[] { 1 };
 
     /**
      * Zookeeper zkClient
      */
-    private CuratorFramework          zkClient;
+    private CuratorFramework                  zkClient;
 
     /**
      * Root path of registry data
      */
-    private String                    rootPath;
+    private String                            rootPath;
 
     /**
      * Prefer get data from local file to remote zk cluster.
      *
      * @see ZookeeperRegistry#PARAM_PREFER_LOCAL_FILE
      */
-    private boolean                   preferLocalFile         = false;
+    private boolean                           preferLocalFile         = false;
 
     /**
      * Create EPHEMERAL node when true, otherwise PERSISTENT
@@ -145,17 +146,27 @@ public class ZookeeperRegistry extends Registry {
      * @see CreateMode#PERSISTENT
      * @see CreateMode#EPHEMERAL
      */
-    private boolean                   ephemeralNode           = true;
+    private boolean                           ephemeralNode           = true;
 
     /**
      * 配置项观察者
      */
-    private ZookeeperConfigObserver   configObserver;
+    private ZookeeperConfigObserver           configObserver;
 
     /**
      * 配置项观察者
      */
-    private ZookeeperProviderObserver providerObserver;
+    private ZookeeperProviderObserver         providerObserver;
+
+    /**
+     * 保存服务发布者的url
+     */
+    private Map<ProviderConfig, List<String>> providerUrls            = new ConcurrentHashMap<ProviderConfig, List<String>>();
+
+    /**
+     * 保存服务消费者的url
+     */
+    private Map<ConsumerConfig, String>       consumerUrls            = new ConcurrentHashMap<ConsumerConfig, String>();
 
     @Override
     public synchronized void init() {
@@ -218,6 +229,8 @@ public class ZookeeperRegistry extends Registry {
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             zkClient.close();
         }
+        providerUrls.clear();
+        consumerUrls.clear();
     }
 
     @Override
@@ -262,6 +275,7 @@ public class ZookeeperRegistry extends Registry {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
                         }
                     }
+                    providerUrls.put(config, urls);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
                             LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
@@ -333,7 +347,7 @@ public class ZookeeperRegistry extends Registry {
         // 反注册服务端节点
         if (config.isRegister()) {
             try {
-                List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls(config);
+                List<String> urls = providerUrls.remove(config);
                 if (CommonUtils.isNotEmpty(urls)) {
                     String providerPath = buildProviderPath(rootPath, config);
                     for (String url : urls) {
@@ -387,10 +401,11 @@ public class ZookeeperRegistry extends Registry {
             try {
                 String consumerPath = buildConsumerPath(rootPath, config);
                 String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
-                url = URLEncoder.encode(url, "UTF-8");
+                String encodeUrl = URLEncoder.encode(url, "UTF-8");
                 getAndCheckZkClient().create().creatingParentContainersIfNeeded()
                     .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
-                    .forPath(consumerPath + CONTEXT_SEP + url);
+                    .forPath(consumerPath + CONTEXT_SEP + encodeUrl);
+                consumerUrls.put(config, url);
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to register consumer to zookeeperRegistry!", e);
             }
@@ -455,10 +470,12 @@ public class ZookeeperRegistry extends Registry {
         // 反注册服务端节点
         if (config.isRegister()) {
             try {
-                String consumerPath = buildConsumerPath(rootPath, config);
-                String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
-                url = URLEncoder.encode(url, "UTF-8");
-                getAndCheckZkClient().delete().forPath(consumerPath + CONTEXT_SEP + url);
+                String url = consumerUrls.remove(config);
+                if (url != null) {
+                    String consumerPath = buildConsumerPath(rootPath, config);
+                    url = URLEncoder.encode(url, "UTF-8");
+                    getAndCheckZkClient().delete().forPath(consumerPath + CONTEXT_SEP + url);
+                }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
                     throw new SofaRpcRuntimeException("Failed to unregister consumer to zookeeperRegistry!", e);

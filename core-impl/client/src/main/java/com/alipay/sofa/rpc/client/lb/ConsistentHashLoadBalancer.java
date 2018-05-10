@@ -142,7 +142,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
         public ProviderInfo select(SofaRequest request) {
             String key = buildKeyOfHash(request.getMethodArgs());
             byte[] digest = messageDigest(key);
-            return sekectForKey(hash(digest, 0));
+            return selectForKey(hash(digest, 0));
         }
 
         /**
@@ -160,12 +160,12 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
         }
 
         /**
-         * Sekect for key.
+         * Select for key.
          *
          * @param hash the hash
          * @return the provider
          */
-        private ProviderInfo sekectForKey(long hash) {
+        private ProviderInfo selectForKey(long hash) {
             ProviderInfo providerInfo = virtualNodes.get(hash);
             if (providerInfo == null) {
                 SortedMap<Long, ProviderInfo> tailMap = virtualNodes.tailMap(hash);

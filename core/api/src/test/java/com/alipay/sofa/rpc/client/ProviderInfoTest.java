@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.client;
 
-import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,68 +33,45 @@ import java.util.Set;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ProviderInfoTest {
+
     @Test
-    public void valueOf() throws Exception {
+    public void test() {
+        ProviderInfo provider = ProviderInfo.valueOf("bolt://10.15.232.229:12222");
+        Assert.assertEquals("bolt://10.15.232.229:12222", provider.toUrl());
     }
 
     @Test
-    public void toUrl() throws Exception {
-        {
-            String src = "10.15.233.114:12200";
-            ProviderInfo providerInfo = ProviderInfo.valueOf(src);
-            Assert.assertEquals(providerInfo.getHost(), "10.15.233.114");
-            Assert.assertEquals(providerInfo.getPort(), 12200);
-            Assert.assertEquals(providerInfo.getPath(), StringUtils.EMPTY);
-            Assert.assertEquals(providerInfo.toUrl(), providerInfo.getProtocolType() + "://" + src);
+    public void testGetWeight() {
+        ProviderInfo provider = ProviderHelper
+            .toProviderInfo("bolt://10.15.232.229:12222?timeout=3333&serialization=hessian2&connections=1&warmupTime=6&warmupWeight=5&appName=test-server&weight=2000");
+
+        long warmupTime = Long.parseLong(provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
+        provider.setDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
+            Integer.parseInt(provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)));
+        provider.setDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME, warmupTime);
+        provider.setDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME, System.currentTimeMillis() + warmupTime);
+        provider.setStatus(ProviderStatus.WARMING_UP);
+
+        Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_BOLT.equals(provider.getProtocolType()));
+        Assert.assertTrue(RpcConstants.SERIALIZE_HESSIAN2.equals(provider.getSerializationType()));
+        Assert.assertTrue("10.15.232.229".equals(provider.getHost()));
+        Assert.assertTrue(provider.getPort() == 12222);
+        Assert.assertTrue("test-server".equals(provider.getAttr(ProviderInfoAttrs.ATTR_APP_NAME)));
+        Assert.assertTrue("1".equals(provider.getAttr(ProviderInfoAttrs.ATTR_CONNECTIONS)));
+        Assert.assertEquals("3333", provider.getStaticAttr(ProviderInfoAttrs.ATTR_TIMEOUT));
+        Assert.assertEquals(5, provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
+        Assert.assertTrue(provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME) != null);
+        Assert.assertEquals("5", provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
+        Assert.assertEquals("6", provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
+        Assert.assertEquals(ProviderStatus.WARMING_UP, provider.getStatus());
+        Assert.assertEquals(5, provider.getWeight());
+        try {
+            Thread.sleep(10);
+        } catch (Exception e) {
         }
-        {
-            String src = "10.15.233.114:12200/";
-            ProviderInfo providerInfo = ProviderInfo.valueOf(src);
-            Assert.assertEquals(providerInfo.getHost(), "10.15.233.114");
-            Assert.assertEquals(providerInfo.getPort(), 12200);
-            Assert.assertEquals(providerInfo.getPath(), StringUtils.CONTEXT_SEP);
-            Assert.assertEquals(providerInfo.toUrl(), providerInfo.getProtocolType() + "://" + src);
-        }
-        {
-            String src = "bolt://10.15.233.114:12200";
-            ProviderInfo providerInfo = ProviderInfo.valueOf(src);
-            Assert.assertEquals(providerInfo.getProtocolType(), "bolt");
-            Assert.assertEquals(providerInfo.getHost(), "10.15.233.114");
-            Assert.assertEquals(providerInfo.getPort(), 12200);
-            Assert.assertEquals(providerInfo.getPath(), StringUtils.EMPTY);
-            Assert.assertEquals(providerInfo.toUrl(), src);
-        }
-        {
-            String src = "bolt://10.15.233.114:12200/";
-            ProviderInfo providerInfo = ProviderInfo.valueOf(src);
-            Assert.assertEquals(providerInfo.getProtocolType(), "bolt");
-            Assert.assertEquals(providerInfo.getHost(), "10.15.233.114");
-            Assert.assertEquals(providerInfo.getPort(), 12200);
-            Assert.assertEquals(providerInfo.getPath(), StringUtils.CONTEXT_SEP);
-            Assert.assertEquals(providerInfo.toUrl(), src);
-        }
-        {
-            String src = "bolt://10.15.233.114:12200?weight=222&serialization=hessian2";
-            ProviderInfo providerInfo = ProviderInfo.valueOf(src);
-            Assert.assertEquals(providerInfo.getProtocolType(), "bolt");
-            Assert.assertEquals(providerInfo.getHost(), "10.15.233.114");
-            Assert.assertEquals(providerInfo.getPort(), 12200);
-            Assert.assertEquals(providerInfo.getPath(), StringUtils.EMPTY);
-            Assert.assertEquals(providerInfo.getWeight(), 222);
-            Assert.assertEquals(providerInfo.getSerializationType(), "hessian2");
-            Assert.assertEquals(ProviderInfo.valueOf(providerInfo.toUrl()), providerInfo);
-        }
-        {
-            String src = "bolt://10.15.233.114:12200/?weight=222&serialization=hessian2";
-            ProviderInfo providerInfo = ProviderInfo.valueOf(src);
-            Assert.assertEquals(providerInfo.getProtocolType(), "bolt");
-            Assert.assertEquals(providerInfo.getHost(), "10.15.233.114");
-            Assert.assertEquals(providerInfo.getPort(), 12200);
-            Assert.assertEquals(providerInfo.getPath(), StringUtils.CONTEXT_SEP);
-            Assert.assertEquals(providerInfo.getWeight(), 222);
-            Assert.assertEquals(providerInfo.getSerializationType(), "hessian2");
-            Assert.assertEquals(ProviderInfo.valueOf(providerInfo.toUrl()), providerInfo);
-        }
+        Assert.assertTrue(provider.getWeight() == 2000);
+        Assert.assertTrue(provider.getStatus() == ProviderStatus.AVAILABLE);
+        Assert.assertTrue(provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME) == null);
     }
 
     @Test
