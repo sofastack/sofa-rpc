@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.Version;
+import com.alipay.sofa.rpc.common.cache.RpcCacheManager;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -173,6 +174,8 @@ public class RpcRuntimeContext {
         for (Destroyable.DestroyHook destroyHook : DESTROY_HOOKS) {
             destroyHook.postDestroy();
         }
+        // 清理缓存
+        RpcCacheManager.clearAll();
         RpcRunningState.setShuttingDown(false);
         if (LOGGER.isWarnEnabled()) {
             LOGGER.warn("SOFA RPC Framework has been release all resources {}...",

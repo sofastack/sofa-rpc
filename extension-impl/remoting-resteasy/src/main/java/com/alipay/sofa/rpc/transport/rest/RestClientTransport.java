@@ -17,9 +17,11 @@
 package com.alipay.sofa.rpc.transport.rest;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.ReflectCache;
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
+import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.ext.Extension;
@@ -62,7 +64,21 @@ public class RestClientTransport extends AbstractProxyClientTransport {
 
     @Override
     protected Method getMethod(SofaRequest request) throws SofaRpcException {
-        return ReflectCache.getOrInitServiceMethod(request.getTargetServiceUniqueName(), request.getMethodName(),
-            request.getMethodArgSigs(), true, request.getInterfaceName());
+        String serviceUniqueName = request.getTargetServiceUniqueName();
+        String methodName = request.getMethodName();
+        String[] methodSigns = request.getMethodArgSigs();
+
+        Method method = ReflectCache.getOverloadMethodCache(serviceUniqueName, methodName, methodSigns);
+        if (method == null) {
+            try {
+                String interfaceName = request.getInterfaceName();
+                method = ClassUtils.forName(interfaceName)
+                    .getMethod(methodName, ClassTypeUtils.getClasses(methodSigns));
+                ReflectCache.putOverloadMethodCache(serviceUniqueName, method);
+            } catch (NoSuchMethodException e) {
+                throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Method not found", e);
+            }
+        }
+        return method;
     }
 }
