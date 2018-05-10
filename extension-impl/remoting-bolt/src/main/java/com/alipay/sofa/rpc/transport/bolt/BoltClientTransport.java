@@ -246,8 +246,6 @@ public class BoltClientTransport extends ClientTransport {
                 ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
-            // 记录到上下文 传递出去
-            RpcInternalContext.getContext().setFuture(future);
             future.setSentTime();
             return future;
         }
