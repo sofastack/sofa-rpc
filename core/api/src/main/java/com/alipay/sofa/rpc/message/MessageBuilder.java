@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.message;
 
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
+import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 
@@ -44,7 +45,7 @@ public class MessageBuilder {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(clazz.getName());
         request.setMethodName(method);
-        request.setMethodArgs(args == null ? new Object[0] : args);
+        request.setMethodArgs(args == null ? CodecUtils.EMPTY_OBJECT_ARRAY : args);
         request.setMethodArgSigs(ClassTypeUtils.getTypeStrs(argTypes, true));
         return request;
     }
@@ -63,7 +64,7 @@ public class MessageBuilder {
         request.setInterfaceName(clazz.getName());
         request.setMethodName(method.getName());
         request.setMethod(method);
-        request.setMethodArgs(args == null ? new Object[0] : args);
+        request.setMethodArgs(args == null ? CodecUtils.EMPTY_OBJECT_ARRAY : args);
         request.setMethodArgSigs(ClassTypeUtils.getTypeStrs(argTypes, true));
         return request;
     }

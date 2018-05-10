@@ -34,13 +34,13 @@ import com.alipay.sofa.rpc.codec.anthessian.GenericSingleClassLoaderSofaSerializ
 import com.alipay.sofa.rpc.codec.anthessian.MultipleClassLoaderSofaSerializerFactory;
 import com.alipay.sofa.rpc.codec.anthessian.SingleClassLoaderSofaSerializerFactory;
 import com.alipay.sofa.rpc.codec.antpb.ProtobufSerializer;
-import com.alipay.sofa.rpc.common.ReflectCache;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.SofaConfigs;
 import com.alipay.sofa.rpc.common.SofaOptions;
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
