@@ -46,6 +46,7 @@ public abstract class FaultBaseTest {
     public static final String                   APP_NAME2 = "testAnotherApp";
 
     protected ServerConfig                       serverConfig;
+    protected ConsumerConfig<FaultHelloService>  consumerConfigNotUse;
     protected ConsumerConfig<FaultHelloService>  consumerConfig;
     protected ConsumerConfig<FaultHelloService2> consumerConfig2;
     protected ConsumerConfig<FaultHelloService>  consumerConfigAnotherApp;
@@ -71,6 +72,15 @@ public abstract class FaultBaseTest {
             .setServer(serverConfig)
             .setRegister(false)
             .setApplication(providerAconfig);
+
+        // just for test
+        consumerConfigNotUse = new ConsumerConfig<FaultHelloService>()
+            .setInterfaceId(FaultHelloService.class.getName())
+            .setTimeout(500)
+            .setDirectUrl("127.0.0.1:12299")
+            .setRegister(false)
+            .setUniqueId("xxx")
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
 
         ApplicationConfig applicationConfig = new ApplicationConfig();
         applicationConfig.setAppName(APP_NAME1);

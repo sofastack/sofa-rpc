@@ -148,6 +148,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                     if (invoker instanceof ProviderProxyInvoker) {
                         providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
+                        context.setInterfaceConfig(providerConfig);
                         // 找到服务后，打印服务的appName
                         appName = providerConfig != null ? providerConfig.getAppName() : null;
                     }
