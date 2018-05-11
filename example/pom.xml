@@ -77,15 +77,23 @@
         </dependency>
         <!-- dependencies for rest end -->
 
+        <!-- dependencies for dubbo -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
         </dependency>
 
+        <!-- dependencies for zookeeper -->
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- dependencies for protobuf -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
         </dependency>
         
         <dependency>

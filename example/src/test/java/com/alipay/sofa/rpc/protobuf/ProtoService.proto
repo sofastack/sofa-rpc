@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package com.alipay.sofa.rpc.protobuf;
+//package com.alipay.sofa.rpc.server.bolt.pb;
+option java_multiple_files = true; // 可选
+option java_outer_classname = "ProtoServiceModels"; // 可选
+
+service ProtoService {
+    rpc echoObj (EchoRequest) returns (EchoResponse) {}
+}
+
+message EchoRequest {
+    string name = 1;
+    Group group = 2;
+}
+
+message EchoResponse {
+    int32 code = 1;
+    string message = 2;
+}
+
+enum Group {
+    A = 0;
+    B = 1;
+}
