@@ -205,10 +205,10 @@ public class ZookeeperRegistryHelper {
      * @return the attribute
      */
     static Map<String, String> convertToAttribute(String configPath, ChildData childData, boolean remove) {
-        String property = childData.getPath().substring(configPath.length() + 1);
+        String attribute = childData.getPath().substring(configPath.length() + 1);
         //If event type is CHILD_REMOVED, attribute should return to default value
-        return Collections.singletonMap(property,
-            remove ? RpcConfigs.getStringValue(property) : new String(childData.getData()));
+        return Collections.singletonMap(attribute,
+            remove ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
     }
 
     /**
@@ -255,6 +255,10 @@ public class ZookeeperRegistryHelper {
 
     static String buildConfigPath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/configs";
+    }
+
+    static String buildOverridePath(String rootPath, AbstractInterfaceConfig config) {
+        return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/overrides";
     }
 
     static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
