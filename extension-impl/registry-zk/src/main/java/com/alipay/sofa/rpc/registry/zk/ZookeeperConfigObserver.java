@@ -89,7 +89,8 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data, false);
+                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
+                    false);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }
@@ -151,7 +152,8 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为接口级配置<配置属性名,null>,例如<timeout,null>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data, true);
+                Map<String, String> attribute = ZookeeperRegistryHelper
+                    .convertConfigToAttribute(configPath, data, true);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }
@@ -180,7 +182,8 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data, false);
+                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
+                    false);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }
