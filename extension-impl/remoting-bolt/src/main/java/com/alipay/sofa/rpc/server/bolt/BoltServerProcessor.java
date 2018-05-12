@@ -22,10 +22,10 @@ import com.alipay.remoting.InvokeContext;
 import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
 import com.alipay.remoting.rpc.protocol.UserProcessor;
 import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
-import com.alipay.sofa.rpc.common.ReflectCache;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -148,12 +148,13 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                     if (invoker instanceof ProviderProxyInvoker) {
                         providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
+                        context.setInterfaceConfig(providerConfig);
                         // 找到服务后，打印服务的appName
                         appName = providerConfig != null ? providerConfig.getAppName() : null;
                     }
                     // 查找方法
                     String methodName = request.getMethodName();
-                    Method serviceMethod = ReflectCache.getServiceMethod(serviceName, methodName,
+                    Method serviceMethod = ReflectCache.getOverloadMethodCache(serviceName, methodName,
                         request.getMethodArgSigs());
                     if (serviceMethod == null) {
                         throwable = cannotFoundServiceMethod(appName, methodName, serviceName);
