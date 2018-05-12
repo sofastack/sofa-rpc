@@ -303,10 +303,6 @@ public class ZookeeperRegistry extends Registry {
                 //订阅接口级配置
                 subscribeConfig(config, config.getConfigListener());
             }
-            if (!INTERFACE_OVERRIDE_CACHE.containsKey(buildOverridePath(rootPath, config))) {
-                //订阅IP级配置
-                subscribeOverride(config, config.getConfigListener());
-            }
         }
     }
 
@@ -318,11 +314,11 @@ public class ZookeeperRegistry extends Registry {
      */
     protected void subscribeConfig(final AbstractInterfaceConfig config, ConfigListener listener) {
         try {
-            final String configPath = buildConfigPath(rootPath, config);
             if (configObserver == null) { // 初始化
                 configObserver = new ZookeeperConfigObserver();
             }
             configObserver.addConfigListener(config, listener);
+            final String configPath = buildConfigPath(rootPath, config);
             // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
             PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, configPath, true);
             pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
@@ -332,13 +328,13 @@ public class ZookeeperRegistry extends Registry {
                         LOGGER.debug("Receive zookeeper event: " + "type=[" + event.getType() + "]");
                     }
                     switch (event.getType()) {
-                        case CHILD_ADDED: //加了一个配置
+                        case CHILD_ADDED: //新增接口级配置
                             configObserver.addConfig(config, configPath, event.getData());
                             break;
-                        case CHILD_REMOVED: //删了一个配置
+                        case CHILD_REMOVED: //删除接口级配置
                             configObserver.removeConfig(config, configPath, event.getData());
                             break;
-                        case CHILD_UPDATED:// 更新一个配置
+                        case CHILD_UPDATED:// 更新接口级配置
                             configObserver.updateConfig(config, configPath, event.getData());
                             break;
                         default:
@@ -355,18 +351,19 @@ public class ZookeeperRegistry extends Registry {
     }
 
     /**
-     * 订阅IP级配置
+     * 订阅IP级配置（服务发布暂时不支持动态配置,暂时支持订阅ConsumerConfig参数设置）
      *
-     * @param config   provider/consumer config
+     * @param config   consumer config
      * @param listener config listener
      */
-    protected void subscribeOverride(final AbstractInterfaceConfig config, ConfigListener listener) {
+    protected void subscribeOverride(final ConsumerConfig config, ConfigListener listener) {
         try {
             if (overrideObserver == null) { // 初始化
                 overrideObserver = new ZookeeperOverrideObserver();
             }
             overrideObserver.addConfigListener(config, listener);
             final String overridePath = buildOverridePath(rootPath, config);
+            final AbstractInterfaceConfig registerConfig = getRegisterConfig(config);
             // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
             PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, overridePath, true);
             pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
@@ -376,13 +373,13 @@ public class ZookeeperRegistry extends Registry {
                         LOGGER.debug("Receive zookeeper event: " + "type=[" + event.getType() + "]");
                     }
                     switch (event.getType()) {
-                        case CHILD_ADDED: //加了一个配置
+                        case CHILD_ADDED: //新增IP级配置
                             overrideObserver.addConfig(config, overridePath, event.getData());
                             break;
-                        case CHILD_REMOVED: //删了一个配置
+                        case CHILD_REMOVED: //删除IP级配置
                             overrideObserver.removeConfig(config, overridePath, event.getData(), registerConfig);
                             break;
-                        case CHILD_UPDATED:// 更新一个配置
+                        case CHILD_UPDATED:// 更新IP级配置
                             overrideObserver.updateConfig(config, overridePath, event.getData());
                             break;
                         default:
@@ -593,28 +590,15 @@ public class ZookeeperRegistry extends Registry {
     /**
      * 获取注册配置
      *
-     * @param config   provider/consumer config
-     * @param provider is provider config
+     * @param config  consumer config
      * @return
      */
-    private AbstractInterfaceConfig getRegisterConfig(AbstractInterfaceConfig config, boolean provider) {
-        if (provider) {
-            List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls((ProviderConfig) config);
-            if (providerUrls.containsValue(urls)) {
-                for (Map.Entry<ProviderConfig, List<String>> providerUrl : providerUrls.entrySet()) {
-                    if (providerUrl.getValue().equals(urls)) {
-                        return providerUrl.getKey();
-                    }
-                }
-            }
-        } else {
-            String url = ZookeeperRegistryHelper.convertConsumerToUrl((ConsumerConfig) config);
-            if (consumerUrls.containsValue(url)) {
-                for (Map.Entry<ConsumerConfig, String> consumerUrl : consumerUrls.entrySet()) {
-                    if (consumerUrl.getValue().equals(url)) {
-                        return consumerUrl.getKey();
-                    }
-                }
+    private AbstractInterfaceConfig getRegisterConfig(ConsumerConfig config) {
+        String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
+        String addr = url.substring(0, url.indexOf("?"));
+        for (Map.Entry<ConsumerConfig, String> consumerUrl : consumerUrls.entrySet()) {
+            if (consumerUrl.getValue().contains(addr)) {
+                return consumerUrl.getKey();
             }
         }
         return null;
