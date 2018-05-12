@@ -227,11 +227,11 @@ public class ZookeeperRegistryTest {
         configListener.setCountDownLatch(latch);
         registry.subscribeConfig(providerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap("timeout", "2000"));
-        Map<String, String> ps = configListener.getData();
-        Assert.assertTrue(ps.size() == 1);
+        Map<String, String> configData = configListener.getData();
+        Assert.assertTrue(configData.size() == 1);
         configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
-        ps = configListener.getData();
-        Assert.assertTrue(ps.size() == 2);
+        configData = configListener.getData();
+        Assert.assertTrue(configData.size() == 2);
 
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
         consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
@@ -249,14 +249,14 @@ public class ZookeeperRegistryTest {
         configListener.setCountDownLatch(latch);
         registry.subscribeConfig(consumerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap(RpcConstants.CONFIG_KEY_TIMEOUT, "3333"));
-        ps = configListener.getData();
-        Assert.assertTrue(ps.size() == 1);
+        configData = configListener.getData();
+        Assert.assertTrue(configData.size() == 1);
         configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
-        ps = configListener.getData();
-        Assert.assertTrue(ps.size() == 2);
+        configData = configListener.getData();
+        Assert.assertTrue(configData.size() == 2);
 
         latch.await(2000, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps.size() == 2);
+        Assert.assertTrue(configData.size() == 2);
     }
 
     /**
@@ -286,8 +286,8 @@ public class ZookeeperRegistryTest {
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server");
         attributes.put(RpcConstants.CONFIG_KEY_SERIALIZATION, "java");
         configListener.attrUpdated(attributes);
-        Map<String, String> ps = configListener.getData();
-        Assert.assertTrue(ps.size() == 3);
+        Map<String, String> configData = configListener.getData();
+        Assert.assertTrue(configData.size() == 3);
 
         consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
             .setUniqueId("unique123Id")
@@ -303,11 +303,11 @@ public class ZookeeperRegistryTest {
         attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "4444");
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server2");
         configListener.attrUpdated(attributes);
-        ps = configListener.getData();
-        Assert.assertTrue(ps.size() == 3);
+        configData = configListener.getData();
+        Assert.assertTrue(configData.size() == 3);
 
         latch.await(2000, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps.size() == 3);
+        Assert.assertTrue(configData.size() == 3);
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
