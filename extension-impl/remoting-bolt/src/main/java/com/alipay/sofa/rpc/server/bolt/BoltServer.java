@@ -18,7 +18,7 @@ package com.alipay.sofa.rpc.server.bolt;
 
 import com.alipay.remoting.RemotingServer;
 import com.alipay.remoting.rpc.RpcServer;
-import com.alipay.sofa.rpc.common.ReflectCache;
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -156,7 +157,9 @@ public class BoltServer implements Server {
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.put(key, instance);
         // 缓存接口的方法
-        ReflectCache.putServiceMethodCache(key, providerConfig.getProxyClass());
+        for (Method m : providerConfig.getProxyClass().getMethods()) {
+            ReflectCache.putOverloadMethodCache(key, m);
+        }
     }
 
     @Override
@@ -164,8 +167,6 @@ public class BoltServer implements Server {
         // 取消缓存Invoker对象
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.remove(key);
-        // 取消缓存接口方法
-        ReflectCache.invalidateServiceMethodCache(key);
         // 如果最后一个需要关闭，则关闭
         if (closeIfNoEntry && invokerMap.size() == 0) {
             stop();
