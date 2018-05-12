@@ -101,10 +101,10 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * 接口配置修改子节点Data列表
      *
      * @param config      接口配置
-     * @param configPath  配置Path
+     * @param overridePath 覆盖Path
      * @param currentData 子节点Data列表
      */
-    public void updateConfigAll(AbstractInterfaceConfig config, String configPath, List<ChildData> currentData) {
+    public void updateConfigAll(AbstractInterfaceConfig config, String overridePath, List<ChildData> currentData) {
         if (CommonUtils.isEmpty(currentData)) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.info("data is null");
@@ -119,7 +119,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
-                List<Map<String, String>> attributes = ZookeeperRegistryHelper.convertOverrideToAttributes(configPath,
+                List<Map<String, String>> attributes = ZookeeperRegistryHelper.convertOverrideToAttributes(overridePath,
                         currentData);
                 for (ConfigListener listener : configListeners) {
                     for (Map<String, String> attribute : attributes) {
@@ -134,11 +134,11 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * 接口配置删除子节点Data
      *
      * @param config         接口配置
-     * @param configPath     配置Path
+     * @param overridePath 覆盖Path
      * @param data           子节点Data
      * @param registerConfig 注册配置
      */
-    public void removeConfig(AbstractInterfaceConfig config, String configPath, ChildData data, AbstractInterfaceConfig registerConfig) throws Exception {
+    public void removeConfig(AbstractInterfaceConfig config, String overridePath, ChildData data, AbstractInterfaceConfig registerConfig) throws Exception {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.info("data is null");
@@ -156,7 +156,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为接口级配置<配置属性名,注册属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(configPath, data, true, registerConfig);
+                Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(overridePath, data, true, registerConfig);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }
