@@ -155,7 +155,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
-                //转换子节点Data为接口级配置<配置属性名,注册属性值>,例如<timeout,200>
+                //转换子节点Data为IP级配置<配置属性名,注册属性值>,例如<timeout,200>
                 Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(overridePath, data, true, registerConfig);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
