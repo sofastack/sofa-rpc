@@ -389,7 +389,7 @@ public class ZookeeperRegistry extends Registry {
             });
             pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
             INTERFACE_OVERRIDE_CACHE.put(overridePath, pathChildrenCache);
-            configObserver.updateConfigAll(config, overridePath, pathChildrenCache.getCurrentData());
+            overrideObserver.updateConfigAll(config, overridePath, pathChildrenCache.getCurrentData());
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
         }
