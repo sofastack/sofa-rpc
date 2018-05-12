@@ -181,18 +181,18 @@ public class ZookeeperRegistryHelper {
     /**
      * Convert child data to attribute list.
      *
-     * @param configPath
+     * @param configPath the config path
      * @param currentData the current data
      * @return the attribute list
      */
-    static List<Map<String, String>> convertToAttributes(String configPath, List<ChildData> currentData) {
+    static List<Map<String, String>> convertConfigToAttributes(String configPath, List<ChildData> currentData) {
         List<Map<String, String>> attributes = Lists.newArrayList();
         if (CommonUtils.isEmpty(currentData)) {
             return attributes;
         }
 
         for (ChildData childData : currentData) {
-            attributes.add(convertToAttribute(configPath, childData, false));
+            attributes.add(convertConfigToAttribute(configPath, childData, false));
         }
         return attributes;
     }
@@ -200,15 +200,51 @@ public class ZookeeperRegistryHelper {
     /**
      * Convert child data to attribute.
      *
-     * @param configPath
+     * @param configPath the config path
      * @param childData  the child data
      * @return the attribute
      */
-    static Map<String, String> convertToAttribute(String configPath, ChildData childData, boolean remove) {
+    static Map<String, String> convertConfigToAttribute(String configPath, ChildData childData, boolean remove) {
         String attribute = childData.getPath().substring(configPath.length() + 1);
         //If event type is CHILD_REMOVED, attribute should return to default value
         return Collections.singletonMap(attribute,
             remove ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
+    }
+
+    /**
+     * Convert child data to attribute list.
+     *
+     * @param overridePath the override path
+     * @param currentData the current data
+     * @return the attribute list
+     */
+    static List<Map<String, String>> convertOverrideToAttributes(String overridePath, List<ChildData> currentData) {
+        List<Map<String, String>> attributes = Lists.newArrayList();
+        if (CommonUtils.isEmpty(currentData)) {
+            return attributes;
+        }
+
+        for (ChildData childData : currentData) {
+            attributes.add(convertConfigToAttribute(overridePath, childData, false));
+        }
+        return attributes;
+    }
+
+    /**
+     * Convert child data to attribute.
+     *
+     * @param overridePath the override path
+     * @param childData  the child data
+     * @return the attribute
+     */
+    static Map<String, String> convertOverrideToAttribute(String overridePath, ChildData childData, boolean remove)
+            throws UnsupportedEncodingException{
+        String url = childData.getPath().substring(overridePath.length() + 1);
+        url = URLDecoder.decode(url, "UTF-8");
+
+        //If event type is CHILD_REMOVED, attribute should return to default value
+        return Collections.singletonMap(attribute,
+                remove ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
     }
 
     /**

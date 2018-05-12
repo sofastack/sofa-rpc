@@ -50,9 +50,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
-import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildConfigPath;
-import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildConsumerPath;
-import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProviderPath;
+import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.*;
 
 /**
  * <p>简单的Zookeeper注册中心,具有如下特性：<br>
@@ -73,9 +71,11 @@ import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProvi
  *             |       |     |--bolt://192.168.3.100?xxx=yyy []
  *             |       |     |--bolt://192.168.3.110?xxx=yyy []
  *             |       |     └--bolt://192.168.3.120?xxx=yyy []
- *             |       └-configs (接口级配置）
- *             |            |--invoke.blacklist ["xxxx"]
- *             |            └--monitor.open ["true"]
+ *             |       |-configs （接口级配置）
+ *             |       |     |--invoke.blacklist ["xxxx"]
+ *             |       |     └--monitor.open ["true"]
+ *             |       └overrides （IP级配置）
+ *             |       |     └--bolt://192.168.3.100?xxx=yyy []
  *             |--com.alipay.sofa.rpc.example.EchoService （下一个服务）
  *             | ......
  *  </pre>
@@ -103,7 +103,7 @@ public class ZookeeperRegistry extends Registry {
     /**
      * 配置项：是否本地优先
      */
-    public final static String                PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
+    public final static String PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
 
     /**
      * 配置项：是否使用临时节点。<br>
@@ -112,32 +112,32 @@ public class ZookeeperRegistry extends Registry {
      * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
      * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
      */
-    public final static String                PARAM_CREATE_EPHEMERAL  = "createEphemeral";
+    public final static String PARAM_CREATE_EPHEMERAL = "createEphemeral";
     /**
      * 服务被下线
      */
-    private final static byte[]               PROVIDER_OFFLINE        = new byte[] { 0 };
+    private final static byte[] PROVIDER_OFFLINE = new byte[]{0};
     /**
      * 正常在线服务
      */
-    private final static byte[]               PROVIDER_ONLINE         = new byte[] { 1 };
+    private final static byte[] PROVIDER_ONLINE = new byte[]{1};
 
     /**
      * Zookeeper zkClient
      */
-    private CuratorFramework                  zkClient;
+    private CuratorFramework zkClient;
 
     /**
      * Root path of registry data
      */
-    private String                            rootPath;
+    private String rootPath;
 
     /**
      * Prefer get data from local file to remote zk cluster.
      *
      * @see ZookeeperRegistry#PARAM_PREFER_LOCAL_FILE
      */
-    private boolean                           preferLocalFile         = false;
+    private boolean preferLocalFile = false;
 
     /**
      * Create EPHEMERAL node when true, otherwise PERSISTENT
@@ -146,27 +146,32 @@ public class ZookeeperRegistry extends Registry {
      * @see CreateMode#PERSISTENT
      * @see CreateMode#EPHEMERAL
      */
-    private boolean                           ephemeralNode           = true;
+    private boolean ephemeralNode = true;
+
+    /**
+     * 接口级配置项观察者
+     */
+    private ZookeeperConfigObserver configObserver;
+
+    /**
+     * IP级配置项观察者
+     */
+    private ZookeeperOverrideObserver overrideObserver;
 
     /**
      * 配置项观察者
      */
-    private ZookeeperConfigObserver           configObserver;
-
-    /**
-     * 配置项观察者
-     */
-    private ZookeeperProviderObserver         providerObserver;
+    private ZookeeperProviderObserver providerObserver;
 
     /**
      * 保存服务发布者的url
      */
-    private Map<ProviderConfig, List<String>> providerUrls            = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private Map<ProviderConfig, List<String>> providerUrls = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private Map<ConsumerConfig, String>       consumerUrls            = new ConcurrentHashMap<ConsumerConfig, String>();
+    private Map<ConsumerConfig, String> consumerUrls = new ConcurrentHashMap<ConsumerConfig, String>();
 
     @Override
     public synchronized void init() {
@@ -193,18 +198,18 @@ public class ZookeeperRegistry extends Registry {
         ephemeralNode = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_CREATE_EPHEMERAL));
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info(
-                "Init ZookeeperRegistry with address {}, root path is {}. preferLocalFile:{}, ephemeralNode:{}",
-                address, rootPath, preferLocalFile, ephemeralNode);
+                    "Init ZookeeperRegistry with address {}, root path is {}. preferLocalFile:{}, ephemeralNode:{}",
+                    address, rootPath, preferLocalFile, ephemeralNode);
         }
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         zkClient = CuratorFrameworkFactory.builder()
-            .connectString(address)
-            .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
-            .connectionTimeoutMs(registryConfig.getConnectTimeout())
-            .canBeReadOnly(false)
-            .retryPolicy(retryPolicy)
-            .defaultData(null)
-            .build();
+                .connectString(address)
+                .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
+                .connectionTimeoutMs(registryConfig.getConnectTimeout())
+                .canBeReadOnly(false)
+                .retryPolicy(retryPolicy)
+                .defaultData(null)
+                .build();
     }
 
     @Override
@@ -246,6 +251,12 @@ public class ZookeeperRegistry extends Registry {
      */
     private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_CONFIG_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
+    /**
+     * IP配置{接口配置路径：PathChildrenCache} <br>
+     * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/overrides ： PathChildrenCache }
+     */
+    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
+
     @Override
     public void register(ProviderConfig config) {
         String appName = config.getAppName();
@@ -263,14 +274,14 @@ public class ZookeeperRegistry extends Registry {
                     String providerPath = buildProviderPath(rootPath, config);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
+                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
                     }
                     for (String url : urls) {
                         url = URLEncoder.encode(url, "UTF-8");
                         String providerUrl = providerPath + CONTEXT_SEP + url;
                         getAndCheckZkClient().create().creatingParentContainersIfNeeded()
-                            .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
-                            .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
+                                .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
+                                .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
                         }
@@ -278,7 +289,7 @@ public class ZookeeperRegistry extends Registry {
                     providerUrls.put(config, urls);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
+                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
                     }
                 }
             } catch (Exception e) {
@@ -288,17 +299,26 @@ public class ZookeeperRegistry extends Registry {
 
         if (config.isSubscribe()) {
             // 订阅配置节点
-            ConfigListener listener = config.getConfigListener();
-            String configPath = buildConfigPath(rootPath, config);
-            if (!INTERFACE_CONFIG_CACHE.containsKey(configPath)) {
-                subscribeConfig(config, listener);
+            if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
+                //订阅接口级配置
+                subscribeConfig(config, config.getConfigListener());
+            }
+            if (!INTERFACE_OVERRIDE_CACHE.containsKey(buildOverridePath(rootPath, config))) {
+                //订阅IP级配置
+                subscribeOverride(config, config.getConfigListener());
             }
         }
     }
 
+    /**
+     * 订阅接口级配置
+     *
+     * @param config   provider/consumer config
+     * @param listener config listener
+     */
     protected void subscribeConfig(final AbstractInterfaceConfig config, ConfigListener listener) {
-        final String configPath = buildConfigPath(rootPath, config);
         try {
+            final String configPath = buildConfigPath(rootPath, config);
             if (configObserver == null) { // 初始化
                 configObserver = new ZookeeperConfigObserver();
             }
@@ -334,6 +354,50 @@ public class ZookeeperRegistry extends Registry {
         }
     }
 
+    /**
+     * 订阅IP级配置
+     *
+     * @param config   provider/consumer config
+     * @param listener config listener
+     */
+    protected void subscribeOverride(final AbstractInterfaceConfig config, ConfigListener listener) {
+        try {
+            if (overrideObserver == null) { // 初始化
+                overrideObserver = new ZookeeperOverrideObserver();
+            }
+            overrideObserver.addConfigListener(config, listener);
+            final String overridePath = buildOverridePath(rootPath, config);
+            // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
+            PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, overridePath, true);
+            pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
+                @Override
+                public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
+                    if (LOGGER.isDebugEnabled(config.getAppName())) {
+                        LOGGER.debug("Receive zookeeper event: " + "type=[" + event.getType() + "]");
+                    }
+                    switch (event.getType()) {
+                        case CHILD_ADDED: //加了一个配置
+                            overrideObserver.addConfig(config, overridePath, event.getData());
+                            break;
+                        case CHILD_REMOVED: //删了一个配置
+                            overrideObserver.removeConfig(config, overridePath, event.getData(), registerConfig);
+                            break;
+                        case CHILD_UPDATED:// 更新一个配置
+                            overrideObserver.updateConfig(config, overridePath, event.getData());
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+            pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+            INTERFACE_OVERRIDE_CACHE.put(overridePath, pathChildrenCache);
+            configObserver.updateConfigAll(config, overridePath, pathChildrenCache.getCurrentData());
+        } catch (Exception e) {
+            throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
+        }
+    }
+
     @Override
     public void unRegister(ProviderConfig config) {
         String appName = config.getAppName();
@@ -356,7 +420,7 @@ public class ZookeeperRegistry extends Registry {
                     }
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                            providerPath, "1"));
+                                providerPath, "1"));
                     }
                 }
             } catch (Exception e) {
@@ -369,10 +433,11 @@ public class ZookeeperRegistry extends Registry {
         if (config.isSubscribe()) {
             try {
                 configObserver.removeConfigListener(config);
+                overrideObserver.removeConfigListener(config);
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
                     throw new SofaRpcRuntimeException("Failed to unsubscribe provider config from zookeeperRegistry!",
-                        e);
+                            e);
                 }
             }
         }
@@ -403,8 +468,8 @@ public class ZookeeperRegistry extends Registry {
                 String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
                 String encodeUrl = URLEncoder.encode(url, "UTF-8");
                 getAndCheckZkClient().create().creatingParentContainersIfNeeded()
-                    .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
-                    .forPath(consumerPath + CONTEXT_SEP + encodeUrl);
+                        .withMode(CreateMode.EPHEMERAL) // Consumer临时节点
+                        .forPath(consumerPath + CONTEXT_SEP + encodeUrl);
                 consumerUrls.put(config, url);
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to register consumer to zookeeperRegistry!", e);
@@ -412,9 +477,13 @@ public class ZookeeperRegistry extends Registry {
         }
         if (config.isSubscribe()) {
             // 订阅配置
-            final String configPath = buildConfigPath(rootPath, config);
-            if (!INTERFACE_CONFIG_CACHE.containsKey(configPath)) {
+            if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
+                //订阅接口级配置
                 subscribeConfig(config, config.getConfigListener());
+            }
+            if (!INTERFACE_OVERRIDE_CACHE.containsKey(buildOverridePath(rootPath, config))) {
+                //订阅IP级配置
+                subscribeOverride(config, config.getConfigListener());
             }
 
             // 订阅Providers节点
@@ -436,7 +505,7 @@ public class ZookeeperRegistry extends Registry {
                     public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
                         if (LOGGER.isDebugEnabled(config.getAppName())) {
                             LOGGER.debugWithApp(config.getAppName(),
-                                "Receive zookeeper event: " + "type=[" + event.getType() + "]");
+                                    "Receive zookeeper event: " + "type=[" + event.getType() + "]");
                         }
                         switch (event.getType()) {
                             case CHILD_ADDED: //加了一个provider
@@ -455,7 +524,7 @@ public class ZookeeperRegistry extends Registry {
                 });
                 pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
                 List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(
-                    providerPath, pathChildrenCache.getCurrentData());
+                        providerPath, pathChildrenCache.getCurrentData());
                 List<ProviderInfo> matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
                 return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
             } catch (Exception e) {
@@ -496,7 +565,7 @@ public class ZookeeperRegistry extends Registry {
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
                     throw new SofaRpcRuntimeException("Failed to unsubscribe consumer config from zookeeperRegistry!",
-                        e);
+                            e);
                 }
             }
         }
@@ -519,5 +588,35 @@ public class ZookeeperRegistry extends Registry {
             throw new SofaRpcRuntimeException("Zookeeper client is not available");
         }
         return zkClient;
+    }
+
+    /**
+     * 获取注册配置
+     *
+     * @param config   provider/consumer config
+     * @param provider is provider config
+     * @return
+     */
+    private AbstractInterfaceConfig getRegisterConfig(AbstractInterfaceConfig config, boolean provider) {
+        if (provider) {
+            List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls((ProviderConfig) config);
+            if (providerUrls.containsValue(urls)) {
+                for (Map.Entry<ProviderConfig, List<String>> providerUrl : providerUrls.entrySet()) {
+                    if (providerUrl.getValue().equals(urls)) {
+                        return providerUrl.getKey();
+                    }
+                }
+            }
+        } else {
+            String url = ZookeeperRegistryHelper.convertConsumerToUrl((ConsumerConfig) config);
+            if (consumerUrls.containsValue(url)) {
+                for (Map.Entry<ConsumerConfig, String> consumerUrl : consumerUrls.entrySet()) {
+                    if (consumerUrl.getValue().equals(url)) {
+                        return consumerUrl.getKey();
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
