@@ -200,7 +200,7 @@ public class ZookeeperRegistryTest {
      * @throws Exception
      */
     @Test
-    public void testConfigObserver() {
+    public void testConfigObserver() throws InterruptedException {
         ServerConfig serverConfig = new ServerConfig()
                 .setProtocol("bolt")
                 .setHost("0.0.0.0")
@@ -251,8 +251,11 @@ public class ZookeeperRegistryTest {
         configListener.attrUpdated(Collections.singletonMap(RpcConstants.CONFIG_KEY_TIMEOUT, "3333"));
         ps = configListener.getData();
         Assert.assertTrue(ps.size() == 1);
-        configListener.attrUpdated(Collections.singletonMap(RpcConstants.CONFIG_KEY_TIMEOUT, "unique234Id"));
+        configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
         ps = configListener.getData();
+        Assert.assertTrue(ps.size() == 2);
+
+        latch.await( 2000, TimeUnit.MILLISECONDS);
         Assert.assertTrue(ps.size() == 2);
     }
 
@@ -262,7 +265,7 @@ public class ZookeeperRegistryTest {
      * @throws Exception
      */
     @Test
-    public void testOverrideObserver() {
+    public void testOverrideObserver() throws InterruptedException {
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
         consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
                 .setUniqueId("unique123Id")
@@ -294,12 +297,16 @@ public class ZookeeperRegistryTest {
                 .setSerialization("java")
                 .setInvokeType("sync")
                 .setTimeout(5555);
+        configListener = new MockConfigListener();
+        configListener.setCountDownLatch(latch);
         registry.subscribeOverride(consumerConfig, configListener);
-        attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "5555");
-        attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server1");
-        attributes.put(RpcConstants.CONFIG_KEY_SERIALIZATION, "java");
+        attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "4444");
+        attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server2");
         configListener.attrUpdated(attributes);
         ps = configListener.getData();
+        Assert.assertTrue(ps.size() == 3);
+
+        latch.await( 2000, TimeUnit.MILLISECONDS);
         Assert.assertTrue(ps.size() == 3);
     }
 
