@@ -34,17 +34,6 @@
             <artifactId>netty-all</artifactId>
         </dependency>
 
-        <!-- 序列化 -->
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>hessian</artifactId>
-        </dependency>
-        <!-- 默认不主动依赖 -->
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-        </dependency>
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

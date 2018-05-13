@@ -17,7 +17,11 @@
 package com.alipay.sofa.rpc.codec;
 
 import com.alipay.sofa.rpc.common.annotation.Unstable;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.ext.Extensible;
+import com.alipay.sofa.rpc.transport.AbstractByteBuf;
+
+import java.util.Map;
 
 /**
  * 序列化器接口
@@ -31,26 +35,32 @@ public interface Serializer {
     /**
      * 序列化
      *
-     * @param object 对象
-     * @return 序列化的字节数组
+     * @param object  对象
+     * @param context 上下文
+     * @return 序列化后的对象
+     * @throws SofaRpcException 序列化异常
      */
-    public byte[] encode(Object object);
+    public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException;
 
     /**
-     * 反序列化
+     * 反序列化，只有类型，返回对象
      *
-     * @param data  原始字节数组
-     * @param clazz 期望的类型
+     * @param data    原始字节数组
+     * @param clazz   期望的类型
+     * @param context 上下文
      * @return 反序列化后的对象
+     * @throws SofaRpcException 序列化异常
      */
-    public Object decode(byte[] data, Class clazz);
+    public Object decode(AbstractByteBuf data, Class clazz, Map<String, String> context) throws SofaRpcException;
 
     /**
-     * 反序列化
+     * 反序列化，已有数据，填充字段
      *
      * @param data     原始字节数组
-     * @param template 模板类型
+     * @param template 模板对象
+     * @param context  上下文
      * @return 反序列化后的对象
+     * @throws SofaRpcException 序列化异常
      */
-    public Object decode(byte[] data, Object template);
+    public Object decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException;
 }

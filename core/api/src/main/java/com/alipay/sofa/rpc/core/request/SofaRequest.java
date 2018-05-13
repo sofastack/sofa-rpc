@@ -129,7 +129,7 @@ public class SofaRequest extends RequestBase {
 
     //====================== 下面是非传递属性 ===============
     /**
-     * 方法对象(缓存一些，减少反射，服务端使用）
+     * 方法对象(为了减少反射缓存）
      */
     private transient Method               method;
 
@@ -139,12 +139,7 @@ public class SofaRequest extends RequestBase {
     private transient String               interfaceName;
 
     /**
-     * 序列化工厂类型：决定是否泛化调用（客户端使用）
-     */
-    private transient int                  serializeFactoryType;
-
-    /**
-     * 序列化类型（客户端使用）
+     * 序列化类型
      */
     private transient byte                 serializeType;
 
@@ -152,6 +147,7 @@ public class SofaRequest extends RequestBase {
      * 调用类型（客户端使用）
      */
     private transient String               invokeType;
+
     /**
      * 用户层服务回调类，调用级别（客户端使用）
      */
@@ -178,26 +174,6 @@ public class SofaRequest extends RequestBase {
      */
     public void setMethod(Method method) {
         this.method = method;
-    }
-
-    /**
-     * Gets serialize factory type.
-     *
-     * @return the serialize factory type
-     */
-    public int getSerializeFactoryType() {
-        return serializeFactoryType;
-    }
-
-    /**
-     * Sets serialize factory type.
-     *
-     * @param serializeFactoryType the serialize factory type
-     * @return the serialize factory type
-     */
-    public SofaRequest setSerializeFactoryType(int serializeFactoryType) {
-        this.serializeFactoryType = serializeFactoryType;
-        return this;
     }
 
     /**
@@ -306,6 +282,5 @@ public class SofaRequest extends RequestBase {
     public boolean isAsync() {
         return invokeType != null && (RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)
             || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType));
-
     }
 }
