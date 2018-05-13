@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,6 +26,7 @@ import java.io.InputStream;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+@NotThreadSafe
 public class UnsafeByteArrayInputStream extends InputStream {
 
     protected byte[] mData;

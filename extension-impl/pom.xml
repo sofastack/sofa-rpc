@@ -19,6 +19,8 @@
         <module>bootstrap-bolt</module>
         <module>bootstrap-dubbo</module>
         <module>bootstrap-rest</module>
+        <module>codec-protobuf</module>
+        <module>codec-sofa-hessian</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
         <module>remoting-bolt</module>

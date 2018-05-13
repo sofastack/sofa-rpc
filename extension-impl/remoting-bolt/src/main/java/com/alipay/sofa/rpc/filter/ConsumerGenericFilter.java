@@ -58,9 +58,10 @@ public class ConsumerGenericFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         try {
-            int type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
-            request.setSerializeFactoryType(type);
+            String type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
+            request.addRequestProp(RemotingConstants.HEAD_GENERIC_TYPE, type);
 
+            // 修正请求对象
             Object[] genericArgs = request.getMethodArgs();
             String methodName = (String) genericArgs[0];
             String[] argTypes = (String[]) genericArgs[1];
@@ -84,7 +85,7 @@ public class ConsumerGenericFilter extends Filter {
         }
     }
 
-    private int getSerializeFactoryType(String method, Object[] args) throws SofaRpcException {
+    private String getSerializeFactoryType(String method, Object[] args) throws SofaRpcException {
         if (METHOD_INVOKE.equals(method)) {
             // 方法名为 $invoke
             return RemotingConstants.SERIALIZE_FACTORY_NORMAL;

@@ -20,28 +20,31 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class SerializerFactoryTest {
     @Test
-    public void getSerializer() throws Exception {
+    public void getSerializer() {
         Serializer serializer = SerializerFactory.getSerializer((byte) 117);
         Assert.assertNotNull(serializer);
-        Assert.assertEquals(serializer.getClass(), TestSerializer.class);
+        Assert.assertEquals(TestSerializer.class, serializer.getClass());
     }
 
     @Test
-    public void getSerializer1() throws Exception {
+    public void getSerializer1() {
         Serializer serializer = SerializerFactory.getSerializer("test");
         Assert.assertNotNull(serializer);
-        Assert.assertEquals(serializer.getClass(), TestSerializer.class);
+        Assert.assertEquals(TestSerializer.class, serializer.getClass());
     }
 
     @Test
-    public void getCodeByAlias() throws Exception {
+    public void getCodeByAlias() {
         Assert.assertTrue(SerializerFactory.getCodeByAlias("test") == 117);
+    }
+
+    @Test
+    public void getAliasByCode() {
+        Assert.assertEquals("test", SerializerFactory.getAliasByCode((byte) 117));
     }
 
 }
