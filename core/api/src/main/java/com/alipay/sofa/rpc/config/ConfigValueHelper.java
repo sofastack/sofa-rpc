@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
 import java.util.regex.Pattern;
@@ -70,8 +71,10 @@ public class ConfigValueHelper {
      * @return 是否为空或"false"或"null"
      */
     protected static boolean assertFalse(String string) {
-        return string == null || "".equals(string)
-            || "false".equalsIgnoreCase(string) || "null".equals(string);
+        return string == null
+            || StringUtils.EMPTY.equals(string)
+            || StringUtils.FALSE.equalsIgnoreCase(string)
+            || StringUtils.NULL.equals(string);
     }
 
     /**
