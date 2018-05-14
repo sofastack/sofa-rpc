@@ -40,8 +40,8 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory
-            .getLogger(ZookeeperOverrideObserver.class);
+    private final static Logger                                              LOGGER            = LoggerFactory
+                                                                                                   .getLogger(ZookeeperOverrideObserver.class);
 
     /**
      * The Config listener map.
@@ -84,14 +84,14 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                        + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                        + ", stat=[" + data.getStat() + "]");
+                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                    + ", stat=[" + data.getStat() + "]");
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为IP级配置<配置属性名,配置属性值>,例如<timeout,200>
                 Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(overridePath, data,
-                        false, null);
+                    false, null);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }
@@ -106,7 +106,8 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @param overridePath 覆盖Path
      * @param currentData  子节点Data列表
      */
-    public void updateConfigAll(AbstractInterfaceConfig config, String overridePath, List<ChildData> currentData) throws UnsupportedEncodingException {
+    public void updateConfigAll(AbstractInterfaceConfig config, String overridePath, List<ChildData> currentData)
+        throws UnsupportedEncodingException {
         if (CommonUtils.isEmpty(currentData)) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
@@ -115,14 +116,14 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 for (ChildData data : currentData) {
                     LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                            + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                            + ", stat=[" + data.getStat() + "]");
+                        + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                        + ", stat=[" + data.getStat() + "]");
                 }
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 List<Map<String, String>> attributes = ZookeeperRegistryHelper.convertOverrideToAttributes(
-                        config, overridePath, currentData);
+                    config, overridePath, currentData);
                 for (ConfigListener listener : configListeners) {
                     for (Map<String, String> attribute : attributes) {
                         listener.attrUpdated(attribute);
@@ -153,14 +154,14 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                        + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                        + ", stat=[" + data.getStat() + "]");
+                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                    + ", stat=[" + data.getStat() + "]");
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为IP级配置<配置属性名,注册属性值>,例如<timeout,200>
                 Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(overridePath, data,
-                        true, registerConfig);
+                    true, registerConfig);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }
@@ -183,14 +184,14 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                        + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                        + ", stat=[" + data.getStat() + "]");
+                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                    + ", stat=[" + data.getStat() + "]");
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 //转换子节点Data为IP级配置<配置属性名,配置属性值>,例如<timeout,200>
                 Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(overridePath, data,
-                        false, null);
+                    false, null);
                 for (ConfigListener listener : configListeners) {
                     listener.attrUpdated(attribute);
                 }

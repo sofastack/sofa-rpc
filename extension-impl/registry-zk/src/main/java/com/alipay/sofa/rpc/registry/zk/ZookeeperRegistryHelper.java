@@ -225,7 +225,7 @@ public class ZookeeperRegistryHelper {
         for (ChildData childData : currentData) {
             String url = URLDecoder.decode(childData.getPath().substring(overridePath.length() + 1), "UTF-8");
             if (config instanceof ConsumerConfig) {
-                //filter non-IP override node child data
+                //If child data contains system local host,return convert attribute
                 if (StringUtils.isNotEmpty(url)
                         && StringUtils.isNotEmpty(SystemInfo.getLocalHost())
                         && url.contains("://" + SystemInfo.getLocalHost() + "?")) {
