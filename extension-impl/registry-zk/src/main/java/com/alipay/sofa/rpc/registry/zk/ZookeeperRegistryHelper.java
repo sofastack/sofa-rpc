@@ -30,14 +30,13 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Helper for ZookeeperRegistry
@@ -66,26 +65,26 @@ public class ZookeeperRegistryHelper {
                     }
                 }
                 sb.append(server.getProtocol())
-                    .append("://")
-                    .append(host)
-                    .append(":")
-                    .append(server.getPort())
-                    .append(server.getContextPath())
-                    .append("?uniqueId=")
-                    .append(providerConfig.getUniqueId())
-                    .append(getKeyPairs("version", "1.0"))
-                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
-                    .append(getKeyPairs("delay", providerConfig.getDelay()))
-                    .append(getKeyPairs("id", providerConfig.getId()))
-                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
-                        providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
-                        providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
-                    .append(getKeyPairs("accepts", server.getAccepts()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
-                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()));
+                        .append("://")
+                        .append(host)
+                        .append(":")
+                        .append(server.getPort())
+                        .append(server.getContextPath())
+                        .append("?uniqueId=")
+                        .append(providerConfig.getUniqueId())
+                        .append(getKeyPairs("version", "1.0"))
+                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
+                        .append(getKeyPairs("delay", providerConfig.getDelay()))
+                        .append(getKeyPairs("id", providerConfig.getId()))
+                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
+                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
+                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
+                                providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
+                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
+                                providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
+                        .append(getKeyPairs("accepts", server.getAccepts()))
+                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
+                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()));
                 addCommonAttrs(sb);
                 urls.add(sb.toString());
             }
@@ -104,15 +103,15 @@ public class ZookeeperRegistryHelper {
         StringBuilder sb = new StringBuilder(200);
         String host = SystemInfo.getLocalHost();
         sb.append(consumerConfig.getProtocol()).append("://").append(host)
-            .append("?uniqueId=").append(consumerConfig.getUniqueId())
-            .append(getKeyPairs("version", "1.0"))
-            .append(getKeyPairs("pid", RpcRuntimeContext.PID))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
-            .append(getKeyPairs("id", consumerConfig.getId()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION, consumerConfig.getSerialization()))
-            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()));
+                .append("?uniqueId=").append(consumerConfig.getUniqueId())
+                .append(getKeyPairs("version", "1.0"))
+                .append(getKeyPairs("pid", RpcRuntimeContext.PID))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
+                .append(getKeyPairs("id", consumerConfig.getId()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION, consumerConfig.getSerialization()))
+                .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()));
         addCommonAttrs(sb);
         return sb.toString();
     }
@@ -151,7 +150,7 @@ public class ZookeeperRegistryHelper {
      * @return the list
      */
     static List<ProviderInfo> convertUrlsToProviders(String providerPath, List<ChildData> currentData)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         List<ProviderInfo> providerInfos = new ArrayList<ProviderInfo>();
         if (CommonUtils.isEmpty(currentData)) {
             return providerInfos;
@@ -164,7 +163,7 @@ public class ZookeeperRegistryHelper {
     }
 
     static ProviderInfo convertUrlToProvider(String providerPath, ChildData childData)
-        throws UnsupportedEncodingException {
+            throws UnsupportedEncodingException {
         String url = childData.getPath().substring(providerPath.length() + 1); // 去掉头部
         url = URLDecoder.decode(url, "UTF-8");
         ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
@@ -182,7 +181,7 @@ public class ZookeeperRegistryHelper {
      * @return the attribute list
      */
     static List<Map<String, String>> convertConfigToAttributes(String configPath, List<ChildData> currentData) {
-        List<Map<String, String>> attributes = Lists.newArrayList();
+        List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
         if (CommonUtils.isEmpty(currentData)) {
             return attributes;
         }
@@ -205,24 +204,34 @@ public class ZookeeperRegistryHelper {
         String attribute = childData.getPath().substring(configPath.length() + 1);
         //If event type is CHILD_REMOVED, attribute should return to default value
         return Collections.singletonMap(attribute,
-            removeType ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
+                removeType ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
     }
 
     /**
      * Convert child data to attribute list.
      *
+     * @param config       the interface config
      * @param overridePath the override path
      * @param currentData  the current data
      * @return the attribute list
      */
-    static List<Map<String, String>> convertOverrideToAttributes(String overridePath, List<ChildData> currentData) {
-        List<Map<String, String>> attributes = Lists.newArrayList();
+    static List<Map<String, String>> convertOverrideToAttributes(AbstractInterfaceConfig config, String overridePath, List<ChildData> currentData)
+            throws UnsupportedEncodingException {
+        List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
         if (CommonUtils.isEmpty(currentData)) {
             return attributes;
         }
 
         for (ChildData childData : currentData) {
-            attributes.add(convertConfigToAttribute(overridePath, childData, false));
+            String url = URLDecoder.decode(childData.getPath().substring(overridePath.length() + 1), "UTF-8");
+            if (config instanceof ConsumerConfig) {
+                //filter non-IP override node child data
+                if (StringUtils.isNotEmpty(url)
+                        && StringUtils.isNotEmpty(SystemInfo.getLocalHost())
+                        && url.contains("://" + SystemInfo.getLocalHost() + "?")) {
+                    attributes.add(convertConfigToAttribute(overridePath, childData, false));
+                }
+            }
         }
         return attributes;
     }
@@ -238,26 +247,26 @@ public class ZookeeperRegistryHelper {
      */
     static Map<String, String> convertOverrideToAttribute(String overridePath, ChildData childData, boolean removeType,
                                                           AbstractInterfaceConfig registerConfig) throws Exception {
-        String url = childData.getPath().substring(overridePath.length() + 1);
-        url = URLDecoder.decode(url, "UTF-8");
-        Map<String, String> attribute = Maps.newConcurrentMap();
+        String url = URLDecoder.decode(childData.getPath().substring(overridePath.length() + 1), "UTF-8");
+        Map<String, String> attribute = new ConcurrentHashMap<String, String>();
         for (String keyPairs : url.substring(url.indexOf("?")).split("&")) {
             String[] overrideAttrs = keyPairs.split("=");
             List<String> configKeys = Arrays.asList(RpcConstants.CONFIG_KEY_TIMEOUT,
-                RpcConstants.CONFIG_KEY_GENERIC,
-                RpcConstants.CONFIG_KEY_APP_NAME,
-                RpcConstants.CONFIG_KEY_SERIALIZATION,
-                RpcConstants.CONFIG_KEY_DYNAMIC,
-                ProviderInfoAttrs.ATTR_WEIGHT,
-                ProviderInfoAttrs.ATTR_WARMUP_TIME,
-                ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
+                    RpcConstants.CONFIG_KEY_GENERIC,
+                    RpcConstants.CONFIG_KEY_APP_NAME,
+                    RpcConstants.CONFIG_KEY_SERIALIZATION,
+                    RpcConstants.CONFIG_KEY_DYNAMIC,
+                    ProviderInfoAttrs.ATTR_WEIGHT,
+                    ProviderInfoAttrs.ATTR_WARMUP_TIME,
+                    ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
             if (configKeys.contains(overrideAttrs[0])) {
                 if (removeType) {
                     Method getMethod = ReflectUtils.getPropertyGetterMethod(AbstractInterfaceConfig.class,
-                        overrideAttrs[0]);
+                            overrideAttrs[0]);
                     Class propertyClazz = getMethod.getReturnType();
+                    //If event type is CHILD_REMOVED, attribute should return to register value
                     attribute.put(overrideAttrs[0], StringUtils.toString(BeanUtils.getProperty(
-                        registerConfig, overrideAttrs[0], propertyClazz)));
+                            registerConfig, overrideAttrs[0], propertyClazz)));
                 } else {
                     attribute.put(overrideAttrs[0], overrideAttrs[1]);
                 }
@@ -280,11 +289,11 @@ public class ZookeeperRegistryHelper {
         String startTimeStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME);
 
         if (StringUtils.isNotBlank(warmupTimeStr) && StringUtils.isNotBlank(warmupWeightStr) &&
-            StringUtils.isNotBlank(startTimeStr)) {
+                StringUtils.isNotBlank(startTimeStr)) {
 
             long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
             int warmupWeight = CommonUtils.parseInt(warmupWeightStr,
-                Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
+                    Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
             long startTime = CommonUtils.parseLong(startTimeStr, 0);
             long warmupEndTime = startTime + warmupTime;
 
@@ -321,7 +330,7 @@ public class ZookeeperRegistryHelper {
         List<ProviderInfo> result = new ArrayList<ProviderInfo>();
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
-                && StringUtils.equals(consumerConfig.getUniqueId(),
+                    && StringUtils.equals(consumerConfig.getUniqueId(),
                     providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
                 result.add(providerInfo);
             }

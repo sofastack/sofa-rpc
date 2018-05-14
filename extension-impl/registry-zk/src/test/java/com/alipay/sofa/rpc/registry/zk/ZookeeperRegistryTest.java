@@ -28,7 +28,6 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
-import com.google.common.collect.Maps;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -281,7 +280,7 @@ public class ZookeeperRegistryTest {
         MockConfigListener configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
         registry.subscribeOverride(consumerConfig, configListener);
-        Map<String, String> attributes = Maps.newConcurrentMap();
+        Map<String, String> attributes = new ConcurrentHashMap<String, String>();
         attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "3333");
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server");
         attributes.put(RpcConstants.CONFIG_KEY_SERIALIZATION, "java");
