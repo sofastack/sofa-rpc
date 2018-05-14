@@ -118,9 +118,13 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
             measureResult.addMeasureDetail(measureResultDetail);
         }
 
+        logMeasureResult(measureResult);
+
         InvocationStatFactory.updateInvocationStats(invocationStats);
         return measureResult;
     }
+
+
 
     /**
      * 对批量Invocation对应的InvocationStat进行一个快照
@@ -249,5 +253,6 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
         return invocationLeastWindowCount < LEGAL_LEAST_WINDOW_COUNT ? LEGAL_LEAST_WINDOW_COUNT
             : invocationLeastWindowCount;
     }
+
 
 }

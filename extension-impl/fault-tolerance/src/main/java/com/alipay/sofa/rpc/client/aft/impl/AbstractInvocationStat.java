@@ -18,8 +18,13 @@ package com.alipay.sofa.rpc.client.aft.impl;
 
 import com.alipay.sofa.rpc.client.aft.InvocationStat;
 import com.alipay.sofa.rpc.client.aft.InvocationStatDimension;
+import com.alipay.sofa.rpc.client.aft.MeasureModel;
+import com.alipay.sofa.rpc.client.aft.MeasureResult;
+import com.alipay.sofa.rpc.client.aft.MeasureResultDetail;
 import com.alipay.sofa.rpc.common.utils.CalculateUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -123,5 +128,26 @@ public abstract class AbstractInvocationStat implements InvocationStat {
     public void update(InvocationStat snapshot) {
         invokeCount.addAndGet(-snapshot.getInvokeCount());
         exceptionCount.addAndGet(-snapshot.getExceptionCount());
+    }
+
+    private void logMeasureResult(MeasureResult measureResult) {
+
+        StringBuilder info = new StringBuilder();
+
+        MeasureModel measureModel = measureResult.getMeasureModel();
+        String appName = measureModel.getAppName();
+        String service = measureModel.getService();
+        List<InvocationStat> stats = measureModel.getInvocationStats();
+        List<MeasureResultDetail> details = measureResult.getAllMeasureResultDetails();
+
+        info.append("measure info: service[" + service + "];stats[");
+        for(InvocationStat stat : stats){
+            info.append(stat.getDimension().getIp());
+            info.append(",");
+        }
+        if (stats.size() > 0){
+            info.substring(-1);
+        }
+
     }
 }
