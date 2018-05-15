@@ -142,13 +142,14 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
 
         MeasureModel measureModel = measureResult.getMeasureModel();
         String appName = measureModel.getAppName();
+        if (!LOGGER.isInfoEnabled(appName)) {
+            return;
+        }
+
         String service = measureModel.getService();
         List<InvocationStat> stats = measureModel.getInvocationStats();
         List<MeasureResultDetail> details = measureResult.getAllMeasureResultDetails();
 
-        if (!LOGGER.isInfoEnabled(appName)) {
-            return;
-        }
 
         StringBuilder info = new StringBuilder();
 
@@ -158,7 +159,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
             info.append(",");
         }
         if (stats.size() > 0) {
-            info = new StringBuilder(info.substring(0, info.lastIndexOf(",")));
+            info.deleteCharAt(info.length()-1);
         }
         info.append("};details{");
 
@@ -180,10 +181,6 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
         info.append("]");
 
         LOGGER.infoWithApp(appName, info.toString());
-    }
-
-    public static void main(String[] args) {
-        new ServiceHorizontalMeasureStrategy().logMeasureResult(null, 0, 0, 0, 0);
     }
 
     /**
