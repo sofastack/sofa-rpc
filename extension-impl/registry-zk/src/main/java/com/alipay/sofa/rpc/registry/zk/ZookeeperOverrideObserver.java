@@ -75,7 +75,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @param config       接口配置
      * @param overridePath 覆盖Path
      * @param data         子节点Data
-     * @throws Exception 转换属性异常
+     * @throws Exception 转换异常
      */
     public void updateConfig(AbstractInterfaceConfig config, String overridePath, ChildData data) throws Exception {
         if (data == null) {
@@ -106,7 +106,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @param config       接口配置
      * @param overridePath 覆盖Path
      * @param currentData  子节点Data列表
-     * @throws UnsupportedEncodingException 转换属性异常
+     * @throws UnsupportedEncodingException 转换异常
      */
     public void updateConfigAll(AbstractInterfaceConfig config, String overridePath, List<ChildData> currentData)
         throws UnsupportedEncodingException {
@@ -142,7 +142,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @param overridePath   覆盖Path
      * @param data           子节点Data
      * @param registerConfig 注册配置
-     * @throws Exception 转换属性异常
+     * @throws Exception 转换异常
      */
     public void removeConfig(AbstractInterfaceConfig config, String overridePath, ChildData data,
                              AbstractInterfaceConfig registerConfig) throws Exception {
@@ -178,7 +178,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @param config       接口配置
      * @param overridePath 覆盖Path
      * @param data         子节点Data
-     * @throws Exception 转换属性异常
+     * @throws Exception 转换异常
      */
     public void addConfig(AbstractInterfaceConfig config, String overridePath, ChildData data) throws Exception {
         if (data == null) {
