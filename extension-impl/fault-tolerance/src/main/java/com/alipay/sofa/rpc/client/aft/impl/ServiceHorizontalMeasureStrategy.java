@@ -136,7 +136,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
     private void logMeasureResult(MeasureResult measureResult, long timeWindow, long leastWindowCount,
                                   double averageExceptionRate,
                                   double leastWindowExceptionRateMultiple) {
-        if(measureResult == null){
+        if (measureResult == null) {
             return;
         }
 
