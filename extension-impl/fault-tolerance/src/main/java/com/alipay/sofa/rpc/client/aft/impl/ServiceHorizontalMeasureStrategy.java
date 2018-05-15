@@ -136,6 +136,9 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
     private void logMeasureResult(MeasureResult measureResult, long timeWindow, long leastWindowCount,
                                   double averageExceptionRate,
                                   double leastWindowExceptionRateMultiple) {
+        if(measureResult == null){
+            return;
+        }
 
         MeasureModel measureModel = measureResult.getMeasureModel();
         String appName = measureModel.getAppName();
@@ -177,6 +180,10 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
         info.append("]");
 
         LOGGER.infoWithApp(appName, info.toString());
+    }
+
+    public static void main(String[] args) {
+        new ServiceHorizontalMeasureStrategy().logMeasureResult(null, 0, 0, 0, 0);
     }
 
     /**
