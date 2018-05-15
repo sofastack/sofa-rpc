@@ -158,7 +158,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
             info.append(",");
         }
         if (stats.size() > 0) {
-            info.deleteCharAt(info.length()-1);
+            info.deleteCharAt(info.length() - 1);
         }
         info.append("};details{");
 
