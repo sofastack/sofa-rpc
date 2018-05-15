@@ -378,10 +378,13 @@ public class BoltClientTransport extends ClientTransport {
 
     protected InvokeContext createInvokeContext(SofaRequest request) {
         InvokeContext invokeContext = new InvokeContext();
-        invokeContext.put(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE, request.getSerializeFactoryType());
         invokeContext.put(InvokeContext.BOLT_CUSTOM_SERIALIZER, request.getSerializeType());
         invokeContext.put(RemotingConstants.HEAD_TARGET_SERVICE, request.getTargetServiceUniqueName());
         invokeContext.put(RemotingConstants.HEAD_METHOD_NAME, request.getMethodName());
+        String genericType = (String) request.getRequestProp(RemotingConstants.HEAD_GENERIC_TYPE);
+        if (genericType != null) {
+            invokeContext.put(RemotingConstants.HEAD_GENERIC_TYPE, genericType);
+        }
         return invokeContext;
     }
 

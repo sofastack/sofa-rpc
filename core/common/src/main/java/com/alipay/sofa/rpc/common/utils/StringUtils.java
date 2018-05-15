@@ -54,6 +54,27 @@ public class StringUtils {
     public static final String   DEFAULT            = "default";
 
     /**
+     * The string {@code "true"}.
+     *
+     * @since 5.4.0
+     */
+    public static final String   TRUE               = "true";
+
+    /**
+     * The string {@code "false"}.
+     *
+     * @since 5.4.0
+     */
+    public static final String   FALSE              = "false";
+
+    /**
+     * The string {@code "null"}.
+     *
+     * @since 5.4.0
+     */
+    public static final String   NULL               = "null";
+
+    /**
      * 空数组
      */
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
