@@ -148,6 +148,7 @@ public class ZookeeperRegistryHelper {
      * @param providerPath
      * @param currentData  the current data
      * @return the list
+     * @throws UnsupportedEncodingException decode exception
      */
     static List<ProviderInfo> convertUrlsToProviders(String providerPath, List<ChildData> currentData)
         throws UnsupportedEncodingException {
@@ -214,6 +215,7 @@ public class ZookeeperRegistryHelper {
      * @param overridePath the override path
      * @param currentData  the current data
      * @return the attribute list
+     * @throws UnsupportedEncodingException decode exception
      */
     static List<Map<String, String>> convertOverrideToAttributes(AbstractInterfaceConfig config, String overridePath,
                                                                  List<ChildData> currentData)
@@ -245,6 +247,7 @@ public class ZookeeperRegistryHelper {
      * @param removeType     is remove type
      * @param registerConfig register provider/consumer config
      * @return the attribute
+     * @throws Exception decode exception
      */
     static Map<String, String> convertOverrideToAttribute(String overridePath, ChildData childData, boolean removeType,
                                                           AbstractInterfaceConfig registerConfig) throws Exception {

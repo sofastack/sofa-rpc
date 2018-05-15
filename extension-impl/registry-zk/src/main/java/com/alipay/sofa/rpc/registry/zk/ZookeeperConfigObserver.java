@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 /**
- * ZookeeperObserver for override node,subscribe interface level provider/consumer config.
+ * ZookeeperObserver for config node,subscribe interface level provider/consumer config.
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
