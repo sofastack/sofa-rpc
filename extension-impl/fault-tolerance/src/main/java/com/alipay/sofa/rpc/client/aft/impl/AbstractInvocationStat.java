@@ -130,7 +130,7 @@ public abstract class AbstractInvocationStat implements InvocationStat {
         exceptionCount.addAndGet(-snapshot.getExceptionCount());
     }
 
-    private void logMeasureResult(MeasureResult measureResult) {
+    private void logMeasureResult(MeasureResult measureResult, long timeWindow, long leastWindowCount, long averageExceptionRate, long leastWindowExceptionRateMultiple) {
 
         StringBuilder info = new StringBuilder();
 
@@ -140,14 +140,28 @@ public abstract class AbstractInvocationStat implements InvocationStat {
         List<InvocationStat> stats = measureModel.getInvocationStats();
         List<MeasureResultDetail> details = measureResult.getAllMeasureResultDetails();
 
-        info.append("measure info: service[" + service + "];stats[");
+        info.append("measure info: service[" + service + "];stats{");
         for(InvocationStat stat : stats){
             info.append(stat.getDimension().getIp());
             info.append(",");
         }
         if (stats.size() > 0){
-            info.substring(-1);
+            info.substring(0, stats.size()-1);
         }
+        info.append("};details{");
+
+        info.append("timeWindow[" + timeWindow + "];leastWindowCount[" + leastWindowCount + "];averageExceptionRate[" + averageExceptionRate + "];leastWindowExceptionRateMultiple[" + leastWindowExceptionRateMultiple + "]");
+        info.append("detail[");
+        for(MeasureResultDetail detail : details){
+
+            String ip = detail.getInvocationStatDimension().getIp();
+            double abnormalRate = detail.getAbnormalRate();
+            long invocationLeastWindowCount = detail.getLeastWindowCount();
+            String measureState = detail.getMeasureState().name();
+
+            info.append(ip + "(abnormalRate:" + abnormalRate + ",invocationLeastWindowCount")
+        }
+
 
     }
 }
