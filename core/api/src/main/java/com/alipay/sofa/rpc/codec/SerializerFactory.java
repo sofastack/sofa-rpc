@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec;
 
+import com.alipay.sofa.rpc.common.struct.TwoWayMap;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
@@ -37,10 +38,9 @@ public final class SerializerFactory {
     private final static ConcurrentHashMap<Byte, Serializer> TYPE_SERIALIZER_MAP = new ConcurrentHashMap<Byte, Serializer>();
 
     /**
-     * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
-     * 还需要额外保留编码和实例的映射：{别名：编码}
+     * 除了托管给扩展加载器的工厂模式（保留alias：实例）外，还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static ConcurrentHashMap<String, Byte>     TYPE_CODE_MAP       = new ConcurrentHashMap<String, Byte>();
+    private final static TwoWayMap<String, Byte>             TYPE_CODE_MAP       = new TwoWayMap<String, Byte>();
 
     /**
      * 扩展加载器
@@ -88,6 +88,16 @@ public final class SerializerFactory {
      */
     public static Byte getCodeByAlias(String serializer) {
         return TYPE_CODE_MAP.get(serializer);
+    }
+
+    /**
+     * 通过Code获取别名
+     *
+     * @param code 序列化的Code
+     * @return 序列化别名
+     */
+    public static String getAliasByCode(byte code) {
+        return TYPE_CODE_MAP.getKey(code);
     }
 
 }

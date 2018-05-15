@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -28,6 +29,7 @@ import java.util.Arrays;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+@NotThreadSafe
 public class UnsafeByteArrayOutputStream extends OutputStream {
     protected byte[] mBuffer;
 

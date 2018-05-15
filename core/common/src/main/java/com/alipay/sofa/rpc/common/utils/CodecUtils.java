@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
+import java.util.Iterator;
+import java.util.Map;
+
 /**
  * Codec工具类
  *
@@ -248,5 +251,47 @@ public final class CodecUtils {
             return (byte) (modifiers + (1 << i));
         }
         return modifiers;
+    }
+
+    /**
+     * 扁平化复制
+     * @param prefix 前缀
+     * @param sourceMap 原始map
+     * @param dstMap 目标map
+     */
+    public static void flatCopyTo(String prefix, Map<String, Object> sourceMap,
+                                  Map<String, String> dstMap) {
+        for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
+            String key = prefix + entry.getKey();
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                dstMap.put(key, (String) value);
+            } else if (value instanceof Number) {
+                dstMap.put(key, value.toString());
+            } else if (value instanceof Map) {
+                flatCopyTo(key + ".", (Map<String, Object>) value, dstMap);
+            }
+        }
+    }
+
+    /**
+     * 树状恢复
+     * @param prefix 前缀
+     * @param sourceMap  原始map
+     * @param dstMap 目标map
+     * @param remove 命中遍历后是否删除
+     */
+    public static void treeCopyTo(String prefix, Map<String, String> sourceMap,
+                                  Map<String, String> dstMap, boolean remove) {
+        Iterator<Map.Entry<String, String>> it = sourceMap.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<String, String> entry = it.next();
+            if (entry.getKey().startsWith(prefix)) {
+                dstMap.put(entry.getKey().substring(prefix.length()), entry.getValue());
+                if (remove) {
+                    it.remove();
+                }
+            }
+        }
     }
 }
