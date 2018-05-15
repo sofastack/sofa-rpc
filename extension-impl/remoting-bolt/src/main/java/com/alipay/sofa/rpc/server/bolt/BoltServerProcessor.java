@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -102,6 +103,9 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             // 默认全局appName
             appName = (String) RpcRuntimeContext.get(RpcRuntimeContext.KEY_APPNAME);
         }
+
+        // 是否链路异步化中
+        boolean isAsyncChain = false;
         try { // 这个 try-finally 为了保证Context一定被清理
             processingCount.incrementAndGet(); // 统计值加1
 
@@ -182,11 +186,10 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             // Response不为空，代表需要返回给客户端
             if (response != null) {
                 RpcInvokeContext invokeContext = RpcInvokeContext.peekContext();
-                Boolean isAsyncChain = invokeContext != null ?
-                    (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null;
-
+                isAsyncChain = CommonUtils.isTrue(invokeContext != null ?
+                    (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null);
                 // 如果是服务端异步代理模式，特殊处理，因为该模式是在业务代码自主异步返回的
-                if (isAsyncChain == null || !isAsyncChain) {
+                if (!isAsyncChain) {
                     // 其它正常请求
                     try { // 这个try-catch 保证一定要记录tracer
                         asyncCtx.sendResponse(response);
@@ -204,8 +207,10 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             }
         } finally {
             processingCount.decrementAndGet();
-            if (EventBus.isEnable(ServerEndHandleEvent.class)) {
-                EventBus.post(new ServerEndHandleEvent());
+            if (!isAsyncChain) {
+                if (EventBus.isEnable(ServerEndHandleEvent.class)) {
+                    EventBus.post(new ServerEndHandleEvent());
+                }
             }
             RpcInvokeContext.removeContext();
             RpcInternalContext.removeAllContext();
