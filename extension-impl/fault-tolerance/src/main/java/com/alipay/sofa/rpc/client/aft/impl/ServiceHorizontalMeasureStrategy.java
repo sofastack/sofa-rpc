@@ -150,7 +150,6 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
         List<InvocationStat> stats = measureModel.getInvocationStats();
         List<MeasureResultDetail> details = measureResult.getAllMeasureResultDetails();
 
-
         StringBuilder info = new StringBuilder();
 
         info.append("measure info: service[" + service + "];stats{");
