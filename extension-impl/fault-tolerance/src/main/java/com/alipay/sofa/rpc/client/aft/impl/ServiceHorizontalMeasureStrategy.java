@@ -142,7 +142,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
 
         MeasureModel measureModel = measureResult.getMeasureModel();
         String appName = measureModel.getAppName();
-        if (!LOGGER.isInfoEnabled(appName)) {
+        if (!LOGGER.isDebugEnabled(appName)) {
             return;
         }
 
@@ -179,7 +179,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
         }
         info.append("]");
 
-        LOGGER.infoWithApp(appName, info.toString());
+        LOGGER.debugWithApp(appName, info.toString());
     }
 
     /**
