@@ -118,8 +118,68 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
             measureResult.addMeasureDetail(measureResultDetail);
         }
 
+        logMeasureResult(measureResult, timeWindow, leastWindowCount, averageExceptionRate,
+            leastWindowExceptionRateMultiple);
+
         InvocationStatFactory.updateInvocationStats(invocationStats);
         return measureResult;
+    }
+
+    /**
+     * Print the measurement result details for each time window.
+     * @param measureResult
+     * @param timeWindow
+     * @param leastWindowCount
+     * @param averageExceptionRate
+     * @param leastWindowExceptionRateMultiple
+     */
+    private void logMeasureResult(MeasureResult measureResult, long timeWindow, long leastWindowCount,
+                                  double averageExceptionRate,
+                                  double leastWindowExceptionRateMultiple) {
+        if (measureResult == null) {
+            return;
+        }
+
+        MeasureModel measureModel = measureResult.getMeasureModel();
+        String appName = measureModel.getAppName();
+        if (!LOGGER.isDebugEnabled(appName)) {
+            return;
+        }
+
+        String service = measureModel.getService();
+        List<InvocationStat> stats = measureModel.getInvocationStats();
+        List<MeasureResultDetail> details = measureResult.getAllMeasureResultDetails();
+
+        StringBuilder info = new StringBuilder();
+
+        info.append("measure info: service[" + service + "];stats{");
+        for (InvocationStat stat : stats) {
+            info.append(stat.getDimension().getIp());
+            info.append(",");
+        }
+        if (stats.size() > 0) {
+            info.deleteCharAt(info.length() - 1);
+        }
+        info.append("};details{");
+
+        info.append("timeWindow[" + timeWindow + "];leastWindowCount[" + leastWindowCount + "];averageExceptionRate[" +
+            averageExceptionRate
+            + "];leastWindowExceptionRateMultiple[" + leastWindowExceptionRateMultiple + "];");
+        info.append("detail[");
+        for (MeasureResultDetail detail : details) {
+
+            String ip = detail.getInvocationStatDimension().getIp();
+            double abnormalRate = detail.getAbnormalRate();
+            long invocationLeastWindowCount = detail.getLeastWindowCount();
+            String measureState = detail.getMeasureState().name();
+
+            info.append("(ip:" + ip + ",abnormalRate:" + abnormalRate + ",invocationLeastWindowCount:" +
+                invocationLeastWindowCount
+                + ",measureState:" + measureState + ")");
+        }
+        info.append("]");
+
+        LOGGER.debugWithApp(appName, info.toString());
     }
 
     /**
@@ -228,7 +288,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
      * @param invocationStat InvocationStat
      * @param weight weight
      * @param leastWindowCount original least Window count
-     * @return  leastWindowCount
+     * @return leastWindowCount
      */
     private long getInvocationLeastWindowCount(InvocationStat invocationStat, Integer weight, long leastWindowCount) {
         InvocationStatDimension statDimension = invocationStat.getDimension();
