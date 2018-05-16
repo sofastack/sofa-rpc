@@ -25,17 +25,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class LookoutServiceImpl implements LookoutService {
 
-    private final AtomicInteger countSync     = new AtomicInteger(9);
-    private final AtomicInteger countFuture   = new AtomicInteger(9);
-    private final AtomicInteger countCallback = new AtomicInteger(9);
-    private final AtomicInteger countOneway   = new AtomicInteger(9);
+    private final AtomicInteger countSync     = new AtomicInteger();
+    private final AtomicInteger countFuture   = new AtomicInteger();
+    private final AtomicInteger countCallback = new AtomicInteger();
+    private final AtomicInteger countOneway   = new AtomicInteger();
 
     @Override
     public String saySync(String string) throws InterruptedException {
-
         if (countSync.incrementAndGet() == 3) {
             Thread.sleep(3500);
-            return string;
+            throw new RuntimeException();
         } else {
             return string;
         }
@@ -45,7 +44,7 @@ public class LookoutServiceImpl implements LookoutService {
     public String sayFuture(String string) throws InterruptedException {
         if (countFuture.incrementAndGet() == 4) {
             Thread.sleep(3500);
-            return string;
+            throw new RuntimeException();
         } else {
             return string;
         }
@@ -55,7 +54,7 @@ public class LookoutServiceImpl implements LookoutService {
     public String sayCallback(String string) throws InterruptedException {
         if (countCallback.incrementAndGet() == 5) {
             Thread.sleep(3500);
-            return string;
+            throw new RuntimeException();
         } else {
             return string;
         }
@@ -65,7 +64,7 @@ public class LookoutServiceImpl implements LookoutService {
     public String sayOneway(String string) throws InterruptedException {
         if (countOneway.incrementAndGet() == 6) {
             Thread.sleep(3500);
-            return string;
+            throw new RuntimeException();
         } else {
             return string;
         }

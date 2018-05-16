@@ -44,7 +44,7 @@ public class LookoutSubscriber extends Subscriber {
     private final RpcLookout rpcMetrics              = new RpcLookout();
 
     public LookoutSubscriber() {
-        super(true);
+        super(false);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class LookoutSubscriber extends Subscriber {
         Long requestSize = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE));
         Long responseSize = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE));
         Long elapsedTime = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE));
-        Boolean success = response != null && !response.isError() && response.getErrorMsg() == null;
+        Boolean success = response != null && !response.isError() && response.getErrorMsg() == null && (!(response.getAppResponse() instanceof Throwable));
 
         clientMetricsModel.setApp(app);
         clientMetricsModel.setService(service);
@@ -116,8 +116,6 @@ public class LookoutSubscriber extends Subscriber {
         clientMetricsModel.setResponseSize(responseSize);
         clientMetricsModel.setElapsedTime(elapsedTime);
         clientMetricsModel.setSuccess(success);
-
-        System.out.println("!!!!" + clientMetricsModel.toString());
 
         return clientMetricsModel;
     }
@@ -141,7 +139,7 @@ public class LookoutSubscriber extends Subscriber {
         String invokeType = request.getInvokeType();
         String callerApp = getStringAvoidNull(request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
         Long elapsedTime = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE));
-        boolean success = response != null && !response.isError() && response.getErrorMsg() == null;
+        boolean success = response != null && !response.isError() && response.getErrorMsg() == null && (!(response.getAppResponse() instanceof Throwable));
 
         rpcServerMetricsModel.setApp(app);
         rpcServerMetricsModel.setService(service);
