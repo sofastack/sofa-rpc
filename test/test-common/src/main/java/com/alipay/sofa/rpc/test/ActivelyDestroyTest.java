@@ -20,8 +20,11 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.event.LookoutSubscriber;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+
+import java.lang.reflect.Field;
 
 /**
  * Test extend this will destroy actively.
@@ -29,6 +32,16 @@ import org.junit.BeforeClass;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class ActivelyDestroyTest {
+
+    static {
+        try {
+            Field lookoutCollectDisable = LookoutSubscriber.class.getField("LOOKOUT_COLLECT_DISABLE");
+            lookoutCollectDisable.setAccessible(true);
+            lookoutCollectDisable.set(null, true);
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+    }
 
     @BeforeClass
     public static void adBeforeClass() {
