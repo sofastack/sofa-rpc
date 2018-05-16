@@ -38,7 +38,7 @@
         <bolt.version>1.4.1</bolt.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <lookout.version>1.1.0</lookout.version>
-        <tracer.version>2.0.1</tracer.version>
+        <tracer.version>2.1.0</tracer.version>
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
@@ -62,7 +62,7 @@
                 <artifactId>spring-context</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -250,7 +250,7 @@
                 <artifactId>hessian</artifactId>
                 <version>${hessian.version}</version>
             </dependency>
-            
+
             <!-- zk client -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -321,7 +321,12 @@
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
             </dependency>
-            
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>tracer-core</artifactId>
+                <version>${tracer.version}</version>
+            </dependency>
+
             <!-- Test libs -->
             <dependency>
                 <groupId>junit</groupId>
