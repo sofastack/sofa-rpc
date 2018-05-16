@@ -190,8 +190,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         for (int i = 0; i < 4; i++) {
             try {
                 lookoutService.sayFuture("lookout_future");
-                Thread.sleep(1000);
-                SofaResponseFuture.getResponse(500,true);
+                SofaResponseFuture.getResponse(3000,true);
             } catch (Exception e) {
                 System.out.println(e);
             }

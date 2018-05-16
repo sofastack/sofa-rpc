@@ -82,4 +82,20 @@ public class RpcClientLookoutModel extends RpcAbstractLookoutModel {
     public void setResponseSize(Long responseSize) {
         this.responseSize = responseSize;
     }
+
+    @Override
+    public String toString() {
+        return "RpcClientLookoutModel{" +
+                "targetApp='" + targetApp + '\'' +
+                ", requestSize=" + requestSize +
+                ", responseSize=" + responseSize +
+                ", app='" + app + '\'' +
+                ", service='" + service + '\'' +
+                ", method='" + method + '\'' +
+                ", protocol='" + protocol + '\'' +
+                ", invokeType='" + invokeType + '\'' +
+                ", elapsedTime=" + elapsedTime +
+                ", success=" + success +
+                '}';
+    }
 }

@@ -44,7 +44,7 @@ public class LookoutSubscriber extends Subscriber {
     private final RpcLookout rpcMetrics              = new RpcLookout();
 
     public LookoutSubscriber() {
-        super(false);
+        super(true);
     }
 
     @Override
@@ -116,6 +116,8 @@ public class LookoutSubscriber extends Subscriber {
         clientMetricsModel.setResponseSize(responseSize);
         clientMetricsModel.setElapsedTime(elapsedTime);
         clientMetricsModel.setSuccess(success);
+
+        System.out.println("!!!!" + clientMetricsModel.toString());
 
         return clientMetricsModel;
     }

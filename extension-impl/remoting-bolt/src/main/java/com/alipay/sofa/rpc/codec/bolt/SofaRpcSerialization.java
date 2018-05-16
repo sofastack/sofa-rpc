@@ -409,6 +409,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             + responseCommand.getHeaderLength();
         // 记录响应反序列化大小和响应反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
+        System.out.println("set rep size:" + respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME, cost);
     }
 }
