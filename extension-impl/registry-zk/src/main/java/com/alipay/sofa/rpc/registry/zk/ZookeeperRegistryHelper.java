@@ -20,12 +20,11 @@ import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.Version;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.common.utils.*;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -34,9 +33,10 @@ import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Helper for ZookeeperRegistry
@@ -145,10 +145,10 @@ public class ZookeeperRegistryHelper {
     /**
      * Convert url to provider list.
      *
-     *
      * @param providerPath
-     * @param currentData the current data
+     * @param currentData  the current data
      * @return the list
+     * @throws UnsupportedEncodingException decode exception
      */
     static List<ProviderInfo> convertUrlsToProviders(String providerPath, List<ChildData> currentData)
         throws UnsupportedEncodingException {
@@ -172,6 +172,111 @@ public class ZookeeperRegistryHelper {
         processWarmUpWeight(providerInfo);
 
         return providerInfo;
+    }
+
+    /**
+     * Convert child data to attribute list.
+     *
+     * @param configPath  the config path
+     * @param currentData the current data
+     * @return the attribute list
+     */
+    static List<Map<String, String>> convertConfigToAttributes(String configPath, List<ChildData> currentData) {
+        List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
+        if (CommonUtils.isEmpty(currentData)) {
+            return attributes;
+        }
+
+        for (ChildData childData : currentData) {
+            attributes.add(convertConfigToAttribute(configPath, childData, false));
+        }
+        return attributes;
+    }
+
+    /**
+     * Convert child data to attribute.
+     *
+     * @param configPath the config path
+     * @param childData  the child data
+     * @param removeType is remove type
+     * @return the attribute
+     */
+    static Map<String, String> convertConfigToAttribute(String configPath, ChildData childData, boolean removeType) {
+        String attribute = childData.getPath().substring(configPath.length() + 1);
+        //If event type is CHILD_REMOVED, attribute should return to default value
+        return Collections.singletonMap(attribute,
+            removeType ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
+    }
+
+    /**
+     * Convert child data to attribute list.
+     *
+     * @param config       the interface config
+     * @param overridePath the override path
+     * @param currentData  the current data
+     * @return the attribute list
+     * @throws UnsupportedEncodingException decode exception
+     */
+    static List<Map<String, String>> convertOverrideToAttributes(AbstractInterfaceConfig config, String overridePath,
+                                                                 List<ChildData> currentData)
+        throws UnsupportedEncodingException {
+        List<Map<String, String>> attributes = new ArrayList<Map<String, String>>();
+        if (CommonUtils.isEmpty(currentData)) {
+            return attributes;
+        }
+
+        for (ChildData childData : currentData) {
+            String url = URLDecoder.decode(childData.getPath().substring(overridePath.length() + 1), "UTF-8");
+            if (config instanceof ConsumerConfig) {
+                //If child data contains system local host, convert config to attribute
+                if (StringUtils.isNotEmpty(url)
+                    && StringUtils.isNotEmpty(SystemInfo.getLocalHost())
+                    && url.contains("://" + SystemInfo.getLocalHost() + "?")) {
+                    attributes.add(convertConfigToAttribute(overridePath, childData, false));
+                }
+            }
+        }
+        return attributes;
+    }
+
+    /**
+     * Convert child data to attribute.
+     *
+     * @param overridePath   the override path
+     * @param childData      the child data
+     * @param removeType     is remove type
+     * @param registerConfig register provider/consumer config
+     * @return the attribute
+     * @throws Exception decode exception
+     */
+    static Map<String, String> convertOverrideToAttribute(String overridePath, ChildData childData, boolean removeType,
+                                                          AbstractInterfaceConfig registerConfig) throws Exception {
+        String url = URLDecoder.decode(childData.getPath().substring(overridePath.length() + 1), "UTF-8");
+        Map<String, String> attribute = new ConcurrentHashMap<String, String>();
+        for (String keyPairs : url.substring(url.indexOf("?")).split("&")) {
+            String[] overrideAttrs = keyPairs.split("=");
+            List<String> configKeys = Arrays.asList(RpcConstants.CONFIG_KEY_TIMEOUT,
+                RpcConstants.CONFIG_KEY_GENERIC,
+                RpcConstants.CONFIG_KEY_APP_NAME,
+                RpcConstants.CONFIG_KEY_SERIALIZATION,
+                RpcConstants.CONFIG_KEY_DYNAMIC,
+                ProviderInfoAttrs.ATTR_WEIGHT,
+                ProviderInfoAttrs.ATTR_WARMUP_TIME,
+                ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
+            if (configKeys.contains(overrideAttrs[0])) {
+                if (removeType) {
+                    Method getMethod = ReflectUtils.getPropertyGetterMethod(AbstractInterfaceConfig.class,
+                        overrideAttrs[0]);
+                    Class propertyClazz = getMethod.getReturnType();
+                    //If event type is CHILD_REMOVED, attribute should return to register value
+                    attribute.put(overrideAttrs[0], StringUtils.toString(BeanUtils.getProperty(
+                        registerConfig, overrideAttrs[0], propertyClazz)));
+                } else {
+                    attribute.put(overrideAttrs[0], overrideAttrs[1]);
+                }
+            }
+        }
+        return attribute;
     }
 
     /**
@@ -218,6 +323,10 @@ public class ZookeeperRegistryHelper {
 
     static String buildConfigPath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/configs";
+    }
+
+    static String buildOverridePath(String rootPath, AbstractInterfaceConfig config) {
+        return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/overrides";
     }
 
     static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
