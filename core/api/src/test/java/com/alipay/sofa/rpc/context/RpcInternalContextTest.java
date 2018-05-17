@@ -16,14 +16,18 @@
  */
 package com.alipay.sofa.rpc.context;
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -35,9 +39,18 @@ import java.util.concurrent.TimeoutException;
  */
 public class RpcInternalContextTest {
 
+    @Before
+    public void before() {
+        RpcInternalContext.removeAllContext();
+    }
+
+    @After
+    public void after() {
+        RpcInternalContext.removeAllContext();
+    }
+
     @Test
     public void testPop() {
-
         RpcInternalContext.pushContext();
 
         RpcInternalContext.popContext();
@@ -71,6 +84,47 @@ public class RpcInternalContextTest {
 
         Assert.assertEquals(RpcInternalContext.getContext(), parentCtx);
         Assert.assertEquals(RpcInternalContext.getContext().getRemoteAddress().toString(), "127.0.0.1:12200");
+    }
+
+    @Test
+    public void testAddress() {
+        RpcInternalContext context = RpcInternalContext.getContext();
+        context.setLocalAddress(null, 80);
+        context.setLocalAddress("127.0.0.1", -1);
+        context.setRemoteAddress(null, 80);
+        context.setRemoteAddress("127.0.0.1", -1);
+        Assert.assertTrue(context.getRemoteAddress().getPort() == 0);
+        Assert.assertEquals("127.0.0.1", context.getRemoteHostName());
+    }
+
+    @Test
+    public void testAttachment() {
+        Assert.assertTrue(RpcInternalContext.isAttachmentEnable());
+        RpcInternalContext context = RpcInternalContext.getContext();
+        boolean error = false;
+        try {
+            context.setAttachment("1", "1");
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("_11", "1111");
+        map.put("_22", "2222");
+        map.put(".33", "3333");
+        context.setAttachments(map);
+        Assert.assertEquals("1111", context.getAttachment("_11"));
+        context.setAttachment(null, "22222");
+        context.setAttachment("_22", null);
+        Assert.assertNull(context.getAttachment(null));
+        Assert.assertNull(context.getAttachment("_22"));
+
+        Assert.assertNull(context.removeAttachment("_33"));
+        Assert.assertEquals("3333", context.removeAttachment(".33"));
+
+        context.clearAttachments();
+        Assert.assertNull(context.removeAttachment("11"));
     }
 
     @Test
@@ -116,7 +170,7 @@ public class RpcInternalContextTest {
             }
         });
 
-        context.setProviderInfo(ProviderInfo.valueOf("127.0.0.1:80"));
+        context.setProviderInfo(ProviderHelper.toProviderInfo("127.0.0.1:80"));
         context.setInterfaceConfig(new ProviderConfig());
         context.setAttachment("_xxxx", "yyyy");
 
@@ -129,7 +183,24 @@ public class RpcInternalContextTest {
         Assert.assertNull(context.getProviderInfo());
         Assert.assertNull(context.getInterfaceConfig());
         Assert.assertTrue(context.getAttachments().isEmpty());
+        Assert.assertNotNull(context.getStopWatch());
+        Assert.assertTrue(context.getStopWatch().read() == 0);
 
-        RpcInternalContext.removeAllContext();
+        Assert.assertNotNull(context.toString());
+    }
+
+    @Test
+    public void testKey() {
+        Assert.assertTrue(RpcInternalContext.isValidInternalParamKey("."));
+        Assert.assertTrue(RpcInternalContext.isValidInternalParamKey(".xx"));
+        Assert.assertTrue(RpcInternalContext.isValidInternalParamKey("_"));
+        Assert.assertTrue(RpcInternalContext.isValidInternalParamKey("_xx"));
+        Assert.assertFalse(RpcInternalContext.isHiddenParamKey("aaaa"));
+
+        Assert.assertTrue(RpcInternalContext.isHiddenParamKey("."));
+        Assert.assertTrue(RpcInternalContext.isHiddenParamKey(".xx"));
+        Assert.assertFalse(RpcInternalContext.isHiddenParamKey("_"));
+        Assert.assertFalse(RpcInternalContext.isHiddenParamKey("_xx"));
+        Assert.assertFalse(RpcInternalContext.isHiddenParamKey("aaaa"));
     }
 }
