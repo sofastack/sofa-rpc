@@ -39,6 +39,7 @@
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <lookout.version>1.1.0</lookout.version>
         <tracer.version>2.0.1</tracer.version>
+        <lookout.version>1.4.0</lookout.version>
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
@@ -320,6 +321,13 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
+            </dependency>
+
+            <!-- lookout -->
+            <dependency>
+                <groupId>com.alipay.sofa.lookout</groupId>
+                <artifactId>lookout-api</artifactId>
+                <version>${lookout.version}</version>
             </dependency>
             
             <!-- Test libs -->
