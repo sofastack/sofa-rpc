@@ -40,6 +40,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Extension("rest")
 public class RestClientTransport extends AbstractProxyClientTransport {
+
+    /**
+     * 默认至少的连接池大小
+     */
+    private static final int MIN_CONNECTION_POOL_SIZE = 80;
+
     public RestClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
     }
@@ -52,7 +58,7 @@ public class RestClientTransport extends AbstractProxyClientTransport {
             .registerProvider().logProviders()
             .establishConnectionTimeout(transportConfig.getConnectTimeout(), TimeUnit.MILLISECONDS)
             .socketTimeout(transportConfig.getInvokeTimeout(), TimeUnit.MILLISECONDS)
-            .connectionPoolSize(transportConfig.getConnectionNum())// 连接池？
+            .connectionPoolSize(Math.max(transportConfig.getConnectionNum(), MIN_CONNECTION_POOL_SIZE))
             .build();
 
         ProviderInfo provider = transportConfig.getProviderInfo();
