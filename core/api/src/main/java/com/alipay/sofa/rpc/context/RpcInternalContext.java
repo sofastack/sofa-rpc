@@ -29,8 +29,8 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import java.net.InetSocketAddress;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于ThreadLocal的内部使用的上下文传递。一般存在于：客户端请求线程、服务端业务线程池、客户端异步线程<br>
@@ -168,7 +168,7 @@ public class RpcInternalContext implements Cloneable {
      *
      * @see #ATTACHMENT_ENABLE
      */
-    private Map<String, Object>     attachments = new HashMap<String, Object>();
+    private Map<String, Object>     attachments = new ConcurrentHashMap<String, Object>();
 
     /**
      * The Stopwatch
@@ -434,7 +434,7 @@ public class RpcInternalContext implements Cloneable {
     public void clear() {
         this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(null)
             .setProviderInfo(null).setInterfaceConfig(null);
-        this.attachments = new HashMap<String, Object>();
+        this.attachments = new ConcurrentHashMap<String, Object>();
         this.stopWatch.reset();
     }
 
@@ -484,7 +484,7 @@ public class RpcInternalContext implements Cloneable {
 
     @Override
     public String toString() {
-        return "RpcInternalContext{" +
+        return super.toString() + "{" +
             "future=" + future +
             ", localAddress=" + localAddress +
             ", remoteAddress=" + remoteAddress +

@@ -534,6 +534,7 @@ public abstract class AbstractCluster extends Cluster {
             // Callback调用
             else if (RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)) {
                 // 调用级别回调监听器
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
                 SofaResponseCallback sofaResponseCallback = request.getSofaResponseCallback();
                 if (sofaResponseCallback == null) {
                     SofaResponseCallback methodResponseCallback = consumerConfig
@@ -547,6 +548,7 @@ public abstract class AbstractCluster extends Cluster {
             }
             // Future调用
             else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
                 // 开始调用
                 ResponseFuture future = transport.asyncSend(request, timeout);
                 // 放入线程上下文

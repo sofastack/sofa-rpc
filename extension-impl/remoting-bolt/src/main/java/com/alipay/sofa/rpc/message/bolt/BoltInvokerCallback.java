@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.context.AsyncRuntime;
 import com.alipay.sofa.rpc.context.BaggageResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
@@ -138,6 +139,12 @@ public class BoltInvokerCallback implements InvokeCallback {
             }
 
         } finally {
+            if (context != null) {
+                Long startTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME);
+                if (startTime != null) {
+                    context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE, RpcRuntimeContext.now() - startTime);
+                }
+            }
             if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
                 EventBus.post(new ClientEndInvokeEvent(request, response, null));
             }
@@ -173,6 +180,12 @@ public class BoltInvokerCallback implements InvokeCallback {
                 RpcErrorType.SERVER_UNDECLARED_ERROR, e.getMessage(), e);
             callback.onSofaException(sofaRpcException, request.getMethodName(), request);
         } finally {
+            if (context != null) {
+                Long startTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME);
+                if (startTime != null) {
+                    context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE, RpcRuntimeContext.now() - startTime);
+                }
+            }
             if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
                 EventBus.post(new ClientEndInvokeEvent(request, null, e));
             }
