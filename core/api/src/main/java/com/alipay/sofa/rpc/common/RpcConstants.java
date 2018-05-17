@@ -198,11 +198,11 @@ public class RpcConstants {
     public static final String  HIDDEN_KEY_DESTROY                 = HIDE_KEY_PREFIX + "destroy";
 
     /**
-     * 内部使用的key：_app_name
+     * 内部使用的key：_app_name，string
      */
     public static final String  INTERNAL_KEY_APP_NAME              = INTERNAL_KEY_PREFIX + "app_name";
     /**
-     * 内部使用的key：_protocol_name
+     * 内部使用的key：_protocol_name，string
      */
     public static final String  INTERNAL_KEY_PROTOCOL_NAME         = INTERNAL_KEY_PREFIX + "protocol_name";
     /**
@@ -230,27 +230,33 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_RESP_DESERIALIZE_TIME = INTERNAL_KEY_PREFIX + "resp_des_time";
     /**
-     * 内部使用的key：_process_wait_time 在业务线程池里等待时间
+     * 内部使用的key：_process_wait_time 在业务线程池里等待时间，long
      */
     public static final String  INTERNAL_KEY_PROCESS_WAIT_TIME     = INTERNAL_KEY_PREFIX + "process_wait_time";
     /**
-     * 内部使用的key：_conn_create_time 长连接建立时间 需要一个 (long) 类型数据
+     * 内部使用的key：_conn_create_time 长连接建立时间，long
      */
     public static final String  INTERNAL_KEY_CONN_CREATE_TIME      = INTERNAL_KEY_PREFIX + "conn_create_time";
     /**
-     * 内部使用的key：_impl_elapse 业务代码执行耗时
+     * 内部使用的key：_impl_elapse 业务代码执行耗时，long
      */
     public static final String  INTERNAL_KEY_IMPL_ELAPSE           = INTERNAL_KEY_PREFIX + "impl_elapse";
     /**
-     * 内部使用的key：_client_elapse 客户端总耗时
+     * 内部使用的key：_client_elapse 客户端总耗时，long
      */
     public static final String  INTERNAL_KEY_CLIENT_ELAPSE         = INTERNAL_KEY_PREFIX + "client_elapse";
     /**
-     * 内部使用的key：_router_record 路由记录
+     * 内部使用的key：_client_send_time 客户端发送时间戳，long
+     * 
+     * @since 5.4.0
+     */
+    public static final String  INTERNAL_KEY_CLIENT_SEND_TIME      = INTERNAL_KEY_PREFIX + "client_send_time";
+    /**
+     * 内部使用的key：_router_record 路由记录，string
      */
     public static final String  INTERNAL_KEY_ROUTER_RECORD         = INTERNAL_KEY_PREFIX + "router_record";
     /**
-     * 内部使用的key：_invoke_times 调用次数
+     * 内部使用的key：_invoke_times 调用次数，int
      */
     public static final String  INTERNAL_KEY_INVOKE_TIMES          = INTERNAL_KEY_PREFIX + "invoke_times";
     /**
@@ -285,7 +291,7 @@ public class RpcConstants {
      */
     public static final String  CONFIG_KEY_GENERIC                 = "generic";
     /**
-     * 配置key:async
+     * 配置key:invokeType
      */
     public static final String  CONFIG_KEY_INVOKE_TYPE             = "invokeType";
     /**
@@ -304,7 +310,7 @@ public class RpcConstants {
     public static final String  CONFIG_KEY_CONCURRENTS             = "concurrents";
 
     /**
-     * 配置key:params
+     * 配置key:parameters
      */
     public static final String  CONFIG_KEY_PARAMS                  = "parameters";
 
