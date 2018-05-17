@@ -41,13 +41,11 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 /**
  *
@@ -149,17 +147,17 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             .setOnReturn(new SofaResponseCallback() {
                 @Override
                 public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                    System.out.println(appResponse);
+
                 }
 
                 @Override
                 public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                    System.out.println(throwable);
+
                 }
 
                 @Override
                 public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-                    System.out.println(sofaException);
+
                 }
             });
         MethodConfig methodConfigOneway = new MethodConfig()
@@ -184,39 +182,39 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         //sync
         for (int i = 0; i < 3; i++) {
             try {
-                System.out.println(lookoutService.saySync("lookout_sync"));
+                lookoutService.saySync("lookout_sync");
             } catch (Exception e) {
                 System.out.println(e);
             }
         }
 
         //future
-        //for (int i = 0; i < 4; i++) {
-        //    try {
-        //        lookoutService.sayFuture("lookout_future");
-        //        SofaResponseFuture.getResponse(3000,true);
-        //    } catch (Exception e) {
-        //        System.out.println(e);
-        //    }
-        //}
+        for (int i = 0; i < 4; i++) {
+            try {
+                lookoutService.sayFuture("lookout_future");
+                SofaResponseFuture.getResponse(3000,true);
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
 
         //callback
-        //for (int i = 0; i < 5; i++) {
-        //    try {
-        //        lookoutService.sayCallback("lookout_callback");
-        //    } catch (Exception e) {
-        //        System.out.println(e);
-        //    }
-        //}
+        for (int i = 0; i < 5; i++) {
+            try {
+                lookoutService.sayCallback("lookout_callback");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
 
         //oneway
-        //for (int i = 0; i < 6; i++) {
-        //    try {
-        //        lookoutService.sayOneway("lookout_oneway");
-        //    } catch (Exception e) {
-        //        System.out.println(e);
-        //    }
-        //}
+        for (int i = 0; i < 6; i++) {
+            try {
+                lookoutService.sayOneway("lookout_oneway");
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
     }
 
     /**
@@ -261,7 +259,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
         for (Measurement measurement : measurements) {
-            //assertEquals(3 , ((Number) measurement.value()).intValue());
+            assertEquals(3 + 4 + 5 + 6, ((Number) measurement.value()).intValue());
         }
     }
 
@@ -289,21 +287,17 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 String methodName = tag.value();
 
                 if (methodName.equals("saySync")) {
-                    testSync(metric, true, 3, "saySync", 0, 0);
-                    //assertMethod(metric, true, 3);
+                    assertMethod(metric, true, 3, "saySync", 0, 0);
 
                 } else if (methodName.equals("sayFuture")) {
-                    //assertMethod(metric, true, 4);
+                    assertMethod(metric, true, 4, "sayFuture",0 , 0);
 
                 } else if (methodName.equals("sayCallback")) {
-                    //Thread.sleep(5000);
-                    //
-                    //assertMethod(metric, true, 5);
+                    assertMethod(metric, true, 5, "sayCallback",0 , 0);
 
                 } else if (methodName.equals("sayOneway")) {
-                    //Thread.sleep(2000);
-                    //
-                    //assertMethod(metric, true, 6);
+                    assertMethod(metric, true, 6, "sayOneway",0 , 0);
+
                 }
             }
         }
@@ -321,17 +315,16 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 String methodName = tag.value();
 
                 if (methodName.equals("saySync")) {
-                    testSync(metric, false, 3, "saySync",1227 , 352);
-                    //assertMethod(metric, false, 3);
+                    assertMethod(metric, false, 3, "saySync",1227 , 352);
 
                 } else if (methodName.equals("sayFuture")) {
-                    //assertMethod(metric, false, 4);
+                    assertMethod(metric, false, 4, "sayFuture",1652 , 534);
 
                 } else if (methodName.equals("sayCallback")) {
-                    //assertMethod(metric, false, 5);
+                    assertMethod(metric, false, 5, "sayCallback",2085 , 720);
 
                 } else if (methodName.equals("sayOneway")) {
-                    //assertMethod(metric, false, 6);
+                    assertMethod(metric, false, 6, "sayOneway",2478 , 0);
 
                 }
             }
@@ -339,10 +332,15 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     }
 
     /**
-     * test sync
+     * assert method
+     * @param metric the metric
+     * @param isProvider is it the provider
+     * @param totalCount the total invoke count
+     * @param method the method name
+     * @param requestSize the request size
+     * @param responseSize the response size
      */
-    private void testSync(Metric metric, boolean isProvider, int totalCount, String method, int requestSize, int responseSize){
-
+    private void assertMethod(Metric metric, boolean isProvider, int totalCount, String method, int requestSize, int responseSize){
         // tag
         boolean tagAssert = false;
         for(Tag tag : metric.id().tags()){
@@ -394,7 +392,11 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         if(isProvider){
             assertEquals(6, measurements.size());
         }else {
-            assertEquals(10, measurements.size());
+            if(method.equals("sayOneway")){
+                assertEquals(5, measurements.size());
+            }else {
+                assertEquals(10, measurements.size());
+            }
         }
 
         boolean invokeInfoAssert = false;
@@ -407,7 +409,11 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 invokeInfoAssert = true;
             }
             if(name.equals("total_time.totalTime")){
-                assertTrue(value>3000);
+                if(method.equals("sayOneway") && !isProvider){
+                    assertTrue(value < 3000);
+                }else {
+                    assertTrue(value > 3000);
+                }
                 invokeInfoAssert = true;
             }
             if(name.equals("total_time.count")){
@@ -419,7 +425,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 invokeInfoAssert = true;
             }
             if(name.equals("fail_time.totalTime")){
-                assertTrue(value>3000);
+                assertTrue(value > 3000);
                 invokeInfoAssert = true;
             }
             if(name.equals("fail_time.count")){
@@ -439,50 +445,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         }
         if(!invokeInfoAssert){
             Assert.fail();
-        }
-
-    }
-
-    /**
-     * assert invoke method of provider and consumer
-     * @param metric
-     * @param isProvider
-     * @param totalCount
-     */
-    private void assertMethod(Metric metric, boolean isProvider, int totalCount) {
-
-        Collection<Measurement> measurements = metric.measure().measurements();
-        if (isProvider) {
-            assertTrue(3 == measurements.size() || 6 == measurements.size());
-        } else {
-            assertTrue(7 == measurements.size() || 10 == measurements.size());
-        }
-
-        List<String> idList = new ArrayList<String>();
-        idList.add("total_count");
-        idList.add("total_time.totalTime");
-        idList.add("total_time.count");
-        idList.add("fail_count");
-        idList.add("fail_time.count");
-        idList.add("fail_time.totalTime");
-        if (!isProvider) {
-            idList.add("request_size.count");
-            idList.add("response_size.count");
-        }
-
-        for (Measurement measurement : measurements) {
-
-            String name = measurement.name();
-
-            assertTrue(idList.contains(name));
-
-            if (name.equals("total_count")) {
-                assertEquals(totalCount, ((Number) measurement.value()).intValue());
-            } else if (name.equals("fail_count")) {
-                assertEquals(1, ((Number) measurement.value()).intValue());
-            } else if (name.equals("total_time.count")) {
-                assertEquals(totalCount, ((Number) measurement.value()).intValue());
-            }
         }
     }
 }

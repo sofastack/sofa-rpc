@@ -32,17 +32,8 @@
 
         <!-- lookout -->
         <dependency>
-            <groupId>com.alipay.sofa.lookout</groupId>
-            <artifactId>lookout-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa.lookout</groupId>
-            <artifactId>lookout-core</artifactId>
-            <version>1.4.0-dev</version>
-        </dependency>
-        <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-lookout</artifactId>
+            <artifactId>sofa-rpc-metrics-lookout</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
     </dependencies>

@@ -57,7 +57,7 @@
         <hessian.version>3.3.0</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
         <bolt.version>1.4.1</bolt.version>
-        <lookout.version>1.4.0-dev</lookout.version>
+        <lookout.version>1.4.0</lookout.version>
     </properties>
 
     <dependencies>
@@ -175,7 +175,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-lookout</artifactId>
+            <artifactId>sofa-rpc-metrics-lookout</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
 
@@ -319,7 +319,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
-                                    <include>com.alipay.sofa:sofa-rpc-lookout</include>
+                                    <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>
