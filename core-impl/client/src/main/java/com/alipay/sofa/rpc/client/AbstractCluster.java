@@ -542,11 +542,16 @@ public abstract class AbstractCluster extends Cluster {
                         request.setSofaResponseCallback(methodResponseCallback);
                     }
                 }
+                // 记录发送开始时间
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
+                // 开始调用
                 transport.asyncSend(request, timeout);
                 response = buildEmptyResponse(request);
             }
             // Future调用
             else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
+                // 记录发送开始时间
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
                 // 开始调用
                 ResponseFuture future = transport.asyncSend(request, timeout);
                 // 放入线程上下文
