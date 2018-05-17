@@ -204,8 +204,6 @@ public class BoltClientTransport extends ClientTransport {
         InvokeContext boltInvokeContext = createInvokeContext(request);
         try {
             beforeSend(context, request);
-            // 复制一份上下文
-            context = context.clone();
             boltInvokeContext.put(RemotingConstants.INVOKE_CTX_RPC_CTX, context);
             return doInvokeAsync(request, context, boltInvokeContext, timeout);
         } catch (Exception e) {

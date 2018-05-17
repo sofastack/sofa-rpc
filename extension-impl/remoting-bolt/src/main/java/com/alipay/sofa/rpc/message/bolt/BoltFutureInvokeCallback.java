@@ -16,12 +16,9 @@
  */
 package com.alipay.sofa.rpc.message.bolt;
 
-import com.alipay.remoting.InvokeCallback;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
-import com.alipay.sofa.rpc.context.BaggageResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
@@ -40,32 +37,12 @@ import java.util.concurrent.Executor;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class BoltFutureInvokeCallback implements InvokeCallback {
+public class BoltFutureInvokeCallback extends AbstractInvokeCallback {
 
     /**
-     * 服务消费者配置
+     * 请求结果Future
      */
-    protected final ConsumerConfig consumerConfig;
-    /**
-     * 服务提供者信息
-     */
-    protected final ProviderInfo   providerInfo;
-    /**
-     * 请求对象
-     */
-    public BoltResponseFuture      rpcFuture;
-    /**
-     * 请求
-     */
-    protected final SofaRequest    request;
-    /**
-     * 请求运行时的ClassLoader
-     */
-    protected ClassLoader          classLoader;
-    /**
-     * 线程池
-     */
-    protected RpcInternalContext   context;
+    public BoltResponseFuture rpcFuture;
 
     /**
      * Instantiates a new Bolt future invoke callback.
@@ -80,12 +57,8 @@ public class BoltFutureInvokeCallback implements InvokeCallback {
     public BoltFutureInvokeCallback(ConsumerConfig consumerConfig, ProviderInfo providerInfo,
                                     BoltResponseFuture rpcFuture, SofaRequest request,
                                     RpcInternalContext context, ClassLoader classLoader) {
-        this.consumerConfig = consumerConfig;
-        this.providerInfo = providerInfo;
+        super(consumerConfig, providerInfo, request, context, classLoader);
         this.rpcFuture = rpcFuture;
-        this.request = request;
-        this.context = context;
-        this.classLoader = classLoader;
     }
 
     @Override
@@ -96,7 +69,6 @@ public class BoltFutureInvokeCallback implements InvokeCallback {
         ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
         SofaResponse response = (SofaResponse) result;
         Throwable throwable = null;
-        RpcInvokeContext invokeCtx = null;
         try {
             Thread.currentThread().setContextClassLoader(this.classLoader);
             RpcInternalContext.setContext(context);
@@ -106,22 +78,17 @@ public class BoltFutureInvokeCallback implements InvokeCallback {
                     request, response, null));
             }
 
-            if (RpcInvokeContext.isBaggageEnable()) {
-                if (context != null) {
-                    invokeCtx = (RpcInvokeContext) context.getAttachment(RpcConstants.HIDDEN_KEY_INVOKE_CONTEXT);
-                }
-                if (invokeCtx == null) {
-                    invokeCtx = RpcInvokeContext.getContext();
-                } else {
-                    RpcInvokeContext.setContext(invokeCtx);
-                }
-                BaggageResolver.pickupFromResponse(invokeCtx, response);
-            }
+            pickupBaggage(response);
 
             // do async filter after respond server
             FilterChain chain = consumerConfig.getConsumerBootstrap().getCluster().getFilterChain();
             if (chain != null) {
                 chain.onAsyncResponse(consumerConfig, request, response, null);
+            }
+
+            recordClientElapseTime();
+            if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
+                EventBus.post(new ClientEndInvokeEvent(request, response, null));
             }
 
             Object appResp = response.getAppResponse();
@@ -135,11 +102,7 @@ public class BoltFutureInvokeCallback implements InvokeCallback {
             } else {
                 rpcFuture.setSuccess(appResp);
             }
-
         } finally {
-            if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
-                EventBus.post(new ClientEndInvokeEvent(request, response, null));
-            }
             Thread.currentThread().setContextClassLoader(oldCl);
             RpcInvokeContext.removeContext();
             RpcInternalContext.removeAllContext();
@@ -167,11 +130,13 @@ public class BoltFutureInvokeCallback implements InvokeCallback {
                 chain.onAsyncResponse(consumerConfig, request, null, e);
             }
 
-            rpcFuture.setFailure(e);
-        } finally {
+            recordClientElapseTime();
             if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
                 EventBus.post(new ClientEndInvokeEvent(request, null, e));
             }
+
+            rpcFuture.setFailure(e);
+        } finally {
             Thread.currentThread().setContextClassLoader(cl);
             RpcInvokeContext.removeContext();
             RpcInternalContext.removeAllContext();
