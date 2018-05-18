@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.alipay.sofa.rpc.event.LookoutSubscriber;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -30,10 +29,6 @@ import org.junit.BeforeClass;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class ActivelyDestroyTest {
-
-    static {
-        LookoutSubscriber.setLookoutCollectDisable(true);
-    }
 
     @BeforeClass
     public static void adBeforeClass() {

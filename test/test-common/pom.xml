@@ -18,12 +18,6 @@
             <artifactId>sofa-rpc-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <!-- lookout -->
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-metrics-lookout</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>

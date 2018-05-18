@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.lookout.RpcLookout;
@@ -37,10 +38,10 @@ public class LookoutSubscriber extends Subscriber {
     /**
      * Whether lookout be banned from collecting information.
      */
-    public static boolean    LOOKOUT_COLLECT_DISABLE = RpcConfigs
-                                                         .getBooleanValue(RpcOptions.LOOKOUT_COLLECT_DISABLE);
+    public static boolean    lookoutCollectDisable = RpcConfigs
+                                                       .getBooleanValue(RpcOptions.LOOKOUT_COLLECT_DISABLE);
 
-    private final RpcLookout rpcMetrics              = new RpcLookout();
+    private final RpcLookout rpcMetrics            = new RpcLookout();
 
     public LookoutSubscriber() {
         super(false);
@@ -49,7 +50,7 @@ public class LookoutSubscriber extends Subscriber {
     @Override
     public void onEvent(Event event) {
 
-        if (LOOKOUT_COLLECT_DISABLE) {
+        if (RpcRunningState.isUnitTestMode() || lookoutCollectDisable) {
             return;
         }
 
@@ -176,10 +177,10 @@ public class LookoutSubscriber extends Subscriber {
     }
 
     public static boolean isLookoutCollectDisable() {
-        return LOOKOUT_COLLECT_DISABLE;
+        return lookoutCollectDisable;
     }
 
     public static void setLookoutCollectDisable(boolean lookoutCollectDisable) {
-        LOOKOUT_COLLECT_DISABLE = lookoutCollectDisable;
+        LookoutSubscriber.lookoutCollectDisable = lookoutCollectDisable;
     }
 }

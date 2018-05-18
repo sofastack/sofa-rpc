@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.lookout;
+package com.alipay.sofa.lookout;
 
 import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Measurement;
@@ -28,13 +28,14 @@ import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
-import com.alipay.sofa.rpc.event.LookoutSubscriber;
+import com.alipay.sofa.rpc.lookout.RpcLookout;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -81,7 +82,12 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Registry registry = new DefaultRegistry();
         Lookout.setRegistry(registry);
 
-        LookoutSubscriber.setLookoutCollectDisable(false);
+        RpcRunningState.setUnitTestMode(false);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        RpcRunningState.setUnitTestMode(true);
     }
 
     @Test
@@ -112,9 +118,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      * invoke
      */
     private void invoke() throws InterruptedException {
-        RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
-            .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
             .setPort(12200)
@@ -128,8 +131,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             .setRef(new LookoutServiceImpl())
             .setServer(serverConfig)
             .setBootstrap("bolt")
-            .setRegister(true)
-            .setRegistry(registryConfig)
+            .setRegister(false)
             .setApplication(new ApplicationConfig().setAppName("TestLookOutServer"));
         providerConfig.export();
 
@@ -169,8 +171,8 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             .setBootstrap("bolt")
             .setMethods(methodConfigs)
             .setTimeout(3000)
-            .setRegister(true)
-            .setRegistry(registryConfig)
+            .setRegister(false)
+            .setDirectUrl("bolt://127.0.0.1:12200?appName=TestLookOutServer")
             .setApplication(new ApplicationConfig().setAppName("TestLookOutClient"));
         LookoutService lookoutService = consumerConfig.refer();
 
@@ -310,16 +312,16 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 String methodName = tag.value();
 
                 if (methodName.equals("saySync")) {
-                    assertMethod(metric, false, 3, "saySync", 1227, 352);
+                    assertMethod(metric, false, 3, "saySync", 1203, 352);
 
                 } else if (methodName.equals("sayFuture")) {
-                    assertMethod(metric, false, 4, "sayFuture", 1652, 534);
+                    assertMethod(metric, false, 4, "sayFuture", 1620, 534);
 
                 } else if (methodName.equals("sayCallback")) {
-                    assertMethod(metric, false, 5, "sayCallback", 2085, 720);
+                    assertMethod(metric, false, 5, "sayCallback", 2045, 720);
 
                 } else if (methodName.equals("sayOneway")) {
-                    assertMethod(metric, false, 6, "sayOneway", 2478, 0);
+                    assertMethod(metric, false, 6, "sayOneway", 2430, 0);
 
                 }
             }
@@ -344,7 +346,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             String key = tag.key();
             String value = tag.value();
             if (key.equals("service")) {
-                assertEquals("com.alipay.sofa.rpc.lookout.LookoutService:1.0", value);
+                assertEquals("com.alipay.sofa.lookout.LookoutService:1.0", value);
                 tagAssert = true;
             }
             if (key.equals("protocol")) {
