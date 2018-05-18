@@ -22,7 +22,6 @@ import com.alipay.lookout.api.Lookout;
 /**
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
- * @version $Id: RpcLookoutId.java, v 0.1 2018年05月10日 下午8:20 LiWei.Liangen Exp $
  */
 public class RpcLookoutId {
 

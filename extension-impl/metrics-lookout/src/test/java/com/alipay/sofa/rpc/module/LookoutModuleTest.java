@@ -14,20 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.lookout;
+package com.alipay.sofa.rpc.module;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
-public interface LookoutService {
+public class LookoutModuleTest {
 
-    String saySync(String string) throws InterruptedException;
-
-    String sayFuture(String string) throws InterruptedException;
-
-    String sayCallback(String string) throws InterruptedException;
-
-    String sayOneway(String string) throws InterruptedException;
-
+    @Test
+    public void testNeedLoad() {
+        LookoutModule lookoutModule = new LookoutModule();
+        Assert.assertEquals(true, lookoutModule.needLoad());
+    }
 }

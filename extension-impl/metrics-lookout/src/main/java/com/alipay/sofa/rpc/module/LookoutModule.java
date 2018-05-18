@@ -26,8 +26,7 @@ import com.alipay.sofa.rpc.ext.Extension;
 
 /**
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: MetricsModule.java, v 0.1 2018年04月25日 下午12:22 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 @Extension("lookout")
 public class LookoutModule implements Module {
@@ -36,7 +35,12 @@ public class LookoutModule implements Module {
 
     @Override
     public boolean needLoad() {
-        return true;
+        try {
+            Class.forName("com.alipay.lookout.spi.DefaultMetricsImporterLocator");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     @Override

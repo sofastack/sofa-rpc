@@ -18,8 +18,8 @@ package com.alipay.sofa.rpc.model;
 
 /**
  * The model for lookout info of server
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: RpcServerMetricsModel.java, v 0.1 2018年04月24日 下午4:22 LiWei.Liengen Exp $
+ *
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcServerLookoutModel extends RpcAbstractLookoutModel {
 

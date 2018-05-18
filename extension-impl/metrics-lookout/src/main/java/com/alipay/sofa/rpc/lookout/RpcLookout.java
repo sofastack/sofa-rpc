@@ -24,6 +24,7 @@ import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Timer;
 import com.alipay.lookout.api.composite.MixinMetric;
 import com.alipay.lookout.api.info.Info;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -40,8 +41,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Rpc reports the information to lookout.
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: RpcMetrics.java, v 0.1 2018年04月23日 下午9:02 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcLookout {
 
@@ -51,8 +51,6 @@ public class RpcLookout {
     private final static Logger LOGGER       = LoggerFactory.getLogger(RpcLookout.class);
 
     private final RpcLookoutId  rpcLookoutId = new RpcLookoutId();
-
-    private static final String EMPTY_STRING = "";
 
     /**
      * Collect the RPC client information.
@@ -250,7 +248,7 @@ public class RpcLookout {
 
     private String emptyIfNull(String value) {
         if (value == null) {
-            return EMPTY_STRING;
+            return StringUtils.EMPTY;
         }
 
         return value;

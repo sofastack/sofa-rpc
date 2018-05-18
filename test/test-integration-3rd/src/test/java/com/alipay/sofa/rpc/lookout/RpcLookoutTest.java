@@ -50,7 +50,6 @@ import static org.junit.Assert.assertTrue;
 /**
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
- * @version $Id: RpcLookoutTest.java, v 0.1 2018年05月10日 下午10:25 LiWei.Liangen Exp $
  */
 public class RpcLookoutTest extends ActivelyDestroyTest {
 

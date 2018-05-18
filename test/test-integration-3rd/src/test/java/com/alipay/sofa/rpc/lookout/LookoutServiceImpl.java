@@ -21,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
- * @version $Id: LookoutServiceImpl.java, v 0.1 2018年05月10日 下午10:56 LiWei.Liangen Exp $
  */
 public class LookoutServiceImpl implements LookoutService {
 

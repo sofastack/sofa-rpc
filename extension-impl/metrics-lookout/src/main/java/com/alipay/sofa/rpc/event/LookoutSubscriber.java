@@ -30,8 +30,7 @@ import com.alipay.sofa.rpc.model.RpcServerLookoutModel;
 /**
  * Collect the raw information for lookout by listening to events.
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: MetricsSubscriber.java, v 0.1 2018年04月23日 下午9:48 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class LookoutSubscriber extends Subscriber {
 

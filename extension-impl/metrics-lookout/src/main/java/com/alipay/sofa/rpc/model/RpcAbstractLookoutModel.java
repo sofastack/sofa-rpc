@@ -18,8 +18,7 @@ package com.alipay.sofa.rpc.model;
 
 /**
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: RpcClientMetricsModel.java, v 0.1 2018年04月24日 上午10:48 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcAbstractLookoutModel {
 
