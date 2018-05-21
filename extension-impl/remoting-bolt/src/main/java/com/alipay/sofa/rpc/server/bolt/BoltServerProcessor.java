@@ -346,7 +346,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                 } catch (Exception e) {
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warnWithApp(null, LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
+                        LOGGER.warn(LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
                     }
                 }
             }
