@@ -29,6 +29,7 @@
         <module>registry-zk</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
+        <module>metrics-lookout</module>
     </modules>
 
     <dependencyManagement>
