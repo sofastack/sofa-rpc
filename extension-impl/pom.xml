@@ -27,6 +27,7 @@
         <module>remoting-resteasy</module>
         <module>registry-local</module>
         <module>registry-zk</module>
+        <module>metrics-lookout</module>
     </modules>
 
     <dependencyManagement>
