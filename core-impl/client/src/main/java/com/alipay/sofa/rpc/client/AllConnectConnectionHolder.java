@@ -700,7 +700,8 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      */
     protected void printFailure(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
-            LOGGER.infoWithApp("Connect to {} provider:{} failure !", interfaceId, providerInfo);
+            LOGGER.infoWithApp(consumerConfig.getAppName(), "Connect to {} provider:{} failure !", interfaceId,
+                providerInfo);
         }
     }
 
@@ -715,7 +716,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void printDead(String interfaceId, ProviderInfo providerInfo, ClientTransport transport, Exception e) {
         Throwable cause = e.getCause();
         if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
-            LOGGER.warnWithApp(
+            LOGGER.warnWithApp(consumerConfig.getAppName(),
                 "Connect to {} provider:{} failure !! The exception is " + ExceptionUtils.toShortString(e, 1)
                     + (cause != null ? ", cause by " + cause.getMessage() + "." : "."),
                 interfaceId, providerInfo);
@@ -833,7 +834,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             }
             ClientTransport transport = entry.getValue();
             if (LOGGER.isDebugEnabled(appName)) {
-                LOGGER.debugWithApp("Retry connect to {} provider:{} ...", interfaceId, providerInfo);
+                LOGGER.debugWithApp(appName, "Retry connect to {} provider:{} ...", interfaceId, providerInfo);
             }
             try {
                 transport.connect();
@@ -844,12 +845,12 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             } catch (Exception e) {
                 if (print) {
                     if (LOGGER.isWarnEnabled(appName)) {
-                        LOGGER.warnWithApp("Retry connect to {} provider:{} error ! The exception is " + e
+                        LOGGER.warnWithApp(appName, "Retry connect to {} provider:{} error ! The exception is " + e
                             .getMessage(), interfaceId, providerInfo);
                     }
                 } else {
                     if (LOGGER.isDebugEnabled(appName)) {
-                        LOGGER.debugWithApp("Retry connect to {} provider:{} error ! The exception is " + e
+                        LOGGER.debugWithApp(appName, "Retry connect to {} provider:{} error ! The exception is " + e
                             .getMessage(), interfaceId, providerInfo);
                     }
                 }

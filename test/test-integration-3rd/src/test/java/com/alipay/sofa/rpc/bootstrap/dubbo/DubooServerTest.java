@@ -22,15 +22,10 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -40,7 +35,7 @@ import java.util.List;
  * @author bystander
  * @version $Id: DubooServerTest.java, v 0.1 2017年10月30日 下午9:23 bystander Exp $
  */
-public class DubooServerTest {
+public class DubooServerTest extends ActivelyDestroyTest {
 
     @Test
     //同步调用,走配置中心
@@ -91,18 +86,5 @@ public class DubooServerTest {
 
         String result = demoService.sayHello("xxx", 22);
         Assert.assertNotNull(result);
-    }
-
-    @BeforeClass
-    public static void adBeforeClass() {
-        RpcRunningState.setUnitTestMode(true);
-    }
-
-    @After
-    public void aferMethod() {
-        DubboSingleton.destroyAll();
-        RpcRuntimeContext.destroy();
-        RpcInternalContext.removeAllContext();
-        RpcInvokeContext.removeContext();
     }
 }
