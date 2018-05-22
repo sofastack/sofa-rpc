@@ -47,7 +47,6 @@ public class LookoutModule implements Module {
     public void install() {
         subscriber = new LookoutSubscriber();
         EventBus.register(ClientEndInvokeEvent.class, subscriber);
-        EventBus.register(ClientAsyncReceiveEvent.class, subscriber);
         EventBus.register(ServerSendEvent.class, subscriber);
         EventBus.register(ServerStartedEvent.class, subscriber);
     }
@@ -56,7 +55,6 @@ public class LookoutModule implements Module {
     public void uninstall() {
         if (subscriber != null) {
             EventBus.unRegister(ClientEndInvokeEvent.class, subscriber);
-            EventBus.unRegister(ClientAsyncReceiveEvent.class, subscriber);
             EventBus.unRegister(ServerSendEvent.class, subscriber);
             EventBus.unRegister(ServerStartedEvent.class, subscriber);
         }
