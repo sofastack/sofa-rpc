@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.context;
 
 import com.alipay.sofa.rpc.client.ProviderHelper;
-import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import org.junit.After;
@@ -171,7 +170,6 @@ public class RpcInternalContextTest {
         });
 
         context.setProviderInfo(ProviderHelper.toProviderInfo("127.0.0.1:80"));
-        context.setInterfaceConfig(new ProviderConfig());
         context.setAttachment("_xxxx", "yyyy");
 
         context.clear();
@@ -181,7 +179,6 @@ public class RpcInternalContextTest {
         Assert.assertFalse(context.isProviderSide());
         Assert.assertFalse(context.isConsumerSide());
         Assert.assertNull(context.getProviderInfo());
-        Assert.assertNull(context.getInterfaceConfig());
         Assert.assertTrue(context.getAttachments().isEmpty());
         Assert.assertNotNull(context.getStopWatch());
         Assert.assertTrue(context.getStopWatch().read() == 0);

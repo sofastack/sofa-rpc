@@ -280,4 +280,20 @@ public class ClientTransportConfig {
         this.channelListeners = channelListeners;
         return this;
     }
+
+    @Override
+    public String toString() {
+        return super.toString() + "{" +
+            "consumerConfig=" + consumerConfig +
+            ", providerInfo=" + providerInfo +
+            ", container='" + container + '\'' +
+            ", connectTimeout=" + connectTimeout +
+            ", disconnectTimeout=" + disconnectTimeout +
+            ", invokeTimeout=" + invokeTimeout +
+            ", connectionNum=" + connectionNum +
+            ", payload=" + payload +
+            ", useEpoll=" + useEpoll +
+            ", channelListeners=" + channelListeners +
+            '}';
+    }
 }

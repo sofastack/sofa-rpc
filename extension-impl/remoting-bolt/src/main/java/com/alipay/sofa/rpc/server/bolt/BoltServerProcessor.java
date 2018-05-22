@@ -152,7 +152,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                     if (invoker instanceof ProviderProxyInvoker) {
                         providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
-                        context.setInterfaceConfig(providerConfig);
                         // 找到服务后，打印服务的appName
                         appName = providerConfig != null ? providerConfig.getAppName() : null;
                     }
@@ -346,7 +345,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                 } catch (Exception e) {
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warnWithApp(null, LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
+                        LOGGER.warn(LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
                     }
                 }
             }

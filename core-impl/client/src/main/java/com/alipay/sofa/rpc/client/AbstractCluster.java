@@ -472,7 +472,6 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
-        context.setInterfaceConfig(consumerConfig);
         context.setProviderInfo(providerInfo);
         return filterChain.invoke(request);
     }
