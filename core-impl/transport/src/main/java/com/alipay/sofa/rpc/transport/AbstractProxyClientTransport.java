@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.transport;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -175,8 +174,8 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
         } finally {
             afterSend(context, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent((ConsumerConfig) context.getInterfaceConfig(),
-                    context.getProviderInfo(), request, response, throwable));
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                    transportConfig.getProviderInfo(), request, response, throwable));
             }
         }
     }
