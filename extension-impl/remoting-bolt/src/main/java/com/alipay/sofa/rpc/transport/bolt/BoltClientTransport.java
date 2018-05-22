@@ -350,8 +350,8 @@ public class BoltClientTransport extends ClientTransport {
         // 序列化
         else if (e instanceof SerializationException) {
             boolean isServer = ((SerializationException) e).isServerSide();
-            exception = isServer ? new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e)
-                : new SofaRpcException(RpcErrorType.SERVER_SERIALIZE, e);
+            exception = isServer ? new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e)
+                : new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e);
         }
         // 反序列化
         else if (e instanceof DeserializationException) {
