@@ -22,8 +22,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: BoltServerStartedEvent.java, v 0.1 2018年04月24日 下午10:57 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class ServerStartedEvent implements Event {
 
