@@ -20,10 +20,8 @@ import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
-import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.common.struct.StopWatch;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.net.InetSocketAddress;
@@ -150,17 +148,17 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The Future.
      */
-    private ResponseFuture<?>       future;
+    private ResponseFuture<?>   future;
 
     /**
      * The Local address.
      */
-    private InetSocketAddress       localAddress;
+    private InetSocketAddress   localAddress;
 
     /**
      * The Remote address.
      */
-    private InetSocketAddress       remoteAddress;
+    private InetSocketAddress   remoteAddress;
 
     /**
      * 附带属性功能，遵循谁使用谁清理的原则。Key必须为 "_" 和 "."开头<br>
@@ -168,30 +166,22 @@ public class RpcInternalContext implements Cloneable {
      *
      * @see #ATTACHMENT_ENABLE
      */
-    private Map<String, Object>     attachments = new ConcurrentHashMap<String, Object>();
+    private Map<String, Object> attachments = new ConcurrentHashMap<String, Object>();
 
     /**
      * The Stopwatch
      */
-    private StopWatch               stopWatch   = new StopWatch();
+    private StopWatch           stopWatch   = new StopWatch();
 
     /**
      * The Provider side.
      */
-    private Boolean                 providerSide;
+    private Boolean             providerSide;
 
     /**
      * 要调用的服务端信息
      */
-    private ProviderInfo            providerInfo;
-
-    /**
-     * 发起调用的客户端信息
-     * 
-     * @since 5.3.3
-     */
-    @Unstable
-    private AbstractInterfaceConfig interfaceConfig;
+    private ProviderInfo        providerInfo;
 
     /**
      * Is provider side.
@@ -432,7 +422,7 @@ public class RpcInternalContext implements Cloneable {
      */
     public void clear() {
         this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(null)
-            .setProviderInfo(null).setInterfaceConfig(null);
+            .setProviderInfo(null);
         this.attachments = new ConcurrentHashMap<String, Object>();
         this.stopWatch.reset();
     }
@@ -457,30 +447,6 @@ public class RpcInternalContext implements Cloneable {
         return providerInfo;
     }
 
-    /**
-     * Gets interface config.
-     *
-     * @return the config
-     * @since 5.3.3
-     */
-    @Unstable
-    public AbstractInterfaceConfig getInterfaceConfig() {
-        return interfaceConfig;
-    }
-
-    /**
-     * Sets interface config.
-     *
-     * @param interfaceConfig the interface config
-     * @return the config
-     * @since 5.3.3
-     */
-    @Unstable
-    public RpcInternalContext setInterfaceConfig(AbstractInterfaceConfig interfaceConfig) {
-        this.interfaceConfig = interfaceConfig;
-        return this;
-    }
-
     @Override
     public String toString() {
         return super.toString() + "{" +
@@ -491,7 +457,6 @@ public class RpcInternalContext implements Cloneable {
             ", stopWatch=" + stopWatch +
             ", providerSide=" + providerSide +
             ", providerInfo=" + providerInfo +
-            ", interfaceConfig=" + interfaceConfig +
             '}';
     }
 
@@ -507,7 +472,6 @@ public class RpcInternalContext implements Cloneable {
             context.stopWatch = this.stopWatch.clone();
             context.providerSide = this.providerSide;
             context.providerInfo = this.providerInfo;
-            context.interfaceConfig = this.interfaceConfig;
             context.attachments.putAll(this.attachments);
             return context;
         }

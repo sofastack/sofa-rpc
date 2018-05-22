@@ -1,6 +1,4 @@
 {
   "rpc.config.order": 999,
-  "default.provider.bootstrap": "test",
-  "default.consumer.bootstrap": "test",
   "logger.impl": "com.alipay.sofa.rpc.log.SystemLogger"
 }

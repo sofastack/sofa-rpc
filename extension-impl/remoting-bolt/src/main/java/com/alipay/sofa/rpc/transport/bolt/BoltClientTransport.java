@@ -35,7 +35,6 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -73,9 +72,18 @@ public class BoltClientTransport extends ClientTransport {
     /**
      * Logger for this class
      */
-    private static final Logger      LOGGER          = LoggerFactory.getLogger(BoltClientTransport.class);
+    private static final Logger                  LOGGER            = LoggerFactory.getLogger(BoltClientTransport.class);
+    /**
+     * Bolt rpc client
+     */
+    protected static final RpcClient             RPC_CLIENT        = new RpcClient();
 
-    protected static final RpcClient RPC_CLIENT      = new RpcClient();
+    /**
+     * Connection manager for reuse connection
+     *
+     * @since 5.4.0
+     */
+    protected static BoltClientConnectionManager connectionManager = new BoltClientConnectionManager(true);
 
     static {
         RPC_CLIENT.init();
@@ -85,18 +93,18 @@ public class BoltClientTransport extends ClientTransport {
     /**
      * bolt需要的URL的缓存
      */
-    protected final Url              url;
+    protected final Url                          url;
 
     /**
      * Connection的实时状态<br>
      * 因为一个url在bolt里对应多个connect的，但是我们禁用，只保留一个
      */
-    protected volatile Connection    connection;
+    protected volatile Connection                connection;
 
     /**
      * 正在发送的调用数量
      */
-    protected volatile AtomicInteger currentRequests = new AtomicInteger(0);
+    protected volatile AtomicInteger             currentRequests   = new AtomicInteger(0);
 
     /**
      * Instant BoltClientTransport
@@ -143,14 +151,7 @@ public class BoltClientTransport extends ClientTransport {
         if (connection == null) {
             synchronized (this) {
                 if (connection == null) {
-                    try {
-                        connection = RPC_CLIENT.getConnection(url, url.getConnectTimeout());
-                        // RPC_CLIENT.disableConnHeartbeat(url);
-                    } catch (InterruptedException e) {
-                        throw new SofaRpcRuntimeException(e);
-                    } catch (RemotingException e) {
-                        throw new SofaRpcRuntimeException(e);
-                    }
+                    connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
                 }
             }
         }
@@ -164,9 +165,9 @@ public class BoltClientTransport extends ClientTransport {
                     LOGGER.info("Try disconnect client transport now. The connection is {}.",
                         NetUtils.channelToString(localAddress(), remoteAddress()));
                 }
+                connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
+                connection = null;
             }
-            connection = null;
-            RPC_CLIENT.closeConnection(url);
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("", e);
         }
@@ -230,8 +231,8 @@ public class BoltClientTransport extends ClientTransport {
         SofaResponseCallback listener = request.getSofaResponseCallback();
         if (listener != null) {
             // callback调用
-            InvokeCallback callback = new BoltInvokerCallback((ConsumerConfig) rpcContext.getInterfaceConfig(),
-                rpcContext.getProviderInfo(), listener, request, rpcContext,
+            InvokeCallback callback = new BoltInvokerCallback(transportConfig.getConsumerConfig(),
+                transportConfig.getProviderInfo(), listener, request, rpcContext,
                 ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
@@ -239,8 +240,8 @@ public class BoltClientTransport extends ClientTransport {
         } else {
             // future 转为 callback
             BoltResponseFuture future = new BoltResponseFuture(request, timeoutMillis);
-            InvokeCallback callback = new BoltFutureInvokeCallback((ConsumerConfig) rpcContext.getInterfaceConfig(),
-                rpcContext.getProviderInfo(), future, request, rpcContext,
+            InvokeCallback callback = new BoltFutureInvokeCallback(transportConfig.getConsumerConfig(),
+                transportConfig.getProviderInfo(), future, request, rpcContext,
                 ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
@@ -266,8 +267,8 @@ public class BoltClientTransport extends ClientTransport {
         } finally {
             afterSend(context, boltInvokeContext, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent((ConsumerConfig) context.getInterfaceConfig(),
-                    context.getProviderInfo(), request, response, throwable));
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                    transportConfig.getProviderInfo(), request, response, throwable));
             }
         }
     }
@@ -303,8 +304,8 @@ public class BoltClientTransport extends ClientTransport {
         } finally {
             afterSend(context, invokeContext, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent((ConsumerConfig) context.getInterfaceConfig(),
-                    context.getProviderInfo(), request, null, throwable));
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                    transportConfig.getProviderInfo(), request, null, throwable));
             }
         }
     }
@@ -346,8 +347,8 @@ public class BoltClientTransport extends ClientTransport {
         // 序列化
         else if (e instanceof SerializationException) {
             boolean isServer = ((SerializationException) e).isServerSide();
-            exception = isServer ? new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e)
-                : new SofaRpcException(RpcErrorType.SERVER_SERIALIZE, e);
+            exception = isServer ? new SofaRpcException(RpcErrorType.SERVER_SERIALIZE, e)
+                : new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e);
         }
         // 反序列化
         else if (e instanceof DeserializationException) {
