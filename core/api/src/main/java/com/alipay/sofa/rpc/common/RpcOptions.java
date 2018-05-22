@@ -489,5 +489,8 @@ public class RpcOptions {
      * 自定义设置: 调用时是否传送app信息，默认true
      */
     public static final String INVOKE_SEND_APP                    = "invoke.send.app";
-
+    /**
+     * Whether to close lookout collection.
+     */
+    public static final String LOOKOUT_COLLECT_DISABLE            = "lookout.collect.disable";
 }

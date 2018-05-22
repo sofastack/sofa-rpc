@@ -57,6 +57,7 @@
         <hessian.version>3.3.0</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
         <bolt.version>1.4.1</bolt.version>
+        <lookout.version>1.4.0</lookout.version>
     </properties>
 
     <dependencies>
@@ -172,6 +173,11 @@
             <artifactId>sofa-rpc-remoting-resteasy</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-metrics-lookout</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
@@ -217,6 +223,11 @@
             <groupId>org.jboss.resteasy</groupId>
             <artifactId>resteasy-jackson-provider</artifactId>
             <version>${resteasy.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa.lookout</groupId>
+            <artifactId>lookout-api</artifactId>
+            <version>${lookout.version}</version>
         </dependency>
     </dependencies>
 
@@ -308,6 +319,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>
