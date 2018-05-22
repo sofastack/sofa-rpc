@@ -96,10 +96,5 @@ public class DiscardTimeoutTest extends ActivelyDestroyTest {
         // 第四个请求已超时
         Assert.assertEquals(success.get(), 2);
         Assert.assertEquals(failure.get(), 2);
-
-        try {
-            Thread.sleep(5000); // 多等一会 看下服务端日志
-        } catch (InterruptedException ignore) {
-        }
     }
 }

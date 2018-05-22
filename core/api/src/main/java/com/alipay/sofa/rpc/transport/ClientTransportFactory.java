@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.transport;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
@@ -24,9 +25,6 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_CONNECTION_REUSE;
 
 /**
  * Factory of ClientTransport
@@ -41,25 +39,9 @@ public class ClientTransportFactory {
                                                                            .getLogger(ClientTransportFactory.class);
 
     /**
-     * 是否长连接复用
+     * 不可复用长连接管理器
      */
-    private final static boolean               CHANNEL_REUSE           = getBooleanValue(TRANSPORT_CONNECTION_REUSE);
-
-    /**
-     * 长连接过滤器
-     */
-    private final static ClientTransportHolder CLIENT_TRANSPORT_HOLDER = CHANNEL_REUSE ? new ReusableClientTransportHolder()
-                                                                           : new NotReusableClientTransportHolder();
-
-    /**
-     * 通过配置获取长连接
-     *
-     * @param config 传输层配置
-     * @return 传输层
-     */
-    public static ClientTransport getClientTransport(ClientTransportConfig config) {
-        return CLIENT_TRANSPORT_HOLDER.getClientTransport(config);
-    }
+    private final static ClientTransportHolder CLIENT_TRANSPORT_HOLDER = new NotReusableClientTransportHolder();
 
     /**
      * 销毁长连接
@@ -108,6 +90,16 @@ public class ClientTransportFactory {
     }
 
     /**
+     * 通过配置获取长连接
+     *
+     * @param config 传输层配置
+     * @return 传输层
+     */
+    public static ClientTransport getClientTransport(ClientTransportConfig config) {
+        return CLIENT_TRANSPORT_HOLDER.getClientTransport(config);
+    }
+
+    /**
      * 关闭全部客户端连接
      */
     public static void closeAll() {
@@ -121,6 +113,7 @@ public class ClientTransportFactory {
         }
     }
 
+    @VisibleForTesting
     static ClientTransportHolder getClientTransportHolder() {
         return CLIENT_TRANSPORT_HOLDER;
     }

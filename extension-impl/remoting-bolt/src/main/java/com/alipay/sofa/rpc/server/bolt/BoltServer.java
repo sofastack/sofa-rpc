@@ -108,7 +108,12 @@ public class BoltServer implements Server {
             // 生成Server对象
             remotingServer = initRemotingServer();
             try {
-                if (!remotingServer.start(serverConfig.getBoundHost())) {
+                if (remotingServer.start(serverConfig.getBoundHost())) {
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
+                            serverConfig.getPort());
+                    }
+                } else {
                     throw new SofaRpcRuntimeException("Failed to start bolt server, see more detail from bolt log.");
                 }
                 started = true;
@@ -138,17 +143,22 @@ public class BoltServer implements Server {
     }
 
     @Override
-    public synchronized void stop() {
+    public void stop() {
         if (!started) {
             return;
         }
-        // 关闭端口，不关闭线程池
-        try {
-            remotingServer.stop();
-        } catch (IllegalStateException ignore) { // NOPMD
+        synchronized (this) {
+            if (!started) {
+                return;
+            }
+            // 关闭端口，不关闭线程池
+            try {
+                remotingServer.stop();
+            } catch (IllegalStateException ignore) { // NOPMD
+            }
+            remotingServer = null;
+            started = false;
         }
-        remotingServer = null;
-        started = false;
     }
 
     @Override
@@ -168,7 +178,7 @@ public class BoltServer implements Server {
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.remove(key);
         // 如果最后一个需要关闭，则关闭
-        if (closeIfNoEntry && invokerMap.size() == 0) {
+        if (closeIfNoEntry && invokerMap.isEmpty()) {
             stop();
         }
     }
