@@ -12,7 +12,7 @@
 
     <artifactId>sofa-rpc-extension-impl</artifactId>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>api-compatible</module>
         <module>extension-common</module>
@@ -27,6 +27,8 @@
         <module>remoting-resteasy</module>
         <module>registry-local</module>
         <module>registry-zk</module>
+        <module>tracer-opentracing</module>
+        <module>tracer-opentracing-resteasy</module>
         <module>metrics-lookout</module>
     </modules>
 

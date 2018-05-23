@@ -16,23 +16,17 @@
  */
 package com.alipay.sofa.lookout;
 
-import com.alipay.lookout.api.Lookout;
-import com.alipay.lookout.api.Measurement;
-import com.alipay.lookout.api.Metric;
-import com.alipay.lookout.api.Registry;
-import com.alipay.lookout.api.Tag;
+import com.alipay.lookout.api.*;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.config.ApplicationConfig;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.MethodConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.config.*;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.lookout.RpcLookout;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.AfterClass;
@@ -49,14 +43,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcLookoutTest extends ActivelyDestroyTest {
 
-    static Field corePoolSize;
-    static Field maxPoolSize;
-    static Field queueSize;
+    private final static Logger LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
+
+    static Field                corePoolSize;
+    static Field                maxPoolSize;
+    static Field                queueSize;
 
     @BeforeClass
     public static void beforeClass() throws IllegalAccessException, NoSuchFieldException {
@@ -83,6 +78,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Lookout.setRegistry(registry);
 
         RpcRunningState.setUnitTestMode(false);
+
+        try {
+            invoke();
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @AfterClass
@@ -90,34 +93,19 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         RpcRunningState.setUnitTestMode(true);
     }
 
-    @Test
-    public void testAll() throws Exception {
-
-        invoke();
-
-        Thread.sleep(5000);
-
+    private Metric fetchWithName(String name) {
         for (Metric metric : Lookout.registry()) {
-            if (metric.id().name().equals("rpc.bolt.threadpool.config")) {
-                testThreadPoolConfig(metric);
-            } else if (metric.id().name().equals("rpc.bolt.threadpool.active.count")) {
-                testThreadPoolActiveCount(metric);
-            } else if (metric.id().name().equals("rpc.bolt.threadpool.idle.count")) {
-                testThreadPoolIdleCount(metric);
-            } else if (metric.id().name().equals("rpc.bolt.threadpool.queue.size")) {
-                testThreadPoolQueueSize(metric);
-            } else if (metric.id().name().equals("rpc.provider.service.stats")) {
-                testProviderServiceStats(metric);
-            } else if (metric.id().name().equals("rpc.consumer.service.stats")) {
-                testConsumerServiceStats(metric);
+            if (metric.id().name().equalsIgnoreCase(name)) {
+                return metric;
             }
         }
+        return null;
     }
 
     /**
      * invoke
      */
-    private void invoke() throws InterruptedException {
+    private static void invoke() throws InterruptedException {
 
         ServerConfig serverConfig = new ServerConfig()
             .setPort(12200)
@@ -216,10 +204,15 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test thread pool config
+     *
      * @param metric
      * @throws Exception
      */
-    private void testThreadPoolConfig(Metric metric) throws Exception {
+    @Test
+    public void testThreadPoolConfig() throws Exception {
+
+        Metric metric = fetchWithName("rpc.bolt.threadpool.config");
+
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
         for (Measurement measurement : measurements) {
@@ -235,11 +228,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test thread pool active count
+     *
      * @param metric
      * @throws Exception
      */
-    private void testThreadPoolActiveCount(Metric metric) throws Exception {
-        Thread.sleep(3500);
+    @Test
+    public void testThreadPoolActiveCount() throws Exception {
+
+        Metric metric = fetchWithName("rpc.bolt.threadpool.active.count");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -250,9 +246,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test thread pool idle count
+     *
      * @param metric
      */
-    private void testThreadPoolIdleCount(Metric metric) {
+    @Test
+    public void testThreadPoolIdleCount() throws Exception {
+
+        Metric metric = fetchWithName("rpc.bolt.threadpool.idle.count");
+
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
         for (Measurement measurement : measurements) {
@@ -262,9 +263,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test thread pool queue size
+     *
      * @param metric
      */
-    private void testThreadPoolQueueSize(Metric metric) {
+    @Test
+    public void testThreadPoolQueueSize() throws Exception {
+
+        Metric metric = fetchWithName("rpc.bolt.threadpool.queue.size");
+
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
         for (Measurement measurement : measurements) {
@@ -274,13 +280,17 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test provider service stats
+     *
      * @param metric
      * @throws InterruptedException
      */
-    private void testProviderServiceStats(Metric metric) throws InterruptedException {
+    @Test
+    public void testProviderServiceStats() throws InterruptedException {
+
+        Metric metric = fetchWithName("rpc.provider.service.stats");
 
         for (Tag tag : metric.id().tags()) {
-            if (tag.key() == "method") {
+            if (tag.key().equalsIgnoreCase("method")) {
                 String methodName = tag.value();
 
                 if (methodName.equals("saySync")) {
@@ -302,13 +312,17 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test consumer service stats
+     *
      * @param metric
      * @throws InterruptedException
      */
-    private void testConsumerServiceStats(Metric metric) throws InterruptedException {
+    @Test
+    public void testConsumerServiceStats() throws InterruptedException {
+
+        Metric metric = fetchWithName("rpc.consumer.service.stats");
 
         for (Tag tag : metric.id().tags()) {
-            if (tag.key() == "method") {
+            if (tag.key().equalsIgnoreCase("method")) {
                 String methodName = tag.value();
 
                 if (methodName.equals("saySync")) {
@@ -330,11 +344,12 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * assert method
-     * @param metric the metric
-     * @param isProvider is it the provider
-     * @param totalCount the total invoke count
-     * @param method the method name
-     * @param requestSize the request size
+     *
+     * @param metric       the metric
+     * @param isProvider   is it the provider
+     * @param totalCount   the total invoke count
+     * @param method       the method name
+     * @param requestSize  the request size
      * @param responseSize the response size
      */
     private void assertMethod(Metric metric, boolean isProvider, int totalCount, String method, int requestSize,
@@ -432,11 +447,15 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             }
             if (!isProvider) {
                 if (name.equals("request_size.count")) {
-                    assertTrue(value == requestSize || value == totalCount);
+                    LOGGER.info("request_size.count,value={},requestSize={},totalCount={}", value, requestSize,
+                        totalCount);
+                    assertTrue(requestSize > 0);
                     invokeInfoAssert = true;
                 }
                 if (name.equals("response_size.count")) {
-                    assertTrue(value == responseSize || value == totalCount - 1);
+                    LOGGER.info("response_size.count,value={},responseSize={},totalCount={}", value, responseSize,
+                        totalCount);
+                    assertTrue(requestSize > 0);
                     invokeInfoAssert = true;
                 }
             }
