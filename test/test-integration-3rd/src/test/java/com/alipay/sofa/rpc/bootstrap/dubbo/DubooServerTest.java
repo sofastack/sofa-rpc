@@ -16,13 +16,9 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
+import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.common.SystemInfo;
-import com.alipay.sofa.rpc.config.ApplicationConfig;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.RegistryConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import com.alipay.sofa.rpc.config.*;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.Assert;
@@ -35,14 +31,14 @@ import java.util.List;
  * @author bystander
  * @version $Id: DubooServerTest.java, v 0.1 2017年10月30日 下午9:23 bystander Exp $
  */
-public class DubooServerTest extends ActivelyDestroyTest {
+public class DubooServerTest extends BaseZkTest {
 
     @Test
     //同步调用,走配置中心
     public void testRegistrySync() {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
-            .setStopTimeout(60000)
+            .setStopTimeout(10)
             .setPort(20880)
             .setProtocol("dubbo")
             .setQueues(100).setCoreThreads(1).setMaxThreads(2).setHost(SystemInfo.getLocalHost());

@@ -34,6 +34,11 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -86,7 +91,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skipTests>${dependency.test.skip}</skipTests>
+                    <skipTests>${skipTests}</skipTests>
                     <includes>
                         <!-- 这里需要根据自己的需要指定要跑的单元测试 -->
                         <include>**/*Test.java</include>
