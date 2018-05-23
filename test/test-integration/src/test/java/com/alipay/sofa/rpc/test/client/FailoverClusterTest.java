@@ -103,9 +103,10 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
                 helloService2.sayHello("xxx", 22);
                 count2++;
             } catch (Exception ignore) {
+                ignore.printStackTrace();
             }
         }
-        Assert.assertEquals(count2, 4);
+        Assert.assertEquals(4, count2);
 
         Cluster cluster = consumerConfig2.getConsumerBootstrap().getCluster();
         Assert.assertTrue(cluster.isAvailable());
@@ -157,9 +158,10 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
                 helloService.sayHello("xxx", 22);
                 count2++;
             } catch (Exception ignore) {
+                ignore.printStackTrace();
             }
         }
-        Assert.assertEquals(count2, 4);
+        Assert.assertEquals(4, count2);
     }
 
     @Test
