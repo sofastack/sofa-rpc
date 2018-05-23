@@ -1,0 +1,2 @@
+com.alipay.sofa.rpc.filter.sofatracer.ConsumerTracerFilter     # -10000
+com.alipay.sofa.rpc.filter.sofatracer.ProviderTracerFilter     # -10000

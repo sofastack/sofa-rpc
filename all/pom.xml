@@ -19,7 +19,7 @@
             <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
         </license>
     </licenses>
-    
+
     <organization>
         <name>The Ant Financial</name>
         <url>http://www.antfin.com/</url>
@@ -43,7 +43,7 @@
         <developerConnection>scm:git:ssh://github.com/alipay/sofa-rpc.git</developerConnection>
         <url>http://github.com/alipay/sofa-rpc/tree/master</url>
     </scm>
-    
+
     <properties>
         <!-- Build args -->
         <maven.compiler.source>1.6</maven.compiler.source>
@@ -57,6 +57,7 @@
         <hessian.version>3.3.0</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
         <bolt.version>1.4.1</bolt.version>
+        <tracer.version>2.1.0</tracer.version>
         <lookout.version>1.4.0</lookout.version>
     </properties>
 
@@ -175,10 +176,19 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing-resteasy</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-metrics-lookout</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
@@ -208,6 +218,11 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>hessian</artifactId>
             <version>${hessian.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>tracer-core</artifactId>
+            <version>${tracer.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
@@ -319,6 +334,8 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
+                                    <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <!-- TODO -->
                                 </includes>

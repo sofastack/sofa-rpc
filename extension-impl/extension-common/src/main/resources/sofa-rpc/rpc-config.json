@@ -14,15 +14,15 @@
   // 是否允许请求和响应透传数据，关闭后，会提高性能
   "invoke.baggage.enable": true,
   /*-------------系统运行时相关配置开始-------------*/
-  
-  
+
+
   /*-------------默认配置值开始-------------*/
   // 默认代理类型
-  "default.proxy" : "javassist",
+  "default.proxy": "javassist",
   // 默认网络层
   "default.transport": "bolt",
   // 默认tracer实现
-  "default.tracer": "",
+  "default.tracer": "sofaTracer",
   /*-------------默认配置值结束-------------*/
 
 
@@ -41,6 +41,6 @@
   "consumer.disconnect.timeout": 5000,
   // 默认consumer调用provider超时时间
   "consumer.invoke.timeout": 3000
-  
+
   /*-------------Consumer相关配置结束-------------*/
 }
