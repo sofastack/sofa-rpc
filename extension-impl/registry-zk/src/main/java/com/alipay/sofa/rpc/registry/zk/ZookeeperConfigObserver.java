@@ -16,18 +16,17 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.curator.framework.recipes.cache.ChildData;
 
 /**
  * ZookeeperObserver for config node,subscribe interface level provider/consumer config.
@@ -83,7 +82,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                     + ", stat=[" + data.getStat() + "]");
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
@@ -114,7 +113,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 for (ChildData data : currentData) {
                     LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                        + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                        + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                         + ", stat=[" + data.getStat() + "]");
                 }
             }
@@ -146,7 +145,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                     + ", stat=[" + data.getStat() + "]");
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
@@ -176,7 +175,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                     + ", stat=[" + data.getStat() + "]");
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);

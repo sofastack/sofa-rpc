@@ -33,6 +33,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
+import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -90,7 +91,7 @@ public class BoltServer implements Server {
     protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
         ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
         threadPool.setThreadFactory(new NamedThreadFactory(
-            "BOLT-BIZ-" + serverConfig.getPort(), serverConfig.isDaemon()));
+            "SEV-BOLT-BIZ-" + serverConfig.getPort(), serverConfig.isDaemon()));
         threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
         if (serverConfig.isPreStartCore()) { // 初始化核心线程池
             threadPool.prestartAllCoreThreads();

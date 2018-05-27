@@ -20,11 +20,16 @@ import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
+import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.Version;
-import com.alipay.sofa.rpc.common.utils.*;
+import com.alipay.sofa.rpc.common.utils.BeanUtils;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.common.utils.ReflectUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -35,7 +40,11 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -204,8 +213,8 @@ public class ZookeeperRegistryHelper {
     static Map<String, String> convertConfigToAttribute(String configPath, ChildData childData, boolean removeType) {
         String attribute = childData.getPath().substring(configPath.length() + 1);
         //If event type is CHILD_REMOVED, attribute should return to default value
-        return Collections.singletonMap(attribute,
-            removeType ? RpcConfigs.getStringValue(attribute) : new String(childData.getData()));
+        return Collections.singletonMap(attribute, removeType ? RpcConfigs.getStringValue(attribute) :
+            StringSerializer.decode(childData.getData()));
     }
 
     /**
@@ -253,7 +262,7 @@ public class ZookeeperRegistryHelper {
                                                           AbstractInterfaceConfig registerConfig) throws Exception {
         String url = URLDecoder.decode(childData.getPath().substring(overridePath.length() + 1), "UTF-8");
         Map<String, String> attribute = new ConcurrentHashMap<String, String>();
-        for (String keyPairs : url.substring(url.indexOf("?")).split("&")) {
+        for (String keyPairs : url.substring(url.indexOf('?')).split("&")) {
             String[] overrideAttrs = keyPairs.split("=");
             List<String> configKeys = Arrays.asList(RpcConstants.CONFIG_KEY_TIMEOUT,
                 RpcConstants.CONFIG_KEY_GENERIC,

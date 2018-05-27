@@ -16,17 +16,48 @@
  */
 package com.alipay.sofa.rpc.protobuf;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ProtoServiceImpl implements ProtoService {
+
+    private int           sleep;
+
+    private String        result;
+
+    private AtomicInteger counter = new AtomicInteger();
+
+    public ProtoServiceImpl() {
+
+    }
+
+    public ProtoServiceImpl(String result) {
+        this.result = result;
+    }
+
+    public ProtoServiceImpl(int sleep) {
+        this.sleep = sleep;
+    }
+
     @Override
     public EchoResponse echoObj(EchoRequest req) {
-        System.out.println(req.getName() + " from group" + req.getGroup());
+        if (sleep > 0) {
+            try {
+                Thread.sleep(sleep);
+            } catch (Exception ignore) { // NOPMD
+            }
+        }
+        counter.incrementAndGet();
         EchoResponse response = EchoResponse.newBuilder()
             .setCode(200)
-            .setMessage("protobuf works! " + req.getName())
+            .setMessage(result != null ? result : "protobuf works! " + req.getName())
             .build();
         return response;
+    }
+
+    public AtomicInteger getCounter() {
+        return counter;
     }
 }

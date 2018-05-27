@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.event.EventBus;
@@ -67,13 +68,9 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                     EventBus.post(new RestServerReceiveEvent(request));
                 }
 
-                if (request.getUri().getPath().endsWith("/favicon.ico")) {
+                if (request.getUri().getPath().endsWith(RemotingConstants.IGNORE_WEB_BROWSER)) {
                     HttpResponse response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND);
                     ctx.writeAndFlush(response);
-
-                    if (EventBus.isEnable(RestServerSendEvent.class)) {
-                        EventBus.post(new RestServerSendEvent(request, null, null));
-                    }
                     return;
                 }
 
@@ -84,20 +81,21 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                 NettyHttpResponse response = request.getResponse();
                 Exception exception = null;
                 try {
-                    // 获取远程ip 兼容nignx转发和vip等
+                    RpcInternalContext context = RpcInternalContext.getContext();
+                    context.setProviderSide(true);
+                    // 获取远程ip 兼容 nignx 转发和 vip 等
                     HttpHeaders httpHeaders = request.getHttpHeaders();
-                    String remoteip = httpHeaders.getHeaderString("X-Forwarded-For");
-                    if (remoteip == null) {
-                        remoteip = httpHeaders.getHeaderString("X-Real-IP");
+                    String remoteIP = httpHeaders.getHeaderString("X-Forwarded-For");
+                    if (remoteIP == null) {
+                        remoteIP = httpHeaders.getHeaderString("X-Real-IP");
                     }
-                    if (remoteip != null) {
-                        RpcInternalContext.getContext().setRemoteAddress(remoteip, 0);
+                    if (remoteIP != null) {
+                        context.setRemoteAddress(remoteIP, 0);
                     } else { // request取不到就从channel里取
-                        RpcInternalContext.getContext().setRemoteAddress(
-                            (InetSocketAddress) ctx.channel().remoteAddress());
+                        context.setRemoteAddress((InetSocketAddress) ctx.channel().remoteAddress());
                     }
                     // 设置本地地址
-                    RpcInternalContext.getContext().setLocalAddress((InetSocketAddress) ctx.channel().localAddress());
+                    context.setLocalAddress((InetSocketAddress) ctx.channel().localAddress());
 
                     dispatcher.service(ctx, request, response, true);
                 } catch (Failure e1) {

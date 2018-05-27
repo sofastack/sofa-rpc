@@ -54,6 +54,11 @@ public class RpcErrorType {
     public static final int SERVER_NETWORK           = 150;
 
     /**
+     * 服务端业务异常
+     */
+    public static final int SERVER_BIZ               = 160;
+
+    /**
      * 服务端过滤器异常
      */
     public static final int SERVER_FILTER            = 170;

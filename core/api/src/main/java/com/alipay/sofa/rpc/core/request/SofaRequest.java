@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.core.request;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -66,7 +67,7 @@ public class SofaRequest extends RequestBase {
             return;
         }
         if (requestProps == null) {
-            requestProps = new HashMap<String, Object>();
+            requestProps = new HashMap<String, Object>(16);
         }
         requestProps.put(key, value);
     }
@@ -91,11 +92,11 @@ public class SofaRequest extends RequestBase {
      * @param map the map
      */
     public void addRequestProps(Map<String, Object> map) {
-        if (map == null || map.size() == 0) {
+        if (map == null || map.isEmpty()) {
             return;
         }
         if (requestProps == null) {
-            requestProps = new HashMap<String, Object>();
+            requestProps = new HashMap<String, Object>(16);
         }
         requestProps.putAll(map);
     }
@@ -142,6 +143,11 @@ public class SofaRequest extends RequestBase {
      * 序列化类型
      */
     private transient byte                 serializeType;
+
+    /**
+     * 请求数据
+     */
+    private transient AbstractByteBuf      data;
 
     /**
      * 调用类型（客户端使用）
@@ -271,6 +277,26 @@ public class SofaRequest extends RequestBase {
      */
     public SofaRequest setTimeout(Integer timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * Gets data.
+     *
+     * @return the data
+     */
+    public AbstractByteBuf getData() {
+        return data;
+    }
+
+    /**
+     * Sets data.
+     *
+     * @param data the data
+     * @return the data
+     */
+    public SofaRequest setData(AbstractByteBuf data) {
+        this.data = data;
         return this;
     }
 

@@ -21,8 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * <p>主要是去掉了synchronized关键字，和修改了数组增长策略（ByteArrayOutputSteam默认是翻倍）</p>
- * no need close
+ * 去掉了synchronized关键字，和修改了数组增长策略（ByteArrayOutputStream默认是翻倍），无需关闭
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */

@@ -142,6 +142,13 @@ public class RemotingConstants {
      * 客户端应用
      */
     public static final String HEAD_PROTOCOL              = "protocol";
+
+    /**
+     * 忽略浏览器的图标请求
+     */
+    public static final String IGNORE_WEB_BROWSER         = "/favicon.ico";
+
+    // ========== 头相关 ============
     /**
      * 对方方法名
      *
@@ -193,6 +200,11 @@ public class RemotingConstants {
      * @since 5.4.0
      */
     public static final String HEAD_GENERIC_TYPE          = "sofa_head_generic_type";
+    /**
+     *
+     * @since 5.4.0
+     */
+    public static final String HEAD_SERIALIZE_TYPE        = "sofa_head_serialize_type";
 
     /**
      * RPC透传请求链路数据

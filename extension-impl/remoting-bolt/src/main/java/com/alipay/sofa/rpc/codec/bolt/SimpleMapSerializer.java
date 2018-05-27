@@ -18,7 +18,7 @@ package com.alipay.sofa.rpc.codec.bolt;
 
 import com.alipay.remoting.exception.DeserializationException;
 import com.alipay.remoting.exception.SerializationException;
-import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -101,7 +101,7 @@ public class SimpleMapSerializer {
         } else if (str.isEmpty()) {
             writeInt(out, 0);
         } else {
-            byte[] bs = str.getBytes(RpcConstants.DEFAULT_CHARSET);
+            byte[] bs = StringSerializer.encode(str);
             writeInt(out, bs.length);
             out.write(bs);
         }
@@ -123,7 +123,7 @@ public class SimpleMapSerializer {
         } else {
             byte[] value = new byte[length];
             in.read(value);
-            return new String(value, RpcConstants.DEFAULT_CHARSET);
+            return StringSerializer.decode(value);
         }
     }
 
