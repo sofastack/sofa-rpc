@@ -14,31 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.transport;
+package com.alipay.sofa.rpc.codec.common;
+
+import com.alipay.sofa.rpc.common.RpcConstants;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @since 5.4.0
  */
-public class ByteArrayWrapperByteBuf extends AbstractByteBuf {
+public final class StringSerializer {
 
-    private final byte[] data;
-
-    public ByteArrayWrapperByteBuf(byte[] data) {
-        this.data = data;
+    public static byte[] encode(String s) {
+        return s == null ? new byte[0] : s.getBytes(RpcConstants.DEFAULT_CHARSET);
     }
 
-    @Override
-    public byte[] array() {
-        return data;
-    }
-
-    @Override
-    public int readableBytes() {
-        return data.length;
-    }
-
-    @Override
-    public boolean release() {
-        return true;
+    public static String decode(byte[] data) {
+        return data == null ? null : new String(data, RpcConstants.DEFAULT_CHARSET);
     }
 }

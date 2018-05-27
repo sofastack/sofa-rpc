@@ -28,10 +28,22 @@ public abstract class AbstractByteBuf {
 
     /**
      * Get byte[] data
-     * 
+     *
      * @return byte[]
      */
     public abstract byte[] array();
 
+    /**
+     * Get length of readable bytes
+     *
+     * @return length
+     */
     public abstract int readableBytes();
+
+    /**
+     * release byte buffer
+     *
+     * @return result
+     */
+    public abstract boolean release();
 }

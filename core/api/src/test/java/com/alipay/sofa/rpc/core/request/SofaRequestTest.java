@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,7 +34,7 @@ import java.util.Map;
  */
 public class SofaRequestTest {
     @Test
-    public void testToString() throws Exception {
+    public void testToString() {
         SofaRequest request = new SofaRequest();
         Assert.assertNotNull(request.toString());
     }
@@ -50,6 +51,8 @@ public class SofaRequestTest {
         request.setTargetAppName("targetApp");
         request.setSerializeType((byte) 11);
         request.setTimeout(1024);
+        request.setSerializeType((byte) 11);
+        request.setData(new ByteArrayWrapperByteBuf(new byte[] { 1, 2, 3 }));
         request.setInvokeType(RpcConstants.INVOKER_TYPE_SYNC);
         request.setSofaResponseCallback(new SofaResponseCallback() {
             @Override
@@ -79,6 +82,8 @@ public class SofaRequestTest {
         Assert.assertTrue(request.getSerializeType() == 11);
         Assert.assertTrue(request.getTimeout() == 1024);
         Assert.assertEquals(RpcConstants.INVOKER_TYPE_SYNC, request.getInvokeType());
+        Assert.assertTrue(request.getSerializeType() == 11);
+        Assert.assertTrue(request.getData().array().length == 3);
         Assert.assertNotNull(request.getSofaResponseCallback());
 
         Map<String, Object> map = request.getRequestProps();

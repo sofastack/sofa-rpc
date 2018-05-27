@@ -38,4 +38,9 @@ public class ByteStreamWrapperByteBuf extends AbstractByteBuf {
     public int readableBytes() {
         return data == null ? 0 : data.size();
     }
+
+    @Override
+    public boolean release() {
+        return true;
+    }
 }

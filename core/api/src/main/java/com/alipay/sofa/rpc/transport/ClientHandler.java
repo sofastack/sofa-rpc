@@ -14,27 +14,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protobuf;
+package com.alipay.sofa.rpc.transport;
 
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
+import java.util.concurrent.Executor;
 
 /**
+ * 客户端处理器
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @since 5.4.0
  */
-public class ProtobufServiceServer {
+public interface ClientHandler {
 
-    public static void main(String[] args) {
-        ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("bolt") // 设置一个协议，默认bolt
-            .setPort(12200) // 设置一个端口，默认12200
-            .setDaemon(false); // 非守护线程
+    /**
+     * On response received.
+     *
+     * @param result response
+     */
+    public void onResponse(final Object result);
 
-        ProviderConfig<ProtoService> providerConfig = new ProviderConfig<ProtoService>()
-            .setInterfaceId(ProtoService.class.getName()) // 指定接口
-            .setRef(new ProtoServiceImpl()) // 指定实现
-            .setServer(serverConfig); // 指定服务端
+    /**
+     * On exception caught.
+     *
+     * @param e exception
+     */
+    public void onException(final Throwable e);
 
-        providerConfig.export(); // 发布服务
-    }
+    /**
+     * User defined executor.
+     *
+     * @return executor
+     */
+    public Executor getExecutor();
 }

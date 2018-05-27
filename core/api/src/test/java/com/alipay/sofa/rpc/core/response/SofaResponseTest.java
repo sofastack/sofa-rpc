@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.core.response;
 
+import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -54,6 +55,11 @@ public class SofaResponseTest {
         response.setAppResponse("1233");
         Assert.assertFalse(response.isError());
         Assert.assertEquals("1233", response.getAppResponse());
+
+        response.setSerializeType((byte) 11);
+        response.setData(new ByteArrayWrapperByteBuf(new byte[] { 1, 2, 3 }));
+        Assert.assertTrue(response.getSerializeType() == 11);
+        Assert.assertTrue(response.getData().array().length == 3);
 
         Map<String, String> map = response.getResponseProps();
         Assert.assertTrue(map == null);
