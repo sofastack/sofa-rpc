@@ -392,4 +392,20 @@ public class RpcInvokeContext {
         this.future = future;
         return this;
     }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder(128);
+        sb.append(super.toString());
+        sb.append("{timeout=").append(timeout);
+        sb.append(", targetURL='").append(targetURL).append('\'');
+        sb.append(", targetGroup='").append(targetGroup).append('\'');
+        sb.append(", responseCallback=").append(responseCallback);
+        sb.append(", future=").append(future);
+        sb.append(", map=").append(map);
+        sb.append(", requestBaggage=").append(requestBaggage);
+        sb.append(", responseBaggage=").append(responseBaggage);
+        sb.append('}');
+        return sb.toString();
+    }
 }
