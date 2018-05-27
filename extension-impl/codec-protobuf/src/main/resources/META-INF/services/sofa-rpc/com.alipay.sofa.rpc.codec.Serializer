@@ -1,0 +1,1 @@
+protobuf=com.alipay.sofa.rpc.codec.protobuf.ProtobufSerializer

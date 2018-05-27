@@ -16,18 +16,20 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.codec.common.StringSerializer;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.listener.ConfigListener;
-import org.apache.curator.framework.recipes.cache.ChildData;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * ZookeeperObserver for config node.
+ * ZookeeperObserver for config node,subscribe interface level provider/consumer config.
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
@@ -43,61 +45,6 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
      * The Config listener map.
      */
     private ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
-
-    /**
-     * 该接口下增加了一个配置
-     *
-     * @param config 接口名称
-     * @param data        配置
-     */
-    public void addConfig(AbstractInterfaceConfig config, ChildData data) {
-        // TODO
-        if (data == null) {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.info("data is null");
-            }
-        } else {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.info("Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                    + ", stat=[" + data.getStat() + "]");
-            }
-        }
-    }
-
-    public void removeConfig(AbstractInterfaceConfig config, ChildData data) {
-        // TODO
-        if (data == null) {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.info("data is null");
-            }
-        } else {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.info("Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                    + ", stat=[" + data.getStat() + "]");
-            }
-        }
-    }
-
-    public void updateConfig(AbstractInterfaceConfig config, ChildData data) {
-        // TODO
-        if (data == null) {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.info("data is null");
-            }
-        } else {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.info("Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
-                    + ", stat=[" + data.getStat() + "]");
-            }
-        }
-    }
-
-    public void updateConfigAll(AbstractInterfaceConfig config, List<ChildData> currentData) {
-
-    }
 
     /**
      * Add config listener.
@@ -118,5 +65,128 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
      */
     public void removeConfigListener(AbstractInterfaceConfig config) {
         configListenerMap.remove(config);
+    }
+
+    /**
+     * 接口配置修改子节点Data
+     *
+     * @param config     接口配置
+     * @param configPath 配置Path
+     * @param data       子节点Data
+     */
+    public void updateConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
+        if (data == null) {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+            }
+        } else {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                    + ", stat=[" + data.getStat() + "]");
+            }
+            List<ConfigListener> configListeners = configListenerMap.get(config);
+            if (CommonUtils.isNotEmpty(configListeners)) {
+                //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
+                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
+                    false);
+                for (ConfigListener listener : configListeners) {
+                    listener.configChanged(attribute);
+                }
+            }
+        }
+    }
+
+    /**
+     * 接口配置修改子节点Data列表
+     *
+     * @param config      接口配置
+     * @param configPath  配置Path
+     * @param currentData 子节点Data列表
+     */
+    public void updateConfigAll(AbstractInterfaceConfig config, String configPath, List<ChildData> currentData) {
+        if (CommonUtils.isEmpty(currentData)) {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+            }
+        } else {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                for (ChildData data : currentData) {
+                    LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                        + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                        + ", stat=[" + data.getStat() + "]");
+                }
+            }
+            List<ConfigListener> configListeners = configListenerMap.get(config);
+            if (CommonUtils.isNotEmpty(configListeners)) {
+                List<Map<String, String>> attributes = ZookeeperRegistryHelper.convertConfigToAttributes(configPath,
+                    currentData);
+                for (ConfigListener listener : configListeners) {
+                    for (Map<String, String> attribute : attributes) {
+                        listener.configChanged(attribute);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * 接口配置删除子节点Data
+     *
+     * @param config     接口配置
+     * @param configPath 配置Path
+     * @param data       子节点Data
+     */
+    public void removeConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
+        if (data == null) {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+            }
+        } else {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                    + ", stat=[" + data.getStat() + "]");
+            }
+            List<ConfigListener> configListeners = configListenerMap.get(config);
+            if (CommonUtils.isNotEmpty(configListeners)) {
+                //转换子节点Data为接口级配置<配置属性名,null>,例如<timeout,null>
+                Map<String, String> attribute = ZookeeperRegistryHelper
+                    .convertConfigToAttribute(configPath, data, true);
+                for (ConfigListener listener : configListeners) {
+                    listener.configChanged(attribute);
+                }
+            }
+        }
+    }
+
+    /**
+     * 接口配置新增子节点Data
+     *
+     * @param config     接口配置
+     * @param configPath 配置Path
+     * @param data       子节点Data
+     */
+    public void addConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
+        if (data == null) {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+            }
+        } else {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                    + ", stat=[" + data.getStat() + "]");
+            }
+            List<ConfigListener> configListeners = configListenerMap.get(config);
+            if (CommonUtils.isNotEmpty(configListeners)) {
+                //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
+                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
+                    false);
+                for (ConfigListener listener : configListeners) {
+                    listener.configChanged(attribute);
+                }
+            }
+        }
     }
 }

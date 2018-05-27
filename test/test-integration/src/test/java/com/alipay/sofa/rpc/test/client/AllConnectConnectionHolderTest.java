@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.test.client;
 import com.alipay.sofa.rpc.client.AllConnectConnectionHolder;
 import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
-import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -98,8 +98,8 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
         AllConnectConnectionHolder holder = (AllConnectConnectionHolder) cluster.getConnectionHolder();
 
         Assert.assertTrue(holder.isAvailableEmpty());
-        Assert.assertNull(holder.getAvailableClientTransport(ProviderInfo
-            .valueOf("bolt://127.0.0.1:22221?serialization=hessian2")));
+        Assert.assertNull(holder.getAvailableClientTransport(
+            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22221?serialization=hessian2")));
 
     }
 
@@ -120,10 +120,10 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
         AllConnectConnectionHolder holder = (AllConnectConnectionHolder) cluster.getConnectionHolder();
 
         Assert.assertTrue(holder.isAvailableEmpty());
-        Assert.assertNotNull(holder.getAvailableClientTransport(ProviderInfo
-            .valueOf("bolt://127.0.0.1:22223?serialization=hessian2")));
-        Assert.assertNotNull(holder.getAvailableClientTransport(ProviderInfo
-            .valueOf("bolt://127.0.0.1:22224?serialization=hessian2")));
+        Assert.assertNotNull(holder.getAvailableClientTransport(
+            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22223?serialization=hessian2")));
+        Assert.assertNotNull(holder.getAvailableClientTransport(
+            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22224?serialization=hessian2")));
         consumerConfig.unRefer();
     }
 }

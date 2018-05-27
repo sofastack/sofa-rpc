@@ -400,7 +400,7 @@ public abstract class AbstractCluster extends Cluster {
      * @return the provider
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
-        ProviderInfo tp = ProviderInfo.valueOf(targetIP);
+        ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getHost().equals(tp.getHost())
                 && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
@@ -471,7 +471,8 @@ public abstract class AbstractCluster extends Cluster {
      * @throws SofaRpcException 请求RPC异常
      */
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
-        RpcInternalContext.getContext().setProviderInfo(providerInfo);
+        RpcInternalContext context = RpcInternalContext.getContext();
+        context.setProviderInfo(providerInfo);
         return filterChain.invoke(request);
     }
 
@@ -540,11 +541,16 @@ public abstract class AbstractCluster extends Cluster {
                         request.setSofaResponseCallback(methodResponseCallback);
                     }
                 }
+                // 记录发送开始时间
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
+                // 开始调用
                 transport.asyncSend(request, timeout);
                 response = buildEmptyResponse(request);
             }
             // Future调用
             else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
+                // 记录发送开始时间
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
                 // 开始调用
                 ResponseFuture future = transport.asyncSend(request, timeout);
                 // 放入线程上下文

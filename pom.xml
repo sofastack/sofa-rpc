@@ -50,7 +50,6 @@
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <module.jacoco.skip>true</module.jacoco.skip>
-        <dependency.test.skip>true</dependency.test.skip>
         <maven.compiler.source>1.6</maven.compiler.source>
         <maven.compiler.target>1.6</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
@@ -271,12 +270,6 @@
                 <dependency.test.skip>false</dependency.test.skip>
                 <maven.javadoc.skip>true</maven.javadoc.skip>
                 <module.jacoco.skip>false</module.jacoco.skip>
-            </properties>
-        </profile>
-        <profile>
-            <id>it-test</id>
-            <properties>
-                <dependency.test.skip>false</dependency.test.skip>
             </properties>
         </profile>
         <profile>

@@ -17,14 +17,13 @@
 package com.alipay.sofa.rpc.transport.rest;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.ReflectCache;
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
+import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
-import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractProxyClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
@@ -41,6 +40,12 @@ import java.util.concurrent.TimeUnit;
  */
 @Extension("rest")
 public class RestClientTransport extends AbstractProxyClientTransport {
+
+    /**
+     * 默认至少的连接池大小
+     */
+    private static final int MIN_CONNECTION_POOL_SIZE = 80;
+
     public RestClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
     }
@@ -53,7 +58,7 @@ public class RestClientTransport extends AbstractProxyClientTransport {
             .registerProvider().logProviders()
             .establishConnectionTimeout(transportConfig.getConnectTimeout(), TimeUnit.MILLISECONDS)
             .socketTimeout(transportConfig.getInvokeTimeout(), TimeUnit.MILLISECONDS)
-            .connectionPoolSize(transportConfig.getConnectionNum())// 连接池？
+            .connectionPoolSize(Math.max(transportConfig.getConnectionNum(), MIN_CONNECTION_POOL_SIZE))
             .build();
 
         ProviderInfo provider = transportConfig.getProviderInfo();
@@ -65,21 +70,21 @@ public class RestClientTransport extends AbstractProxyClientTransport {
 
     @Override
     protected Method getMethod(SofaRequest request) throws SofaRpcException {
-        return ReflectCache.getOrInitServiceMethod(request.getTargetServiceUniqueName(), request.getMethodName(),
-            request.getMethodArgSigs(), true, request.getInterfaceName());
-    }
+        String serviceUniqueName = request.getTargetServiceUniqueName();
+        String methodName = request.getMethodName();
+        String[] methodSigns = request.getMethodArgSigs();
 
-    /**
-     * 调用前设置一些属性
-     *
-     * @param context RPC上下文
-     * @param request 请求对象
-     */
-    @Override
-    protected void beforeSend(RpcInternalContext context, SofaRequest request) {
-        super.beforeSend(context, request);
-        if (EventBus.isEnable(ClientBeforeSendEvent.class)) {
-            EventBus.post(new ClientBeforeSendEvent(request));
+        Method method = ReflectCache.getOverloadMethodCache(serviceUniqueName, methodName, methodSigns);
+        if (method == null) {
+            try {
+                String interfaceName = request.getInterfaceName();
+                method = ClassUtils.forName(interfaceName)
+                    .getMethod(methodName, ClassTypeUtils.getClasses(methodSigns));
+                ReflectCache.putOverloadMethodCache(serviceUniqueName, method);
+            } catch (NoSuchMethodException e) {
+                throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Method not found", e);
+            }
         }
+        return method;
     }
 }

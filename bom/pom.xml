@@ -11,7 +11,7 @@
 
     <properties>
         <javassist.version>3.20.0-GA</javassist.version>
-        <netty.version>4.1.13.Final</netty.version>
+        <netty.version>4.1.24.Final</netty.version>
         <spring.version>4.2.6.RELEASE</spring.version>
         <!-- 3rd extends libs -->
         <servlet.version>2.5</servlet.version>
@@ -25,7 +25,7 @@
         <hessian.version>3.3.0</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.1.0</protobuf.version>
-        <jackson.version>2.7.8</jackson.version>
+        <jackson.version>2.7.9</jackson.version>
         <msgpack.version>0.6.11</msgpack.version>
         <!--common-->
         <httpcomponents.version>4.3.3</httpcomponents.version>
@@ -38,7 +38,8 @@
         <bolt.version>1.4.1</bolt.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <lookout.version>1.1.0</lookout.version>
-        <tracer.version>2.0.1</tracer.version>
+        <tracer.version>2.1.0</tracer.version>
+        <lookout.version>1.4.0</lookout.version>
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
@@ -62,7 +63,7 @@
                 <artifactId>spring-context</artifactId>
                 <version>${spring.version}</version>
             </dependency>
-            
+
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
@@ -250,12 +251,18 @@
                 <artifactId>hessian</artifactId>
                 <version>${hessian.version}</version>
             </dependency>
-            
+
             <!-- zk client -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
                 <artifactId>curator-recipes</artifactId>
                 <version>${curator.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-test</artifactId>
+                <version>${curator.version}</version>
+                <scope>test</scope>
             </dependency>
 
             <!--dubbo-->
@@ -295,6 +302,12 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>bolt</artifactId>
                 <version>${bolt.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa.common</groupId>
@@ -321,7 +334,17 @@
                 <artifactId>commons-io</artifactId>
                 <version>2.4</version>
             </dependency>
-            
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>tracer-core</artifactId>
+                <version>${tracer.version}</version>
+            </dependency>
+            <!-- lookout -->
+            <dependency>
+                <groupId>com.alipay.sofa.lookout</groupId>
+                <artifactId>lookout-api</artifactId>
+                <version>${lookout.version}</version>
+            </dependency>
             <!-- Test libs -->
             <dependency>
                 <groupId>junit</groupId>

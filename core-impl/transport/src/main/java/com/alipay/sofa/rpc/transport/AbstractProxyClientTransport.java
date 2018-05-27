@@ -25,6 +25,9 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
+import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
+import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.lang.reflect.InvocationTargetException;
@@ -149,17 +152,31 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
+        SofaResponse response = null;
+        SofaRpcException throwable = null;
         try {
             beforeSend(context, request);
-            return doInvokeSync(request, timeout);
+            if (EventBus.isEnable(ClientBeforeSendEvent.class)) {
+                EventBus.post(new ClientBeforeSendEvent(request));
+            }
+            response = doInvokeSync(request, timeout);
+            return response;
         } catch (InvocationTargetException e) {
-            throw convertToRpcException(e);
+            throwable = convertToRpcException(e);
+            throw throwable;
         } catch (SofaRpcException e) {
+            throwable = e;
             throw e;
         } catch (Exception e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Fail to send message to remote", e);
+            throwable = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
+                "Failed to send message to remote", e);
+            throw throwable;
         } finally {
             afterSend(context, request);
+            if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                    transportConfig.getProviderInfo(), request, response, throwable));
+            }
         }
     }
 

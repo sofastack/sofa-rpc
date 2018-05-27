@@ -120,16 +120,6 @@ public class FilterInvoker implements Invoker {
     }
 
     /**
-     * 得到下一个Filter
-     *
-     * @return Filter
-     */
-    @JustForTest
-    Filter getNextFilter() {
-        return nextFilter;
-    }
-
-    /**
      * 得到下一个FilterInvoker
      *
      * @return FilterInvoker

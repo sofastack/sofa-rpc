@@ -86,8 +86,10 @@ public class ClientProxyInvoker implements Invoker {
                 throw e;
             } finally {
                 // 产生调用结束事件
-                if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
-                    EventBus.post(new ClientEndInvokeEvent(request, response, throwable));
+                if (!request.isAsync()) {
+                    if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
+                        EventBus.post(new ClientEndInvokeEvent(request, response, throwable));
+                    }
                 }
             }
             // 包装响应

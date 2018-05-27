@@ -54,6 +54,27 @@ public class StringUtils {
     public static final String   DEFAULT            = "default";
 
     /**
+     * The string {@code "true"}.
+     *
+     * @since 5.4.0
+     */
+    public static final String   TRUE               = "true";
+
+    /**
+     * The string {@code "false"}.
+     *
+     * @since 5.4.0
+     */
+    public static final String   FALSE              = "false";
+
+    /**
+     * The string {@code "null"}.
+     *
+     * @since 5.4.0
+     */
+    public static final String   NULL               = "null";
+
+    /**
      * 空数组
      */
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -242,6 +263,17 @@ public class StringUtils {
     /**
      * 对象转string
      *
+     * @param o          对象
+     * @param defaultVal 默认值
+     * @return 不为null执行toString方法
+     */
+    public static String toString(Object o, String defaultVal) {
+        return o == null ? defaultVal : o.toString();
+    }
+
+    /**
+     * 对象转string
+     *
      * @param o 对象
      * @return 不为null执行toString方法
      */
@@ -250,14 +282,25 @@ public class StringUtils {
     }
 
     /**
-     * 对象转string
+     * 对象数组转string
      *
-     * @param o          对象
-     * @param defaultVal 默认值
+     * @param args 对象
      * @return 不为null执行toString方法
+     * @since 5.4.0
      */
-    public static String toString(Object o, String defaultVal) {
-        return o == null ? defaultVal : o.toString();
+    public static String objectsToString(Object[] args) {
+        if (args == null) {
+            return null;
+        } else if (args.length == 0) {
+            return "[]";
+        } else {
+            StringBuilder sb = new StringBuilder().append("[");
+            for (Object arg : args) {
+                sb.append(arg.toString()).append(",");
+            }
+            sb.setCharAt(sb.length() - 1, ']');
+            return sb.toString();
+        }
     }
 
     /**

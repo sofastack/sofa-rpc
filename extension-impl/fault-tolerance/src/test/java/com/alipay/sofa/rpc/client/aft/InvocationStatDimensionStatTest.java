@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.client.aft;
 
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.aft.impl.ServiceExceptionInvocationStat;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -52,7 +53,8 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
 
     @Test
     public void testInvocationStatFactory() {
-        InvocationStatDimension invocation = new InvocationStatDimension(ProviderInfo.valueOf("ip"), consumerConfig);
+        InvocationStatDimension invocation = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip"),
+            consumerConfig);
         InvocationStat InvocationStat1Result = InvocationStatFactory.getInvocationStat(invocation);
         InvocationStat InvocationStat2Result = InvocationStatFactory.getInvocationStat(invocation);
 
@@ -62,7 +64,8 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
     @Test
     public void testInvocationStatStatic() {
 
-        InvocationStatDimension invocation = new InvocationStatDimension(ProviderInfo.valueOf("ip"), consumerConfig);
+        InvocationStatDimension invocation = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip"),
+            consumerConfig);
         InvocationStat invocationStat = new ServiceExceptionInvocationStat(invocation);
 
         /**test info static*/

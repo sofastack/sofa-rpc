@@ -65,7 +65,7 @@ public class RpcReferenceContext {
     protected long           responseSize;
 
     /** client ip */
-    String                   clinetIP;
+    String                   clientIP;
     /** rpc客户端端口号 */
     int                      clientPort;
 
@@ -205,12 +205,22 @@ public class RpcReferenceContext {
         this.responseSize = responseSize;
     }
 
-    public String getClinetIP() {
-        return clinetIP;
+    public String getClientIP() {
+        return clientIP;
     }
 
-    public void setClinetIP(String clinetIP) {
-        this.clinetIP = clinetIP;
+    public void setClientIP(String clientIP) {
+        this.clientIP = clientIP;
+    }
+
+    @Deprecated
+    public String getClinetIP() {
+        return clientIP;
+    }
+
+    @Deprecated
+    public void setClinetIP(String clientIP) {
+        this.clientIP = clientIP;
     }
 
     public int getClientPort() {

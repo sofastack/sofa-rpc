@@ -18,7 +18,7 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
@@ -75,7 +75,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
         throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
             LOGGER.infoWithApp(config.getAppName(), "Receive update provider: path=[" + data.getPath() + "]"
-                + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                 + ", stat=[" + data.getStat() + "]");
         }
         List<ProviderInfoListener> providerInfoListeners = providerListenerMap.get(config);
@@ -93,7 +93,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
         throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
             LOGGER.infoWithApp(config.getAppName(), "Receive remove provider: path=[" + data.getPath() + "]"
-                + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                 + ", stat=[" + data.getStat() + "]");
         }
         List<ProviderInfoListener> providerInfoListeners = providerListenerMap.get(config);
@@ -111,7 +111,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
         throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
             LOGGER.infoWithApp(config.getAppName(), "Receive add provider: path=[" + data.getPath() + "]"
-                + ", data=[" + new String(data.getData(), RpcConstants.DEFAULT_CHARSET) + "]"
+                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                 + ", stat=[" + data.getStat() + "]");
         }
         List<ProviderInfoListener> providerInfoListeners = providerListenerMap.get(config);

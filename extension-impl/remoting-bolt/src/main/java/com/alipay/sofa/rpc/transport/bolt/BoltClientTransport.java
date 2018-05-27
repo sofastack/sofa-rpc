@@ -72,9 +72,18 @@ public class BoltClientTransport extends ClientTransport {
     /**
      * Logger for this class
      */
-    private static final Logger      LOGGER          = LoggerFactory.getLogger(BoltClientTransport.class);
+    private static final Logger                  LOGGER            = LoggerFactory.getLogger(BoltClientTransport.class);
+    /**
+     * Bolt rpc client
+     */
+    protected static final RpcClient             RPC_CLIENT        = new RpcClient();
 
-    protected static final RpcClient RPC_CLIENT      = new RpcClient();
+    /**
+     * Connection manager for reuse connection
+     *
+     * @since 5.4.0
+     */
+    protected static BoltClientConnectionManager connectionManager = new BoltClientConnectionManager(true);
 
     static {
         RPC_CLIENT.init();
@@ -82,25 +91,20 @@ public class BoltClientTransport extends ClientTransport {
     }
 
     /**
-     * 服务端提供者信息
-     */
-    protected final ProviderInfo     providerInfo;
-
-    /**
      * bolt需要的URL的缓存
      */
-    protected final Url              url;
+    protected final Url                          url;
 
     /**
      * Connection的实时状态<br>
      * 因为一个url在bolt里对应多个connect的，但是我们禁用，只保留一个
      */
-    protected volatile Connection    connection;
+    protected volatile Connection                connection;
 
     /**
      * 正在发送的调用数量
      */
-    protected volatile AtomicInteger currentRequests = new AtomicInteger(0);
+    protected volatile AtomicInteger             currentRequests   = new AtomicInteger(0);
 
     /**
      * Instant BoltClientTransport
@@ -109,8 +113,7 @@ public class BoltClientTransport extends ClientTransport {
      */
     protected BoltClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
-        providerInfo = transportConfig.getProviderInfo();
-        url = convertProviderToUrl(transportConfig, providerInfo);
+        url = convertProviderToUrl(transportConfig, transportConfig.getProviderInfo());
     }
 
     /**
@@ -148,14 +151,7 @@ public class BoltClientTransport extends ClientTransport {
         if (connection == null) {
             synchronized (this) {
                 if (connection == null) {
-                    try {
-                        connection = RPC_CLIENT.getConnection(url, url.getConnectTimeout());
-                        // RPC_CLIENT.disableConnHeartbeat(url);
-                    } catch (InterruptedException e) {
-                        throw new SofaRpcRuntimeException(e);
-                    } catch (RemotingException e) {
-                        throw new SofaRpcRuntimeException(e);
-                    }
+                    connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
                 }
             }
         }
@@ -169,9 +165,9 @@ public class BoltClientTransport extends ClientTransport {
                     LOGGER.info("Try disconnect client transport now. The connection is {}.",
                         NetUtils.channelToString(localAddress(), remoteAddress()));
                 }
+                connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
+                connection = null;
             }
-            connection = null;
-            RPC_CLIENT.closeConnection(url);
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("", e);
         }
@@ -209,8 +205,6 @@ public class BoltClientTransport extends ClientTransport {
         InvokeContext boltInvokeContext = createInvokeContext(request);
         try {
             beforeSend(context, request);
-            // 复制一份上下文
-            context = context.clone();
             boltInvokeContext.put(RemotingConstants.INVOKE_CTX_RPC_CTX, context);
             return doInvokeAsync(request, context, boltInvokeContext, timeout);
         } catch (Exception e) {
@@ -237,20 +231,20 @@ public class BoltClientTransport extends ClientTransport {
         SofaResponseCallback listener = request.getSofaResponseCallback();
         if (listener != null) {
             // callback调用
-            InvokeCallback callback = new BoltInvokerCallback(transportConfig.getConsumerConfig(), providerInfo,
-                listener, request, rpcContext, ClassLoaderUtils.getCurrentClassLoader());
+            InvokeCallback callback = new BoltInvokerCallback(transportConfig.getConsumerConfig(),
+                transportConfig.getProviderInfo(), listener, request, rpcContext,
+                ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
             return null;
         } else {
             // future 转为 callback
             BoltResponseFuture future = new BoltResponseFuture(request, timeoutMillis);
-            InvokeCallback callback = new BoltFutureInvokeCallback(transportConfig.getConsumerConfig(), providerInfo,
-                future, request, rpcContext, ClassLoaderUtils.getCurrentClassLoader());
+            InvokeCallback callback = new BoltFutureInvokeCallback(transportConfig.getConsumerConfig(),
+                transportConfig.getProviderInfo(), future, request, rpcContext,
+                ClassLoaderUtils.getCurrentClassLoader());
             // 发起调用
             RPC_CLIENT.invokeWithCallback(url, request, invokeContext, callback, timeoutMillis);
-            // 记录到上下文 传递出去
-            RpcInternalContext.getContext().setFuture(future);
             future.setSentTime();
             return future;
         }
@@ -274,7 +268,7 @@ public class BoltClientTransport extends ClientTransport {
             afterSend(context, boltInvokeContext, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
                 EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                    providerInfo, request, response, throwable));
+                    transportConfig.getProviderInfo(), request, response, throwable));
             }
         }
     }
@@ -311,7 +305,7 @@ public class BoltClientTransport extends ClientTransport {
             afterSend(context, invokeContext, request);
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
                 EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                    providerInfo, request, null, throwable));
+                    transportConfig.getProviderInfo(), request, null, throwable));
             }
         }
     }
@@ -339,8 +333,11 @@ public class BoltClientTransport extends ClientTransport {
      */
     protected SofaRpcException convertToRpcException(Exception e) {
         SofaRpcException exception;
+        if (e instanceof SofaRpcException) {
+            exception = (SofaRpcException) e;
+        }
         // 超时
-        if (e instanceof InvokeTimeoutException) {
+        else if (e instanceof InvokeTimeoutException) {
             exception = new SofaTimeOutException(e);
         }
         // 服务器忙
@@ -350,8 +347,8 @@ public class BoltClientTransport extends ClientTransport {
         // 序列化
         else if (e instanceof SerializationException) {
             boolean isServer = ((SerializationException) e).isServerSide();
-            exception = isServer ? new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e)
-                : new SofaRpcException(RpcErrorType.SERVER_SERIALIZE, e);
+            exception = isServer ? new SofaRpcException(RpcErrorType.SERVER_SERIALIZE, e)
+                : new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e);
         }
         // 反序列化
         else if (e instanceof DeserializationException) {
@@ -380,10 +377,13 @@ public class BoltClientTransport extends ClientTransport {
 
     protected InvokeContext createInvokeContext(SofaRequest request) {
         InvokeContext invokeContext = new InvokeContext();
-        invokeContext.put(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE, request.getSerializeFactoryType());
         invokeContext.put(InvokeContext.BOLT_CUSTOM_SERIALIZER, request.getSerializeType());
         invokeContext.put(RemotingConstants.HEAD_TARGET_SERVICE, request.getTargetServiceUniqueName());
         invokeContext.put(RemotingConstants.HEAD_METHOD_NAME, request.getMethodName());
+        String genericType = (String) request.getRequestProp(RemotingConstants.HEAD_GENERIC_TYPE);
+        if (genericType != null) {
+            invokeContext.put(RemotingConstants.HEAD_GENERIC_TYPE, genericType);
+        }
         return invokeContext;
     }
 

@@ -27,7 +27,7 @@ import org.junit.Test;
 public class ClientTransportFactoryTest {
 
     @Test
-    public void doReuseTest() {
+    public void doNotReuseTest() {
         ClientTransportConfig config = new ClientTransportConfig();
         config.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
             .setContainer("test");
@@ -39,7 +39,7 @@ public class ClientTransportFactoryTest {
             .setContainer("test");
         TestClientTransport clientTransport2 = (TestClientTransport) ClientTransportFactory.getClientTransport(config2);
 
-        Assert.assertTrue(clientTransport == clientTransport2);
+        Assert.assertTrue(clientTransport != clientTransport2);
 
         ClientTransportConfig config3 = new ClientTransportConfig();
         config3.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12223))

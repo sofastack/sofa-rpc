@@ -12,19 +12,24 @@
 
     <artifactId>sofa-rpc-extension-impl</artifactId>
     <packaging>pom</packaging>
-    
+
     <modules>
         <module>api-compatible</module>
         <module>extension-common</module>
         <module>bootstrap-bolt</module>
         <module>bootstrap-dubbo</module>
         <module>bootstrap-rest</module>
+        <module>codec-protobuf</module>
+        <module>codec-sofa-hessian</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
         <module>remoting-bolt</module>
         <module>remoting-resteasy</module>
         <module>registry-local</module>
         <module>registry-zk</module>
+        <module>tracer-opentracing</module>
+        <module>tracer-opentracing-resteasy</module>
+        <module>metrics-lookout</module>
     </modules>
 
     <dependencyManagement>
