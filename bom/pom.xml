@@ -11,7 +11,7 @@
 
     <properties>
         <javassist.version>3.20.0-GA</javassist.version>
-        <netty.version>4.1.13.Final</netty.version>
+        <netty.version>4.1.24.Final</netty.version>
         <spring.version>4.2.6.RELEASE</spring.version>
         <!-- 3rd extends libs -->
         <servlet.version>2.5</servlet.version>
@@ -25,7 +25,7 @@
         <hessian.version>3.3.0</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.1.0</protobuf.version>
-        <jackson.version>2.7.8</jackson.version>
+        <jackson.version>2.7.9</jackson.version>
         <msgpack.version>0.6.11</msgpack.version>
         <!--common-->
         <httpcomponents.version>4.3.3</httpcomponents.version>
@@ -302,6 +302,12 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>bolt</artifactId>
                 <version>${bolt.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa.common</groupId>

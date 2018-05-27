@@ -34,5 +34,6 @@ public class ByteArrayWrapperByteBufTest {
         Assert.assertNotNull(byteBuf.array());
         Assert.assertTrue(byteBuf.array().length == 3);
         Assert.assertTrue(byteBuf.readableBytes() == 3);
+        Assert.assertTrue(byteBuf.release());
     }
 }

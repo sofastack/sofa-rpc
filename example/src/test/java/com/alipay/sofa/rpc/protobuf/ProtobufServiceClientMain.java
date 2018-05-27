@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class ProtobufServiceClient {
+public class ProtobufServiceClientMain {
 
     public static void main(String[] args) {
         ConsumerConfig<ProtoService> consumerConfig = new ConsumerConfig<ProtoService>()

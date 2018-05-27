@@ -17,11 +17,12 @@
 package com.alipay.sofa.rpc.codec.protobuf;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -57,16 +58,16 @@ import java.util.Map;
 @Extension(value = "protobuf", code = 11)
 public class ProtobufSerializer extends AbstractSerializer {
 
-    private ProtobufHelper      protobufHelper     = new ProtobufHelper();
+    private final ProtobufHelper protobufHelper     = new ProtobufHelper();
 
     /**
      * Encode method name
      */
-    private static final String METHOD_TOBYTEARRAY = "toByteArray";
+    private static final String  METHOD_TOBYTEARRAY = "toByteArray";
     /**
      * Decode method name
      */
-    private static final String METHOD_PARSEFROM   = "parseFrom";
+    private static final String  METHOD_PARSEFROM   = "parseFrom";
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
@@ -95,7 +96,7 @@ public class ProtobufSerializer extends AbstractSerializer {
                 throw buildSerializeError("Error when invoke " + clazz.getName() + ".toByteArray().", e);
             }
         } else if (object instanceof String) {
-            return new ByteArrayWrapperByteBuf(((String) object).getBytes(RpcConstants.DEFAULT_CHARSET));
+            return new ByteArrayWrapperByteBuf(StringSerializer.encode((String) object));
         } else {
             throw buildSerializeError("Unsupported class:" + object.getClass().getName()
                 + ", only support protobuf message");
@@ -166,7 +167,7 @@ public class ProtobufSerializer extends AbstractSerializer {
                 }
             }
         } else if (clazz == String.class) {
-            return new String(data.array(), RpcConstants.DEFAULT_CHARSET);
+            return StringSerializer.decode(data.array());
         } else {
             throw buildDeserializeError("Unsupported class:" + clazz.getName() + ", only support protobuf message");
         }
@@ -209,10 +210,11 @@ public class ProtobufSerializer extends AbstractSerializer {
             sofaRequest.setTargetAppName(targetApp);
         }
 
-        // 解析trace信息
-        Map<String, String> traceMap = new HashMap<String, String>(16);
-        CodecUtils.treeCopyTo(RemotingConstants.RPC_TRACE_NAME + ".", head, traceMap, true);
-        sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
+        // 解析tracer等信息
+        parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, head, sofaRequest);
+        if (RpcInvokeContext.isBaggageEnable()) {
+            parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, head, sofaRequest);
+        }
         for (Map.Entry<String, String> entry : head.entrySet()) {
             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
         }
@@ -224,6 +226,15 @@ public class ProtobufSerializer extends AbstractSerializer {
         sofaRequest.setMethodArgs(new Object[] { pbReq });
         sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
         return sofaRequest;
+    }
+
+    private void parseRequestHeader(String key, Map<String, String> headerMap,
+                                    SofaRequest sofaRequest) {
+        Map<String, String> traceMap = new HashMap<String, String>(8);
+        CodecUtils.treeCopyTo(key + ".", headerMap, traceMap, true);
+        if (!traceMap.isEmpty()) {
+            sofaRequest.addRequestProp(key, traceMap);
+        }
     }
 
     private SofaResponse decodeSofaResponse(AbstractByteBuf data, SofaResponse sofaResponse, Map<String, String> head) {

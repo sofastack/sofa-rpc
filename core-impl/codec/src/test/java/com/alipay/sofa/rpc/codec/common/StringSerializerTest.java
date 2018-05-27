@@ -14,31 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.transport;
+package com.alipay.sofa.rpc.codec.common;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class ByteArrayWrapperByteBuf extends AbstractByteBuf {
+public class StringSerializerTest {
 
-    private final byte[] data;
-
-    public ByteArrayWrapperByteBuf(byte[] data) {
-        this.data = data;
+    @Test
+    public void encode() {
+        Assert.assertTrue(StringSerializer.encode("11").length == 2);
+        Assert.assertTrue(StringSerializer.encode("").length == 0);
+        Assert.assertTrue(StringSerializer.encode(null).length == 0);
     }
 
-    @Override
-    public byte[] array() {
-        return data;
-    }
-
-    @Override
-    public int readableBytes() {
-        return data.length;
-    }
-
-    @Override
-    public boolean release() {
-        return true;
+    @Test
+    public void decode() {
+        Assert.assertNull(StringSerializer.decode(null));
+        Assert.assertEquals("", StringSerializer.decode(new byte[0]));
+        Assert.assertEquals("11", StringSerializer.decode(StringSerializer.encode("11")));
     }
 }

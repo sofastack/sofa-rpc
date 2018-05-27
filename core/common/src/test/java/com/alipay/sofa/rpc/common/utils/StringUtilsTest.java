@@ -151,4 +151,46 @@ public class StringUtilsTest {
         Assert.assertEquals("", StringUtils.substringAfter("abc", "d"));
         Assert.assertEquals("abc", StringUtils.substringAfter("abc", ""));
     }
+
+    @Test
+    public void testToString() {
+        Assert.assertEquals(null, StringUtils.toString(null));
+        Assert.assertEquals("Bean:11", StringUtils.toString(new Bean("11")));
+
+        Assert.assertEquals(null, StringUtils.toString((Object) null, null));
+        Assert.assertEquals("1", StringUtils.toString((Object) null, "1"));
+        Assert.assertEquals("Bean:11", StringUtils.toString(new Bean("11"), null));
+
+        Assert.assertEquals(null, StringUtils.objectsToString(null));
+        Assert.assertEquals("[]", StringUtils.objectsToString(new Object[0]));
+        Assert.assertEquals("[1,22]", StringUtils.objectsToString(new Object[] { 1, "22" }));
+        Assert.assertEquals("[1,Bean:11]", StringUtils.objectsToString(new Object[] { 1, new Bean("11") }));
+    }
+
+    @Test
+    public void testEquals() {
+        Assert.assertTrue(StringUtils.equals(null, null));
+        Assert.assertFalse(StringUtils.equals(null, ""));
+        Assert.assertFalse(StringUtils.equals("", null));
+        Assert.assertTrue(StringUtils.equals("", ""));
+        Assert.assertFalse(StringUtils.equals("1", "2"));
+        Assert.assertTrue(StringUtils.equals("1", "1"));
+    }
+
+    class Bean {
+        private String s;
+
+        public Bean() {
+
+        }
+
+        public Bean(String s) {
+            this.s = s;
+        }
+
+        @Override
+        public String toString() {
+            return "Bean:" + s;
+        }
+    }
 }
