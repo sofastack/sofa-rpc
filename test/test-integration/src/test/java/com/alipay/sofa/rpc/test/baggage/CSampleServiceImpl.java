@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
+import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
 /**
  *
@@ -38,6 +40,19 @@ public class CSampleServiceImpl implements SampleService {
             context.putResponseBaggage("respBaggageC_force", "c2aaaff");
         }
         return "hello world c";
+    }
+
+    @Override
+    public EchoResponse echoObj(EchoRequest req) {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        System.out.println("----c-----:" + context);
+        reqBaggage = context.getRequestBaggage("reqBaggageC");
+        if (reqBaggage != null) {
+            context.putResponseBaggage("respBaggageC", "c2aaa");
+        } else {
+            context.putResponseBaggage("respBaggageC_force", "c2aaaff");
+        }
+        return EchoResponse.newBuilder().setCode(200).setMessage("hello world c").build();
     }
 
     public String getReqBaggage() {

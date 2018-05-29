@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
+import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -100,6 +102,68 @@ public class BCallbackSampleServiceImpl implements SampleService {
             e.printStackTrace();
         }
         return str[0] + str[1];
+    }
+
+    @Override
+    public EchoResponse echoObj(EchoRequest req) {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        System.out.println("--b1-----:" + context);
+        reqBaggage = context.getRequestBaggage("reqBaggageB");
+        if (reqBaggage != null) {
+            context.putResponseBaggage("respBaggageB", "b2aaa");
+        } else {
+            context.putResponseBaggage("respBaggageB_force", "b2aaaff");
+        }
+        final EchoResponse[] str = new EchoResponse[2];
+        final CountDownLatch latch = new CountDownLatch(2);
+        try {
+            RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback() {
+                @Override
+                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                    str[0] = (EchoResponse) appResponse;
+                    latch.countDown();
+                }
+
+                @Override
+                public void onAppException(Throwable throwable, String methodName,
+                                           RequestBase request) {
+                    latch.countDown();
+                }
+
+                @Override
+                public void onSofaException(SofaRpcException sofaException, String methodName,
+                                            RequestBase request) {
+                    latch.countDown();
+                }
+            });
+            sampleServiceC.hello();
+            RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback() {
+                @Override
+                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                    str[1] = (EchoResponse) appResponse;
+                    latch.countDown();
+                }
+
+                @Override
+                public void onAppException(Throwable throwable, String methodName,
+                                           RequestBase request) {
+                    latch.countDown();
+                }
+
+                @Override
+                public void onSofaException(SofaRpcException sofaException, String methodName,
+                                            RequestBase request) {
+                    latch.countDown();
+                }
+            });
+            sampleServiceD.hello();
+            latch.await(2000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        EchoResponse s1 = str[0];
+        EchoResponse s2 = str[1];
+        return EchoResponse.newBuilder().setCode(200).setMessage(s1.getMessage() + s2.getMessage()).build();
     }
 
     public String getReqBaggage() {
