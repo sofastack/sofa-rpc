@@ -53,7 +53,7 @@
         <slf4j.version>1.7.21</slf4j.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <javassist.version>3.20.0-GA</javassist.version>
-        <netty.version>4.1.13.Final</netty.version>
+        <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.0</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
         <bolt.version>1.4.1</bolt.version>
@@ -203,6 +203,12 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
             <version>${bolt.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa.common</groupId>
