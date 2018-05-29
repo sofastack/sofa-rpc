@@ -18,33 +18,26 @@ package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
+import com.alipay.sofa.rpc.config.ServerConfig;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcLookoutId {
 
-    private volatile Id  consumerId;
-    private final Object consumerIdLock                  = new Object();
+    private volatile Id                         consumerId;
+    private final Object                        consumerIdLock  = new Object();
 
-    private volatile Id  providerId;
-    private final Object providerIdLock                  = new Object();
+    private volatile Id                         providerId;
+    private final Object                        providerIdLock  = new Object();
 
-    private volatile Id  boltThreadPoolConfigId;
-    private final Object boltThreadPoolConfigIdLock      = new Object();
-
-    private volatile Id  boltThreadPoolActiveCountId;
-    private final Object boltThreadPoolActiveCountIdLock = new Object();
-
-    private volatile Id  boltThreadPoolIdleCountId;
-    private final Object boltThreadPoolIdleCountIdLock   = new Object();
-
-    private volatile Id  boltThreadPoolQueueSizeId;
-    private final Object boltThreadPoolQueueSizeIdLock   = new Object();
+    private final ConcurrentHashMap<String, Id> serverConfigIds = new ConcurrentHashMap<String, Id>();
 
     /**
      * create consumerId
+     *
      * @return consumerId
      */
     public Id getConsumerId() {
@@ -62,6 +55,7 @@ public class RpcLookoutId {
 
     /**
      * Create ProviderId
+     *
      * @return ProviderId
      */
     public Id getProviderId() {
@@ -77,71 +71,57 @@ public class RpcLookoutId {
         return providerId;
     }
 
-    /**
-     * Create BoltThreadPoolConfigId
-     * @return BoltThreadPoolConfigId
-     */
-    public Id getBoltThreadPoolConfigId() {
-
-        if (boltThreadPoolConfigId == null) {
-            synchronized (boltThreadPoolConfigIdLock) {
-                if (boltThreadPoolConfigId == null) {
-                    boltThreadPoolConfigId = Lookout.registry().createId("rpc.bolt.threadpool.config");
-                }
-            }
-        }
-
-        return boltThreadPoolConfigId;
+    public synchronized Id getServerThreadConfigId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.config";
+        return getId(key);
     }
 
-    /**
-     * Create BoltThreadPoolActiveCountId
-     * @return BoltThreadPoolActiveCountId
-     */
-    public Id getBoltThreadPoolActiveCountId() {
-
-        if (boltThreadPoolActiveCountId == null) {
-            synchronized (boltThreadPoolActiveCountIdLock) {
-                if (boltThreadPoolActiveCountId == null) {
-                    boltThreadPoolActiveCountId = Lookout.registry().createId("rpc.bolt.threadpool.active.count");
-                }
-            }
-        }
-
-        return boltThreadPoolActiveCountId;
+    public Id getServerThreadPoolActiveCountId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.active.count";
+        return getId(key);
     }
 
-    /**
-     * Create BoltThreadPoolIdleCountId
-     * @return BoltThreadPoolIdleCountId
-     */
-    public Id getBoltThreadPoolIdleCountId() {
-
-        if (boltThreadPoolIdleCountId == null) {
-            synchronized (boltThreadPoolIdleCountIdLock) {
-                if (boltThreadPoolIdleCountId == null) {
-                    boltThreadPoolIdleCountId = Lookout.registry().createId("rpc.bolt.threadpool.idle.count");
-                }
-            }
-        }
-
-        return boltThreadPoolIdleCountId;
+    public Id getServerThreadPoolIdleCountId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.idle.count";
+        return getId(key);
     }
 
-    /**
-     * Create BoltThreadPoolQueueSizeId
-     * @return BoltThreadPoolQueueSizeId
-     */
-    public Id getBoltThreadPoolQueueSizeId() {
+    public Id getServerThreadPoolQueueSizeId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.queue.size";
+        return getId(key);
+    }
 
-        if (boltThreadPoolQueueSizeId == null) {
-            synchronized (boltThreadPoolQueueSizeIdLock) {
-                if (boltThreadPoolQueueSizeId == null) {
-                    boltThreadPoolQueueSizeId = Lookout.registry().createId("rpc.bolt.threadpool.queue.size");
+    private Id getId(String key) {
+        Id lookoutId = serverConfigIds.get(key);
+        if (lookoutId == null) {
+            synchronized (RpcLookout.class) {
+                lookoutId = serverConfigIds.get(key);
+                if (lookoutId == null) {
+                    lookoutId = Lookout.registry().createId(key);
+                    serverConfigIds.put(key, lookoutId);
                 }
             }
         }
+        return lookoutId;
+    }
 
-        return boltThreadPoolQueueSizeId;
+    public Id removeServerThreadConfigId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.config";
+        return serverConfigIds.remove(key);
+    }
+
+    public Id removeServerThreadPoolActiveCountId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.active.count";
+        return serverConfigIds.remove(key);
+    }
+
+    public Id removeServerThreadPoolIdleCountId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.idle.count";
+        return serverConfigIds.remove(key);
+    }
+
+    public Id removeServerThreadPoolQueueSizeId(ServerConfig serverConfig) {
+        String key = "rpc." + serverConfig.getProtocol() + ".threadpool.queue.size";
+        return serverConfigIds.remove(key);
     }
 }

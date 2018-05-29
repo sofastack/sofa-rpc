@@ -80,6 +80,11 @@ public class LookoutSubscriber extends Subscriber {
 
             rpcMetrics.collectThreadPool(serverStartedEvent.getServerConfig(),
                 serverStartedEvent.getThreadPoolExecutor());
+
+        } else if (eventClass == ServerStoppedEvent.class) {
+            ServerStoppedEvent serverStartedEvent = (ServerStoppedEvent) event;
+
+            rpcMetrics.removeThreadPool(serverStartedEvent.getServerConfig());
         }
     }
 

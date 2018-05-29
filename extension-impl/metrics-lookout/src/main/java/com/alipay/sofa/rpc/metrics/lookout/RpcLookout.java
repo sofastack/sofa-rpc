@@ -51,6 +51,7 @@ public class RpcLookout {
 
     /**
      * Collect the RPC client information.
+     *
      * @param rpcClientMetricsModel client information model
      */
     public void collectClient(RpcClientLookoutModel rpcClientMetricsModel) {
@@ -64,12 +65,13 @@ public class RpcLookout {
             recordSize(methodConsumerMetric, rpcClientMetricsModel);
 
         } catch (Throwable t) {
-            LOGGER.error(LogCodes.ERROR_METRIC_REPORT_ERROR, t);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_METRIC_REPORT_ERROR), t);
         }
     }
 
     /**
      * Collect the RPC server information.
+     *
      * @param rpcServerMetricsModel server information model
      */
     public void collectServer(RpcServerLookoutModel rpcServerMetricsModel) {
@@ -81,26 +83,78 @@ public class RpcLookout {
             recordCounterAndTimer(methodProviderMetric, rpcServerMetricsModel);
 
         } catch (Throwable t) {
-            LOGGER.error(LogCodes.ERROR_METRIC_REPORT_ERROR, t);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_METRIC_REPORT_ERROR), t);
         }
     }
 
     /**
      * Collect the thread pool information
-     * @param serverConfig ServerConfig
+     *
+     * @param serverConfig       ServerConfig
      * @param threadPoolExecutor ThreadPoolExecutor
      */
-    public void collectThreadPool(ServerConfig serverConfig, ThreadPoolExecutor threadPoolExecutor) {
+    public void collectThreadPool(ServerConfig serverConfig, final ThreadPoolExecutor threadPoolExecutor) {
+        try {
 
-        recordThreadPoolStaticConfig(serverConfig);
+            int coreSize = serverConfig.getCoreThreads();
+            int maxSize = serverConfig.getMaxThreads();
+            int queueSize = serverConfig.getQueues();
 
-        recordThreadPoolDynamicStatus(threadPoolExecutor);
+            final ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig(coreSize, maxSize, queueSize);
+
+            Lookout.registry().info(rpcLookoutId.getServerThreadConfigId(serverConfig), new Info<ThreadPoolConfig>() {
+
+                @Override
+                public ThreadPoolConfig value() {
+                    return threadPoolConfig;
+                }
+            });
+
+            Lookout.registry().gauge(rpcLookoutId.getServerThreadPoolActiveCountId(serverConfig), new Gauge<Integer>() {
+
+                @Override
+                public Integer value() {
+                    return threadPoolExecutor.getActiveCount();
+                }
+            });
+
+            Lookout.registry().gauge(rpcLookoutId.getServerThreadPoolIdleCountId(serverConfig), new Gauge<Integer>() {
+
+                @Override
+                public Integer value() {
+                    return threadPoolExecutor.getPoolSize() - threadPoolExecutor.getActiveCount();
+                }
+            });
+
+            Lookout.registry().gauge(rpcLookoutId.getServerThreadPoolQueueSizeId(serverConfig), new Gauge<Integer>() {
+
+                @Override
+                public Integer value() {
+                    return threadPoolExecutor.getQueue().size();
+                }
+            });
+        } catch (Throwable t) {
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_METRIC_REPORT_ERROR), t);
+        }
+    }
+
+    /**
+     * remove the thread pool information
+     *
+     * @param serverConfig server config
+     */
+    public void removeThreadPool(ServerConfig serverConfig) {
+        Lookout.registry().removeMetric(rpcLookoutId.removeServerThreadConfigId(serverConfig));
+        Lookout.registry().removeMetric(rpcLookoutId.removeServerThreadPoolActiveCountId(serverConfig));
+        Lookout.registry().removeMetric(rpcLookoutId.removeServerThreadPoolIdleCountId(serverConfig));
+        Lookout.registry().removeMetric(rpcLookoutId.removeServerThreadPoolQueueSizeId(serverConfig));
     }
 
     /**
      * Record the number of calls and time consuming.
+     *
      * @param mixinMetric MixinMetric
-     * @param model information model
+     * @param model       information model
      */
     private void recordCounterAndTimer(MixinMetric mixinMetric, RpcAbstractLookoutModel model) {
         Counter totalCounter = mixinMetric.counter("total_count");
@@ -126,8 +180,9 @@ public class RpcLookout {
 
     /**
      * Record request size and response size
+     *
      * @param mixinMetric MixinMetric
-     * @param model information model
+     * @param model       information model
      */
     private void recordSize(MixinMetric mixinMetric, RpcClientLookoutModel model) {
 
@@ -147,6 +202,7 @@ public class RpcLookout {
 
     /**
      * Create consumer id
+     *
      * @param model RpcClientLookoutModel
      * @return Id
      */
@@ -154,101 +210,32 @@ public class RpcLookout {
 
         Map<String, String> tags = new HashMap<String, String>(6);
 
-        tags.put("app", emptyIfNull(model.getApp()));
-        tags.put("service", emptyIfNull(model.getService()));
-        tags.put("method", emptyIfNull(model.getMethod()));
-        tags.put("protocol", emptyIfNull(model.getProtocol()));
-        tags.put("invoke_type", emptyIfNull(model.getInvokeType()));
-        tags.put("target_app", emptyIfNull(model.getTargetApp()));
+        tags.put("app", StringUtils.defaultString(model.getApp()));
+        tags.put("service", StringUtils.defaultString(model.getService()));
+        tags.put("method", StringUtils.defaultString(model.getMethod()));
+        tags.put("protocol", StringUtils.defaultString(model.getProtocol()));
+        tags.put("invoke_type", StringUtils.defaultString(model.getInvokeType()));
+        tags.put("target_app", StringUtils.defaultString(model.getTargetApp()));
 
         return rpcLookoutId.getConsumerId().withTags(tags);
     }
 
     /**
      * Create provider id
+     *
      * @param model RpcServerLookoutModel
      * @return Id
      */
     public Id createMethodProviderId(RpcServerLookoutModel model) {
         Map<String, String> tags = new HashMap<String, String>(5);
 
-        tags.put("app", emptyIfNull(model.getApp()));
-        tags.put("service", emptyIfNull(model.getService()));
-        tags.put("method", emptyIfNull(model.getMethod()));
-        tags.put("protocol", emptyIfNull(model.getProtocol()));
-        tags.put("caller_app", emptyIfNull(model.getCallerApp()));
+        tags.put("app", StringUtils.defaultString(model.getApp()));
+        tags.put("service", StringUtils.defaultString(model.getService()));
+        tags.put("method", StringUtils.defaultString(model.getMethod()));
+        tags.put("protocol", StringUtils.defaultString(model.getProtocol()));
+        tags.put("caller_app", StringUtils.defaultString(model.getCallerApp()));
 
         return rpcLookoutId.getProviderId().withTags(tags);
-    }
-
-    /**
-     * Record the static configuration information of the thread pool.
-     * @param serverConfig ServerConfig
-     */
-    private void recordThreadPoolStaticConfig(ServerConfig serverConfig) {
-
-        try {
-
-            int coreSize = serverConfig.getCoreThreads();
-            int maxSize = serverConfig.getMaxThreads();
-            int queueSize = serverConfig.getQueues();
-
-            final ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig(coreSize, maxSize, queueSize);
-
-            Lookout.registry().info(rpcLookoutId.getBoltThreadPoolConfigId(), new Info<ThreadPoolConfig>() {
-
-                @Override
-                public ThreadPoolConfig value() {
-                    return threadPoolConfig;
-                }
-            });
-
-        } catch (Throwable t) {
-            LOGGER.error(LogCodes.ERROR_METRIC_REPORT_ERROR, t);
-        }
-    }
-
-    /**
-     * Record thread pool dynamic running information.
-     * @param threadPoolExecutor
-     */
-    private void recordThreadPoolDynamicStatus(final ThreadPoolExecutor threadPoolExecutor) {
-
-        try {
-            Lookout.registry().gauge(rpcLookoutId.getBoltThreadPoolActiveCountId(), new Gauge<Integer>() {
-
-                @Override
-                public Integer value() {
-                    return threadPoolExecutor.getActiveCount();
-                }
-            });
-
-            Lookout.registry().gauge(rpcLookoutId.getBoltThreadPoolIdleCountId(), new Gauge<Integer>() {
-
-                @Override
-                public Integer value() {
-                    return threadPoolExecutor.getPoolSize() - threadPoolExecutor.getActiveCount();
-                }
-            });
-
-            Lookout.registry().gauge(rpcLookoutId.getBoltThreadPoolQueueSizeId(), new Gauge<Integer>() {
-
-                @Override
-                public Integer value() {
-                    return threadPoolExecutor.getQueue().size();
-                }
-            });
-        } catch (Throwable t) {
-            LOGGER.error(LogCodes.ERROR_METRIC_REPORT_ERROR, t);
-        }
-    }
-
-    private String emptyIfNull(String value) {
-        if (value == null) {
-            return StringUtils.EMPTY;
-        }
-
-        return value;
     }
 
     /**
@@ -280,7 +267,7 @@ public class RpcLookout {
         /**
          * Setter method for property <tt>corePoolSize</tt>.
          *
-         * @param corePoolSize  value to be assigned to property corePoolSize
+         * @param corePoolSize value to be assigned to property corePoolSize
          */
         public void setCorePoolSize(int corePoolSize) {
             this.corePoolSize = corePoolSize;
@@ -298,7 +285,7 @@ public class RpcLookout {
         /**
          * Setter method for property <tt>maxPoolSize</tt>.
          *
-         * @param maxPoolSize  value to be assigned to property maxPoolSize
+         * @param maxPoolSize value to be assigned to property maxPoolSize
          */
         public void setMaxPoolSize(int maxPoolSize) {
             this.maxPoolSize = maxPoolSize;
@@ -316,7 +303,7 @@ public class RpcLookout {
         /**
          * Setter method for property <tt>queueSize</tt>.
          *
-         * @param queueSize  value to be assigned to property queueSize
+         * @param queueSize value to be assigned to property queueSize
          */
         public void setQueueSize(int queueSize) {
             this.queueSize = queueSize;
