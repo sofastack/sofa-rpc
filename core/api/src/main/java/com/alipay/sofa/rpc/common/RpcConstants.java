@@ -159,6 +159,30 @@ public class RpcConstants {
      * @since 5.2.0
      */
     public static final String  PROTOCOL_TYPE_REST                 = "rest";
+    /**
+     * 协议类型：http (http/1.1)
+     *
+     * @since 5.4.0
+     */
+    public static final String  PROTOCOL_TYPE_HTTP                 = "http";
+    /**
+     * 协议类型：https
+     *
+     * @since 5.4.0
+     */
+    public static final String  PROTOCOL_TYPE_HTTPS                = "https";
+    /**
+     * 协议类型：http2 clear text
+     *
+     * @since 5.4.0
+     */
+    public static final String  PROTOCOL_TYPE_H2C                  = "h2c";
+    /**
+     * 协议类型：http2 
+     *
+     * @since 5.4.0
+     */
+    public static final String  PROTOCOL_TYPE_H2                   = "h2";
 
     /*--------Config配置值相关结束---------*/
 
