@@ -258,19 +258,14 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory
                         .getSerializer(requestCommand.getSerializer());
                     SofaRequest sofaRequest = new SofaRequest();
-                    sofaRequest = (SofaRequest) rpcSerializer.decode(
-                        new ByteArrayWrapperByteBuf(requestCommand.getContent()), sofaRequest, headerMap);
-                    if (sofaRequest == null) {
-                        throw new DeserializationException("Decode request return null!");
-                    }
+                    rpcSerializer.decode(new ByteArrayWrapperByteBuf(requestCommand.getContent()),
+                        sofaRequest, headerMap);
                     requestCommand.setRequestObject(sofaRequest);
                 } finally {
                     Thread.currentThread().setContextClassLoader(oldClassLoader);
                 }
 
                 return true;
-            } catch (DeserializationException ex) {
-                throw ex;
             } catch (Exception ex) {
                 throw new DeserializationException(ex.getMessage(), ex);
             } finally {
@@ -364,8 +359,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     (String) invokeContext.get(RemotingConstants.HEAD_GENERIC_TYPE));
 
                 Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory.getSerializer(serializer);
-                sofaResponse = (SofaResponse) rpcSerializer.decode(
-                    new ByteArrayWrapperByteBuf(responseCommand.getContent()), sofaResponse, header);
+                rpcSerializer.decode(new ByteArrayWrapperByteBuf(responseCommand.getContent()), sofaResponse, header);
 
                 responseCommand.setResponseObject(sofaResponse);
                 return true;

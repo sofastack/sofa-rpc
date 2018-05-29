@@ -59,8 +59,7 @@ public interface Serializer {
      * @param data     原始字节数组
      * @param template 模板对象
      * @param context  上下文
-     * @return 反序列化后的对象
      * @throws SofaRpcException 序列化异常
      */
-    public Object decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException;
+    public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException;
 }
