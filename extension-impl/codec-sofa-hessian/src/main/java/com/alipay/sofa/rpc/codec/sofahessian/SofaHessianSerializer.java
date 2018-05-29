@@ -59,7 +59,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension(value = "sofahessian", code = 1)
+@Extension(value = "hessian2", code = 1)
 public class SofaHessianSerializer extends AbstractSerializer {
 
     /**
