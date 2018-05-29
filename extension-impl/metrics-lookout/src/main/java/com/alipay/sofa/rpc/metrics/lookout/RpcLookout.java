@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.lookout;
+package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.Counter;
 import com.alipay.lookout.api.DistributionSummary;
@@ -29,9 +29,6 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.model.RpcAbstractLookoutModel;
-import com.alipay.sofa.rpc.model.RpcClientLookoutModel;
-import com.alipay.sofa.rpc.model.RpcServerLookoutModel;
 
 import java.util.HashMap;
 import java.util.Map;

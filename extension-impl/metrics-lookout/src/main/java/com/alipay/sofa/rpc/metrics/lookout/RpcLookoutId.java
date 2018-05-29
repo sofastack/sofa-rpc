@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.lookout;
+package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
