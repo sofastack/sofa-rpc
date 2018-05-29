@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.lookout;
+package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.*;
 import com.alipay.lookout.core.DefaultRegistry;
@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.lookout.RpcLookout;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -205,7 +204,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * test thread pool config
      *
-     * @param metric
      * @throws Exception
      */
     @Test
@@ -229,7 +227,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * test thread pool active count
      *
-     * @param metric
      * @throws Exception
      */
     @Test
@@ -246,8 +243,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test thread pool idle count
-     *
-     * @param metric
      */
     @Test
     public void testThreadPoolIdleCount() throws Exception {
@@ -263,8 +258,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test thread pool queue size
-     *
-     * @param metric
      */
     @Test
     public void testThreadPoolQueueSize() throws Exception {
@@ -281,7 +274,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * test provider service stats
      *
-     * @param metric
      * @throws InterruptedException
      */
     @Test
@@ -313,7 +305,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * test consumer service stats
      *
-     * @param metric
      * @throws InterruptedException
      */
     @Test
@@ -361,7 +352,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             String key = tag.key();
             String value = tag.value();
             if (key.equals("service")) {
-                assertEquals("com.alipay.sofa.lookout.LookoutService:1.0", value);
+                assertEquals(LookoutService.class.getCanonicalName() + ":1.0", value);
                 tagAssert = true;
             }
             if (key.equals("protocol")) {

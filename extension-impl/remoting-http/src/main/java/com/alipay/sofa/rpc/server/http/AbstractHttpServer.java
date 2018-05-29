@@ -23,6 +23,9 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ServerStartedEvent;
+import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.server.BusinessPool;
@@ -117,6 +120,12 @@ public abstract class AbstractHttpServer implements Server {
             try {
                 serverTransport = ServerTransportFactory.getServerTransport(serverTransportConfig);
                 started = serverTransport.start();
+
+                if (started) {
+                    if (EventBus.isEnable(ServerStartedEvent.class)) {
+                        EventBus.post(new ServerStartedEvent(serverConfig, bizThreadPool));
+                    }
+                }
             } catch (SofaRpcRuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -148,6 +157,10 @@ public abstract class AbstractHttpServer implements Server {
             serverTransport.stop();
             serverTransport = null;
             started = false;
+
+            if (EventBus.isEnable(ServerStoppedEvent.class)) {
+                EventBus.post(new ServerStoppedEvent(serverConfig));
+            }
         }
     }
 
