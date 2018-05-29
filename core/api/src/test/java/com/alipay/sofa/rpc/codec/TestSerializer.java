@@ -41,7 +41,7 @@ public class TestSerializer extends AbstractSerializer {
     }
 
     @Override
-    public Object decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
-        return null;
+    public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
+
     }
 }
