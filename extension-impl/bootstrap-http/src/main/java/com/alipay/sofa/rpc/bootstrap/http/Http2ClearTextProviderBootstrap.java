@@ -25,13 +25,13 @@ import com.alipay.sofa.rpc.ext.Extension;
  * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
  */
 @Extension("h2c")
-public class Http2ProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
+public class Http2ClearTextProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
     /**
      * 构造函数
      *
      * @param providerConfig 服务发布者配置
      */
-    protected Http2ProviderBootstrap(ProviderConfig<T> providerConfig) {
+    protected Http2ClearTextProviderBootstrap(ProviderConfig<T> providerConfig) {
         super(providerConfig);
     }
 }
