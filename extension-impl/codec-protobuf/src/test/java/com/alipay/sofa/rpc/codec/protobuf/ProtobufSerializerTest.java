@@ -74,8 +74,13 @@ public class ProtobufSerializerTest {
         }
         Assert.assertTrue(error);
 
-        dst = (String) serializer.decode(data, "", null);
-        Assert.assertEquals("xxx", dst);
+        error = false;
+        try {
+            serializer.decode(data, "", null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
     }
 
     @Test
@@ -106,7 +111,8 @@ public class ProtobufSerializerTest {
         head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
         head.put("unkown", "yes");
 
-        SofaRequest newRequest = (SofaRequest) serializer.decode(data, new SofaRequest(), head);
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
 
         Assert.assertEquals(newRequest.getInterfaceName(), request.getInterfaceName());
         Assert.assertEquals(newRequest.getMethodName(), request.getMethodName());
@@ -125,7 +131,8 @@ public class ProtobufSerializerTest {
         head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
         head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
         head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        newRequest = (SofaRequest) serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), new SofaRequest(), head);
+        newRequest = new SofaRequest();
+        serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, head);
         Assert.assertEquals("", ((EchoStrReq) newRequest.getMethodArgs()[0]).getS());
     }
 
@@ -168,7 +175,8 @@ public class ProtobufSerializerTest {
         response = new SofaResponse();
         response.setAppResponse(EchoStrRes.newBuilder().setS("result").build());
         data = serializer.encode(response, null);
-        SofaResponse newResponse = (SofaResponse) serializer.decode(data, new SofaResponse(), head);
+        SofaResponse newResponse = new SofaResponse();
+        serializer.decode(data, newResponse, head);
         Assert.assertFalse(newResponse.isError());
         Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
         Assert.assertEquals("result", ((EchoStrRes) newResponse.getAppResponse()).getS());
@@ -179,8 +187,8 @@ public class ProtobufSerializerTest {
         head.put(RemotingConstants.HEAD_METHOD_NAME, "echoStr");
         head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
         head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        newResponse = (SofaResponse) serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]),
-            new SofaResponse(), head);
+        newResponse = new SofaResponse();
+        serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newResponse, head);
         Assert.assertFalse(newResponse.isError());
         Assert.assertNotNull(newResponse.getAppResponse());
         Assert.assertEquals("", ((EchoStrRes) newResponse.getAppResponse()).getS());
@@ -195,7 +203,8 @@ public class ProtobufSerializerTest {
         response = new SofaResponse();
         response.setErrorMsg("1233");
         data = serializer.encode(response, null);
-        newResponse = (SofaResponse) serializer.decode(data, new SofaResponse(), head);
+        newResponse = new SofaResponse();
+        serializer.decode(data, newResponse, head);
         Assert.assertTrue(newResponse.isError());
         Assert.assertEquals(response.getErrorMsg(), newResponse.getErrorMsg());
     }

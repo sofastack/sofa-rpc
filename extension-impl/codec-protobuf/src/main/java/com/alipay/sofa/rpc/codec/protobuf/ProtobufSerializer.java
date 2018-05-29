@@ -174,19 +174,19 @@ public class ProtobufSerializer extends AbstractSerializer {
     }
 
     @Override
-    public Object decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
+    public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         } else if (template instanceof SofaRequest) {
-            return decodeSofaRequest(data, (SofaRequest) template, context);
+            decodeSofaRequest(data, (SofaRequest) template, context);
         } else if (template instanceof SofaResponse) {
-            return decodeSofaResponse(data, (SofaResponse) template, context);
+            decodeSofaResponse(data, (SofaResponse) template, context);
         } else {
-            return decode(data, template.getClass(), context);
+            throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
         }
     }
 
-    private SofaRequest decodeSofaRequest(AbstractByteBuf data, SofaRequest sofaRequest, Map<String, String> head) {
+    private void decodeSofaRequest(AbstractByteBuf data, SofaRequest sofaRequest, Map<String, String> head) {
         if (head == null) {
             throw buildDeserializeError("head is null!");
         }
@@ -225,7 +225,6 @@ public class ProtobufSerializer extends AbstractSerializer {
         Object pbReq = decode(data, requestClass, head);
         sofaRequest.setMethodArgs(new Object[] { pbReq });
         sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
-        return sofaRequest;
     }
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,
@@ -237,7 +236,7 @@ public class ProtobufSerializer extends AbstractSerializer {
         }
     }
 
-    private SofaResponse decodeSofaResponse(AbstractByteBuf data, SofaResponse sofaResponse, Map<String, String> head) {
+    private void decodeSofaResponse(AbstractByteBuf data, SofaResponse sofaResponse, Map<String, String> head) {
         if (head == null) {
             throw buildDeserializeError("head is null!");
         }
@@ -266,6 +265,5 @@ public class ProtobufSerializer extends AbstractSerializer {
             Object pbRes = decode(data, responseClass, head);
             sofaResponse.setAppResponse(pbRes);
         }
-        return sofaResponse;
     }
 }
