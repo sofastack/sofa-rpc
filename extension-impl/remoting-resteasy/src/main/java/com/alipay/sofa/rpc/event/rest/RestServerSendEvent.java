@@ -14,23 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.event;
+package com.alipay.sofa.rpc.event.rest;
 
+import com.alipay.sofa.rpc.event.Event;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
+import org.jboss.resteasy.plugins.server.netty.NettyHttpResponse;
 
 /**
- * RestServerReceiveEvent
+ * RestServerSendEvent
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class RestServerReceiveEvent implements Event {
-    private final NettyHttpRequest request;
+public class RestServerSendEvent implements Event {
 
-    public RestServerReceiveEvent(NettyHttpRequest request) {
+    private final NettyHttpRequest  request;
+    private final NettyHttpResponse response;
+    private final Throwable         throwable;
+
+    public RestServerSendEvent(NettyHttpRequest request, NettyHttpResponse response, Throwable throwable) {
         this.request = request;
+        this.response = response;
+        this.throwable = throwable;
     }
 
     public NettyHttpRequest getRequest() {
         return request;
+    }
+
+    public NettyHttpResponse getResponse() {
+        return response;
+    }
+
+    public Throwable getThrowable() {
+        return throwable;
     }
 }
