@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.lookout;
+package com.alipay.sofa.rpc.metrics.lookout;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

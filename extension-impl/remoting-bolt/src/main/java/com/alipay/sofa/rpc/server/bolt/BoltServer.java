@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
+import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
@@ -67,9 +68,9 @@ public class BoltServer implements Server {
     protected ServerConfig         serverConfig;
 
     /**
-     *
+     * BoltServerProcessor
      */
-    BoltServerProcessor            boltServerProcessor;
+    protected BoltServerProcessor  boltServerProcessor;
     /**
      * 业务线程池
      */
@@ -163,6 +164,9 @@ public class BoltServer implements Server {
             try {
                 remotingServer.stop();
             } catch (IllegalStateException ignore) { // NOPMD
+            }
+            if (EventBus.isEnable(ServerStoppedEvent.class)) {
+                EventBus.post(new ServerStoppedEvent(serverConfig));
             }
             remotingServer = null;
             started = false;

@@ -24,9 +24,9 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.lookout.RpcLookout;
-import com.alipay.sofa.rpc.model.RpcClientLookoutModel;
-import com.alipay.sofa.rpc.model.RpcServerLookoutModel;
+import com.alipay.sofa.rpc.metrics.lookout.RpcLookout;
+import com.alipay.sofa.rpc.metrics.lookout.RpcClientLookoutModel;
+import com.alipay.sofa.rpc.metrics.lookout.RpcServerLookoutModel;
 
 /**
  * Collect the raw information for lookout by listening to events.
@@ -80,6 +80,11 @@ public class LookoutSubscriber extends Subscriber {
 
             rpcMetrics.collectThreadPool(serverStartedEvent.getServerConfig(),
                 serverStartedEvent.getThreadPoolExecutor());
+
+        } else if (eventClass == ServerStoppedEvent.class) {
+            ServerStoppedEvent serverStartedEvent = (ServerStoppedEvent) event;
+
+            rpcMetrics.removeThreadPool(serverStartedEvent.getServerConfig());
         }
     }
 

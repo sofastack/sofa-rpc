@@ -14,20 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.lookout;
+package com.alipay.sofa.rpc.event.rest;
+
+import com.alipay.sofa.rpc.event.Event;
+import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
 
 /**
+ * RestServerReceiveEvent
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public interface LookoutService {
+public class RestServerReceiveEvent implements Event {
+    private final NettyHttpRequest request;
 
-    String saySync(String string) throws InterruptedException;
+    public RestServerReceiveEvent(NettyHttpRequest request) {
+        this.request = request;
+    }
 
-    String sayFuture(String string) throws InterruptedException;
-
-    String sayCallback(String string) throws InterruptedException;
-
-    String sayOneway(String string) throws InterruptedException;
-
+    public NettyHttpRequest getRequest() {
+        return request;
+    }
 }
