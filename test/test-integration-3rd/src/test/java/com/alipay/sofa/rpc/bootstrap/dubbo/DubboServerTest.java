@@ -29,9 +29,8 @@ import java.util.List;
 
 /**
  * @author bystander
- * @version $Id: DubooServerTest.java, v 0.1 2017年10月30日 下午9:23 bystander Exp $
  */
-public class DubooServerTest extends BaseZkTest {
+public class DubboServerTest extends BaseZkTest {
 
     @Test
     //同步调用,走配置中心
