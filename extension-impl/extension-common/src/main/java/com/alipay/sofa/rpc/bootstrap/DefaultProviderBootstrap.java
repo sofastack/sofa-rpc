@@ -65,17 +65,17 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 是否已发布
      */
-    protected transient volatile boolean                     exported;
+    protected transient volatile boolean                            exported;
 
     /**
      * 服务端Invoker对象
      */
-    protected transient Invoker                              providerProxyInvoker;
+    protected transient Invoker                                     providerProxyInvoker;
 
     /**
      * 发布的服务配置
      */
-    protected final ConcurrentHashMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
+    protected final static ConcurrentHashMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
 
     @Override
     public void export() {
