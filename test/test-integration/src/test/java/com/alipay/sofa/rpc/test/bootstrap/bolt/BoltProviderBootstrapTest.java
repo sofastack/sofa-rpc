@@ -63,6 +63,7 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
             .setRegister(false);
         try {
             providerConfig1.export();
+            Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcRuntimeException);
         }
@@ -72,7 +73,7 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
             .setInterfaceId(HelloService.class.getName())
             .setRef(new HelloServiceImpl(2000))
             .setServer(serverConfig)
-            .setRepeatedExportLimit(3)
+            .setRepeatedExportLimit(2)
             .setRegister(false);
         providerConfig2.export();
 
@@ -81,10 +82,11 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
             .setInterfaceId(HelloService.class.getName())
             .setRef(new HelloServiceImpl(2000))
             .setServer(serverConfig)
-            .setRepeatedExportLimit(3)
+            .setRepeatedExportLimit(2)
             .setRegister(false);
         try {
             providerConfig3.export();
+            Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcRuntimeException);
         }
