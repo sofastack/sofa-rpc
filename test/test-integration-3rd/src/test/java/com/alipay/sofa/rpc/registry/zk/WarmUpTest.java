@@ -59,6 +59,7 @@ public class WarmUpTest extends ActivelyDestroyTest {
             .setRef(new WarmUpServiceImpl(22111))
             .setServer(serverConfig2)
             .setRegistry(registryConfig)
+            .setRepeatedExportLimit(-1)
             .setWeight(0);
 
         providerConfig.export();
