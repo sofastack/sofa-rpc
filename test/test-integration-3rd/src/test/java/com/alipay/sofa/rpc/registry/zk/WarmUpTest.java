@@ -23,7 +23,6 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -60,6 +59,7 @@ public class WarmUpTest extends BaseZkTest {
             .setRef(new WarmUpServiceImpl(22111))
             .setServer(serverConfig2)
             .setRegistry(registryConfig)
+            .setRepeatedExportLimit(-1)
             .setWeight(0);
 
         providerConfig.export();
