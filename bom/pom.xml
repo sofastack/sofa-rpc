@@ -38,7 +38,7 @@
         <bolt.version>1.4.1</bolt.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <lookout.version>1.1.0</lookout.version>
-        <tracer.version>2.1.0</tracer.version>
+        <tracer.version>2.1.1</tracer.version>
         <lookout.version>1.4.0</lookout.version>
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
