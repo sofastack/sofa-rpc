@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.4.0</version>
+    <version>5.4.1-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/alipay/sofa-rpc</url>
@@ -34,6 +34,11 @@
         <developer>
             <name>Wei Li</name>
             <email>lw111072@antfin.com</email>
+            <organization>The Ant Financial</organization>
+        </developer>
+        <developer>
+            <name>ZhiYuan Lei</name>
+            <email>zhiyuan.lzy@antfin.com</email>
             <organization>The Ant Financial</organization>
         </developer>
     </developers>
