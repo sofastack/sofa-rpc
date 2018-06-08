@@ -73,7 +73,7 @@ public class RestServer implements Server {
 
     private SofaNettyJaxrsServer buildServer() {
         // 生成Server对象
-        SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer();
+        SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer(serverConfig);
 
         int bossThreads = serverConfig.getIoThreads();
         if (bossThreads > 0) {

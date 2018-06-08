@@ -19,12 +19,16 @@ package com.alipay.sofa.rpc.server.rest;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ServerConfig;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -59,6 +63,7 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
  */
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
+    private ServerConfig               serverConfig;
     protected ServerBootstrap          bootstrap           = new ServerBootstrap();
     protected String                   hostname            = null;
     protected int                      port                = 8080;
@@ -79,6 +84,13 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     protected boolean                  keepAlive           = false;                       // CHANGE:是否长连接
     protected boolean                  telnet              = true;                        // CHANGE:是否允许telnet
     protected boolean                  daemon              = true;                        // CHANGE:是否守护线程
+
+    public SofaNettyJaxrsServer() {
+    }
+
+    public SofaNettyJaxrsServer(ServerConfig serverConfig) {
+        this.serverConfig = serverConfig;
+    }
 
     public void setSSLContext(SSLContext sslContext) {
         this.sslContext = sslContext;
@@ -206,12 +218,22 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     @Override
     public void start() {
         // CHANGE: 增加线程名字
-        eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port, daemon));
-        eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
-            daemon));
+        if (serverConfig != null && serverConfig.isEpoll()) {
+            eventLoopGroup = new EpollEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port,
+                daemon));
+            eventExecutor = new EpollEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
+                daemon));
+        } else {
+            eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port, daemon));
+            eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
+                daemon));
+        }
         // Configure the server.
-        bootstrap.group(eventLoopGroup)
-            .channel(NioServerSocketChannel.class)
+        bootstrap
+            .group(eventLoopGroup)
+            .channel(
+                (serverConfig != null && serverConfig.isEpoll()) ? EpollServerSocketChannel.class
+                    : NioServerSocketChannel.class)
             .childHandler(createChannelInitializer())
             .option(ChannelOption.SO_BACKLOG, backlog)
             .childOption(ChannelOption.SO_KEEPALIVE, keepAlive); // CHANGE:
