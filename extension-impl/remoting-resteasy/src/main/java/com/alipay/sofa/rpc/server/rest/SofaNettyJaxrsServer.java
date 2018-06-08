@@ -63,7 +63,7 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
  */
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
-    private final ServerConfig               serverConfig;
+    private final ServerConfig         serverConfig;
     protected ServerBootstrap          bootstrap           = new ServerBootstrap();
     protected String                   hostname            = null;
     protected int                      port                = 8080;
@@ -218,7 +218,8 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
             eventExecutor = new EpollEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
                 serverConfig.isDaemon()));
         } else {
-            eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port, serverConfig.isDaemon()));
+            eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port,
+                serverConfig.isDaemon()));
             eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
                 serverConfig.isDaemon()));
         }

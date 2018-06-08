@@ -217,7 +217,8 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     /**
      * 是否长连接
      */
-    protected boolean  keepAlive = true;
+    protected boolean                         keepAlive        = true;
+
     /**
      * 启动服务
      *
