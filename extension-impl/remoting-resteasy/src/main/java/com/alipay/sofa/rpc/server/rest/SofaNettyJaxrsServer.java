@@ -63,7 +63,7 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
  */
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
-    private ServerConfig               serverConfig;
+    private final ServerConfig               serverConfig;
     protected ServerBootstrap          bootstrap           = new ServerBootstrap();
     protected String                   hostname            = null;
     protected int                      port                = 8080;
@@ -81,12 +81,6 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     private Map<ChannelOption, Object> channelOptions      = Collections.emptyMap();
     private Map<ChannelOption, Object> childChannelOptions = Collections.emptyMap();
     private List<ChannelHandler>       httpChannelHandlers = Collections.emptyList();
-    protected boolean                  keepAlive           = false;                       // CHANGE:是否长连接
-    protected boolean                  telnet              = true;                        // CHANGE:是否允许telnet
-    protected boolean                  daemon              = true;                        // CHANGE:是否守护线程
-
-    public SofaNettyJaxrsServer() {
-    }
 
     public SofaNettyJaxrsServer(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
@@ -220,13 +214,13 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         // CHANGE: 增加线程名字
         if (serverConfig != null && serverConfig.isEpoll()) {
             eventLoopGroup = new EpollEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port,
-                daemon));
+                serverConfig.isDaemon()));
             eventExecutor = new EpollEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
-                daemon));
+                serverConfig.isDaemon()));
         } else {
-            eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port, daemon));
+            eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port, serverConfig.isDaemon()));
             eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
-                daemon));
+                serverConfig.isDaemon()));
         }
         // Configure the server.
         bootstrap
@@ -236,7 +230,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
                     : NioServerSocketChannel.class)
             .childHandler(createChannelInitializer())
             .option(ChannelOption.SO_BACKLOG, backlog)
-            .childOption(ChannelOption.SO_KEEPALIVE, keepAlive); // CHANGE:
+            .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isKeepAlive()); // CHANGE:
 
         for (Map.Entry<ChannelOption, Object> entry : channelOptions.entrySet()) {
             bootstrap.option(entry.getKey(), entry.getValue());
@@ -298,17 +292,5 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
             eventExecutor.shutdownGracefully().sync();
         } catch (Exception ignore) { // NOPMD
         }
-    }
-
-    public void setKeepAlive(boolean keepAlive) {
-        this.keepAlive = keepAlive;
-    }
-
-    public void setTelnet(boolean telnet) {
-        this.telnet = telnet;
-    }
-
-    public void setDaemon(boolean daemon) {
-        this.daemon = daemon;
     }
 }
