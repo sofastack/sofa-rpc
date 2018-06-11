@@ -215,6 +215,11 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     private transient String                  boundHost;
 
     /**
+     * 是否长连接
+     */
+    protected boolean                         keepAlive        = true;
+
+    /**
      * 启动服务
      *
      * @return the server
@@ -815,6 +820,22 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      */
     public String getBoundHost() {
         return boundHost;
+    }
+
+    /**
+     * Get KeepAlive
+     * @return 是否长连接
+     */
+    public boolean isKeepAlive() {
+        return keepAlive;
+    }
+
+    /**
+     * set KeepAlive
+     * @param keepAlive 是否长连接
+     */
+    public void setKeepAlive(boolean keepAlive) {
+        this.keepAlive = keepAlive;
     }
 
     /**
