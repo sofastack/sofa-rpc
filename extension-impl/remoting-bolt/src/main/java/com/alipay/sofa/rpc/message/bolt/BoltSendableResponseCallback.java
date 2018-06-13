@@ -112,7 +112,6 @@ public abstract class BoltSendableResponseCallback<T> implements SendableRespons
     @Override
     public void sendSofaException(SofaRpcException sofaException) {
         checkState();
-        checkState();
         SofaResponse response = new SofaResponse();
         response.setErrorMsg(sofaException.getMessage());
         sendSofaResponse(response, sofaException);
