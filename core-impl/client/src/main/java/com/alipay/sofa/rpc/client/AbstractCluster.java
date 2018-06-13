@@ -203,7 +203,7 @@ public abstract class AbstractCluster extends Cluster {
         ProviderGroup oldProviderGroup = addressHolder.getProviderGroup(providerGroup.getName());
         if (ProviderHelper.isEmpty(providerGroup)) {
             addressHolder.updateProviders(providerGroup);
-            if (CommonUtils.isNotEmpty(oldProviderGroup.getProviderInfos())) {
+            if (!ProviderHelper.isEmpty(oldProviderGroup)) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
                         "providers has been closed, or this consumer has been add to blacklist");
@@ -270,9 +270,6 @@ public abstract class AbstractCluster extends Cluster {
                         "Unmatched protocol between consumer [{}] and provider [{}].",
                         consumerConfig.getProtocol(), providerInfo.getProtocolType());
                 }
-            }
-            if (StringUtils.isEmpty(providerInfo.getSerializationType())) {
-                providerInfo.setSerializationType(consumerConfig.getSerialization());
             }
         }
     }
