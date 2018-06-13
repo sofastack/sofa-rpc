@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.test.async;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -60,5 +62,35 @@ public class AsyncHelloServiceImpl implements AsyncHelloService {
             LOGGER.error("--------c0 is not null");
         }
         return "hello async无效返回"; // 如果设置了AsyncProxyResponseCallback，则此处返回其实是无效。
+    }
+
+    @Override
+    public String appException(String name) {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        context.setTimeout(2000);
+        context.setResponseCallback(new BoltSendableResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                sendAppException(new RuntimeException("1234"));
+            }
+        });
+
+        helloService.sayHello(name, 1); // B-异步调用->C
+        return null;
+    }
+
+    @Override
+    public String rpcException(String name) {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        context.setTimeout(2000);
+        context.setResponseCallback(new BoltSendableResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                sendSofaException(new SofaRpcException(RpcErrorType.SERVER_BUSY, "bbb"));
+            }
+        });
+
+        helloService.sayHello(name, 1); // B-异步调用->C
+        return null;
     }
 }

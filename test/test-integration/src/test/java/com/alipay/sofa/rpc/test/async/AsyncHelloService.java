@@ -17,13 +17,14 @@
 package com.alipay.sofa.rpc.test.async;
 
 /**
- * <p></p>
- * <p>
- *
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public interface AsyncHelloService {
 
     String sayHello(String name, int age);
+
+    String appException(String name);
+
+    String rpcException(String name);
 }
