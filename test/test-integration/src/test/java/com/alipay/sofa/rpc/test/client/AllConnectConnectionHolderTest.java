@@ -121,9 +121,9 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
 
         Assert.assertTrue(holder.isAvailableEmpty());
         Assert.assertNotNull(holder.getAvailableClientTransport(
-            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22223?serialization=hessian2")));
+            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22223")));
         Assert.assertNotNull(holder.getAvailableClientTransport(
-            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22224?serialization=hessian2")));
+            ProviderHelper.toProviderInfo("bolt://127.0.0.1:22224")));
         consumerConfig.unRefer();
     }
 }
