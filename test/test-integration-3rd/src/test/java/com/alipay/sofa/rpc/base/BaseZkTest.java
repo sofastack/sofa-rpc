@@ -25,6 +25,7 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
 import java.io.IOException;
+import java.util.concurrent.Callable;
 
 /**
  * @author bystander
@@ -58,5 +59,31 @@ public abstract class BaseZkTest {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 循环获取某个值，直到满足预期或者超时为止，相比sleep可高效
+     * @param callable 任务
+     * @param expect 期望值
+     * @param period 周期
+     * @param times 次数
+     * @param <T> 值类型
+     * @return 返回值
+     */
+    protected <T> T delayGet(Callable<T> callable, T expect, int period, int times) {
+        T result = null;
+        int i = 0;
+        while (i++ < times) {
+            try {
+                Thread.sleep(period);//第一个窗口结束
+                result = callable.call();
+                if (result != null && result.equals(expect)) {
+                    break;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 }
