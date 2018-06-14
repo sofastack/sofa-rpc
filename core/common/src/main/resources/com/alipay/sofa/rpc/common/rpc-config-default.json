@@ -259,7 +259,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 开启压缩的大小基线
   "compress.size.baseline": 2048,
   //Whether the Http2 Cleartext protocol client uses Prior Knowledge to start Http2
-  "transport.h2c.use_prior_knowledge": false,
+  "transport.client.h2c.usePriorKnowledge": true,
   /*-------------Transport层相关配置结束-------------*/
 
   /*

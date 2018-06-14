@@ -45,12 +45,6 @@ import java.util.concurrent.TimeUnit;
  */
 public class Http2ClearTextPriorKnowledgeTest extends ActivelyDestroyTest {
 
-    @BeforeClass
-    public static void adBeforeClass() {
-        RpcConfigs.putValue("transport.h2c.use_prior_knowledge", true);
-        ActivelyDestroyTest.adBeforeClass();
-    }
-
     @Test
     public void testProtobuf() {
         // 只有1个线程 执行
