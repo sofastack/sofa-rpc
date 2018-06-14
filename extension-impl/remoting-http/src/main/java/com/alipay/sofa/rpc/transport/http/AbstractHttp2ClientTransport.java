@@ -105,9 +105,13 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
      */
     protected final ProviderInfo        providerInfo;
     /**
+     * Start from 3 (because 1 is setting stream)
+     */
+    private final static int            START_STREAM_ID = 3;
+    /**
      * StreamId, start from 3 (because 1 is setting stream)
      */
-    protected final AtomicInteger       streamId        = new AtomicInteger(3);
+    protected final AtomicInteger       streamId        = new AtomicInteger();
     /**
      * 正在发送的调用数量
      */
@@ -131,6 +135,9 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
 
     @Override
     public void connect() {
+        if (isAvailable()) {
+            return;
+        }
         EventLoopGroup workerGroup = NettyHelper.getClientIOEventLoopGroup();
         Http2ClientInitializer initializer = new Http2ClientInitializer(transportConfig);
         try {
@@ -152,6 +159,8 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
             http2SettingsHandler.awaitSettings(transportConfig.getConnectTimeout(), TimeUnit.MILLISECONDS);
 
             responseChannelHandler = initializer.responseHandler();
+            // RESET streamId
+            streamId.set(START_STREAM_ID);
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_NETWORK, e);
         }
@@ -295,8 +304,8 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
                 TIMEOUT_TIMER.newTimeout(new TimerTask() {
                     @Override
                     public void run(Timeout timeout) throws Exception {
-                        Map.Entry<ChannelFuture, AbstractHttpClientHandler> entry =
-                                responseChannelHandler.removePromise(requestId);
+                        Map.Entry<ChannelFuture, AbstractHttpClientHandler> entry = responseChannelHandler
+                            .removePromise(requestId);
                         if (entry != null) {
                             ClientHandler handler = entry.getValue();
                             Exception e = timeoutException(request, timeoutMills, null);

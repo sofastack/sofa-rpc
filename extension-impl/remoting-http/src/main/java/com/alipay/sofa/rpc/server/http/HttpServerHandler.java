@@ -61,10 +61,6 @@ public class HttpServerHandler implements ServerHandler {
         return processingCount;
     }
 
-    public HttpServerHandler(ThreadPoolExecutor bizThreadPool) {
-        this.bizThreadPool = bizThreadPool;
-    }
-
     @Override
     public void registerChannel(AbstractChannel nettyChannel) {
 
@@ -138,5 +134,10 @@ public class HttpServerHandler implements ServerHandler {
 
     public ThreadPoolExecutor getBizThreadPool() {
         return bizThreadPool;
+    }
+
+    public HttpServerHandler setBizThreadPool(ThreadPoolExecutor bizThreadPool) {
+        this.bizThreadPool = bizThreadPool;
+        return this;
     }
 }
