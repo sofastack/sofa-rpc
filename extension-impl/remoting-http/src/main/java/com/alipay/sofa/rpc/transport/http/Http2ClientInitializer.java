@@ -28,7 +28,14 @@ import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpClientUpgradeHandler;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-import io.netty.handler.codec.http2.*;
+import io.netty.handler.codec.http2.DefaultHttp2Connection;
+import io.netty.handler.codec.http2.DelegatingDecompressorFrameListener;
+import io.netty.handler.codec.http2.Http2ClientUpgradeCodec;
+import io.netty.handler.codec.http2.Http2Connection;
+import io.netty.handler.codec.http2.HttpToHttp2ConnectionHandler;
+import io.netty.handler.codec.http2.HttpToHttp2ConnectionHandlerBuilder;
+import io.netty.handler.codec.http2.InboundHttp2ToHttpAdapterBuilder;
+import io.netty.handler.codec.http2.Http2ConnectionPrefaceAndSettingsFrameWrittenEvent;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
@@ -52,7 +59,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     /**
      * Does the H2C Protocol Use the Prior-Knowledge Method to Start Http2
      */
-    private boolean  useH2cPriorKnowledge = getBooleanValue(TRANSPORT_H2C_USE_PRIOR_KNOWLEDGE);
+    private boolean                      useH2cPriorKnowledge = getBooleanValue(TRANSPORT_H2C_USE_PRIOR_KNOWLEDGE);
 
     public Http2ClientInitializer(ClientTransportConfig transportConfig) {
         this.transportConfig = transportConfig;
