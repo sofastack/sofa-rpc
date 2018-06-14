@@ -90,7 +90,7 @@ public abstract class AbstractHttpServer implements Server {
         // 启动线程池
         this.bizThreadPool = initThreadPool(serverConfig);
         // 服务端处理器
-        this.serverHandler = new HttpServerHandler(bizThreadPool);
+        this.serverHandler = new HttpServerHandler();
 
         // set default transport config
         this.serverTransportConfig.setContainer(container);
@@ -118,6 +118,9 @@ public abstract class AbstractHttpServer implements Server {
                 return;
             }
             try {
+                // 启动线程池
+                this.bizThreadPool = initThreadPool(serverConfig);
+                this.serverHandler.setBizThreadPool(bizThreadPool);
                 serverTransport = ServerTransportFactory.getServerTransport(serverTransportConfig);
                 started = serverTransport.start();
 
@@ -156,6 +159,14 @@ public abstract class AbstractHttpServer implements Server {
             // 关闭端口，不关闭线程池
             serverTransport.stop();
             serverTransport = null;
+
+            // 关闭线程池
+            if (bizThreadPool != null) {
+                bizThreadPool.shutdown();
+                bizThreadPool = null;
+                serverHandler.setBizThreadPool(null);
+            }
+
             started = false;
 
             if (EventBus.isEnable(ServerStoppedEvent.class)) {
@@ -216,12 +227,6 @@ public abstract class AbstractHttpServer implements Server {
         }
 
         stop();
-
-        // 关闭线程池
-        if (bizThreadPool != null) {
-            bizThreadPool.shutdown();
-        }
-
         serverHandler = null;
     }
 
