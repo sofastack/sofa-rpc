@@ -69,6 +69,7 @@ public class RestServer implements Server {
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
+        httpServer = buildServer();
     }
 
     private SofaNettyJaxrsServer buildServer() {
@@ -136,7 +137,6 @@ public class RestServer implements Server {
             }
             // 绑定到端口
             try {
-                httpServer = buildServer();
                 httpServer.start();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
@@ -170,7 +170,6 @@ public class RestServer implements Server {
                 LOGGER.info("Stop the http rest server at port {}", serverConfig.getPort());
             }
             httpServer.stop();
-            httpServer = null;
         } catch (Exception e) {
             LOGGER.error("Stop the http rest server at port " + serverConfig.getPort() + " error !", e);
         }
@@ -222,6 +221,7 @@ public class RestServer implements Server {
     @Override
     public void destroy() {
         stop();
+        httpServer = null;
     }
 
     @Override

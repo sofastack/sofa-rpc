@@ -144,7 +144,7 @@ public class BoltClientTransport extends ClientTransport {
     public void connect() {
         if (connection != null) {
             if (!connection.isFine()) {
-                connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
+                connection.close();
                 connection = null;
             }
         }
