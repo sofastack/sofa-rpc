@@ -445,6 +445,10 @@ public class RpcOptions {
      */
     public static final String TRANSPORT_CONNECTION_REUSE         = "transport.connection.reuse";
     /**
+     * Whether the Http2 Cleartext protocol client uses Prior Knowledge to start Http2
+     */
+    public static final String TRANSPORT_H2C_USE_PRIOR_KNOWLEDGE  = "transport.h2c.use_prior_knowledge";
+    /**
      * 是否开启压缩
      */
     public static final String COMPRESS_OPEN                      = "compress.open";
