@@ -35,9 +35,13 @@ import io.netty.handler.codec.http2.Http2Connection;
 import io.netty.handler.codec.http2.HttpToHttp2ConnectionHandler;
 import io.netty.handler.codec.http2.HttpToHttp2ConnectionHandlerBuilder;
 import io.netty.handler.codec.http2.InboundHttp2ToHttpAdapterBuilder;
+import io.netty.handler.codec.http2.Http2ConnectionPrefaceAndSettingsFrameWrittenEvent;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
+
+import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE;
 
 /**
  * Configures the client pipeline to support HTTP/2 frames.
@@ -51,6 +55,11 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     private HttpToHttp2ConnectionHandler connectionHandler;
     private Http2ClientChannelHandler    responseHandler;
     private Http2SettingsHandler         settingsHandler;
+
+    /**
+     * Does the H2C Protocol Use the Prior-Knowledge Method to Start Http2
+     */
+    private boolean                      useH2cPriorKnowledge = getBooleanValue(TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE);
 
     public Http2ClientInitializer(ClientTransportConfig transportConfig) {
         this.transportConfig = transportConfig;
@@ -74,7 +83,11 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
         if (RpcConstants.PROTOCOL_TYPE_H2.equals(protocol)) {
             configureSsl(ch);
         } else if (RpcConstants.PROTOCOL_TYPE_H2C.equals(protocol)) {
-            configureClearText(ch);
+            if (!useH2cPriorKnowledge) {
+                configureClearTextWithHttpUpgrade(ch);
+            } else {
+                configureClearTextWithPriorKnowledge(ch);
+            }
         }
     }
 
@@ -117,7 +130,7 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     /**
      * Configure the pipeline for a cleartext upgrade from HTTP to HTTP/2.
      */
-    private void configureClearText(SocketChannel ch) {
+    private void configureClearTextWithHttpUpgrade(SocketChannel ch) {
         HttpClientCodec sourceCodec = new HttpClientCodec();
         Http2ClientUpgradeCodec upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler);
         HttpClientUpgradeHandler upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, 65536);
@@ -153,6 +166,30 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     private static class UserEventLogger extends ChannelInboundHandlerAdapter {
         @Override
         public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            ctx.fireUserEventTriggered(evt);
+        }
+    }
+
+    /**
+     * Configure the pipeline for a cleartext useing Prior-Knowledge method to start http2.
+     */
+    private void configureClearTextWithPriorKnowledge(SocketChannel ch) {
+        ch.pipeline().addLast(connectionHandler,
+            new PrefaceFrameWrittenEventHandler(),
+            new UserEventLogger());
+        configureEndOfPipeline(ch.pipeline());
+    }
+
+    /**
+     * Class that capture Prior-Knowledge method's Preface frame written Events triggered on this channel,
+     * and Flush Channel for send preface frame to remote realy
+     */
+    private static class PrefaceFrameWrittenEventHandler extends ChannelInboundHandlerAdapter {
+        @Override
+        public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+            if (evt instanceof Http2ConnectionPrefaceAndSettingsFrameWrittenEvent) {
+                ctx.flush();
+            }
             ctx.fireUserEventTriggered(evt);
         }
     }
