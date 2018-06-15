@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.transport.http;
 
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -33,6 +34,7 @@ import com.alipay.sofa.rpc.server.bolt.pb.Group;
 import com.alipay.sofa.rpc.server.http.HttpService;
 import com.alipay.sofa.rpc.server.http.HttpServiceImpl;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,9 +47,18 @@ import java.util.concurrent.TimeUnit;
  */
 public class Http2ClearTextHttpUpgradeTest extends ActivelyDestroyTest {
 
+    /**
+     * Keep the config parameter previous value for restore it later
+     */
+    private static boolean useH2cPriorKnowledge = RpcConfigs
+                                                    .getBooleanValue(RpcOptions.TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE);
+
     @BeforeClass
     public static void adBeforeClass() {
-        RpcConfigs.putValue("transport.client.h2c.usePriorKnowledge", false);
+        /**
+         * set config parameter to using http2 with 'upgrade h2c' startup frame
+         */
+        RpcConfigs.putValue(RpcOptions.TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE, false);
         ActivelyDestroyTest.adBeforeClass();
     }
 
@@ -174,5 +185,15 @@ public class Http2ClearTextHttpUpgradeTest extends ActivelyDestroyTest {
                 Assert.fail();
             }
         }
+    }
+
+    @AfterClass
+    public static void adAfterClass() {
+        ActivelyDestroyTest.adAfterClass();
+
+        /**
+         * restore config parameter to previous value
+         */
+        RpcConfigs.putValue(RpcOptions.TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE, useH2cPriorKnowledge);
     }
 }
