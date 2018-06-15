@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.server.ServerFactory;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
@@ -53,6 +54,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_TELNET;
 import static com.alipay.sofa.rpc.common.RpcOptions.SEVER_ADAPTIVE_PORT;
 import static com.alipay.sofa.rpc.common.RpcOptions.SEVER_AUTO_START;
 import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_PAYLOAD_MAX;
+import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_SERVER_KEEPALIVE;
 
 /**
  * 服务端配置
@@ -203,6 +205,11 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      */
     protected int                             stopTimeout      = getIntValue(SERVER_STOP_TIMEOUT);
 
+    /**
+     * 是否维持长连接
+     */
+    protected boolean                         keepAlive        = getBooleanValue(TRANSPORT_SERVER_KEEPALIVE);
+
     /*------------- 参数配置项结束-----------------*/
     /**
      * 服务端对象
@@ -213,11 +220,6 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      * 绑定的地址。是某个网卡，还是全部地址
      */
     private transient String                  boundHost;
-
-    /**
-     * 是否长连接
-     */
-    protected boolean                         keepAlive        = true;
 
     /**
      * 启动服务
@@ -609,7 +611,10 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      * @return the parameters
      */
     public ServerConfig setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+        if (this.parameters == null) {
+            this.parameters = new ConcurrentHashMap<String, String>();
+            this.parameters.putAll(parameters);
+        }
         return this;
     }
 
@@ -824,6 +829,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
 
     /**
      * Get KeepAlive
+     *
      * @return 是否长连接
      */
     public boolean isKeepAlive() {
@@ -832,18 +838,15 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
 
     /**
      * set KeepAlive
+     *
      * @param keepAlive 是否长连接
+     * @return this
      */
-    public void setKeepAlive(boolean keepAlive) {
+    public ServerConfig setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
+        return this;
     }
 
-    /**
-     * Hash code.
-     *
-     * @return int int
-     * @see Object#hashCode()
-     */
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -855,13 +858,6 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
         return result;
     }
 
-    /**
-     * Equals boolean.
-     *
-     * @param obj the obj
-     * @return boolean boolean
-     * @see Object#equals(Object)
-     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -894,12 +890,6 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
         return true;
     }
 
-    /**
-     * To string.
-     *
-     * @return string string
-     * @see Object#toString()
-     */
     @Override
     public String toString() {
         return "ServerConfig [protocol=" + protocol + ", port=" + port + ", host=" + host + "]";

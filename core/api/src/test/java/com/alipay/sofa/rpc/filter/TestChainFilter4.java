@@ -27,7 +27,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter3")
+@Extension("testChainFilter4")
 public class TestChainFilter4 extends Filter {
 
     @Override

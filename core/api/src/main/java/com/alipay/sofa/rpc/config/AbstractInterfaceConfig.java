@@ -551,7 +551,10 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the parameters
      */
     public S setParameters(Map<String, String> parameters) {
-        this.parameters = parameters;
+        if (this.parameters == null) {
+            this.parameters = new ConcurrentHashMap<String, String>();
+        }
+        this.parameters.putAll(parameters);
         return castThis();
     }
 

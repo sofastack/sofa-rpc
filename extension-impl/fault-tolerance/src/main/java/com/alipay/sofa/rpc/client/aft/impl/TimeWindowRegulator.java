@@ -274,5 +274,5 @@ public class TimeWindowRegulator implements Regulator {
                 measureStrategy.removeMeasureModel(invocationStat);
             }
         }
-    };
+    }
 }

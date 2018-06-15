@@ -23,6 +23,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  *
@@ -35,11 +36,12 @@ public class FilterChainTest {
     public void buildProviderChain() {
         ConsumerConfig config = new ConsumerConfig();
         ArrayList<Filter> list = new ArrayList<Filter>();
-        list.add(new TestChainFilter0());
+        config.setFilter(Collections.singletonList("testChainFilter0"));
         list.add(new TestChainFilter1());
         list.add(new TestChainFilter2());
         list.add(new TestChainFilter3());
         list.add(new TestChainFilter4());
+        list.add(new ExcludeFilter("-testChainFilter5"));
         config.setFilterRef(list);
 
         FilterChain chain = FilterChain.buildConsumerChain(config, new TestChainFilterInvoker(config));

@@ -17,8 +17,14 @@
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
 import com.alipay.sofa.rpc.base.BaseZkTest;
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.SystemInfo;
-import com.alipay.sofa.rpc.config.*;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.Assert;
@@ -54,6 +60,12 @@ public class DubboServerTest extends BaseZkTest {
             .setSubscribe(true)
             .setRegister(true);
 
+        List<MethodConfig> methodConfigs = new ArrayList<MethodConfig>();
+        MethodConfig methodConfig = new MethodConfig();
+        methodConfig.setTimeout(3000);
+        methodConfig.setName("sayHello");
+        methodConfigs.add(methodConfig);
+
         registryConfigs.add(registryConfig);
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
@@ -73,13 +85,31 @@ public class DubboServerTest extends BaseZkTest {
             .setTimeout(30000)
             .setRegister(true)
             .setProtocol("dubbo")
-            .setBootstrap("dubbo")
             .setApplication(clientApplication)
             .setRegistry(registryConfigs)
+            .setMethods(methodConfigs)
             .setInJVM(false);
         final HelloService demoService = consumerConfig.refer();
 
         String result = demoService.sayHello("xxx", 22);
         Assert.assertNotNull(result);
+
+        ConsumerBootstrap bootstrap = consumerConfig.getConsumerBootstrap();
+        Assert.assertTrue(bootstrap instanceof DubboConsumerBootstrap);
+        Assert.assertTrue(bootstrap.isSubscribed());
+        Assert.assertNotNull(bootstrap.getProxyIns());
+        bootstrap.unRefer();
+        try {
+            bootstrap.getCluster();
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UnsupportedOperationException);
+        }
+        try {
+            bootstrap.subscribe();
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof UnsupportedOperationException);
+        }
     }
 }
