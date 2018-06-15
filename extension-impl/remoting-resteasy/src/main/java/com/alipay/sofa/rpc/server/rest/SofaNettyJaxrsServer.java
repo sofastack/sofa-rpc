@@ -81,7 +81,15 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     private Map<ChannelOption, Object> childChannelOptions = Collections.emptyMap();
     private List<ChannelHandler>       httpChannelHandlers = Collections.emptyList();
 
+    /**
+     * Build SofaNettyJaxrsServer
+     *
+     * @param serverConfig ServerConfig
+     */
     public SofaNettyJaxrsServer(ServerConfig serverConfig) {
+        if (serverConfig == null) {
+            throw new IllegalArgumentException("server config is null");
+        }
         this.serverConfig = serverConfig;
     }
 
@@ -92,7 +100,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     /**
      * Specify the worker count to use. For more information about this please see the javadocs of {@link EventLoopGroup}
      *
-     * @param ioWorkerCount
+     * @param ioWorkerCount ioWorkerCount
      */
     public void setIoWorkerCount(int ioWorkerCount) {
         this.ioWorkerCount = ioWorkerCount;
@@ -103,7 +111,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * If you want to disable the use of the {@link EventExecutor} specify a value <= 0.  This should only be done if you are 100% sure that you don't have any blocking
      * code in there.
      *
-     * @param executorThreadCount
+     * @param executorThreadCount executorThreadCount
      */
     public void setExecutorThreadCount(int executorThreadCount) {
         this.executorThreadCount = executorThreadCount;
@@ -211,26 +219,21 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     @Override
     public void start() {
         // CHANGE: 增加线程名字
-        if (serverConfig != null && serverConfig.isEpoll()) {
-            eventLoopGroup = new EpollEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port,
-                serverConfig.isDaemon()));
-            eventExecutor = new EpollEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
-                serverConfig.isDaemon()));
-        } else {
-            eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SEV-REST-IO-" + port,
-                serverConfig.isDaemon()));
-            eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SEV-REST-BIZ-" + port,
-                serverConfig.isDaemon()));
-        }
+        boolean daemon = serverConfig.isDaemon();
+        boolean isEpoll = serverConfig.isEpoll();
+        NamedThreadFactory ioFactory = new NamedThreadFactory("SEV-REST-IO-" + port, daemon);
+        NamedThreadFactory bizFactory = new NamedThreadFactory("SEV-REST-BIZ-" + port, daemon);
+        eventLoopGroup = isEpoll ? new EpollEventLoopGroup(ioWorkerCount, ioFactory)
+            : new NioEventLoopGroup(ioWorkerCount, ioFactory);
+        eventExecutor = isEpoll ? new EpollEventLoopGroup(executorThreadCount, bizFactory)
+            : new NioEventLoopGroup(executorThreadCount, bizFactory);
         // Configure the server.
         bootstrap = new ServerBootstrap()
             .group(eventLoopGroup)
-            .channel(
-                (serverConfig != null && serverConfig.isEpoll()) ? EpollServerSocketChannel.class
-                    : NioServerSocketChannel.class)
+            .channel(isEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
             .childHandler(createChannelInitializer())
             .option(ChannelOption.SO_BACKLOG, backlog)
-            .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isKeepAlive()); // CHANGE:
+            .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isKeepAlive()); // CHANGE: setKeepAlive
 
         for (Map.Entry<ChannelOption, Object> entry : channelOptions.entrySet()) {
             bootstrap.option(entry.getKey(), entry.getValue());

@@ -14,21 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.filter;
+package com.alipay.sofa.rpc.config;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- *
- * @author <a href="mailto:lw111072@antfin.com">liangen</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class TestCustomizeFilter extends BeanIdMatchFilter {
+public class ApplicationConfigTest {
 
-    @Override
-    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        return invoker.invoke(request);
+    @Test
+    public void testAll() {
+        ApplicationConfig config = new ApplicationConfig();
+        config.setAppName("xxx").setAppId("a-123").setInsId("a-123-001");
+        Assert.assertEquals("xxx", config.getAppName());
+        Assert.assertEquals("a-123", config.getAppId());
+        Assert.assertEquals("a-123-001", config.getInsId());
     }
 
 }

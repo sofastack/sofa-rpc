@@ -14,21 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.filter;
+package com.alipay.sofa.rpc.server;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.PriorityQueue;
 
 /**
- *
- * @author <a href="mailto:lw111072@antfin.com">liangen</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class TestCustomizeFilter extends BeanIdMatchFilter {
+public class AbstractTaskTest {
 
-    @Override
-    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        return invoker.invoke(request);
+    @Test
+    public void compareTo() {
+        TestTask testTask1 = new TestTask();
+        testTask1.setPriority(123);
+        Assert.assertEquals(123, testTask1.getPriority());
+
+        TestTask testTask2 = new TestTask();
+        testTask2.setPriority(234);
+
+        Assert.assertTrue(testTask1.compareTo(testTask2) > 0);
+
+        PriorityQueue<AbstractTask> queue = new PriorityQueue<AbstractTask>();
+        queue.offer(testTask1);
+        queue.offer(testTask2);
+        Assert.assertEquals(queue.poll(), testTask2);
+        Assert.assertEquals(queue.poll(), testTask1);
     }
-
 }

@@ -16,19 +16,34 @@
  */
 package com.alipay.sofa.rpc.filter;
 
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.ext.Extension;
 
 /**
  *
- * @author <a href="mailto:lw111072@antfin.com">liangen</a>
+ *
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class TestCustomizeFilter extends BeanIdMatchFilter {
+@Extension("testChainFilter5")
+@AutoActive(consumerSide = true)
+public class TestChainFilter5 extends Filter {
 
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        return invoker.invoke(request);
+        request.getMethodArgs()[0] = request.getMethodArgs()[0] + "_q5";
+        SofaResponse response = invoker.invoke(request);
+        if (!request.isAsync()) {
+            response.setAppResponse(response.getAppResponse() + "_s5");
+        }
+        return response;
     }
 
+    @Override
+    public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
+        throws SofaRpcException {
+        response.setAppResponse(response.getAppResponse() + "_a5");
+    }
 }

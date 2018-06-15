@@ -47,9 +47,8 @@ public interface SofaResponseCallback<T> {
      * SOFA RPC will callback this method when framework meet exception
      *
      * @param sofaException framework exception
-     *  @param methodName the invoked method
+     * @param methodName the invoked method
      * @param request the invoked request object
      */
-    public void onSofaException(SofaRpcException sofaException, String methodName,
-                                RequestBase request);
+    public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request);
 }

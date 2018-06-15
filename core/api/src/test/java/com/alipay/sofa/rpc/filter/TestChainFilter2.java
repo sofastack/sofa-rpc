@@ -21,13 +21,16 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
+import org.junit.Assert;
+
+import java.util.Map;
 
 /**
  *
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter1")
+@Extension("testChainFilter2")
 public class TestChainFilter2 extends Filter {
 
     @Override
@@ -37,6 +40,12 @@ public class TestChainFilter2 extends Filter {
         if (!request.isAsync()) {
             response.setAppResponse(response.getAppResponse() + "_s2");
         }
+        Map<String, Object> context = invoker.getConfigContext();
+        Assert.assertNotNull(context);
+        invoker.getMethodParam(request.getMethodName(), "invokeType");
+        invoker.getStringMethodParam(request.getMethodName(), "invokeType", "sync");
+        invoker.getIntMethodParam(request.getMethodName(), "timeout", 3000);
+        invoker.getBooleanMethodParam(request.getMethodName(), "cache", false);
         return response;
     }
 
