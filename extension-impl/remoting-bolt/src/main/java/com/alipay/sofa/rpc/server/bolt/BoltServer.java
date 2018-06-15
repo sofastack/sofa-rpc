@@ -227,9 +227,13 @@ public class BoltServer implements Server {
 
     @Override
     public void destroy(DestroyHook hook) {
-        hook.preDestroy();
+        if (hook != null) {
+            hook.preDestroy();
+        }
         destroy();
-        hook.postDestroy();
+        if (hook != null) {
+            hook.postDestroy();
+        }
     }
 
     /**

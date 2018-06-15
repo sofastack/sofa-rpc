@@ -16,18 +16,28 @@
  */
 package com.alipay.sofa.rpc.metrics.lookout;
 
-import com.alipay.lookout.api.*;
+import com.alipay.lookout.api.Lookout;
+import com.alipay.lookout.api.Measurement;
+import com.alipay.lookout.api.Metric;
+import com.alipay.lookout.api.Registry;
+import com.alipay.lookout.api.Tag;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.config.*;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -44,7 +54,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
-public class RpcLookoutTest extends ActivelyDestroyTest {
+public class RpcLookoutTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
 
@@ -53,7 +63,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     static Field                queueSize;
 
     @BeforeClass
-    public static void beforeClass() throws IllegalAccessException, NoSuchFieldException {
+    public static void beforeClass() {
         try {
             Class clazz = RpcLookout.class;
             Class[] innerClazzs = clazz.getDeclaredClasses();
@@ -70,7 +80,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("", e);
         }
 
         Registry registry = new DefaultRegistry();
@@ -82,14 +92,17 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             invoke();
             Thread.sleep(5000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("", e);
         }
 
     }
 
     @AfterClass
-    public static void afterClass() {
+    public static void adAfterClass() {
         RpcRunningState.setUnitTestMode(true);
+        RpcRuntimeContext.destroy();
+        RpcInternalContext.removeContext();
+        RpcInvokeContext.removeContext();
     }
 
     private Metric fetchWithName(String name) {
@@ -104,7 +117,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * invoke
      */
-    private static void invoke() throws InterruptedException {
+    private static void invoke() {
 
         ServerConfig serverConfig = new ServerConfig()
             .setPort(12200)
@@ -168,7 +181,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             try {
                 lookoutService.saySync("lookout_sync");
             } catch (Exception e) {
-                System.out.println(e);
+                LOGGER.error("", e);
             }
         }
 
@@ -178,7 +191,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 lookoutService.sayFuture("lookout_future");
                 SofaResponseFuture.getResponse(3000, true);
             } catch (Exception e) {
-                System.out.println(e);
+                LOGGER.error("", e);
             }
         }
 
@@ -187,7 +200,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             try {
                 lookoutService.sayCallback("lookout_callback");
             } catch (Exception e) {
-                System.out.println(e);
+                LOGGER.error("", e);
             }
         }
 
@@ -196,7 +209,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             try {
                 lookoutService.sayOneway("lookout_oneway");
             } catch (Exception e) {
-                System.out.println(e);
+                LOGGER.error("", e);
             }
         }
     }
@@ -204,7 +217,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * test thread pool config
      *
-     * @throws Exception
+     * @throws Exception Exception
      */
     @Test
     public void testThreadPoolConfig() throws Exception {
@@ -227,7 +240,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * test thread pool active count
      *
-     * @throws Exception
+     * @throws Exception Exception
      */
     @Test
     public void testThreadPoolActiveCount() throws Exception {
@@ -245,7 +258,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      * test thread pool idle count
      */
     @Test
-    public void testThreadPoolIdleCount() throws Exception {
+    public void testThreadPoolIdleCount() {
 
         Metric metric = fetchWithName("rpc.bolt.threadpool.idle.count");
 
@@ -260,7 +273,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      * test thread pool queue size
      */
     @Test
-    public void testThreadPoolQueueSize() throws Exception {
+    public void testThreadPoolQueueSize() {
 
         Metric metric = fetchWithName("rpc.bolt.threadpool.queue.size");
 
@@ -273,11 +286,9 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test provider service stats
-     *
-     * @throws InterruptedException
      */
     @Test
-    public void testProviderServiceStats() throws InterruptedException {
+    public void testProviderServiceStats() {
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
@@ -304,11 +315,9 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     /**
      * test consumer service stats
-     *
-     * @throws InterruptedException
      */
     @Test
-    public void testConsumerServiceStats() throws InterruptedException {
+    public void testConsumerServiceStats() {
 
         Metric metric = fetchWithName("rpc.consumer.service.stats");
 
