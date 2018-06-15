@@ -208,7 +208,6 @@
         <dependency>
             <groupId>com.alipay.sofa.lookout</groupId>
             <artifactId>lookout-core</artifactId>
-            <version>1.4.0</version>
             <scope>test</scope>
         </dependency>
 

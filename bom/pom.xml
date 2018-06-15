@@ -35,11 +35,10 @@
         <!-- Test libs -->
         <junit.version>4.10</junit.version>
         <!-- alipay libs -->
-        <bolt.version>1.4.1</bolt.version>
+        <bolt.version>1.4.2</bolt.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
-        <lookout.version>1.1.0</lookout.version>
         <tracer.version>2.1.1</tracer.version>
-        <lookout.version>1.4.0</lookout.version>
+        <lookout.version>1.4.1</lookout.version>
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
@@ -343,6 +342,11 @@
             <dependency>
                 <groupId>com.alipay.sofa.lookout</groupId>
                 <artifactId>lookout-api</artifactId>
+                <version>${lookout.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa.lookout</groupId>
+                <artifactId>lookout-core</artifactId>
                 <version>${lookout.version}</version>
             </dependency>
             <!-- Test libs -->

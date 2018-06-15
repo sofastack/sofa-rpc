@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ServerConfig;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
@@ -64,7 +63,7 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
     private final ServerConfig         serverConfig;
-    protected ServerBootstrap          bootstrap           = new ServerBootstrap();
+    protected ServerBootstrap          bootstrap           = null;
     protected String                   hostname            = null;
     protected int                      port                = 8080;
     protected ResteasyDeployment       deployment          = new SofaResteasyDeployment(); // CHANGE: 使用sofa的类
@@ -224,7 +223,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
                 serverConfig.isDaemon()));
         }
         // Configure the server.
-        bootstrap
+        bootstrap = new ServerBootstrap()
             .group(eventLoopGroup)
             .channel(
                 (serverConfig != null && serverConfig.isEpoll()) ? EpollServerSocketChannel.class
@@ -293,5 +292,6 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
             eventExecutor.shutdownGracefully().sync();
         } catch (Exception ignore) { // NOPMD
         }
+        bootstrap = null;
     }
 }
