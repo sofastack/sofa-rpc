@@ -29,8 +29,6 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
-import com.alipay.sofa.rpc.test.HelloService;
-import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.apache.zookeeper.CreateMode;
 import org.junit.Assert;
 import org.junit.Test;
@@ -59,26 +57,26 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
 
             ServerConfig serverConfig = new ServerConfig().setPort(22222)
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
-            ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName()).setRef(new HelloServiceImpl(22222))
+            ProviderConfig<OverrideService> providerConfig = new ProviderConfig<OverrideService>()
+                .setInterfaceId(OverrideService.class.getName()).setRef(new OverrideServiceImpl(22222))
                 .setServer(serverConfig).setRegistry(registryConfig)
                 .setParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME, "2000")
                 .setParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT, "100").setWeight(0);
 
             ServerConfig serverConfig2 = new ServerConfig().setPort(22111)
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
-            ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName()).setRef(new HelloServiceImpl(22111))
+            ProviderConfig<OverrideService> providerConfig2 = new ProviderConfig<OverrideService>()
+                .setInterfaceId(OverrideService.class.getName()).setRef(new OverrideServiceImpl(22111))
                 .setServer(serverConfig2).setRegistry(registryConfig).setRepeatedExportLimit(-1)
                 .setWeight(0);
 
             providerConfig.export();
             providerConfig2.export();
 
-            ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName()).setRegistry(registryConfig)
+            ConsumerConfig<OverrideService> consumerConfig = new ConsumerConfig<OverrideService>()
+                .setInterfaceId(OverrideService.class.getName()).setRegistry(registryConfig)
                 .setTimeout(3333).setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
-            HelloService helloService = consumerConfig.refer();
+            OverrideService overrideService = consumerConfig.refer();
 
             AddressHolder addressHolder = consumerConfig.getConsumerBootstrap().getCluster()
                 .getAddressHolder();
@@ -89,14 +87,14 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
             Assert.assertTrue(delayGetSize(addressHolder, 1, 100) == 1);
 
             List<String> path = registry.getZkClient().getChildren()
-                .forPath("/sofa-rpc/" + HelloService.class.getCanonicalName() + "/providers");
+                .forPath("/sofa-rpc/" + OverrideService.class.getCanonicalName() + "/providers");
             String url = URLDecoder.decode(path.get(0), "UTF-8");
             ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
 
             // 模拟下发一个override
             String override1 = providerInfo.getProtocolType() + "://" + providerInfo.getHost() + ":"
                 + providerInfo.getPort() + "?timeout=2345";
-            String overridePath1 = "/sofa-rpc/" + HelloService.class.getCanonicalName() + "/overrides/"
+            String overridePath1 = "/sofa-rpc/" + OverrideService.class.getCanonicalName() + "/overrides/"
                 + URLEncoder.encode(override1, "UTF-8");
             registry.getZkClient().create().creatingParentContainersIfNeeded()
                 .withMode(CreateMode.PERSISTENT).forPath(overridePath1);
@@ -110,7 +108,7 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
             // 恢复到3333
             String override2 = providerInfo.getProtocolType() + "://" + providerInfo.getHost() + ":"
                 + providerInfo.getPort() + "?timeout=3333";
-            String overridePath2 = "/sofa-rpc/" + HelloService.class.getCanonicalName() + "/overrides/"
+            String overridePath2 = "/sofa-rpc/" + OverrideService.class.getCanonicalName() + "/overrides/"
                 + URLEncoder.encode(override2, "UTF-8");
             registry.getZkClient().create().creatingParentContainersIfNeeded()
                 .withMode(CreateMode.PERSISTENT).forPath(overridePath2);
