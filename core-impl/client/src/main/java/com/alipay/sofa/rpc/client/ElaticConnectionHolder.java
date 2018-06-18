@@ -125,7 +125,10 @@ public class ElaticConnectionHolder extends AllConnectConnectionHolder {
                 providerInfoList.size());
 
             if (!asynConnectProviderInfoList.isEmpty()) {
-                LOGGER.debug("asynConnectProviderInfoListSize:{}", asynConnectProviderInfoList.size());
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, "asynConnectProviderInfoListSize:{}",
+                        asynConnectProviderInfoList.size());
+                }
                 final ExecutorService executorService = Executors
                     .newFixedThreadPool(asynConnectProviderInfoList.size());
 
