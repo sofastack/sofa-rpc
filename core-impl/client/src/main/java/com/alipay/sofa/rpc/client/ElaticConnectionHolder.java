@@ -112,7 +112,8 @@ public class ElaticConnectionHolder extends AllConnectConnectionHolder {
             try {
                 int totalTimeout = ((synInitConnectProviderSize % threads == 0) ? (synInitConnectProviderSize / threads)
                     : ((synInitConnectProviderSize /
-                    threads) + 1)) * connectTimeout + 500;
+                    threads) + 1)) *
+                    connectTimeout + 500;
                 latch.await(totalTimeout, TimeUnit.MILLISECONDS); // 一直等到子线程都结束
             } catch (InterruptedException e) {
                 LOGGER.errorWithApp(appName, "Exception when add provider", e);
@@ -125,31 +126,29 @@ public class ElaticConnectionHolder extends AllConnectConnectionHolder {
 
             if (!asynConnectProviderInfoList.isEmpty()) {
                 LOGGER.debug("asynConnectProviderInfoListSize:{}", asynConnectProviderInfoList.size());
-                final ExecutorService executorService = Executors.newFixedThreadPool(1);
-                final List<FutureTask> futureTaskList = new ArrayList<FutureTask>();
+                final ExecutorService executorService = Executors
+                    .newFixedThreadPool(asynConnectProviderInfoList.size());
 
                 namedThreadFactory.newThread(new Runnable() {
                     private FutureTask<String> futureTask;
 
                     @Override
                     public void run() {
-                        ExecutorService executorService = Executors.newFixedThreadPool(1);
                         for (final ProviderInfo providerInfo : asynConnectProviderInfoList) {
                             final ClientTransportConfig config = providerToClientConfig(providerInfo);
 
-                            futureTask = new FutureTask<String>(new Callable<String>() {// 需要的数据类型是String，使用泛型实现！
-                                    @Override
-                                    public String call() throws Exception {
-                                        ClientTransport transport = ClientTransportFactory.getClientTransport(config);
-                                        if (consumerConfig.isLazy()) {
-                                            uninitializedConnections.put(providerInfo, transport);
-                                        } else {
-                                            initClientTransport(interfaceId, providerInfo, transport);
-                                        }
-                                        return providerInfo.getHost() + ":" + providerInfo.getPort();
+                            futureTask = new FutureTask<String>(new Callable<String>() {
+                                @Override
+                                public String call() throws Exception {
+                                    ClientTransport transport = ClientTransportFactory.getClientTransport(config);
+                                    if (consumerConfig.isLazy()) {
+                                        uninitializedConnections.put(providerInfo, transport);
+                                    } else {
+                                        initClientTransport(interfaceId, providerInfo, transport);
                                     }
-                                });
-                            futureTaskList.add(futureTask);
+                                    return providerInfo.getHost() + ":" + providerInfo.getPort();
+                                }
+                            });
                             executorService.submit(futureTask);
                         }
                     }
