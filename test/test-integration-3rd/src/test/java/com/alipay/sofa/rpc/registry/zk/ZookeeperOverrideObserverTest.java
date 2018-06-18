@@ -29,6 +29,8 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.alipay.sofa.rpc.test.TestUtils;
+
 import org.apache.zookeeper.CreateMode;
 import org.junit.Assert;
 import org.junit.Test;
@@ -123,7 +125,7 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
     }
 
     int delayGetSize(final AddressHolder addressHolder, int expect, int n50ms) {
-        return delayGet(new Callable<Integer>() {
+        return TestUtils.delayGet(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 return addressHolder.getAllProviderSize();
@@ -132,7 +134,7 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
     }
 
     int delayGetTimeout(final ConsumerConfig consumerConfig, int expect, int n50ms) {
-        return delayGet(new Callable<Integer>() {
+        return TestUtils.delayGet(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 return consumerConfig.getTimeout();

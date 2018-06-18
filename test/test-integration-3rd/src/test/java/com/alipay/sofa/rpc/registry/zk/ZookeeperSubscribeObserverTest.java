@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import com.alipay.sofa.rpc.test.TestUtils;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -98,7 +99,7 @@ public class ZookeeperSubscribeObserverTest extends BaseZkTest {
     }
 
     int delayGetSize(final AddressHolder addressHolder, int expect, int n50ms) {
-        return delayGet(new Callable<Integer>() {
+        return TestUtils.delayGet(new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
                 return addressHolder.getAllProviderSize();
