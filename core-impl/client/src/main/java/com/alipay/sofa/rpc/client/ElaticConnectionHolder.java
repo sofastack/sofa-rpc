@@ -98,19 +98,20 @@ public class ElaticConnectionHolder extends AllConnectConnectionHolder {
                 new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
 
             NamedThreadFactory namedThreadFactory = new NamedThreadFactory("CLI--ASYN-CONN-", true);
-            int initConnectProviderSize = 0;
+            // 第一次同步建立连接的连接数
+            int synInitConnectProviderSize = 0;
             for (final ProviderInfo providerInfo : providerInfoList) {
                 final ClientTransportConfig config = providerToClientConfig(providerInfo);
-                if (initConnectProviderSize >= minSynConnectSize) {
+                if (synInitConnectProviderSize >= minSynConnectSize) {
                     break;
                 }
-                initConnectProviderSize++;
+                synInitConnectProviderSize++;
                 initClientRunnable(initPool, latch, providerInfo);
             }
 
             try {
-                int totalTimeout = ((initConnectProviderSize % threads == 0) ? (initConnectProviderSize / threads)
-                    : ((initConnectProviderSize /
+                int totalTimeout = ((synInitConnectProviderSize % threads == 0) ? (synInitConnectProviderSize / threads)
+                    : ((synInitConnectProviderSize /
                     threads) + 1)) * connectTimeout + 500;
                 latch.await(totalTimeout, TimeUnit.MILLISECONDS); // 一直等到子线程都结束
             } catch (InterruptedException e) {
@@ -119,7 +120,7 @@ public class ElaticConnectionHolder extends AllConnectConnectionHolder {
                 initPool.shutdown(); // 关闭线程池
             }
 
-            final List<ProviderInfo> asynConnectProviderInfoList = providerInfoList.subList(initConnectProviderSize,
+            final List<ProviderInfo> asynConnectProviderInfoList = providerInfoList.subList(synInitConnectProviderSize,
                 providerInfoList.size());
 
             if (!asynConnectProviderInfoList.isEmpty()) {
