@@ -429,8 +429,12 @@ public class ZookeeperRegistry extends Registry {
         // 反订阅配置节点
         if (config.isSubscribe()) {
             try {
-                configObserver.removeConfigListener(config);
-                overrideObserver.removeConfigListener(config);
+                if (null != configObserver) {
+                    configObserver.removeConfigListener(config);
+                }
+                if (null != overrideObserver) {
+                    overrideObserver.removeConfigListener(config);
+                }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
                     throw new SofaRpcRuntimeException("Failed to unsubscribe provider config from zookeeperRegistry!",
