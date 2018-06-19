@@ -16,15 +16,16 @@
  */
 package com.alipay.sofa.rpc.base;
 
-import com.alipay.sofa.rpc.context.RpcInternalContext;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import java.io.IOException;
+
 import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
-import java.io.IOException;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 
 /**
  * @author bystander
@@ -59,4 +60,5 @@ public abstract class BaseZkTest {
             }
         }
     }
+
 }
