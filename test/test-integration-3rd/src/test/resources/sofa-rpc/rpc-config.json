@@ -1,0 +1,6 @@
+{
+  "rpc.config.order": 999,
+  "logger.impl": "com.alipay.sofa.rpc.log.SLF4JLoggerImpl",
+  "consumer.connect.elatic.size":2,
+  "consumer.connect.elatic.precent":0
+}

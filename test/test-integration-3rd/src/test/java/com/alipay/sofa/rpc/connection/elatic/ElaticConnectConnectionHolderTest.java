@@ -14,8 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.client;
+package com.alipay.sofa.rpc.connection.elatic;
 
+import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ElaticConnectionHolder;
@@ -39,7 +40,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href=mailto:liangyuanpengem@163.com>LiangYuanPeng</a>
  */
-public class ElaticConnectConnectionHolderTest extends ActivelyDestroyTest {
+public class ElaticConnectConnectionHolderTest extends BaseZkTest {
 
     private static ServerConfig   serverConfig1;
     private static ServerConfig   serverConfig2;
@@ -108,33 +109,9 @@ public class ElaticConnectConnectionHolderTest extends ActivelyDestroyTest {
     }
 
     @Test
-    public void testConnectElaticSize() throws Exception {
+    public void testConnectElatic() throws Exception {
 
-        //please change the connect.elatic.size in the rpc-config.json
-        //use connect.elatic.precent first unless connect.elatic.precent = 0
-
-        ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setConnectionHolder("elatic")
-            .setRegistry(registryConfig);
-        HelloService helloService = consumerConfig.refer();
-
-        ClientProxyInvoker invoker = (ClientProxyInvoker) ProxyFactory.getInvoker(helloService,
-            consumerConfig.getProxy());
-        Cluster cluster = invoker.getCluster();
-        Assert.assertTrue(cluster.getConnectionHolder() instanceof ElaticConnectionHolder);
-        ElaticConnectionHolder holder = (ElaticConnectionHolder) cluster.getConnectionHolder();
-        Assert.assertTrue(!holder.isAvailableEmpty());
-        TimeUnit.SECONDS.sleep(3);
-
-        Assert.assertEquals(holder.getAvailableConnections().size(), 4);
-
-    }
-
-    @Test
-    public void testConnectElaticPrecent() throws Exception {
-
-        //please change the connect.elatic.precent in the rpc-config.json
+        //please change the connect.elatic.size or connect.elatic.precent in the rpc-config.json
         //use connect.elatic.precent first unless connect.elatic.precent = 0
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
