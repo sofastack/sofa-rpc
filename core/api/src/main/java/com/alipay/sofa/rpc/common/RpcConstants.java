@@ -403,6 +403,11 @@ public class RpcConstants {
      */
     public static final String  CONFIG_KEY_APP_NAME                = "appName";
 
+    /**
+     * 配置key:loadBalancer
+     */
+    public static final String  CONFIG_KEY_LOADBALANCER            = "loadBalancer";
+
     /*--------配置项相关结束---------*/
 
     /*--------客户端相关开始---------*/

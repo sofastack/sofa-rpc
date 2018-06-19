@@ -16,15 +16,15 @@
  */
 package com.alipay.sofa.rpc.client;
 
-import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
-import com.alipay.sofa.rpc.ext.Extension;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
+
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
+import com.alipay.sofa.rpc.ext.Extension;
 
 /**
  * 只支持单个分组的地址选择器（额外存一个直连分组）
@@ -78,7 +78,8 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public ProviderGroup getProviderGroup(String groupName) {
         rLock.lock();
         try {
-            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup : registryGroup;
+            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup
+                : registryGroup;
         } finally {
             rLock.unlock();
         }
@@ -99,7 +100,12 @@ public class SingleGroupAddressHolder extends AddressHolder {
 
     @Override
     public int getAllProviderSize() {
-        return directUrlGroup.size() + registryGroup.size();
+        rLock.lock();
+        try {
+            return directUrlGroup.size() + registryGroup.size();
+        } finally {
+            rLock.unlock();
+        }
     }
 
     @Override
@@ -132,7 +138,8 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public void updateProviders(ProviderGroup providerGroup) {
         wLock.lock();
         try {
-            getProviderGroup(providerGroup.getName()).setProviderInfos(new ArrayList(providerGroup.getProviderInfos()));
+            getProviderGroup(providerGroup.getName())
+                .setProviderInfos(new ArrayList(providerGroup.getProviderInfos()));
         } finally {
             wLock.unlock();
         }
