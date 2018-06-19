@@ -18,8 +18,10 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -83,7 +85,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
             List<ProviderInfo> providerInfos = Arrays.asList(
                 ZookeeperRegistryHelper.convertUrlToProvider(providerPath, data));
             for (ProviderInfoListener listener : providerInfoListeners) {
-                List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config.getProtocol(), providerInfos);
+                List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config, providerInfos);
                 listener.addProvider(new ProviderGroup(providerInfosForProtocol));
             }
         }
@@ -100,7 +102,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
         if (CommonUtils.isNotEmpty(providerInfoListeners)) {
             List<ProviderInfo> providerInfos = Arrays.asList(
                 ZookeeperRegistryHelper.convertUrlToProvider(providerPath, data));
-            List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config.getProtocol(), providerInfos);
+            List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config, providerInfos);
             for (ProviderInfoListener listener : providerInfoListeners) {
                 listener.removeProvider(new ProviderGroup(providerInfosForProtocol));
             }
@@ -119,16 +121,19 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
             List<ProviderInfo> providerInfos = Arrays.asList(
                 ZookeeperRegistryHelper.convertUrlToProvider(providerPath, data));
             for (ProviderInfoListener listener : providerInfoListeners) {
-                List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config.getProtocol(), providerInfos);
+                List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config, providerInfos);
                 listener.addProvider(new ProviderGroup(providerInfosForProtocol));
             }
         }
     }
 
-    private List<ProviderInfo> filterByProtocol(String protocol, List<ProviderInfo> providerInfos) {
+    static List<ProviderInfo> filterByProtocol(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
+        String protocol = consumerConfig.getProtocol();
         List<ProviderInfo> result = new ArrayList<ProviderInfo>();
         for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)) {
+            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
+                && StringUtils.equals(consumerConfig.getUniqueId(),
+                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
                 result.add(providerInfo);
             }
         }
