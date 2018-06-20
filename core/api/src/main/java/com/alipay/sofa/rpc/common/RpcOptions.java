@@ -362,13 +362,13 @@ public class RpcOptions {
      *
      * @since 5.4.1
      */
-    public static final String CONSUMER_ELATICCONNECT_PRECENT           = "consumer.connect.elatic.precent";
+    public static final String CONSUMER_ELASTICCONNECT_PRECENT          = "consumer.connect.elastic.precent";
     /**
      * 初始化连接时建立连接的个数
      *
      * @since 5.4.1
      */
-    public static final String CONCUMER_ELATICCONNECT_SIZE              = "consumer.connect.elatic.size";
+    public static final String CONCUMER_ELASTICCONNECT_SIZE             = "consumer.connect.elastic.size";
 
     /**
      * 默认回调线程池最小

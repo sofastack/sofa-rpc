@@ -14,18 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.connection.elatic;
+package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.base.BaseZkTest;
-import com.alipay.sofa.rpc.client.ClientProxyInvoker;
-import com.alipay.sofa.rpc.client.Cluster;
-import com.alipay.sofa.rpc.client.ElaticConnectionHolder;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
-import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.AfterClass;
@@ -40,7 +36,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href=mailto:liangyuanpengem@163.com>LiangYuanPeng</a>
  */
-public class ElaticConnectConnectionHolderTest extends BaseZkTest {
+public class ElasticConnectConnectionHolderTest extends BaseZkTest {
 
     private static ServerConfig   serverConfig1;
     private static ServerConfig   serverConfig2;
@@ -123,8 +119,8 @@ public class ElaticConnectConnectionHolderTest extends BaseZkTest {
         ClientProxyInvoker invoker = (ClientProxyInvoker) ProxyFactory.getInvoker(helloService,
             consumerConfig.getProxy());
         Cluster cluster = invoker.getCluster();
-        Assert.assertTrue(cluster.getConnectionHolder() instanceof ElaticConnectionHolder);
-        ElaticConnectionHolder holder = (ElaticConnectionHolder) cluster.getConnectionHolder();
+        Assert.assertTrue(cluster.getConnectionHolder() instanceof ElasticConnectionHolder);
+        ElasticConnectionHolder holder = (ElasticConnectionHolder) cluster.getConnectionHolder();
         Assert.assertTrue(!holder.isAvailableEmpty());
         TimeUnit.SECONDS.sleep(3);
 

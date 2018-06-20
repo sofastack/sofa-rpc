@@ -25,43 +25,42 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import com.alipay.sofa.rpc.transport.ClientTransportFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONCUMER_ELATICCONNECT_SIZE;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ELATICCONNECT_PRECENT;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONCUMER_ELASTICCONNECT_SIZE;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ELASTICCONNECT_PRECENT;
 
 /**
  * 弹性长连接，可按百分比配置以及按个数配置
  *
  * @author <a href=mailto:liangyuanpengem@163.com>LiangYuanPeng</a>
  */
-@Extension("elatic")
-public class ElaticConnectionHolder extends AllConnectConnectionHolder {
+@Extension("elastic")
+public class ElasticConnectionHolder extends AllConnectConnectionHolder {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER               = LoggerFactory.getLogger(ElaticConnectionHolder.class);
+    private final static Logger LOGGER                = LoggerFactory.getLogger(ElasticConnectionHolder.class);
 
     /**
      * 弹性连接，初始化连接百分比数
      */
-    protected int               elaticConnectPrecent = getIntValue(CONSUMER_ELATICCONNECT_PRECENT);
+    protected int               elasticConnectPrecent = getIntValue(CONSUMER_ELASTICCONNECT_PRECENT);
 
     /**
      * 弹性连接，初始化连接数
      */
-    protected int               elaticConnectSize    = getIntValue(CONCUMER_ELATICCONNECT_SIZE);
+    protected int               elasticConnectSize    = getIntValue(CONCUMER_ELASTICCONNECT_SIZE);
 
     /**
      * 构造函数
      *
      * @param consumerBootstrap 服务消费者配置
      */
-    protected ElaticConnectionHolder(ConsumerBootstrap consumerBootstrap) {
+    protected ElasticConnectionHolder(ConsumerBootstrap consumerBootstrap) {
         super(consumerBootstrap);
         this.consumerConfig = consumerBootstrap.getConsumerConfig();
     }
@@ -79,11 +78,11 @@ public class ElaticConnectionHolder extends AllConnectConnectionHolder {
             int minSynConnectSize = 0;
             //可自定义初始化连接的百分比数以及固定最小数
             //计算初始化连接最少数,优先使用初始化最小数属性进行计算,百分比属性默认为0
-            if (elaticConnectPrecent > 0) {
-                double precent = elaticConnectPrecent >= 100 ? 1 : elaticConnectPrecent * 0.01;
+            if (elasticConnectPrecent > 0) {
+                double precent = elasticConnectPrecent >= 100 ? 1 : elasticConnectPrecent * 0.01;
                 minSynConnectSize = ((Double) (providerInfoList.size() * precent)).intValue();
             } else {
-                minSynConnectSize = elaticConnectSize;
+                minSynConnectSize = elasticConnectSize;
             }
 
             // 多线程建立连接
