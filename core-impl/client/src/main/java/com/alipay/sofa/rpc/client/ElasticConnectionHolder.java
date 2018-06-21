@@ -96,7 +96,7 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
                 new LinkedBlockingQueue<Runnable>(minSynConnectSize),
                 new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
 
-            NamedThreadFactory namedThreadFactory = new NamedThreadFactory("CLI--ASYN-CONN-", true);
+            NamedThreadFactory namedThreadFactory = new NamedThreadFactory("CLI-ASYN-CONN-", true);
             // 第一次同步建立连接的连接数
             int synInitConnectProviderSize = 0;
             for (final ProviderInfo providerInfo : providerInfoList) {
