@@ -105,14 +105,14 @@ public class ElasticConnectConnectionHolderTest extends BaseZkTest {
     }
 
     @Test
-    public void testConnectElatic() throws Exception {
+    public void testConnectElastic() throws Exception {
 
         //please change the connect.elatic.size or connect.elatic.precent in the rpc-config.json
         //use connect.elatic.precent first unless connect.elatic.precent = 0
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
-            .setConnectionHolder("elatic")
+            .setConnectionHolder("elastic")
             .setRegistry(registryConfig);
         HelloService helloService = consumerConfig.refer();
 
