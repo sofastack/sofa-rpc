@@ -59,11 +59,14 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
     /**
      * Logger for Http2ChannelHandler
      **/
-    private static final Logger               LOGGER    = LoggerFactory.getLogger(Http2ServerChannelHandler.class);
+    private static final Logger               LOGGER           = LoggerFactory
+                                                                   .getLogger(Http2ServerChannelHandler.class);
 
-    private final Http2Connection.PropertyKey headerKey = encoder().connection().newKey();
+    private final Http2Connection.PropertyKey headerKey        = encoder().connection().newKey();
 
     private final HttpServerHandler           serverHandler;
+
+    private boolean                           isUpgradeH2cMode = false;
 
     Http2ServerChannelHandler(HttpServerHandler serverHandler, Http2ConnectionDecoder decoder,
                               Http2ConnectionEncoder encoder,
@@ -93,6 +96,7 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
         if (evt instanceof HttpServerUpgradeHandler.UpgradeEvent) {
             HttpServerUpgradeHandler.UpgradeEvent upgradeEvent =
                     (HttpServerUpgradeHandler.UpgradeEvent) evt;
+            this.isUpgradeH2cMode = true;
             onHeadersRead(ctx, 1, http1HeadersToHttp2Headers(upgradeEvent.upgradeRequest()), 0, true);
         }
         super.userEventTriggered(ctx, evt);
@@ -122,7 +126,13 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
     @Override
     public void onHeadersRead(ChannelHandlerContext ctx, int streamId,
                               Http2Headers headers, int padding, boolean endOfStream) {
-        if (streamId > 1) {
+        /**
+         * https://http2.github.io/http2-spec/#rfc.section.5.1.1 second paragraph
+         * only when in upgrade h2c mode, 0x01 cannot be selected as a new stream identifier.
+         * some gateway or proxy product, use 0x01 as first normal request's stream id  when
+         * in prior knowleadge mode.
+         */
+        if (this.isUpgradeH2cMode && streamId > 1 || !this.isUpgradeH2cMode && streamId > 0) {
             // 正常的请求（streamId==1 的是settings请求）
             if (endOfStream) {
                 // 没有DATA帧的请求，可能是DATA
@@ -156,7 +166,13 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
             return;
         }
 
-        if (streamId > 1) {
+        /**
+         * https://http2.github.io/http2-spec/#rfc.section.5.1.1 second paragraph
+         * only when in upgrade h2c mode, 0x01 cannot be selected as a new stream identifier.
+         * some gateway or proxy product, use 0x01 as first normal request's stream id  when
+         * in prior knowleadge mode.
+         */
+        if (this.isUpgradeH2cMode && streamId > 1 || !this.isUpgradeH2cMode && streamId > 0) {
             // 本来这里可以提前检查接口方法是否存在，但是为了日志统一，全部放到serverHandler里去
             SofaRequest sofaRequest = new SofaRequest();
             try {
