@@ -68,7 +68,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
     @Override
     public V get() throws InterruptedException, ExecutionException {
         try {
-            return (V) get(timeout, TimeUnit.MILLISECONDS);
+            return get(timeout, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             throw new ExecutionException(e);
         }

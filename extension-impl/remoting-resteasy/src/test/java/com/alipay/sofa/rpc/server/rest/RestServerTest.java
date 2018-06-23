@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -23,13 +24,12 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RestServerTest {
 
-    public void start() throws Exception {
+    @Test
+    public void start() {
         String host = "127.0.0.1";
         int port = 18801;
         ServerConfig serverConfig = new ServerConfig();
@@ -42,24 +42,44 @@ public class RestServerTest {
         server.start();
         Assert.assertTrue(server.started);
         Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
+        // 重复启动
+        server.start();
 
         server.stop();
         Assert.assertFalse(server.started);
         Assert.assertFalse(NetUtils.canTelnet(host, port, 1000));
+        // 重复关闭
+        server.stop();
 
+        // 销毁
+        server.init(serverConfig);
         server.start();
         Assert.assertTrue(server.started);
         Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
-
-        server.stop();
-        Assert.assertFalse(server.started);
-        Assert.assertFalse(NetUtils.canTelnet(host, port, 1000));
-
         server.destroy();
-    }
 
-    @Test
-    public void stop() throws Exception {
-    }
+        // 销毁
+        server.init(serverConfig);
+        server.start();
+        Assert.assertTrue(server.started);
+        Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
+        server.destroy(null);
 
+        // 销毁
+        server.init(serverConfig);
+        server.start();
+        Assert.assertTrue(server.started);
+        Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
+        server.destroy(new Destroyable.DestroyHook() {
+            @Override
+            public void preDestroy() {
+
+            }
+
+            @Override
+            public void postDestroy() {
+
+            }
+        });
+    }
 }

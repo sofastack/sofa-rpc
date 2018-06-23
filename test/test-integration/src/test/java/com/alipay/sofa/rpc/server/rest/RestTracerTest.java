@@ -38,7 +38,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -87,8 +91,6 @@ public class RestTracerTest extends ActivelyDestroyTest {
             .setServer(servers);
         providerConfig.export();
 
-        Thread.sleep(3000);
-
         //rest服务
         ConsumerConfig<RestService> consumerConfigRest = new ConsumerConfig<RestService>()
             .setInterfaceId(RestService.class.getName())
@@ -134,9 +136,6 @@ public class RestTracerTest extends ActivelyDestroyTest {
                     }
                 }
             }).start();
-
-            //     Thread.sleep(1000);
-
         }
         latch.await();
         Assert.assertEquals(times * times, success.get());
@@ -157,7 +156,6 @@ public class RestTracerTest extends ActivelyDestroyTest {
             Assert.assertTrue(serverTraceIds.contains(clientTraceId));
 
         }
-
     }
 
     //read TraceId and spanId

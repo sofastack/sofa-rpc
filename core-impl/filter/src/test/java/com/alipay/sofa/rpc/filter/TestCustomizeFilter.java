@@ -26,10 +26,6 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  */
 public class TestCustomizeFilter extends BeanIdMatchFilter {
 
-    public TestCustomizeFilter() {
-        setIdRule("AAA,!BBB");
-    }
-
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         return invoker.invoke(request);
