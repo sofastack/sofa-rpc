@@ -46,7 +46,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
-@Extension("http")
 public abstract class AbstractHttpServer implements Server {
 
     protected final String container;
