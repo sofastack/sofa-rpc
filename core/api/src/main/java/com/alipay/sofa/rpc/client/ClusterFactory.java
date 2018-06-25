@@ -31,10 +31,10 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 public class ClusterFactory {
 
     /**
-     * 构造Client对象
+     * 构造Cluster对象
      *
      * @param consumerBootstrap 客户端配置
-     * @return Client对象
+     * @return Cluster对象
      */
     public static Cluster getCluster(ConsumerBootstrap consumerBootstrap) {
         try {
