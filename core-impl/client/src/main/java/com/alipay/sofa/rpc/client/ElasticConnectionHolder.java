@@ -29,8 +29,8 @@ import java.util.List;
 import java.util.concurrent.*;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONCUMER_ELASTICCONNECT_SIZE;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ELASTICCONNECT_PRECENT;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONCUMER_CONNECT_ELASTIC_SIZE;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PRECENT;
 
 /**
  * 弹性长连接，可按百分比配置以及按个数配置
@@ -48,12 +48,12 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
     /**
      * 弹性连接，初始化连接百分比数
      */
-    protected int               elasticConnectPrecent = getIntValue(CONSUMER_ELASTICCONNECT_PRECENT);
+    protected int               elasticConnectPrecent = getIntValue(CONSUMER_CONNECT_ELASTIC_PRECENT);
 
     /**
      * 弹性连接，初始化连接数
      */
-    protected int               elasticConnectSize    = getIntValue(CONCUMER_ELASTICCONNECT_SIZE);
+    protected int               elasticConnectSize    = getIntValue(CONCUMER_CONNECT_ELASTIC_SIZE);
 
     /**
      * 构造函数
@@ -91,12 +91,13 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
 
             int connectTimeout = consumerConfig.getConnectTimeout();
 
+            NamedThreadFactory namedThreadFactory = new NamedThreadFactory("CLI-CONN-" + interfaceId, true);
+
             ThreadPoolExecutor initPool = new ThreadPoolExecutor(threads, threads,
                 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(minSynConnectSize),
-                new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
+                namedThreadFactory);
 
-            NamedThreadFactory namedThreadFactory = new NamedThreadFactory("CLI-ASYN-CONN-", true);
             // 第一次同步建立连接的连接数
             int synInitConnectProviderSize = 0;
             for (final ProviderInfo providerInfo : providerInfoList) {
@@ -129,32 +130,27 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
                         asynConnectProviderInfoList.size());
                 }
                 final ExecutorService executorService = Executors
-                    .newFixedThreadPool(asynConnectProviderInfoList.size());
+                    .newFixedThreadPool(asynConnectProviderInfoList.size(), namedThreadFactory);
 
-                namedThreadFactory.newThread(new Runnable() {
-                    private FutureTask<String> futureTask;
+                FutureTask<String> futureTask;
 
-                    @Override
-                    public void run() {
-                        for (final ProviderInfo providerInfo : asynConnectProviderInfoList) {
-                            final ClientTransportConfig config = providerToClientConfig(providerInfo);
+                for (final ProviderInfo providerInfo : asynConnectProviderInfoList) {
+                    final ClientTransportConfig config = providerToClientConfig(providerInfo);
 
-                            futureTask = new FutureTask<String>(new Callable<String>() {
-                                @Override
-                                public String call() throws Exception {
-                                    ClientTransport transport = ClientTransportFactory.getClientTransport(config);
-                                    if (consumerConfig.isLazy()) {
-                                        uninitializedConnections.put(providerInfo, transport);
-                                    } else {
-                                        initClientTransport(interfaceId, providerInfo, transport);
-                                    }
-                                    return providerInfo.getHost() + ":" + providerInfo.getPort();
-                                }
-                            });
-                            executorService.submit(futureTask);
+                    futureTask = new FutureTask<String>(new Callable<String>() {
+                        @Override
+                        public String call() throws Exception {
+                            ClientTransport transport = ClientTransportFactory.getClientTransport(config);
+                            if (consumerConfig.isLazy()) {
+                                uninitializedConnections.put(providerInfo, transport);
+                            } else {
+                                initClientTransport(interfaceId, providerInfo, transport);
+                            }
+                            return providerInfo.getHost() + ":" + providerInfo.getPort();
                         }
-                    }
-                }).run();
+                    });
+                    executorService.submit(futureTask);
+                }
 
             }
         }
