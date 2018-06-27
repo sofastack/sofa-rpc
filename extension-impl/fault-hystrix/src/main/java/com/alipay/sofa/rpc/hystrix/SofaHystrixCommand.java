@@ -70,9 +70,9 @@ public class SofaHystrixCommand extends HystrixCommand<SofaResponse> {
             actualResponse.setAppResponse(fallbackResult);
             return actualResponse;
         } catch (IllegalAccessException e) {
-            throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.", e);
+            throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
         } catch (InvocationTargetException e) {
-            throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.",
+            throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
                 e.getTargetException());
         }
     }

@@ -74,9 +74,9 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
                             try {
                                 return request.getMethod().invoke(fallback, request.getMethodArgs());
                             } catch (IllegalAccessException e) {
-                                throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.", e);
+                                throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
                             } catch (InvocationTargetException e) {
-                                throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.",
+                                throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
                                     e.getTargetException());
                             }
                         }

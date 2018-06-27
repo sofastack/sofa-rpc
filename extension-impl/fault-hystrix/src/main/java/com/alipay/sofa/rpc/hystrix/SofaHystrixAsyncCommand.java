@@ -59,9 +59,9 @@ public class SofaHystrixAsyncCommand extends SofaHystrixCommand {
             rpcInternalContext.setFuture(new HystrixResponseFuture(delegate));
             return new SofaResponse();
         } catch (IllegalAccessException e) {
-            throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.", e);
+            throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
         } catch (InvocationTargetException e) {
-            throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.",
+            throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
                 e.getTargetException());
         }
     }
