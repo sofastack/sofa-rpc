@@ -17,45 +17,33 @@
 package com.alipay.sofa.rpc.hystrix;
 
 import com.alipay.sofa.rpc.context.RpcInternalContext;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
-import com.netflix.hystrix.HystrixCommand;
+import com.alipay.sofa.rpc.message.ResponseFuture;
+import rx.Observable;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.Future;
 
-public class SofaHystrixCommand extends HystrixCommand<SofaResponse> {
+public class SofaHystrixAsyncCommand extends SofaHystrixCommand {
 
-    protected RpcInternalContext rpcInternalContext;
-    protected RpcInvokeContext   rpcInvokeContext;
-    protected FilterInvoker      invoker;
-    protected SofaRequest        request;
+    private SofaHystrixObservableCommand command;
 
-    protected SofaHystrixCommand(FilterInvoker invoker, SofaRequest request) {
-        super(SetterFactoryLoader.load(invoker.getConfig()).createSetter(invoker, request));
-        this.rpcInternalContext = RpcInternalContext.peekContext();
-        this.rpcInvokeContext = RpcInvokeContext.peekContext();
-        this.invoker = invoker;
-        this.request = request;
+    protected SofaHystrixAsyncCommand(FilterInvoker invoker, SofaRequest request) {
+        super(invoker, request);
+        this.command = new SofaHystrixObservableCommand(invoker, request);
     }
 
     @Override
     protected SofaResponse run() throws Exception {
-        RpcInternalContext.setContext(rpcInternalContext);
-        RpcInvokeContext.setContext(rpcInvokeContext);
-
-        SofaResponse sofaResponse = invoker.invoke(request);
-        if (!sofaResponse.isError()) {
-            return sofaResponse;
-        }
-        return getFallback(sofaResponse, null);
-    }
-
-    @Override
-    protected SofaResponse getFallback() {
-        return getFallback(null, getExecutionException());
+        SofaResponse response = super.run();
+        ResponseFuture responseFuture = RpcInternalContext.getContext().getFuture();
+        command.setResponseFuture(responseFuture);
+        responseFuture = command.toResponseFuture();
+        RpcInternalContext.getContext().setFuture(responseFuture);
+        return response;
     }
 
     protected SofaResponse getFallback(SofaResponse response, Throwable t) {
@@ -63,12 +51,13 @@ public class SofaHystrixCommand extends HystrixCommand<SofaResponse> {
         if (fallbackFactory == null) {
             return super.getFallback();
         }
-        Object fallback = fallbackFactory.create(response, t);
+        final Object fallback = fallbackFactory.create(response, t);
         try {
+            // 希望 fallback 异常能在第一次调用时抛出，所以没使用 Observable#fromCallable
             Object fallbackResult = request.getMethod().invoke(fallback, request.getMethodArgs());
-            SofaResponse actualResponse = new SofaResponse();
-            actualResponse.setAppResponse(fallbackResult);
-            return actualResponse;
+            Future delegate = Observable.just(fallbackResult).toBlocking().toFuture();
+            rpcInternalContext.setFuture(new HystrixResponseFuture(delegate));
+            return new SofaResponse();
         } catch (IllegalAccessException e) {
             throw new SofaRpcRuntimeException("Hystrix fallback method invoke failed.", e);
         } catch (InvocationTargetException e) {
