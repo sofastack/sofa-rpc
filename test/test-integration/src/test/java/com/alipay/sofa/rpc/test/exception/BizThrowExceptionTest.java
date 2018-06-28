@@ -83,5 +83,12 @@ public class BizThrowExceptionTest extends ActivelyDestroyTest {
             Assert.assertTrue(e instanceof TestException);
             Assert.assertEquals(e.getMessage(), "TestException");
         }
+
+        try {
+            service.throwDeclaredExceptionWithoutReturn();
+        } catch (Throwable e) {
+            Assert.assertTrue(e instanceof TestException);
+            Assert.assertEquals(e.getMessage(), "DeclaredExceptionWithoutReturn");
+        }
     }
 }
