@@ -189,18 +189,19 @@ public class JavassistProxy implements Proxy {
                 ".SERVER_UNDECLARED_ERROR," + " response.getErrorMsg());");
             sb.append("}");
 
+            sb.append("Object ret = response.getAppResponse();");
+            sb.append("if (ret instanceof Throwable) {");
+            sb.append("    throw (Throwable) ret;");
+            sb.append("} else {");
             if (returnType.equals(void.class)) {
                 sb.append(" return;");
             } else {
-                sb.append("Object ret = response.getAppResponse();");
-                sb.append("if (ret instanceof Throwable) {");
-                sb.append("    throw (Throwable) ret;");
-                sb.append("} else {");
-                sb.append("    return " + asArgument(returnType, "ret") + ";");
-                sb.append("}");
+                sb.append(" return " + asArgument(returnType, "ret") + ";");
             }
+            sb.append("}");
 
             sb.append("}");
+
             resultList.add(sb.toString());
             sb.delete(0, sb.length());
         }
