@@ -69,6 +69,6 @@ public class BoltResponseFuture<V> extends AbstractResponseFuture<V> {
 
     @Override
     public void notifyListeners() {
-        throw new UnsupportedOperationException("Not supported, Please use callback function");
+
     }
 }
