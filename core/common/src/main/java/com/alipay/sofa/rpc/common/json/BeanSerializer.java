@@ -243,7 +243,7 @@ public class BeanSerializer {
      */
     public static <T> T deserializeByType(Object src, Class<T> clazz) {
         if (src == null) {
-            return null;
+            return (T) ClassUtils.getDefaultPrimitiveValue(clazz);
         } else if (src instanceof Boolean) {
             return (T) CompatibleTypeUtils.convert(src, clazz);
         } else if (src instanceof Number) {
