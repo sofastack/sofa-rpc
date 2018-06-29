@@ -168,16 +168,16 @@ public class JavassistProxy implements Proxy {
                 " response.getErrorMsg());");
             sb.append("}");
 
+            sb.append("Object ret = response.getAppResponse();");
+            sb.append("if (ret instanceof " + Throwable.class.getName() + ") {");
+            sb.append("    throw (" + Throwable.class.getName() + ") ret;");
+            sb.append("} else {");
             if (returnType.equals(void.class)) {
                 sb.append(" return;");
             } else {
-                sb.append("Object ret = response.getAppResponse();");
-                sb.append("if(ret instanceof " + Throwable.class.getName() + ") {");
-                sb.append("    throw (" + Throwable.class.getName() + ") ret;");
-                sb.append("} else {");
-                sb.append("    return " + asArgument(returnType, "ret") + ";");
-                sb.append("}");
+                sb.append(" return " + asArgument(returnType, "ret") + ";");
             }
+            sb.append("}");
 
             sb.append("}");
             resultList.add(sb.toString());
