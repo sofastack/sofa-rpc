@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.4.2</version>
+    <version>5.4.3-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/alipay/sofa-rpc</url>
