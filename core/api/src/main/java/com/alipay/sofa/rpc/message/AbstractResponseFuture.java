@@ -186,10 +186,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
         boolean res = this.cancle0(mayInterruptIfRunning);
-        try {
-            notifyListeners();
-        } catch (UnsupportedOperationException ignore) {
-        }
+        notifyListeners();
         return res;
     }
 
