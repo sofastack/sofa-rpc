@@ -5,7 +5,7 @@
    
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-parent</artifactId>
-    <version>5.4.0</version>
+    <version>5.4.2</version>
     <packaging>pom</packaging>
     <name>[SOFA] - RPC Framework</name>
     <url>http://www.antfin.com</url>
@@ -117,6 +117,15 @@
             </plugins>
         </pluginManagement>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <addMavenDescriptor>false</addMavenDescriptor>
+                    </archive>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>

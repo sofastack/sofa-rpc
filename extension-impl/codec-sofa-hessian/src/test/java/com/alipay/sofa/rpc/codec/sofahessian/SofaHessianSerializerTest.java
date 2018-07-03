@@ -56,10 +56,15 @@ public class SofaHessianSerializerTest {
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
 
-        dst = (String) serializer.decode(data, "", null);
-        Assert.assertEquals("xxx", dst);
-
         boolean error = false;
+        try {
+            serializer.decode(data, "", null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
         try {
             serializer.decode(data, null, null);
         } catch (Exception e) {

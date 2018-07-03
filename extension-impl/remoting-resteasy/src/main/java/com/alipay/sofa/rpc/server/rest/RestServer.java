@@ -69,11 +69,12 @@ public class RestServer implements Server {
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
+        httpServer = buildServer();
     }
 
     private SofaNettyJaxrsServer buildServer() {
         // 生成Server对象
-        SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer();
+        SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer(serverConfig);
 
         int bossThreads = serverConfig.getIoThreads();
         if (bossThreads > 0) {
@@ -83,9 +84,6 @@ public class RestServer implements Server {
         httpServer.setMaxRequestSize(serverConfig.getPayload());
         httpServer.setHostname(serverConfig.getBoundHost());
         httpServer.setPort(serverConfig.getPort());
-        httpServer.setTelnet(serverConfig.isTelnet());
-        httpServer.setKeepAlive(true); // keepAlive TODO 可配置
-        httpServer.setDaemon(serverConfig.isDaemon());
 
         ResteasyDeployment resteasyDeployment = httpServer.getDeployment();
         resteasyDeployment.start();
@@ -139,7 +137,6 @@ public class RestServer implements Server {
             }
             // 绑定到端口
             try {
-                httpServer = buildServer();
                 httpServer.start();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
@@ -173,7 +170,6 @@ public class RestServer implements Server {
                 LOGGER.info("Stop the http rest server at port {}", serverConfig.getPort());
             }
             httpServer.stop();
-            httpServer = null;
         } catch (Exception e) {
             LOGGER.error("Stop the http rest server at port " + serverConfig.getPort() + " error !", e);
         }
@@ -225,12 +221,17 @@ public class RestServer implements Server {
     @Override
     public void destroy() {
         stop();
+        httpServer = null;
     }
 
     @Override
     public void destroy(DestroyHook hook) {
-        hook.preDestroy();
+        if (hook != null) {
+            hook.preDestroy();
+        }
         destroy();
-        hook.postDestroy();
+        if (hook != null) {
+            hook.postDestroy();
+        }
     }
 }

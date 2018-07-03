@@ -67,6 +67,7 @@ public class BoltConsumerBootstrapTest extends ActivelyDestroyTest {
             .setTimeout(3000);
         try {
             consumerConfig3.refer();
+            Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcRuntimeException);
         }
@@ -85,6 +86,7 @@ public class BoltConsumerBootstrapTest extends ActivelyDestroyTest {
             .setTimeout(3000);
         try {
             consumerConfig5.refer();
+            Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcRuntimeException);
         }

@@ -135,5 +135,7 @@ public class RestTest extends ActivelyDestroyTest {
 
         Assert.assertEquals(helloService.get("zzz"), "serverzzz");
         Assert.assertEquals(helloService.post("zzz", "boddddy"), "server zzzboddddy");
+
+        providerConfig.unExport();
     }
 }

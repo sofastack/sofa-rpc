@@ -196,7 +196,7 @@ public class ExtensionLoader<T> {
         }
     }
 
-    protected void readLine(URL url, String line) throws Throwable {
+    protected void readLine(URL url, String line) {
         String[] aliasAndClassName = parseAliasAndClassName(line);
         if (aliasAndClassName == null || aliasAndClassName.length != 2) {
             return;
@@ -366,7 +366,7 @@ public class ExtensionLoader<T> {
         }
 
         String alias = null;
-        String className = null;
+        String className;
         int i = line.indexOf('=');
         if (i > 0) {
             alias = line.substring(0, i).trim(); // 以代码里的为准

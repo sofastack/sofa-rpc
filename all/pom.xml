@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.4.0</version>
+    <version>5.4.2</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/alipay/sofa-rpc</url>
@@ -36,6 +36,11 @@
             <email>lw111072@antfin.com</email>
             <organization>The Ant Financial</organization>
         </developer>
+        <developer>
+            <name>ZhiYuan Lei</name>
+            <email>zhiyuan.lzy@antfin.com</email>
+            <organization>The Ant Financial</organization>
+        </developer>
     </developers>
 
     <scm>
@@ -53,12 +58,12 @@
         <slf4j.version>1.7.21</slf4j.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <javassist.version>3.20.0-GA</javassist.version>
-        <netty.version>4.1.13.Final</netty.version>
+        <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.0</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
-        <bolt.version>1.4.1</bolt.version>
-        <tracer.version>2.1.0</tracer.version>
-        <lookout.version>1.4.0</lookout.version>
+        <bolt.version>1.4.2</bolt.version>
+        <tracer.version>2.1.1</tracer.version>
+        <lookout.version>1.4.1</lookout.version>
     </properties>
 
     <dependencies>
@@ -131,6 +136,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-bootstrap-http</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-rest</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
@@ -171,6 +181,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-remoting-http</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-resteasy</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
@@ -193,6 +208,12 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
             <version>${bolt.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty-all</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa.common</groupId>
@@ -262,7 +283,7 @@
                 <version>3.0.2</version>
                 <configuration>
                     <archive>
-                        <addMavenDescriptor>false</addMavenDescriptor>
+                        <addMavenDescriptor>true</addMavenDescriptor>
                         <index>true</index>
                         <manifest>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
@@ -325,18 +346,20 @@
                                     <include>com.alipay.sofa:sofa-rpc-api-compatible</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-dubbo</include>
+                                    <include>com.alipay.sofa:sofa-rpc-bootstrap-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-rest</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>
+                                    <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-local</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
+                                    <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
-                                    <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>
@@ -353,24 +376,7 @@
                                         implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
                                     <resource>META-INF/spring.schemas</resource>
                                 </transformer>
-                                <!-- 不包含pom信息 -->
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resource>pom.xml</resource>
-                                </transformer>
-                                <transformer
-                                        implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resource>pom.properties</resource>
-                                </transformer>
                             </transformers>
-                            <filters>
-                                <filter>
-                                    <artifact>*:*</artifact>
-                                    <excludes>
-                                        <exclude>META-INF/maven/**</exclude>
-                                    </excludes>
-                                </filter>
-                            </filters>
                         </configuration>
                     </execution>
                 </executions>

@@ -243,7 +243,7 @@ public class BeanSerializer {
      */
     public static <T> T deserializeByType(Object src, Class<T> clazz) {
         if (src == null) {
-            return null;
+            return (T) ClassUtils.getDefaultPrimitiveValue(clazz);
         } else if (src instanceof Boolean) {
             return (T) CompatibleTypeUtils.convert(src, clazz);
         } else if (src instanceof Number) {
@@ -260,7 +260,7 @@ public class BeanSerializer {
                 if (Map.class.isAssignableFrom(clazz)) { // map转map
                     return (T) mapToMap(srcMap, (Class<? extends Map>) clazz);
                 } else {
-                    return (T) mapToObject(srcMap, clazz); // 自定义对象
+                    return mapToObject(srcMap, clazz); // 自定义对象
                 }
             }
         } else if (src instanceof Collection) {

@@ -85,41 +85,46 @@ public class AsyncChainTest extends ActivelyDestroyTest {
             .setDirectUrl("bolt://127.0.0.1:22223");
         AsyncHelloService asyncHelloService = AConsumer.refer();
 
-        final CountDownLatch latch = new CountDownLatch(1);
-        final Object[] ret = { null };
+        final CountDownLatch[] latch = new CountDownLatch[1];
+        latch[0] = new CountDownLatch(1);
+        final Object[] ret = new Object[1];
 
-        RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback() {
-            @Override
-            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                LOGGER.info("A get result: {}", appResponse);
-                ret[0] = appResponse;
-                latch.countDown();
-            }
-
-            @Override
-            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                LOGGER.info("A get app exception: {}", throwable);
-                latch.countDown();
-            }
-
-            @Override
-            public void onSofaException(SofaRpcException sofaException, String methodName,
-                                        RequestBase request) {
-                LOGGER.info("A get sofa exception: {}", sofaException);
-                latch.countDown();
-            }
-        });
-
+        // 链路异步化调用--正常
+        RpcInvokeContext.getContext().setResponseCallback(buildCallback(ret, latch));
         String ret0 = asyncHelloService.sayHello("xxx", 22);
         Assert.assertNull(ret0); // 第一次返回null
-
         try {
-            latch.await(5000, TimeUnit.MILLISECONDS);
+            latch[0].await(5000, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
         }
+        Assert.assertTrue(ret[0] instanceof String);
 
-        Assert.assertNotNull(ret[0]);
+        // 链路异步化调用--业务异常
+        ret[0] = null;
+        latch[0] = new CountDownLatch(1);
+        RpcInvokeContext.getContext().setResponseCallback(buildCallback(ret, latch));
+        ret0 = asyncHelloService.appException("xxx");
+        Assert.assertNull(ret0); // 第一次返回null
+        try {
+            latch[0].await(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+        Assert.assertTrue(ret[0] instanceof RuntimeException);
 
+        // 链路异步化调用--rpc异常
+        ret[0] = null;
+        latch[0] = new CountDownLatch(1);
+        RpcInvokeContext.getContext().setResponseCallback(buildCallback(ret, latch));
+        ret0 = asyncHelloService.rpcException("xxx");
+        Assert.assertNull(ret0); // 第一次返回null
+        try {
+            latch[0].await(5000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+        Assert.assertTrue(ret[0] instanceof SofaRpcException);
+        Assert.assertTrue(((SofaRpcException) ret[0]).getMessage().contains("bbb"));
+
+        // 非链路异步化调用--普通
         ConsumerConfig<AsyncHelloService> AConsumer2 = new ConsumerConfig<AsyncHelloService>()
             .setInterfaceId(AsyncHelloService.class.getName())
             .setTimeout(3000)
@@ -128,5 +133,31 @@ public class AsyncChainTest extends ActivelyDestroyTest {
 
         String s2 = syncHelloService.sayHello("yyy", 22);
         Assert.assertNotNull(s2);
+    }
+
+    private SofaResponseCallback buildCallback(final Object[] ret, final CountDownLatch[] latch) {
+        return new SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                LOGGER.info("A get result: {}", appResponse);
+                ret[0] = appResponse;
+                latch[0].countDown();
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                LOGGER.info("A get app exception: ", throwable);
+                ret[0] = throwable;
+                latch[0].countDown();
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        RequestBase request) {
+                LOGGER.info("A get sofa exception: ", sofaException);
+                ret[0] = sofaException;
+                latch[0].countDown();
+            }
+        };
     }
 }
