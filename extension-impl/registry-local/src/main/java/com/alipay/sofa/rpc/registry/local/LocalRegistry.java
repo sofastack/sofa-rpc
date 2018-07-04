@@ -379,7 +379,7 @@ public class LocalRegistry extends Registry {
                 LOGGER.debug("{} has differente", entry.getKey());
             }
             ValueDifference<ProviderGroup> differentValue = entry.getValue();
-            ProviderGroup innew = differentValue.rightValue();
+            ProviderGroup innew = differentValue.leftValue();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("new(right) is {}", innew);
             }
