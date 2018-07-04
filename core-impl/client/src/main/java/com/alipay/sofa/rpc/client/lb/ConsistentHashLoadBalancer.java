@@ -29,7 +29,7 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
-import java.util.SortedMap;
+import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -165,19 +165,13 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
          * @param hash the hash
          * @return the provider
          */
-        private ProviderInfo selectForKey(long hash) {
-            ProviderInfo providerInfo = virtualNodes.get(hash);
-            if (providerInfo == null) {
-                SortedMap<Long, ProviderInfo> tailMap = virtualNodes.tailMap(hash);
-                if (tailMap.isEmpty()) {
-                    hash = virtualNodes.firstKey();
-                } else {
-                    hash = tailMap.firstKey();
-                }
-                providerInfo = virtualNodes.get(hash);
-            }
-            return providerInfo;
-        }
+		private ProviderInfo selectForKey(long hash) {
+			Map.Entry<Long, ProviderInfo> entry = virtualNodes.ceilingEntry(hash);
+			if (entry == null) {
+				entry = virtualNodes.firstEntry();
+			}
+			return entry.getValue();
+		}
 
         /**
          * 换算法？ MD5  SHA-1 MurMurHash???
