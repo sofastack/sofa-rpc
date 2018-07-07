@@ -356,7 +356,7 @@ public class LocalRegistry extends Registry {
      *
      * @param newCache the new cache
      */
-    private void notifyConsumer(Map<String, ProviderGroup> newCache) {
+     void notifyConsumer(Map<String, ProviderGroup> newCache) {
         Map<String, ProviderGroup> oldCache = memoryCache;
         // 比较两个map的差异
         MapDifference<String, ProviderGroup> difference =
