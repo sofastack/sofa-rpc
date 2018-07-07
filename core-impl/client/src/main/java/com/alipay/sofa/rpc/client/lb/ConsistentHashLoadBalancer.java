@@ -165,13 +165,13 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
          * @param hash the hash
          * @return the provider
          */
-		private ProviderInfo selectForKey(long hash) {
-			Map.Entry<Long, ProviderInfo> entry = virtualNodes.ceilingEntry(hash);
-			if (entry == null) {
-				entry = virtualNodes.firstEntry();
-			}
-			return entry.getValue();
-		}
+        private ProviderInfo selectForKey(long hash) {
+            Map.Entry<Long, ProviderInfo> entry = virtualNodes.ceilingEntry(hash);
+            if (entry == null) {
+                entry = virtualNodes.firstEntry();
+            }
+            return entry.getValue();
+        }
 
         /**
          * 换算法？ MD5  SHA-1 MurMurHash???
