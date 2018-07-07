@@ -109,8 +109,8 @@ public class LocalRegistryTest {
 
     @Test
     public void testAll() throws Exception {
-    	// test for notifyConsumer
-		notifyConsumerTest();
+        // test for notifyConsumer
+        notifyConsumerTest();
 
         int timeoutPerSub = 5000;
 
@@ -233,30 +233,30 @@ public class LocalRegistryTest {
         Assert.assertTrue(registry.notifyListeners.size() == 0);
     }
 
-	public void notifyConsumerTest() {
-		LocalRegistry registry = new LocalRegistry(new RegistryConfig());
-		ConsumerConfig<?> consumer = new ConsumerConfig();
-		consumer.setInterfaceId("test");
-		LocalRegistryTest.MockProviderInfoListener providerInfoListener = new LocalRegistryTest.MockProviderInfoListener();
-		consumer.setProviderInfoListener(providerInfoListener);
-		registry.subscribe(consumer);
-		String key = LocalRegistryHelper.buildListDataId(consumer, consumer.getProtocol());
+    public void notifyConsumerTest() {
+        LocalRegistry registry = new LocalRegistry(new RegistryConfig());
+        ConsumerConfig<?> consumer = new ConsumerConfig();
+        consumer.setInterfaceId("test");
+        LocalRegistryTest.MockProviderInfoListener providerInfoListener = new LocalRegistryTest.MockProviderInfoListener();
+        consumer.setProviderInfoListener(providerInfoListener);
+        registry.subscribe(consumer);
+        String key = LocalRegistryHelper.buildListDataId(consumer, consumer.getProtocol());
 
-		registry.memoryCache.put(key, new ProviderGroup());
+        registry.memoryCache.put(key, new ProviderGroup());
 
-		Map<String, ProviderGroup> newCache = new HashMap<String, ProviderGroup>();
-		ProviderGroup newProviderGroup = new ProviderGroup();
-		ProviderInfo providerInfo=new ProviderInfo().setHost("0.0.0.0");
-		newProviderGroup.add(providerInfo);
-		newCache.put(key, newProviderGroup);
+        Map<String, ProviderGroup> newCache = new HashMap<String, ProviderGroup>();
+        ProviderGroup newProviderGroup = new ProviderGroup();
+        ProviderInfo providerInfo = new ProviderInfo().setHost("0.0.0.0");
+        newProviderGroup.add(providerInfo);
+        newCache.put(key, newProviderGroup);
 
-		registry.notifyConsumer(newCache);
+        registry.notifyConsumer(newCache);
 
-		Map<String, ProviderGroup> ps = providerInfoListener.getData();
-		Assert.assertTrue(ps.size() > 0);
-		Assert.assertNotNull(ps.get(RpcConstants.ADDRESS_DEFAULT_GROUP));
-		Assert.assertTrue(ps.get(RpcConstants.ADDRESS_DEFAULT_GROUP).size() == 1);
-	}
+        Map<String, ProviderGroup> ps = providerInfoListener.getData();
+        Assert.assertTrue(ps.size() > 0);
+        Assert.assertNotNull(ps.get(RpcConstants.ADDRESS_DEFAULT_GROUP));
+        Assert.assertTrue(ps.get(RpcConstants.ADDRESS_DEFAULT_GROUP).size() == 1);
+    }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
 
