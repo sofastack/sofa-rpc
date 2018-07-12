@@ -16,18 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import org.apache.curator.framework.recipes.cache.ChildData;
-
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
@@ -47,6 +35,17 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import org.apache.curator.framework.recipes.cache.ChildData;
+
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Helper for ZookeeperRegistry
@@ -94,7 +93,8 @@ public class ZookeeperRegistryHelper {
                     .append(
                         getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()))
                     .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
-                        providerConfig.getSerialization()));
+                        providerConfig.getSerialization()))
+                    .append(convertMap2Pair(providerConfig.getParameters()));
                 addCommonAttrs(sb);
                 urls.add(sb.toString());
             }
@@ -121,7 +121,8 @@ public class ZookeeperRegistryHelper {
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
                 consumerConfig.getSerialization()))
-            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()));
+            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
+            .append(convertMap2Pair(consumerConfig.getParameters()));
         addCommonAttrs(sb);
         return sb.toString();
     }
@@ -150,6 +151,25 @@ public class ZookeeperRegistryHelper {
         sb.append(getKeyPairs("pid", RpcRuntimeContext.PID));
         sb.append(getKeyPairs("language", "java"));
         sb.append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION + ""));
+    }
+
+    /**
+     * 转换 map to url pair
+     *
+     * @param map 属性
+     */
+    private static String convertMap2Pair(Map<String, String> map) {
+
+        if (CommonUtils.isEmpty(map)) {
+            return StringUtils.EMPTY;
+        }
+
+        StringBuilder sb = new StringBuilder(128);
+        for (Map.Entry<String, String> entry : map.entrySet()) {
+            sb.append(getKeyPairs(entry.getKey(), entry.getValue()));
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -255,9 +275,9 @@ public class ZookeeperRegistryHelper {
     /**
      * Convert child data to attribute.
      *
-     * @param overridePath   the override path
-     * @param childData      the child data
-     * @param removeType     is remove type
+     * @param overridePath    the override path
+     * @param childData       the child data
+     * @param removeType      is remove type
      * @param interfaceConfig register provider/consumer config
      * @return the attribute
      * @throws Exception decode exception
