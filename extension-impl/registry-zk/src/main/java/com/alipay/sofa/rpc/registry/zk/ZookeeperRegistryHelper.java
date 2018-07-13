@@ -84,10 +84,6 @@ public class ZookeeperRegistryHelper {
                     .append(
                         getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
                     .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_TIME,
-                        providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_TIME)))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
-                        providerConfig.getParameter(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT)))
                     .append(getKeyPairs("accepts", server.getAccepts()))
                     .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
                     .append(
