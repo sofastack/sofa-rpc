@@ -16,16 +16,21 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
+import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
  * @version $Id: ZookeeperRegistryHelperTest.java, v 0.1 2018年04月25日 下午7:09 LiWei.Liengen Exp $
  */
@@ -111,5 +116,32 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(null, providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
         Assert.assertEquals(ProviderStatus.AVAILABLE, providerInfo.getStatus());
         Assert.assertEquals(600, providerInfo.getWeight());
+    }
+
+    @Test
+    public void testCustomParams() {
+        ProviderConfig providerConfig = new ProviderConfig();
+        Map<String, String> map = new HashMap<String, String>();
+        map.put("x", "y");
+        map.put("a", "b");
+        providerConfig.setParameters(map);
+
+        ServerConfig server = new ServerConfig();
+        providerConfig.setServer(server);
+        List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls(providerConfig);
+        System.out.println(urls);
+
+        Assert.assertNotNull(urls);
+        Assert.assertEquals(1, urls.size());
+
+        String url = urls.get(0);
+
+        ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
+
+        System.out.println(providerInfo);
+
+        Assert.assertEquals("b", providerInfo.getStaticAttr("a"));
+        Assert.assertEquals("y", providerInfo.getStaticAttr("x"));
+
     }
 }
