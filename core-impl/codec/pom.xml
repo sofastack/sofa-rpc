@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-core-impl</artifactId>
-        <version>5.4.3-SNAPSHOT</version>
+        <version>5.4.3</version>
     </parent>
 
     <artifactId>sofa-rpc-codec</artifactId>

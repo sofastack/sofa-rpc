@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-bom</artifactId>
-    <version>5.4.3-SNAPSHOT</version>
+    <version>5.4.3</version>
     <packaging>pom</packaging>
 
     <properties>
@@ -22,7 +22,7 @@
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo_version>2.4.10</dubbo_version>
         <!-- serialization -->
-        <hessian.version>3.3.0</hessian.version>
+        <hessian.version>3.3.2</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.1.0</protobuf.version>
         <jackson.version>2.7.9</jackson.version>
