@@ -82,6 +82,25 @@ public class ExtensionLoaderTest {
         Assert.assertNotNull(extensionClass);
         Assert.assertTrue(extensionClass.getOrder() == 123);
 
+        loader = new ExtensionLoader<Filter>(Filter.class, false, new TestErrorLoadListener());
+        loader.loadFromFile("META-INF/ext3/");
+        Assert.assertFalse(loader.getAllExtensions().isEmpty());
+        extensionClass = loader.getExtensionClass("rightxx0");
+        Assert.assertNull(extensionClass);
+        extensionClass = loader.getExtensionClass("rightxx1");
+        Assert.assertNotNull(extensionClass);
+        Assert.assertTrue(extensionClass.getOrder() == 128);
+
+        loader = new ExtensionLoader<Filter>(Filter.class, false, new TestLoadListener());
+        loader.loadFromFile("META-INF/ext4/");
+        Assert.assertFalse(loader.getAllExtensions().isEmpty());
+        extensionClass = loader.getExtensionClass("rightxx0");
+        Assert.assertNotNull(extensionClass);
+        Assert.assertTrue(extensionClass.getOrder() == 123);
+        extensionClass = loader.getExtensionClass("rightxx1");
+        Assert.assertNotNull(extensionClass);
+        Assert.assertTrue(extensionClass.getOrder() == 128);
+
     }
 
     @Test
