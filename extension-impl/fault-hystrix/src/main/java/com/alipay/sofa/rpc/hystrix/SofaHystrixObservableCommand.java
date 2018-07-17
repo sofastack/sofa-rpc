@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
@@ -37,7 +38,8 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
     private ResponseFuture responseFuture;
 
     public SofaHystrixObservableCommand(FilterInvoker invoker, SofaRequest request) {
-        super(SetterFactoryLoader.load(invoker.getConfig()).createObservableSetter(invoker, request));
+        super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createObservableSetter(invoker,
+            request));
         this.invoker = invoker;
         this.request = request;
     }
@@ -56,7 +58,7 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
         return Observable.fromCallable(new Callable<FallbackFactory>() {
             @Override
             public FallbackFactory call() throws Exception {
-                return FallbackFactoryLoader.load(invoker.getConfig());
+                return SofaHystrixConfig.loadFallbackFactory((ConsumerConfig) invoker.getConfig());
             }
         }).flatMap(new Func1<FallbackFactory, Observable<?>>() {
             @Override

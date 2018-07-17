@@ -85,8 +85,9 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
             .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()))
-            .setParameter(HystrixConstants.SOFA_HYSTRIX_FALLBACK, HelloServiceFallback.class.getName());
+            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+
+        SofaHystrixConfig.registerFallback(consumerConfig, new HelloServiceFallback());
 
         HelloService helloService = consumerConfig.refer();
 
@@ -107,8 +108,9 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
             .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()))
-            .setParameter(HystrixConstants.SOFA_HYSTRIX_FALLBACK_FACTORY, HelloServiceFallbackFactory.class.getName());
+            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+
+        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
 
         HelloService helloService = consumerConfig.refer();
 

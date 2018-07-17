@@ -18,11 +18,6 @@ package com.alipay.sofa.rpc.hystrix;
 
 public class HystrixConstants {
 
-    public static final String SOFA_HYSTRIX_ENABLED          = "sofa.hystrix.enabled";
+    public static final String SOFA_HYSTRIX_ENABLED = "sofa.hystrix.enabled";
 
-    public static final String SOFA_HYSTRIX_SETTER_FACTORY   = "sofa.hystrix.setter-factory";
-
-    public static final String SOFA_HYSTRIX_FALLBACK_FACTORY = "sofa.hystrix.fallback-factory";
-
-    public static final String SOFA_HYSTRIX_FALLBACK         = "sofa.hystrix.fallback";
 }
