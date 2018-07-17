@@ -65,7 +65,6 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
                     return Observable.fromCallable(new Callable<Object>() {
                         @Override
                         public Object call() throws Exception {
-                            System.out.println(fallbackFactory);
                             return fallbackFactory.create(null, getExecutionException());
                         }
                     }).map(new Func1<Object, Object>() {

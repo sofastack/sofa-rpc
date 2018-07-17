@@ -28,12 +28,12 @@ import java.lang.reflect.InvocationTargetException;
 
 public class SofaHystrixCommand extends HystrixCommand<SofaResponse> {
 
-    protected RpcInternalContext rpcInternalContext;
-    protected RpcInvokeContext   rpcInvokeContext;
-    protected FilterInvoker      invoker;
-    protected SofaRequest        request;
+    private RpcInternalContext rpcInternalContext;
+    private RpcInvokeContext   rpcInvokeContext;
+    protected FilterInvoker    invoker;
+    protected SofaRequest      request;
 
-    protected SofaHystrixCommand(FilterInvoker invoker, SofaRequest request) {
+    public SofaHystrixCommand(FilterInvoker invoker, SofaRequest request) {
         super(SetterFactoryLoader.load(invoker.getConfig()).createSetter(invoker, request));
         this.rpcInternalContext = RpcInternalContext.peekContext();
         this.rpcInvokeContext = RpcInvokeContext.peekContext();

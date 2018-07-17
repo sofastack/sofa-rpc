@@ -79,30 +79,6 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
     }
 
     @Test
-    public void testHystrixCallFailedFallback() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
-        providerConfig.export();
-
-        // 希望第一阶段执行失败时也会 fallback
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setDirectUrl("bolt://127.0.0.1:22222")
-            .setFilterRef(Arrays.asList(new HystrixFilter(), new MockInvokeFailedFilter()))
-            .setParameter(HystrixConstants.SOFA_HYSTRIX_FALLBACK, HelloServiceFallback.class.getName());
-
-        HelloService helloService = consumerConfig.refer();
-
-        try {
-            helloService.sayHello("abc", 24);
-            String result = (String) SofaResponseFuture.getResponse(10000, true);
-            Assert.assertEquals("fallback abc from server! age: 24", result);
-        } finally {
-            consumerConfig.unRefer();
-            providerConfig.unExport();
-        }
-    }
-
-    @Test
     public void testHystrixFallback() throws InterruptedException {
         ProviderConfig<HelloService> providerConfig = defaultServer(2000);
         providerConfig.export();
