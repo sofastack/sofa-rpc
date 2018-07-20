@@ -33,6 +33,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class BusinessPool {
 
     public static synchronized ThreadPoolExecutor initPool(ServerTransportConfig transportConfig) {
@@ -61,6 +62,7 @@ public class BusinessPool {
         return new ThreadPoolExecutor(minPoolSize, maxPoolSize, aliveTime, TimeUnit.MILLISECONDS, configQueue);
     }
 
+    // TODO: 2018/7/6 by zmyer
     public static ThreadPoolExecutor initPool(ServerConfig serverConfig) {
         int minPoolSize = serverConfig.getCoreThreads();
         int maxPoolSize = serverConfig.getMaxThreads();
@@ -68,7 +70,7 @@ public class BusinessPool {
         int aliveTime = serverConfig.getAliveTime();
 
         BlockingQueue<Runnable> poolQueue = queueSize > 0 ? new LinkedBlockingQueue<Runnable>(
-            queueSize) : new SynchronousQueue<Runnable>();
+                queueSize) : new SynchronousQueue<Runnable>();
 
         return new ThreadPoolExecutor(minPoolSize, maxPoolSize, aliveTime, TimeUnit.MILLISECONDS, poolQueue);
     }

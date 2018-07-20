@@ -30,14 +30,15 @@ import java.util.Map;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRequest extends RequestBase {
 
-    private static final long   serialVersionUID = 7329530374415722876L;
+    private static final long serialVersionUID = 7329530374415722876L;
 
     /**
      * 对方应用名称：例如`A进程`调`B进程`(B里面有B1,B2两个应用)，这里传递的是B1。
      */
-    private String              targetAppName;
+    private String targetAppName;
 
     /**
      * 扩展属性 extensional properties
@@ -130,27 +131,27 @@ public class SofaRequest extends RequestBase {
     /**
      * 方法对象(缓存一些，减少反射，服务端使用）
      */
-    private transient Method               method;
+    private transient Method method;
 
     /**
      * 接口名
      */
-    private transient String               interfaceName;
+    private transient String interfaceName;
 
     /**
      * 序列化工厂类型：决定是否泛化调用（客户端使用）
      */
-    private transient int                  serializeFactoryType;
+    private transient int serializeFactoryType;
 
     /**
      * 序列化类型（客户端使用）
      */
-    private transient byte                 serializeType;
+    private transient byte serializeType;
 
     /**
      * 调用类型（客户端使用）
      */
-    private transient String               invokeType;
+    private transient String invokeType;
     /**
      * 用户层服务回调类，调用级别（客户端使用）
      */
@@ -159,7 +160,7 @@ public class SofaRequest extends RequestBase {
     /**
      * 用户层请求超时，调用级别（客户端使用）
      */
-    private transient Integer              timeout;
+    private transient Integer timeout;
 
     /**
      * Gets method.
@@ -304,7 +305,7 @@ public class SofaRequest extends RequestBase {
      */
     public boolean isAsync() {
         return invokeType != null && (RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)
-            || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType));
+                || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType));
 
     }
 }

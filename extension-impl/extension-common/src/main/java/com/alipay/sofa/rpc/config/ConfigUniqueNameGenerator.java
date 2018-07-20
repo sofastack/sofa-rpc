@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class ConfigUniqueNameGenerator {
 
     /**
@@ -35,7 +36,7 @@ public class ConfigUniqueNameGenerator {
         // 加上 1.0 是为了兼容之前的版本
         String uniqueId = interfaceConfig.getUniqueId();
         return interfaceConfig.getInterfaceId() + ":" + interfaceConfig.getVersion()
-            + (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
+                + (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
     }
 
     /**

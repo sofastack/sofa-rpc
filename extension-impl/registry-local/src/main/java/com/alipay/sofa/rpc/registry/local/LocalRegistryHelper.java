@@ -51,6 +51,7 @@ import java.util.Set;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/9 by zmyer
 public class LocalRegistryHelper {
 
     /**
@@ -80,11 +81,11 @@ public class LocalRegistryHelper {
      */
     public static ProviderInfo convertProviderToProviderInfo(ProviderConfig config, ServerConfig server) {
         ProviderInfo providerInfo = new ProviderInfo()
-            .setPort(server.getPort())
-            .setWeight(config.getWeight())
-            .setSerializationType(config.getSerialization())
-            .setProtocolType(server.getProtocol())
-            .setPath(server.getContextPath());
+                .setPort(server.getPort())
+                .setWeight(config.getWeight())
+                .setSerializationType(config.getSerialization())
+                .setProtocolType(server.getProtocol())
+                .setPath(server.getContextPath());
         String host = server.getHost();
         if (NetUtils.isLocalHost(host) || NetUtils.isAnyHost(host)) {
             host = SystemInfo.getLocalHost();
@@ -118,6 +119,7 @@ public class LocalRegistryHelper {
         return RpcRuntimeContext.now();
     }
 
+    // TODO: 2018/7/9 by zmyer
     static synchronized boolean backup(String address, Map<String, ProviderGroup> memoryCache) {
         // 先写一个lock文件，跨进程的锁
         File lockFile = new File(address + ".lock");
@@ -199,7 +201,7 @@ public class LocalRegistryHelper {
                 if (!deleted) {
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("Lock file create by this thread, but failed to delete it," +
-                            " may be the elapsed time of this backup is too long");
+                                " may be the elapsed time of this backup is too long");
                     }
                 }
             }
@@ -261,7 +263,7 @@ public class LocalRegistryHelper {
      */
     static String buildListDataId(AbstractInterfaceConfig config, String protocol) {
         if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol)
-            || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
+                || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
             return ConfigUniqueNameGenerator.getUniqueName(config) + "@DEFAULT";
         } else {
             return ConfigUniqueNameGenerator.getUniqueName(config) + "@" + protocol;

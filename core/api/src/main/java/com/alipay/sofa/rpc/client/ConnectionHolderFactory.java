@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ConnectionHolderFactory {
 
     /**
@@ -35,16 +36,17 @@ public class ConnectionHolderFactory {
      * @param consumerBootstrap 服务消费者配置
      * @return ConnectionHolder
      */
+    // TODO: 2018/6/22 by zmyer
     public static ConnectionHolder getConnectionHolder(ConsumerBootstrap consumerBootstrap) {
         try {
             String connectionHolder = consumerBootstrap.getConsumerConfig().getConnectionHolder();
             ExtensionClass<ConnectionHolder> ext = ExtensionLoaderFactory
-                .getExtensionLoader(ConnectionHolder.class).getExtensionClass(connectionHolder);
+                    .getExtensionLoader(ConnectionHolder.class).getExtensionClass(connectionHolder);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.connectionHolder", connectionHolder,
-                    "Unsupported connectionHolder of client!");
+                        "Unsupported connectionHolder of client!");
             }
-            return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
+            return ext.getExtInstance(new Class[]{ ConsumerBootstrap.class }, new Object[]{ consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {

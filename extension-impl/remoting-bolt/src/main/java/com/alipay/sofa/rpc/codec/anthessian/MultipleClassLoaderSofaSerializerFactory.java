@@ -29,15 +29,17 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class MultipleClassLoaderSofaSerializerFactory extends SingleClassLoaderSofaSerializerFactory {
 
     /**
      * logger for this class 
      */
-    private static final Logger                                                   LOGGER                    = LoggerFactory
-                                                                                                                .getLogger(MultipleClassLoaderSofaSerializerFactory.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(MultipleClassLoaderSofaSerializerFactory.class);
 
-    private final ConcurrentMap<String, ConcurrentMap<ClassLoader, Deserializer>> cachedTypeDeserializerMap = new ConcurrentHashMap<String, ConcurrentMap<ClassLoader, Deserializer>>();
+    private final ConcurrentMap<String, ConcurrentMap<ClassLoader, Deserializer>> cachedTypeDeserializerMap =
+            new ConcurrentHashMap<String, ConcurrentMap<ClassLoader, Deserializer>>();
 
     @Override
     protected Deserializer getDeserializerFromCachedType(String type) {
@@ -53,7 +55,7 @@ public class MultipleClassLoaderSofaSerializerFactory extends SingleClassLoaderS
     protected void putDeserializerToCachedType(String type, Deserializer deserializer) {
 
         ConcurrentMap<ClassLoader, Deserializer> concurrentMap = cachedTypeDeserializerMap
-            .get(type);
+                .get(type);
 
         if (concurrentMap == null) {
             ConcurrentMap<ClassLoader, Deserializer> newMap = new ConcurrentHashMap<ClassLoader, Deserializer>();

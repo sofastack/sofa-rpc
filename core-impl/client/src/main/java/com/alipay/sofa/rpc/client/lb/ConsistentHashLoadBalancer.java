@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extension("consistentHash")
 public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
@@ -63,8 +64,8 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
         int hashcode = providerInfos.hashCode(); // 判断是否同样的服务列表
         Selector selector = selectorCache.get(key);
         if (selector == null // 原来没有
-            ||
-            selector.getHashCode() != hashcode) { // 或者服务列表已经变化
+                ||
+                selector.getHashCode() != hashcode) { // 或者服务列表已经变化
             selector = new Selector(interfaceId, method, providerInfos, hashcode);
             selectorCache.put(key, selector);
         }
@@ -74,22 +75,23 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
     /**
      * 选择器
      */
+    // TODO: 2018/7/6 by zmyer
     private static class Selector {
 
         /**
          * The Hashcode.
          */
-        private final int                         hashcode;
+        private final int hashcode;
 
         /**
          * The Interface id.
          */
-        private final String                      interfaceId;
+        private final String interfaceId;
 
         /**
          * The Method name.
          */
-        private final String                      method;
+        private final String method;
 
         /**
          * 虚拟节点
@@ -185,6 +187,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
          * @param value the value
          * @return the byte [ ]
          */
+        // TODO: 2018/7/6 by zmyer
         private byte[] messageDigest(String value) {
             MessageDigest md5;
             try {
@@ -208,9 +211,9 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
          */
         private long hash(byte[] digest, int index) {
             long f = ((long) (digest[3 + index * 4] & 0xFF) << 24)
-                | ((long) (digest[2 + index * 4] & 0xFF) << 16)
-                | ((long) (digest[1 + index * 4] & 0xFF) << 8)
-                | (digest[index * 4] & 0xFF);
+                    | ((long) (digest[2 + index * 4] & 0xFF) << 16)
+                    | ((long) (digest[1 + index * 4] & 0xFF) << 8)
+                    | (digest[index * 4] & 0xFF);
             return f & 0xFFFFFFFFL;
         }
 

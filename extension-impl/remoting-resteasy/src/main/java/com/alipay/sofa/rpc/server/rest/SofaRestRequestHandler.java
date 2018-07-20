@@ -48,9 +48,10 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @see org.jboss.resteasy.plugins.server.netty.RequestHandler
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
     protected final RequestDispatcher dispatcher;
-    private final static Logger       logger = Logger.getLogger(SofaRestRequestHandler.class);
+    private final static Logger logger = Logger.getLogger(SofaRestRequestHandler.class);
 
     public SofaRestRequestHandler(RequestDispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -94,7 +95,7 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                         RpcInternalContext.getContext().setRemoteAddress(remoteip, 0);
                     } else { // request取不到就从channel里取
                         RpcInternalContext.getContext().setRemoteAddress(
-                            (InetSocketAddress) ctx.channel().remoteAddress());
+                                (InetSocketAddress) ctx.channel().remoteAddress());
                     }
                     // 设置本地地址
                     RpcInternalContext.getContext().setLocalAddress((InetSocketAddress) ctx.channel().localAddress());
@@ -136,7 +137,7 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
-        throws Exception {
+            throws Exception {
         // handle the case of to big requests.
         if (e.getCause() instanceof TooLongFrameException) {
             DefaultHttpResponse response = new DefaultHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE);

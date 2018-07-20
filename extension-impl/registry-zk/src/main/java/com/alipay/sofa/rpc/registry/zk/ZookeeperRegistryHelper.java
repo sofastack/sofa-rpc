@@ -49,6 +49,7 @@ public class ZookeeperRegistryHelper {
      * @param providerConfig the ProviderConfig
      * @return the url list
      */
+    // TODO: 2018/7/9 by zmyer
     static List<String> convertProviderToUrls(ProviderConfig providerConfig) {
         List<ServerConfig> servers = providerConfig.getServer();
         if (servers != null && !servers.isEmpty()) {
@@ -89,6 +90,7 @@ public class ZookeeperRegistryHelper {
      * @param consumerConfig the ConsumerConfig
      * @return the url list
      */
+    // TODO: 2018/7/9 by zmyer
     static String convertConsumerToUrl(ConsumerConfig consumerConfig) {
         StringBuilder sb = new StringBuilder(200);
         String host = SystemInfo.getLocalHost();
@@ -129,6 +131,7 @@ public class ZookeeperRegistryHelper {
      *
      * @param sb 属性
      */
+    // TODO: 2018/7/9 by zmyer
     private static void addCommonAttrs(StringBuilder sb) {
         sb.append(getKeyPairs("pid", RpcRuntimeContext.PID));
         sb.append(getKeyPairs("language", "java"));
@@ -171,14 +174,17 @@ public class ZookeeperRegistryHelper {
         return ProviderInfo.valueOf(url);
     }
 
+    // TODO: 2018/7/9 by zmyer
     static String buildProviderPath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/providers";
     }
 
+    // TODO: 2018/7/9 by zmyer
     static String buildConsumerPath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/consumers";
     }
 
+    // TODO: 2018/7/9 by zmyer
     static String buildConfigPath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/configs";
     }

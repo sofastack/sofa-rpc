@@ -21,6 +21,7 @@ package com.alipay.sofa.rpc.base;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public interface Destroyable {
 
     /**
@@ -30,7 +31,7 @@ public interface Destroyable {
 
     /**
      * Do destroy with hook.
-     * 
+     *
      * @param hook DestroyHook
      */
     public void destroy(DestroyHook hook);
@@ -38,6 +39,7 @@ public interface Destroyable {
     /**
      * 销毁钩子
      */
+    // TODO: 2018/7/6 by zmyer
     interface DestroyHook {
         /**
          * 销毁前要做的事情

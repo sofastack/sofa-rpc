@@ -45,6 +45,7 @@ import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_PROTOBUF;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
     /**
@@ -55,28 +56,31 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
     /**
      * 缓存序列化类型
      */
-    private Byte   serializeType;
+    private Byte serializeType;
 
     /**
      * 构造执行链
      *
      * @param bootstrap 调用端配置
      */
+    // TODO: 2018/7/6 by zmyer
     public DefaultClientProxyInvoker(ConsumerBootstrap bootstrap) {
         super(bootstrap);
         cacheCommonData();
     }
 
+    // TODO: 2018/7/6 by zmyer
     private void cacheCommonData() {
         // 缓存数据
         this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
         this.serializeType = parseSerializeType(consumerConfig.getSerialization());
     }
 
+    // TODO: 2018/7/6 by zmyer
     private Byte parseSerializeType(String serialization) {
         Byte serializeType;
         if (SERIALIZE_HESSIAN.equals(serialization)
-            || SERIALIZE_HESSIAN2.equals(serialization)) {
+                || SERIALIZE_HESSIAN2.equals(serialization)) {
             serializeType = RemotingConstants.SERIALIZE_CODE_HESSIAN;
         } else if (SERIALIZE_PROTOBUF.equals(serialization)) {
             serializeType = RemotingConstants.SERIALIZE_CODE_PROTOBUF;
@@ -111,7 +115,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
                 request.setSofaResponseCallback(responseCallback);
                 invokeCtx.setResponseCallback(null); // 一次性用完
                 invokeCtx.put(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN,
-                    isSendableResponseCallback(responseCallback));
+                        isSendableResponseCallback(responseCallback));
             }
             // 如果用户设置了调用级别超时时间
             Integer timeout = invokeCtx.getTimeout();

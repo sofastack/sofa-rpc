@@ -49,6 +49,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class RpcRuntimeContext {
 
     /**
@@ -226,6 +227,7 @@ public class RpcRuntimeContext {
      *
      * @param providerConfig the provider config
      */
+    // TODO: 2018/7/9 by zmyer
     public static void cacheProviderConfig(ProviderBootstrap providerConfig) {
         EXPORTED_PROVIDER_CONFIGS.add(providerConfig);
     }

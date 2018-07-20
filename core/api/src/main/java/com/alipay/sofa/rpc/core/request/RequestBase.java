@@ -26,19 +26,20 @@ import java.io.Serializable;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class RequestBase implements Serializable {
 
-    private static final long  serialVersionUID = -7323141575870688636L;
+    private static final long serialVersionUID = -7323141575870688636L;
 
     /**
      * 方法名
      */
-    private String             methodName;
+    private String methodName;
 
     /**
      * 方法参数签名invoke method arguments name
      */
-    private String[]           methodArgSigs;
+    private String[] methodArgSigs;
 
     /**
      * 方法参数值 invoke method arguments object
@@ -48,7 +49,7 @@ public abstract class RequestBase implements Serializable {
     /**
      * 服务唯一名称 traget service unique name
      */
-    private String             targetServiceUniqueName;
+    private String targetServiceUniqueName;
 
     public String getMethodName() {
         return methodName;
@@ -62,6 +63,7 @@ public abstract class RequestBase implements Serializable {
         return methodArgSigs;
     }
 
+    // TODO: 2018/6/22 by zmyer
     public String getTargetServiceUniqueName() {
         return targetServiceUniqueName;
     }

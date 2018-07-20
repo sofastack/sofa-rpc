@@ -32,13 +32,14 @@ import com.caucho.hessian.io.SerializerFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
 
-    /** 
+    /**
      * logger for this class 
      */
     private static final Logger LOGGER = LoggerFactory
-                                           .getLogger(SingleClassLoaderSofaSerializerFactory.class);
+            .getLogger(SingleClassLoaderSofaSerializerFactory.class);
 
     @Override
     protected Serializer getDefaultSerializer(Class cl) {
@@ -77,7 +78,7 @@ public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
             } catch (Exception e) {
                 if (e instanceof ClassNotFoundException) {
                     LOGGER.errorWithApp(null, LogCodes.getLog(LogCodes.ERROR_DECODE_CLASS_NOT_FOUND,
-                        getClass().getName(), type, Thread.currentThread().getContextClassLoader()));
+                            getClass().getName(), type, Thread.currentThread().getContextClassLoader()));
                 } else {
                     LOGGER.errorWithApp(null, e.toString(), e);
                 }

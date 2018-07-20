@@ -30,6 +30,7 @@ import java.util.Arrays;
  * @see Extension
  * @see Extensible
  */
+// TODO: 2018/6/22 by zmyer
 public class ExtensionClass<T> implements Sortable {
 
     /**
@@ -39,35 +40,35 @@ public class ExtensionClass<T> implements Sortable {
     /**
      * 扩展别名,不是provider uniqueId
      */
-    protected final String             alias;
+    protected final String alias;
     /**
      * 扩展编码，必须唯一
      */
-    protected byte                     code;
+    protected byte code;
     /**
      * 是否单例
      */
-    protected boolean                  singleton;
+    protected boolean singleton;
 
     /**
      * 扩展点排序值，大的优先级高
      */
-    protected int                      order;
+    protected int order;
 
     /**
      * 是否覆盖其它低{@link #order}的同名扩展
      */
-    protected boolean                  override;
+    protected boolean override;
 
     /**
      * 排斥其它扩展，可以排斥掉其它低{@link #order}的扩展
      */
-    protected String[]                 rejection;
+    protected String[] rejection;
 
     /**
      * 服务端实例对象（只在是单例的时候保留）
      */
-    private volatile transient T       instance;
+    private volatile transient T instance;
 
     /**
      * 构造函数
@@ -85,6 +86,7 @@ public class ExtensionClass<T> implements Sortable {
      *
      * @return 扩展点对象实例
      */
+    // TODO: 2018/7/6 by zmyer
     public T getExtInstance() {
         return getExtInstance(null, null);
     }
@@ -96,6 +98,7 @@ public class ExtensionClass<T> implements Sortable {
      * @param args     构造函数参数值
      * @return 扩展点对象实例 ext instance
      */
+    // TODO: 2018/7/6 by zmyer
     public T getExtInstance(Class[] argTypes, Object[] args) {
         if (clazz != null) {
             try {
@@ -238,14 +241,14 @@ public class ExtensionClass<T> implements Sortable {
     @Override
     public String toString() {
         return "ExtensionClass{" +
-            "clazz=" + clazz +
-            ", alias='" + alias + '\'' +
-            ", code=" + code +
-            ", singleton=" + singleton +
-            ", order=" + order +
-            ", override=" + override +
-            ", rejection=" + Arrays.toString(rejection) +
-            ", instance=" + instance +
-            '}';
+                "clazz=" + clazz +
+                ", alias='" + alias + '\'' +
+                ", code=" + code +
+                ", singleton=" + singleton +
+                ", order=" + order +
+                ", override=" + override +
+                ", rejection=" + Arrays.toString(rejection) +
+                ", instance=" + instance +
+                '}';
     }
 }

@@ -28,10 +28,11 @@ import java.util.Arrays;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class UnsafeByteArrayOutputStream extends OutputStream {
     protected byte[] mBuffer;
 
-    protected int    mCount;
+    protected int mCount;
 
     public UnsafeByteArrayOutputStream() {
         this(32);

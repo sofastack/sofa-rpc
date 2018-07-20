@@ -32,6 +32,7 @@ import java.util.Set;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/9 by zmyer
 public class CompatibleTypeUtils {
 
     private CompatibleTypeUtils() {
@@ -58,7 +59,7 @@ public class CompatibleTypeUtils {
             if (char.class.equals(type) || Character.class.equals(type)) {
                 if (string.length() != 1) {
                     throw new IllegalArgumentException(String.format("CAN NOT convert String(%s) to char!" +
-                        " when convert String to char, the String MUST only 1 char.", string));
+                            " when convert String to char, the String MUST only 1 char.", string));
                 }
                 return string.charAt(0);
             } else if (type.isEnum()) {
@@ -86,7 +87,7 @@ public class CompatibleTypeUtils {
                     return DateUtils.strToDate(string, DateUtils.DATE_FORMAT_TIME);
                 } catch (ParseException e) {
                     throw new IllegalStateException("Failed to parse date " + value + " by format " +
-                        DateUtils.DATE_FORMAT_TIME + ", cause: " + e.getMessage(), e);
+                            DateUtils.DATE_FORMAT_TIME + ", cause: " + e.getMessage(), e);
                 }
             } else if (type == Class.class) {
                 return ClassTypeUtils.getClass((String) value);

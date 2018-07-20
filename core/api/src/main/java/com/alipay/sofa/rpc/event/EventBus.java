@@ -31,9 +31,10 @@ import java.util.concurrent.CopyOnWriteArraySet;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class EventBus {
 
-    private static final Logger  LOGGER           = LoggerFactory.getLogger(EventBus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
 
     /**
      * 是否允许携带上下文附件，关闭后只能传递"."开头的key，"_" 开头的Key将不被保持和传递。<br>
@@ -63,7 +64,8 @@ public class EventBus {
     /**
      * 某中事件的订阅者
      */
-    private final static ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>> SUBSCRIBER_MAP = new ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>>();
+    private final static ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>> SUBSCRIBER_MAP =
+            new ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>>();
 
     /**
      * 注册一个订阅者
@@ -118,12 +120,12 @@ public class EventBus {
                     handleEvent(subscriber, event);
                 } else { // 异步
                     AsyncRuntime.getAsyncThreadPool().execute(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                handleEvent(subscriber, event);
-                            }
-                        });
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    handleEvent(subscriber, event);
+                                }
+                            });
                 }
             }
         }

@@ -30,6 +30,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ReflectUtils {
 
     /**
@@ -47,14 +48,14 @@ public class ReflectUtils {
 
     private static boolean isPrimitiveType(Class<?> clazz) {
         return clazz.isPrimitive() // 基本类型
-            // 基本类型的对象
-            ||
-            Boolean.class == clazz
-            || Character.class == clazz
-            || Number.class.isAssignableFrom(clazz)
-            // string 或者 date
-            || String.class == clazz
-            || Date.class.isAssignableFrom(clazz);
+                // 基本类型的对象
+                ||
+                Boolean.class == clazz
+                || Character.class == clazz
+                || Number.class.isAssignableFrom(clazz)
+                // string 或者 date
+                || String.class == clazz
+                || Date.class.isAssignableFrom(clazz);
     }
 
     /**
@@ -100,7 +101,7 @@ public class ReflectUtils {
      * @throws NoSuchMethodException  如果找不到匹配的方法
      */
     public static Method getMethod(String clazzName, String methodName, String[] argsType)
-        throws ClassNotFoundException, NoSuchMethodException {
+            throws ClassNotFoundException, NoSuchMethodException {
         StringBuilder sb = new StringBuilder(256);
         sb.append(clazzName).append("#").append(methodName).append("(");
         if (argsType != null && argsType.length > 0) {
@@ -137,7 +138,7 @@ public class ReflectUtils {
      * @throws NoSuchMethodException  如果找不到匹配的方法
      */
     public static Method getMethod(Class clazz, String methodName, String[] argsType)
-        throws NoSuchMethodException, ClassNotFoundException {
+            throws NoSuchMethodException, ClassNotFoundException {
         return getMethod(clazz.getCanonicalName(), methodName, argsType);
     }
 
@@ -145,7 +146,8 @@ public class ReflectUtils {
      * 方法对象缓存 {接口名#方法名:Method}<br>
      * 用于用户没传了参数列表
      */
-    private final static ConcurrentHashMap<String, Class[]> METHOD_ARGS_TYPE_CACHE = new ConcurrentHashMap<String, Class[]>();
+    private final static ConcurrentHashMap<String, Class[]> METHOD_ARGS_TYPE_CACHE =
+            new ConcurrentHashMap<String, Class[]>();
 
     /**
      * 缓存接口的方法，重载方法会被覆盖
@@ -154,6 +156,7 @@ public class ReflectUtils {
      * @param methodName  方法名
      * @param argsType    参数列表
      */
+    // TODO: 2018/7/6 by zmyer
     public static void cacheMethodArgsType(String interfaceId, String methodName, Class[] argsType) {
         String key = interfaceId + "#" + methodName;
         METHOD_ARGS_TYPE_CACHE.put(key, argsType);
@@ -181,7 +184,7 @@ public class ReflectUtils {
      * @throws NoSuchMethodException 没找到
      */
     public static Method getPropertySetterMethod(Class clazz, String property, Class propertyClazz)
-        throws NoSuchMethodException {
+            throws NoSuchMethodException {
         String methodName = "set" + property.substring(0, 1).toUpperCase() + property.substring(1);
         try {
             Method method = clazz.getMethod(methodName, propertyClazz);
@@ -217,24 +220,24 @@ public class ReflectUtils {
 
     protected static boolean isBeanPropertyReadMethod(Method method) {
         return method != null
-            && Modifier.isPublic(method.getModifiers())
-            && !Modifier.isStatic(method.getModifiers())
-            && method.getReturnType() != void.class
-            && method.getDeclaringClass() != Object.class
-            && method.getParameterTypes().length == 0
-            && (method.getName().startsWith("get") || method.getName().startsWith("is"))
-            && (!"get".equals(method.getName()) && !"is".equals(method.getName())); // 排除就叫get和is的方法
+                && Modifier.isPublic(method.getModifiers())
+                && !Modifier.isStatic(method.getModifiers())
+                && method.getReturnType() != void.class
+                && method.getDeclaringClass() != Object.class
+                && method.getParameterTypes().length == 0
+                && (method.getName().startsWith("get") || method.getName().startsWith("is"))
+                && (!"get".equals(method.getName()) && !"is".equals(method.getName())); // 排除就叫get和is的方法
     }
 
     protected static String getPropertyNameFromBeanReadMethod(Method method) {
         if (isBeanPropertyReadMethod(method)) {
             if (method.getName().startsWith("get")) {
                 return method.getName().substring(3, 4).toLowerCase()
-                    + method.getName().substring(4);
+                        + method.getName().substring(4);
             }
             if (method.getName().startsWith("is")) {
                 return method.getName().substring(2, 3).toLowerCase()
-                    + method.getName().substring(3);
+                        + method.getName().substring(3);
             }
         }
         return null;
@@ -242,18 +245,18 @@ public class ReflectUtils {
 
     protected static boolean isBeanPropertyWriteMethod(Method method) {
         return method != null
-            && Modifier.isPublic(method.getModifiers())
-            && !Modifier.isStatic(method.getModifiers())
-            && method.getDeclaringClass() != Object.class
-            && method.getParameterTypes().length == 1
-            && method.getName().startsWith("set")
-            && !"set".equals(method.getName()); // 排除就叫set的方法
+                && Modifier.isPublic(method.getModifiers())
+                && !Modifier.isStatic(method.getModifiers())
+                && method.getDeclaringClass() != Object.class
+                && method.getParameterTypes().length == 1
+                && method.getName().startsWith("set")
+                && !"set".equals(method.getName()); // 排除就叫set的方法
     }
 
     protected static boolean isPublicInstanceField(Field field) {
         return Modifier.isPublic(field.getModifiers())
-            && !Modifier.isStatic(field.getModifiers())
-            && !Modifier.isFinal(field.getModifiers())
-            && !field.isSynthetic();
+                && !Modifier.isStatic(field.getModifiers())
+                && !Modifier.isFinal(field.getModifiers())
+                && !field.isSynthetic();
     }
 }

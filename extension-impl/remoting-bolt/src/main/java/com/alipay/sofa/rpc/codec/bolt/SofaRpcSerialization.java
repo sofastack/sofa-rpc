@@ -67,6 +67,7 @@ import java.util.Map;
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SofaRpcSerialization.class);

@@ -60,6 +60,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class AbstractCluster extends Cluster {
 
     /**
@@ -79,30 +80,30 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 是否已启动(已建立连接)
      */
-    protected volatile boolean initialized   = false;
+    protected volatile boolean initialized = false;
 
     /**
      * 是否已经销毁（已经销毁不能再继续使用）
      */
-    protected volatile boolean destroyed     = false;
+    protected volatile boolean destroyed = false;
 
     /**
      * 当前Client正在发送的调用数量
      */
-    protected AtomicInteger    countOfInvoke = new AtomicInteger(0);
+    protected AtomicInteger countOfInvoke = new AtomicInteger(0);
 
     /**
      * 路由列表
      */
-    protected RouterChain      routerChain;
+    protected RouterChain routerChain;
     /**
      * 负载均衡接口
      */
-    protected LoadBalancer     loadBalancer;
+    protected LoadBalancer loadBalancer;
     /**
      * 地址保持器
      */
-    protected AddressHolder    addressHolder;
+    protected AddressHolder addressHolder;
     /**
      * 连接管理器
      */
@@ -110,8 +111,9 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 过滤器链
      */
-    protected FilterChain      filterChain;
+    protected FilterChain filterChain;
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public synchronized void init() {
         if (initialized) { // 已初始化
@@ -127,7 +129,7 @@ public abstract class AbstractCluster extends Cluster {
         connectionHolder = ConnectionHolderFactory.getConnectionHolder(consumerBootstrap);
         // 构造Filter链,最底层是调用过滤器
         this.filterChain = FilterChain.buildConsumerChain(this.consumerConfig,
-            new ConsumerInvoker(consumerBootstrap));
+                new ConsumerInvoker(consumerBootstrap));
 
         if (consumerConfig.isLazy()) { // 延迟连接
             if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
@@ -156,8 +158,8 @@ public abstract class AbstractCluster extends Cluster {
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
             throw new SofaRpcRuntimeException("The consumer is depend on alive provider " +
-                "and there is no alive provider, you can ignore it " +
-                "by ConsumerConfig.setCheck(boolean) (default is false)");
+                    "and there is no alive provider, you can ignore it " +
+                    "by ConsumerConfig.setCheck(boolean) (default is false)");
         }
     }
 
@@ -204,7 +206,7 @@ public abstract class AbstractCluster extends Cluster {
             if (CommonUtils.isNotEmpty(oldProviderGroup.getProviderInfos())) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
-                        "providers has been closed, or this consumer has been add to blacklist");
+                            "providers has been closed, or this consumer has been add to blacklist");
                     closeTransports();
                 }
             }
@@ -213,11 +215,13 @@ public abstract class AbstractCluster extends Cluster {
             connectionHolder.updateProviders(providerGroup);
         }
         if (EventBus.isEnable(ProviderInfoUpdateEvent.class)) {
-            ProviderInfoUpdateEvent event = new ProviderInfoUpdateEvent(consumerConfig, oldProviderGroup, providerGroup);
+            ProviderInfoUpdateEvent event = new ProviderInfoUpdateEvent(consumerConfig, oldProviderGroup,
+                    providerGroup);
             EventBus.post(event);
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void updateAllProviders(List<ProviderGroup> providerGroups) {
         List<ProviderGroup> oldProviderGroups = new ArrayList<ProviderGroup>(addressHolder.getProviderGroups());
@@ -234,7 +238,7 @@ public abstract class AbstractCluster extends Cluster {
             if (CommonUtils.isNotEmpty(currentProviderList)) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
-                        "providers has been closed, or this consumer has been add to blacklist");
+                            "providers has been closed, or this consumer has been add to blacklist");
                     closeTransports();
                 }
             }
@@ -244,7 +248,7 @@ public abstract class AbstractCluster extends Cluster {
         }
         if (EventBus.isEnable(ProviderInfoUpdateAllEvent.class)) {
             ProviderInfoUpdateAllEvent event = new ProviderInfoUpdateAllEvent(consumerConfig, oldProviderGroups,
-                providerGroups);
+                    providerGroups);
             EventBus.post(event);
         }
     }
@@ -254,6 +258,7 @@ public abstract class AbstractCluster extends Cluster {
      *
      * @param providerGroup 服务列表分组
      */
+    // TODO: 2018/7/6 by zmyer
     protected void checkProviderInfo(ProviderGroup providerGroup) {
         List<ProviderInfo> providerInfos = providerGroup == null ? null : providerGroup.getProviderInfos();
         if (CommonUtils.isEmpty(providerInfos)) {
@@ -265,8 +270,8 @@ public abstract class AbstractCluster extends Cluster {
             if (!StringUtils.equals(providerInfo.getProtocolType(), consumerConfig.getProtocol())) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(),
-                        "Unmatched protocol between consumer [{}] and provider [{}].",
-                        consumerConfig.getProtocol(), providerInfo.getProtocolType());
+                            "Unmatched protocol between consumer [{}] and provider [{}].",
+                            consumerConfig.getProtocol(), providerInfo.getProtocolType());
                 }
             }
             if (StringUtils.isEmpty(providerInfo.getSerializationType())) {
@@ -275,6 +280,7 @@ public abstract class AbstractCluster extends Cluster {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         SofaResponse response = null;
@@ -308,6 +314,7 @@ public abstract class AbstractCluster extends Cluster {
      * @param providerInfo 服务端
      * @param request      请求对象
      */
+    // TODO: 2018/6/22 by zmyer
     protected void checkProviderVersion(ProviderInfo providerInfo, SofaRequest request) {
 
     }
@@ -336,8 +343,9 @@ public abstract class AbstractCluster extends Cluster {
      * @return 一个可用的provider
      * @throws SofaRpcException rpc异常
      */
+    // TODO: 2018/7/6 by zmyer
     protected ProviderInfo select(SofaRequest message, List<ProviderInfo> invokedProviderInfos)
-        throws SofaRpcException {
+            throws SofaRpcException {
         // 粘滞连接，当前连接可用
         if (consumerConfig.isSticky()) {
             if (lastProviderInfo != null) {
@@ -354,7 +362,8 @@ public abstract class AbstractCluster extends Cluster {
         if (CommonUtils.isEmpty(providerInfos)) {
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         }
-        if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
+        if (CommonUtils.isNotEmpty(invokedProviderInfos) &&
+                providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
             providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
         }
 
@@ -397,12 +406,13 @@ public abstract class AbstractCluster extends Cluster {
      * @param targetIP the target ip
      * @return the provider
      */
+    // TODO: 2018/7/6 by zmyer
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
         ProviderInfo tp = ProviderInfo.valueOf(targetIP);
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getHost().equals(tp.getHost())
-                && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
-                && providerInfo.getPort() == tp.getPort()) {
+                    && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
+                    && providerInfo.getPort() == tp.getPort()) {
                 return providerInfo;
             }
         }
@@ -436,6 +446,7 @@ public abstract class AbstractCluster extends Cluster {
      * @param providerInfo 指定Provider
      * @return 一个可用的transport或者null
      */
+    // TODO: 2018/7/6 by zmyer
     protected ClientTransport selectByProvider(SofaRequest message, ProviderInfo providerInfo) {
         ClientTransport transport = connectionHolder.getAvailableClientTransport(providerInfo);
         if (transport != null) {
@@ -456,6 +467,7 @@ public abstract class AbstractCluster extends Cluster {
      * @param providerInfo 服务端
      * @param message      请求对象
      */
+    // TODO: 2018/7/6 by zmyer
     protected void checkAlias(ProviderInfo providerInfo, SofaRequest message) {
 
     }
@@ -468,11 +480,13 @@ public abstract class AbstractCluster extends Cluster {
      * @return 执行后返回的响应
      * @throws SofaRpcException 请求RPC异常
      */
+    // TODO: 2018/7/6 by zmyer
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         RpcInternalContext.getContext().setProviderInfo(providerInfo);
         return filterChain.invoke(request);
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public SofaResponse sendMsg(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         ClientTransport clientTransport = connectionHolder.getAvailableClientTransport(providerInfo);
@@ -491,8 +505,9 @@ public abstract class AbstractCluster extends Cluster {
      * @return 调用结果
      * @throws SofaRpcException rpc异常
      */
+    // TODO: 2018/6/22 by zmyer
     protected SofaResponse doSendMsg(ProviderInfo providerInfo, ClientTransport transport,
-                                     SofaRequest request) throws SofaRpcException {
+            SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
         // 添加调用的服务端远程地址
         RpcInternalContext.getContext().setRemoteAddress(providerInfo.getHost(), providerInfo.getPort());
@@ -533,7 +548,7 @@ public abstract class AbstractCluster extends Cluster {
                 SofaResponseCallback sofaResponseCallback = request.getSofaResponseCallback();
                 if (sofaResponseCallback == null) {
                     SofaResponseCallback methodResponseCallback = consumerConfig
-                        .getMethodOnreturn(request.getMethodName());
+                            .getMethodOnreturn(request.getMethodName());
                     if (methodResponseCallback != null) { // 方法的Callback
                         request.setSofaResponseCallback(methodResponseCallback);
                     }
@@ -567,6 +582,7 @@ public abstract class AbstractCluster extends Cluster {
      * @param providerInfo   服务提供者信息
      * @return 调用超时
      */
+    // TODO: 2018/6/22 by zmyer
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
@@ -585,11 +601,13 @@ public abstract class AbstractCluster extends Cluster {
         return timeout;
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void destroy() {
         destroy(null);
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void destroy(DestroyHook hook) {
         if (destroyed) {
@@ -621,6 +639,7 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 优雅关闭的钩子
      */
+    // TODO: 2018/7/6 by zmyer
     protected class GracefulDestroyHook implements DestroyHook {
         @Override
         public void preDestroy() {
@@ -631,7 +650,7 @@ public abstract class AbstractCluster extends Cluster {
                 long start = RpcRuntimeContext.now();
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("There are {} outstanding call in client, will close transports util return",
-                        count);
+                            count);
                 }
                 while (countOfInvoke.get() > 0 && RpcRuntimeContext.now() - start < timeout) { // 等待返回结果
                     try {
@@ -737,6 +756,7 @@ public abstract class AbstractCluster extends Cluster {
      *
      * @return 当前的Provider列表
      */
+    // TODO: 2018/7/6 by zmyer
     public Collection<ProviderInfo> currentProviderList() {
         List<ProviderInfo> providerInfos = new ArrayList<ProviderInfo>();
         List<ProviderGroup> providerGroups = addressHolder.getProviderGroups();

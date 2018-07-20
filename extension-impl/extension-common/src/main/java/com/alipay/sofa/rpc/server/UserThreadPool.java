@@ -25,9 +25,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * 给用户配置的自定义业务线程池
  * <p>
- * 
+ *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class UserThreadPool {
 
     /**
@@ -35,43 +36,43 @@ public class UserThreadPool {
      *
      * @see ThreadPoolExecutor#corePoolSize
      */
-    private int                           corePoolSize    = 10;
+    private int corePoolSize = 10;
     /**
      * 最大线程池
      *
      * @see ThreadPoolExecutor#maximumPoolSize
      */
-    private int                           maximumPoolSize = 100;
+    private int maximumPoolSize = 100;
     /**
      * 线程回收时间（毫秒）
      *
      * @see ThreadPoolExecutor#keepAliveTime
      */
-    private int                           keepAliveTime   = 300000;
+    private int keepAliveTime = 300000;
     /**
      * 队列大小
      *
      * @see ThreadPoolExecutor#getQueue()
      */
-    private int                           queueSize       = 0;
+    private int queueSize = 0;
     /**
      * 线程名字
      *
      * @see ThreadPoolExecutor#threadFactory#threadPoolName
      */
-    private String                        threadPoolName  = "SofaUserProcessor";
+    private String threadPoolName = "SofaUserProcessor";
     /**
      * 是否关闭核心线程池
      *
      * @see ThreadPoolExecutor#allowCoreThreadTimeOut
      */
-    private boolean                       allowCoreThreadTimeOut;
+    private boolean allowCoreThreadTimeOut;
     /**
      * 是否初始化核心线程池
      *
      * @see ThreadPoolExecutor#prestartAllCoreThreads
      */
-    private boolean                       prestartAllCoreThreads;
+    private boolean prestartAllCoreThreads;
 
     /**
      * 线程池
@@ -83,7 +84,7 @@ public class UserThreadPool {
      */
     public void init() {
         executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
-            ThreadPoolUtils.buildQueue(queueSize), new NamedThreadFactory(threadPoolName));
+                ThreadPoolUtils.buildQueue(queueSize), new NamedThreadFactory(threadPoolName));
         if (allowCoreThreadTimeOut) {
             executor.allowCoreThreadTimeOut(true);
         }

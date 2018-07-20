@@ -30,6 +30,7 @@ import java.util.List;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extensible(singleton = false)
 @ThreadSafe
 public abstract class LoadBalancer {
@@ -42,13 +43,14 @@ public abstract class LoadBalancer {
     /**
      * 服务消费者配置
      */
-    protected final ConsumerConfig    consumerConfig;
+    protected final ConsumerConfig consumerConfig;
 
     /**
      * 构造函数
      *
      * @param consumerBootstrap 服务消费者配置
      */
+    // TODO: 2018/7/6 by zmyer
     public LoadBalancer(ConsumerBootstrap consumerBootstrap) {
         this.consumerBootstrap = consumerBootstrap;
         this.consumerConfig = consumerBootstrap != null ? consumerBootstrap.getConsumerConfig() : null;
@@ -72,5 +74,5 @@ public abstract class LoadBalancer {
      * @throws SofaRpcException rpc异常
      */
     public abstract ProviderInfo select(SofaRequest request, List<ProviderInfo> providerInfos)
-        throws SofaRpcException;
+            throws SofaRpcException;
 }

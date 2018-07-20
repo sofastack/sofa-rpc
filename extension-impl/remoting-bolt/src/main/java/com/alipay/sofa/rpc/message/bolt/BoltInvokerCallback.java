@@ -41,16 +41,17 @@ import java.util.concurrent.Executor;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class BoltInvokerCallback implements InvokeCallback {
 
     /**
      * 服务消费者配置
      */
-    protected final ConsumerConfig       consumerConfig;
+    protected final ConsumerConfig consumerConfig;
     /**
      * 服务提供者信息
      */
-    protected final ProviderInfo         providerInfo;
+    protected final ProviderInfo providerInfo;
     /**
      * 请求里的实际回调对象
      */
@@ -58,15 +59,15 @@ public class BoltInvokerCallback implements InvokeCallback {
     /**
      * 请求
      */
-    protected final SofaRequest          request;
+    protected final SofaRequest request;
     /**
      * 请求运行时的ClassLoader
      */
-    protected ClassLoader                classLoader;
+    protected ClassLoader classLoader;
     /**
      * 线程池
      */
-    protected RpcInternalContext         context;
+    protected RpcInternalContext context;
 
     /**
      * Instantiates a new Bolt invoker callback.
@@ -78,9 +79,10 @@ public class BoltInvokerCallback implements InvokeCallback {
      * @param context        the context
      * @param classLoader    the class loader
      */
+    // TODO: 2018/6/22 by zmyer
     public BoltInvokerCallback(ConsumerConfig consumerConfig, ProviderInfo providerInfo,
-                               SofaResponseCallback listener, SofaRequest request,
-                               RpcInternalContext context, ClassLoader classLoader) {
+            SofaResponseCallback listener, SofaRequest request,
+            RpcInternalContext context, ClassLoader classLoader) {
         this.consumerConfig = consumerConfig;
         this.providerInfo = providerInfo;
         this.callback = listener;
@@ -104,7 +106,7 @@ public class BoltInvokerCallback implements InvokeCallback {
 
             if (EventBus.isEnable(ClientAsyncReceiveEvent.class)) {
                 EventBus.post(new ClientAsyncReceiveEvent(consumerConfig, providerInfo,
-                    request, response, null));
+                        request, response, null));
             }
 
             if (RpcInvokeContext.isBaggageEnable()) {
@@ -128,7 +130,7 @@ public class BoltInvokerCallback implements InvokeCallback {
             Object appResp = response.getAppResponse();
             if (response.isError()) { // rpc层异常
                 SofaRpcException sofaRpcException = new SofaRpcException(
-                    RpcErrorType.SERVER_UNDECLARED_ERROR, response.getErrorMsg());
+                        RpcErrorType.SERVER_UNDECLARED_ERROR, response.getErrorMsg());
                 callback.onSofaException(sofaRpcException, request.getMethodName(), request);
             } else if (appResp instanceof Throwable) { // 业务层异常
                 throwable = (Throwable) appResp;
@@ -160,7 +162,7 @@ public class BoltInvokerCallback implements InvokeCallback {
 
             if (EventBus.isEnable(ClientAsyncReceiveEvent.class)) {
                 EventBus.post(new ClientAsyncReceiveEvent(consumerConfig, providerInfo,
-                    request, null, e));
+                        request, null, e));
             }
 
             // do async filter after respond server
@@ -170,7 +172,7 @@ public class BoltInvokerCallback implements InvokeCallback {
             }
 
             SofaRpcException sofaRpcException = new SofaRpcException(
-                RpcErrorType.SERVER_UNDECLARED_ERROR, e.getMessage(), e);
+                    RpcErrorType.SERVER_UNDECLARED_ERROR, e.getMessage(), e);
             callback.onSofaException(sofaRpcException, request.getMethodName(), request);
         } finally {
             if (EventBus.isEnable(ClientEndInvokeEvent.class)) {

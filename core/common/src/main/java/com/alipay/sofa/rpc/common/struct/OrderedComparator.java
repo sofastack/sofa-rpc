@@ -27,6 +27,7 @@ import java.util.Comparator;
  * @param <T> the type parameter
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class OrderedComparator<T extends Sortable> implements Comparator<T>, Serializable {
 
     /**
@@ -54,6 +55,6 @@ public class OrderedComparator<T extends Sortable> implements Comparator<T>, Ser
     public int compare(T o1, T o2) {
         // order一样的情况下，顺序不变
         return order ? o1.getOrder() - o2.getOrder() :
-            o2.getOrder() - o1.getOrder();
+                o2.getOrder() - o1.getOrder();
     }
 }

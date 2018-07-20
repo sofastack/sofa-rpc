@@ -33,6 +33,7 @@ import static com.alipay.sofa.rpc.common.utils.ClassLoaderUtils.getCurrentClassL
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public final class ClassUtils {
 
     /**
@@ -129,6 +130,7 @@ public final class ClassUtils {
      * @return 对象实例
      * @throws SofaRpcRuntimeException 没有找到方法，或者无法处理，或者初始化方法异常等
      */
+    // TODO: 2018/7/9 by zmyer
     public static <T> T newInstance(Class<T> clazz) throws SofaRpcRuntimeException {
         if (clazz == Short.class || clazz == short.class) {
             return (T) Short.valueOf((short) 0);
@@ -163,7 +165,7 @@ public final class ClassUtils {
             Constructor<T>[] constructors = (Constructor<T>[]) clazz.getDeclaredConstructors();
             if (constructors == null || constructors.length == 0) {
                 throw new SofaRpcRuntimeException("The " + clazz.getCanonicalName()
-                    + " has no default constructor!");
+                        + " has no default constructor!");
             }
             Constructor<T> constructor = constructors[0];
             if (constructor.getParameterTypes().length > 0) {
@@ -201,8 +203,9 @@ public final class ClassUtils {
      * @return 对象实例
      * @throws SofaRpcRuntimeException 没有找到方法，或者无法处理，或者初始化方法异常等
      */
+    // TODO: 2018/7/6 by zmyer
     public static <T> T newInstanceWithArgs(Class<T> clazz, Class<?>[] argTypes, Object[] args)
-        throws SofaRpcRuntimeException {
+            throws SofaRpcRuntimeException {
         if (CommonUtils.isEmpty(argTypes)) {
             return newInstance(clazz);
         }
@@ -215,7 +218,7 @@ public final class ClassUtils {
                 Constructor<T>[] constructors = (Constructor<T>[]) clazz.getDeclaredConstructors();
                 if (constructors == null || constructors.length == 0) {
                     throw new SofaRpcRuntimeException("The " + clazz.getCanonicalName()
-                        + " has no constructor with argTypes :" + Arrays.toString(argTypes));
+                            + " has no constructor with argTypes :" + Arrays.toString(argTypes));
                 }
                 Constructor<T> constructor = null;
                 for (Constructor<T> c : constructors) {
@@ -236,7 +239,7 @@ public final class ClassUtils {
                 }
                 if (constructor == null) {
                     throw new SofaRpcRuntimeException("The " + clazz.getCanonicalName()
-                        + " has no constructor with argTypes :" + Arrays.toString(argTypes));
+                            + " has no constructor with argTypes :" + Arrays.toString(argTypes));
                 } else {
                     constructor.setAccessible(true);
                     Object[] newArgs = new Object[args.length + 1];

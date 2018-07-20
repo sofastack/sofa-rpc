@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.core.request.RequestBase;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public interface SofaResponseCallback<T> {
     /**
      * SOFA RPC will callback this method when server return response success
@@ -51,5 +52,5 @@ public interface SofaResponseCallback<T> {
      * @param request the invoked request object
      */
     public void onSofaException(SofaRpcException sofaException, String methodName,
-                                RequestBase request);
+            RequestBase request);
 }

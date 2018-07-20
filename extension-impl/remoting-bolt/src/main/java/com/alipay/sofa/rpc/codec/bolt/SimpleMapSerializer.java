@@ -35,6 +35,7 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SimpleMapSerializer {
 
     /**
@@ -90,7 +91,7 @@ public class SimpleMapSerializer {
 
     /**
      * 写一个String
-     * 
+     *
      * @param out 输出流
      * @param str 字符串
      * @throws IOException 写入异常
@@ -109,7 +110,7 @@ public class SimpleMapSerializer {
 
     /**
      * 读取一个字符串
-     * 
+     *
      * @param in 输入流程
      * @return 字符串
      * @throws IOException 读取异常
@@ -129,7 +130,7 @@ public class SimpleMapSerializer {
 
     /**
      * OutputStream.write(int) 仅 write 第一个 byte, 而不是整个 int
-     * 
+     *
      * @param out OutputStream
      * @param i int value
      * @throws IOException if an I/O error occurs.
@@ -143,15 +144,15 @@ public class SimpleMapSerializer {
 
     /**
      * InputStream.read 仅 read 一个 byte
-     * 
+     *
      * @param in InputStream
      * @return int value
      * @throws IOException if an I/O error occurs.
      */
     public int readInt(InputStream in) throws IOException {
         return ((byte) in.read() & 0xff) << 24
-            | ((byte) in.read() & 0xff) << 16
-            | ((byte) in.read() & 0xff) << 8
-            | (byte) in.read() & 0xff;
+                | ((byte) in.read() & 0xff) << 16
+                | ((byte) in.read() & 0xff) << 8
+                | (byte) in.read() & 0xff;
     }
 }

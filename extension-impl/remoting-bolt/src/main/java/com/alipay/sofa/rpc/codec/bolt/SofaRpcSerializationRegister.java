@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRpcSerializationRegister {
 
     private static final SofaRpcSerialization RPC_SERIALIZATION = new SofaRpcSerialization();
@@ -33,11 +34,11 @@ public class SofaRpcSerializationRegister {
         // 注册序列化器到bolt
         if (CustomSerializerManager.getCustomSerializer(SofaRequest.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaRequest.class.getName(),
-                RPC_SERIALIZATION);
+                    RPC_SERIALIZATION);
         }
         if (CustomSerializerManager.getCustomSerializer(SofaResponse.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaResponse.class.getName(),
-                RPC_SERIALIZATION);
+                    RPC_SERIALIZATION);
         }
     }
 }

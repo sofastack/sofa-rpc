@@ -52,28 +52,28 @@ public class LocalRegistry extends Registry {
     /**
      * Logger
      */
-    private static final Logger                 LOGGER          = LoggerFactory.getLogger(LocalRegistry.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalRegistry.class);
 
     /**
      * 定时加载
      */
-    private ScheduledService                    scheduledExecutorService;
+    private ScheduledService scheduledExecutorService;
 
     /**
      * 内存里的服务列表 {service : [provider...]}
      */
-    protected Map<String, ProviderGroup>        memoryCache     = new ConcurrentHashMap<String, ProviderGroup>();
+    protected Map<String, ProviderGroup> memoryCache = new ConcurrentHashMap<String, ProviderGroup>();
 
     /**
      * 内存发生了变化，如果为true，则将触发写入文件动作
      */
-    private boolean                             needBackup      = false;
+    private boolean needBackup = false;
 
     /**
      * 是否订阅通知（即扫描文件变化），默认为true
      * 如果FileRegistry是被动加载（例如作为注册中心备份的）的，建议false，防止重复通知
      */
-    private boolean                             subscribe       = true;
+    private boolean subscribe = true;
 
     /**
      * 订阅者通知列表（key为订阅者关键字，value为ConsumerConfig列表）
@@ -83,16 +83,16 @@ public class LocalRegistry extends Registry {
     /**
      * 最后一次扫描文件时间
      */
-    private long                                lastLoadTime;
+    private long lastLoadTime;
 
     /**
      * 扫描周期，毫秒
      */
-    private int                                 scanPeriod      = 2000;
+    private int scanPeriod = 2000;
     /**
      * 输出和备份文件目录
      */
-    private String                              regFile;
+    private String regFile;
 
     /**
      * 注册中心配置
@@ -103,6 +103,7 @@ public class LocalRegistry extends Registry {
         super(registryConfig);
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void init() {
         this.regFile = registryConfig.getFile();
@@ -113,7 +114,7 @@ public class LocalRegistry extends Registry {
         lastLoadTime = LocalRegistryHelper.loadBackupFileToCache(regFile, memoryCache);
         // 开始扫描
         this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.local.scan.period"),
-            scanPeriod);
+                scanPeriod);
         Runnable task = new Runnable() {
             @Override
             public void run() {
@@ -142,18 +143,19 @@ public class LocalRegistry extends Registry {
         };
         //启动扫描线程
         scheduledExecutorService = new ScheduledService("LocalRegistry-Back-Load",
-            ScheduledService.MODE_FIXEDDELAY,
-            task, //定时load任务
-            scanPeriod, // 延迟一个周期
-            scanPeriod, // 一个周期循环
-            TimeUnit.MILLISECONDS
-                ).start();
+                ScheduledService.MODE_FIXEDDELAY,
+                task, //定时load任务
+                scanPeriod, // 延迟一个周期
+                scanPeriod, // 一个周期循环
+                TimeUnit.MILLISECONDS
+        ).start();
 
     }
 
     /**
      * 写文件
      */
+    // TODO: 2018/7/9 by zmyer
     protected void doWriteFile() {
         if (needBackup) {
             if (LocalRegistryHelper.backup(regFile, memoryCache)) {
@@ -162,11 +164,13 @@ public class LocalRegistry extends Registry {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public boolean start() {
         return false;
     }
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void register(ProviderConfig config) {
         String appName = config.getAppName();
@@ -203,6 +207,7 @@ public class LocalRegistry extends Registry {
      * @param serviceName  服务关键字
      * @param providerInfo 服务提供者数据
      */
+    // TODO: 2018/7/9 by zmyer
     protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo) {
         if (LOGGER.isInfoEnabled(appName)) {
             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, serviceName));
@@ -225,6 +230,7 @@ public class LocalRegistry extends Registry {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void unRegister(ProviderConfig config) {
         String appName = config.getAppName();
@@ -246,11 +252,11 @@ public class LocalRegistry extends Registry {
                     doUnRegister(serviceName, providerInfo);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
+                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "1"));
                     }
                 } catch (Exception e) {
                     LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB, serviceName, "0"),
-                        e);
+                            e);
                 }
             }
         }
@@ -356,6 +362,7 @@ public class LocalRegistry extends Registry {
      *
      * @param newCache the new cache
      */
+    // TODO: 2018/7/6 by zmyer
     private void notifyConsumer(Map<String, ProviderGroup> newCache) {
         Map<String, ProviderGroup> oldCache = memoryCache;
         // 比较两个map的差异

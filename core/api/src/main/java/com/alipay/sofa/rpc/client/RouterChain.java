@@ -43,29 +43,32 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class RouterChain {
 
     /**
      * LOGGER
      */
-    private static final Logger                                            LOGGER                = LoggerFactory
-                                                                                                     .getLogger(RouterChain.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
+    private final static ConcurrentHashMap<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES =
+            new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
+    private final static ConcurrentHashMap<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES =
+            new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Router>                           EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Router> EXTENSION_LOADER = buildLoader();
 
+    // TODO: 2018/7/6 by zmyer
     private static ExtensionLoader<Router> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Router.class, new ExtensionLoaderListener<Router>() {
             @Override
@@ -82,7 +85,7 @@ public class RouterChain {
                     }
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Extension of interface " + Router.class + ", " + implClass + "(" + alias +
-                            ") will auto active");
+                                ") will auto active");
                     }
                 }
             }
@@ -94,6 +97,7 @@ public class RouterChain {
      */
     private final List<Router> routers;
 
+    // TODO: 2018/6/22 by zmyer
     public RouterChain(List<Router> actualRouters, ConsumerBootstrap consumerBootstrap) {
         this.routers = new ArrayList<Router>();
         if (CommonUtils.isNotEmpty(actualRouters)) {
@@ -113,6 +117,7 @@ public class RouterChain {
      * @param providerInfos providers（<b>当前可用</b>的服务Provider列表）
      * @return 路由匹配的服务Provider列表
      */
+    // TODO: 2018/7/6 by zmyer
     public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
         for (Router router : routers) {
             providerInfos = router.route(request, providerInfos);
@@ -126,10 +131,11 @@ public class RouterChain {
      * @param consumerBootstrap 服务端订阅者配置
      * @return 路由链
      */
+    // TODO: 2018/6/22 by zmyer
     public static RouterChain buildConsumerChain(ConsumerBootstrap consumerBootstrap) {
         ConsumerConfig<?> consumerConfig = consumerBootstrap.getConsumerConfig();
         List<Router> customRouters = consumerConfig.getRouterRef() == null ? new ArrayList<Router>()
-            : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
+                : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
         // 先解析是否有特殊处理
         HashSet<String> excludes = parseExcludeRouter(customRouters);
 
@@ -174,6 +180,7 @@ public class RouterChain {
      * @param customRouters 自定义Router
      * @return 是否排除
      */
+    // TODO: 2018/6/22 by zmyer
     private static HashSet<String> parseExcludeRouter(List<Router> customRouters) {
         HashSet<String> excludeKeys = new HashSet<String>();
         if (CommonUtils.isNotEmpty(customRouters)) {
@@ -184,7 +191,7 @@ public class RouterChain {
                     String excludeName = excludeRouter.getExcludeName();
                     if (StringUtils.isNotEmpty(excludeName)) {
                         String excludeRouterName = startsWithExcludePrefix(excludeName) ? excludeName.substring(1)
-                            : excludeName;
+                                : excludeName;
                         if (StringUtils.isNotEmpty(excludeRouterName)) {
                             excludeKeys.add(excludeRouterName);
                         }
@@ -201,6 +208,7 @@ public class RouterChain {
         return excludeKeys;
     }
 
+    // TODO: 2018/6/22 by zmyer
     private static boolean startsWithExcludePrefix(String excludeName) {
         char c = excludeName.charAt(0);
         return c == '-' || c == '!';

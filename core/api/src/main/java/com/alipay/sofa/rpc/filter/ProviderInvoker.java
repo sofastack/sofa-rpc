@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderInvoker<T> extends FilterInvoker {
 
     /**
@@ -50,6 +51,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
         this.providerConfig = providerConfig;
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
 
@@ -91,7 +93,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
             if (RpcInternalContext.isAttachmentEnable()) {
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
-                    endTime - startTime);
+                        endTime - startTime);
             }
         }
 

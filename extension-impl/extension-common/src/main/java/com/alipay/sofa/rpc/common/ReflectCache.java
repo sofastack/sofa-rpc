@@ -29,6 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ReflectCache {
 
     /**
@@ -82,6 +83,7 @@ public class ReflectCache {
      * @param serviceUniqueName 服务唯一名称
      * @return 服务级别ClassLoader
      */
+    // TODO: 2018/7/6 by zmyer
     public static ClassLoader getServiceClassLoader(String serviceUniqueName) {
         ClassLoader appClassLoader = SERVICE_CLASSLOADER_MAP.get(serviceUniqueName);
         if (appClassLoader == null) {
@@ -95,7 +97,8 @@ public class ReflectCache {
      * 方法对象缓存 {service:{方法名#(参数列表):Method}} <br>
      * 用于缓存参数列表，不是按接口，是按ServiceUniqueName
      */
-    private final static ConcurrentHashMap<String, Map<String, Method>> METHOD_CACHE = new ConcurrentHashMap<String, Map<String, Method>>();
+    private final static ConcurrentHashMap<String, Map<String, Method>> METHOD_CACHE =
+            new ConcurrentHashMap<String, Map<String, Method>>();
 
     /**
      * 缓存服务的公共方法
@@ -103,6 +106,7 @@ public class ReflectCache {
      * @param serviceUniqueName 服务唯一名称
      * @param clazz             接口类
      */
+    // TODO: 2018/7/6 by zmyer
     public final static void putServiceMethodCache(String serviceUniqueName, Class clazz) {
         // 分析该POJO的所有公开方法
         Map<String, Method> publicMethods = new HashMap<String, Method>();
@@ -122,6 +126,7 @@ public class ReflectCache {
      *
      * @param serviceUniqueName 服务唯一名称
      */
+    // TODO: 2018/7/9 by zmyer
     public static void invalidateServiceMethodCache(String serviceUniqueName) {
         METHOD_CACHE.remove(serviceUniqueName);
     }
@@ -134,6 +139,7 @@ public class ReflectCache {
      * @param methodSigns       方法描述
      * @return 方法对象
      */
+    // TODO: 2018/7/6 by zmyer
     public static Method getServiceMethod(String serviceUniqueName, String methodName, String[] methodSigns) {
         return getOrInitServiceMethod(serviceUniqueName, methodName, methodSigns, false, null);
     }
@@ -147,8 +153,9 @@ public class ReflectCache {
      * @param init              是否初始化
      * @return 方法对象
      */
+    // TODO: 2018/7/6 by zmyer
     public static Method getOrInitServiceMethod(String serviceUniqueName, String methodName,
-                                                String[] methodSigns, boolean init, String interfaceName) {
+            String[] methodSigns, boolean init, String interfaceName) {
         Map<String, Method> map = METHOD_CACHE.get(serviceUniqueName);
         if (map == null) {
             if (init) {

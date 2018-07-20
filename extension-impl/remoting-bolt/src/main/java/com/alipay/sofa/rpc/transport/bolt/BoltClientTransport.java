@@ -66,6 +66,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("bolt")
 public class BoltClientTransport extends ClientTransport {
 
@@ -137,6 +138,7 @@ public class BoltClientTransport extends ClientTransport {
         return boltUrl;
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void connect() {
         if (connection != null) {
@@ -202,6 +204,7 @@ public class BoltClientTransport extends ClientTransport {
         return currentRequests.get();
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public ResponseFuture asyncSend(SofaRequest request, int timeout) throws SofaRpcException {
         checkConnection();
@@ -231,6 +234,7 @@ public class BoltClientTransport extends ClientTransport {
      * @throws InterruptedException 中断异常
      * @since 5.2.0
      */
+    // TODO: 2018/6/22 by zmyer
     protected ResponseFuture doInvokeAsync(SofaRequest request, RpcInternalContext rpcContext,
             InvokeContext invokeContext, int timeoutMillis)
             throws RemotingException, InterruptedException {
@@ -256,6 +260,7 @@ public class BoltClientTransport extends ClientTransport {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
         checkConnection();
@@ -290,11 +295,13 @@ public class BoltClientTransport extends ClientTransport {
      * @throws InterruptedException 中断异常
      * @since 5.2.0
      */
+    // TODO: 2018/6/22 by zmyer
     protected SofaResponse doInvokeSync(SofaRequest request, InvokeContext invokeContext, int timeoutMillis)
             throws RemotingException, InterruptedException {
         return (SofaResponse) RPC_CLIENT.invokeSync(url, request, invokeContext, timeoutMillis);
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void oneWaySend(SofaRequest request, int timeout) throws SofaRpcException {
         checkConnection();
@@ -326,6 +333,7 @@ public class BoltClientTransport extends ClientTransport {
      * @throws InterruptedException 中断异常
      * @since 5.2.0
      */
+    // TODO: 2018/6/22 by zmyer
     protected void doOneWay(SofaRequest request, InvokeContext invokeContext, int timeoutMillis)
             throws RemotingException, InterruptedException {
         RPC_CLIENT.oneway(url, request, invokeContext);
@@ -378,6 +386,7 @@ public class BoltClientTransport extends ClientTransport {
         return exception;
     }
 
+    // TODO: 2018/6/22 by zmyer
     protected InvokeContext createInvokeContext(SofaRequest request) {
         InvokeContext invokeContext = new InvokeContext();
         invokeContext.put(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE, request.getSerializeFactoryType());
@@ -393,6 +402,7 @@ public class BoltClientTransport extends ClientTransport {
      * @param context RPC上下文
      * @param request 请求对象
      */
+    // TODO: 2018/6/22 by zmyer
     protected void beforeSend(RpcInternalContext context, SofaRequest request) {
         currentRequests.incrementAndGet();
         context.setLocalAddress(localAddress());
@@ -439,6 +449,7 @@ public class BoltClientTransport extends ClientTransport {
         return connection == null ? null : connection.getLocalAddress();
     }
 
+    // TODO: 2018/7/6 by zmyer
     protected void checkConnection() throws SofaRpcException {
         if (connection == null) {
             throw new SofaRpcException(RpcErrorType.CLIENT_NETWORK, "connection is null");

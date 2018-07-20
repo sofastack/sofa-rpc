@@ -28,18 +28,21 @@ import java.lang.reflect.InvocationHandler;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extension("jdk")
 public class JDKProxy implements Proxy {
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
         InvocationHandler handler = new JDKInvocationHandler(interfaceClass, proxyInvoker);
         ClassLoader classLoader = ClassLoaderUtils.getCurrentClassLoader();
         T result = (T) java.lang.reflect.Proxy.newProxyInstance(classLoader,
-            new Class[] { interfaceClass }, handler);
+                new Class[]{ interfaceClass }, handler);
         return result;
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public Invoker getInvoker(Object proxyObject) {
         return parseInvoker(proxyObject);
@@ -51,6 +54,7 @@ public class JDKProxy implements Proxy {
      * @param proxyObject Proxy object
      * @return proxy invoker
      */
+    // TODO: 2018/7/6 by zmyer
     public static Invoker parseInvoker(Object proxyObject) {
         InvocationHandler handler = java.lang.reflect.Proxy.getInvocationHandler(proxyObject);
         if (handler instanceof JDKInvocationHandler) {

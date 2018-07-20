@@ -31,6 +31,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class BoltResponseFuture<V> implements ResponseFuture<V> {
 
     /**
@@ -43,7 +44,7 @@ public class BoltResponseFuture<V> implements ResponseFuture<V> {
      *
      * @see CauseHolder
      */
-    private volatile Object     result;
+    private volatile Object result;
 
     /**
      * 异常包装类
@@ -59,11 +60,11 @@ public class BoltResponseFuture<V> implements ResponseFuture<V> {
     /**
      * 用户设置的超时时间
      */
-    private final int     timeout;
+    private final int timeout;
     /**
      * Future生成时间
      */
-    private final long    genTime = RpcRuntimeContext.now();
+    private final long genTime = RpcRuntimeContext.now();
     /**
      * Future已发送时间
      */
@@ -133,7 +134,7 @@ public class BoltResponseFuture<V> implements ResponseFuture<V> {
     }
 
     private boolean await(long timeout, TimeUnit unit)
-        throws InterruptedException {
+            throws InterruptedException {
         return await0(unit.toNanos(timeout), true);
     }
 
@@ -161,7 +162,7 @@ public class BoltResponseFuture<V> implements ResponseFuture<V> {
                 //checkDeadLock(); need this check?
                 incWaiters();
                 try {
-                    for (;;) {
+                    for (; ; ) {
                         try {
                             wait(waitTime / 1000000, (int) (waitTime % 1000000));
                         } catch (InterruptedException e) {

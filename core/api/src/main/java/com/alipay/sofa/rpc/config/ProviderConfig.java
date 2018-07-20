@@ -51,64 +51,65 @@ import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_WEIGHT;
  * @param <T> the type parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig<T>> implements Serializable {
 
     /**
      * The constant serialVersionUID.
      */
-    private static final long                                       serialVersionUID    = -3058073881775315962L;
+    private static final long serialVersionUID = -3058073881775315962L;
 
     /*---------- 参数配置项开始 ------------*/
 
     /**
      * 接口实现类引用
      */
-    protected transient T                                           ref;
+    protected transient T ref;
 
     /**
      * 配置的协议列表
      */
-    protected List<ServerConfig>                                    server;
+    protected List<ServerConfig> server;
 
     /**
      * 服务发布延迟,单位毫秒，默认0，配置为-1代表spring加载完毕（通过spring才生效）
      */
-    protected int                                                   delay               = getIntValue(PROVIDER_DELAY);
+    protected int delay = getIntValue(PROVIDER_DELAY);
 
     /**
      * 权重
      */
-    protected int                                                   weight              = getIntValue(PROVIDER_WEIGHT);
+    protected int weight = getIntValue(PROVIDER_WEIGHT);
 
     /**
      * 包含的方法
      */
-    protected String                                                include             = getStringValue(PROVIDER_INCLUDE);
+    protected String include = getStringValue(PROVIDER_INCLUDE);
 
     /**
      * 不发布的方法列表，逗号分隔
      */
-    protected String                                                exclude             = getStringValue(PROVIDER_EXCLUDE);
+    protected String exclude = getStringValue(PROVIDER_EXCLUDE);
 
     /**
      * 是否动态注册，默认为true，配置为false代表不主动发布，需要到管理端进行上线操作
      */
-    protected boolean                                               dynamic             = getBooleanValue(PROVIDER_DYNAMIC);
+    protected boolean dynamic = getBooleanValue(PROVIDER_DYNAMIC);
 
     /**
      * 服务优先级，越大越高
      */
-    protected int                                                   priority            = getIntValue(PROVIDER_PRIORITY);
+    protected int priority = getIntValue(PROVIDER_PRIORITY);
 
     /**
      * 启动器
      */
-    protected String                                                bootstrap           = getStringValue(DEFAULT_PROVIDER_BOOTSTRAP);
+    protected String bootstrap = getStringValue(DEFAULT_PROVIDER_BOOTSTRAP);
 
     /**
      * 自定义线程池
      */
-    protected transient ThreadPoolExecutor                          executor;
+    protected transient ThreadPoolExecutor executor;
 
     /**
      * whitelist blacklist
@@ -119,19 +120,19 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * 服务端执行超时时间(毫秒)，不会打断执行线程，只是打印警告
      */
-    protected int                                                   timeout             = getIntValue(PROVIDER_INVOKE_TIMEOUT);
+    protected int timeout = getIntValue(PROVIDER_INVOKE_TIMEOUT);
 
     /**
      * 接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
      */
-    protected int                                                   concurrents         = getIntValue(PROVIDER_CONCURRENTS);
+    protected int concurrents = getIntValue(PROVIDER_CONCURRENTS);
 
     /**
      * 同一个服务（接口协议uniqueId相同）的最大发布次数，防止由于代码bug导致重复发布。注意：后面的发布可能会覆盖前面的实现，-1表示不检查
      *
      * @since 5.2.0
      */
-    protected int                                                   repeatedExportLimit = getIntValue(PROVIDER_REPEATED_EXPORT_LIMIT);
+    protected int repeatedExportLimit = getIntValue(PROVIDER_REPEATED_EXPORT_LIMIT);
 
     /*---------- 参数配置项结束 ------------*/
 
@@ -143,13 +144,14 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * 服务提供者启动类
      */
-    protected transient ProviderBootstrap                           providerBootstrap;
+    protected transient ProviderBootstrap providerBootstrap;
 
     /**
      * Gets proxy class.
      *
      * @return the proxyClass
      */
+    // TODO: 2018/7/6 by zmyer
     @Override
     public Class<?> getProxyClass() {
         if (proxyClass != null) {
@@ -160,11 +162,11 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
                 this.proxyClass = ClassUtils.forName(interfaceId);
                 if (!proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("service.interfaceId",
-                        interfaceId, "interfaceId must set interface class, not implement class");
+                            interfaceId, "interfaceId must set interface class, not implement class");
                 }
             } else {
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
-                    "null", "interfaceId must be not null");
+                        "null", "interfaceId must be not null");
             }
         } catch (SofaRpcRuntimeException e) {
             throw e;
@@ -179,6 +181,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      *
      * @return the string
      */
+    // TODO: 2018/7/6 by zmyer
     @Override
     public String buildKey() {
         return interfaceId + ":" + uniqueId;
@@ -189,6 +192,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      *
      * @return the ref
      */
+    // TODO: 2018/7/6 by zmyer
     public T getRef() {
         return ref;
     }
@@ -473,7 +477,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
         if (CommonUtils.isNotEmpty(methods)) {
             for (MethodConfig methodConfig : methods.values()) {
                 if (methodConfig.getConcurrents() != null
-                    && methodConfig.getConcurrents() > 0) {
+                        && methodConfig.getConcurrents() > 0) {
                     return true;
                 }
             }

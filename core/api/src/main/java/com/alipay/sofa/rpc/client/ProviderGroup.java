@@ -29,12 +29,13 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderGroup {
 
     /**
      * 服务分组名称
      */
-    protected final String       name;
+    protected final String name;
 
     /**
      * 服务分组下服务端列表（缓存的是List，方便快速读取）
@@ -91,6 +92,7 @@ public class ProviderGroup {
      *
      * @return the provider infos
      */
+    // TODO: 2018/7/6 by zmyer
     public List<ProviderInfo> getProviderInfos() {
         return providerInfos;
     }
@@ -189,9 +191,9 @@ public class ProviderGroup {
     @Override
     public String toString() {
         return "ProviderGroup{" +
-            "name='" + name + '\'' +
-            ", providerInfos=" + providerInfos +
-            '}';
+                "name='" + name + '\'' +
+                ", providerInfos=" + providerInfos +
+                '}';
     }
 
 }

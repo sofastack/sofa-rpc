@@ -57,28 +57,29 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @see org.jboss.resteasy.plugins.server.netty.NettyJaxrsServer
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
-    protected ServerBootstrap          bootstrap           = new ServerBootstrap();
-    protected String                   hostname            = null;
-    protected int                      port                = 8080;
-    protected ResteasyDeployment       deployment          = new SofaResteasyDeployment(); // CHANGE: 使用sofa的类
-    protected String                   root                = "";
-    protected SecurityDomain           domain;
-    private EventLoopGroup             eventLoopGroup;
-    private EventLoopGroup             eventExecutor;
-    private int                        ioWorkerCount       = SystemInfo.getCpuCores() * 2; // CHANGE:cpu计算修改
-    private int                        executorThreadCount = 16;
-    private SSLContext                 sslContext;
-    private int                        maxRequestSize      = 1024 * 1024 * 10;
-    private int                        backlog             = 128;
-    private List<ChannelHandler>       channelHandlers     = Collections.emptyList();
-    private Map<ChannelOption, Object> channelOptions      = Collections.emptyMap();
+    protected ServerBootstrap bootstrap = new ServerBootstrap();
+    protected String hostname = null;
+    protected int port = 8080;
+    protected ResteasyDeployment deployment = new SofaResteasyDeployment(); // CHANGE: 使用sofa的类
+    protected String root = "";
+    protected SecurityDomain domain;
+    private EventLoopGroup eventLoopGroup;
+    private EventLoopGroup eventExecutor;
+    private int ioWorkerCount = SystemInfo.getCpuCores() * 2; // CHANGE:cpu计算修改
+    private int executorThreadCount = 16;
+    private SSLContext sslContext;
+    private int maxRequestSize = 1024 * 1024 * 10;
+    private int backlog = 128;
+    private List<ChannelHandler> channelHandlers = Collections.emptyList();
+    private Map<ChannelOption, Object> channelOptions = Collections.emptyMap();
     private Map<ChannelOption, Object> childChannelOptions = Collections.emptyMap();
-    private List<ChannelHandler>       httpChannelHandlers = Collections.emptyList();
-    protected boolean                  keepAlive           = false;                       // CHANGE:是否长连接
-    protected boolean                  telnet              = true;                        // CHANGE:是否允许telnet
-    protected boolean                  daemon              = true;                        // CHANGE:是否守护线程
+    private List<ChannelHandler> httpChannelHandlers = Collections.emptyList();
+    protected boolean keepAlive = false;                       // CHANGE:是否长连接
+    protected boolean telnet = true;                        // CHANGE:是否允许telnet
+    protected boolean daemon = true;                        // CHANGE:是否守护线程
 
     public void setSSLContext(SSLContext sslContext) {
         this.sslContext = sslContext;
@@ -140,7 +141,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @param channelHandlers the additional {@link io.netty.channel.ChannelHandler}s.
      */
     public void setChannelHandlers(final List<ChannelHandler> channelHandlers) {
-        this.channelHandlers = channelHandlers == null ? Collections.<ChannelHandler> emptyList() : channelHandlers;
+        this.channelHandlers = channelHandlers == null ? Collections.<ChannelHandler>emptyList() : channelHandlers;
     }
 
     /**
@@ -150,8 +151,8 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @param httpChannelHandlers the additional {@link io.netty.channel.ChannelHandler}s.
      */
     public void setHttpChannelHandlers(final List<ChannelHandler> httpChannelHandlers) {
-        this.httpChannelHandlers = httpChannelHandlers == null ? Collections.<ChannelHandler> emptyList()
-            : httpChannelHandlers;
+        this.httpChannelHandlers = httpChannelHandlers == null ? Collections.<ChannelHandler>emptyList()
+                : httpChannelHandlers;
     }
 
     /**
@@ -161,7 +162,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @see io.netty.bootstrap.ServerBootstrap#option(io.netty.channel.ChannelOption, Object)
      */
     public void setChannelOptions(final Map<ChannelOption, Object> channelOptions) {
-        this.channelOptions = channelOptions == null ? Collections.<ChannelOption, Object> emptyMap() : channelOptions;
+        this.channelOptions = channelOptions == null ? Collections.<ChannelOption, Object>emptyMap() : channelOptions;
     }
 
     /**
@@ -171,8 +172,8 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @see io.netty.bootstrap.ServerBootstrap#childOption(io.netty.channel.ChannelOption, Object)
      */
     public void setChildChannelOptions(final Map<ChannelOption, Object> channelOptions) {
-        this.childChannelOptions = channelOptions == null ? Collections.<ChannelOption, Object> emptyMap()
-            : channelOptions;
+        this.childChannelOptions = channelOptions == null ? Collections.<ChannelOption, Object>emptyMap()
+                : channelOptions;
     }
 
     @Override
@@ -198,23 +199,25 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         this.domain = sc;
     }
 
+    // TODO: 2018/6/22 by zmyer
     protected RequestDispatcher createRequestDispatcher() {
         return new RequestDispatcher((SynchronousDispatcher) deployment.getDispatcher(),
-            deployment.getProviderFactory(), domain);
+                deployment.getProviderFactory(), domain);
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void start() {
         // CHANGE: 增加线程名字
         eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SOFA-REST-IO-" + port, daemon));
         eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SOFA-REST-BIZ-" + port,
-            daemon));
+                daemon));
         // Configure the server.
         bootstrap.group(eventLoopGroup)
-            .channel(NioServerSocketChannel.class)
-            .childHandler(createChannelInitializer())
-            .option(ChannelOption.SO_BACKLOG, backlog)
-            .childOption(ChannelOption.SO_KEEPALIVE, keepAlive); // CHANGE:
+                .channel(NioServerSocketChannel.class)
+                .childHandler(createChannelInitializer())
+                .option(ChannelOption.SO_BACKLOG, backlog)
+                .childOption(ChannelOption.SO_KEEPALIVE, keepAlive); // CHANGE:
 
         for (Map.Entry<ChannelOption, Object> entry : channelOptions.entrySet()) {
             bootstrap.option(entry.getKey(), entry.getValue());
@@ -234,6 +237,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         bootstrap.bind(socketAddress).syncUninterruptibly();
     }
 
+    // TODO: 2018/6/22 by zmyer
     private ChannelInitializer<SocketChannel> createChannelInitializer() {
         final RequestDispatcher dispatcher = createRequestDispatcher();
         if (sslContext == null) {
@@ -256,8 +260,9 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     private void setupHandlers(SocketChannel ch, RequestDispatcher dispatcher,
-                               RestEasyHttpRequestDecoder.Protocol protocol) {
+            RestEasyHttpRequestDecoder.Protocol protocol) {
         ChannelPipeline channelPipeline = ch.pipeline();
         channelPipeline.addLast(channelHandlers.toArray(new ChannelHandler[channelHandlers.size()]));
         channelPipeline.addLast(new HttpRequestDecoder());

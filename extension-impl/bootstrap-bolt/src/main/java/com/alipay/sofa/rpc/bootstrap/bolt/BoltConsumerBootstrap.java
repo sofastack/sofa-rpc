@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("bolt")
 public class BoltConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
