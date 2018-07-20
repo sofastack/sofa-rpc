@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import static com.alipay.sofa.rpc.common.json.JSON.getSerializeFields;
 
