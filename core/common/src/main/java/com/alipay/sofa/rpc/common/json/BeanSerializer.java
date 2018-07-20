@@ -84,8 +84,11 @@ public class BeanSerializer {
             return array;
         } else if (bean instanceof Map) {
             Map map = (Map) bean;
-            for (Object key : map.keySet()) {
-                map.put(key, serialize(map.get(key), addType));
+            Iterator itr = map.entrySet().iterator();
+            Map.Entry entry = null;
+            while (itr.hasNext()) {
+                entry = (Map.Entry) itr.next();
+                map.put(entry.getKey(), serialize(entry.getValue(), addType));
             }
             return map;
         } else if (bean instanceof Date) {
