@@ -114,9 +114,6 @@
                     <artifactId>jacoco-maven-plugin</artifactId>
                     <version>0.7.9</version>
                 </plugin>
-            </plugins>
-        </pluginManagement>
-        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -252,6 +249,7 @@
                 </executions>
             </plugin>
         </plugins>
+        </pluginManagement>
     </build>
 
     <profiles>
