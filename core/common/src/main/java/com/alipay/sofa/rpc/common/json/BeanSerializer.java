@@ -60,7 +60,7 @@ public class BeanSerializer {
      * @param bean    要序列化的对象
      * @param addType 是否增加类型标识
      * @return 序列化后的结果，可能是string，number，boolean，list或者map等
-     * @throws NullPointerException 如果非空字段为空的化
+     * @throws NullPointerException 如果非空字段为空的话
      */
     public static Object serialize(Object bean, boolean addType) throws NullPointerException {
         if (bean == null) {
