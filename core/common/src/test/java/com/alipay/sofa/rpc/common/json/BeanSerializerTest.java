@@ -64,6 +64,7 @@ public class BeanSerializerTest {
         } catch (Exception e) {
             error = true;
         }
+        Assert.assertFalse(error);
 
         bean.setName("zzzgg");
         bean.setSex(true);
@@ -93,7 +94,7 @@ public class BeanSerializerTest {
         } catch (Exception e) {
             error = true;
         }
-
+        Assert.assertFalse(error);
     }
 
     @Test
@@ -184,4 +185,39 @@ public class BeanSerializerTest {
 
     }
 
+    @Test
+    public void serializeMap() {
+        boolean error = false;
+        Map<Object, Object> bean = createTestMap();
+        try {
+            Map map = (Map) BeanSerializer.serialize(bean, true);
+            for (Map.Entry<Object, Object> entry : bean.entrySet()) {
+                if (!map.containsKey(entry.getKey())) {
+                    error = true;
+                    break;
+                }
+            }
+            Assert.assertFalse(error);
+
+            map = (Map) BeanSerializer.serialize(bean);
+            for (Map.Entry<Object, Object> entry : bean.entrySet()) {
+                if (!map.containsKey(entry.getKey())) {
+                    error = true;
+                    break;
+                }
+            }
+            Assert.assertFalse(error);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+    }
+
+    private Map<Object, Object> createTestMap() {
+        Map<Object, Object> map = new HashMap<Object, Object>();
+        map.put(1, "1");
+        map.put("2", 2);
+        map.put("true", true);
+        return map;
+    }
 }
