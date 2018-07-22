@@ -17,7 +17,11 @@
 package com.alipay.sofa.rpc.common.json;
 
 import java.lang.reflect.Array;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p>只关心JSON格式的解析，不关心java的具体类型</p>
