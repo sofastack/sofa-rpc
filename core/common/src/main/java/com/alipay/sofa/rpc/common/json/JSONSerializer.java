@@ -58,8 +58,8 @@ public class JSONSerializer {
         } else if (object instanceof CharSequence || object instanceof Character) { //TODO 去除特殊字符
             String tmp = object.toString();
             return '\"' + tmp.replace("\"", "\\\"").replace("\b", "\\b")
-                    .replace("\t", "\\t").replace("\r", "\\r")
-                    .replace("\f", "\\f").replace("\n", "\\n") + '\"';
+                .replace("\t", "\\t").replace("\r", "\\r")
+                .replace("\f", "\\f").replace("\n", "\\n") + '\"';
         } else if (object instanceof Number || object instanceof Boolean) {
             str = object.toString();
         } else if (object instanceof Map) {
@@ -71,7 +71,7 @@ public class JSONSerializer {
             while (itr.hasNext()) {
                 entry = (Map.Entry) itr.next();
                 sb.append(serialize(entry.getKey(), addType, true)).append(':')
-                        .append(serialize(entry.getValue(), addType)).append(',');
+                    .append(serialize(entry.getValue(), addType)).append(',');
             }
             int last = sb.length() - 1;
             if (sb.charAt(last) == ',') {
