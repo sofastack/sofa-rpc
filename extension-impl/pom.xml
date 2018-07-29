@@ -32,6 +32,7 @@
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
         <module>metrics-lookout</module>
+        <module>sofa-rpc-codec-jackson</module>
     </modules>
 
     <dependencyManagement>
