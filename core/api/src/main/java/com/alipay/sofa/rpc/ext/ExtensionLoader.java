@@ -346,9 +346,16 @@ public class ExtensionLoader<T> {
     }
 
     private void loadSuccess(String alias, ExtensionClass<T> extensionClass) {
-        all.put(alias, extensionClass);
         if (listener != null) {
-            listener.onLoad(extensionClass); // 加载完毕，通知监听器
+            try {
+                listener.onLoad(extensionClass); // 加载完毕，通知监听器
+                all.put(alias, extensionClass);
+            } catch (Exception e) {
+                LOGGER.error("Error when load extension of extensible " + interfaceClass + " with alias: "
+                    + alias + ".", e);
+            }
+        } else {
+            all.put(alias, extensionClass);
         }
     }
 
