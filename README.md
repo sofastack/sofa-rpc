@@ -29,15 +29,15 @@ SOFARPC 是一个高可扩展性、高性能、生产级的 Java RPC 框架。�
 
 ## 文档
 
-- [快速开始](https://github.com/alipay/sofa-rpc/wiki/GettingStarted)
-- [用户手册](https://github.com/alipay/sofa-rpc/wiki/UserGuide)
-- [开发者指南](https://github.com/alipay/sofa-rpc/wiki/DeveloperGuide)
-- [发布历史](https://github.com/alipay/sofa-rpc/wiki/ReleaseNotes)
-- [发展路线](https://github.com/alipay/sofa-rpc/wiki/RoadMap)
+- [快速开始](http://www.sofastack.tech/sofa-rpc/docs/Getting-Started-With-SOFA-Boot)
+- [用户手册](http://www.sofastack.tech/sofa-rpc/docs/Programming)
+- [开发者指南](http://www.sofastack.tech/sofa-rpc/docs/How-To-Build)
+- [发布历史](http://www.sofastack.tech/sofa-rpc/docs/ReleaseNotes)
+- [发展路线](http://www.sofastack.tech/sofa-rpc/docs/RoadMap)
 
 ## 贡献
 
-[如何参与 SOFARPC 代码贡献](https://github.com/alipay/sofa-rpc/wiki/Contributing)
+[如何参与 SOFARPC 代码贡献](http://www.sofastack.tech/sofa-rpc/docs/Contributing)
 
 ## 致谢
 

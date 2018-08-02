@@ -16,21 +16,16 @@
  */
 package com.alipay.sofa.rpc.ext;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.Filter;
-import com.alipay.sofa.rpc.filter.FilterInvoker;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension(value = "rightxx1", order = 128)
-public class RightFilter1 extends Filter {
+public class TestErrorLoadListener implements ExtensionLoaderListener<Filter> {
     @Override
-    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        return null;
+    public void onLoad(ExtensionClass extensionClass) {
+        if ("rightxx0".equals(extensionClass.getAlias())) {
+            throw new NullPointerException();
+        }
     }
 }

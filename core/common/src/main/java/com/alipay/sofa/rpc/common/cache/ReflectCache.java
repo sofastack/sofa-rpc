@@ -102,7 +102,7 @@ public final class ReflectCache {
     static final ConcurrentHashMap<String, Class> CLASS_CACHE    = new ConcurrentHashMap<String, Class>();
 
     /**
-     * String-->Class 缓存
+     * Class-->String 缓存
      */
     @VisibleForTesting
     static final ConcurrentHashMap<Class, String> TYPE_STR_CACHE = new ConcurrentHashMap<Class, String>();
