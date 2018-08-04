@@ -17,8 +17,8 @@
 package com.alipay.sofa.rpc.registry.internal;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
-import com.alipay.sofa.rpc.registry.model.*;
 import com.alipay.sofa.rpc.registry.common.ConsulConstants;
+import com.alipay.sofa.rpc.registry.model.*;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
@@ -48,15 +48,15 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConsulClient {
 
-    private static final Logger                    log  = LoggerFactory.getLogger(ConsulClient.class);
+    private static final Logger log = LoggerFactory.getLogger(ConsulClient.class);
 
-    private final Object                           lock = new Object();
+    private final Object lock = new Object();
 
     private final com.ecwid.consul.v1.ConsulClient client;
 
-    private final TtlScheduler                     ttlScheduler;
+    private final TtlScheduler ttlScheduler;
 
-    private final ScheduledExecutorService         scheduleRegistry;
+    private final ScheduledExecutorService scheduleRegistry;
 
     public ConsulClient(String host, int port) {
         client = new com.ecwid.consul.v1.ConsulClient(host, port);
@@ -81,7 +81,7 @@ public class ConsulClient {
         Set<ConsulSession> failedSession = ttlScheduler.getFailedSession();
         if (failedSession.size() > 0 || failedService.size() > 0) {
             log.debug(String.format("retry to registry failed service %d or failed session %d", failedService.size(),
-                failedSession.size()));
+                    failedSession.size()));
             for (ConsulService2 consulService2 : failedService) {
                 registerService(consulService2.getService());
             }
@@ -133,7 +133,7 @@ public class ConsulClient {
         client.getKVValue(ephemralNode.getEphemralNodeKey());
 
         return client.setKVValue(ephemralNode.getEphemralNodeKey(), ephemralNode.getEphemralNodeValue(),
-            kvPutParams).getValue();
+                kvPutParams).getValue();
     }
 
     public ConsulRouterResp lookupRouterMessage(String serviceName, long lastConsulIndex) {
@@ -143,11 +143,11 @@ public class ConsulClient {
         if (getValue != null && StringUtils.isNotBlank(getValue.getValue())) {
             String router = new String(Base64.decodeBase64(getValue.getValue()));
             ConsulRouterResp response = ConsulRouterResp.newResponse()//
-                .withValue(router)//
-                .withConsulIndex(orgResponse.getConsulIndex())//
-                .withConsulLastContact(orgResponse.getConsulLastContact())//
-                .withConsulKnowLeader(orgResponse.isConsulKnownLeader())//
-                .build();
+                    .withValue(router)//
+                    .withConsulIndex(orgResponse.getConsulIndex())//
+                    .withConsulLastContact(orgResponse.getConsulLastContact())//
+                    .withConsulKnowLeader(orgResponse.isConsulKnownLeader())//
+                    .build();
             return response;
         }
         return null;
@@ -162,21 +162,21 @@ public class ConsulClient {
             for (HealthService orgService : HealthServices) {
                 Service org = orgService.getService();
                 ConsulService newService = ConsulService.newSalukiService()//
-                    .withAddress(org.getAddress())//
-                    .withName(org.getService())//
-                    .withId(org.getId())//
-                    .withPort(org.getPort().toString())//
-                    .withTags(org.getTags())//
-                    .build();
+                        .withAddress(org.getAddress())//
+                        .withName(org.getService())//
+                        .withId(org.getId())//
+                        .withPort(org.getPort().toString())//
+                        .withTags(org.getTags())//
+                        .build();
                 ConsulServcies.add(newService);
             }
             if (!ConsulServcies.isEmpty()) {
                 ConsulServiceResp response = ConsulServiceResp.newResponse()//
-                    .withValue(ConsulServcies)//
-                    .withConsulIndex(orgResponse.getConsulIndex())//
-                    .withConsulLastContact(orgResponse.getConsulLastContact())//
-                    .withConsulKnowLeader(orgResponse.isConsulKnownLeader())//
-                    .build();
+                        .withValue(ConsulServcies)//
+                        .withConsulIndex(orgResponse.getConsulIndex())//
+                        .withConsulLastContact(orgResponse.getConsulLastContact())//
+                        .withConsulKnowLeader(orgResponse.isConsulKnownLeader())//
+                        .build();
                 return response;
             }
         }

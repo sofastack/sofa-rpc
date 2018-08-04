@@ -18,7 +18,8 @@ package com.alipay.sofa.rpc.registry.internal;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.registry.common.ConsulConstants;
-import com.alipay.sofa.rpc.registry.model.*;
+import com.alipay.sofa.rpc.registry.model.ConsulService2;
+import com.alipay.sofa.rpc.registry.model.ConsulSession;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.google.common.collect.Sets;
@@ -37,34 +38,34 @@ import java.util.concurrent.TimeUnit;
  */
 public class TtlScheduler {
 
-    private static final Logger            log                      = LoggerFactory.getLogger(TtlScheduler.class);
+    private static final Logger log = LoggerFactory.getLogger(TtlScheduler.class);
 
-    private final Set<ConsulService2>      services                 = Sets.newConcurrentHashSet();
+    private final Set<ConsulService2> services = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulSession>       sessions                 = Sets.newConcurrentHashSet();
+    private final Set<ConsulSession> sessions = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulService2>      failedservices           = Sets.newConcurrentHashSet();
+    private final Set<ConsulService2> failedservices = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulSession>       failedsessions           = Sets.newConcurrentHashSet();
+    private final Set<ConsulSession> failedsessions = Sets.newConcurrentHashSet();
 
     private final ScheduledExecutorService heartbeatServiceExecutor = Executors.newScheduledThreadPool(1,
-                                                                        new NamedThreadFactory("CheckServiceTimer",
-                                                                            true));
+            new NamedThreadFactory("CheckServiceTimer",
+                    true));
 
     private final ScheduledExecutorService heartbeatSessionExecutor = Executors.newScheduledThreadPool(1,
-                                                                        new NamedThreadFactory("CheckSessionTimer",
-                                                                            true));
+            new NamedThreadFactory("CheckSessionTimer",
+                    true));
 
-    private final ConsulClient             client;
+    private final ConsulClient client;
 
     public TtlScheduler(ConsulClient client) {
         this.client = client;
         heartbeatServiceExecutor.scheduleAtFixedRate(new ConsulHeartbeatServiceTask(),
-            ConsulConstants.HEARTBEAT_CIRCLE,
-            ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
+                ConsulConstants.HEARTBEAT_CIRCLE,
+                ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
         heartbeatSessionExecutor.scheduleAtFixedRate(new ConsulHeartbeatSessionTask(),
-            ConsulConstants.HEARTBEAT_CIRCLE,
-            ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
+                ConsulConstants.HEARTBEAT_CIRCLE,
+                ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
     }
 
     public void addHeartbeatServcie(final ConsulService2 service) {

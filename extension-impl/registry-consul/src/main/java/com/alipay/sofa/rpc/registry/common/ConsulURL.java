@@ -24,39 +24,44 @@ import java.net.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * ConsulURL
+ *
+ * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
+ */
 public class ConsulURL implements Serializable {
 
-    private static final long                         serialVersionUID = -1985165475234910535L;
+    private static final long serialVersionUID = -1985165475234910535L;
 
-    private final String                              protocol;
+    private final String protocol;
 
-    private final String                              host;
+    private final String host;
 
-    private final int                                 port;
+    private final int port;
 
-    private final String                              group;
+    private final String group;
 
-    private final String                              interfaceId;
+    private final String interfaceId;
 
-    private final String                              path;
+    private final String path;
 
-    private final Map<String, String>                 parameters;
+    private final Map<String, String> parameters;
 
     // ==== cache ====
 
-    private volatile transient Map<String, Number>    numbers;
+    private volatile transient Map<String, Number> numbers;
 
     private volatile transient Map<String, ConsulURL> urls;
 
-    private volatile transient String                 ip;
+    private volatile transient String ip;
 
-    private volatile transient String                 full;
+    private volatile transient String full;
 
-    private volatile transient String                 identity;
+    private volatile transient String identity;
 
-    private volatile transient String                 parameter;
+    private volatile transient String parameter;
 
-    private volatile transient String                 string;
+    private volatile transient String string;
 
     protected ConsulURL() {
         this.protocol = null;
@@ -637,12 +642,12 @@ public class ConsulURL implements Serializable {
             return identity;
         }
         return identity = buildString(true, false); // only return identity message, see the method "equals" and
-                                                    // "hashCode"
+        // "hashCode"
     }
 
     public String toIdentityString(String... parameters) {
         return buildString(true, false, parameters); // only return identity message, see the method "equals" and
-                                                     // "hashCode"
+        // "hashCode"
     }
 
     public String toFullString() {
@@ -675,7 +680,7 @@ public class ConsulURL implements Serializable {
             boolean first = true;
             for (Map.Entry<String, String> entry : new TreeMap<String, String>(getParameters()).entrySet()) {
                 if (entry.getKey() != null && entry.getKey().length() > 0
-                    && (includes == null || includes.contains(entry.getKey()))) {
+                        && (includes == null || includes.contains(entry.getKey()))) {
                     if (first) {
                         if (concat) {
                             buf.append("?");

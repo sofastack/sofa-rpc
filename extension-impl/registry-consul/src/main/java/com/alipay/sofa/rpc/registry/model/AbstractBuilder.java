@@ -20,11 +20,11 @@ import java.util.Map;
 
 abstract class AbstractBuilder {
 
-    private static final String        VARIABLE_START      = "${";
-    private static final char          VARIABLE_END        = '}';
-    private static final char          DEFAULT_VALUE_START = ':';
+    private static final String VARIABLE_START      = "${";
+    private static final char   VARIABLE_END        = '}';
+    private static final char   DEFAULT_VALUE_START = ':';
 
-    private static Map<String, String> environment         = System.getenv();
+    private static Map<String, String> environment = System.getenv();
 
     static void setEnvironmentForTesting(Map<String, String> environment) {
         AbstractBuilder.environment = environment;

@@ -21,11 +21,16 @@ import com.alipay.sofa.rpc.registry.common.ConsulURLUtils;
 import com.ecwid.consul.v1.session.model.NewSession;
 import com.ecwid.consul.v1.session.model.Session;
 
+/**
+ * Consul 临时节点
+ *
+ * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
+ */
 public final class ConsulEphemralNode {
 
-    private final ConsulURL      url;
+    private final ConsulURL url;
 
-    private final String         interval;
+    private final String interval;
 
     private final ThrallRoleType ephemralType;
 
@@ -101,9 +106,9 @@ public final class ConsulEphemralNode {
 
     public static class Builder extends AbstractBuilder {
 
-        private ConsulURL      url;
+        private ConsulURL url;
 
-        private String         interval;
+        private String interval;
 
         private ThrallRoleType ephemralType;
 

@@ -19,10 +19,11 @@ package com.alipay.sofa.rpc.registry.model;
 import com.alipay.sofa.rpc.registry.common.ConsulURL;
 
 import java.util.List;
-import java.util.Set;
 
 /**
- * Created by dingpeng on 2018/7/23.
+ * NotifyListener
+ *
+ * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
 public interface NotifyListener {
 

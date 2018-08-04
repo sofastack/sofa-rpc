@@ -51,7 +51,7 @@ public class ConsulURLUtils {
     }
 
     private static final Pattern ADDRESS_PATTERN =
-                                                         Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
+            Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
 
     public static boolean isValidAddress(String address) {
         return ADDRESS_PATTERN.matcher(address).matches();
@@ -90,10 +90,10 @@ public class ConsulURLUtils {
         switch (roleType) {
             case CONSUMER:
                 return toServicePath(url) + Constants.PATH_SEPARATOR + url.getVersion()
-                    + Constants.PATH_SEPARATOR + Constants.CONSUMERS_CATEGORY;
+                        + Constants.PATH_SEPARATOR + Constants.CONSUMERS_CATEGORY;
             case PROVIDER:
                 return toServicePath(url) + Constants.PATH_SEPARATOR + url.getVersion()
-                    + Constants.PATH_SEPARATOR + Constants.PROVIDERS_CATEGORY;
+                        + Constants.PATH_SEPARATOR + Constants.PROVIDERS_CATEGORY;
             default:
                 throw new IllegalArgumentException("there is no role type");
         }
@@ -102,12 +102,12 @@ public class ConsulURLUtils {
 
     public static String healthServicePath(ConsulURL url, ThrallRoleType roleType) {
         return toCategoryPathNotIncludeVersion(url, roleType) + Constants.PATH_SEPARATOR
-            + ConsulURL.encode(url.toFullString());
+                + ConsulURL.encode(url.toFullString());
     }
 
     public static String ephemralNodePath(ConsulURL url, ThrallRoleType roleType) {
         return Constants.CONSUL_SERVICE_PRE + toCategoryPathIncludeVersion(url, roleType)
-            + Constants.PATH_SEPARATOR + url.getAddress();
+                + Constants.PATH_SEPARATOR + url.getAddress();
     }
 
 }

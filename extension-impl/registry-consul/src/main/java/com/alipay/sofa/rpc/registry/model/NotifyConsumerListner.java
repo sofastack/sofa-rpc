@@ -19,15 +19,16 @@ package com.alipay.sofa.rpc.registry.model;
 import com.alipay.sofa.rpc.registry.common.ConsulURL;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- * Created by dingpeng on 2018/7/25.
+ * 消费者通知器
+ *
+ * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
 public class NotifyConsumerListner implements NotifyListener {
 
-    private ConsulURL                        subscribeUrl;
+    private ConsulURL subscribeUrl;
 
     private AtomicReference<List<ConsulURL>> providerUrls;
 

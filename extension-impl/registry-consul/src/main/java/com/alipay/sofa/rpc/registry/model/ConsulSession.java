@@ -17,13 +17,13 @@
 package com.alipay.sofa.rpc.registry.model;
 
 /**
- * EphemralNode of Consul
+ * sessions to store EphemralNode of Consul
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
 public final class ConsulSession {
 
-    private String             sessionId;
+    private String sessionId;
 
     private ConsulEphemralNode ephemralNode;
 
