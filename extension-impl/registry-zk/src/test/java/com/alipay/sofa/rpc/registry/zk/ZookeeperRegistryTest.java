@@ -310,14 +310,14 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         latch.await(2000, TimeUnit.MILLISECONDS);
         Assert.assertTrue(configData.size() == 3);
     }
-    
+
     @Test
     public void testDestroy() {
-    	MockDestroyHook mockHook = new MockDestroyHook();
-    	registry.destroy(mockHook);
-    	
-    	Assert.assertTrue(mockHook.isPreDestory());
-    	Assert.assertTrue(mockHook.isPostDestroy());
+        MockDestroyHook mockHook = new MockDestroyHook();
+        registry.destroy(mockHook);
+
+        Assert.assertTrue(mockHook.isPreDestory());
+        Assert.assertTrue(mockHook.isPostDestroy());
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
@@ -400,28 +400,28 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             return concurrentHashMap;
         }
     }
-    
+
     private static class MockDestroyHook implements Destroyable.DestroyHook {
-    	private boolean preDestory = false;
-    	
-    	private boolean postDestroy = false;
-    	
-		@Override
-		public void preDestroy() {
-			preDestory = true;
-		}
+        private boolean preDestory  = false;
 
-		@Override
-		public void postDestroy() {
-			postDestroy = true;
-		}
+        private boolean postDestroy = false;
 
-		public boolean isPreDestory() {
-			return preDestory;
-		}
+        @Override
+        public void preDestroy() {
+            preDestory = true;
+        }
 
-		public boolean isPostDestroy() {
-			return postDestroy;
-		}
+        @Override
+        public void postDestroy() {
+            postDestroy = true;
+        }
+
+        public boolean isPreDestory() {
+            return preDestory;
+        }
+
+        public boolean isPostDestroy() {
+            return postDestroy;
+        }
     }
 }
