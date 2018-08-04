@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
+import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -309,6 +310,15 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         latch.await(2000, TimeUnit.MILLISECONDS);
         Assert.assertTrue(configData.size() == 3);
     }
+    
+    @Test
+    public void testDestroy() {
+    	MockDestroyHook mockHook = new MockDestroyHook();
+    	registry.destroy(mockHook);
+    	
+    	Assert.assertTrue(mockHook.isPreDestory());
+    	Assert.assertTrue(mockHook.isPostDestroy());
+    }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
 
@@ -389,5 +399,29 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         public Map<String, String> getData() {
             return concurrentHashMap;
         }
+    }
+    
+    private static class MockDestroyHook implements Destroyable.DestroyHook {
+    	private boolean preDestory = false;
+    	
+    	private boolean postDestroy = false;
+    	
+		@Override
+		public void preDestroy() {
+			preDestory = true;
+		}
+
+		@Override
+		public void postDestroy() {
+			postDestroy = true;
+		}
+
+		public boolean isPreDestory() {
+			return preDestory;
+		}
+
+		public boolean isPostDestroy() {
+			return postDestroy;
+		}
     }
 }
