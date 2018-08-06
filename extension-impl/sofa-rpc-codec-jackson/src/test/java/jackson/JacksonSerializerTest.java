@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package jackson;
 
 import com.alipay.sofa.rpc.codec.jackson.JacksonSerializer;
@@ -34,16 +50,16 @@ public class JacksonSerializerTest {
     public void testEncode() throws Exception {
         //序列化null
         boolean error = false;
-        try{
-            jacksonSerializer.encode(null,null);
-        }catch (SofaRpcException e){
+        try {
+            jacksonSerializer.encode(null, null);
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
 
         //序列化字符串
-        AbstractByteBuf byteBuf = jacksonSerializer.encode("xxxyyy",null);
-        String res = (String)jacksonSerializer.decode(byteBuf,String.class,null);
+        AbstractByteBuf byteBuf = jacksonSerializer.encode("xxxyyy", null);
+        String res = (String) jacksonSerializer.decode(byteBuf, String.class, null);
         Assert.assertEquals("xxxyyy", res);
 
         //序列化对象
@@ -53,8 +69,8 @@ public class JacksonSerializerTest {
         echo.setName("name");
         Echo2 echo2 = new Echo2("1111");
         echo.setEcho2(echo2);
-        AbstractByteBuf echoByteBuf = jacksonSerializer.encode(echo,null);
-        Echo echoRes = (Echo)jacksonSerializer.decode(echoByteBuf,Echo.class,null);
+        AbstractByteBuf echoByteBuf = jacksonSerializer.encode(echo, null);
+        Echo echoRes = (Echo) jacksonSerializer.decode(echoByteBuf, Echo.class, null);
         assert echoRes != null;
         Assert.assertEquals(echoRes.getName(), "name");
         Assert.assertEquals(echoRes.isDel(), false);
@@ -63,8 +79,8 @@ public class JacksonSerializerTest {
 
         //序列化日期
         Date date = new Date();
-        AbstractByteBuf dateByteBuf = jacksonSerializer.encode(date,null);
-        Date dateRes = (Date)jacksonSerializer.decode(dateByteBuf,Date.class,null);
+        AbstractByteBuf dateByteBuf = jacksonSerializer.encode(date, null);
+        Date dateRes = (Date) jacksonSerializer.decode(dateByteBuf, Date.class, null);
         Assert.assertEquals(dateRes.getTime(), date.getTime());
 
         SofaRequest sofaRequest = new SofaRequest();
@@ -106,13 +122,13 @@ public class JacksonSerializerTest {
         Assert.assertEquals(newRequest.getMethodName(), request.getMethodName());
         Assert.assertArrayEquals(newRequest.getMethodArgSigs(), request.getMethodArgSigs());
         Assert.assertEquals(newRequest.getMethodArgs().length, request.getMethodArgs().length);
-        Assert.assertEquals("jackson.Echo",newRequest.getMethodArgSigs()[0]);
+        Assert.assertEquals("jackson.Echo", newRequest.getMethodArgSigs()[0]);
         Assert.assertEquals("111", ((Echo) newRequest.getMethodArgs()[0]).getName());
         Assert.assertEquals("test", newRequest.getMethodArgs()[1]);
         Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
         Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
         Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
-                request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
 
         // null request
         head = new HashMap<String, String>(10);
@@ -209,12 +225,12 @@ public class JacksonSerializerTest {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(EchoService.class.getName());
         request.setMethodName("checkOut");
-        request.setMethod(EchoService.class.getMethod("checkOut", new Class[]{Echo.class,String.class}));
+        request.setMethod(EchoService.class.getMethod("checkOut", new Class[] { Echo.class, String.class }));
         Echo echo = new Echo();
         echo.setName("111");
         echo.setDel(true);
-        request.setMethodArgs(new Object[] {echo,"test"});
-        request.setMethodArgSigs(new String[] { Echo.class.getCanonicalName(),String.class.getCanonicalName() });
+        request.setMethodArgs(new Object[] { echo, "test" });
+        request.setMethodArgSigs(new String[] { Echo.class.getCanonicalName(), String.class.getCanonicalName() });
         request.setTargetServiceUniqueName(EchoService.class.getName() + ":1.0");
         request.setTargetAppName("targetApp");
         request.setSerializeType((byte) 12);
@@ -243,4 +259,4 @@ public class JacksonSerializerTest {
         return request;
     }
 
-} 
+}

@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.alipay.sofa.rpc.codec.jackson;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
@@ -26,10 +42,10 @@ import java.util.Map;
 @Extension(value = "jackson", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    protected ObjectMapper objectMapper = new ObjectMapper();
+    protected ObjectMapper            objectMapper            = new ObjectMapper();
     protected JacksonSerializerHelper jacksonSerializerHelper = new JacksonSerializerHelper();
 
-    public JacksonSerializer(){
+    public JacksonSerializer() {
         objectMapper.enableDefaultTyping();
     }
 
@@ -48,11 +64,13 @@ public class JacksonSerializer extends AbstractSerializer {
         }
     }
 
-    protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context) throws SofaRpcException {
-        return encode(sofaRequest.getMethodArgs(),context);
+    protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
+        throws SofaRpcException {
+        return encode(sofaRequest.getMethodArgs(), context);
     }
 
-    protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context) throws SofaRpcException {
+    protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
+        throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
             // 框架异常：错误则body序列化的是错误字符串
@@ -83,11 +101,11 @@ public class JacksonSerializer extends AbstractSerializer {
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
         } else if (clazz == String.class) {
-            if(data == null){
+            if (data == null) {
                 return StringSerializer.decode(new byte[0]);
             }
             return StringSerializer.decode(data.array());
-        } else{
+        } else {
             if (data == null || data.readableBytes() == 0) {
                 try {
                     Constructor constructor = clazz.getDeclaredConstructor();
@@ -98,7 +116,7 @@ public class JacksonSerializer extends AbstractSerializer {
                 }
             } else {
                 try {
-                    return objectMapper.readValue(data.array(),clazz);
+                    return objectMapper.readValue(data.array(), clazz);
                 } catch (Exception e) {
                     throw buildDeserializeError("An error occurred while deserializing " + clazz.getName(), e);
                 }
@@ -153,14 +171,14 @@ public class JacksonSerializer extends AbstractSerializer {
         }
 
         Class[] requestClass = jacksonSerializerHelper.getReqClass(targetService,
-                sofaRequest.getMethodName());
+            sofaRequest.getMethodName());
 
-        Object[] args = ((ArrayList)decode(data,ArrayList.class,null)).toArray();
+        Object[] args = ((ArrayList) decode(data, ArrayList.class, null)).toArray();
         String[] argSigs = new String[requestClass.length];
-        if(args.length == 0){
+        if (args.length == 0) {
             args = new Object[requestClass.length];
             for (int i = 0; i < requestClass.length; i++) {
-                args[i] = decode(null,requestClass[i],null);
+                args[i] = decode(null, requestClass[i], null);
             }
         }
         for (int i = 0; i < requestClass.length; i++) {
@@ -209,6 +227,5 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaResponse.setAppResponse(pbRes);
         }
     }
-
 
 }
