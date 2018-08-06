@@ -152,7 +152,7 @@ public class JacksonSerializerTest {
         error = false;
         try {
             jacksonSerializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, head);
-        }catch (SofaRpcException e){
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
@@ -168,7 +168,7 @@ public class JacksonSerializerTest {
         error = false;
         try {
             jacksonSerializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, head);
-        }catch (SofaRpcException e){
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
@@ -281,7 +281,7 @@ public class JacksonSerializerTest {
         error = false;
         try {
             jacksonSerializer.decode(data, newResponse, head);
-        }catch (SofaRpcException e){
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
@@ -300,7 +300,7 @@ public class JacksonSerializerTest {
         error = false;
         try {
             jacksonSerializer.decode(data, newResponse, head);
-        }catch (SofaRpcException e){
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
@@ -310,16 +310,16 @@ public class JacksonSerializerTest {
     public void testDecodeExceptions() throws NoSuchMethodException {
         boolean error = false;
         try {
-            jacksonSerializer.decode(null,null, null);
-        }catch (SofaRpcException e){
+            jacksonSerializer.decode(null, null, null);
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
 
         error = false;
         try {
-            jacksonSerializer.decode(null,Object[].class, null);
-        }catch (SofaRpcException e){
+            jacksonSerializer.decode(null, Object[].class, null);
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
@@ -327,8 +327,8 @@ public class JacksonSerializerTest {
         error = false;
         Object o = null;
         try {
-            jacksonSerializer.decode(null,o, null);
-        }catch (SofaRpcException e){
+            jacksonSerializer.decode(null, o, null);
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
@@ -336,8 +336,8 @@ public class JacksonSerializerTest {
         error = false;
         o = String.class;
         try {
-            jacksonSerializer.decode(null,o, null);
-        }catch (SofaRpcException e){
+            jacksonSerializer.decode(null, o, null);
+        } catch (SofaRpcException e) {
             error = true;
         }
         Assert.assertTrue(error);
