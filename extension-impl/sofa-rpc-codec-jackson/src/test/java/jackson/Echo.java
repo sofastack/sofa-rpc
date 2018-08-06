@@ -4,6 +4,7 @@ package jackson;
  * @author 景竹 2018/7/29
  */
 public class Echo {
+
     private String name;
     private int age;
     private boolean isDel;

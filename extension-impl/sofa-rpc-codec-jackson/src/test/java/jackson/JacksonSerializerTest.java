@@ -7,7 +7,9 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
+import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -89,7 +91,6 @@ public class JacksonSerializerTest {
         }
         Assert.assertTrue(error);
 
-
         Map<String, String> head = new HashMap<String, String>(10);
         head.put(RemotingConstants.HEAD_TARGET_SERVICE, EchoService.class.getCanonicalName() + ":1.0");
         head.put(RemotingConstants.HEAD_METHOD_NAME, "checkOut");
@@ -105,12 +106,103 @@ public class JacksonSerializerTest {
         Assert.assertEquals(newRequest.getMethodName(), request.getMethodName());
         Assert.assertArrayEquals(newRequest.getMethodArgSigs(), request.getMethodArgSigs());
         Assert.assertEquals(newRequest.getMethodArgs().length, request.getMethodArgs().length);
-        Assert.assertEquals("Echo2", ((Echo2) newRequest.getMethodArgs()[0]).getName());
-        Assert.assertEquals("String", ((Echo2) newRequest.getMethodArgs()[1]).getName());
+        Assert.assertEquals("jackson.Echo",newRequest.getMethodArgSigs()[0]);
+        Assert.assertEquals("111", ((Echo) newRequest.getMethodArgs()[0]).getName());
+        Assert.assertEquals("test", newRequest.getMethodArgs()[1]);
         Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
         Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
         Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
                 request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+
+        // null request
+        head = new HashMap<String, String>(10);
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, EchoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "checkOut");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        newRequest = new SofaRequest();
+        jacksonSerializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, head);
+        Assert.assertTrue(((Echo) newRequest.getMethodArgs()[0]).getName() == null);
+
+    }
+
+    @Test
+    public void testSofaResponse() throws Exception {
+        SofaResponse response = new SofaResponse();
+        response.setAppResponse("1233");
+        AbstractByteBuf data = jacksonSerializer.encode(response, null);
+        boolean error = false;
+        try {
+            jacksonSerializer.decode(data, SofaResponse.class, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
+        try {
+            jacksonSerializer.decode(data, null, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
+        try {
+            jacksonSerializer.decode(data, new SofaResponse(), null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        // success response
+        Map<String, String> head = new HashMap<String, String>(10);
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, EchoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "checkOut");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        response = new SofaResponse();
+        Echo2 echo2 = new Echo2();
+        echo2.setDel(true);
+        echo2.setName("123");
+        echo2.setAge(18);
+        response.setAppResponse(echo2);
+        data = jacksonSerializer.encode(response, null);
+        SofaResponse newResponse = new SofaResponse();
+        jacksonSerializer.decode(data, newResponse, head);
+        Assert.assertFalse(newResponse.isError());
+        Assert.assertEquals("123", ((Echo2) newResponse.getAppResponse()).getName());
+        Assert.assertEquals(18, ((Echo2) newResponse.getAppResponse()).getAge());
+        Assert.assertEquals(true, ((Echo2) newResponse.getAppResponse()).isDel());
+
+        // null response
+        head = new HashMap<String, String>(8);
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, EchoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "checkOut");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        newResponse = new SofaResponse();
+        jacksonSerializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newResponse, head);
+        Assert.assertFalse(newResponse.isError());
+        Assert.assertNotNull(newResponse.getAppResponse());
+        assert ((Echo2) newResponse.getAppResponse()).getName() == null;
+
+        // error response
+        head = new HashMap<String, String>(10);
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, EchoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "checkOut");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
+        response = new SofaResponse();
+        response.setErrorMsg("1233");
+        data = jacksonSerializer.encode(response, null);
+        newResponse = new SofaResponse();
+        jacksonSerializer.decode(data, newResponse, head);
+        Assert.assertTrue(newResponse.isError());
+        Assert.assertEquals(response.getErrorMsg(), newResponse.getErrorMsg());
     }
 
     private SofaRequest buildRequest() throws NoSuchMethodException {

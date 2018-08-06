@@ -15,17 +15,17 @@ public class JacksonSerializerHelper {
     /**
      * 请求参数类型缓存 {service+method:class}
      */
-    private final ConcurrentHashMap<String, Class> requestClassCache    = new ConcurrentHashMap<String, Class>();
+    private final ConcurrentHashMap<String, Class[]> requestClassCache    = new ConcurrentHashMap();
 
     /**
      * 返回结果类型缓存 {service+method:class}
      */
-    private final ConcurrentHashMap<String, Class> responseClassCache   = new ConcurrentHashMap<String, Class>();
+    private final ConcurrentHashMap<String, Class> responseClassCache   = new ConcurrentHashMap();
 
-    public Class getReqClass(String service, String methodName) {
+    public Class[] getReqClass(String service, String methodName) {
 
         String key = buildMethodKey(service, methodName);
-        Class reqClass = requestClassCache.get(key);
+        Class[] reqClass = requestClassCache.get(key);
         if (reqClass == null) {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
@@ -52,13 +52,8 @@ public class JacksonSerializerHelper {
             throw new SofaRpcRuntimeException("Cannot found method: " + clazz.getName() + "." + methodName);
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
-        if (parameterTypes == null
-                || parameterTypes.length != 1) {
-            throw new SofaRpcRuntimeException("class " + clazz.getName()
-                    + ", only support one parameter!");
-        }
-        Class reqClass = parameterTypes[0];
-        requestClassCache.put(key, reqClass);
+        requestClassCache.put(key, parameterTypes);
+        //set return type
         Class resClass = pbMethod.getReturnType();
         if (resClass == void.class) {
             throw new SofaRpcRuntimeException("class " + clazz.getName()

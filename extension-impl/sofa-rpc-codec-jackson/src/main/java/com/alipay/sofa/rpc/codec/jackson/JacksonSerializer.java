@@ -16,6 +16,7 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,6 +28,10 @@ public class JacksonSerializer extends AbstractSerializer {
 
     protected ObjectMapper objectMapper = new ObjectMapper();
     protected JacksonSerializerHelper jacksonSerializerHelper = new JacksonSerializerHelper();
+
+    public JacksonSerializer(){
+        objectMapper.enableDefaultTyping();
+    }
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
@@ -44,7 +49,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context) throws SofaRpcException {
-        return encode(sofaRequest.getMethodArgs(), context);
+        return encode(sofaRequest.getMethodArgs(),context);
     }
 
     protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context) throws SofaRpcException {
@@ -78,8 +83,11 @@ public class JacksonSerializer extends AbstractSerializer {
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
         } else if (clazz == String.class) {
+            if(data == null){
+                return StringSerializer.decode(new byte[0]);
+            }
             return StringSerializer.decode(data.array());
-        } else {
+        } else{
             if (data == null || data.readableBytes() == 0) {
                 try {
                     Constructor constructor = clazz.getDeclaredConstructor();
@@ -144,11 +152,22 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
         }
 
-        Class requestClass = jacksonSerializerHelper.getReqClass(targetService,
+        Class[] requestClass = jacksonSerializerHelper.getReqClass(targetService,
                 sofaRequest.getMethodName());
-        Object pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(new Object[] { pbReq });
-        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
+
+        Object[] args = ((ArrayList)decode(data,ArrayList.class,null)).toArray();
+        String[] argSigs = new String[requestClass.length];
+        if(args.length == 0){
+            args = new Object[requestClass.length];
+            for (int i = 0; i < requestClass.length; i++) {
+                args[i] = decode(null,requestClass[i],null);
+            }
+        }
+        for (int i = 0; i < requestClass.length; i++) {
+            argSigs[i] = requestClass[i].getName();
+        }
+        sofaRequest.setMethodArgs(args);
+        sofaRequest.setMethodArgSigs(argSigs);
     }
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,

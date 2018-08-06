@@ -11,5 +11,5 @@ public interface EchoService {
      * @param name the name
      * @return the int
      */
-    int checkOut(Echo echo,String name);
+    Echo2 checkOut(Echo echo,String name);
 }
