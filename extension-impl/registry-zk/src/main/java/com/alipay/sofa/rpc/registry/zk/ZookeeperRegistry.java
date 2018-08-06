@@ -240,7 +240,7 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void destroy(DestroyHook hook) {
-        hook.postDestroy();
+        hook.preDestroy();
         destroy();
         hook.postDestroy();
     }

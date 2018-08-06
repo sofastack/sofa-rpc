@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.Iterator;
 
 import static com.alipay.sofa.rpc.common.json.JSON.getSerializeFields;
 
@@ -60,7 +61,7 @@ public class BeanSerializer {
      * @param bean    要序列化的对象
      * @param addType 是否增加类型标识
      * @return 序列化后的结果，可能是string，number，boolean，list或者map等
-     * @throws NullPointerException 如果非空字段为空的化
+     * @throws NullPointerException 如果非空字段为空的话
      */
     public static Object serialize(Object bean, boolean addType) throws NullPointerException {
         if (bean == null) {
@@ -84,8 +85,11 @@ public class BeanSerializer {
             return array;
         } else if (bean instanceof Map) {
             Map map = (Map) bean;
-            for (Object key : map.keySet()) {
-                map.put(key, serialize(map.get(key), addType));
+            Iterator itr = map.entrySet().iterator();
+            Map.Entry entry = null;
+            while (itr.hasNext()) {
+                entry = (Map.Entry) itr.next();
+                map.put(entry.getKey(), serialize(entry.getValue(), addType));
             }
             return map;
         } else if (bean instanceof Date) {
