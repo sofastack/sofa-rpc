@@ -157,7 +157,7 @@ public class JacksonSerializerTest {
         }
         Assert.assertTrue(error);
 
-        //Exception HEAD_METHOD_NAME is null
+        //Exception： HEAD_METHOD_NAME is null
         head = new HashMap<String, String>(10);
         head.put(RemotingConstants.HEAD_TARGET_SERVICE, EchoService.class.getCanonicalName() + ":1.0");
         head.put(RemotingConstants.HEAD_METHOD_NAME, null);
