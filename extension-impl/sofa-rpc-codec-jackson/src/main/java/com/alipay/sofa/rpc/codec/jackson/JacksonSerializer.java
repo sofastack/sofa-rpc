@@ -221,7 +221,7 @@ public class JacksonSerializer extends AbstractSerializer {
             String errorMessage = (String) decode(data, String.class, head);
             sofaResponse.setErrorMsg(errorMessage);
         } else {
-            // 根据接口+方法名找到参数类型
+            // 根据接口 + 方法名找到参数类型
             Class responseClass = jacksonSerializerHelper.getResClass(targetService, methodName);
             Object pbRes = decode(data, responseClass, head);
             sofaResponse.setAppResponse(pbRes);
