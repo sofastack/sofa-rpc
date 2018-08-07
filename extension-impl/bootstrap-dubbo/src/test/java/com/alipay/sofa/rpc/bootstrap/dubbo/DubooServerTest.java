@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
 import com.alibaba.dubbo.rpc.RpcContext;
+import com.alibaba.dubbo.rpc.service.GenericService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoServiceImpl;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -52,38 +53,43 @@ public class DubooServerTest {
     @Test
     //同步调用,直连
     public void testSync() {
-        // 只有1个线程 执行
-        ServerConfig serverConfig = new ServerConfig()
-            .setStopTimeout(60000)
-            .setPort(20880)
-            .setProtocol("dubbo")
-            .setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
-        // 发布一个服务，每个请求要执行1秒
-        ApplicationConfig serverApplacation = new ApplicationConfig();
-        serverApplacation.setAppName("server");
-        providerConfig = new ProviderConfig<DemoService>()
-            .setInterfaceId(DemoService.class.getName())
-            .setRef(new DemoServiceImpl())
-            .setBootstrap("dubbo")
-            .setServer(serverConfig)
-            // .setParameter(RpcConstants.CONFIG_HIDDEN_KEY_WARNING, "false")
-            .setRegister(false).setApplication(serverApplacation);
-        providerConfig.export();
+        try {
+            // 只有1个线程 执行
+            ServerConfig serverConfig = new ServerConfig()
+                .setStopTimeout(60000)
+                .setPort(20880)
+                .setProtocol("dubbo")
+                .setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
-        ApplicationConfig clientApplication = new ApplicationConfig();
-        clientApplication.setAppName("client");
-        consumerConfig = new ConsumerConfig<DemoService>()
-            .setInterfaceId(DemoService.class.getName())
-            .setDirectUrl("dubbo://127.0.0.1:20880")
-            .setBootstrap("dubbo")
-            .setTimeout(30000)
-            .setRegister(false).setProtocol("dubbo").setApplication(clientApplication);
-        final DemoService demoService = consumerConfig.refer();
+            // 发布一个服务，每个请求要执行1秒
+            ApplicationConfig serverApplacation = new ApplicationConfig();
+            serverApplacation.setAppName("server");
+            providerConfig = new ProviderConfig<DemoService>()
+                .setInterfaceId(DemoService.class.getName())
+                .setRef(new DemoServiceImpl())
+                .setBootstrap("dubbo")
+                .setServer(serverConfig)
+                // .setParameter(RpcConstants.CONFIG_HIDDEN_KEY_WARNING, "false")
+                .setRegister(false).setApplication(serverApplacation);
+            providerConfig.export();
 
-        String result = demoService.sayHello("xxx");
-        Assert.assertTrue(result.equalsIgnoreCase("hello xxx"));
+            ApplicationConfig clientApplication = new ApplicationConfig();
+            clientApplication.setAppName("client");
+            consumerConfig = new ConsumerConfig<DemoService>()
+                .setInterfaceId(DemoService.class.getName())
+                .setDirectUrl("dubbo://127.0.0.1:20880")
+                .setBootstrap("dubbo")
+                .setTimeout(30000)
+                .setRegister(false).setProtocol("dubbo").setApplication(clientApplication);
+            final DemoService demoService = consumerConfig.refer();
 
+            String result = demoService.sayHello("xxx");
+            Assert.assertTrue(result.equalsIgnoreCase("hello xxx"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.assertTrue(false);
+        }
     }
 
     @Test
@@ -189,6 +195,47 @@ public class DubooServerTest {
         }
 
         Assert.assertEquals("Hello xxx", futureResult);
+
+    }
+
+    @Test
+    //同步泛化调用,直连
+    public void testGenericSync() {
+        // 只有1个线程 执行
+        ServerConfig serverConfig = new ServerConfig()
+            .setStopTimeout(60000)
+            .setPort(20880)
+            .setProtocol("dubbo")
+            .setQueues(100).setCoreThreads(1).setMaxThreads(2);
+
+        // 发布一个服务，每个请求要执行1秒
+        ApplicationConfig serverApplacation = new ApplicationConfig();
+        serverApplacation.setAppName("server");
+        providerConfig = new ProviderConfig<DemoService>()
+            .setInterfaceId(DemoService.class.getName())
+            .setRef(new DemoServiceImpl())
+            .setBootstrap("dubbo")
+            .setServer(serverConfig)
+            // .setParameter(RpcConstants.CONFIG_HIDDEN_KEY_WARNING, "false")
+            .setRegister(false).setApplication(serverApplacation);
+        providerConfig.export();
+
+        ApplicationConfig clientApplication = new ApplicationConfig();
+        clientApplication.setAppName("client");
+        consumerConfig = new ConsumerConfig<DemoService>()
+            .setInterfaceId(DemoService.class.getName())
+            .setDirectUrl("dubbo://127.0.0.1:20880")
+            .setBootstrap("dubbo")
+            .setTimeout(30000)
+            .setRegister(false)
+            .setProtocol("dubbo")
+            .setApplication(clientApplication)
+            .setGeneric(true);
+        final GenericService demoService = (GenericService) consumerConfig.refer();
+
+        String result = (String) demoService.$invoke("sayHello", new String[] { "java.lang.String" },
+            new Object[] { "xxx" });
+        Assert.assertEquals(result, "Hello xxx");
 
     }
 
