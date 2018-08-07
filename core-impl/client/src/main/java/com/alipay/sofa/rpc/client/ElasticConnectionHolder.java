@@ -36,7 +36,9 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PRE
  * 弹性长连接，可按百分比配置以及按个数配置
  *
  * @author <a href=mailto:liangyuanpengem@163.com>LiangYuanPeng</a>
+ * @since 5.5.0
  */
+
 @Extension("elastic")
 public class ElasticConnectionHolder extends AllConnectConnectionHolder {
 

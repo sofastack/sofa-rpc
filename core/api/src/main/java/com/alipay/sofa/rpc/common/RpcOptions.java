@@ -360,13 +360,13 @@ public class RpcOptions {
     /**
      * 初始化连接时建立连接的百分比
      *
-     * @since 5.4.1
+     * @since 5.5.0
      */
     public static final String CONSUMER_CONNECT_ELASTIC_PRECENT         = "consumer.connect.elastic.precent";
     /**
      * 初始化连接时建立连接的个数
      *
-     * @since 5.4.1
+     * @since 5.5.0
      */
     public static final String CONCUMER_CONNECT_ELASTIC_SIZE            = "consumer.connect.elastic.size";
 
