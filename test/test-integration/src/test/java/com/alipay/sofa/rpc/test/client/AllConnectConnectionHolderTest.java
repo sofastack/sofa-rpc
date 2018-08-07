@@ -16,10 +16,10 @@
  */
 package com.alipay.sofa.rpc.test.client;
 
+import com.alipay.sofa.rpc.client.AllConnectConnectionHolder;
 import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ProviderHelper;
-import com.alipay.sofa.rpc.client.AllConnectConnectionHolder;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
