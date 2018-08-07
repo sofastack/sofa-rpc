@@ -406,23 +406,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
             int connectTimeout = consumerConfig.getConnectTimeout();
             for (final ProviderInfo providerInfo : providerInfoList) {
-                final ClientTransportConfig config = providerToClientConfig(providerInfo);
-                initPool.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        ClientTransport transport = ClientTransportFactory.getClientTransport(config);
-                        if (consumerConfig.isLazy()) {
-                            uninitializedConnections.put(providerInfo, transport);
-                            latch.countDown();
-                        } else {
-                            try {
-                                initClientTransport(interfaceId, providerInfo, transport);
-                            } finally {
-                                latch.countDown(); // 连上或者抛异常
-                            }
-                        }
-                    }
-                });
+                initClientRunnable(initPool, latch, providerInfo);
             }
 
             try {
