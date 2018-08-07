@@ -17,21 +17,14 @@
 package jackson;
 
 /**
- * @author 景竹 2018/7/29
+ * @author 景竹 2018/7/29 since 5.5.0
  */
-public class Echo2 {
-
-    public Echo2(String name) {
-        this.name = name;
-    }
-
-    public Echo2() {
-        this.name = name;
-    }
+public class Echo {
 
     private String  name;
     private int     age;
     private boolean isDel;
+    private Echo2   echo2;
 
     public String getName() {
         return name;
@@ -55,5 +48,13 @@ public class Echo2 {
 
     public void setDel(boolean del) {
         isDel = del;
+    }
+
+    public Echo2 getEcho2() {
+        return echo2;
+    }
+
+    public void setEcho2(Echo2 echo2) {
+        this.echo2 = echo2;
     }
 }

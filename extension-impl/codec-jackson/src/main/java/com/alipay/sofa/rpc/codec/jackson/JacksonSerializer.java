@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author 景竹 2018/7/28
+ * @author 景竹 2018/7/28  since 5.5.0
  */
 @Extension(value = "jackson", code = 12)
 public class JacksonSerializer extends AbstractSerializer {

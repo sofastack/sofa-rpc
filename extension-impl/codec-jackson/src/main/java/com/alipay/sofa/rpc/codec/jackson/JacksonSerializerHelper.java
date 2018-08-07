@@ -24,7 +24,7 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author 景竹 2018/7/28
+ * @author 景竹 2018/7/28  since 5.5.0
  */
 public class JacksonSerializerHelper {
 

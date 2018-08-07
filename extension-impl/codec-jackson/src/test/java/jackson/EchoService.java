@@ -17,7 +17,7 @@
 package jackson;
 
 /**
- * @author 景竹 2018/7/29
+ * @author 景竹 2018/7/29 since 5.5.0
  */
 public interface EchoService {
 
