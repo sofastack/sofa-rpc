@@ -267,7 +267,7 @@ public class JacksonSerializerTest {
         Assert.assertTrue(newResponse.isError());
         Assert.assertEquals("test", newResponse.getErrorMsg());
 
-        //Exception:HEAD_TARGET_SERVICE is null
+        //Exception: HEAD_TARGET_SERVICE is null
         head = new HashMap<String, String>(10);
         head.put(RemotingConstants.HEAD_TARGET_SERVICE, null);
         head.put(RemotingConstants.HEAD_METHOD_NAME, "checkOut");
