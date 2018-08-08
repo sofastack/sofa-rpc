@@ -225,7 +225,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     /**
-     * 从存活丢到亚健康列表
+     * 从亚健康丢到重试列表
      *
      * @param providerInfo Provider
      * @param transport    连接

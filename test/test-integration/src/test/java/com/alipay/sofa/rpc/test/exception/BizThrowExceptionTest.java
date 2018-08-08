@@ -52,36 +52,52 @@ public class BizThrowExceptionTest extends ActivelyDestroyTest {
             .setRegister(false);
         providerConfig.export();
 
-        ConsumerConfig<TestExceptionService> consumerConfig = new ConsumerConfig<TestExceptionService>()
-            .setInterfaceId(TestExceptionService.class.getName())
-            .setDirectUrl("bolt://127.0.0.1:22222")
-            .setTimeout(1000)
-            .setRegister(false);
-        final TestExceptionService service = consumerConfig.refer();
+        for (String proxy : new String[] { "jdk", "javassist" }) {
+            ConsumerConfig<TestExceptionService> consumerConfig = new ConsumerConfig<TestExceptionService>()
+                .setInterfaceId(TestExceptionService.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:22222")
+                .setTimeout(1000)
+                .setProxy(proxy)
+                .setRepeatedReferLimit(-1)
+                .setRegister(false);
+            final TestExceptionService service = consumerConfig.refer();
 
-        try {
-            service.throwRuntimeException();
-        } catch (Throwable e) {
-            Assert.assertTrue(e instanceof RuntimeException);
-            Assert.assertEquals(e.getMessage(), "RuntimeException");
-        }
-        try {
-            service.throwException();
-        } catch (Throwable e) {
-            Assert.assertTrue(e instanceof Exception);
-            Assert.assertEquals(e.getMessage(), "Exception");
-        }
-        try {
-            service.throwSofaException();
-        } catch (Throwable e) {
-            Assert.assertTrue(e instanceof SofaRpcException);
-            Assert.assertEquals(e.getMessage(), "SofaRpcException");
-        }
-        try {
-            service.throwDeclaredException();
-        } catch (Throwable e) {
-            Assert.assertTrue(e instanceof TestException);
-            Assert.assertEquals(e.getMessage(), "TestException");
+            try {
+                service.throwRuntimeException();
+                Assert.fail();
+            } catch (Throwable e) {
+                Assert.assertTrue(e instanceof RuntimeException);
+                Assert.assertEquals(e.getMessage(), "RuntimeException");
+            }
+            try {
+                service.throwException();
+                Assert.fail();
+            } catch (Throwable e) {
+                Assert.assertTrue(e instanceof Exception);
+                Assert.assertEquals(e.getMessage(), "Exception");
+            }
+            try {
+                service.throwSofaException();
+                Assert.fail();
+            } catch (Throwable e) {
+                Assert.assertTrue(e instanceof SofaRpcException);
+                Assert.assertEquals(e.getMessage(), "SofaRpcException");
+            }
+            try {
+                service.throwDeclaredException();
+                Assert.fail();
+            } catch (Throwable e) {
+                Assert.assertTrue(e instanceof TestException);
+                Assert.assertEquals(e.getMessage(), "TestException");
+            }
+
+            try {
+                service.throwDeclaredExceptionWithoutReturn();
+                Assert.fail();
+            } catch (Throwable e) {
+                Assert.assertTrue(e instanceof TestException);
+                Assert.assertEquals(e.getMessage(), "DeclaredExceptionWithoutReturn");
+            }
         }
     }
 }
