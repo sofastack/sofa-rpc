@@ -18,7 +18,7 @@ package com.alipay.sofa.rpc.registry.internal;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.registry.common.ConsulConstants;
-import com.alipay.sofa.rpc.registry.model.ConsulService2;
+import com.alipay.sofa.rpc.registry.model.HeartbeatService;
 import com.alipay.sofa.rpc.registry.model.ConsulSession;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
@@ -40,11 +40,11 @@ public class TtlScheduler {
 
     private static final Logger            log                      = LoggerFactory.getLogger(TtlScheduler.class);
 
-    private final Set<ConsulService2>      services                 = Sets.newConcurrentHashSet();
+    private final Set<HeartbeatService>    services                 = Sets.newConcurrentHashSet();
 
     private final Set<ConsulSession>       sessions                 = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulService2>      failedservices           = Sets.newConcurrentHashSet();
+    private final Set<HeartbeatService>    failedservices           = Sets.newConcurrentHashSet();
 
     private final Set<ConsulSession>       failedsessions           = Sets.newConcurrentHashSet();
 
@@ -68,7 +68,7 @@ public class TtlScheduler {
             ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
     }
 
-    public void addHeartbeatServcie(final ConsulService2 service) {
+    public void addHeartbeatServcie(final HeartbeatService service) {
         services.add(service);
     }
 
@@ -76,11 +76,11 @@ public class TtlScheduler {
         sessions.add(session);
     }
 
-    public void removeHeartbeatServcie(final ConsulService2 service) {
+    public void removeHeartbeatServcie(final HeartbeatService service) {
         services.remove(service);
     }
 
-    public Set<ConsulService2> getFailedService() {
+    public Set<HeartbeatService> getFailedService() {
         return failedservices;
     }
 
@@ -97,7 +97,7 @@ public class TtlScheduler {
 
         @Override
         public void run() {
-            for (ConsulService2 service : services) {
+            for (HeartbeatService service : services) {
                 try {
                     String checkId = service.getNewService().getId();
                     if (!checkId.startsWith("service:")) {

@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.registry.common;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 
 import java.io.Serializable;
@@ -78,7 +80,7 @@ public class ConsulURL implements Serializable {
     }
 
     public ConsulURL(String protocol, String host, int port, String[] pairs) {
-        this(protocol, host, port, null, "", "", CollectionUtils.toStringMap(pairs));
+        this(protocol, host, port, null, "", "", CommonUtils.toStringMap(pairs));
     }
 
     public ConsulURL(String protocol, String host, int port, Map<String, String> parameters) {
@@ -90,7 +92,7 @@ public class ConsulURL implements Serializable {
     }
 
     public ConsulURL(String protocol, String host, int port, String path, String... pairs) {
-        this(protocol, host, port, path, "", "", CollectionUtils.toStringMap(pairs));
+        this(protocol, host, port, path, "", "", CommonUtils.toStringMap(pairs));
     }
 
     public ConsulURL(String protocol, String host, int port, String path, Map<String, String> parameters) {
@@ -103,7 +105,7 @@ public class ConsulURL implements Serializable {
 
     public ConsulURL(String protocol, String username, String host, int port, String path,
                      String... pairs) {
-        this(protocol, host, port, path, "", "", CollectionUtils.toStringMap(pairs));
+        this(protocol, host, port, path, "", "", CommonUtils.toStringMap(pairs));
     }
 
     public ConsulURL(String protocol, String host, int port, String path, String group,
@@ -767,17 +769,17 @@ public class ConsulURL implements Serializable {
     }
 
     public String getGroup() {
-        String group = getParameter(Constants.GROUP_KEY, Constants.DEFAULT_GROUP);
+        String group = getParameter(RpcConstants.CONFIG_KEY_UNIQUEID, RpcConstants.ADDRESS_DEFAULT_GROUP);
         return group;
     }
 
     public String getVersion() {
-        String group = getParameter(Constants.VERSION_KEY, Constants.DEFAULT_VERSION);
+        String group = getParameter(RpcConstants.CONFIG_KEY_RPC_VERSION, Constants.DEFAULT_VERSION);
         return group;
     }
 
     public String getServiceInterface() {
-        return getParameter(Constants.INTERFACE_KEY, path);
+        return getParameter(RpcConstants.CONFIG_KEY_INTERFACE, path);
     }
 
     public String toServiceString() {
@@ -785,7 +787,7 @@ public class ConsulURL implements Serializable {
     }
 
     public ConsulURL setServiceInterface(String service) {
-        return addParameter(Constants.INTERFACE_KEY, service);
+        return addParameter(RpcConstants.CONFIG_KEY_INTERFACE, service);
     }
 
     public static String encode(String value) {

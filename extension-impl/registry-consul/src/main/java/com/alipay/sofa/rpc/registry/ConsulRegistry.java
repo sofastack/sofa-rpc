@@ -31,7 +31,7 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.common.*;
-import com.alipay.sofa.rpc.registry.internal.ConsulClient;
+import com.alipay.sofa.rpc.registry.internal.ConsulManager;
 import com.alipay.sofa.rpc.registry.model.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
@@ -63,7 +63,7 @@ public class ConsulRegistry extends Registry {
     private final static Logger                                     LOGGER                 = LoggerFactory
                                                                                                .getLogger(ConsulRegistry.class);
 
-    private ConsulClient                                            client;
+    private ConsulManager                                           consulManager;
 
     private boolean                                                 ephemeralNode          = true;
 
@@ -161,12 +161,12 @@ public class ConsulRegistry extends Registry {
     @Override
     public void init() {
 
-        if (client != null) {
+        if (consulManager != null) {
             return;
         }
 
         String[] address = validateIp(registryConfig);
-        client = new ConsulClient(address[0], Integer.parseInt(address[1]));
+        consulManager = new ConsulManager(address[0], Integer.parseInt(address[1]));
         ephemeralNode = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_CREATE_EPHEMERAL));
         serviceCache = CacheBuilder.newBuilder().maximumSize(1000).build();
         notifyExecutor = Executors.newCachedThreadPool(
@@ -219,10 +219,10 @@ public class ConsulRegistry extends Registry {
 
                         ConsulURL providerConfigUrl = ConsulURL.valueOf(url);
                         ConsulService service = this.buildConsulHealthService(providerConfigUrl);
-                        client.registerService(service);
+                        consulManager.registerService(service);
                         ConsulEphemralNode ephemralNode = this.buildEphemralNode(providerConfigUrl,
                             ThrallRoleType.PROVIDER);
-                        client.registerEphemralNode(ephemralNode);
+                        consulManager.registerEphemralNode(ephemralNode);
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
                         }
@@ -261,7 +261,7 @@ public class ConsulRegistry extends Registry {
                     for (String url : urls) {
                         ConsulURL providerConfigUrl = ConsulURL.valueOf(url);
                         ConsulService service = this.buildConsulHealthService(providerConfigUrl);
-                        client.unregisterService(service);
+                        consulManager.unregisterService(service);
                     }
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
@@ -349,7 +349,7 @@ public class ConsulRegistry extends Registry {
                     serviceLookUper.setDaemon(true);
                     serviceLookUper.start();
                     ConsulEphemralNode ephemralNode = this.buildEphemralNode(consulURL, ThrallRoleType.CONSUMER);
-                    client.registerEphemralNode(ephemralNode);
+                    consulManager.registerEphemralNode(ephemralNode);
                 } else {
                     notifyListener(consulURL, listener);
                 }
@@ -435,7 +435,7 @@ public class ConsulRegistry extends Registry {
         Long lastConsulIndexId =
                 lookupGroupServices.get(group) == null ? 0L : lookupGroupServices.get(group);
         String serviceName = ConsulURLUtils.toServiceName(group);
-        ConsulServiceResp consulResp = client.lookupHealthService(serviceName, lastConsulIndexId);
+        ConsulServiceResp consulResp = consulManager.lookupHealthService(serviceName, lastConsulIndexId);
         if (consulResp != null) {
             List<ConsulService> consulServcies = consulResp.getConsulServices();
             boolean updated = consulServcies != null && !consulServcies.isEmpty()
@@ -499,7 +499,7 @@ public class ConsulRegistry extends Registry {
                         for (Map.Entry<String, List<ConsulURL>> entry : groupNewUrls.entrySet()) {
                             List<ConsulURL> oldUrls = groupCacheUrls.get(entry.getKey());
                             List<ConsulURL> newUrls = entry.getValue();
-                            boolean isSame = CollectionUtils.isSameCollection(newUrls, oldUrls);
+                            boolean isSame = CommonUtils.isSameCollection(newUrls, oldUrls);
                             if (!isSame) {
                                 groupCacheUrls.put(entry.getKey(), newUrls);
                                 Pair<ConsulURL, Set<NotifyListener>> listenerPair =

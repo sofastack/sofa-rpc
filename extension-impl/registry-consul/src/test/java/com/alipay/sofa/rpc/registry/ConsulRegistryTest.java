@@ -20,8 +20,8 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.*;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.ecwid.consul.v1.ConsulClient;
 import com.pszymczyk.consul.ConsulProcess;
-import com.pszymczyk.consul.ConsulStarter;
 import com.pszymczyk.consul.ConsulStarterBuilder;
 import com.pszymczyk.consul.infrastructure.Ports;
 import org.junit.AfterClass;
@@ -37,13 +37,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by dingpeng on 2018/7/25.
+ * Test of ConsulRegistry
+ *
+ * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
 public class ConsulRegistryTest {
 
     private static ConsulProcess  consul;
-
-    private static int            randomHttpsPort = Ports.nextAvailable();
 
     private static RegistryConfig registryConfig;
 
@@ -51,19 +51,11 @@ public class ConsulRegistryTest {
 
     @BeforeClass
     public static void setup() {
-        String path = "src/test/resources/ssl";
-        String certRootPath = new File(path).getAbsolutePath();
         //language=JSON
         String customConfiguration =
                 "{\n" +
                     "  \"datacenter\": \"dc-test\",\n" +
-                    "  \"log_level\": \"info\",\n" +
-                    "  \"ports\": {\n" +
-                    "    \"https\": " + randomHttpsPort + "\n" +
-                    "  },\n" +
-                    "  \"ca_file\": \"" + certRootPath + "/ca.cert\",\n" +
-                    "  \"key_file\": \"" + certRootPath + "/key.key\",\n" +
-                    "  \"cert_file\": \"" + certRootPath + "/key.crt\"\n" +
+                    "  \"log_level\": \"info\"\n" +
                     "}\n";
 
         consul = ConsulStarterBuilder.consulStarter()
@@ -82,7 +74,6 @@ public class ConsulRegistryTest {
 
         registry = (ConsulRegistry) RegistryFactory.getRegistry(registryConfig);
         registry.init();
-        //        Assert.assertTrue(registry.start());
     }
 
     @AfterClass

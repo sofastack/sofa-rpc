@@ -23,13 +23,13 @@ import com.ecwid.consul.v1.agent.model.NewService;
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
-public class ConsulService2 {
+public class HeartbeatService {
 
     private ConsulService service;
 
     private NewService    newService;
 
-    public ConsulService2(ConsulService service, NewService newService) {
+    public HeartbeatService(ConsulService service, NewService newService) {
         super();
         this.service = service;
         this.newService = newService;
@@ -68,7 +68,7 @@ public class ConsulService2 {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ConsulService2 other = (ConsulService2) obj;
+        HeartbeatService other = (HeartbeatService) obj;
         if (newService == null) {
             if (other.newService != null)
                 return false;
@@ -84,7 +84,7 @@ public class ConsulService2 {
 
     @Override
     public String toString() {
-        return "ConsulService2 [service=" + service + ", newService=" + newService + "]";
+        return "HeartbeatService [service=" + service + ", newService=" + newService + "]";
     }
 
 }

@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.registry.internal;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.registry.common.ConsulConstants;
 import com.alipay.sofa.rpc.registry.model.*;
+import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
 import com.ecwid.consul.v1.agent.model.NewService;
@@ -46,20 +47,20 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
-public class ConsulClient {
+public class ConsulManager {
 
-    private static final Logger                    log  = LoggerFactory.getLogger(ConsulClient.class);
+    private static final Logger            log  = LoggerFactory.getLogger(ConsulManager.class);
 
-    private final Object                           lock = new Object();
+    private final Object                   lock = new Object();
 
-    private final com.ecwid.consul.v1.ConsulClient client;
+    private final ConsulClient             client;
 
-    private final TtlScheduler                     ttlScheduler;
+    private final TtlScheduler             ttlScheduler;
 
-    private final ScheduledExecutorService         scheduleRegistry;
+    private final ScheduledExecutorService scheduleRegistry;
 
-    public ConsulClient(String host, int port) {
-        client = new com.ecwid.consul.v1.ConsulClient(host, port);
+    public ConsulManager(String host, int port) {
+        client = new ConsulClient(host, port);
         ttlScheduler = new TtlScheduler(client);
         scheduleRegistry = Executors.newScheduledThreadPool(1, new NamedThreadFactory("retryFailedTtl", true));
         scheduleRegistry.scheduleAtFixedRate(new Runnable() {
@@ -77,13 +78,13 @@ public class ConsulClient {
     }
 
     private void retryFailedTtl() {
-        Set<ConsulService2> failedService = ttlScheduler.getFailedService();
+        Set<HeartbeatService> failedService = ttlScheduler.getFailedService();
         Set<ConsulSession> failedSession = ttlScheduler.getFailedSession();
         if (failedSession.size() > 0 || failedService.size() > 0) {
             log.debug(String.format("retry to registry failed service %d or failed session %d", failedService.size(),
                 failedSession.size()));
-            for (ConsulService2 consulService2 : failedService) {
-                registerService(consulService2.getService());
+            for (HeartbeatService heartbeatService : failedService) {
+                registerService(heartbeatService.getService());
             }
             Set<Boolean> allSuccess = Sets.newHashSet();
             for (ConsulSession consulSession : failedSession) {
@@ -98,15 +99,15 @@ public class ConsulClient {
     public void registerService(ConsulService service) {
         NewService newService = service.getNewService();
         client.agentServiceRegister(newService);
-        ConsulService2 consulService2 = new ConsulService2(service, newService);
-        ttlScheduler.addHeartbeatServcie(consulService2);
+        HeartbeatService heartbeatService = new HeartbeatService(service, newService);
+        ttlScheduler.addHeartbeatServcie(heartbeatService);
     }
 
     public void unregisterService(ConsulService service) {
         NewService newService = service.getNewService();
         client.agentServiceDeregister(newService.getId());
-        ConsulService2 consulService2 = new ConsulService2(service, newService);
-        ttlScheduler.removeHeartbeatServcie(consulService2);
+        HeartbeatService heartbeatService = new HeartbeatService(service, newService);
+        ttlScheduler.removeHeartbeatServcie(heartbeatService);
     }
 
     public Boolean registerEphemralNode(ConsulEphemralNode ephemralNode) {

@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.common;
 
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.registry.model.ThrallRoleType;
 
 import java.util.HashMap;
@@ -51,10 +52,13 @@ public class ConsulURLUtils {
     }
 
     private static final Pattern ADDRESS_PATTERN =
-                                                         Pattern.compile("^\\d{1,3}(\\.\\d{1,3}){3}\\:\\d{1,5}$");
+                                                         Pattern
+                                                             .compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
 
     public static boolean isValidAddress(String address) {
-        return ADDRESS_PATTERN.matcher(address).matches();
+        String[] ipAndHost = StringUtils.split(address, ":");
+
+        return ipAndHost.length == 2 && ADDRESS_PATTERN.matcher(ipAndHost[0]).matches();
     }
 
     /**** help method *****/
