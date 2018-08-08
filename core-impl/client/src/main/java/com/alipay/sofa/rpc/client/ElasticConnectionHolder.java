@@ -131,8 +131,10 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
                     LOGGER.infoWithApp(appName, "asynConnectProviderInfoListSize:{}",
                         asynConnectProviderInfoList.size());
                 }
-                final ExecutorService executorService = Executors
-                    .newFixedThreadPool(asynConnectProviderInfoList.size(), namedThreadFactory);
+                final ExecutorService executorService = new ThreadPoolExecutor(5, 5,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(asynConnectProviderInfoList.size()),
+                    namedThreadFactory);
 
                 FutureTask<String> futureTask;
 
