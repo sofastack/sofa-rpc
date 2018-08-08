@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-extension-impl</artifactId>
-        <version>5.4.3</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>sofa-rpc-registry-consul</artifactId>
@@ -29,12 +29,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>18.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-remoting-resteasy</artifactId>
-            <version>5.4.3</version>
         </dependency>
 
         <dependency>

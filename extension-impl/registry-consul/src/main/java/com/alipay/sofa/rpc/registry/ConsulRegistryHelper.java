@@ -64,19 +64,19 @@ public class ConsulRegistryHelper {
                     }
                 }
                 sb.append(server.getProtocol()).append("://").append(host)
-                        .append(":").append(server.getPort()).append(server.getContextPath())
-                        .append("?uniqueId=").append(providerConfig.getUniqueId())
-                        .append(getKeyPairs("version", "1.0"))
-                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
-                        .append(getKeyPairs("delay", providerConfig.getDelay()))
-                        .append(getKeyPairs("id", providerConfig.getId()))
-                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
-                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_WEIGHT, providerConfig.getWeight()))
-                        .append(getKeyPairs("crossLang", providerConfig.getParameter("crossLang")))
-                        .append(getKeyPairs("accepts", server.getAccepts()))
-                        .append(getKeyPairs("interface", providerConfig.getInterfaceId()))
-                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME))
-                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()));
+                    .append(":").append(server.getPort()).append(server.getContextPath())
+                    .append("?uniqueId=").append(providerConfig.getUniqueId())
+                    .append(getKeyPairs("version", "1.0"))
+                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
+                    .append(getKeyPairs("delay", providerConfig.getDelay()))
+                    .append(getKeyPairs("id", providerConfig.getId()))
+                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
+                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_WEIGHT, providerConfig.getWeight()))
+                    .append(getKeyPairs("crossLang", providerConfig.getParameter("crossLang")))
+                    .append(getKeyPairs("accepts", server.getAccepts()))
+                    .append(getKeyPairs("interface", providerConfig.getInterfaceId()))
+                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME))
+                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()));
                 addCommonAttrs(sb);
                 urls.add(sb.toString());
             }
@@ -107,11 +107,11 @@ public class ConsulRegistryHelper {
         String startTimeStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME);
 
         if (StringUtils.isNotBlank(warmupTimeStr) && StringUtils.isNotBlank(warmupWeightStr)
-                && StringUtils.isNotBlank(startTimeStr)) {
+            && StringUtils.isNotBlank(startTimeStr)) {
 
             long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
             int warmupWeight = CommonUtils.parseInt(warmupWeightStr,
-                    Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
+                Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
             long startTime = CommonUtils.parseLong(startTimeStr, 0);
             long warmupEndTime = startTime + warmupTime;
 
@@ -137,18 +137,18 @@ public class ConsulRegistryHelper {
         StringBuilder sb = new StringBuilder(200);
         String host = SystemInfo.getLocalHost();
         sb.append(consumerConfig.getProtocol()).append("://").append(host).append("/")
-                .append(consumerConfig.getInterfaceId())
-                .append("?uniqueId=").append(consumerConfig.getUniqueId())
-                .append(getKeyPairs("version", "1.0"))
-                .append(getKeyPairs("pid", RpcRuntimeContext.PID))
-                //.append(getKeyPairs("randomPort", server.isRandomPort()))
-                .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
-                .append(getKeyPairs("id", consumerConfig.getId()))
-                .append(getKeyPairs("crossLang", consumerConfig.getParameter("crossLang")))
-                .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
-                .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
-                .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION, consumerConfig.getSerialization()))
-                .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME));
+            .append(consumerConfig.getInterfaceId())
+            .append("?uniqueId=").append(consumerConfig.getUniqueId())
+            .append(getKeyPairs("version", "1.0"))
+            .append(getKeyPairs("pid", RpcRuntimeContext.PID))
+            //.append(getKeyPairs("randomPort", server.isRandomPort()))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
+            .append(getKeyPairs("id", consumerConfig.getId()))
+            .append(getKeyPairs("crossLang", consumerConfig.getParameter("crossLang")))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION, consumerConfig.getSerialization()))
+            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.START_TIME));
         addCommonAttrs(sb);
         return sb.toString();
     }
@@ -200,7 +200,7 @@ public class ConsulRegistryHelper {
         List<ProviderInfo> result = new ArrayList<ProviderInfo>();
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
-                    && StringUtils.equals(consumerConfig.getUniqueId(),
+                && StringUtils.equals(consumerConfig.getUniqueId(),
                     providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
                 result.add(providerInfo);
             }
@@ -213,7 +213,7 @@ public class ConsulRegistryHelper {
         String protocol = consumerConfig.getProtocol();
         for (ConsulURL consulUrl : consulURLs) {
             if (consulUrl.getProtocol().equalsIgnoreCase(protocol)
-                    && StringUtils.equals(consumerConfig.getUniqueId(),
+                && StringUtils.equals(consumerConfig.getUniqueId(),
                     consulUrl.getParameter(ProviderInfoAttrs.ATTR_UNIQUEID))) {
                 result.add(consulUrl);
             }

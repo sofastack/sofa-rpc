@@ -35,27 +35,27 @@ public class CollectionUtils {
 
     private static final Comparator<String> SIMPLE_NAME_COMPARATOR = new Comparator<String>() {
 
-        public int compare(String s1, String s2) {
-            if (s1 == null && s2 == null) {
-                return 0;
-            }
-            if (s1 == null) {
-                return -1;
-            }
-            if (s2 == null) {
-                return 1;
-            }
-            int i1 = s1.lastIndexOf('.');
-            if (i1 >= 0) {
-                s1 = s1.substring(i1 + 1);
-            }
-            int i2 = s2.lastIndexOf('.');
-            if (i2 >= 0) {
-                s2 = s2.substring(i2 + 1);
-            }
-            return s1.compareToIgnoreCase(s2);
-        }
-    };
+                                                                       public int compare(String s1, String s2) {
+                                                                           if (s1 == null && s2 == null) {
+                                                                               return 0;
+                                                                           }
+                                                                           if (s1 == null) {
+                                                                               return -1;
+                                                                           }
+                                                                           if (s2 == null) {
+                                                                               return 1;
+                                                                           }
+                                                                           int i1 = s1.lastIndexOf('.');
+                                                                           if (i1 >= 0) {
+                                                                               s1 = s1.substring(i1 + 1);
+                                                                           }
+                                                                           int i2 = s2.lastIndexOf('.');
+                                                                           if (i2 >= 0) {
+                                                                               s2 = s2.substring(i2 + 1);
+                                                                           }
+                                                                           return s1.compareToIgnoreCase(s2);
+                                                                       }
+                                                                   };
 
     public static List<String> sortSimpleName(List<String> list) {
         if (list != null && list.size() > 0) {

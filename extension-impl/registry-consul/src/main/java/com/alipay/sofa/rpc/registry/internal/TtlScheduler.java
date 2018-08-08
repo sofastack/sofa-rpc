@@ -38,34 +38,34 @@ import java.util.concurrent.TimeUnit;
  */
 public class TtlScheduler {
 
-    private static final Logger log = LoggerFactory.getLogger(TtlScheduler.class);
+    private static final Logger            log                      = LoggerFactory.getLogger(TtlScheduler.class);
 
-    private final Set<ConsulService2> services = Sets.newConcurrentHashSet();
+    private final Set<ConsulService2>      services                 = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulSession> sessions = Sets.newConcurrentHashSet();
+    private final Set<ConsulSession>       sessions                 = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulService2> failedservices = Sets.newConcurrentHashSet();
+    private final Set<ConsulService2>      failedservices           = Sets.newConcurrentHashSet();
 
-    private final Set<ConsulSession> failedsessions = Sets.newConcurrentHashSet();
+    private final Set<ConsulSession>       failedsessions           = Sets.newConcurrentHashSet();
 
     private final ScheduledExecutorService heartbeatServiceExecutor = Executors.newScheduledThreadPool(1,
-            new NamedThreadFactory("CheckServiceTimer",
-                    true));
+                                                                        new NamedThreadFactory("CheckServiceTimer",
+                                                                            true));
 
     private final ScheduledExecutorService heartbeatSessionExecutor = Executors.newScheduledThreadPool(1,
-            new NamedThreadFactory("CheckSessionTimer",
-                    true));
+                                                                        new NamedThreadFactory("CheckSessionTimer",
+                                                                            true));
 
-    private final ConsulClient client;
+    private final ConsulClient             client;
 
     public TtlScheduler(ConsulClient client) {
         this.client = client;
         heartbeatServiceExecutor.scheduleAtFixedRate(new ConsulHeartbeatServiceTask(),
-                ConsulConstants.HEARTBEAT_CIRCLE,
-                ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
+            ConsulConstants.HEARTBEAT_CIRCLE,
+            ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
         heartbeatSessionExecutor.scheduleAtFixedRate(new ConsulHeartbeatSessionTask(),
-                ConsulConstants.HEARTBEAT_CIRCLE,
-                ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
+            ConsulConstants.HEARTBEAT_CIRCLE,
+            ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
     }
 
     public void addHeartbeatServcie(final ConsulService2 service) {

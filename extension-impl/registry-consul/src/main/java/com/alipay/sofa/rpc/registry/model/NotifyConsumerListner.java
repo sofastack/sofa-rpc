@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class NotifyConsumerListner implements NotifyListener {
 
-    private ConsulURL subscribeUrl;
+    private ConsulURL                        subscribeUrl;
 
     private AtomicReference<List<ConsulURL>> providerUrls;
 

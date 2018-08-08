@@ -60,12 +60,12 @@ public class ConsulRegistry extends Registry {
     /**
      * Logger
      */
-    private final static Logger LOGGER = LoggerFactory
-            .getLogger(ConsulRegistry.class);
+    private final static Logger                                     LOGGER                 = LoggerFactory
+                                                                                               .getLogger(ConsulRegistry.class);
 
-    private ConsulClient client;
+    private ConsulClient                                            client;
 
-    private boolean ephemeralNode = true;
+    private boolean                                                 ephemeralNode          = true;
 
     /**
      * 配置项：是否使用临时节点。<br>
@@ -74,34 +74,34 @@ public class ConsulRegistry extends Registry {
      * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
      * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
      */
-    public final static String PARAM_CREATE_EPHEMERAL = "createEphemeral";
+    public final static String                                      PARAM_CREATE_EPHEMERAL = "createEphemeral";
 
     /**
      * Root path of registry data
      */
-    private String rootPath;
+    private String                                                  rootPath;
 
     /**
      * 保存服务发布者的url
      */
-    private Map<ProviderConfig, List<String>> providerUrls = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private Map<ProviderConfig, List<String>>                       providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private Map<ConsumerConfig, String> consumerUrls = new ConcurrentHashMap<ConsumerConfig, String>();
+    private Map<ConsumerConfig, String>                             consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
 
-    private Cache<String, Map<String, List<ConsulURL>>> serviceCache;
+    private Cache<String, Map<String, List<ConsulURL>>>             serviceCache;
 
-    private final Map<String, Long> lookupGroupServices = Maps.newConcurrentMap();
+    private final Map<String, Long>                                 lookupGroupServices    = Maps.newConcurrentMap();
 
     private final Map<String, Pair<ConsulURL, Set<NotifyListener>>> notifyServiceListeners =
-            Maps.newConcurrentMap();
+                                                                                                   Maps.newConcurrentMap();
 
-    private final Set<String> serviceGroupLookUped = Sets
-            .newConcurrentHashSet();
+    private final Set<String>                                       serviceGroupLookUped   = Sets
+                                                                                               .newConcurrentHashSet();
 
-    private ExecutorService notifyExecutor;
+    private ExecutorService                                         notifyExecutor;
 
     /**
      * 注册中心配置
@@ -143,19 +143,19 @@ public class ConsulRegistry extends Registry {
 
     private ConsulService buildConsulHealthService(ConsulURL url) {
         return ConsulService.newSalukiService()//
-                .withAddress(url.getHost())//
-                .withPort(Integer.valueOf(url.getPort()).toString())//
-                .withName(ConsulURLUtils.toServiceName(url.getGroup()))//
-                .withTag(ConsulURLUtils.healthServicePath(url, ThrallRoleType.PROVIDER))//
-                .withId(url.getHost() + ":" + url.getPort() + "-" + url.getPath() + "-" + url.getVersion())//
-                .withCheckInterval(Integer.valueOf(ConsulConstants.TTL).toString()).build();
+            .withAddress(url.getHost())//
+            .withPort(Integer.valueOf(url.getPort()).toString())//
+            .withName(ConsulURLUtils.toServiceName(url.getGroup()))//
+            .withTag(ConsulURLUtils.healthServicePath(url, ThrallRoleType.PROVIDER))//
+            .withId(url.getHost() + ":" + url.getPort() + "-" + url.getPath() + "-" + url.getVersion())//
+            .withCheckInterval(Integer.valueOf(ConsulConstants.TTL).toString()).build();
     }
 
     private ConsulEphemralNode buildEphemralNode(ConsulURL url, ThrallRoleType roleType) {
         return ConsulEphemralNode.newEphemralNode().withUrl(url)//
-                .withEphemralType(roleType)//
-                .withCheckInterval(Integer.toString(ConsulConstants.TTL * 6))//
-                .build();
+            .withEphemralType(roleType)//
+            .withCheckInterval(Integer.toString(ConsulConstants.TTL * 6))//
+            .build();
     }
 
     @Override
@@ -170,7 +170,7 @@ public class ConsulRegistry extends Registry {
         ephemeralNode = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_CREATE_EPHEMERAL));
         serviceCache = CacheBuilder.newBuilder().maximumSize(1000).build();
         notifyExecutor = Executors.newCachedThreadPool(
-                new NamedThreadFactory("NotifyConsumerListener", true));
+            new NamedThreadFactory("NotifyConsumerListener", true));
     }
 
     @Override
@@ -211,7 +211,7 @@ public class ConsulRegistry extends Registry {
                     String providerPath = ConsulRegistryHelper.buildProviderPath(rootPath, config);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
                     }
                     for (String url : urls) {
                         //                        url = URLEncoder.encode(url, "UTF-8");
@@ -221,7 +221,7 @@ public class ConsulRegistry extends Registry {
                         ConsulService service = this.buildConsulHealthService(providerConfigUrl);
                         client.registerService(service);
                         ConsulEphemralNode ephemralNode = this.buildEphemralNode(providerConfigUrl,
-                                ThrallRoleType.PROVIDER);
+                            ThrallRoleType.PROVIDER);
                         client.registerEphemralNode(ephemralNode);
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
@@ -230,7 +230,7 @@ public class ConsulRegistry extends Registry {
                     providerUrls.put(config, urls);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName,
-                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
                     }
                 }
             } catch (Exception e) {
@@ -265,7 +265,7 @@ public class ConsulRegistry extends Registry {
                     }
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                                providerPath, "1"));
+                            providerPath, "1"));
                     }
                 }
             } catch (Exception e) {
@@ -306,7 +306,7 @@ public class ConsulRegistry extends Registry {
                 ConsulURL consulURL = ConsulURL.valueOf(url);
 
                 Iterator<Map.Entry<String, Map<String, List<ConsulURL>>>> it = serviceCache.asMap().entrySet()
-                        .iterator();
+                    .iterator();
 
                 Set<ProviderInfo> result = new HashSet<ProviderInfo>();
 
@@ -426,8 +426,8 @@ public class ConsulRegistry extends Registry {
         } catch (Exception t) {
             // 将失败的通知请求记录到失败列表，定时重试
             LOGGER.error(
-                    "Failed to notify for subscribe " + url + ", waiting for retry, cause: " + t.getMessage(),
-                    t);
+                "Failed to notify for subscribe " + url + ", waiting for retry, cause: " + t.getMessage(),
+                t);
         }
     }
 
@@ -439,7 +439,7 @@ public class ConsulRegistry extends Registry {
         if (consulResp != null) {
             List<ConsulService> consulServcies = consulResp.getConsulServices();
             boolean updated = consulServcies != null && !consulServcies.isEmpty()
-                    && consulResp.getConsulIndex() > lastConsulIndexId;
+                && consulResp.getConsulIndex() > lastConsulIndexId;
             if (updated) {
                 Map<String, List<ConsulURL>> groupProviderUrls = Maps.newConcurrentMap();
                 for (ConsulService service : consulServcies) {
@@ -464,7 +464,7 @@ public class ConsulRegistry extends Registry {
             for (String tag : service.getTags()) {
                 if (org.apache.commons.lang3.StringUtils.indexOf(tag, Constants.PROVIDERS_CATEGORY) != -1) {
                     String toUrlPath = org.apache.commons.lang3.StringUtils.substringAfter(tag,
-                            Constants.PROVIDERS_CATEGORY);
+                        Constants.PROVIDERS_CATEGORY);
                     ConsulURL consulUrl = ConsulURL.valueOf(ConsulURL.decode(toUrlPath));
                     return consulUrl;
                 }

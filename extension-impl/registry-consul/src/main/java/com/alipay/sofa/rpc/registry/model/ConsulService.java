@@ -86,12 +86,12 @@ public final class ConsulService {
     @Override
     public String toString() {
         return "Service{" + //
-                "name=" + name + //
-                ", id=" + id + //
-                ", address=" + address + //
-                ", port=" + port + //
-                ", interval=" + interval + //
-                ", tags=" + tags + '}';//
+            "name=" + name + //
+            ", id=" + id + //
+            ", address=" + address + //
+            ", port=" + port + //
+            ", interval=" + interval + //
+            ", tags=" + tags + '}';//
     }
 
     String toConsulRegistrationJson() {
@@ -143,12 +143,12 @@ public final class ConsulService {
 
     public static class Builder extends AbstractBuilder {
 
-        private String  name;
-        private String  id;
-        private String  address;
-        private Integer port;
+        private String      name;
+        private String      id;
+        private String      address;
+        private Integer     port;
         private Set<String> tags = new HashSet<String>();
-        private String interval;
+        private String      interval;
 
         public Builder withName(String name) {
             this.name = substituteEnvironmentVariables(name);

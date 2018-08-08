@@ -28,9 +28,9 @@ import com.ecwid.consul.v1.session.model.Session;
  */
 public final class ConsulEphemralNode {
 
-    private final ConsulURL url;
+    private final ConsulURL      url;
 
-    private final String interval;
+    private final String         interval;
 
     private final ThrallRoleType ephemralType;
 
@@ -106,9 +106,9 @@ public final class ConsulEphemralNode {
 
     public static class Builder extends AbstractBuilder {
 
-        private ConsulURL url;
+        private ConsulURL      url;
 
-        private String interval;
+        private String         interval;
 
         private ThrallRoleType ephemralType;
 

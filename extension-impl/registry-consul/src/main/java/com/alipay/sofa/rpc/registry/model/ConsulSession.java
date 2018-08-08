@@ -23,7 +23,7 @@ package com.alipay.sofa.rpc.registry.model;
  */
 public final class ConsulSession {
 
-    private String sessionId;
+    private String             sessionId;
 
     private ConsulEphemralNode ephemralNode;
 

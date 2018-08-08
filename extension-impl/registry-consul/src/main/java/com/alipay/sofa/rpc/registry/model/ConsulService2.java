@@ -27,7 +27,7 @@ public class ConsulService2 {
 
     private ConsulService service;
 
-    private NewService newService;
+    private NewService    newService;
 
     public ConsulService2(ConsulService service, NewService newService) {
         super();

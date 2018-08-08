@@ -1,1 +1,2 @@
 all=com.alipay.sofa.rpc.client.AllConnectConnectionHolder
+elastic=com.alipay.sofa.rpc.client.ElasticConnectionHolder
