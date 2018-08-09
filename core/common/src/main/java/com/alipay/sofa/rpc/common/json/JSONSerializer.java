@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.common.json;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -47,31 +48,39 @@ public class JSONSerializer {
      * @return Json格式字符串
      */
     public static String serialize(Object object, boolean addType) {
+        return serialize(object, addType, false);
+    }
+
+    private static String serialize(Object object, boolean addType, boolean isKey) {
+        String str = null;
         if (object == null) {
-            return "null";
+            str = "null";
         } else if (object instanceof CharSequence || object instanceof Character) { //TODO 去除特殊字符
             String tmp = object.toString();
             return '\"' + tmp.replace("\"", "\\\"").replace("\b", "\\b")
                 .replace("\t", "\\t").replace("\r", "\\r")
                 .replace("\f", "\\f").replace("\n", "\\n") + '\"';
         } else if (object instanceof Number || object instanceof Boolean) {
-            return object.toString();
+            str = object.toString();
         } else if (object instanceof Map) {
             StringBuilder sb = new StringBuilder();
             sb.append('{');
             Map map = (Map) object;
-            for (Object key : map.keySet()) {
-                Object value = map.get(key);
-                sb.append(serialize(key, addType)).append(':').append(serialize(value, addType)).append(',');
+            Iterator itr = map.entrySet().iterator();
+            Map.Entry entry = null;
+            while (itr.hasNext()) {
+                entry = (Map.Entry) itr.next();
+                sb.append(serialize(entry.getKey(), addType, true)).append(':')
+                    .append(serialize(entry.getValue(), addType)).append(',');
             }
             int last = sb.length() - 1;
             if (sb.charAt(last) == ',') {
                 sb.deleteCharAt(last);
             }
             sb.append('}');
-            return sb.toString();
+            str = sb.toString();
         } else if (object instanceof Collection) {
-            return serialize(((Collection) object).toArray(), addType);
+            str = serialize(((Collection) object).toArray(), addType);
         } else if (object.getClass().isArray()) {
             StringBuilder sb = new StringBuilder();
             sb.append('[');
@@ -85,11 +94,16 @@ public class JSONSerializer {
                 sb.deleteCharAt(last);
             }
             sb.append(']');
-            return sb.toString();
+            str = sb.toString();
         } else {
             //throw new IllegalArgumentException("Unsupported type " + object.getClass().getName() + ":" + object.toString());
             // 自定义对象，先转成map等
-            return serialize(BeanSerializer.serialize(object, addType), addType);
+            str = serialize(BeanSerializer.serialize(object, addType), addType);
+        }
+        if (isKey) {
+            return serialize(str, addType, true);
+        } else {
+            return str;
         }
     }
 

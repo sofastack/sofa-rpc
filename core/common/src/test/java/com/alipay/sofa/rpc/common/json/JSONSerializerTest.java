@@ -19,10 +19,7 @@ package com.alipay.sofa.rpc.common.json;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  *
@@ -115,5 +112,60 @@ public class JSONSerializerTest {
         Assert.assertEquals(json.get("b"), 1);
         Assert.assertEquals(json.get("c"), 1);
         Assert.assertEquals(json.get("d"), 9999999999l);
+    }
+
+    @Test
+    public void testSerializeMap() {
+        boolean error = false;
+        Map<Object, Object> bean = createTestMap();
+        try {
+            String s = JSONSerializer.serialize(bean, true);
+            Map dBean = (Map) JSONSerializer.deserialize(s);
+            String keyStr = null;
+            for (Map.Entry<Object, Object> entry : bean.entrySet()) {
+                keyStr = entry.getKey().toString();
+                if (!dBean.containsKey(keyStr)) {
+                    error = true;
+                    break;
+                }
+                if (!objectsEquals(entry.getValue(), dBean.get(keyStr))) {
+                    error = true;
+                    break;
+                }
+            }
+            Assert.assertFalse(error);
+
+            s = JSONSerializer.serialize(bean);
+            dBean = (Map) JSONSerializer.deserialize(s);
+            for (Map.Entry<Object, Object> entry : bean.entrySet()) {
+                keyStr = entry.getKey().toString();
+                if (!dBean.containsKey(entry.getKey().toString())) {
+                    error = true;
+                    break;
+                }
+                if (!objectsEquals(entry.getValue(), dBean.get(keyStr))) {
+                    error = true;
+                    break;
+                }
+            }
+            Assert.assertFalse(error);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+    }
+
+    private boolean objectsEquals(Object a, Object b) {
+        return (a == b) || (a != null && a.equals(b));
+    }
+
+    private Map<Object, Object> createTestMap() {
+        Map<Object, Object> map = new HashMap<Object, Object>();
+        map.put(1, "1");
+        map.put("2", 2);
+        map.put("true", true);
+        map.put(false, false);
+        map.put("null", null);
+        return map;
     }
 }
