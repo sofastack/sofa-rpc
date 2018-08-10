@@ -43,6 +43,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -61,36 +62,38 @@ public class ConsulRegistry extends Registry {
     /**
      * Logger
      */
-    private final static Logger                                     LOGGER                 = LoggerFactory
-                                                                                               .getLogger(ConsulRegistry.class);
+    private final static Logger                                               LOGGER                 = LoggerFactory
+                                                                                                         .getLogger(ConsulRegistry.class);
 
-    private ConsulManager                                           consulManager;
+    private ConsulManager                                                     consulManager;
 
     /**
      * Root path of registry data
      */
-    private String                                                  rootPath;
+    private String                                                            rootPath;
 
     /**
      * 保存服务发布者的url
      */
-    private ConcurrentHashMap<ProviderConfig, List<String>>         providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private ConcurrentHashMap<ProviderConfig, List<String>>                   providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private ConcurrentHashMap<ConsumerConfig, String>               consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
+    private ConcurrentHashMap<ConsumerConfig, String>                         consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
 
-    private Cache<String, Map<String, List<ConsulURL>>>             serviceCache;
+    private Cache<String, Map<String, List<ConsulURL>>>                       serviceCache;
 
-    private final Map<String, Long>                                 lookupGroupServices    = Maps.newConcurrentMap();
+    private final ConcurrentMap<String, Long>                                 lookupGroupServices    = Maps
+                                                                                                         .newConcurrentMap();
 
-    private final Map<String, Pair<ConsulURL, Set<NotifyListener>>> notifyServiceListeners = Maps.newConcurrentMap();
+    private final ConcurrentMap<String, Pair<ConsulURL, Set<NotifyListener>>> notifyServiceListeners = Maps
+                                                                                                         .newConcurrentMap();
 
-    private final Set<String>                                       serviceGroupLookUped   = Sets
-                                                                                               .newConcurrentHashSet();
+    private final Set<String>                                                 serviceGroupLookUped   = Sets
+                                                                                                         .newConcurrentHashSet();
 
-    private ExecutorService                                         notifyExecutor;
+    private ExecutorService                                                   notifyExecutor;
 
     /**
      * 注册中心配置
