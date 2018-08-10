@@ -34,31 +34,31 @@ public interface Server extends Destroyable {
      *
      * @param serverConfig ServerConfig
      */
-    public void init(ServerConfig serverConfig);
+    void init(ServerConfig serverConfig);
 
     /**
      * 启动
      */
-    public void start();
+    void start();
 
     /**
      * 是否已经启动
      *
      * @return 是否启动
      */
-    public boolean isStarted();
+    boolean isStarted();
 
     /**
      * 是否还绑定了服务（没有可以销毁）
      *
      * @return has service entry
      */
-    public boolean hasNoEntry();
+    boolean hasNoEntry();
 
     /**
      * 停止
      */
-    public void stop();
+    void stop();
 
     /**
      * 注册服务
@@ -66,7 +66,7 @@ public interface Server extends Destroyable {
      * @param providerConfig 服务提供者配置
      * @param instance       服务提供者实例
      */
-    public void registerProcessor(ProviderConfig providerConfig, Invoker instance);
+    void registerProcessor(ProviderConfig providerConfig, Invoker instance);
 
     /**
      * 取消注册服务
@@ -74,5 +74,5 @@ public interface Server extends Destroyable {
      * @param providerConfig 服务提供者配置
      * @param closeIfNoEntry 如果没有注册服务，最后一个关闭Server
      */
-    public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry);
+    void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry);
 }
