@@ -66,8 +66,6 @@ public class ConsulRegistry extends Registry {
 
     private ConsulManager                                           consulManager;
 
-    private boolean                                                 ephemeralNode          = true;
-
     /**
      * 配置项：是否使用临时节点。<br>
      * 如果使用临时节点：那么断开连接的时候，将zookeeper将自动消失。好处是如果服务端异常关闭，也不会有垃圾数据。<br>
@@ -168,7 +166,6 @@ public class ConsulRegistry extends Registry {
 
         String[] address = validateIp(registryConfig);
         consulManager = new ConsulManager(address[0], Integer.parseInt(address[1]));
-        ephemeralNode = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_CREATE_EPHEMERAL));
         serviceCache = CacheBuilder.newBuilder().maximumSize(1000).build();
         notifyExecutor = Executors.newCachedThreadPool(
             new NamedThreadFactory("NotifyConsumerListener", true));
@@ -343,7 +340,9 @@ public class ConsulRegistry extends Registry {
                     listenersPair.getValue().add(listener);
                 }
 
-                notifyServiceListeners.putIfAbsent(consulURL.getServiceKey(), listenersPair);
+                if (notifyServiceListeners.get(consulURL.getServiceKey()) == null) {
+                    notifyServiceListeners.put(consulURL.getServiceKey(), listenersPair);
+                }
                 if (!serviceGroupLookUped.contains(consulURL.getGroup())) {
                     serviceGroupLookUped.add(consulURL.getGroup());
                     ServiceLookUper serviceLookUper = new ServiceLookUper(consulURL.getGroup());
