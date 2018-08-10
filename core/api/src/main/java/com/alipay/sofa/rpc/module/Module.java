@@ -32,15 +32,15 @@ public interface Module {
      *
      * @return 是否
      */
-    public boolean needLoad();
+    boolean needLoad();
 
     /**
      * 安装模板
      */
-    public void install();
+    void install();
 
     /**
      * 卸载模块
      */
-    public void uninstall();
+    void uninstall();
 }

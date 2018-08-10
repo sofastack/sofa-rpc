@@ -50,7 +50,7 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
     /**
      * 弹性连接，初始化连接百分比数
      */
-    protected int               elasticConnectPrecent = getIntValue(CONSUMER_CONNECT_ELASTIC_PRECENT);
+    protected int               elasticConnectPercent = getIntValue(CONSUMER_CONNECT_ELASTIC_PRECENT);
 
     /**
      * 弹性连接，初始化连接数
@@ -77,12 +77,12 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
         }
         if (providerSize > 0) {
 
-            int minSynConnectSize = 0;
+            int minSynConnectSize;
             //可自定义初始化连接的百分比数以及固定最小数
             //计算初始化连接最少数,优先使用初始化最小数属性进行计算,百分比属性默认为0
-            if (elasticConnectPrecent > 0) {
-                double precent = elasticConnectPrecent >= 100 ? 1 : elasticConnectPrecent * 0.01;
-                minSynConnectSize = ((Double) (providerInfoList.size() * precent)).intValue();
+            if (elasticConnectPercent > 0) {
+                double percent = elasticConnectPercent >= 100 ? 1 : elasticConnectPercent * 0.01;
+                minSynConnectSize = ((Double) (providerInfoList.size() * percent)).intValue();
             } else {
                 minSynConnectSize = elasticConnectSize;
             }
@@ -103,7 +103,6 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
             // 第一次同步建立连接的连接数
             int synInitConnectProviderSize = 0;
             for (final ProviderInfo providerInfo : providerInfoList) {
-                final ClientTransportConfig config = providerToClientConfig(providerInfo);
                 if (synInitConnectProviderSize >= minSynConnectSize) {
                     break;
                 }

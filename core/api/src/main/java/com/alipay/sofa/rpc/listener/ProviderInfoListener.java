@@ -32,26 +32,26 @@ public interface ProviderInfoListener {
      *
      * @param providerGroup 服务端列表组
      */
-    public void addProvider(ProviderGroup providerGroup);
+    void addProvider(ProviderGroup providerGroup);
 
     /**
      * 删除某标签的服务端列表（增量）
      *
      * @param providerGroup 服务端列表组
      */
-    public void removeProvider(ProviderGroup providerGroup);
+    void removeProvider(ProviderGroup providerGroup);
 
     /**
      * 更新某标签的服务端列表（全量）
      *
      * @param providerGroup 服务端列表组
      */
-    public void updateProviders(ProviderGroup providerGroup);
+    void updateProviders(ProviderGroup providerGroup);
 
     /**
      * 更新全部服务端列表（全量）
      *
      * @param providerGroups 全部服务端列表，为空代表清空已有列表
      */
-    public void updateAllProviders(List<ProviderGroup> providerGroups);
+    void updateAllProviders(List<ProviderGroup> providerGroups);
 }
