@@ -19,22 +19,11 @@ package com.alipay.sofa.rpc.registry;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
-import com.alipay.sofa.rpc.client.ProviderStatus;
-import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.SystemInfo;
-import com.alipay.sofa.rpc.common.Version;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.registry.common.ConsulURL;
 import com.alipay.sofa.rpc.utils.RegistryUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 

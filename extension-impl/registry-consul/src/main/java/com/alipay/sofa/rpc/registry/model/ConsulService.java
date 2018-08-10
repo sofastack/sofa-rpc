@@ -79,7 +79,7 @@ public final class ConsulService {
         return interval;
     }
 
-    public static Builder newSalukiService() {
+    public static Builder newService() {
         return new Builder();
     }
 

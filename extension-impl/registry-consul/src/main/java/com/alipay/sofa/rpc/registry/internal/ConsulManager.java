@@ -110,7 +110,7 @@ public class ConsulManager {
         ttlScheduler.removeHeartbeatServcie(heartbeatService);
     }
 
-    public Boolean registerEphemralNode(ConsulEphemralNode ephemralNode) {
+    public Boolean registerEphemralNode(ConsulEphemeralNode ephemralNode) {
         String sessionId = null;
         List<Session> sessions = client.getSessionList(QueryParams.DEFAULT).getValue();
         if (sessions != null && !sessions.isEmpty()) {
@@ -162,7 +162,7 @@ public class ConsulManager {
             List<ConsulService> ConsulServcies = Lists.newArrayList();
             for (HealthService orgService : HealthServices) {
                 Service org = orgService.getService();
-                ConsulService newService = ConsulService.newSalukiService()//
+                ConsulService newService = ConsulService.newService()//
                     .withAddress(org.getAddress())//
                     .withName(org.getService())//
                     .withId(org.getId())//

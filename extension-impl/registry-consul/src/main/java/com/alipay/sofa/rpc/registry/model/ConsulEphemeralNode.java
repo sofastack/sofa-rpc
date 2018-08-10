@@ -26,18 +26,18 @@ import com.ecwid.consul.v1.session.model.Session;
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
-public final class ConsulEphemralNode {
+public final class ConsulEphemeralNode {
 
     private final ConsulURL      url;
 
     private final String         interval;
 
-    private final ThrallRoleType ephemralType;
+    private final ThrallRoleType ephemeralType;
 
-    private ConsulEphemralNode(Builder builder) {
+    private ConsulEphemeralNode(Builder builder) {
         this.url = builder.url;
         this.interval = builder.interval;
-        this.ephemralType = builder.ephemralType;
+        this.ephemeralType = builder.ephemeralType;
     }
 
     public NewSession getNewSession() {
@@ -50,11 +50,11 @@ public final class ConsulEphemralNode {
     }
 
     public String getSessionName() {
-        return ephemralType.name() + "_" + url.getHost() + "_" + url.getPort();
+        return ephemeralType.name() + "_" + url.getHost() + "_" + url.getPort();
     }
 
     public String getEphemralNodeKey() {
-        return ConsulURLUtils.ephemralNodePath(url, ephemralType);
+        return ConsulURLUtils.ephemralNodePath(url, ephemeralType);
     }
 
     public String getEphemralNodeValue() {
@@ -69,7 +69,7 @@ public final class ConsulEphemralNode {
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((ephemralType == null) ? 0 : ephemralType.hashCode());
+        result = prime * result + ((ephemeralType == null) ? 0 : ephemeralType.hashCode());
         result = prime * result + ((interval == null) ? 0 : interval.hashCode());
         result = prime * result + ((url == null) ? 0 : url.hashCode());
         return result;
@@ -83,8 +83,8 @@ public final class ConsulEphemralNode {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ConsulEphemralNode other = (ConsulEphemralNode) obj;
-        if (ephemralType != other.ephemralType)
+        ConsulEphemeralNode other = (ConsulEphemeralNode) obj;
+        if (ephemeralType != other.ephemeralType)
             return false;
         if (interval == null) {
             if (other.interval != null)
@@ -101,7 +101,7 @@ public final class ConsulEphemralNode {
 
     @Override
     public String toString() {
-        return "ConsulEphemralNode [url=" + url + ", interval=" + interval + ", ephemralType=" + ephemralType + "]";
+        return "ConsulEphemeralNode [url=" + url + ", interval=" + interval + ", ephemeralType=" + ephemeralType + "]";
     }
 
     public static class Builder extends AbstractBuilder {
@@ -110,15 +110,15 @@ public final class ConsulEphemralNode {
 
         private String         interval;
 
-        private ThrallRoleType ephemralType;
+        private ThrallRoleType ephemeralType;
 
         public Builder withUrl(ConsulURL url) {
             this.url = url;
             return this;
         }
 
-        public Builder withEphemralType(ThrallRoleType ephemralType) {
-            this.ephemralType = ephemralType;
+        public Builder withEphemralType(ThrallRoleType ephemeralType) {
+            this.ephemeralType = ephemeralType;
             return this;
         }
 
@@ -127,8 +127,8 @@ public final class ConsulEphemralNode {
             return this;
         }
 
-        public ConsulEphemralNode build() {
-            return new ConsulEphemralNode(this);
+        public ConsulEphemeralNode build() {
+            return new ConsulEphemeralNode(this);
         }
 
     }

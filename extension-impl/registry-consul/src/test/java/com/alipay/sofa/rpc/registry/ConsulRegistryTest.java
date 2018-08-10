@@ -20,15 +20,12 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.*;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
-import com.ecwid.consul.v1.ConsulClient;
 import com.pszymczyk.consul.ConsulProcess;
 import com.pszymczyk.consul.ConsulStarterBuilder;
-import com.pszymczyk.consul.infrastructure.Ports;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

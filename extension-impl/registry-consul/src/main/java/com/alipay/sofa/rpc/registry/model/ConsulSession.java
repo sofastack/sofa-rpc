@@ -23,11 +23,11 @@ package com.alipay.sofa.rpc.registry.model;
  */
 public final class ConsulSession {
 
-    private String             sessionId;
+    private String              sessionId;
 
-    private ConsulEphemralNode ephemralNode;
+    private ConsulEphemeralNode ephemralNode;
 
-    public ConsulSession(String sessionId, ConsulEphemralNode ephemralNode) {
+    public ConsulSession(String sessionId, ConsulEphemeralNode ephemralNode) {
         super();
         this.sessionId = sessionId;
         this.ephemralNode = ephemralNode;
@@ -41,11 +41,11 @@ public final class ConsulSession {
         this.sessionId = sessionId;
     }
 
-    public ConsulEphemralNode getEphemralNode() {
+    public ConsulEphemeralNode getEphemralNode() {
         return ephemralNode;
     }
 
-    public void setEphemralNode(ConsulEphemralNode ephemralNode) {
+    public void setEphemralNode(ConsulEphemeralNode ephemralNode) {
         this.ephemralNode = ephemralNode;
     }
 

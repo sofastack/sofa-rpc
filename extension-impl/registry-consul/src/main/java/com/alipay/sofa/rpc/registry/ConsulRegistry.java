@@ -67,15 +67,6 @@ public class ConsulRegistry extends Registry {
     private ConsulManager                                           consulManager;
 
     /**
-     * 配置项：是否使用临时节点。<br>
-     * 如果使用临时节点：那么断开连接的时候，将zookeeper将自动消失。好处是如果服务端异常关闭，也不会有垃圾数据。<br>
-     * 坏处是如果和zookeeper的网络闪断也通知客户端，客户端以为是服务端下线<br>
-     * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
-     * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
-     */
-    public final static String                                      PARAM_CREATE_EPHEMERAL = "createEphemeral";
-
-    /**
      * Root path of registry data
      */
     private String                                                  rootPath;
@@ -83,19 +74,18 @@ public class ConsulRegistry extends Registry {
     /**
      * 保存服务发布者的url
      */
-    private Map<ProviderConfig, List<String>>                       providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private ConcurrentHashMap<ProviderConfig, List<String>>         providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private Map<ConsumerConfig, String>                             consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
+    private ConcurrentHashMap<ConsumerConfig, String>               consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
 
     private Cache<String, Map<String, List<ConsulURL>>>             serviceCache;
 
     private final Map<String, Long>                                 lookupGroupServices    = Maps.newConcurrentMap();
 
-    private final Map<String, Pair<ConsulURL, Set<NotifyListener>>> notifyServiceListeners =
-                                                                                                   Maps.newConcurrentMap();
+    private final Map<String, Pair<ConsulURL, Set<NotifyListener>>> notifyServiceListeners = Maps.newConcurrentMap();
 
     private final Set<String>                                       serviceGroupLookUped   = Sets
                                                                                                .newConcurrentHashSet();
@@ -141,7 +131,7 @@ public class ConsulRegistry extends Registry {
     }
 
     private ConsulService buildConsulHealthService(ConsulURL url) {
-        return ConsulService.newSalukiService()//
+        return ConsulService.newService()//
             .withAddress(url.getHost())//
             .withPort(Integer.valueOf(url.getPort()).toString())//
             .withName(ConsulURLUtils.toServiceName(url.getGroup()))//
@@ -150,8 +140,8 @@ public class ConsulRegistry extends Registry {
             .withCheckInterval(Integer.valueOf(ConsulConstants.TTL).toString()).build();
     }
 
-    private ConsulEphemralNode buildEphemralNode(ConsulURL url, ThrallRoleType roleType) {
-        return ConsulEphemralNode.newEphemralNode().withUrl(url)//
+    private ConsulEphemeralNode buildEphemralNode(ConsulURL url, ThrallRoleType roleType) {
+        return ConsulEphemeralNode.newEphemralNode().withUrl(url)//
             .withEphemralType(roleType)//
             .withCheckInterval(Integer.toString(ConsulConstants.TTL * 6))//
             .build();
@@ -218,7 +208,7 @@ public class ConsulRegistry extends Registry {
                         ConsulURL providerConfigUrl = ConsulURL.valueOf(url);
                         ConsulService service = this.buildConsulHealthService(providerConfigUrl);
                         consulManager.registerService(service);
-                        ConsulEphemralNode ephemralNode = this.buildEphemralNode(providerConfigUrl,
+                        ConsulEphemeralNode ephemralNode = this.buildEphemralNode(providerConfigUrl,
                             ThrallRoleType.PROVIDER);
                         consulManager.registerEphemralNode(ephemralNode);
                         if (LOGGER.isInfoEnabled(appName)) {
@@ -251,8 +241,8 @@ public class ConsulRegistry extends Registry {
         // 反注册服务端节点
         if (config.isRegister()) {
             try {
-                providerUrls.remove(config);
-                List<String> urls = ConsulRegistryHelper.convertProviderToUrls(config);
+                List<String> urls = providerUrls.remove(config);
+
                 if (CommonUtils.isNotEmpty(urls)) {
                     String providerPath = ConsulRegistryHelper.buildProviderPath(rootPath, config);
 
@@ -297,8 +287,6 @@ public class ConsulRegistry extends Registry {
         // 注册Consumer节点
         if (config.isRegister()) {
             try {
-
-                String providerPath = ConsulRegistryHelper.buildProviderPath(rootPath, config);
 
                 String url = ConsulRegistryHelper.convertConsumerToUrl(config);
                 ConsulURL consulURL = ConsulURL.valueOf(url);
@@ -348,7 +336,7 @@ public class ConsulRegistry extends Registry {
                     ServiceLookUper serviceLookUper = new ServiceLookUper(consulURL.getGroup());
                     serviceLookUper.setDaemon(true);
                     serviceLookUper.start();
-                    ConsulEphemralNode ephemralNode = this.buildEphemralNode(consulURL, ThrallRoleType.CONSUMER);
+                    ConsulEphemeralNode ephemralNode = this.buildEphemralNode(consulURL, ThrallRoleType.CONSUMER);
                     consulManager.registerEphemralNode(ephemralNode);
                 } else {
                     notifyListener(consulURL, listener);
