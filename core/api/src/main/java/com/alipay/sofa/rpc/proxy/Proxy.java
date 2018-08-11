@@ -35,7 +35,7 @@ public interface Proxy {
      * @param <T>            类型
      * @return 代理对象
      */
-    public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker);
+    <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker);
 
     /**
      * 从代理对象里解析Invoker
@@ -43,5 +43,5 @@ public interface Proxy {
      * @param proxyObject 代理对象
      * @return Invoker
      */
-    public Invoker getInvoker(Object proxyObject);
+    Invoker getInvoker(Object proxyObject);
 }

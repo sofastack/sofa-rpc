@@ -139,7 +139,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
         wLock.lock();
         try {
             getProviderGroup(providerGroup.getName())
-                .setProviderInfos(new ArrayList(providerGroup.getProviderInfos()));
+                .setProviderInfos(new ArrayList<ProviderInfo>(providerGroup.getProviderInfos()));
         } finally {
             wLock.unlock();
         }

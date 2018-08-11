@@ -763,6 +763,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             try { // 睡一下下 防止被连上又被服务端踢下线
                 Thread.sleep(100);
             } catch (InterruptedException e) {
+                // ignore
             }
             if (transport.isAvailable()) { // double check
                 return true;
