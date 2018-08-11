@@ -67,6 +67,8 @@ public class RegistryUtils {
                     .append(
                         getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, providerConfig.getUniqueId()))
                     .append(
+                        getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, providerConfig.getInterfaceId()))
+                    .append(
                         getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
                     .append(getKeyPairs("delay", providerConfig.getDelay()))
                     .append(getKeyPairs("id", providerConfig.getId()))
@@ -103,6 +105,7 @@ public class RegistryUtils {
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
             .append(getKeyPairs("id", consumerConfig.getId()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, consumerConfig.getInterfaceId()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
                 consumerConfig.getSerialization()))

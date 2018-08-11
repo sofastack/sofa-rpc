@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.registry.common;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
@@ -779,7 +780,11 @@ public class ConsulURL implements Serializable {
     }
 
     public String getServiceInterface() {
-        return getParameter(RpcConstants.CONFIG_KEY_INTERFACE, path);
+        String interfaceId = getParameter(RpcConstants.CONFIG_KEY_INTERFACE, "");
+        if (StringUtils.isEmpty(interfaceId)) {
+            interfaceId = getParameter("interfaceId");
+        }
+        return interfaceId;
     }
 
     public String toServiceString() {
