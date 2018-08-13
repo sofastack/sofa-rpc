@@ -21,6 +21,8 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.rest.RestService;
 import com.alipay.sofa.rpc.server.rest.RestServiceImpl;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
@@ -36,6 +38,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class MultiProtolServerTest extends ActivelyDestroyTest {
+
+    private static final Logger logger = LoggerFactory.getLogger(MultiProtolServerTest.class);
 
     @Test
     public void testMultiProtocol() {
@@ -72,6 +76,7 @@ public class MultiProtolServerTest extends ActivelyDestroyTest {
                 .setRegister(false);
             providerConfig2.export();
         } catch (Throwable e) {
+            logger.error("testMultiProtocol failed", e);
             Assert.fail();
         }
 
