@@ -156,7 +156,7 @@ public class LogCodes {
     public static final String                 INFO_ROUTE_REGISTRY_PUB_START              = "00205";
     public static final String                 INFO_ROUTE_REGISTRY_PUB_OVER               = "00206";
     public static final String                 LOCALFILEREGISTRY_WRITE_FILEOVER           = "00207";
-    public static final String                 INFO_CONFREG_IGNORE                        = "00208";
+    public static final String                 INFO_REGISTRY_IGNORE                       = "00208";
     public static final String                 INFO_CONNECT_PUT_TO_ALIVE                  = "00209";
     public static final String                 INFO_CONNECT_PUT_TO_RETRY                  = "00210";
     public static final String                 INFO_CONNECT_RETRY_START                   = "00211";

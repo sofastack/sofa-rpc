@@ -262,7 +262,7 @@ public class ZookeeperRegistry extends Registry {
         String appName = config.getAppName();
         if (!registryConfig.isRegister()) {
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
@@ -401,7 +401,7 @@ public class ZookeeperRegistry extends Registry {
         if (!registryConfig.isRegister()) {
             // 注册中心不注册
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
@@ -458,7 +458,7 @@ public class ZookeeperRegistry extends Registry {
         if (!registryConfig.isSubscribe()) {
             // 注册中心不订阅
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return null;
         }
