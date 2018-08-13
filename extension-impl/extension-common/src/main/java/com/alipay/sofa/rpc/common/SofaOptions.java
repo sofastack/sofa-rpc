@@ -27,23 +27,23 @@ public class SofaOptions {
     /**
      * 默认TR协议的端口
      */
-    public static final int TR_DEFAULT_PORT            = 12200;
+    public static final int    TR_DEFAULT_PORT                     = 12200;
     /**
      * 默认GRPC协议的端口
      *
      * @since 5.0.0
      */
-    public static final int GRPC_DEFAULT_PORT          = 50051;
+    public static final int    GRPC_DEFAULT_PORT                   = 50051;
 
     /**
      * 最大等待时间为 30s
      */
-    public static final int DEFAULT_HEARTBEAT_INTERVAL = 27;
+    public static final int    DEFAULT_HEARTBEAT_INTERVAL          = 27;
 
     /**
      * 最大等待时间为 30s
      */
-    public static final int MAX_ADDRESS_WAIT_TIME      = 30 * 1000;
+    public static final int    MAX_ADDRESS_WAIT_TIME               = 30 * 1000;
 
     // ========== 通用配置 ========== 
     /**
@@ -165,27 +165,27 @@ public class SofaOptions {
     /**
      * gRPC服务监听端口
      */
-    public static final String CONFIG_GRPC_PORT  = "rpc_grpc_port";
+    public static final String CONFIG_GRPC_PORT                    = "rpc_grpc_port";
     /**
      * gRPC业务线程池的最小值
      */
-    public static final String GRPC_MIN_POOLSIZE = "rpc_min_pool_size_grpc";
+    public static final String GRPC_MIN_POOLSIZE                   = "rpc_min_pool_size_grpc";
     /**
      * gRPC业务线程池的最大值
      */
-    public static final String GRPC_MAX_POOLSIZE = "rpc_max_pool_size_grpc";
+    public static final String GRPC_MAX_POOLSIZE                   = "rpc_max_pool_size_grpc";
     /**
      * gRPC业务线程池的队列大小
      */
-    public static final String GRPC_QUEUE_SIZE   = "rpc_pool_queue_size_grpc";
+    public static final String GRPC_QUEUE_SIZE                     = "rpc_pool_queue_size_grpc";
 
     // ========== 只能通过System.setProperty()设置，无法在文件中配置 ===========
     /**
      * 获取服务注册中心返回地址的最大等待时间  只能通过 -D 生效
      */
-    public static final String CONFIG_MAX_ADDRESS_WAIT_TIME   = "rpc_max_address_wait_time";
+    public static final String CONFIG_MAX_ADDRESS_WAIT_TIME        = "rpc_max_address_wait_time";
     /**
      * TR心跳间隔
      */
-    public static final String CONFIG_RPC_HEART_BEAT_INTERVAL = "rpc_tr_heart_beat_interval";
+    public static final String CONFIG_RPC_HEART_BEAT_INTERVAL      = "rpc_tr_heart_beat_interval";
 }
