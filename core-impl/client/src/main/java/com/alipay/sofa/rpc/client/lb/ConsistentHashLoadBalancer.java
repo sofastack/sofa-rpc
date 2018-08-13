@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 一致性hash算法，同样的请求（第一参数）会打到同样的节点
@@ -44,7 +45,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
     /**
      * {interface#method : selector}
      */
-    private ConcurrentHashMap<String, Selector> selectorCache = new ConcurrentHashMap<String, Selector>();
+    private ConcurrentMap<String, Selector> selectorCache = new ConcurrentHashMap<String, Selector>();
 
     /**
      * 构造函数

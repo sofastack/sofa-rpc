@@ -40,6 +40,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -68,24 +69,24 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 是否已发布
      */
-    protected transient volatile boolean                            exported;
+    protected transient volatile boolean                        exported;
 
     /**
      * 服务端Invoker对象
      */
-    protected transient Invoker                                     providerProxyInvoker;
+    protected transient Invoker                                 providerProxyInvoker;
 
     /**
      * 发布的服务配置
      */
-    protected final static ConcurrentHashMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
+    protected final static ConcurrentMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
 
     /**
      * 延迟加载的线程名工厂
      */
-    private final ThreadFactory                                     factory       = new NamedThreadFactory(
-                                                                                      "DELAY-EXPORT",
-                                                                                      true);
+    private final ThreadFactory                                 factory       = new NamedThreadFactory(
+                                                                                  "DELAY-EXPORT",
+                                                                                  true);
 
     @Override
     public void export() {

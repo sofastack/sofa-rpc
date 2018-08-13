@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of Registry
@@ -39,13 +40,13 @@ public class RegistryFactory {
     /**
      * 保存全部的配置和注册中心实例
      */
-    private final static ConcurrentHashMap<RegistryConfig, Registry> ALL_REGISTRIES = new ConcurrentHashMap<RegistryConfig, Registry>();
+    private final static ConcurrentMap<RegistryConfig, Registry> ALL_REGISTRIES = new ConcurrentHashMap<RegistryConfig, Registry>();
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                      LOGGER         = LoggerFactory
-                                                                                        .getLogger(RegistryFactory.class);
+    private final static Logger                                  LOGGER         = LoggerFactory
+                                                                                    .getLogger(RegistryFactory.class);
 
     /**
      * 得到注册中心对象

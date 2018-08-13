@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of ClientTransport
@@ -122,7 +123,7 @@ public class ClientTransportFactory {
      * 反向虚拟的长连接对象, 缓存一个长连接一个<br>
      * {"127.0.0.1:22000<->127.0.0.1:54321": ClientTransport}
      */
-    private volatile static ConcurrentHashMap<String, ClientTransport> REVERSE_CLIENT_TRANSPORT_MAP = null;
+    private volatile static ConcurrentMap<String, ClientTransport> REVERSE_CLIENT_TRANSPORT_MAP = null;
 
     /**
      * 构建反向的（服务端到客户端）虚拟长连接
