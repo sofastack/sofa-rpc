@@ -39,7 +39,7 @@ import java.util.List;
 public class DubboServerTest extends BaseZkTest {
 
     @Test
-    //同步调用,走配置中心
+    //同步调用,走服务注册中心
     public void testRegistrySync() {
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
