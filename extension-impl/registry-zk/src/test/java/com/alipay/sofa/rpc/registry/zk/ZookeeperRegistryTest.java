@@ -39,6 +39,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -312,9 +313,9 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
 
-        ConcurrentHashMap<String, ProviderInfo> ps = new ConcurrentHashMap<String, ProviderInfo>();
+        ConcurrentMap<String, ProviderInfo> ps = new ConcurrentHashMap<String, ProviderInfo>();
 
-        private CountDownLatch                  countDownLatch;
+        private CountDownLatch              countDownLatch;
 
         public void setCountDownLatch(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
@@ -363,9 +364,9 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
     private static class MockConfigListener implements ConfigListener {
 
-        ConcurrentHashMap<String, String> concurrentHashMap = new ConcurrentHashMap<String, String>();
+        ConcurrentMap<String, String> concurrentHashMap = new ConcurrentHashMap<String, String>();
 
-        private CountDownLatch            countDownLatch;
+        private CountDownLatch        countDownLatch;
 
         public void setCountDownLatch(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;

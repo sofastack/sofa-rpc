@@ -33,6 +33,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * ZookeeperObserver for provider node.
@@ -44,13 +45,13 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                           LOGGER              = LoggerFactory
-                                                                                                  .getLogger(ZookeeperConfigObserver.class);
+    private final static Logger                                       LOGGER              = LoggerFactory
+                                                                                              .getLogger(ZookeeperConfigObserver.class);
 
     /**
      * The Provider add listener map.
      */
-    private ConcurrentHashMap<ConsumerConfig, List<ProviderInfoListener>> providerListenerMap = new ConcurrentHashMap<ConsumerConfig, List<ProviderInfoListener>>();
+    private ConcurrentMap<ConsumerConfig, List<ProviderInfoListener>> providerListenerMap = new ConcurrentHashMap<ConsumerConfig, List<ProviderInfoListener>>();
 
     /**
      * Add provider listener.

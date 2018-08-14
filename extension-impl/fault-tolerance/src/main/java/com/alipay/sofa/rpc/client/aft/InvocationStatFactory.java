@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 调控入口类
@@ -35,12 +36,12 @@ public class InvocationStatFactory {
     /**
      * 调控统计和结果的映射
      */
-    static final ConcurrentHashMap<InvocationStatDimension, InvocationStat> ALL_STATS = new ConcurrentHashMap<InvocationStatDimension, InvocationStat>();
+    static final ConcurrentMap<InvocationStatDimension, InvocationStat> ALL_STATS = new ConcurrentHashMap<InvocationStatDimension, InvocationStat>();
 
     /**
      * Listeners of InvocationStat
      */
-    static final ConcurrentHashSet<InvocationStatListener>                  LISTENERS = new ConcurrentHashSet<InvocationStatListener>();
+    static final ConcurrentHashSet<InvocationStatListener>              LISTENERS = new ConcurrentHashSet<InvocationStatListener>();
 
     /**
      * 得到调用统计器

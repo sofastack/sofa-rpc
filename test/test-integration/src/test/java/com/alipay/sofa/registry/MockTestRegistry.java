@@ -40,6 +40,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_APP_NAME;
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_RPC_VERSION;
@@ -72,12 +73,12 @@ public class MockTestRegistry extends Registry {
     /**
      * 订阅者通知列表（key为订阅者关键字，value为ConsumerConfig列表）
      */
-    protected ConcurrentHashMap<String, Map<ConsumerConfig, ProviderInfoListener>> notifyListeners = new ConcurrentHashMap<String, Map<ConsumerConfig, ProviderInfoListener>>();
+    protected ConcurrentMap<String, Map<ConsumerConfig, ProviderInfoListener>> notifyListeners = new ConcurrentHashMap<String, Map<ConsumerConfig, ProviderInfoListener>>();
 
     /**
      * 内存里的服务列表 {service : [provider...]}
      */
-    protected ConcurrentHashMap<String, ProviderGroup>                             memoryCache     = new ConcurrentHashMap<String, ProviderGroup>();
+    protected ConcurrentMap<String, ProviderGroup>                             memoryCache     = new ConcurrentHashMap<String, ProviderGroup>();
 
     @Override
     public boolean start() {
