@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.config;
 import com.alipay.sofa.rpc.server.UserThreadPool;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 用户自定义线程管理器
@@ -30,7 +31,7 @@ public class UserThreadPoolManager {
     /**
      * 用户自定义的业务线程池，可以给不同的接口指定不同的业务线程池
      */
-    private static ConcurrentHashMap<String, UserThreadPool> userThreadMap = null;
+    private static ConcurrentMap<String, UserThreadPool> userThreadMap = null;
 
     /**
      * 是否有自定义线程池

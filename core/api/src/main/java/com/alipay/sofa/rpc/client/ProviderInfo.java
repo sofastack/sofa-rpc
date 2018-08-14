@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.common.RpcOptions;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 抽象的服务提供列表
@@ -31,42 +32,42 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ProviderInfo implements Serializable {
 
-    private static final long                                 serialVersionUID = -6438690329875954051L;
+    private static final long                             serialVersionUID = -6438690329875954051L;
 
     /**
      * 原始地址
      */
-    private transient String                                  originUrl;
+    private transient String                              originUrl;
 
     /**
      * The Protocol type.
      */
-    private String                                            protocolType     = RpcConfigs
-                                                                                   .getStringValue(RpcOptions.DEFAULT_PROTOCOL);
+    private String                                        protocolType     = RpcConfigs
+                                                                               .getStringValue(RpcOptions.DEFAULT_PROTOCOL);
     /**
      * The Ip.
      */
-    private String                                            host;
+    private String                                        host;
 
     /**
      * The Port.
      */
-    private int                                               port             = 80;
+    private int                                           port             = 80;
 
     /**
      * The path
      */
-    private String                                            path;
+    private String                                        path;
 
     /**
      * 序列化方式，服务端指定，以服务端的为准
      */
-    private String                                            serializationType;
+    private String                                        serializationType;
 
     /**
      * The rpc Version
      */
-    private int                                               rpcVersion;
+    private int                                           rpcVersion;
 
     /**
      * 权重
@@ -74,25 +75,25 @@ public class ProviderInfo implements Serializable {
      * @see ProviderInfoAttrs#ATTR_WEIGHT 原始权重
      * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT 预热权重
      */
-    private transient volatile int                            weight           = RpcConfigs
-                                                                                   .getIntValue(RpcOptions.PROVIDER_WEIGHT);
+    private transient volatile int                        weight           = RpcConfigs
+                                                                               .getIntValue(RpcOptions.PROVIDER_WEIGHT);
 
     /**
      * 服务状态
      */
-    private transient volatile ProviderStatus                 status           = ProviderStatus.AVAILABLE;
+    private transient volatile ProviderStatus             status           = ProviderStatus.AVAILABLE;
 
     /**
      * 静态属性，不会变的
      */
-    private final ConcurrentHashMap<String, String>           staticAttrs      = new ConcurrentHashMap<String, String>();
+    private final ConcurrentMap<String, String>           staticAttrs      = new ConcurrentHashMap<String, String>();
 
     /**
      * 动态属性，会动态变的 <br />
      * <p>
      * 例如动态权重，是否启用，预热标记等  invocationOptimizing
      */
-    private final transient ConcurrentHashMap<String, Object> dynamicAttrs     = new ConcurrentHashMap<String, Object>();
+    private final transient ConcurrentMap<String, Object> dynamicAttrs     = new ConcurrentHashMap<String, Object>();
 
     /**
      * Instantiates a new Provider.
@@ -398,7 +399,7 @@ public class ProviderInfo implements Serializable {
      *
      * @return the static attribute
      */
-    public ConcurrentHashMap<String, String> getStaticAttrs() {
+    public ConcurrentMap<String, String> getStaticAttrs() {
         return staticAttrs;
     }
 
@@ -419,7 +420,7 @@ public class ProviderInfo implements Serializable {
      *
      * @return the dynamic attribute
      */
-    public ConcurrentHashMap<String, Object> getDynamicAttrs() {
+    public ConcurrentMap<String, Object> getDynamicAttrs() {
         return dynamicAttrs;
     }
 

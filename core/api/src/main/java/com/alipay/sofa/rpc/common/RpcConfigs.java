@@ -35,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 配置加载器和操作入口
@@ -46,11 +47,11 @@ public class RpcConfigs {
     /**
      * 全部配置
      */
-    private final static ConcurrentHashMap<String, Object>                  CFG          = new ConcurrentHashMap<String, Object>();
+    private final static ConcurrentMap<String, Object>                  CFG          = new ConcurrentHashMap<String, Object>();
     /**
      * 配置变化监听器
      */
-    private final static ConcurrentHashMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String, List<RpcConfigListener>>();
+    private final static ConcurrentMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String, List<RpcConfigListener>>();
 
     static {
         init(); // 加载配置文件

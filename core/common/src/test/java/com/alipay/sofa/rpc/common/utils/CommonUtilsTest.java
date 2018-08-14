@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -61,7 +62,7 @@ public class CommonUtilsTest {
 
     @Test
     public void testPutToConcurrentMap() throws Exception {
-        final ConcurrentHashMap<String, AtomicInteger> hashMap = new ConcurrentHashMap<String, AtomicInteger>();
+        final ConcurrentMap<String, AtomicInteger> hashMap = new ConcurrentHashMap<String, AtomicInteger>();
         final CountDownLatch latch = new CountDownLatch(3);
         for (int i = 0; i < 3; i++) {
             Thread thread = new Thread(new Runnable() {

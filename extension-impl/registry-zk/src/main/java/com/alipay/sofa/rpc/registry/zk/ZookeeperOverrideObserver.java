@@ -28,6 +28,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * ZookeeperObserver for override node,subscribe ip level provider/consumer config.
@@ -39,13 +40,13 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                              LOGGER            = LoggerFactory
-                                                                                                   .getLogger(ZookeeperOverrideObserver.class);
+    private final static Logger                                          LOGGER            = LoggerFactory
+                                                                                               .getLogger(ZookeeperOverrideObserver.class);
 
     /**
      * The Config listener map.
      */
-    private ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
+    private ConcurrentMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
 
     /**
      * Add config listener.

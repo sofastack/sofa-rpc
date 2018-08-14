@@ -42,11 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -82,34 +78,34 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 未初始化的（从未连接过，例如lazy=true）
      */
-    protected ConcurrentHashMap<ProviderInfo, ClientTransport> uninitializedConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> uninitializedConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 存活的客户端列表（保持了长连接，且一切正常的）
      */
-    protected ConcurrentHashMap<ProviderInfo, ClientTransport> aliveConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> aliveConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 存活但是亚健康节点（连续心跳超时，这种只发心跳，不发请求）
      */
-    protected ConcurrentHashMap<ProviderInfo, ClientTransport> subHealthConnections     = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> subHealthConnections     = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 失败待重试的客户端列表（连上后断开的）
      */
-    protected ConcurrentHashMap<ProviderInfo, ClientTransport> retryConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> retryConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 客户端变化provider的锁
      */
-    private Lock                                               providerLock             = new ReentrantLock();
+    private Lock                                           providerLock             = new ReentrantLock();
 
     /**
      * Gets retry connections.
      *
      * @return the retry connections
      */
-    public ConcurrentHashMap<ProviderInfo, ClientTransport> getRetryConnections() {
+    public ConcurrentMap<ProviderInfo, ClientTransport> getRetryConnections() {
         return retryConnections;
     }
 
@@ -492,14 +488,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     @Override
-    public ConcurrentHashMap<ProviderInfo, ClientTransport> getAvailableConnections() {
+    public ConcurrentMap<ProviderInfo, ClientTransport> getAvailableConnections() {
         return aliveConnections.isEmpty() ? subHealthConnections : aliveConnections;
     }
 
     @Override
     public List<ProviderInfo> getAvailableProviders() {
         // 存活为空的，那就用亚健康的
-        ConcurrentHashMap<ProviderInfo, ClientTransport> map =
+        ConcurrentMap<ProviderInfo, ClientTransport> map =
                 aliveConnections.isEmpty() ? subHealthConnections : aliveConnections;
         return new ArrayList<ProviderInfo>(map.keySet());
     }

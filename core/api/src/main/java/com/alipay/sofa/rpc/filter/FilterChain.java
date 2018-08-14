@@ -40,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -52,23 +53,23 @@ public class FilterChain implements Invoker {
     /**
      * 日志
      */
-    private static final Logger                                            LOGGER                = LoggerFactory
-                                                                                                     .getLogger(FilterChain.class);
+    private static final Logger                                        LOGGER                = LoggerFactory
+                                                                                                 .getLogger(FilterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Filter>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Filter>>();
+    private final static ConcurrentMap<String, ExtensionClass<Filter>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Filter>>();
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Filter>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Filter>>();
+    private final static ConcurrentMap<String, ExtensionClass<Filter>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Filter>>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Filter>                           EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Filter>                       EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Filter> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
