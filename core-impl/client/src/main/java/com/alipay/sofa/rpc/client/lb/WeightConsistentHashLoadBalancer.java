@@ -34,7 +34,7 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author 景竹 2018/8/13
+ * @author 景竹 2018/8/13 since 5.5.0
  */
 @Extension("weightConsistentHash")
 public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {

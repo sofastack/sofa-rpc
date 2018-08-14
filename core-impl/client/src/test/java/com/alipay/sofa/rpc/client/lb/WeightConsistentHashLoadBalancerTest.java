@@ -24,7 +24,7 @@ import org.junit.Test;
 import java.util.*;
 
 /**
- * @author 景竹 2018/8/13
+ * @author 景竹 2018/8/13 since 5.5.0
  */
 public class WeightConsistentHashLoadBalancerTest extends BaseLoadBalancerTest {
 
