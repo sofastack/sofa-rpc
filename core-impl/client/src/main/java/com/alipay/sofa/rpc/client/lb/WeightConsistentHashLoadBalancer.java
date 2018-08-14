@@ -40,7 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
     /**
-     * {interface#method : selector}
+     * {interface#method :  selector}
      */
     private final ConcurrentHashMap<String, Selector> selectorCache = new ConcurrentHashMap<String, Selector>();
 
