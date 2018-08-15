@@ -81,7 +81,7 @@ public class ConsulURL implements Serializable {
     }
 
     public ConsulURL(String protocol, String host, int port, String[] pairs) {
-        this(protocol, host, port, null, "", "", CommonUtils.toStringMap(pairs));
+        this(protocol, host, port, null, "", "", toStringMap(pairs));
     }
 
     public ConsulURL(String protocol, String host, int port, Map<String, String> parameters) {
@@ -93,7 +93,7 @@ public class ConsulURL implements Serializable {
     }
 
     public ConsulURL(String protocol, String host, int port, String path, String... pairs) {
-        this(protocol, host, port, path, "", "", CommonUtils.toStringMap(pairs));
+        this(protocol, host, port, path, "", "", toStringMap(pairs));
     }
 
     public ConsulURL(String protocol, String host, int port, String path, Map<String, String> parameters) {
@@ -106,7 +106,7 @@ public class ConsulURL implements Serializable {
 
     public ConsulURL(String protocol, String username, String host, int port, String path,
                      String... pairs) {
-        this(protocol, host, port, path, "", "", CommonUtils.toStringMap(pairs));
+        this(protocol, host, port, path, "", "", toStringMap(pairs));
     }
 
     public ConsulURL(String protocol, String host, int port, String path, String group,
@@ -294,7 +294,7 @@ public class ConsulURL implements Serializable {
         if (value == null || value.length() == 0) {
             return defaultValue;
         }
-        return Constants.COMMA_SPLIT_PATTERN.split(value);
+        return ConsulConstants.COMMA_SPLIT_PATTERN.split(value);
     }
 
     private Map<String, Number> getNumbers() {
@@ -431,11 +431,11 @@ public class ConsulURL implements Serializable {
     }
 
     public boolean isLocalHost() {
-        return NetUtils.isLocalHost(host) || getParameter(Constants.LOCALHOST_KEY, false);
+        return NetUtils.isLocalHost(host) || getParameter(ConsulConstants.LOCALHOST_KEY, false);
     }
 
     public boolean isAnyHost() {
-        return Constants.ANYHOST_VALUE.equals(host) || getParameter(Constants.ANYHOST_KEY, false);
+        return ConsulConstants.ANYHOST_VALUE.equals(host) || getParameter(ConsulConstants.ANYHOST_KEY, false);
     }
 
     public ConsulURL addParameterAndEncoded(String key, String value) {
@@ -660,6 +660,19 @@ public class ConsulURL implements Serializable {
         return full = buildString(true, true);
     }
 
+    public static Map<String, String> toStringMap(String... pairs) {
+        Map<String, String> parameters = new HashMap<String, String>();
+        if (pairs.length > 0) {
+            if (pairs.length % 2 != 0) {
+                throw new IllegalArgumentException("pairs must be even.");
+            }
+            for (int i = 0; i < pairs.length; i = i + 2) {
+                parameters.put(pairs[i], pairs[i + 1]);
+            }
+        }
+        return parameters;
+    }
+
     public String toFullString(String... parameters) {
         return buildString(true, true, parameters);
     }
@@ -775,7 +788,7 @@ public class ConsulURL implements Serializable {
     }
 
     public String getVersion() {
-        String group = getParameter(RpcConstants.CONFIG_KEY_RPC_VERSION, Constants.DEFAULT_VERSION);
+        String group = getParameter(RpcConstants.CONFIG_KEY_RPC_VERSION, ConsulConstants.DEFAULT_VERSION);
         return group;
     }
 

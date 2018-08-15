@@ -63,27 +63,27 @@ public class ConsulURLUtils {
 
     /**** help method *****/
     public static String toServiceName(String group) {
-        return Constants.CONSUL_SERVICE_PRE + group;
+        return ConsulConstants.CONSUL_SERVICE_PRE + group;
     }
 
     public static String toRoutePath(ConsulURL url) {
         String name = url.getServiceInterface();
         String group = url.getGroup();
-        return Constants.CONSUL_SERVICE_PRE + group + Constants.PATH_SEPARATOR + name;
+        return ConsulConstants.CONSUL_SERVICE_PRE + group + ConsulConstants.PATH_SEPARATOR + name;
     }
 
     private static String toServicePath(ConsulURL url) {
         String name = url.getServiceInterface();
         String group = url.getGroup();
-        return group + Constants.PATH_SEPARATOR + ConsulURL.encode(name);
+        return group + ConsulConstants.PATH_SEPARATOR + ConsulURL.encode(name);
     }
 
     public static String toCategoryPathNotIncludeVersion(ConsulURL url, ThrallRoleType roleType) {
         switch (roleType) {
             case CONSUMER:
-                return toServicePath(url) + Constants.PATH_SEPARATOR + Constants.CONSUMERS_CATEGORY;
+                return toServicePath(url) + ConsulConstants.PATH_SEPARATOR + ConsulConstants.CONSUMERS_CATEGORY;
             case PROVIDER:
-                return toServicePath(url) + Constants.PATH_SEPARATOR + Constants.PROVIDERS_CATEGORY;
+                return toServicePath(url) + ConsulConstants.PATH_SEPARATOR + ConsulConstants.PROVIDERS_CATEGORY;
             default:
                 throw new IllegalArgumentException("there is no role type");
         }
@@ -93,11 +93,11 @@ public class ConsulURLUtils {
     public static String toCategoryPathIncludeVersion(ConsulURL url, ThrallRoleType roleType) {
         switch (roleType) {
             case CONSUMER:
-                return toServicePath(url) + Constants.PATH_SEPARATOR + url.getVersion()
-                    + Constants.PATH_SEPARATOR + Constants.CONSUMERS_CATEGORY;
+                return toServicePath(url) + ConsulConstants.PATH_SEPARATOR + url.getVersion()
+                    + ConsulConstants.PATH_SEPARATOR + ConsulConstants.CONSUMERS_CATEGORY;
             case PROVIDER:
-                return toServicePath(url) + Constants.PATH_SEPARATOR + url.getVersion()
-                    + Constants.PATH_SEPARATOR + Constants.PROVIDERS_CATEGORY;
+                return toServicePath(url) + ConsulConstants.PATH_SEPARATOR + url.getVersion()
+                    + ConsulConstants.PATH_SEPARATOR + ConsulConstants.PROVIDERS_CATEGORY;
             default:
                 throw new IllegalArgumentException("there is no role type");
         }
@@ -105,13 +105,13 @@ public class ConsulURLUtils {
     }
 
     public static String healthServicePath(ConsulURL url, ThrallRoleType roleType) {
-        return toCategoryPathNotIncludeVersion(url, roleType) + Constants.PATH_SEPARATOR
+        return toCategoryPathNotIncludeVersion(url, roleType) + ConsulConstants.PATH_SEPARATOR
             + ConsulURL.encode(url.toFullString());
     }
 
     public static String ephemralNodePath(ConsulURL url, ThrallRoleType roleType) {
-        return Constants.CONSUL_SERVICE_PRE + toCategoryPathIncludeVersion(url, roleType)
-            + Constants.PATH_SEPARATOR + url.getAddress();
+        return ConsulConstants.CONSUL_SERVICE_PRE + toCategoryPathIncludeVersion(url, roleType)
+            + ConsulConstants.PATH_SEPARATOR + url.getAddress();
     }
 
 }

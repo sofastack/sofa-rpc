@@ -292,23 +292,4 @@ public class CommonUtils {
         return parameters;
     }
 
-    /**
-     * 比较集合是否一致，忽略顺序
-     *
-     * @param newCollection  新集合
-     * @param oldCollection 旧集合
-     * @return 是否一致
-     */
-    public static boolean isSameCollection(Collection<?> newCollection, Collection<?> oldCollection) {
-        if (newCollection == null || newCollection.isEmpty()) {
-            return true;
-        } else if (oldCollection != null) {
-            if (newCollection.containsAll(oldCollection) && oldCollection.containsAll(newCollection)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        return false;
-    }
 }

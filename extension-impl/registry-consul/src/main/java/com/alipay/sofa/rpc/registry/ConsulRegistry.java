@@ -453,9 +453,9 @@ public class ConsulRegistry extends Registry {
     private ConsulURL buildURL(ConsulService service) {
         try {
             for (String tag : service.getTags()) {
-                if (org.apache.commons.lang3.StringUtils.indexOf(tag, Constants.PROVIDERS_CATEGORY) != -1) {
+                if (org.apache.commons.lang3.StringUtils.indexOf(tag, ConsulConstants.PROVIDERS_CATEGORY) != -1) {
                     String toUrlPath = org.apache.commons.lang3.StringUtils.substringAfter(tag,
-                        Constants.PROVIDERS_CATEGORY);
+                        ConsulConstants.PROVIDERS_CATEGORY);
                     ConsulURL consulUrl = ConsulURL.valueOf(ConsulURL.decode(toUrlPath));
                     return consulUrl;
                 }
@@ -490,7 +490,7 @@ public class ConsulRegistry extends Registry {
                         for (Map.Entry<String, List<ConsulURL>> entry : groupNewUrls.entrySet()) {
                             List<ConsulURL> oldUrls = groupCacheUrls.get(entry.getKey());
                             List<ConsulURL> newUrls = entry.getValue();
-                            boolean isSame = CommonUtils.isSameCollection(newUrls, oldUrls);
+                            boolean isSame = CommonUtils.listEquals(newUrls, oldUrls);
                             if (!isSame) {
                                 groupCacheUrls.put(entry.getKey(), newUrls);
                                 Pair<ConsulURL, Set<NotifyListener>> listenerPair =
