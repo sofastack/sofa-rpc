@@ -360,6 +360,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-local</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
+                                    <include>com.alipay.sofa:sofa-rpc-registry-consul</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>

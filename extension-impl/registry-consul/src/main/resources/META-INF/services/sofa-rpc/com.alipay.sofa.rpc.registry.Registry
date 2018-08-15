@@ -1,1 +1,1 @@
-consul=com.alipay.sofa.rpc.registry.ConsulRegistry
+consul=com.alipay.sofa.rpc.registry.consul.ConsulRegistry

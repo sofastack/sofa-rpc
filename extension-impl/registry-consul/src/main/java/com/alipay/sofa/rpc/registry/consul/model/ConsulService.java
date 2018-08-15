@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.model;
+package com.alipay.sofa.rpc.registry.consul.model;
 
 import com.ecwid.consul.v1.agent.model.NewService;
 

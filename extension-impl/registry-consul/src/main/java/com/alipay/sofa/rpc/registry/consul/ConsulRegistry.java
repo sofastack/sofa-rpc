@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry;
+package com.alipay.sofa.rpc.registry.consul;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
@@ -30,9 +30,10 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.registry.common.*;
-import com.alipay.sofa.rpc.registry.internal.ConsulManager;
-import com.alipay.sofa.rpc.registry.model.*;
+import com.alipay.sofa.rpc.registry.Registry;
+import com.alipay.sofa.rpc.registry.consul.common.*;
+import com.alipay.sofa.rpc.registry.consul.internal.ConsulManager;
+import com.alipay.sofa.rpc.registry.consul.model.*;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;

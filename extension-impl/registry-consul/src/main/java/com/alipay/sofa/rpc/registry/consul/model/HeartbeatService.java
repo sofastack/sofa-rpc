@@ -14,47 +14,49 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.model;
+package com.alipay.sofa.rpc.registry.consul.model;
+
+import com.ecwid.consul.v1.agent.model.NewService;
 
 /**
- * sessions to store EphemralNode of Consul
+ * ConsulService and NewService
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
-public final class ConsulSession {
+public class HeartbeatService {
 
-    private String              sessionId;
+    private ConsulService service;
 
-    private ConsulEphemeralNode ephemralNode;
+    private NewService    newService;
 
-    public ConsulSession(String sessionId, ConsulEphemeralNode ephemralNode) {
+    public HeartbeatService(ConsulService service, NewService newService) {
         super();
-        this.sessionId = sessionId;
-        this.ephemralNode = ephemralNode;
+        this.service = service;
+        this.newService = newService;
     }
 
-    public String getSessionId() {
-        return sessionId;
+    public ConsulService getService() {
+        return service;
     }
 
-    public void setSessionId(String sessionId) {
-        this.sessionId = sessionId;
+    public void setService(ConsulService service) {
+        this.service = service;
     }
 
-    public ConsulEphemeralNode getEphemralNode() {
-        return ephemralNode;
+    public NewService getNewService() {
+        return newService;
     }
 
-    public void setEphemralNode(ConsulEphemeralNode ephemralNode) {
-        this.ephemralNode = ephemralNode;
+    public void setNewService(NewService newService) {
+        this.newService = newService;
     }
 
     @Override
     public int hashCode() {
         final int prime = 31;
         int result = 1;
-        result = prime * result + ((ephemralNode == null) ? 0 : ephemralNode.hashCode());
-        result = prime * result + ((sessionId == null) ? 0 : sessionId.hashCode());
+        result = prime * result + ((newService == null) ? 0 : newService.hashCode());
+        result = prime * result + ((service == null) ? 0 : service.hashCode());
         return result;
     }
 
@@ -66,23 +68,23 @@ public final class ConsulSession {
             return false;
         if (getClass() != obj.getClass())
             return false;
-        ConsulSession other = (ConsulSession) obj;
-        if (ephemralNode == null) {
-            if (other.ephemralNode != null)
+        HeartbeatService other = (HeartbeatService) obj;
+        if (newService == null) {
+            if (other.newService != null)
                 return false;
-        } else if (!ephemralNode.equals(other.ephemralNode))
+        } else if (!newService.equals(other.newService))
             return false;
-        if (sessionId == null) {
-            if (other.sessionId != null)
+        if (service == null) {
+            if (other.service != null)
                 return false;
-        } else if (!sessionId.equals(other.sessionId))
+        } else if (!service.equals(other.service))
             return false;
         return true;
     }
 
     @Override
     public String toString() {
-        return "ConsulSession [sessionId=" + sessionId + ", ephemralNode=" + ephemralNode + "]";
+        return "HeartbeatService [service=" + service + ", newService=" + newService + "]";
     }
 
 }

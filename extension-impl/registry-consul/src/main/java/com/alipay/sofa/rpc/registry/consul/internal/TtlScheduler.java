@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.internal;
+package com.alipay.sofa.rpc.registry.consul.internal;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
-import com.alipay.sofa.rpc.registry.common.ConsulConstants;
-import com.alipay.sofa.rpc.registry.model.HeartbeatService;
-import com.alipay.sofa.rpc.registry.model.ConsulSession;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulConstants;
+import com.alipay.sofa.rpc.registry.consul.model.HeartbeatService;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulSession;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.google.common.collect.Sets;

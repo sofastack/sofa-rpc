@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.common;
+package com.alipay.sofa.rpc.registry.consul.common;
 
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.registry.model.ThrallRoleType;
+import com.alipay.sofa.rpc.registry.consul.model.ThrallRoleType;
 
 import java.util.HashMap;
 import java.util.Map;

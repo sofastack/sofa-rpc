@@ -14,14 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry;
+package com.alipay.sofa.rpc.registry.consul;
 
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.registry.common.ConsulURL;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
 import com.alipay.sofa.rpc.utils.RegistryUtils;
 
 import java.util.ArrayList;

@@ -14,10 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.model;
+package com.alipay.sofa.rpc.registry.consul.model;
 
-import com.alipay.sofa.rpc.registry.common.ConsulURL;
-import com.alipay.sofa.rpc.registry.common.ConsulURLUtils;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulURLUtils;
 import com.ecwid.consul.v1.session.model.NewSession;
 import com.ecwid.consul.v1.session.model.Session;
 
