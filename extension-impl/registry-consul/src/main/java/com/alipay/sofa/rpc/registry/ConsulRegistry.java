@@ -55,7 +55,6 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  * @since 5.5.0
  */
-
 @Extension("consul")
 public class ConsulRegistry extends Registry {
 
