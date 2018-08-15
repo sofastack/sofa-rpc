@@ -34,6 +34,7 @@ import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -51,22 +52,22 @@ public class NettyHelper {
     /**
      * Logger for NettyHelper
      **/
-    private static final Logger                                     LOGGER           = LoggerFactory
-                                                                                         .getLogger(NettyHelper.class);
+    private static final Logger                                 LOGGER           = LoggerFactory
+                                                                                     .getLogger(NettyHelper.class);
 
     /**
      * 服务端Boss线程池（一种协议一个）
      */
-    private static ConcurrentHashMap<String, EventLoopGroup>        serverBossGroups = new ConcurrentHashMap<String, EventLoopGroup>();
+    private static ConcurrentMap<String, EventLoopGroup>        serverBossGroups = new ConcurrentHashMap<String, EventLoopGroup>();
     /**
      * 服务端IO线程池（一种协议一个）
      */
-    private static ConcurrentHashMap<String, EventLoopGroup>        serverIoGroups   = new ConcurrentHashMap<String, EventLoopGroup>();
+    private static ConcurrentMap<String, EventLoopGroup>        serverIoGroups   = new ConcurrentHashMap<String, EventLoopGroup>();
 
     /**
      * 由于线程池是公用的，需要计数器，在最后一个人关闭时才能销毁
      */
-    private static ConcurrentHashMap<EventLoopGroup, AtomicInteger> refCounter       = new ConcurrentHashMap<EventLoopGroup, AtomicInteger>();
+    private static ConcurrentMap<EventLoopGroup, AtomicInteger> refCounter       = new ConcurrentHashMap<EventLoopGroup, AtomicInteger>();
 
     /**
      * 得到服务端Boss线程池

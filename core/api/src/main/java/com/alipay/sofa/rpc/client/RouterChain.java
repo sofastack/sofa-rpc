@@ -36,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -48,23 +49,23 @@ public class RouterChain {
     /**
      * LOGGER
      */
-    private static final Logger                                            LOGGER                = LoggerFactory
-                                                                                                     .getLogger(RouterChain.class);
+    private static final Logger                                        LOGGER                = LoggerFactory
+                                                                                                 .getLogger(RouterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
+    private final static ConcurrentMap<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
+    private final static ConcurrentMap<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Router>                           EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Router>                       EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Router> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Router.class, new ExtensionLoaderListener<Router>() {

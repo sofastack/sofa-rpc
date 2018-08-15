@@ -172,7 +172,7 @@ public class LocalRegistry extends Registry {
         String appName = config.getAppName();
         if (!registryConfig.isRegister()) {
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
@@ -230,7 +230,7 @@ public class LocalRegistry extends Registry {
         String appName = config.getAppName();
         if (!registryConfig.isRegister()) { // 注册中心不注册
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }

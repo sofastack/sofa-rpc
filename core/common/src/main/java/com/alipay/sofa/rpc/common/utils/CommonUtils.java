@@ -177,6 +177,7 @@ public class CommonUtils {
 
     /**
      * String Long turn number.
+     *
      * @param num         The number of strings.
      * @param defaultLong The default value
      * @return long
@@ -246,9 +247,7 @@ public class CommonUtils {
             List<T> ltmp = new ArrayList<T>(left);
             List<T> rtmp = new ArrayList<T>(right);
             for (T t : ltmp) {
-                if (rtmp.contains(t)) {
-                    rtmp.remove(t);
-                }
+                rtmp.remove(t);
             }
             return rtmp.isEmpty();
         }

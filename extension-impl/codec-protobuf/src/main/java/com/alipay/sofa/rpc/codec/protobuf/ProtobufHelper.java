@@ -25,6 +25,7 @@ import com.google.protobuf.MessageLite;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -34,28 +35,28 @@ public class ProtobufHelper {
     /**
      * Support multiple classloader?
      */
-    private static final boolean             MULTIPLE_CLASSLOADER = RpcConfigs
-                                                                      .getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
+    private static final boolean         MULTIPLE_CLASSLOADER = RpcConfigs
+                                                                  .getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
 
     /**
      * Cache of parseFrom method
      */
-    ConcurrentHashMap<Class, Method>         parseFromMethodMap   = new ConcurrentHashMap<Class, Method>();
+    ConcurrentMap<Class, Method>         parseFromMethodMap   = new ConcurrentHashMap<Class, Method>();
 
     /**
      * Cache of toByteArray method
      */
-    ConcurrentHashMap<Class, Method>         toByteArrayMethodMap = new ConcurrentHashMap<Class, Method>();
+    ConcurrentMap<Class, Method>         toByteArrayMethodMap = new ConcurrentHashMap<Class, Method>();
 
     /**
      * 请求参数类型缓存 {service+method:class}
      */
-    private ConcurrentHashMap<String, Class> requestClassCache    = new ConcurrentHashMap<String, Class>();
+    private ConcurrentMap<String, Class> requestClassCache    = new ConcurrentHashMap<String, Class>();
 
     /**
      * 返回结果类型缓存 {service+method:class}
      */
-    private ConcurrentHashMap<String, Class> responseClassCache   = new ConcurrentHashMap<String, Class>();
+    private ConcurrentMap<String, Class> responseClassCache   = new ConcurrentHashMap<String, Class>();
 
     /**
      * 从缓存中获取请求值类

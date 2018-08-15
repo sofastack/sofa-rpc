@@ -21,19 +21,20 @@ import com.alipay.lookout.api.Lookout;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcLookoutId {
 
-    private volatile Id                         consumerId;
-    private final Object                        consumerIdLock  = new Object();
+    private volatile Id                     consumerId;
+    private final Object                    consumerIdLock  = new Object();
 
-    private volatile Id                         providerId;
-    private final Object                        providerIdLock  = new Object();
+    private volatile Id                     providerId;
+    private final Object                    providerIdLock  = new Object();
 
-    private final ConcurrentHashMap<String, Id> serverConfigIds = new ConcurrentHashMap<String, Id>();
+    private final ConcurrentMap<String, Id> serverConfigIds = new ConcurrentHashMap<String, Id>();
 
     /**
      * create consumerId
