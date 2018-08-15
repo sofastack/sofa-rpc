@@ -37,6 +37,6 @@ public interface ProtocolNegotiator {
      * @param clientTransport 和服务提供者的长连接
      * @return 握手言和
      */
-    public boolean handshake(ProviderInfo providerInfo, ClientTransport clientTransport);
+    boolean handshake(ProviderInfo providerInfo, ClientTransport clientTransport);
 
 }

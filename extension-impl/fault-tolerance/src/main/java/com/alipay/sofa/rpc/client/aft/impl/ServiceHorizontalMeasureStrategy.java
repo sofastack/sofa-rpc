@@ -35,6 +35,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 服务水平ip资源度量策略 如果某个ip的异常率大于该服务所有ip的平均异常率到一定比例，则判定为异常。
@@ -214,7 +215,7 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
     /**
      * All measure model
      */
-    protected final ConcurrentHashMap<String, MeasureModel> appServiceMeasureModels = new ConcurrentHashMap<String, MeasureModel>();
+    protected final ConcurrentMap<String, MeasureModel> appServiceMeasureModels = new ConcurrentHashMap<String, MeasureModel>();
 
     /**
      * 如果该Invocation不属于一个MeasureModel，那么创建一个MeasureModel。并返回该MeasureModel。

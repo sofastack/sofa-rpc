@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.common.json;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 /**
  *
@@ -32,6 +33,8 @@ public class TestJsonBean {
     private int                     age;
     @JSONField(skipIfNull = true)
     private ArrayList<TestJsonBean> friends;
+    @JSONField(skipIfNull = true)
+    private Set<TestJsonBean>       vips;
     @JSONField(alias = "Remark")
     private Object[]                remark;
 
@@ -63,6 +66,15 @@ public class TestJsonBean {
 
     public void setFriends(ArrayList<TestJsonBean> friends) {
         this.friends = friends;
+    }
+
+    public Set<TestJsonBean> getVips() {
+        return vips;
+    }
+
+    public TestJsonBean setVips(Set<TestJsonBean> vips) {
+        this.vips = vips;
+        return this;
     }
 
     public Object[] getRemark() {

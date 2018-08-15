@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.*;
@@ -240,7 +241,7 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void destroy(DestroyHook hook) {
-        hook.postDestroy();
+        hook.preDestroy();
         destroy();
         hook.postDestroy();
     }
@@ -249,20 +250,20 @@ public class ZookeeperRegistry extends Registry {
      * 接口配置{接口配置路径：PathChildrenCache} <br>
      * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/configs ： PathChildrenCache }
      */
-    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
+    private static final ConcurrentMap<String, PathChildrenCache> INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
 
     /**
      * IP配置{接口配置路径：PathChildrenCache} <br>
      * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/overrides ： PathChildrenCache }
      */
-    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
+    private static final ConcurrentMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
     @Override
     public void register(ProviderConfig config) {
         String appName = config.getAppName();
         if (!registryConfig.isRegister()) {
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
@@ -401,7 +402,7 @@ public class ZookeeperRegistry extends Registry {
         if (!registryConfig.isRegister()) {
             // 注册中心不注册
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
@@ -458,7 +459,7 @@ public class ZookeeperRegistry extends Registry {
         if (!registryConfig.isSubscribe()) {
             // 注册中心不订阅
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_CONFREG_IGNORE));
+                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return null;
         }

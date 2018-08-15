@@ -29,11 +29,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 import static com.alipay.sofa.rpc.common.json.JSON.getSerializeFields;
 
@@ -172,25 +172,28 @@ public class BeanSerializer {
                 }
 
                 value = src.get(name);
-                if (isRequired && value == null) {
-                    throw new NullPointerException("Field " + name + " can't be null");
-                }
-                Class fieldClazz = field.getType();
-                if (Collection.class.isAssignableFrom(fieldClazz)) {
-                    Class genericType = Object.class;
-                    try {
-                        genericType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
-                    } catch (Exception ignore) { // NOPMD
-                    }
-                    if (value instanceof Collection) {
-                        value = collection2Collection((Collection) value, fieldClazz, genericType);
-                    } else if (value.getClass().isArray()) {
-                        value = arrayToCollection((Object[]) value, fieldClazz, genericType);
-                    } else {
-                        return null;
+                if (value == null) {
+                    if (isRequired) {
+                        throw new NullPointerException("Field " + name + " can't be null");
                     }
                 } else {
-                    value = deserializeByType(value, fieldClazz);
+                    Class fieldClazz = field.getType();
+                    if (Collection.class.isAssignableFrom(fieldClazz)) {
+                        Class genericType = Object.class;
+                        try {
+                            genericType = (Class) ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0];
+                        } catch (Exception ignore) { // NOPMD
+                        }
+                        if (value instanceof Collection) {
+                            value = collection2Collection((Collection) value, fieldClazz, genericType);
+                        } else if (value.getClass().isArray()) {
+                            value = arrayToCollection(value, fieldClazz, genericType);
+                        } else {
+                            throw new RuntimeException("value type is not supported, type=" + value.getClass());
+                        }
+                    } else {
+                        value = deserializeByType(value, fieldClazz);
+                    }
                 }
                 // 赋值
                 field.set(bean, value);
@@ -204,8 +207,8 @@ public class BeanSerializer {
         return (T) bean;
     }
 
-    private static <T, A> Collection<T> arrayToCollection(A[] src,
-                                                          Class<? extends Collection> clazz, Class<T> genericType) {
+    private static <T> Collection<T> arrayToCollection(Object src,
+                                                       Class<? extends Collection> clazz, Class<T> genericType) {
         if (clazz.isInterface()) {
             if (List.class.isAssignableFrom(clazz)) {
                 clazz = ArrayList.class;
@@ -214,8 +217,8 @@ public class BeanSerializer {
             }
         }
         Collection collection = ClassUtils.newInstance(clazz);
-        for (int i = 0; i < src.length; ++i) {
-            collection.add(deserializeByType(src[i], genericType));
+        for (int i = 0; i < Array.getLength(src); ++i) {
+            collection.add(deserializeByType(Array.get(src, i), genericType));
         }
         return collection;
     }
@@ -283,8 +286,13 @@ public class BeanSerializer {
                 return (T) list;
             }
         } else if (src.getClass().isArray()) {
-            if (src.getClass().getComponentType().isPrimitive()) { // 基本类型数组 直接返回
-                return (T) src;
+            Class componentType = src.getClass().getComponentType();
+            if (componentType.isPrimitive()) {
+                if (Collection.class.isAssignableFrom(clazz)) {
+                    return (T) arrayToCollection(src, (Class<? extends Collection>) clazz, Object.class);
+                } else {
+                    return (T) src;
+                }
             } else {
                 Object[] array = (Object[]) src;
                 if (clazz == Object.class) {
@@ -292,7 +300,7 @@ public class BeanSerializer {
                 } else if (clazz.isArray()) {
                     return (T) array2Array(array, clazz.getComponentType());
                 } else if (Collection.class.isAssignableFrom(clazz)) {
-                    return (T) arrayToCollection((Object[]) src, (Class<? extends Collection>) clazz, Object.class);
+                    return (T) arrayToCollection(src, (Class<? extends Collection>) clazz, Object.class);
                 } else {
                     return (T) src;
                 }

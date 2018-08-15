@@ -150,7 +150,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         referenceConfig.setUrl(consumerConfig.getDirectUrl());
         referenceConfig.setCheck(consumerConfig.isCheck());
         referenceConfig.setLazy(consumerConfig.isLazy());
-
+        referenceConfig.setGeneric(consumerConfig.isGeneric());
         String invokeType = consumerConfig.getInvokeType();
         if (invokeType != null) {
             if (RpcConstants.INVOKER_TYPE_ONEWAY.equals(invokeType)) {

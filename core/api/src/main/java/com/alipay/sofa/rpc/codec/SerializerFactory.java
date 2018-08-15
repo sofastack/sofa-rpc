@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 序列化工厂
@@ -35,17 +36,17 @@ public final class SerializerFactory {
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{编码：序列化器}
      */
-    private final static ConcurrentHashMap<Byte, Serializer> TYPE_SERIALIZER_MAP = new ConcurrentHashMap<Byte, Serializer>();
+    private final static ConcurrentMap<Byte, Serializer> TYPE_SERIALIZER_MAP = new ConcurrentHashMap<Byte, Serializer>();
 
     /**
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外，还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static TwoWayMap<String, Byte>             TYPE_CODE_MAP       = new TwoWayMap<String, Byte>();
+    private final static TwoWayMap<String, Byte>         TYPE_CODE_MAP       = new TwoWayMap<String, Byte>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Serializer>         EXTENSION_LOADER    = buildLoader();
+    private final static ExtensionLoader<Serializer>     EXTENSION_LOADER    = buildLoader();
 
     private static ExtensionLoader<Serializer> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Serializer.class,

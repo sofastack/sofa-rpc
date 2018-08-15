@@ -254,7 +254,7 @@ public class LocalRegistryHelper {
     }
 
     /**
-     * 配置中心的Key
+     * 服务注册中心的Key
      *
      * @param config   配置
      * @param protocol 协议
