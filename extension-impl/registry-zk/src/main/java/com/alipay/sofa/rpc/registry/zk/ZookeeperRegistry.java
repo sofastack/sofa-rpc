@@ -48,6 +48,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.*;
@@ -249,13 +250,13 @@ public class ZookeeperRegistry extends Registry {
      * 接口配置{接口配置路径：PathChildrenCache} <br>
      * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/configs ： PathChildrenCache }
      */
-    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
+    private static final ConcurrentMap<String, PathChildrenCache> INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
 
     /**
      * IP配置{接口配置路径：PathChildrenCache} <br>
      * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/overrides ： PathChildrenCache }
      */
-    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
+    private static final ConcurrentMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
     @Override
     public void register(ProviderConfig config) {

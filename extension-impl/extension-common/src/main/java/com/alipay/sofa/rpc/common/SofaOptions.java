@@ -65,11 +65,11 @@ public class SofaOptions {
      */
     public static final String CONFIG_NI_BIND                      = "rpc_bind_network_interface";
     /**
-     * 是否将服务提供者注册到配置中心（全局开关）
+     * 是否将服务提供者注册到服务注册中心（全局开关）
      *
      * @since 4.10.0
      */
-    public static final String CONFIG_RPC_REGISTER_CONFREG_IGNORE  = "rpc_register_confreg_ignore";
+    public static final String CONFIG_RPC_REGISTER_REGISTRY_IGNORE = "rpc_register_registry_ignore";
     /**
      * 虚拟主机地址，通过配置指定<br>
      * 例如宿主机地址(10.1.1.1)上有一个虚拟主机(192.2.2.2)，服务启动后监听的地址是192.2.2.2:1234，<br>
@@ -181,7 +181,7 @@ public class SofaOptions {
 
     // ========== 只能通过System.setProperty()设置，无法在文件中配置 ===========
     /**
-     * 获取配置中心返回地址的最大等待时间  只能通过 -D 生效
+     * 获取服务注册中心返回地址的最大等待时间  只能通过 -D 生效
      */
     public static final String CONFIG_MAX_ADDRESS_WAIT_TIME        = "rpc_max_address_wait_time";
     /**

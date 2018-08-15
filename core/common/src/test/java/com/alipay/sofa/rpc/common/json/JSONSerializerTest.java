@@ -100,6 +100,13 @@ public class JSONSerializerTest {
     }
 
     @Test
+    public void testDeserializeSpecialCharter() {
+        String s = "{\"a\": \"\\b\\t\\n\\f\\r\\u771f\\u7684\\u5417\\uff1f\\u54c8\\u54c8\\u0068\\u0061\\u0068\\u0061\" }";
+        Map json = (Map) JSONSerializer.deserialize(s);
+        Assert.assertEquals(json.get("a"), "\b\t\n\f\r真的吗？哈哈haha");
+    }
+
+    @Test
     public void testDeserializeWithComment() {
 
         String s = "{" +

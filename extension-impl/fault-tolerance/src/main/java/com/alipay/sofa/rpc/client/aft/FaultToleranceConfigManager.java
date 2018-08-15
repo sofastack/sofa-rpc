@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * The type Fault tolerance config manager.
@@ -32,23 +33,23 @@ public class FaultToleranceConfigManager {
     /**
      * Logger for this class
      */
-    private static final Logger                                          LOGGER      = LoggerFactory
-                                                                                         .getLogger(FaultToleranceConfigManager.class);
+    private static final Logger                                      LOGGER      = LoggerFactory
+                                                                                     .getLogger(FaultToleranceConfigManager.class);
 
     /**
      * All fault-tolerance config of apps
      */
-    private static final ConcurrentHashMap<String, FaultToleranceConfig> APP_CONFIGS = new ConcurrentHashMap<String, FaultToleranceConfig>();
+    private static final ConcurrentMap<String, FaultToleranceConfig> APP_CONFIGS = new ConcurrentHashMap<String, FaultToleranceConfig>();
 
     /**
      * Default fault-tolerance config
      */
-    private static final FaultToleranceConfig                            DEFAULT_CFG = new FaultToleranceConfig();
+    private static final FaultToleranceConfig                        DEFAULT_CFG = new FaultToleranceConfig();
 
     /**
      * 
      */
-    private static volatile boolean                                      aftEnable   = false;
+    private static volatile boolean                                  aftEnable   = false;
 
     /**
      * Put app config.

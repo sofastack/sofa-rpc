@@ -37,6 +37,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * <p>一个可扩展接口类，对应一个加载器</p>
@@ -47,38 +48,38 @@ public class ExtensionLoader<T> {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                  LOGGER = LoggerFactory
-                                                                            .getLogger(ExtensionLoader.class);
+    private final static Logger                              LOGGER = LoggerFactory
+                                                                        .getLogger(ExtensionLoader.class);
 
     /**
      * 当前加载的接口类名
      */
-    protected final Class<T>                                     interfaceClass;
+    protected final Class<T>                                 interfaceClass;
 
     /**
      * 接口名字
      */
-    protected final String                                       interfaceName;
+    protected final String                                   interfaceName;
 
     /**
      * 扩展点是否单例
      */
-    protected final Extensible                                   extensible;
+    protected final Extensible                               extensible;
 
     /**
      * 全部的加载的实现类 {"alias":ExtensionClass}
      */
-    protected final ConcurrentHashMap<String, ExtensionClass<T>> all;
+    protected final ConcurrentMap<String, ExtensionClass<T>> all;
 
     /**
      * 如果是单例，那么factory不为空
      */
-    protected final ConcurrentHashMap<String, T>                 factory;
+    protected final ConcurrentMap<String, T>                 factory;
 
     /**
      * 加载监听器
      */
-    protected final ExtensionLoaderListener<T>                   listener;
+    protected final ExtensionLoaderListener<T>               listener;
 
     /**
      * 构造函数（自动加载）
@@ -392,7 +393,7 @@ public class ExtensionLoader<T> {
      *
      * @return 扩展类对象
      */
-    public ConcurrentHashMap<String, ExtensionClass<T>> getAllExtensions() {
+    public ConcurrentMap<String, ExtensionClass<T>> getAllExtensions() {
         return all;
     }
 

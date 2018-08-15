@@ -27,6 +27,7 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * ZookeeperObserver for config node,subscribe interface level provider/consumer config.
@@ -38,13 +39,13 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                              LOGGER            = LoggerFactory
-                                                                                                   .getLogger(ZookeeperConfigObserver.class);
+    private final static Logger                                          LOGGER            = LoggerFactory
+                                                                                               .getLogger(ZookeeperConfigObserver.class);
 
     /**
      * The Config listener map.
      */
-    private ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
+    private ConcurrentMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
 
     /**
      * Add config listener.

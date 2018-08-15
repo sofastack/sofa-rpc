@@ -40,6 +40,7 @@ import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -58,7 +59,7 @@ public class RpcRuntimeContext {
     /**
      * 上下文信息，例如instancekey，本机ip等信息
      */
-    private final static ConcurrentHashMap                    CONTEXT                   = new ConcurrentHashMap();
+    private final static ConcurrentMap                        CONTEXT                   = new ConcurrentHashMap();
 
     /**
      * 当前进程Id
@@ -295,7 +296,7 @@ public class RpcRuntimeContext {
      *
      * @return the CONTEXT
      */
-    public static ConcurrentHashMap getContext() {
+    public static ConcurrentMap getContext() {
         return new ConcurrentHashMap(CONTEXT);
     }
 
