@@ -99,7 +99,6 @@ public class ConsulRegistry extends Registry {
      *
      * @param registryConfig 注册中心配置
      */
-
     protected ConsulRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
     }
