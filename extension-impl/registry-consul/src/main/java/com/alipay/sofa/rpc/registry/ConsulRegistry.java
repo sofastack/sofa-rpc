@@ -74,12 +74,12 @@ public class ConsulRegistry extends Registry {
     /**
      * 保存服务发布者的url
      */
-    private ConcurrentMap<ProviderConfig, List<String>>                   providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private ConcurrentMap<ProviderConfig, List<String>>                       providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private ConcurrentMap<ConsumerConfig, String>                         consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
+    private ConcurrentMap<ConsumerConfig, String>                             consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
 
     private Cache<String, Map<String, List<ConsulURL>>>                       serviceCache;
 
