@@ -97,7 +97,7 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
         private final TreeMap<Long, ProviderInfo> virtualNodes;
 
         /**
-         * Instantiates a new Selector.
+         * Instantiates a new Selector .
          *
          * @param interfaceId the interface id
          * @param method      the method
