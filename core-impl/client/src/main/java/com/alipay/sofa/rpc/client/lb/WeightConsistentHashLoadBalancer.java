@@ -63,8 +63,8 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
         Selector selector = selectorCache.get(key);
         // 原来没有
         if (selector == null ||
-                // 或者服务列表已经变化
-                selector.getHashCode() != hashcode) {
+            // 或者服务列表已经变化
+            selector.getHashCode() != hashcode) {
             selector = new Selector(interfaceId, method, providerInfos, hashcode);
             selectorCache.put(key, selector);
         }
@@ -202,9 +202,9 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
          */
         private long hash(byte[] digest, int index) {
             long f = ((long) (digest[3 + index * 4] & 0xFF) << 24)
-                    | ((long) (digest[2 + index * 4] & 0xFF) << 16)
-                    | ((long) (digest[1 + index * 4] & 0xFF) << 8)
-                    | (digest[index * 4] & 0xFF);
+                | ((long) (digest[2 + index * 4] & 0xFF) << 16)
+                | ((long) (digest[1 + index * 4] & 0xFF) << 8)
+                | (digest[index * 4] & 0xFF);
             return f & 0xFFFFFFFFL;
         }
 
