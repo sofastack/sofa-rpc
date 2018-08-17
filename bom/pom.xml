@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-bom</artifactId>
-    <version>5.4.4</version>
+    <version>5.4.5-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
