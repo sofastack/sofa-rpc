@@ -21,9 +21,9 @@ import com.alipay.sofa.rpc.client.AddressHolder;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.Router;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.filter.AutoActive;
@@ -31,21 +31,21 @@ import com.alipay.sofa.rpc.filter.AutoActive;
 import java.util.List;
 
 /**
- * 从注册中心获取地址进行路由
+ * 从mesh获取路由,只为 bolt 开启。
  * <p>
  *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
  */
-@Extension(value = "registry", order = -18000)
+@Extension(value = "mesh", order = -19000)
 @AutoActive(consumerSide = true)
-public class RegistryRouter extends Router {
+public class MeshRouter extends Router {
 
     /**
      * 路由路径：注册中心
      *
-     * @since 5.2.0
+     * @since 5.5.0
      */
-    public static final String  RPC_REGISTRY_ROUTER = "REGISTRY";
+    public static final String  RPC_MESH_ROUTER = "MESH";
 
     /**
      * 服务消费者配置
@@ -61,17 +61,26 @@ public class RegistryRouter extends Router {
     public boolean needToLoad(ConsumerBootstrap consumerBootstrap) {
         ConsumerConfig consumerConfig = consumerBootstrap.getConsumerConfig();
         // 不是直连，且从注册中心订阅配置
-        return StringUtils.isEmpty(consumerConfig.getDirectUrl()) && consumerConfig.isSubscribe();
+        final boolean isDirect = StringUtils.isNotBlank(consumerConfig.getDirectUrl());
+        final List<RegistryConfig> registrys = consumerConfig.getRegistry();
+        boolean isMesh = false;
+
+        if (registrys != null) {
+            for (RegistryConfig registry : registrys) {
+                if (registry.getProtocol().equalsIgnoreCase(RpcConstants.REGISTRY_PROTOCOL_MESH)) {
+                    isMesh = true;
+                    break;
+                }
+            }
+        }
+
+        boolean isBolt = consumerConfig.getProtocol().equalsIgnoreCase(RpcConstants.PROTOCOL_TYPE_BOLT);
+
+        return !isDirect && isMesh && isBolt;
     }
 
     @Override
     public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
-
-        //has  address. FIXME
-        if (CommonUtils.isNotEmpty(providerInfos)) {
-            return providerInfos;
-        }
-
         AddressHolder addressHolder = consumerBootstrap.getCluster().getAddressHolder();
         if (addressHolder != null) {
             List<ProviderInfo> current = addressHolder.getProviderInfos(RpcConstants.ADDRESS_DEFAULT_GROUP);
@@ -81,7 +90,8 @@ public class RegistryRouter extends Router {
                 providerInfos = current;
             }
         }
-        recordRouterWay(RPC_REGISTRY_ROUTER);
+        recordRouterWay(RPC_MESH_ROUTER);
         return providerInfos;
     }
+
 }

@@ -1,2 +1,3 @@
 directUrl=com.alipay.sofa.rpc.client.router.DirectUrlRouter
 registry=com.alipay.sofa.rpc.client.router.RegistryRouter
+mesh=com.alipay.sofa.rpc.client.router.MeshRouter
