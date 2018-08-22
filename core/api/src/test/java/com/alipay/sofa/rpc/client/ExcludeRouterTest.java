@@ -16,32 +16,27 @@
  */
 package com.alipay.sofa.rpc.client;
 
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-
-import java.util.List;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- * It means this router of "excludeName" is exclude.
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class ExcludeRouter extends Router {
-
-    /**
-     * 要排除的过滤器 -*和 -default表示不加载默认过滤器
-     */
-    private final String excludeName;
-
-    public ExcludeRouter(String excludeName) {
-        this.excludeName = excludeName;
+public class ExcludeRouterTest {
+    @Test
+    public void invoke() throws Exception {
+        boolean error = false;
+        try {
+            new ExcludeRouter("*").route(null, null);
+        } catch (Exception e) {
+            error = e instanceof UnsupportedOperationException;
+        }
+        Assert.assertTrue(error);
     }
 
-    public String getExcludeName() {
-        return excludeName;
+    @Test
+    public void getExcludeName() throws Exception {
+        Assert.assertEquals("*", new ExcludeRouter("*").getExcludeName());
     }
 
-    @Override
-    public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
-        throw new UnsupportedOperationException();
-    }
 }
