@@ -37,9 +37,9 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
@@ -52,23 +52,25 @@ public class FilterChain implements Invoker {
     /**
      * 日志
      */
-    private static final Logger                                            LOGGER                = LoggerFactory
-                                                                                                     .getLogger(FilterChain.class);
+    private static final Logger                              LOGGER                = LoggerFactory
+                                                                                       .getLogger(FilterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Filter>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Filter>>();
+    private final static Map<String, ExtensionClass<Filter>> PROVIDER_AUTO_ACTIVES = Collections
+                                                                                       .synchronizedMap(new LinkedHashMap<String, ExtensionClass<Filter>>());
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Filter>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Filter>>();
+    private final static Map<String, ExtensionClass<Filter>> CONSUMER_AUTO_ACTIVES = Collections
+                                                                                       .synchronizedMap(new LinkedHashMap<String, ExtensionClass<Filter>>());
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Filter>                           EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Filter>             EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Filter> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
@@ -81,7 +83,8 @@ public class FilterChain implements Invoker {
                     String alias = extensionClass.getAlias();
                     if (autoActive.providerSide()) {
                         PROVIDER_AUTO_ACTIVES.put(alias, extensionClass);
-                    } else if (autoActive.consumerSide()) {
+                    }
+                    if (autoActive.consumerSide()) {
                         CONSUMER_AUTO_ACTIVES.put(alias, extensionClass);
                     }
                     if (LOGGER.isDebugEnabled()) {
@@ -203,15 +206,15 @@ public class FilterChain implements Invoker {
     public static FilterChain buildConsumerChain(ConsumerConfig<?> consumerConfig, FilterInvoker lastFilter) {
 
         /*
-        * 例如自动装载扩展 A(a),B(b),C(c)  filter=[-a,d]  filterRef=[new E, new Exclude(b)]
-        * 逻辑如下：
-        * 1.解析config.getFilterRef()，记录E和-b
-        * 2.解析config.getFilter()字符串，记录 d 和 -a,-b
-        * 3.再解析自动装载扩展，a,b被排除了，所以拿到c,d
-        * 4.对c d进行排序
-        * 5.拿到C、D实现类
-        * 6.加上自定义，返回C、D、E
-        */
+         * 例如自动装载扩展 A(a),B(b),C(c)  filter=[-a,d]  filterRef=[new E, new Exclude(b)]
+         * 逻辑如下：
+         * 1.解析config.getFilterRef()，记录E和-b
+         * 2.解析config.getFilter()字符串，记录 d 和 -a,-b
+         * 3.再解析自动装载扩展，a,b被排除了，所以拿到c,d
+         * 4.对c d进行排序
+         * 5.拿到C、D实现类
+         * 6.加上自定义，返回C、D、E
+         */
         // 用户通过自己new实例的方式注入的filter，优先级高
         List<Filter> customFilters = consumerConfig.getFilterRef() == null ?
             new ArrayList<Filter>() : new CopyOnWriteArrayList<Filter>(consumerConfig.getFilterRef());
@@ -301,7 +304,6 @@ public class FilterChain implements Invoker {
 
     /**
      * Do filtering when async respond from server
-     *
      *
      * @param config    Consumer config
      * @param request   SofaRequest
