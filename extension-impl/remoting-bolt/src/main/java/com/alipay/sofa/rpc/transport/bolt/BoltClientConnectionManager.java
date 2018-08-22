@@ -105,6 +105,10 @@ class BoltClientConnectionManager {
             return null;
         }
         Connection connection = urlConnectionMap.get(transportConfig);
+        if (connection != null && !connection.isFine()) {
+            closeConnection(rpcClient, transportConfig, url);
+            connection = null;
+        }
         if (connection == null) {
             try {
                 connection = rpcClient.getConnection(url, url.getConnectTimeout());
