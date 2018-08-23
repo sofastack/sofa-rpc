@@ -17,12 +17,14 @@
 package com.alipay.sofa.rpc.filter;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  *
@@ -33,29 +35,40 @@ public class FilterChainTest {
 
     @Test
     public void buildProviderChain() {
-        ConsumerConfig config = new ConsumerConfig();
+
+        ProviderConfig providerConfig = new ProviderConfig();
+        providerConfig.setFilter(Arrays.asList("testChainFilter0", "-testChainFilter8"));
+
+        ConsumerConfig consumerConfig = new ConsumerConfig();
         ArrayList<Filter> list = new ArrayList<Filter>();
-        list.add(new TestChainFilter0());
+        consumerConfig.setFilter(Arrays.asList("testChainFilter0", "-testChainFilter8"));
         list.add(new TestChainFilter1());
         list.add(new TestChainFilter2());
         list.add(new TestChainFilter3());
         list.add(new TestChainFilter4());
-        config.setFilterRef(list);
+        list.add(new ExcludeFilter("-testChainFilter5"));
+        consumerConfig.setFilterRef(list);
 
-        FilterChain chain = FilterChain.buildConsumerChain(config, new TestChainFilterInvoker(config));
+        // mock provider chain (0,6,7）
+        FilterChain providerChain = FilterChain.buildProviderChain(providerConfig,
+            new TestProviderFilterInvoker(providerConfig));
+        // mock consumer chain（0,7,2,4)
+        FilterChain consumerChain = FilterChain.buildConsumerChain(consumerConfig,
+            new TestConsumerFilterInvoker(consumerConfig, providerChain));
+        Assert.assertNotNull(consumerChain.getChain());
 
         SofaRequest request = new SofaRequest();
         request.setMethodArgs(new String[] { "xxx" });
         request.setInvokeType("sync");
-        String result = (String) chain.invoke(request).getAppResponse();
-        Assert.assertEquals("xxx_q0_q2_q4_s4_s2_s0", result);
+        String result = (String) consumerChain.invoke(request).getAppResponse();
+        Assert.assertEquals("xxx_q0_q7_q2_q4_q0_q6_q7_s7_s6_s0_s4_s2_s7_s0", result);
 
         request = new SofaRequest();
         request.setMethodArgs(new String[] { "xxx" });
         request.setInvokeType("callback");
-        SofaResponse response = chain.invoke(request);
-        chain.onAsyncResponse(config, request, response, null);
+        SofaResponse response = consumerChain.invoke(request);
+        consumerChain.onAsyncResponse(consumerConfig, request, response, null);
         result = (String) response.getAppResponse();
-        Assert.assertEquals("xxx_q0_q2_q4_a4_a2_a0", result);
+        Assert.assertEquals("xxx_q0_q7_q2_q4_q0_q6_q7_a4_a2_a7_a0", result);
     }
 }

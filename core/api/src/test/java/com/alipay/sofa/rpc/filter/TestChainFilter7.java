@@ -21,37 +21,27 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
-import org.junit.Assert;
-
-import java.util.Map;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter2")
-public class TestChainFilter2 extends Filter {
+@Extension("testChainFilter7")
+@AutoActive(providerSide = true, consumerSide = true)
+public class TestChainFilter7 extends Filter {
 
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        request.getMethodArgs()[0] = request.getMethodArgs()[0] + "_q2";
+        request.getMethodArgs()[0] = request.getMethodArgs()[0] + "_q7";
         SofaResponse response = invoker.invoke(request);
         if (!request.isAsync()) {
-            response.setAppResponse(response.getAppResponse() + "_s2");
+            response.setAppResponse(response.getAppResponse() + "_s7");
         }
-        Map<String, Object> context = invoker.getConfigContext();
-        Assert.assertNotNull(context);
-        invoker.getMethodParam(request.getMethodName(), "invokeType");
-        invoker.getStringMethodParam(request.getMethodName(), "invokeType", "sync");
-        invoker.getIntMethodParam(request.getMethodName(), "timeout", 3000);
-        invoker.getBooleanMethodParam(request.getMethodName(), "cache", false);
         return response;
     }
 
     @Override
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
         throws SofaRpcException {
-        response.setAppResponse(response.getAppResponse() + "_a2");
+        response.setAppResponse(response.getAppResponse() + "_a7");
     }
 }

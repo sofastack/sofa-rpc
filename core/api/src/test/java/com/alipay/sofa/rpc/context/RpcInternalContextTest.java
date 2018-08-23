@@ -20,7 +20,9 @@ import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
@@ -34,6 +36,16 @@ import java.util.concurrent.TimeoutException;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RpcInternalContextTest {
+
+    @Before
+    public void before() {
+        RpcInternalContext.removeAllContext();
+    }
+
+    @After
+    public void after() {
+        RpcInternalContext.removeAllContext();
+    }
 
     @Test
     public void testPop() {
