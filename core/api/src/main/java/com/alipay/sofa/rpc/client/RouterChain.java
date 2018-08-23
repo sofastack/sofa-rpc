@@ -78,7 +78,8 @@ public class RouterChain {
                     String alias = extensionClass.getAlias();
                     if (autoActive.providerSide()) {
                         PROVIDER_AUTO_ACTIVES.put(alias, extensionClass);
-                    } else if (autoActive.consumerSide()) {
+                    }
+                    if (autoActive.consumerSide()) {
                         CONSUMER_AUTO_ACTIVES.put(alias, extensionClass);
                     }
                     if (LOGGER.isDebugEnabled()) {
