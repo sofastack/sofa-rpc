@@ -14,28 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.filter;
+package com.alipay.sofa.rpc.client.router;
 
-import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.Router;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.filter.AutoActive;
+
+import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class TestChainFilterInvoker extends FilterInvoker {
-    protected TestChainFilterInvoker(AbstractInterfaceConfig config) {
-        super(config);
-    }
+@Extension("testChainRouter8")
+@AutoActive(providerSide = true, consumerSide = true)
+public class TestChainRouter8 extends Router {
 
     @Override
-    public SofaResponse invoke(SofaRequest sofaRequest) throws SofaRpcException {
-        SofaResponse response = new SofaResponse();
-        response.setAppResponse(sofaRequest.getMethodArgs()[0]);
-        return response;
+    public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
+        recordRouterWay("r8");
+        return providerInfos;
     }
-
 }

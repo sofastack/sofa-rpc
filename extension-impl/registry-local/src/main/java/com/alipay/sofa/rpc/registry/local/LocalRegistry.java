@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.common.struct.MapDifference;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.struct.ValueDifference;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -105,6 +106,11 @@ public class LocalRegistry extends Registry {
 
     @Override
     public void init() {
+
+        if (StringUtils.isNotBlank(regFile)) {
+            return;
+        }
+
         this.regFile = registryConfig.getFile();
         if (regFile == null) {
             throw new SofaRpcRuntimeException("File of LocalRegistry is null");
