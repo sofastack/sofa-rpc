@@ -14,34 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.client;
+package com.alipay.sofa.rpc.client.router;
 
+import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.client.Router;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.List;
 
 /**
- * It means this router of "excludeName" is exclude.
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class ExcludeRouter extends Router {
-
-    /**
-     * 要排除的过滤器 -*和 -default表示不加载默认过滤器
-     */
-    private final String excludeName;
-
-    public ExcludeRouter(String excludeName) {
-        this.excludeName = excludeName;
-    }
-
-    public String getExcludeName() {
-        return excludeName;
-    }
+@Extension("testChainRouter2")
+public class TestChainRouter2 extends Router {
 
     @Override
     public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
-        throw new UnsupportedOperationException();
+        recordRouterWay("r2");
+        return providerInfos;
     }
 }
