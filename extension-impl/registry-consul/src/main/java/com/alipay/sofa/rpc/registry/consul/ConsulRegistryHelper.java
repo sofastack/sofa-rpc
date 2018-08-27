@@ -22,7 +22,7 @@ import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
-import com.alipay.sofa.rpc.utils.RegistryUtils;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
