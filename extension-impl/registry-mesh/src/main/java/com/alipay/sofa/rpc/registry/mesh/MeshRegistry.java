@@ -125,6 +125,9 @@ public class MeshRegistry extends Registry {
      * @param providerInfo 服务提供者数据
      */
     protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo) {
+
+        registerAppInfoOnce(appName);
+
         if (LOGGER.isInfoEnabled(appName)) {
             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, serviceName));
         }
@@ -199,18 +202,9 @@ public class MeshRegistry extends Registry {
 
     @Override
     public List<ProviderGroup> subscribe(ConsumerConfig config) {
+        final String appName = config.getAppName();
 
-        synchronized (MeshRegistry.class) {
-            if (!registedApp) {
-                ApplicationInfoRequest applicationInfoRequest = buildApplicationRequest(config);
-                boolean registed = client.registeApplication(applicationInfoRequest);
-                if (!registed) {
-                    throw new RuntimeException("registe application occors error," + applicationInfoRequest);
-                } else {
-                    registedApp = true;
-                }
-            }
-        }
+        registerAppInfoOnce(appName);
 
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
@@ -240,15 +234,29 @@ public class MeshRegistry extends Registry {
         return providerGroups;
     }
 
+    protected void registerAppInfoOnce(String appName) {
+        synchronized (MeshRegistry.class) {
+            if (!registedApp) {
+                ApplicationInfoRequest applicationInfoRequest = buildApplicationRequest(appName);
+                boolean registed = client.registeApplication(applicationInfoRequest);
+                if (!registed) {
+                    throw new RuntimeException("registe application occors error," + applicationInfoRequest);
+                } else {
+                    registedApp = true;
+                }
+            }
+        }
+    }
+
     /**
      * can be extended
      *
-     * @param config
+     * @param appName
      * @return
      */
-    protected ApplicationInfoRequest buildApplicationRequest(ConsumerConfig config) {
+    protected ApplicationInfoRequest buildApplicationRequest(String appName) {
         ApplicationInfoRequest applicationInfoRequest = new ApplicationInfoRequest();
-        applicationInfoRequest.setAppName(config.getAppName());
+        applicationInfoRequest.setAppName(appName);
         return applicationInfoRequest;
     }
 
