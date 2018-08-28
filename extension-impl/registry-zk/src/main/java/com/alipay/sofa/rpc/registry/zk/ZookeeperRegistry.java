@@ -211,6 +211,9 @@ public class ZookeeperRegistry extends Registry {
             .retryPolicy(retryPolicy)
             .defaultData(null)
             .build();
+
+        ZookeeperStateChange stateChange = new ZookeeperStateChange(providerUrls,rootPath,PROVIDER_ONLINE);
+        zkClient.getConnectionStateListenable().addListener(stateChange);
     }
 
     @Override
