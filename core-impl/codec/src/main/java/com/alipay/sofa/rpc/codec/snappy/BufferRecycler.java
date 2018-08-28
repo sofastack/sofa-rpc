@@ -27,15 +27,15 @@ import java.lang.ref.SoftReference;
  */
 class BufferRecycler {
 
-    private final static int                                          MIN_OUTPUT_BUFFER   = 8000;
+    private final static int                                          MIN_OUTPUT_BUFFER    = 8000;
 
     /**
      * This <code>ThreadLocal</code> contains a {@link SoftReference}
      * to a {@link BufferRecycler} used to provide a low-cost
      * buffer recycling for buffers we need for encoding, decoding.
      */
-    final protected static ThreadLocal<SoftReference<BufferRecycler>> recyclerRef         = new ThreadLocal<SoftReference<BufferRecycler>>();
-    private final ExtractedBufferRecycler extractedBufferRecycler = new ExtractedBufferRecycler();
+    final protected static ThreadLocal<SoftReference<BufferRecycler>> recyclerRef          = new ThreadLocal<SoftReference<BufferRecycler>>();
+    private final SingleBufferRecycler                                singleBufferRecycler = new SingleBufferRecycler();
 
     private byte[]                                                    inputBuffer;
     private byte[]                                                    outputBuffer;
@@ -69,11 +69,11 @@ class BufferRecycler {
     ///////////////////////////////////////////////////////////////////////
 
     public byte[] allocEncodingBuffer(int minSize) {
-        return extractedBufferRecycler.allocEncodingBuffer(minSize);
+        return singleBufferRecycler.allocEncodingBuffer(minSize);
     }
 
     public void releaseEncodeBuffer(byte[] buffer) {
-        extractedBufferRecycler.releaseEncodeBuffer(buffer);
+        singleBufferRecycler.releaseEncodeBuffer(buffer);
     }
 
     public byte[] allocOutputBuffer(int minSize) {

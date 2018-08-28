@@ -1,10 +1,10 @@
 package com.alipay.sofa.rpc.codec.snappy;
 
-class ExtractedBufferRecycler {
+class SingleBufferRecycler {
     private final static int MIN_ENCODING_BUFFER = 4000;
     private byte[] encodingBuffer;
 
-    ExtractedBufferRecycler() {
+    SingleBufferRecycler() {
     }
 
     byte[] allocEncodingBuffer(int minSize) {
