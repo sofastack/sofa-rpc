@@ -26,7 +26,6 @@ import java.lang.ref.SoftReference;
  * @author tatu
  */
 class BufferRecycler {
-    private final static int                                          MIN_ENCODING_BUFFER = 4000;
 
     private final static int                                          MIN_OUTPUT_BUFFER   = 8000;
 
@@ -36,12 +35,12 @@ class BufferRecycler {
      * buffer recycling for buffers we need for encoding, decoding.
      */
     final protected static ThreadLocal<SoftReference<BufferRecycler>> recyclerRef         = new ThreadLocal<SoftReference<BufferRecycler>>();
+    private final ExtractedBufferRecycler extractedBufferRecycler = new ExtractedBufferRecycler();
 
     private byte[]                                                    inputBuffer;
     private byte[]                                                    outputBuffer;
 
     private byte[]                                                    decodingBuffer;
-    private byte[]                                                    encodingBuffer;
 
     private short[]                                                   encodingHash;
 
@@ -70,19 +69,11 @@ class BufferRecycler {
     ///////////////////////////////////////////////////////////////////////
 
     public byte[] allocEncodingBuffer(int minSize) {
-        byte[] buf = encodingBuffer;
-        if (buf == null || buf.length < minSize) {
-            buf = new byte[Math.max(minSize, MIN_ENCODING_BUFFER)];
-        } else {
-            encodingBuffer = null;
-        }
-        return buf;
+        return extractedBufferRecycler.allocEncodingBuffer(minSize);
     }
 
     public void releaseEncodeBuffer(byte[] buffer) {
-        if (encodingBuffer == null || buffer.length > encodingBuffer.length) {
-            encodingBuffer = buffer;
-        }
+        extractedBufferRecycler.releaseEncodeBuffer(buffer);
     }
 
     public byte[] allocOutputBuffer(int minSize) {
