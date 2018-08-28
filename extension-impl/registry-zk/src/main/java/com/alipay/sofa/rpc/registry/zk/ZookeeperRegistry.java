@@ -104,7 +104,7 @@ public class ZookeeperRegistry extends Registry {
     /**
      * 配置项：是否本地优先
      */
-    public final static String                PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
+    public final static String                          PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
 
     /**
      * 配置项：是否使用临时节点。<br>
@@ -113,32 +113,32 @@ public class ZookeeperRegistry extends Registry {
      * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
      * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
      */
-    public final static String                PARAM_CREATE_EPHEMERAL  = "createEphemeral";
+    public final static String                          PARAM_CREATE_EPHEMERAL  = "createEphemeral";
     /**
      * 服务被下线
      */
-    private final static byte[]               PROVIDER_OFFLINE        = new byte[] { 0 };
+    private final static byte[]                         PROVIDER_OFFLINE        = new byte[] { 0 };
     /**
      * 正常在线服务
      */
-    private final static byte[]               PROVIDER_ONLINE         = new byte[] { 1 };
+    private final static byte[]                         PROVIDER_ONLINE         = new byte[] { 1 };
 
     /**
      * Zookeeper zkClient
      */
-    private CuratorFramework                  zkClient;
+    private CuratorFramework                            zkClient;
 
     /**
      * Root path of registry data
      */
-    private String                            rootPath;
+    private String                                      rootPath;
 
     /**
      * Prefer get data from local file to remote zk cluster.
      *
      * @see ZookeeperRegistry#PARAM_PREFER_LOCAL_FILE
      */
-    private boolean                           preferLocalFile         = false;
+    private boolean                                     preferLocalFile         = false;
 
     /**
      * Create EPHEMERAL node when true, otherwise PERSISTENT
@@ -147,32 +147,32 @@ public class ZookeeperRegistry extends Registry {
      * @see CreateMode#PERSISTENT
      * @see CreateMode#EPHEMERAL
      */
-    private boolean                           ephemeralNode           = true;
+    private boolean                                     ephemeralNode           = true;
 
     /**
      * 接口级配置项观察者
      */
-    private ZookeeperConfigObserver           configObserver;
+    private ZookeeperConfigObserver                     configObserver;
 
     /**
      * IP级配置项观察者
      */
-    private ZookeeperOverrideObserver         overrideObserver;
+    private ZookeeperOverrideObserver                   overrideObserver;
 
     /**
      * 配置项观察者
      */
-    private ZookeeperProviderObserver         providerObserver;
+    private ZookeeperProviderObserver                   providerObserver;
 
     /**
      * 保存服务发布者的url
      */
-    private Map<ProviderConfig, List<String>> providerUrls            = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private ConcurrentMap<ProviderConfig, List<String>> providerUrls            = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private Map<ConsumerConfig, String>       consumerUrls            = new ConcurrentHashMap<ConsumerConfig, String>();
+    private ConcurrentMap<ConsumerConfig, String>       consumerUrls            = new ConcurrentHashMap<ConsumerConfig, String>();
 
     @Override
     public synchronized void init() {
