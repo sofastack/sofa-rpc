@@ -51,10 +51,9 @@ public class SerializerFactoryTest {
     @Test
     public void getSerializerNotExist() {
         try {
-            Serializer serializer = SerializerFactory.getSerializer((byte) 999);
-            Assert.assertTrue(false);
+            SerializerFactory.getSerializer((byte) 999);
+            Assert.fail();
         } catch (SofaRpcRuntimeException e) {
-            Assert.assertTrue(true);
         }
     }
 
