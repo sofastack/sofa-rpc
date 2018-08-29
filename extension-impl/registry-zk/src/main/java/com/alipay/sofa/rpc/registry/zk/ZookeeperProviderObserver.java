@@ -76,10 +76,24 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
 
     public void updateProvider(ConsumerConfig config, String providerPath, ChildData data)
         throws UnsupportedEncodingException {
+        String logMsg = "Receive update provider: path=[" + data.getPath() + "]"
+            + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+            + ", stat=[" + data.getStat() + "]";
+        addProvider(config, providerPath, data, logMsg);
+    }
+
+    public void addProvider(ConsumerConfig config, String providerPath, ChildData data)
+        throws UnsupportedEncodingException {
+        String logMsg = "Receive add provider: path=[" + data.getPath() + "]"
+            + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+            + ", stat=[" + data.getStat() + "]";
+        addProvider(config, providerPath, data, logMsg);
+    }
+
+    private void addProvider(ConsumerConfig config, String providerPath, ChildData data, String logMsg)
+        throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
-            LOGGER.infoWithApp(config.getAppName(), "Receive update provider: path=[" + data.getPath() + "]"
-                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                + ", stat=[" + data.getStat() + "]");
+            LOGGER.infoWithApp(config.getAppName(), logMsg);
         }
         List<ProviderInfoListener> providerInfoListeners = providerListenerMap.get(config);
         if (CommonUtils.isNotEmpty(providerInfoListeners)) {
@@ -110,25 +124,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
         }
     }
 
-    public void addProvider(ConsumerConfig config, String providerPath, ChildData data)
-        throws UnsupportedEncodingException {
-        if (LOGGER.isInfoEnabled(config.getAppName())) {
-            LOGGER.infoWithApp(config.getAppName(), "Receive add provider: path=[" + data.getPath() + "]"
-                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                + ", stat=[" + data.getStat() + "]");
-        }
-        List<ProviderInfoListener> providerInfoListeners = providerListenerMap.get(config);
-        if (CommonUtils.isNotEmpty(providerInfoListeners)) {
-            List<ProviderInfo> providerInfos = Arrays.asList(
-                ZookeeperRegistryHelper.convertUrlToProvider(providerPath, data));
-            for (ProviderInfoListener listener : providerInfoListeners) {
-                List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config, providerInfos);
-                listener.addProvider(new ProviderGroup(providerInfosForProtocol));
-            }
-        }
-    }
-
-    static List<ProviderInfo> filterByProtocol(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
+    private List<ProviderInfo> filterByProtocol(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
         String protocol = consumerConfig.getProtocol();
         List<ProviderInfo> result = new ArrayList<ProviderInfo>();
         for (ProviderInfo providerInfo : providerInfos) {
