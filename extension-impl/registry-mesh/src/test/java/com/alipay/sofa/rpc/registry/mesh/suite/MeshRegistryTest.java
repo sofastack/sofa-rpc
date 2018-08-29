@@ -127,8 +127,10 @@ public class MeshRegistryTest {
         }
 
         Boolean registedAppValue = null;
+        // in case of effected by other case.
         try {
             registedAppValue = (Boolean) registedAppField.get(registry);
+            registedAppField.set(registry, false);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
