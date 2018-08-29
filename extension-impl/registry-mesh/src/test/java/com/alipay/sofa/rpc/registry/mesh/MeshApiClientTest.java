@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.mesh.suite;
+package com.alipay.sofa.rpc.registry.mesh;
 
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.registry.mesh.client.MeshApiClient;
@@ -40,7 +40,7 @@ import org.junit.Test;
  * @author bystander
  * @version $Id: MeshApiClientTest.java, v 0.1 2018年08月07日 12:04 PM bystander Exp $
  */
-public class MeshApiClientTest {
+public class MeshApiClientTest extends BaseMeshTest {
 
     private MeshApiClient meshApiClient;
 

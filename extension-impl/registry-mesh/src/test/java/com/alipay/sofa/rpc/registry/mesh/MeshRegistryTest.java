@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.mesh.suite;
+package com.alipay.sofa.rpc.registry.mesh;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.common.json.JSON;
@@ -26,8 +26,6 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
-import com.alipay.sofa.rpc.registry.mesh.MeshRegistry;
-import com.alipay.sofa.rpc.registry.mesh.MeshRegistryHelper;
 import com.alipay.sofa.rpc.registry.mesh.mock.HttpMockServer;
 import com.alipay.sofa.rpc.registry.mesh.model.ApplicationInfoResult;
 import com.alipay.sofa.rpc.registry.mesh.model.MeshEndpoint;
@@ -51,7 +49,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class MeshRegistryTest {
+public class MeshRegistryTest extends BaseMeshTest {
 
     private static RegistryConfig registryConfig;
 
