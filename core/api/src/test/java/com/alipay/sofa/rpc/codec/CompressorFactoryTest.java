@@ -16,12 +16,11 @@
  */
 package com.alipay.sofa.rpc.codec;
 
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class CompressorFactoryTest {
@@ -44,4 +43,12 @@ public class CompressorFactoryTest {
         Assert.assertEquals(CompressorFactory.getCodeByAlias("test"), (byte) 113);
     }
 
+    @Test
+    public void getCompressorNotExist() throws Exception {
+        try {
+            CompressorFactory.getCompressor((byte) 999);
+            Assert.fail();
+        } catch (SofaRpcRuntimeException e) {
+        }
+    }
 }
