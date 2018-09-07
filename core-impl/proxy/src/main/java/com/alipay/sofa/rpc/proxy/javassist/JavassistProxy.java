@@ -30,7 +30,12 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.proxy.Proxy;
-import javassist.*;
+import javassist.ClassPool;
+import javassist.CtClass;
+import javassist.CtConstructor;
+import javassist.CtField;
+import javassist.CtMethod;
+import javassist.LoaderClassPath;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
