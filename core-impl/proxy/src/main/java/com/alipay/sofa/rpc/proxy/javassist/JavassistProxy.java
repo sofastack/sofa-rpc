@@ -57,9 +57,9 @@ public class JavassistProxy implements Proxy {
     /**
      * Logger for this class
      */
-    private static final Logger            LOGGER          = LoggerFactory.getLogger(JavassistProxy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(JavassistProxy.class);
 
-    private static AtomicInteger           counter         = new AtomicInteger();
+    private static AtomicInteger counter = new AtomicInteger();
 
     /**
      * 原始类和代理类的映射
@@ -114,7 +114,7 @@ public class JavassistProxy implements Proxy {
                 }
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("javassist proxy of interface: {} \r\n{}", interfaceClass,
-                        debug != null ? debug.toString() : "");
+                            debug != null ? debug.toString() : "");
                 }
                 clazz = mCtc.toClass();
                 PROXY_CLASS_MAP.put(interfaceClass, clazz);
@@ -125,7 +125,7 @@ public class JavassistProxy implements Proxy {
         } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("javassist proxy of interface: {} \r\n{}", interfaceClass,
-                    debug != null ? debug.toString() : "");
+                        debug != null ? debug.toString() : "");
             }
             throw new SofaRpcRuntimeException("", e);
         }
@@ -144,7 +144,7 @@ public class JavassistProxy implements Proxy {
             Class<?> returnType = m.getReturnType();
 
             sb.append(Modifier.toString(m.getModifiers()).replace("abstract", ""))
-                .append(" ").append(ClassTypeUtils.getTypeStr(returnType)).append(" ").append(m.getName()).append("( ");
+                    .append(" ").append(ClassTypeUtils.getTypeStr(returnType)).append(" ").append(m.getName()).append("( ");
             int c = 0;
 
             for (Class<?> mp : mType) {
@@ -175,20 +175,20 @@ public class JavassistProxy implements Proxy {
             }
 
             fieldList.add("private " + Method.class.getCanonicalName() + " method_" + mi + " = "
-                + ReflectUtils.class.getCanonicalName() + ".getMethod("
-                + interfaceClass.getCanonicalName() + ".class, \"" + m.getName() + "\", "
-                + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");"
-                );
+                    + ReflectUtils.class.getCanonicalName() + ".getMethod("
+                    + interfaceClass.getCanonicalName() + ".class, \"" + m.getName() + "\", "
+                    + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");"
+            );
 
             sb.append(SofaRequest.class.getCanonicalName()).append(" request = ")
-                .append(MessageBuilder.class.getCanonicalName())
-                .append(".buildSofaRequest(clazz, method, paramTypes, paramValues);");
+                    .append(MessageBuilder.class.getCanonicalName())
+                    .append(".buildSofaRequest(clazz, method, paramTypes, paramValues);");
             sb.append(SofaResponse.class.getCanonicalName()).append(" response = ")
-                .append("proxyInvoker.invoke(request);");
+                    .append("proxyInvoker.invoke(request);");
             sb.append("if(response.isError()){");
             sb.append("  throw new ").append(SofaRpcException.class.getName()).append("(")
-                .append(RpcErrorType.class.getName())
-                .append(".SERVER_UNDECLARED_ERROR,").append(" response.getErrorMsg());");
+                    .append(RpcErrorType.class.getName())
+                    .append(".SERVER_UNDECLARED_ERROR,").append(" response.getErrorMsg());");
             sb.append("}");
 
             sb.append("Object ret = response.getAppResponse();");
@@ -223,7 +223,7 @@ public class JavassistProxy implements Proxy {
         sb.delete(0, sb.length());
         sb.append("public boolean equals(Object obj) {");
         sb.append("  return this == obj || (getClass().isInstance($1) && proxyInvoker.equals(")
-            .append(JavassistProxy.class.getName()).append(".parseInvoker($1)));");
+                .append(JavassistProxy.class.getName()).append(".parseInvoker($1)));");
         sb.append("}");
         resultList.add(sb.toString());
     }
