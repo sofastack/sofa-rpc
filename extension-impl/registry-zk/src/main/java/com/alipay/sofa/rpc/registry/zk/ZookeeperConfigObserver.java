@@ -76,6 +76,17 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
      * @param data       子节点Data
      */
     public void updateConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
+        addConfig(config, configPath, data);
+    }
+
+    /**
+     * 接口配置新增子节点Data
+     *
+     * @param config     接口配置
+     * @param configPath 配置Path
+     * @param data       子节点Data
+     */
+    public void addConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
@@ -161,33 +172,4 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         }
     }
 
-    /**
-     * 接口配置新增子节点Data
-     *
-     * @param config     接口配置
-     * @param configPath 配置Path
-     * @param data       子节点Data
-     */
-    public void addConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
-        if (data == null) {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
-            }
-        } else {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
-            }
-            List<ConfigListener> configListeners = configListenerMap.get(config);
-            if (CommonUtils.isNotEmpty(configListeners)) {
-                //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
-                    false);
-                for (ConfigListener listener : configListeners) {
-                    listener.configChanged(attribute);
-                }
-            }
-        }
-    }
 }

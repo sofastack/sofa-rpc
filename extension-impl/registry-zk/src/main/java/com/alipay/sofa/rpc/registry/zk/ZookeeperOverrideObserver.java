@@ -78,6 +78,18 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @throws Exception 转换配置异常
      */
     public void updateConfig(AbstractInterfaceConfig config, String overridePath, ChildData data) throws Exception {
+        addConfig(config, overridePath, data);
+    }
+
+    /**
+     * 接口配置新增子节点Data
+     *
+     * @param config       接口配置
+     * @param overridePath 覆盖Path
+     * @param data         子节点Data
+     * @throws Exception 转换配置异常
+     */
+    public void addConfig(AbstractInterfaceConfig config, String overridePath, ChildData data) throws Exception {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
@@ -172,34 +184,4 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
         }
     }
 
-    /**
-     * 接口配置新增子节点Data
-     *
-     * @param config       接口配置
-     * @param overridePath 覆盖Path
-     * @param data         子节点Data
-     * @throws Exception 转换配置异常
-     */
-    public void addConfig(AbstractInterfaceConfig config, String overridePath, ChildData data) throws Exception {
-        if (data == null) {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
-            }
-        } else {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
-            }
-            List<ConfigListener> configListeners = configListenerMap.get(config);
-            if (CommonUtils.isNotEmpty(configListeners)) {
-                //转换子节点Data为IP级配置<配置属性名,配置属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertOverrideToAttribute(overridePath, data,
-                    false, null);
-                for (ConfigListener listener : configListeners) {
-                    listener.attrUpdated(attribute);
-                }
-            }
-        }
-    }
 }
