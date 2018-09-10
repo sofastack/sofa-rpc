@@ -140,7 +140,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         referenceConfig.setId(consumerConfig.getId());
         referenceConfig.setInterface(consumerConfig.getInterfaceId());
         referenceConfig.setGroup(consumerConfig.getUniqueId());
-        referenceConfig.setVersion(consumerConfig.getUniqueId());
+        referenceConfig.setVersion(consumerConfig.getGroup());
         referenceConfig.setActives(consumerConfig.getConcurrents());
         referenceConfig.setCluster(consumerConfig.getCluster());
         referenceConfig.setConnections(consumerConfig.getConnectionNum());
