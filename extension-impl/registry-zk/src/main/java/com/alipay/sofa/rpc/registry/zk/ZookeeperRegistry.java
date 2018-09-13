@@ -50,7 +50,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
-import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.*;
+import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildConfigPath;
+import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildConsumerPath;
+import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildOverridePath;
+import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProviderPath;
 
 /**
  * <p>简单的Zookeeper注册中心,具有如下特性：<br>
@@ -159,7 +162,7 @@ public class ZookeeperRegistry extends Registry {
     private ZookeeperOverrideObserver         overrideObserver;
 
     /**
-     * 配置项观察者
+     * 服务列表观察者
      */
     private ZookeeperProviderObserver         providerObserver;
 
@@ -500,7 +503,7 @@ public class ZookeeperRegistry extends Registry {
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
                 providerObserver.addProviderListener(config, providerInfoListener);
                 // TODO 换成监听父节点变化（只是监听变化了，而不通知变化了什么，然后客户端自己来拉数据的）
-                PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, providerPath, true);
+                final PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, providerPath, true);
                 pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
                     @Override
                     public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
@@ -510,13 +513,16 @@ public class ZookeeperRegistry extends Registry {
                         }
                         switch (event.getType()) {
                             case CHILD_ADDED: //加了一个provider
-                                providerObserver.addProvider(config, providerPath, event.getData());
+                                providerObserver.addProvider(config, providerPath, event.getData(),
+                                    pathChildrenCache.getCurrentData());
                                 break;
                             case CHILD_REMOVED: //删了一个provider
-                                providerObserver.removeProvider(config, providerPath, event.getData());
+                                providerObserver.removeProvider(config, providerPath, event.getData(),
+                                    pathChildrenCache.getCurrentData());
                                 break;
                             case CHILD_UPDATED: // 更新一个Provider
-                                providerObserver.updateProvider(config, providerPath, event.getData());
+                                providerObserver.updateProvider(config, providerPath, event.getData(),
+                                    pathChildrenCache.getCurrentData());
                                 break;
                             default:
                                 break;
@@ -594,7 +600,7 @@ public class ZookeeperRegistry extends Registry {
     /**
      * 获取注册配置
      *
-     * @param config  consumer config
+     * @param config consumer config
      * @return
      */
     private AbstractInterfaceConfig getRegisterConfig(ConsumerConfig config) {
