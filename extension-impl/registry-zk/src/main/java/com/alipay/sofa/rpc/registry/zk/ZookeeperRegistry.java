@@ -234,6 +234,8 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void destroy() {
+        closePathChildrenCache(INTERFACE_CONFIG_CACHE);
+        closePathChildrenCache(INTERFACE_OVERRIDE_CACHE);
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             zkClient.close();
         }
@@ -249,16 +251,22 @@ public class ZookeeperRegistry extends Registry {
     }
 
     /**
+     * 接口配置{ConsumerConfig：PathChildrenCache} <br>
+     * 例如：{ConsumerConfig ： PathChildrenCache }
+     */
+    private static final ConcurrentHashMap<ConsumerConfig, PathChildrenCache> INTERFACE_PROVIDER_CACHE = new ConcurrentHashMap<ConsumerConfig, PathChildrenCache>();
+
+    /**
      * 接口配置{接口配置路径：PathChildrenCache} <br>
      * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/configs ： PathChildrenCache }
      */
-    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
+    private static final ConcurrentHashMap<String, PathChildrenCache>         INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
 
     /**
      * IP配置{接口配置路径：PathChildrenCache} <br>
      * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/overrides ： PathChildrenCache }
      */
-    private static final ConcurrentHashMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
+    private static final ConcurrentHashMap<String, PathChildrenCache>         INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
     @Override
     public void register(ProviderConfig config) {
@@ -489,7 +497,6 @@ public class ZookeeperRegistry extends Registry {
                 //订阅IP级配置
                 subscribeOverride(config, config.getConfigListener());
             }
-
             // 订阅Providers节点
             try {
                 if (providerObserver == null) { // 初始化
@@ -499,37 +506,42 @@ public class ZookeeperRegistry extends Registry {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_SUB, providerPath));
                 }
-                // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
-                ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
-                providerObserver.addProviderListener(config, providerInfoListener);
-                // TODO 换成监听父节点变化（只是监听变化了，而不通知变化了什么，然后客户端自己来拉数据的）
-                final PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, providerPath, true);
-                pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
-                    @Override
-                    public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
-                        if (LOGGER.isDebugEnabled(config.getAppName())) {
-                            LOGGER.debugWithApp(config.getAppName(),
-                                "Receive zookeeper event: " + "type=[" + event.getType() + "]");
+                PathChildrenCache pathChildrenCache = INTERFACE_PROVIDER_CACHE.get(config);
+                if (pathChildrenCache == null) {
+                    // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
+                    ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
+                    providerObserver.addProviderListener(config, providerInfoListener);
+                    // TODO 换成监听父节点变化（只是监听变化了，而不通知变化了什么，然后客户端自己来拉数据的）
+                    pathChildrenCache = new PathChildrenCache(zkClient, providerPath, true);
+                    final PathChildrenCache finalPathChildrenCache = pathChildrenCache;
+                    pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
+                        @Override
+                        public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
+                            if (LOGGER.isDebugEnabled(config.getAppName())) {
+                                LOGGER.debugWithApp(config.getAppName(),
+                                    "Receive zookeeper event: " + "type=[" + event.getType() + "]");
+                            }
+                            switch (event.getType()) {
+                                case CHILD_ADDED: //加了一个provider
+                                    providerObserver.addProvider(config, providerPath, event.getData(),
+                                        finalPathChildrenCache.getCurrentData());
+                                    break;
+                                case CHILD_REMOVED: //删了一个provider
+                                    providerObserver.removeProvider(config, providerPath, event.getData(),
+                                        finalPathChildrenCache.getCurrentData());
+                                    break;
+                                case CHILD_UPDATED: // 更新一个Provider
+                                    providerObserver.updateProvider(config, providerPath, event.getData(),
+                                        finalPathChildrenCache.getCurrentData());
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
-                        switch (event.getType()) {
-                            case CHILD_ADDED: //加了一个provider
-                                providerObserver.addProvider(config, providerPath, event.getData(),
-                                    pathChildrenCache.getCurrentData());
-                                break;
-                            case CHILD_REMOVED: //删了一个provider
-                                providerObserver.removeProvider(config, providerPath, event.getData(),
-                                    pathChildrenCache.getCurrentData());
-                                break;
-                            case CHILD_UPDATED: // 更新一个Provider
-                                providerObserver.updateProvider(config, providerPath, event.getData(),
-                                    pathChildrenCache.getCurrentData());
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-                pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+                    });
+                    pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+                    INTERFACE_PROVIDER_CACHE.put(config, pathChildrenCache);
+                }
                 List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(
                     providerPath, pathChildrenCache.getCurrentData());
                 List<ProviderInfo> matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
@@ -575,6 +587,17 @@ public class ZookeeperRegistry extends Registry {
                         e);
                 }
             }
+            PathChildrenCache childrenCache = INTERFACE_PROVIDER_CACHE.remove(config);
+            if (childrenCache != null) {
+                try {
+                    childrenCache.close();
+                } catch (Exception e) {
+                    if (!RpcRunningState.isShuttingDown()) {
+                        throw new SofaRpcRuntimeException(
+                            "Failed to unsubscribe consumer config from zookeeperRegistry!", e);
+                    }
+                }
+            }
         }
     }
 
@@ -612,5 +635,15 @@ public class ZookeeperRegistry extends Registry {
             }
         }
         return null;
+    }
+
+    private void closePathChildrenCache(Map<String, PathChildrenCache> map) {
+        for (Map.Entry<String, PathChildrenCache> entry : map.entrySet()) {
+            try {
+                entry.getValue().close();
+            } catch (Exception e) {
+                LOGGER.error("Close PathChildrenCache error!", e);
+            }
+        }
     }
 }
