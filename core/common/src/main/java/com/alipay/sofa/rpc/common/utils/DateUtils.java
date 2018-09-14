@@ -114,6 +114,7 @@ public class DateUtils {
     public static Long strToLong(String dateStr) throws ParseException {
         return strToDate(dateStr).getTime();
     }
+
     /**
      * 字符串转时间
      *

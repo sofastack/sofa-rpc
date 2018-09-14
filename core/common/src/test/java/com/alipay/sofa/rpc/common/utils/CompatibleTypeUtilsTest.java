@@ -105,11 +105,11 @@ public class CompatibleTypeUtilsTest {
         Set set = (Set) CompatibleTypeUtils.convert(Collections.singletonList("x"), Set.class);
         Assert.assertEquals("x", set.iterator().next());
 
-        list = (List) CompatibleTypeUtils.convert(new String[]{"x"}, List.class);
+        list = (List) CompatibleTypeUtils.convert(new String[] { "x" }, List.class);
         Assert.assertEquals("x", list.get(0));
-        list = (List) CompatibleTypeUtils.convert(new String[]{"x"}, ArrayList.class);
+        list = (List) CompatibleTypeUtils.convert(new String[] { "x" }, ArrayList.class);
         Assert.assertEquals("x", list.get(0));
-        set = (Set) CompatibleTypeUtils.convert(new String[]{"x"}, Set.class);
+        set = (Set) CompatibleTypeUtils.convert(new String[] { "x" }, Set.class);
         Assert.assertEquals("x", set.iterator().next());
     }
 
