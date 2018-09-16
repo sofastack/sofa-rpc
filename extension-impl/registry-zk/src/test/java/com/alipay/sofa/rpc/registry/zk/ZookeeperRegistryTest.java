@@ -257,7 +257,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
         latch.await(2000, TimeUnit.MILLISECONDS);
         Assert.assertEquals(2, configData.size());
-        
+
         registry.unRegister(providerConfig);
     }
 
