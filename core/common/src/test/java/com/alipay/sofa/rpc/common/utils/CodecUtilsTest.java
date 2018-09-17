@@ -129,14 +129,30 @@ public class CodecUtilsTest {
 
     @Test
     public void startsWith() {
+        Assert.assertTrue(CodecUtils.startsWith(new byte[] { 1, 2, 3 }, new byte[] { 1, 2 }));
+        Assert.assertFalse(CodecUtils.startsWith(new byte[] { 2, 3 }, new byte[] { 1, 2 }));
+        Assert.assertFalse(CodecUtils.startsWith(new byte[] { 3 }, new byte[] { 1, 2 }));
     }
 
     @Test
     public void byte2Booleans() {
+        Assert.assertEquals(0, CodecUtils.booleansToByte(null));
+        Assert.assertEquals(0, CodecUtils.booleansToByte(new boolean[0]));
+
+        // 01010101
+        boolean[] bs = new boolean[] { false, true, false, true, false, true, false, true };
+        byte b = CodecUtils.booleansToByte(bs);
+        Assert.assertEquals(85, b);
+
+        boolean[] bs2 = CodecUtils.byte2Booleans(b);
+        for (int i = 0; i < bs.length; i++) {
+            Assert.assertEquals(bs[i], bs2[i]);
+        }
     }
 
     @Test
     public void booleansToByte() {
+
     }
 
     @Test
@@ -249,4 +265,17 @@ public class CodecUtilsTest {
         Assert.assertTrue(newRequestProps.size() == 5);
     }
 
+    @Test
+    public void byte2hex() {
+        String s = "5";
+        try {
+            CodecUtils.hex2byte(s);
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof IllegalArgumentException);
+        }
+        s = "567400075b6f626a65";
+        byte[] bs = CodecUtils.hex2byte(s);
+        Assert.assertTrue(s.equalsIgnoreCase(CodecUtils.byte2hex(bs)));
+    }
 }

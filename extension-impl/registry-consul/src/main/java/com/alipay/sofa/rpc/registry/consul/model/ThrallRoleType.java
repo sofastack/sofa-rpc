@@ -41,7 +41,7 @@ public enum ThrallRoleType {
             case 0:
                 return CONSUMER;
             case 1:
-                return CONSUMER;
+                return PROVIDER;
             default:
                 return null;
         }

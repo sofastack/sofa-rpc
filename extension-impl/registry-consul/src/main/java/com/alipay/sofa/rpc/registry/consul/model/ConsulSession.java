@@ -60,23 +60,30 @@ public final class ConsulSession {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ConsulSession other = (ConsulSession) obj;
         if (ephemralNode == null) {
-            if (other.ephemralNode != null)
+            if (other.ephemralNode != null) {
                 return false;
-        } else if (!ephemralNode.equals(other.ephemralNode))
+            }
+        } else if (!ephemralNode.equals(other.ephemralNode)) {
             return false;
+        }
         if (sessionId == null) {
-            if (other.sessionId != null)
+            if (other.sessionId != null) {
                 return false;
-        } else if (!sessionId.equals(other.sessionId))
+            }
+        } else if (!sessionId.equals(other.sessionId)) {
             return false;
+        }
         return true;
     }
 

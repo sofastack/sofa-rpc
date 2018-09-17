@@ -24,15 +24,15 @@
         <module>codec-sofa-hessian</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
+        <module>metrics-lookout</module>
+        <module>registry-consul</module>
+        <module>registry-local</module>
+        <module>registry-zk</module>
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>
-        <module>registry-local</module>
-        <module>registry-zk</module>
-        <module>registry-consul</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
-        <module>metrics-lookout</module>
     </modules>
 
     <dependencyManagement>
