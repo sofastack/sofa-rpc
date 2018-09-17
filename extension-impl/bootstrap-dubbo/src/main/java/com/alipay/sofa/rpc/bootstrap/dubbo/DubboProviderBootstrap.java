@@ -166,7 +166,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         serviceConfig.setInterface(providerConfig.getInterfaceId());
         serviceConfig.setRef(providerConfig.getRef());
         serviceConfig.setGroup(providerConfig.getUniqueId());
-        serviceConfig.setVersion("1.0");
+        serviceConfig.setVersion(providerConfig.getGroup());
         serviceConfig.setActives(providerConfig.getConcurrents());
         serviceConfig.setDelay(providerConfig.getDelay());
         serviceConfig.setDynamic(providerConfig.isDynamic());
