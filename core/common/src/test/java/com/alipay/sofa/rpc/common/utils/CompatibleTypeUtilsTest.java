@@ -21,7 +21,6 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -64,20 +63,16 @@ public class CompatibleTypeUtilsTest {
 
         Date dataTime = DateUtils.strToDate("2018-1-1 11:22:33");
         Assert.assertEquals(dataTime, CompatibleTypeUtils.convert("2018-1-1 11:22:33", Date.class));
-
-        Long timeLong = DateUtils.strToLong("2018-01-01 11:22:33");
+        Long timeLong = DateUtils.strToLong("2018-1-1 11:22:33");
         java.sql.Date sqlDate = new java.sql.Date(timeLong);
-        Object timeResult = CompatibleTypeUtils.convert("2018-01-01 11:22:33", java.sql.Date.class);
+        Object timeResult = CompatibleTypeUtils.convert("2018-1-1 11:22:33", java.sql.Date.class);
         Assert.assertEquals(sqlDate, timeResult);
-
         timeResult = CompatibleTypeUtils.convert(timeLong, java.sql.Date.class);
         Assert.assertEquals(sqlDate, timeResult);
-
-        timeResult = CompatibleTypeUtils.convert("2018-01-01 11:22:33", java.sql.Timestamp.class);
+        timeResult = CompatibleTypeUtils.convert("2018-1-1 11:22:33", java.sql.Timestamp.class);
         java.sql.Timestamp timestamp = new java.sql.Timestamp(timeLong);
         Assert.assertEquals(timestamp, timeResult);
-
-        timeResult = CompatibleTypeUtils.convert("2018-01-01 11:22:33", java.sql.Time.class);
+        timeResult = CompatibleTypeUtils.convert("2018-1-1 11:22:33", java.sql.Time.class);
         java.sql.Time time = new java.sql.Time(timeLong);
         Assert.assertEquals(time, timeResult);
 
