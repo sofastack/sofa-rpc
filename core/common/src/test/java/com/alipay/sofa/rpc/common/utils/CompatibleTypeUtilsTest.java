@@ -28,8 +28,6 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class CompatibleTypeUtilsTest {
@@ -65,6 +63,18 @@ public class CompatibleTypeUtilsTest {
 
         Date dataTime = DateUtils.strToDate("2018-1-1 11:22:33");
         Assert.assertEquals(dataTime, CompatibleTypeUtils.convert("2018-1-1 11:22:33", Date.class));
+        Long timeLong = DateUtils.strToLong("2018-1-1 11:22:33");
+        java.sql.Date sqlDate = new java.sql.Date(timeLong);
+        Object timeResult = CompatibleTypeUtils.convert("2018-1-1 11:22:33", java.sql.Date.class);
+        Assert.assertEquals(sqlDate, timeResult);
+        timeResult = CompatibleTypeUtils.convert(timeLong, java.sql.Date.class);
+        Assert.assertEquals(sqlDate, timeResult);
+        timeResult = CompatibleTypeUtils.convert("2018-1-1 11:22:33", java.sql.Timestamp.class);
+        java.sql.Timestamp timestamp = new java.sql.Timestamp(timeLong);
+        Assert.assertEquals(timestamp, timeResult);
+        timeResult = CompatibleTypeUtils.convert("2018-1-1 11:22:33", java.sql.Time.class);
+        java.sql.Time time = new java.sql.Time(timeLong);
+        Assert.assertEquals(time, timeResult);
 
         Assert.assertEquals(new Short("123"), CompatibleTypeUtils.convert(123, Short.class));
         Assert.assertEquals(new Short("123"), CompatibleTypeUtils.convert(123, short.class));

@@ -106,6 +106,16 @@ public class DateUtils {
     }
 
     /**
+     * 字符串转时间戳
+     * @param dateStr 时间字符串
+     * @return 时间戳
+     * @throws ParseException 解析异常
+     */
+    public static Long strToLong(String dateStr) throws ParseException {
+        return strToDate(dateStr).getTime();
+    }
+
+    /**
      * 字符串转时间
      *
      * @param dateStr 时间字符串
