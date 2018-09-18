@@ -16,7 +16,10 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
 /**
@@ -272,24 +275,4 @@ public class CommonUtils {
         }
         return sb.length() > 0 ? sb.substring(0, sb.length() - separator.length()) : StringUtils.EMPTY;
     }
-
-    /**
-     * 将String数组转化为map
-     *
-     * @param pairs  目标数组
-     * @return HashMap
-     */
-    public static Map<String, String> toStringMap(String... pairs) {
-        Map<String, String> parameters = new HashMap<String, String>();
-        if (pairs.length > 0) {
-            if (pairs.length % 2 != 0) {
-                throw new IllegalArgumentException("pairs must be even.");
-            }
-            for (int i = 0; i < pairs.length; i = i + 2) {
-                parameters.put(pairs[i], pairs[i + 1]);
-            }
-        }
-        return parameters;
-    }
-
 }

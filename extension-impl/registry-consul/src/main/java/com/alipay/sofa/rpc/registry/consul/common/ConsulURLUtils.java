@@ -38,14 +38,16 @@ public class ConsulURLUtils {
     private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)");
 
     public static Map<String, String> parseQueryString(String qs) {
-        if (qs == null || qs.length() == 0)
+        if (qs == null || qs.length() == 0) {
             return new HashMap<String, String>();
+        }
         String[] tmp = qs.split("\\&");
         Map<String, String> map = new HashMap<String, String>(tmp.length);
         for (int i = 0; i < tmp.length; i++) {
             Matcher matcher = KVP_PATTERN.matcher(tmp[i]);
-            if (matcher.matches() == false)
+            if (matcher.matches() == false) {
                 continue;
+            }
             map.put(matcher.group(1), matcher.group(2));
         }
         return map;
