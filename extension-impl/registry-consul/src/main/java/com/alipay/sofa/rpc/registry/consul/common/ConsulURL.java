@@ -17,14 +17,25 @@
 package com.alipay.sofa.rpc.registry.consul.common;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
-import java.net.*;
-import java.util.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -161,16 +172,18 @@ public class ConsulURL implements Serializable {
         }
         i = url.indexOf("://");
         if (i >= 0) {
-            if (i == 0)
+            if (i == 0) {
                 throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+            }
             protocol = url.substring(0, i);
             url = url.substring(i + 3);
         } else {
             // case: file:/path/to/file.txt
             i = url.indexOf(":/");
             if (i >= 0) {
-                if (i == 0)
+                if (i == 0) {
                     throw new IllegalStateException("url missing protocol: \"" + url + "\"");
+                }
                 protocol = url.substring(0, i);
                 url = url.substring(i + 1);
             }
@@ -186,8 +199,9 @@ public class ConsulURL implements Serializable {
             port = Integer.parseInt(url.substring(i + 1));
             url = url.substring(0, i);
         }
-        if (url.length() > 0)
+        if (url.length() > 0) {
             host = url;
+        }
         return new ConsulURL(protocol, host, port, path, interfaceId, group, parameters);
     }
 
@@ -478,20 +492,23 @@ public class ConsulURL implements Serializable {
     }
 
     public ConsulURL addParameter(String key, Enum<?> value) {
-        if (value == null)
+        if (value == null) {
             return this;
+        }
         return addParameter(key, String.valueOf(value));
     }
 
     public ConsulURL addParameter(String key, Number value) {
-        if (value == null)
+        if (value == null) {
             return this;
+        }
         return addParameter(key, String.valueOf(value));
     }
 
     public ConsulURL addParameter(String key, CharSequence value) {
-        if (value == null || value.length() == 0)
+        if (value == null || value.length() == 0) {
             return this;
+        }
         return addParameter(key, String.valueOf(value));
     }
 
@@ -533,8 +550,9 @@ public class ConsulURL implements Serializable {
             }
         }
         // 如果没有修改，直接返回。
-        if (hasAndEqual)
+        if (hasAndEqual) {
             return this;
+        }
 
         Map<String, String> map = new HashMap<String, String>(getParameters());
         map.putAll(parameters);
@@ -605,30 +623,39 @@ public class ConsulURL implements Serializable {
     }
 
     public String getRawParameter(String key) {
-        if ("protocol".equals(key))
+        if ("protocol".equals(key)) {
             return protocol;
-        if ("host".equals(key))
+        }
+        if ("host".equals(key)) {
             return host;
-        if ("port".equals(key))
+        }
+        if ("port".equals(key)) {
             return String.valueOf(port);
-        if ("path".equals(key))
+        }
+        if ("path".equals(key)) {
             return path;
+        }
         return getParameter(key);
     }
 
     public Map<String, String> toMap() {
         Map<String, String> map = new HashMap<String, String>(parameters);
-        if (protocol != null)
+        if (protocol != null) {
             map.put("protocol", protocol);
-        if (host != null)
+        }
+        if (host != null) {
             map.put("host", host);
-        if (port > 0)
+        }
+        if (port > 0) {
             map.put("port", String.valueOf(port));
-        if (path != null)
+        }
+        if (path != null) {
             map.put("path", path);
+        }
         return map;
     }
 
+    @Override
     public String toString() {
         if (string != null) {
             return string;
@@ -767,8 +794,9 @@ public class ConsulURL implements Serializable {
 
     public String getServiceKey() {
         String inf = getServiceInterface();
-        if (inf == null)
+        if (inf == null) {
             return null;
+        }
         StringBuilder buf = new StringBuilder();
         String group = getGroup();
         if (group != null && group.length() > 0) {
@@ -845,40 +873,54 @@ public class ConsulURL implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ConsulURL other = (ConsulURL) obj;
         if (host == null) {
-            if (other.host != null)
+            if (other.host != null) {
                 return false;
-        } else if (!host.equals(other.host))
+            }
+        } else if (!host.equals(other.host)) {
             return false;
+        }
         if (path == null) {
-            if (other.path != null)
+            if (other.path != null) {
                 return false;
-        } else if (!path.equals(other.path))
+            }
+        } else if (!path.equals(other.path)) {
             return false;
-        if (port != other.port)
+        }
+        if (port != other.port) {
             return false;
+        }
         if (protocol == null) {
-            if (other.protocol != null)
+            if (other.protocol != null) {
                 return false;
-        } else if (!protocol.equals(other.protocol))
+            }
+        } else if (!protocol.equals(other.protocol)) {
             return false;
+        }
         if (this.getGroup() == null) {
-            if (other.getGroup() != null)
+            if (other.getGroup() != null) {
                 return false;
-        } else if (!this.getGroup().equals(other.getGroup()))
+            }
+        } else if (!this.getGroup().equals(other.getGroup())) {
             return false;
+        }
         if (this.getVersion() == null) {
-            if (other.getVersion() != null)
+            if (other.getVersion() != null) {
                 return false;
-        } else if (!this.getVersion().equals(other.getVersion()))
+            }
+        } else if (!this.getVersion().equals(other.getVersion())) {
             return false;
+        }
 
         return true;
     }
