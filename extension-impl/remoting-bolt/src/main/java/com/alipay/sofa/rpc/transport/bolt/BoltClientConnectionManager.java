@@ -105,6 +105,10 @@ class BoltClientConnectionManager {
             return null;
         }
         Connection connection = urlConnectionMap.get(transportConfig);
+        if (connection != null && !connection.isFine()) {
+            closeConnection(rpcClient, transportConfig, url);
+            connection = null;
+        }
         if (connection == null) {
             try {
                 connection = rpcClient.getConnection(url, url.getConnectTimeout());
@@ -113,7 +117,9 @@ class BoltClientConnectionManager {
             } catch (RemotingException e) {
                 throw new SofaRpcRuntimeException(e);
             }
-
+            if (connection == null) {
+                return null;
+            }
             // 保存唯一长连接
             Connection oldConnection = urlConnectionMap.putIfAbsent(transportConfig, connection);
             if (oldConnection != null) {

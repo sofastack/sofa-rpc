@@ -52,7 +52,7 @@ public class RestServer implements Server {
     protected volatile boolean     started;
 
     /**
-     * Bolt服务端
+     * Rest服务端
      */
     protected SofaNettyJaxrsServer httpServer;
 
