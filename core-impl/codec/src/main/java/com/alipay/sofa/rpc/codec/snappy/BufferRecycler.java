@@ -26,22 +26,21 @@ import java.lang.ref.SoftReference;
  * @author tatu
  */
 class BufferRecycler {
-    private final static int                                          MIN_ENCODING_BUFFER = 4000;
 
-    private final static int                                          MIN_OUTPUT_BUFFER   = 8000;
+    private final static int                                          MIN_OUTPUT_BUFFER    = 8000;
 
     /**
      * This <code>ThreadLocal</code> contains a {@link SoftReference}
      * to a {@link BufferRecycler} used to provide a low-cost
      * buffer recycling for buffers we need for encoding, decoding.
      */
-    final protected static ThreadLocal<SoftReference<BufferRecycler>> recyclerRef         = new ThreadLocal<SoftReference<BufferRecycler>>();
+    final protected static ThreadLocal<SoftReference<BufferRecycler>> recyclerRef          = new ThreadLocal<SoftReference<BufferRecycler>>();
+    private final SingleBufferRecycler                                singleBufferRecycler = new SingleBufferRecycler();
 
     private byte[]                                                    inputBuffer;
     private byte[]                                                    outputBuffer;
 
     private byte[]                                                    decodingBuffer;
-    private byte[]                                                    encodingBuffer;
 
     private short[]                                                   encodingHash;
 
@@ -70,19 +69,11 @@ class BufferRecycler {
     ///////////////////////////////////////////////////////////////////////
 
     public byte[] allocEncodingBuffer(int minSize) {
-        byte[] buf = encodingBuffer;
-        if (buf == null || buf.length < minSize) {
-            buf = new byte[Math.max(minSize, MIN_ENCODING_BUFFER)];
-        } else {
-            encodingBuffer = null;
-        }
-        return buf;
+        return singleBufferRecycler.allocEncodingBuffer(minSize);
     }
 
     public void releaseEncodeBuffer(byte[] buffer) {
-        if (encodingBuffer == null || buffer.length > encodingBuffer.length) {
-            encodingBuffer = buffer;
-        }
+        singleBufferRecycler.releaseEncodeBuffer(buffer);
     }
 
     public byte[] allocOutputBuffer(int minSize) {
