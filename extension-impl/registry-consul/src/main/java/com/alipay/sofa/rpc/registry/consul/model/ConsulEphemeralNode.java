@@ -77,25 +77,33 @@ public final class ConsulEphemeralNode {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         ConsulEphemeralNode other = (ConsulEphemeralNode) obj;
-        if (ephemeralType != other.ephemeralType)
+        if (ephemeralType != other.ephemeralType) {
             return false;
+        }
         if (interval == null) {
-            if (other.interval != null)
+            if (other.interval != null) {
                 return false;
-        } else if (!interval.equals(other.interval))
+            }
+        } else if (!interval.equals(other.interval)) {
             return false;
+        }
         if (url == null) {
-            if (other.url != null)
+            if (other.url != null) {
                 return false;
-        } else if (!url.equals(other.url))
+            }
+        } else if (!url.equals(other.url)) {
             return false;
+        }
         return true;
     }
 

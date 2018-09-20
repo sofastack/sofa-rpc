@@ -62,23 +62,30 @@ public class HeartbeatService {
 
     @Override
     public boolean equals(Object obj) {
-        if (this == obj)
+        if (this == obj) {
             return true;
-        if (obj == null)
+        }
+        if (obj == null) {
             return false;
-        if (getClass() != obj.getClass())
+        }
+        if (getClass() != obj.getClass()) {
             return false;
+        }
         HeartbeatService other = (HeartbeatService) obj;
         if (newService == null) {
-            if (other.newService != null)
+            if (other.newService != null) {
                 return false;
-        } else if (!newService.equals(other.newService))
+            }
+        } else if (!newService.equals(other.newService)) {
             return false;
+        }
         if (service == null) {
-            if (other.service != null)
+            if (other.service != null) {
                 return false;
-        } else if (!service.equals(other.service))
+            }
+        } else if (!service.equals(other.service)) {
             return false;
+        }
         return true;
     }
 

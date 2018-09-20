@@ -18,8 +18,8 @@ package com.alipay.sofa.rpc.registry.consul.internal;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.registry.consul.common.ConsulConstants;
-import com.alipay.sofa.rpc.registry.consul.model.HeartbeatService;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulSession;
+import com.alipay.sofa.rpc.registry.consul.model.HeartbeatService;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.google.common.collect.Sets;
@@ -38,7 +38,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class TtlScheduler {
 
-    private static final Logger            log                      = LoggerFactory.getLogger(TtlScheduler.class);
+    private static final Logger            LOGGER                   = LoggerFactory.getLogger(TtlScheduler.class);
 
     private final Set<HeartbeatService>    services                 = Sets.newConcurrentHashSet();
 
@@ -104,11 +104,13 @@ public class TtlScheduler {
                         checkId = "service:" + checkId;
                     }
                     client.agentCheckPass(checkId);
-                    log.debug("Sending consul heartbeat for: " + checkId);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Sending consul heartbeat for: {}", checkId);
+                    }
                 } catch (Throwable e) {
                     failedservices.add(service);
                     services.remove(service);
-                    log.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }
@@ -126,11 +128,13 @@ public class TtlScheduler {
                         client.renewSession(sessionId, QueryParams.DEFAULT);
                         sessionIds.add(sessionId);
                     }
-                    log.debug("Sending consul heartbeat for: " + sessionId);
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Sending consul heartbeat for: {}", sessionId);
+                    }
                 } catch (Throwable e) {
                     failedsessions.addAll(sessions);
                     sessions.clear();
-                    log.error(e.getMessage(), e);
+                    LOGGER.error(e.getMessage(), e);
                 }
             }
         }

@@ -18,7 +18,12 @@ package com.alipay.sofa.rpc.registry.consul.internal;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.registry.consul.common.ConsulConstants;
-import com.alipay.sofa.rpc.registry.consul.model.*;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulEphemeralNode;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulRouterResp;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulService;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulServiceResp;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulSession;
+import com.alipay.sofa.rpc.registry.consul.model.HeartbeatService;
 import com.ecwid.consul.v1.ConsulClient;
 import com.ecwid.consul.v1.QueryParams;
 import com.ecwid.consul.v1.Response;
@@ -49,9 +54,9 @@ import java.util.concurrent.TimeUnit;
  */
 public class ConsulManager {
 
-    private static final Logger            log  = LoggerFactory.getLogger(ConsulManager.class);
+    private static final Logger            LOGGER = LoggerFactory.getLogger(ConsulManager.class);
 
-    private final Object                   lock = new Object();
+    private final Object                   lock   = new Object();
 
     private final ConsulClient             client;
 
@@ -70,19 +75,26 @@ public class ConsulManager {
                 try {
                     retryFailedTtl();
                 } catch (Throwable e) {
-                    log.info("retry registry znode failed", e);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("retry registry znode failed", e);
+                    }
                 }
             }
         }, ConsulConstants.HEARTBEAT_CIRCLE, ConsulConstants.HEARTBEAT_CIRCLE, TimeUnit.MILLISECONDS);
-        log.info("ConsulEcwidClient init finish. client host:" + host + ", port:" + port);
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("ConsulEcwidClient init finish. client host:" + host + ", port:" + port);
+        }
     }
 
     private void retryFailedTtl() {
         Set<HeartbeatService> failedService = ttlScheduler.getFailedService();
         Set<ConsulSession> failedSession = ttlScheduler.getFailedSession();
         if (failedSession.size() > 0 || failedService.size() > 0) {
-            log.debug(String.format("retry to registry failed service %d or failed session %d", failedService.size(),
-                failedSession.size()));
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug(String.format("retry to registry failed service %d or failed session %d",
+                    failedService.size(),
+                    failedSession.size()));
+            }
             for (HeartbeatService heartbeatService : failedService) {
                 registerService(heartbeatService.getService());
             }
@@ -158,9 +170,9 @@ public class ConsulManager {
         QueryParams queryParams = new QueryParams(ConsulConstants.CONSUL_BLOCK_TIME_SECONDS, lastConsulIndex);
         Response<List<HealthService>> orgResponse = client.getHealthServices(serviceName, true, queryParams);
         if (orgResponse != null && orgResponse.getValue() != null && !orgResponse.getValue().isEmpty()) {
-            List<HealthService> HealthServices = orgResponse.getValue();
-            List<ConsulService> ConsulServcies = Lists.newArrayList();
-            for (HealthService orgService : HealthServices) {
+            List<HealthService> healthServices = orgResponse.getValue();
+            List<ConsulService> consulServices = Lists.newArrayList();
+            for (HealthService orgService : healthServices) {
                 Service org = orgService.getService();
                 ConsulService newService = ConsulService.newService()//
                     .withAddress(org.getAddress())//
@@ -169,11 +181,11 @@ public class ConsulManager {
                     .withPort(org.getPort().toString())//
                     .withTags(org.getTags())//
                     .build();
-                ConsulServcies.add(newService);
+                consulServices.add(newService);
             }
-            if (!ConsulServcies.isEmpty()) {
+            if (!consulServices.isEmpty()) {
                 ConsulServiceResp response = ConsulServiceResp.newResponse()//
-                    .withValue(ConsulServcies)//
+                    .withValue(consulServices)//
                     .withConsulIndex(orgResponse.getConsulIndex())//
                     .withConsulLastContact(orgResponse.getConsulLastContact())//
                     .withConsulKnowLeader(orgResponse.isConsulKnownLeader())//

@@ -222,6 +222,44 @@ public final class CodecUtils {
     }
 
     /**
+     * byte[] to hex string, such as [0,1] --> "0001"
+     * 
+     * @param bytes data
+     * @return hex string 
+     */
+    public static String byte2hex(byte[] bytes) {
+        StringBuilder hs = new StringBuilder();
+        String stmp;
+        for (int n = 0; bytes != null && n < bytes.length; n++) {
+            stmp = Integer.toHexString(bytes[n] & 0XFF);
+            if (stmp.length() == 1) {
+                hs.append('0');
+            }
+            hs.append(stmp);
+        }
+        return hs.toString().toUpperCase();
+    }
+
+    /**
+     * hex string to byte[], such as "0001" -> [0,1]
+     *
+     * @param str hex string
+     * @return byte[]
+     */
+    public static byte[] hex2byte(String str) {
+        byte[] bytes = str.getBytes();
+        if ((bytes.length % 2) != 0) {
+            throw new IllegalArgumentException();
+        }
+        byte[] b2 = new byte[bytes.length / 2];
+        for (int n = 0; n < bytes.length; n += 2) {
+            String item = new String(bytes, n, 2);
+            b2[n / 2] = (byte) Integer.parseInt(item, 16);
+        }
+        return b2;
+    }
+
+    /**
      * 一个byte可以存8个boolean，可以按位获取
      *
      * @param modifiers 描述符

@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.codec.sofahessian;
 
-import com.alipay.hessian.ClassNameResolver;
-import com.alipay.hessian.NameBlackListFilter;
 import com.alipay.hessian.generic.model.GenericObject;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
@@ -45,9 +43,9 @@ import java.util.Map;
 /**
  * Serializer of SOFAHessian
  * <<p>
- * Encode: : Support MessageLite, String, SofaRequest and SofaResponse.
+ * Encode: Object, SofaRequest and SofaResponse.
  * <p>
- * Decode by class mode : Support MessageLite and String.
+ * Decode by class mode : Support SofaRequest and SofaResponse.
  * <p>
  * Decode by object template : Support SofaRequest and SofaResponse.
  * <ul>
@@ -78,12 +76,10 @@ public class SofaHessianSerializer extends AbstractSerializer {
         boolean enableMultipleClassLoader = RpcConfigs.getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
         serializerFactory = getSerializerFactory(enableMultipleClassLoader, false);
         genericSerializerFactory = getSerializerFactory(enableMultipleClassLoader, true);
-        if (RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) &&
-            SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
-            ClassNameResolver resolver = new ClassNameResolver();
-            resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
-            serializerFactory.setClassNameResolver(resolver);
-            genericSerializerFactory.setClassNameResolver(resolver);
+        if (!RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) ||
+            !SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
+            serializerFactory.setClassNameResolver(null);
+            genericSerializerFactory.setClassNameResolver(null);
         }
     }
 
