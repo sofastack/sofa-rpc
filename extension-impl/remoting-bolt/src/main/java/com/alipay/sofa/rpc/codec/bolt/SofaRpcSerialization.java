@@ -28,6 +28,8 @@ import com.alipay.remoting.rpc.protocol.RpcResponseCommand;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.SofaConfigs;
+import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -48,6 +50,9 @@ import java.util.Map;
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
 public class SofaRpcSerialization extends DefaultCustomSerializer {
+
+    private final boolean         meshSwitch = SofaConfigs.getBooleanValue(
+                                                 SofaOptions.CONFIG_RPC_MESH_SWITCH, false);
 
     protected SimpleMapSerializer mapSerializer;
 
@@ -93,13 +98,16 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             if (StringUtils.isNotEmpty(service)) {
                 Map<String, String> header = new HashMap<String, String>(16);
                 header.put(RemotingConstants.HEAD_SERVICE, service);
-                // 新序列化协议全部采用扁平化头部
+                // 新序列化协议全部采用扁平化头部,pb保持，其他的受开关控制
                 byte serializer = requestCommand.getSerializer();
                 if (serializer != RemotingConstants.SERIALIZE_CODE_HESSIAN
                     && serializer != RemotingConstants.SERIALIZE_CODE_JAVA) {
                     putRequestMetadataToHeader(requestObject, header);
+                } else if (meshSwitch) {
+                    putRequestMetadataToHeader(requestObject, header);
                 }
                 requestCommand.setHeader(mapSerializer.encode(header));
+
             }
             return true;
         }
@@ -111,6 +119,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             RequestBase requestBase = (RequestBase) requestObject;
             header.put(RemotingConstants.HEAD_METHOD_NAME, requestBase.getMethodName());
             header.put(RemotingConstants.HEAD_TARGET_SERVICE, requestBase.getTargetServiceUniqueName());
+            //暂时不传
+            //header.put("methodArgSigs", Arrays.toString(requestBase.getMethodArgSigs())); // 以后不支持方法重载的话不需要传
 
             if (requestBase instanceof SofaRequest) {
                 SofaRequest sofaRequest = (SofaRequest) requestBase;
