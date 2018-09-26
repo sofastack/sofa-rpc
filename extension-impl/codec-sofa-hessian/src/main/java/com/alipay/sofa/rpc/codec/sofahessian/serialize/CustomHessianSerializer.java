@@ -22,16 +22,38 @@ import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import java.util.Map;
 
 /**
- * @author bystander
- * @version $Id: RpcDecoderObjector.java, v 0.1 2018年09月07日 4:27 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
-public interface RpcSerializeObjector<T> {
+public interface CustomHessianSerializer<T> {
 
+    /**
+     * 反序列化，已有数据，填充字段
+     *
+     * @param data     原始字节数组
+     * @param template 模板对象
+     * @param context  上下文
+     * @throws SofaRpcException 序列化异常
+     */
     public void decodeObjectByTemplate(AbstractByteBuf data, Map<String, String> context,
                                        T template) throws SofaRpcException;
 
-    public Object decodeObject(AbstractByteBuf data, Map<String, String> context) throws SofaRpcException;
+    /**
+     * 反序列化，只有类型，返回对象
+     *
+     * @param data    原始字节数组
+     * @param context 上下文
+     * @return 反序列化后的对象
+     * @throws SofaRpcException 序列化异常
+     */
+    public T decodeObject(AbstractByteBuf data, Map<String, String> context) throws SofaRpcException;
 
-    public AbstractByteBuf encodeObject(T sofaRequest, Map<String, String> context);
-
+    /**
+     * 序列化
+     *
+     * @param object  对象
+     * @param context 上下文
+     * @return 序列化后的对象
+     * @throws SofaRpcException 序列化异常
+     */
+    public AbstractByteBuf encodeObject(T object, Map<String, String> context);
 }
