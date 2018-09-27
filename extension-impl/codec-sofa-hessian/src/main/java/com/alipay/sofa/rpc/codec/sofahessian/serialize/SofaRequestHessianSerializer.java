@@ -27,22 +27,19 @@ import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteStreamWrapperByteBuf;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.SerializerFactory;
 
 import java.io.IOException;
 import java.util.Map;
 
 /**
- * @author bystander
- * @version $Id: SofaRequestRpcSerializeObjector.java, v 0.1 2018年09月07日 4:34 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
-public class SofaRequestRpcSerializeObjector extends AbstractRpcSerializeObjector implements
-                                                                                 RpcSerializeObjector<SofaRequest> {
+public class SofaRequestHessianSerializer extends AbstractCustomHessianSerializer<SofaRequest> {
 
-    /**
-     * Instantiates a new Sofa hessian serializer.
-     */
-    public SofaRequestRpcSerializeObjector() {
-        super();
+    public SofaRequestHessianSerializer(SerializerFactory serializerFactory,
+                                        SerializerFactory genericSerializerFactory) {
+        super(serializerFactory, genericSerializerFactory);
     }
 
     @Override

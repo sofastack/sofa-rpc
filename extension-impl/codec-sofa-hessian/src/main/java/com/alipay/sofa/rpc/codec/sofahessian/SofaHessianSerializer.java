@@ -19,8 +19,9 @@ package com.alipay.sofa.rpc.codec.sofahessian;
 import com.alipay.hessian.ClassNameResolver;
 import com.alipay.hessian.NameBlackListFilter;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
-import com.alipay.sofa.rpc.codec.sofahessian.serialize.RpcSerializeObjector;
-import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomHessianSerializer;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaRequestHessianSerializer;
+import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaResponseHessianSerializer;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.SofaConfigs;
@@ -28,6 +29,8 @@ import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteStreamWrapperByteBuf;
@@ -41,9 +44,9 @@ import java.util.Map;
 /**
  * Serializer of SOFAHessian
  * <<p>
- * Encode: : Support MessageLite, String, SofaRequest and SofaResponse.
+ * Encode: Object, SofaRequest and SofaResponse.
  * <p>
- * Decode by class mode : Support MessageLite and String.
+ * Decode by class mode : Support SofaRequest and SofaResponse.
  * <p>
  * Decode by object template : Support SofaRequest and SofaResponse.
  * <ul>
@@ -80,7 +83,14 @@ public class SofaHessianSerializer extends AbstractSerializer {
             resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
             serializerFactory.setClassNameResolver(resolver);
             genericSerializerFactory.setClassNameResolver(resolver);
+        } else {
+            serializerFactory.setClassNameResolver(null);
+            genericSerializerFactory.setClassNameResolver(null);
         }
+        CustomHessianSerializerManager.addSerializer(SofaRequest.class,
+            new SofaRequestHessianSerializer(serializerFactory, genericSerializerFactory));
+        CustomHessianSerializerManager.addSerializer(SofaResponse.class,
+            new SofaResponseHessianSerializer(serializerFactory, genericSerializerFactory));
     }
 
     /**
@@ -103,7 +113,7 @@ public class SofaHessianSerializer extends AbstractSerializer {
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) {
 
-        final RpcSerializeObjector serializer = RpcSerializeObjectorManager.getSerializer(object.getClass());
+        CustomHessianSerializer serializer = CustomHessianSerializerManager.getSerializer(object.getClass());
         if (serializer != null) {
             return serializer.encodeObject(object, context);
         } else {
@@ -126,7 +136,7 @@ public class SofaHessianSerializer extends AbstractSerializer {
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
         } else {
-            final RpcSerializeObjector serializer = RpcSerializeObjectorManager.getSerializer(clazz);
+            CustomHessianSerializer serializer = CustomHessianSerializerManager.getSerializer(clazz);
             if (serializer != null) {
                 return serializer.decodeObject(data, context);
             } else {
@@ -149,32 +159,12 @@ public class SofaHessianSerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         } else {
-            final RpcSerializeObjector serializer = RpcSerializeObjectorManager.getSerializer(template.getClass());
+            CustomHessianSerializer serializer = CustomHessianSerializerManager.getSerializer(template.getClass());
             if (serializer != null) {
                 serializer.decodeObjectByTemplate(data, context, template);
             } else {
                 throw buildDeserializeError(template.getClass() + " template is not supported");
             }
         }
-    }
-
-    /**
-     * Is generic request boolean.
-     *
-     * @param serializeType the serialize type
-     * @return the boolean
-     */
-    protected boolean isGenericRequest(String serializeType) {
-        return serializeType != null && !serializeType.equals(RemotingConstants.SERIALIZE_FACTORY_NORMAL);
-    }
-
-    /**
-     * Is generic response boolean.
-     *
-     * @param serializeType the serialize type
-     * @return the boolean
-     */
-    protected boolean isGenericResponse(String serializeType) {
-        return serializeType != null && serializeType.equals(RemotingConstants.SERIALIZE_FACTORY_GENERIC);
     }
 }

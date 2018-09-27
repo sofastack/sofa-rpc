@@ -148,22 +148,6 @@ public class SofaHessianSerializerTest {
         Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
     }
 
-    @Test
-    public void isGenericRequest() {
-        Assert.assertFalse(serializer.isGenericRequest(null));
-        Assert.assertFalse(serializer.isGenericRequest(RemotingConstants.SERIALIZE_FACTORY_NORMAL));
-        Assert.assertTrue(serializer.isGenericRequest(RemotingConstants.SERIALIZE_FACTORY_MIX));
-        Assert.assertTrue(serializer.isGenericRequest(RemotingConstants.SERIALIZE_FACTORY_GENERIC));
-    }
-
-    @Test
-    public void isGenericResponse() {
-        Assert.assertFalse(serializer.isGenericResponse(null));
-        Assert.assertFalse(serializer.isGenericResponse(RemotingConstants.SERIALIZE_FACTORY_NORMAL));
-        Assert.assertFalse(serializer.isGenericResponse(RemotingConstants.SERIALIZE_FACTORY_MIX));
-        Assert.assertTrue(serializer.isGenericResponse(RemotingConstants.SERIALIZE_FACTORY_GENERIC));
-    }
-
     private SofaRequest buildRequest() throws NoSuchMethodException {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(Invoker.class.getName());

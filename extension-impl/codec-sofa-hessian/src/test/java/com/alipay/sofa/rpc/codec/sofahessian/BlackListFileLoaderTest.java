@@ -16,19 +16,11 @@
  */
 package com.alipay.sofa.rpc.codec.sofahessian;
 
-import com.alipay.hessian.ClassNameResolver;
 import com.alipay.hessian.NameBlackListFilter;
 import com.alipay.sofa.rpc.common.SofaOptions;
-import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
-import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
-import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.SerializerFactory;
-import com.sun.test.TestBean;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,19 +59,11 @@ public class BlackListFileLoaderTest {
 
         pass = true;
         try {
-            className = filter.resolve("java.lang.Thread");
+            className = filter.resolve("com.sun.rowset.JdbcRowSetImpl");
         } catch (Exception e) {
             pass = false;
         }
         Assert.assertFalse(pass);
-
-        pass = true;
-        try {
-            className = filter.resolve("java.net.Socket");
-        } catch (Exception e) {
-            pass = false;
-        }
-        Assert.assertTrue(pass);
     }
 
     @Test
@@ -140,53 +124,4 @@ public class BlackListFileLoaderTest {
         origin.add("com.zzz");
         return origin;
     }
-
-    @Test
-    public void testInBlack() {
-        SerializerFactory serializerFactory = new SerializerFactory();
-        ClassNameResolver resolver = new ClassNameResolver();
-        resolver.addFilter(new NameBlackListFilter(
-            BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
-        serializerFactory.setClassNameResolver(resolver);
-
-        UnsafeByteArrayOutputStream stream = new UnsafeByteArrayOutputStream();
-        Hessian2Output output = new Hessian2Output(stream);
-        output.setSerializerFactory(serializerFactory);
-        boolean pass = true;
-        try {
-            output.writeObject(new TestBean());
-            output.close();
-        } catch (IOException e) {
-            pass = false;
-            Assert.assertTrue(e.getMessage().contains("black"));
-        }
-        Assert.assertFalse(pass);
-
-        byte[] bs = new byte[] { 79, -91, 99, 111, 109, 46, 115, 117, 110, 46, 116, 101, 115, 116, 46, 84, 101, 115,
-                116, 66, 101, 97, 110, -111, 4, 110, 97, 109, 101, 111, -112, 78 };
-        UnsafeByteArrayInputStream inputStream = new UnsafeByteArrayInputStream(bs);
-        Hessian2Input input = new Hessian2Input(inputStream);
-        input.setSerializerFactory(serializerFactory);
-        pass = true;
-        try {
-            TestBean bean = (TestBean) input.readObject(TestBean.class);
-        } catch (IOException e) {
-            pass = false;
-            Assert.assertTrue(e.getMessage().contains("black"));
-        }
-        Assert.assertFalse(pass);
-
-        inputStream = new UnsafeByteArrayInputStream(bs);
-        input = new Hessian2Input(inputStream);
-        input.setSerializerFactory(serializerFactory);
-        pass = true;
-        try {
-            TestBean bean = (TestBean) input.readObject();
-        } catch (IOException e) {
-            pass = false;
-            Assert.assertTrue(e.getMessage().contains("black"));
-        }
-        Assert.assertFalse(pass);
-    }
-
 }

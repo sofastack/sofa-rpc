@@ -16,28 +16,17 @@
  */
 package com.alipay.sofa.rpc.codec.sofahessian.serialize;
 
-import com.alipay.hessian.ClassNameResolver;
-import com.alipay.hessian.NameBlackListFilter;
-import com.alipay.sofa.rpc.codec.sofahessian.BlackListFileLoader;
-import com.alipay.sofa.rpc.codec.sofahessian.GenericMultipleClassLoaderSofaSerializerFactory;
-import com.alipay.sofa.rpc.codec.sofahessian.GenericSingleClassLoaderSofaSerializerFactory;
-import com.alipay.sofa.rpc.codec.sofahessian.MultipleClassLoaderSofaSerializerFactory;
-import com.alipay.sofa.rpc.codec.sofahessian.SingleClassLoaderSofaSerializerFactory;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.RpcConfigs;
-import com.alipay.sofa.rpc.common.RpcOptions;
-import com.alipay.sofa.rpc.common.SofaConfigs;
-import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.caucho.hessian.io.SerializerFactory;
 
 /**
- * @author bystander
- * @version $Id: AbstractRpcSerializeObjector.java, v 0.1 2018年09月08日 7:15 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class AbstractRpcSerializeObjector {
+public abstract class AbstractCustomHessianSerializer<T> implements CustomHessianSerializer<T> {
 
     /**
      * Normal Serializer Factory
@@ -48,35 +37,10 @@ public class AbstractRpcSerializeObjector {
      */
     protected SerializerFactory genericSerializerFactory;
 
-    public AbstractRpcSerializeObjector() {
-
-        boolean enableMultipleClassLoader = RpcConfigs.getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
-        serializerFactory = getSerializerFactory(enableMultipleClassLoader, false);
-        genericSerializerFactory = getSerializerFactory(enableMultipleClassLoader, true);
-        if (RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) &&
-            SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
-            ClassNameResolver resolver = new ClassNameResolver();
-            resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
-            serializerFactory.setClassNameResolver(resolver);
-            genericSerializerFactory.setClassNameResolver(resolver);
-        }
-    }
-
-    /**
-     * Gets serializer factory.
-     *
-     * @param multipleClassLoader the multiple class loader
-     * @param generic             the generic
-     * @return the serializer factory
-     */
-    protected SerializerFactory getSerializerFactory(boolean multipleClassLoader, boolean generic) {
-        if (generic) {
-            return multipleClassLoader ? new GenericMultipleClassLoaderSofaSerializerFactory() :
-                new GenericSingleClassLoaderSofaSerializerFactory();
-        } else {
-            return multipleClassLoader ? new MultipleClassLoaderSofaSerializerFactory() :
-                new SingleClassLoaderSofaSerializerFactory();
-        }
+    public AbstractCustomHessianSerializer(SerializerFactory serializerFactory,
+                                           SerializerFactory genericSerializerFactory) {
+        this.serializerFactory = serializerFactory;
+        this.genericSerializerFactory = genericSerializerFactory;
     }
 
     protected SofaRpcException buildDeserializeError(String message) {
