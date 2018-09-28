@@ -26,7 +26,6 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
