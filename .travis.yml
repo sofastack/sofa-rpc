@@ -30,14 +30,14 @@ install:
 - sh ./tools/check_format.sh
 
 before_script:
-- sh $NACOS_HOME/bin/startup.sh -m standalone
+- bash $NACOS_HOME/bin/startup.sh -m standalone
 - sleep 10
 
 script:
 - travis_retry mvn clean package -Pci-test
 
 after_script:
-- sh $NACOS_HOME/bin/shutdown.sh
+- bash $NACOS_HOME/bin/shutdown.sh
 
 after_success:
 - bash <(curl -s https://codecov.io/bash)
