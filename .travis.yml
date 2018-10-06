@@ -32,8 +32,6 @@ install:
 before_script:
 - sh $NACOS_HOME/bin/startup.sh -m standalone
 - sleep 10
-- ps -ef|grep nacos|grep -v grep
-- netstat -an|grep 8848
 
 script:
 - travis_retry mvn clean package -Pci-test
