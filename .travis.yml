@@ -27,8 +27,5 @@ install:
 script:
 - travis_retry mvn clean package -Pci-test
 
-after_script:
-- bash $NACOS_HOME/bin/shutdown.sh
-
 after_success:
 - bash <(curl -s https://codecov.io/bash)
