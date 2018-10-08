@@ -19,19 +19,10 @@ before_install:
   && export PATH=$M2_HOME/bin:$PATH
   && cp ./tools/ci/.travis.settings.xml $HOME/.m2/settings.xml
   && mvn -version
-- echo "Downloading Nacos 0.2.1"
-  && wget https://github.com/alibaba/nacos/releases/download/0.2.1/nacos-server-0.2.1.zip
-  && unzip -q nacos-server-0.2.1.zip
-  && export NACOS_HOME=$PWD/nacos
-  && export PATH=$NACOS_HOME/bin:$PATH
 
 install:
 - mvn clean install -Pci-install -B -U -e
 - sh ./tools/check_format.sh
-
-before_script:
-- bash $NACOS_HOME/bin/startup.sh -m standalone
-- sleep 10
 
 script:
 - travis_retry mvn clean package -Pci-test
