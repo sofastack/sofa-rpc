@@ -48,7 +48,7 @@
                 <executions>
                     <execution>
                         <id>nacos-server</id>
-                        <phase>test</phase>
+                        <phase>compile</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
