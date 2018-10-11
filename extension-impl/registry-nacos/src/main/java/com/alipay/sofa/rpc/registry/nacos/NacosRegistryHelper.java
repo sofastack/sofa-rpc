@@ -43,7 +43,7 @@ import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
  */
 class NacosRegistryHelper {
 
-    private static final String DEFAULT_CLUSTER = "default-cluster";
+    static final String DEFAULT_CLUSTER = "default-cluster";
 
     /**
      * Convert provider to instances list.

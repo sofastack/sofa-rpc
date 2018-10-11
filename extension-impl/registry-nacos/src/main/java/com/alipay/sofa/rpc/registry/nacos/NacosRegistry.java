@@ -86,6 +86,8 @@ public class NacosRegistry extends Registry {
 
     private NacosRegistryProviderObserver                 providerObserver;
 
+    private List<String>                                  defaultCluster;
+
     private ConcurrentMap<ProviderConfig, List<Instance>> providerInstances = new ConcurrentHashMap<ProviderConfig, List<Instance>>();
 
     private ConcurrentMap<ConsumerConfig, EventListener>  consumerListeners = new ConcurrentHashMap<ConsumerConfig, EventListener>();
@@ -119,6 +121,8 @@ public class NacosRegistry extends Registry {
             address = addressInput;
             namespace = DEFAULT_NAMESPACE;
         }
+
+        defaultCluster = Collections.singletonList(NacosRegistryHelper.DEFAULT_CLUSTER);
 
         Properties nacosConfig = new Properties();
         nacosConfig.put(PropertyKeyConst.SERVER_ADDR, address);
@@ -269,10 +273,10 @@ public class NacosRegistry extends Registry {
                         }
                     }
                 };
-                namingService.subscribe(serviceName, eventListener);
+                namingService.subscribe(serviceName, defaultCluster, eventListener);
                 consumerListeners.put(config, eventListener);
 
-                List<Instance> allInstances = namingService.getAllInstances(serviceName);
+                List<Instance> allInstances = namingService.getAllInstances(serviceName, defaultCluster);
 
                 List<ProviderInfo> providerInfos = NacosRegistryHelper.convertInstancesToProviders(allInstances);
                 List<ProviderInfo> matchProviders = NacosRegistryHelper.matchProviderInfos(config, providerInfos);
@@ -294,7 +298,7 @@ public class NacosRegistry extends Registry {
             try {
                 EventListener eventListener = consumerListeners.remove(config);
                 if (null != eventListener) {
-                    namingService.unsubscribe(serviceName, eventListener);
+                    namingService.unsubscribe(serviceName, defaultCluster, eventListener);
                 }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
