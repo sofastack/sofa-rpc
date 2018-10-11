@@ -6,7 +6,7 @@
     <parent>
         <artifactId>sofa-rpc-core-impl</artifactId>
         <groupId>com.alipay.sofa</groupId>
-        <version>5.4.6</version>
+        <version>2.4.7-SNAPSHOT</version>
     </parent>
     
     <artifactId>sofa-rpc-transport</artifactId>
