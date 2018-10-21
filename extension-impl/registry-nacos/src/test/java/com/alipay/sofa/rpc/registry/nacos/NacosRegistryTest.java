@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.nacos;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -123,7 +124,6 @@ public class NacosRegistryTest extends BaseNacosTest {
         List<ProviderGroup> all = registry.subscribe(consumer);
         providerInfoListener.updateAllProviders(all);
 
-        Thread.sleep(TimeUnit.MILLISECONDS.toMillis(timeoutPerSub * 5));
         Map<String, ProviderInfo> ps = providerInfoListener.getData();
         Assert.assertEquals("after register: 1", 1, ps.size());
 
@@ -152,55 +152,55 @@ public class NacosRegistryTest extends BaseNacosTest {
         latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
         Assert.assertEquals("after unregister: 0", 0, ps.size());
 
-        //// 一次发2个端口的再次注册
-        //latch = new CountDownLatch(1);
-        //providerInfoListener.setCountDownLatch(latch);
-        //provider.getServer().add(new ServerConfig()
-        //    .setProtocol("bolt")
-        //    .setHost("0.0.0.0")
-        //    .setPort(12201));
-        //registry.register(provider);
-        //latch.await(timeoutPerSub * 10, TimeUnit.MILLISECONDS);
-        //ps = providerInfoListener.getData();
-        //Assert.assertEquals("after register two servers: 2", 2, ps.size());
-        //
-        //// 重复订阅
-        //ConsumerConfig<?> consumer2 = new ConsumerConfig();
-        //consumer2.setInterfaceId("com.alipay.xxx.TestService")
-        //    .setUniqueId("unique123Id")
-        //    .setApplication(new ApplicationConfig().setAppName("test-server"))
-        //    .setProxy("javassist")
-        //    .setSubscribe(true)
-        //    .setSerialization("java")
-        //    .setInvokeType("sync")
-        //    .setTimeout(4444);
-        //CountDownLatch latch2 = new CountDownLatch(1);
-        //MockProviderInfoListener providerInfoListener2 = new MockProviderInfoListener();
-        //providerInfoListener2.setCountDownLatch(latch2);
-        //consumer2.setProviderInfoListener(providerInfoListener2);
-        //providerInfoListener2.updateAllProviders(registry.subscribe(consumer2));
-        //latch2.await(timeoutPerSub, TimeUnit.MILLISECONDS);
-        //
-        //Map<String, ProviderInfo> ps2 = providerInfoListener2.getData();
-        //Assert.assertEquals("after register duplicate: 2", 2, ps2.size());
-        //
-        //// 取消订阅者1
-        //registry.unSubscribe(consumer);
-        //
-        //// 批量反注册，判断订阅者2的数据
-        //latch = new CountDownLatch(2);
-        //providerInfoListener2.setCountDownLatch(latch);
-        //List<ProviderConfig> providerConfigList = new ArrayList<ProviderConfig>();
-        //providerConfigList.add(provider);
-        //registry.batchUnRegister(providerConfigList);
-        //
-        //latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
-        //Assert.assertEquals("after unregister: 0", 0, ps2.size());
-        //
-        //// 批量取消订阅
-        //List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
-        //consumerConfigList.add(consumer2);
-        //registry.batchUnSubscribe(consumerConfigList);
+        // 一次发2个端口的再次注册
+        latch = new CountDownLatch(2);
+        providerInfoListener.setCountDownLatch(latch);
+        provider.getServer().add(new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12201));
+        registry.register(provider);
+        latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
+        ps = providerInfoListener.getData();
+        Assert.assertEquals("after register two servers: 2", 2, ps.size());
+
+        // 重复订阅
+        ConsumerConfig<?> consumer2 = new ConsumerConfig();
+        consumer2.setInterfaceId("com.alipay.xxx.TestService")
+            .setUniqueId("nacos-test")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setProxy("javassist")
+            .setSubscribe(true)
+            .setSerialization("java")
+            .setInvokeType("sync")
+            .setTimeout(4444);
+        CountDownLatch latch2 = new CountDownLatch(1);
+        MockProviderInfoListener providerInfoListener2 = new MockProviderInfoListener();
+        providerInfoListener2.setCountDownLatch(latch2);
+        consumer2.setProviderInfoListener(providerInfoListener2);
+        providerInfoListener2.updateAllProviders(registry.subscribe(consumer2));
+        latch2.await(timeoutPerSub, TimeUnit.MILLISECONDS);
+
+        Map<String, ProviderInfo> ps2 = providerInfoListener2.getData();
+        Assert.assertEquals("after register duplicate: 2", 2, ps2.size());
+
+        // 取消订阅者1
+        registry.unSubscribe(consumer);
+
+        // 批量反注册，判断订阅者2的数据
+        latch = new CountDownLatch(2);
+        providerInfoListener2.setCountDownLatch(latch);
+        List<ProviderConfig> providerConfigList = new ArrayList<ProviderConfig>();
+        providerConfigList.add(provider);
+        registry.batchUnRegister(providerConfigList);
+
+        latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
+        Assert.assertEquals("after unregister: 0", 0, ps2.size());
+
+        // 批量取消订阅
+        List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
+        consumerConfigList.add(consumer2);
+        registry.batchUnSubscribe(consumerConfigList);
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
