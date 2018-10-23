@@ -36,7 +36,7 @@ public class LookoutModule implements Module {
     @Override
     public boolean needLoad() {
         try {
-            Class.forName("com.alipay.lookout.spi.DefaultMetricsImporterLocator");
+            Class.forName("com.alipay.lookout.spi.MetricsImporterLocator");
             return true;
         } catch (Exception e) {
             return false;
