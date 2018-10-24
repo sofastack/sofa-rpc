@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.module;
 
-import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
 import com.alipay.sofa.rpc.event.ClientEndInvokeEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.LookoutSubscriber;
