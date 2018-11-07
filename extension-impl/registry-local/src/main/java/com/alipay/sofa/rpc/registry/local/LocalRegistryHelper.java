@@ -35,17 +35,22 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
+import javax.xml.bind.DatatypeConverter;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Util method of local registry.
@@ -60,16 +65,16 @@ public class LocalRegistryHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalRegistryHelper.class);
 
     /**
-     * Check file's lastmodified.
+     * Check file's digest.
      *
      * @param address    the address
-     * @param updateDate the update date
+     * @param lastDigest the update digest
      * @return true被修改，false未被修改
      */
-    public static boolean checkModified(String address, long updateDate) {
+    public static boolean checkModified(String address, String lastDigest) {
         // 检查文件是否被修改了
-        File xmlFile = new File(address);
-        return xmlFile.lastModified() > updateDate;
+        String newDigest = calMD5Checksum(address);
+        return StringUtils.equals(newDigest, lastDigest);
     }
 
     /**
@@ -94,7 +99,9 @@ public class LocalRegistryHelper {
         return providerInfo;
     }
 
-    static long loadBackupFileToCache(String address, Map<String, ProviderGroup> memoryCache) {
+    static Map<String, ProviderGroup> loadBackupFileToCache(String address) {
+
+        Map<String, ProviderGroup> memoryCache = new ConcurrentHashMap<String, ProviderGroup>();
         // 从文件夹下读取指定文件
         File regFile = new File(address);
         if (!regFile.exists()) {
@@ -116,7 +123,7 @@ public class LocalRegistryHelper {
                 throw new SofaRpcRuntimeException("Error when read backup file: " + regFile.getAbsolutePath(), e);
             }
         }
-        return RpcRuntimeContext.now();
+        return memoryCache;
     }
 
     static synchronized boolean backup(String address, Map<String, ProviderGroup> memoryCache) {
@@ -267,5 +274,41 @@ public class LocalRegistryHelper {
         } else {
             return ConfigUniqueNameGenerator.getUniqueName(config) + "@" + protocol;
         }
+    }
+
+    private static byte[] createChecksum(String filename) {
+        MessageDigest complete = null;
+        InputStream fis = null;
+        byte[] digest = new byte[0];
+        try {
+            complete = MessageDigest.getInstance("MD5");
+            fis = new FileInputStream(filename);
+            byte[] buffer = new byte[1024];
+            int numRead;
+            do {
+                numRead = fis.read(buffer);
+                if (numRead > 0) {
+                    complete.update(buffer, 0, numRead);
+                }
+            } while (numRead != -1);
+        } catch (Exception e) {
+            //ignore
+        } finally {
+            try {
+                fis.close();
+            } catch (IOException ignored) {
+            }
+        }
+        if (complete != null) {
+            digest = complete.digest();
+        }
+        return digest;
+    }
+
+    public static String calMD5Checksum(String filename) {
+        byte[] b;
+        b = createChecksum(filename);
+        String digestInHex = DatatypeConverter.printHexBinary(b).toUpperCase();
+        return digestInHex;
     }
 }
