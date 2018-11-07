@@ -52,8 +52,8 @@ public class RandomLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
@@ -75,8 +75,8 @@ public class RandomLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             Assert.assertTrue(cnt.get(9000) == 0);
 

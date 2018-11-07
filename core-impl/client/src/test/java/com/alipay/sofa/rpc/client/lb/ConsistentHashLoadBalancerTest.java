@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.client.lb;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,6 +33,7 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ConsistentHashLoadBalancerTest extends BaseLoadBalancerTest {
+
     @Test
     public void doSelect() throws Exception {
 
@@ -53,8 +56,8 @@ public class ConsistentHashLoadBalancerTest extends BaseLoadBalancerTest {
             cnt.put(port, cnt.get(port) + 1);
         }
         long end = System.currentTimeMillis();
-        System.out.println("elapsed" + (end - start) + "ms");
-        System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+        LOGGER.info("elapsed" + (end - start) + "ms");
+        LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
         int count = 0;
         for (int i = 0; i < size; i++) {

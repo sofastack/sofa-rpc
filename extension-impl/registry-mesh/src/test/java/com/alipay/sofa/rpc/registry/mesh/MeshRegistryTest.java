@@ -132,7 +132,9 @@ public class MeshRegistryTest extends BaseMeshTest {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-        Assert.assertTrue(!registedAppValue.booleanValue());
+
+        LOGGER.info("current registedAppValue is " + registedAppValue);
+        Assert.assertTrue(!registedAppValue);
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -158,7 +160,9 @@ public class MeshRegistryTest extends BaseMeshTest {
             e.printStackTrace();
         }
 
-        Assert.assertTrue(registedAppValue.booleanValue());
+        LOGGER.info("final registedAppValue is " + registedAppValue);
+
+        Assert.assertTrue(registedAppValue);
     }
 
     @Test

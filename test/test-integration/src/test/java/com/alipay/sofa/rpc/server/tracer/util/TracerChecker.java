@@ -24,12 +24,10 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
+import org.apache.commons.io.FileUtils;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,37 +46,25 @@ public class TracerChecker {
      * @return
      */
     public static List<JSONObject> readTracerDigest(File file) {
-        List<JSONObject> JSONObjects = new ArrayList<JSONObject>();
-        InputStreamReader reader = null;
-        BufferedReader bufferedReader = null;
-        try {
-            reader = new FileReader(file);
-            bufferedReader = new BufferedReader(reader);
-            String lineText = null;
-            while ((lineText = bufferedReader.readLine()) != null) {
-                //this is json format now
-                JSONObjects.add(JSON.parseObject(lineText));
-            }
 
-        } catch (Exception e) {
+        LOGGER.info("start to read tracer file," + file.toURI());
+
+        List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+        List<String> contents = null;
+        try {
+            contents = FileUtils.readLines(file);
+        } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            if (bufferedReader != null) {
-                try {
-                    bufferedReader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
         }
-        return JSONObjects;
+
+        for (String content : contents) {
+            jsonObjects.add(JSON.parseObject(content));
+        }
+
+        LOGGER.info("end to read tracer file,jsonObjects" + jsonObjects);
+
+        return jsonObjects;
     }
 
     public static String extractField(JSONObject jsonObject, String fieldName) {

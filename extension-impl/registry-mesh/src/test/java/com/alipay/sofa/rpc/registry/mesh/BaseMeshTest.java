@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -29,6 +31,8 @@ import org.junit.BeforeClass;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class BaseMeshTest {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseMeshTest.class);
 
     @BeforeClass
     public static void adBeforeClass() {
