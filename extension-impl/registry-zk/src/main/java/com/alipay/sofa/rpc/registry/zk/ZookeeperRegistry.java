@@ -26,6 +26,9 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.ConsumerSubEvent;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
@@ -47,6 +50,7 @@ import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -376,6 +380,11 @@ public class ZookeeperRegistry extends Registry {
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Failed to register provider to zookeeperRegistry!", e);
         }
+
+        if (EventBus.isEnable(ProviderPubEvent.class)) {
+            ProviderPubEvent event = new ProviderPubEvent(config);
+            EventBus.post(event);
+        }
     }
 
     /**
@@ -539,6 +548,8 @@ public class ZookeeperRegistry extends Registry {
         subscribeConsumerUrls(config);
 
         if (config.isSubscribe()) {
+
+            List<ProviderInfo> matchProviders = new ArrayList<ProviderInfo>();
             // 订阅配置
             if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
                 //订阅接口级配置
@@ -595,11 +606,18 @@ public class ZookeeperRegistry extends Registry {
                 }
                 List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(
                     providerPath, pathChildrenCache.getCurrentData());
-                List<ProviderInfo> matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
-                return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
+                matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to subscribe provider from zookeeperRegistry!", e);
             }
+
+            if (EventBus.isEnable(ConsumerSubEvent.class)) {
+                ConsumerSubEvent event = new ConsumerSubEvent(config);
+                EventBus.post(event);
+            }
+
+            return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
+
         }
         return null;
     }
