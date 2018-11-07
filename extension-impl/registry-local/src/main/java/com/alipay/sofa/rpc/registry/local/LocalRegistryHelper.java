@@ -37,9 +37,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import javax.xml.bind.DatatypeConverter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
@@ -278,30 +276,28 @@ public class LocalRegistryHelper {
 
     private static byte[] createChecksum(String filename) {
         MessageDigest complete = null;
-        InputStream fis = null;
-        byte[] digest = new byte[0];
         try {
             complete = MessageDigest.getInstance("MD5");
-            fis = new FileInputStream(filename);
-            byte[] buffer = new byte[1024];
-            int numRead;
-            do {
-                numRead = fis.read(buffer);
-                if (numRead > 0) {
-                    complete.update(buffer, 0, numRead);
-                }
-            } while (numRead != -1);
         } catch (Exception e) {
             //ignore
-        } finally {
-            try {
-                fis.close();
-            } catch (IOException ignored) {
-            }
         }
+        String content = null;
+        try {
+            final File file = new File(filename);
+            content = FileUtils.file2String(file);
+        } catch (IOException e) {
+            //ignore
+        }
+
+        if (content == null) {
+            content = "";
+        }
+        byte[] digest = new byte[0];
+
         if (complete != null) {
-            digest = complete.digest();
+            digest = complete.digest(content.getBytes());
         }
+
         return digest;
     }
 
