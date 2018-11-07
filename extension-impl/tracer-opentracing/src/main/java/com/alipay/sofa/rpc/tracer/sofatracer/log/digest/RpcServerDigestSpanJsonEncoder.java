@@ -22,6 +22,7 @@ import com.alipay.common.tracer.core.appender.self.Timestamp;
 import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
 
 import java.io.IOException;
 import java.util.Map;
@@ -39,7 +40,7 @@ public class RpcServerDigestSpanJsonEncoder implements SpanEncoder<SofaTracerSpa
     public String encode(SofaTracerSpan span) throws IOException {
         jsb.reset();
         //打印时间
-        jsb.appendBegin("timestamp", Timestamp.format(span.getEndTime()));
+        jsb.appendBegin(RpcSpanTags.TIMESTAMP, Timestamp.format(span.getEndTime()));
         //添加其他字段
         this.appendSlot(jsb, span);
         jsb.appendEnd();
@@ -49,9 +50,9 @@ public class RpcServerDigestSpanJsonEncoder implements SpanEncoder<SofaTracerSpa
     public void appendSlot(JsonStringBuilder xsb, SofaTracerSpan span) {
         SofaTracerSpanContext spanContext = span.getSofaTracerSpanContext();
         //traceId
-        jsb.append("tracerId", spanContext.getTraceId());
+        jsb.append(RpcSpanTags.TRACERID, spanContext.getTraceId());
         //spanId
-        jsb.append("spanId", spanContext.getSpanId());
+        jsb.append(RpcSpanTags.SPANID, spanContext.getSpanId());
         //tags
         Map<String, String> tagsWithStr = span.getTagsWithStr();
         if (CommonUtils.isNotEmpty(tagsWithStr)) {
@@ -72,7 +73,7 @@ public class RpcServerDigestSpanJsonEncoder implements SpanEncoder<SofaTracerSpa
                 jsb.append(entry.getKey(), entry.getValue());
             }
         }
-        jsb.append("baggage", baggageSerialized(spanContext));
+        jsb.append(RpcSpanTags.BAGGAGE, baggageSerialized(spanContext));
     }
 
     protected String baggageSerialized(SofaTracerSpanContext spanContext) {

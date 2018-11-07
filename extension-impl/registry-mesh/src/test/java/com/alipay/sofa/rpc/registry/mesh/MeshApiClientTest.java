@@ -49,9 +49,6 @@ public class MeshApiClientTest extends BaseMeshTest {
         ApplicationInfoRequest request = new ApplicationInfoRequest();
         request.setAppName("test");
         boolean result = meshApiClient.registeApplication(request);
-
-        System.out.println(result);
-
         Assert.assertTrue(result);
     }
 
@@ -96,8 +93,6 @@ public class MeshApiClientTest extends BaseMeshTest {
         request.setProviderMetaInfo(providerMetaInfo);
         boolean result = meshApiClient.publishService(request);
 
-        System.out.println(result);
-
         Assert.assertTrue(result);
     }
 
@@ -109,7 +104,6 @@ public class MeshApiClientTest extends BaseMeshTest {
         int result = meshApiClient.unPublishService(request);
 
         Assert.assertEquals(1, result);
-        System.out.println(result);
     }
 
     @Test
@@ -123,8 +117,6 @@ public class MeshApiClientTest extends BaseMeshTest {
 
         SubscribeServiceResult result = meshApiClient.subscribeService(request);
 
-        System.out.println(result);
-
         Assert.assertTrue(result.isSuccess());
     }
 
@@ -134,9 +126,6 @@ public class MeshApiClientTest extends BaseMeshTest {
 
         request.setServiceName("com.alipay.rpc.common.service.facade.pb.SampleServicePb:1.0@DEFAULT");
         boolean result = meshApiClient.unSubscribeService(request);
-
-        System.out.println(result);
-
         Assert.assertTrue(result);
     }
 
