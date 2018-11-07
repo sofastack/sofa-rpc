@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.module;
 
 import com.alipay.lookout.api.Lookout;
+import com.alipay.lookout.api.NoopRegistry;
 import com.alipay.lookout.api.Registry;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.lookout.core.InfoWrapper;
@@ -38,8 +39,9 @@ public class ProviderPubTest {
     public void testPubLookout() {
 
         Registry registry = new DefaultRegistry();
-        Lookout.setRegistry(registry);
-
+        if (Lookout.registry() == NoopRegistry.INSTANCE) {
+            Lookout.setRegistry(registry);
+        }
         LookoutModule lookoutModule = new LookoutModule();
         Assert.assertEquals(true, lookoutModule.needLoad());
 

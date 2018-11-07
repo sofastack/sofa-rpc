@@ -33,8 +33,4 @@ public class ProviderPubEvent implements Event {
     public ProviderConfig getProviderConfig() {
         return providerConfig;
     }
-
-    public void setProviderConfig(ProviderConfig providerConfig) {
-        this.providerConfig = providerConfig;
-    }
 }

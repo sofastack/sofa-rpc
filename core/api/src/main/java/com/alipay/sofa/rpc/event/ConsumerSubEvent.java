@@ -33,8 +33,4 @@ public class ConsumerSubEvent implements Event {
     public ConsumerConfig getConsumerConfig() {
         return consumerConfig;
     }
-
-    public void setConsumerConfig(ConsumerConfig consumerConfig) {
-        this.consumerConfig = consumerConfig;
-    }
 }
