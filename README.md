@@ -45,4 +45,4 @@ SOFARPC 最早源于阿里内部的 HSF，非常感谢毕玄创造了 HSF，使 
 
 ## 开源许可
 
-SOFARPC 基于 [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE) 协议，SOFARPC 依赖了一些三方组件，它们的开源协议参见[依赖组件版权说明](https://github.com/alipay/sofa-rpc/wiki/NOTICE)。
+SOFARPC 基于 [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE) 协议，SOFARPC 依赖了一些三方组件，它们的开源协议参见[依赖组件版权说明](http://www.sofastack.tech/sofa-rpc/docs/NOTICE)。

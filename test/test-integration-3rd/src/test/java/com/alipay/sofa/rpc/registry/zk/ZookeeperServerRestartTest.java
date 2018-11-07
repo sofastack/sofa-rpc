@@ -37,13 +37,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ZookeeperServerRestartTest extends BaseZkTest {
 
-    /** Logger for ZookeeperServerRestartTest **/
+    /**
+     * Logger for ZookeeperServerRestartTest
+     **/
     private static final Logger LOGGER = LoggerFactory.getLogger(ZookeeperServerRestartTest.class);
 
     @Test
     public void testAll() throws Exception {
         final RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
-            .setAddress("127.0.0.1:2181");
+            .setAddress("127.0.0.1:2181").setConnectTimeout(100);
         final ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
             .getRegistry(registryConfig);
         registry.start();
@@ -88,7 +90,9 @@ public class ZookeeperServerRestartTest extends BaseZkTest {
                 }
                 serverConfig2.getServer().start();
                 Registry registry1 = RegistryFactory.getRegistry(registryConfig);
-                // mock server restart and register provider 
+                // mock server restart and register provider
+                // if we don't unRegistry,create will fail,beacuse data is not clean quickly.
+                registry1.unRegister(providerConfig);
                 registry1.register(providerConfig);
             }
         });
