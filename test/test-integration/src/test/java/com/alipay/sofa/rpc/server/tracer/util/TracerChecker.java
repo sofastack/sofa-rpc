@@ -176,7 +176,7 @@ public class TracerChecker {
 
     private static boolean validateField(String... fileds) {
 
-        LOGGER.info("validateField,value=" + fileds);
+        LOGGER.info("validateField,value=" + StringUtils.join(fileds, ","));
 
         for (String field : fileds) {
             if (StringUtils.isEmpty(field)) {

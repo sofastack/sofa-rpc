@@ -108,7 +108,6 @@ public class RestTracerTest extends ActivelyDestroyTest {
                     try {
                         for (int j = 0; j < times; j++) {
                             final String ok_rest = restServiceRest.get("ok_rest");
-                            System.out.println("rest-xx" + ok_rest);
                             Assert.assertEquals("serverok_rest", ok_rest);
                             success.incrementAndGet();
                         }
