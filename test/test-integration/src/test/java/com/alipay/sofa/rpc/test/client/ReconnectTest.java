@@ -87,7 +87,7 @@ public class ReconnectTest extends ActivelyDestroyTest {
             helloService.sayHello("xxx", 11);
             Assert.fail();
         } catch (Exception e) {
-            Assert.assertTrue(e.getMessage().contains(LogCodes.ERROR_NO_AVAILBLE_PROVIDER));
+            Assert.assertTrue(e.getMessage().contains(LogCodes.ERROR_TARGET_URL_INVALID));
         }
 
         // Mock server restart
