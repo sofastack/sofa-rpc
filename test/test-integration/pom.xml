@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-test</artifactId>
-        <version>5.4.2</version>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>sofa-rpc-test-integration</artifactId>
@@ -135,6 +135,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-zk</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-registry-consul</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

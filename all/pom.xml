@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.4.2</version>
+    <version>5.5.0-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/alipay/sofa-rpc</url>
@@ -59,9 +59,9 @@
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <javassist.version>3.20.0-GA</javassist.version>
         <netty.version>4.1.25.Final</netty.version>
-        <hessian.version>3.3.0</hessian.version>
+        <hessian.version>3.3.3</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
-        <bolt.version>1.4.2</bolt.version>
+        <bolt.version>1.4.6</bolt.version>
         <tracer.version>2.1.1</tracer.version>
         <lookout.version>1.4.1</lookout.version>
     </properties>
@@ -167,6 +167,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-log-common-tools</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-registry-consul</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
         <dependency>
@@ -359,6 +364,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>
                                     <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
+                                    <include>com.alipay.sofa:sofa-rpc-registry-consul</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-local</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>

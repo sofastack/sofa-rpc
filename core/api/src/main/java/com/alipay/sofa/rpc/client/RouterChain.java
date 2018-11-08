@@ -48,23 +48,25 @@ public class RouterChain {
     /**
      * LOGGER
      */
-    private static final Logger                                            LOGGER                = LoggerFactory
-                                                                                                     .getLogger(RouterChain.class);
+    private static final Logger                              LOGGER                = LoggerFactory
+                                                                                       .getLogger(RouterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
+    private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = Collections
+                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static ConcurrentHashMap<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
+    private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = Collections
+                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Router>                           EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Router>             EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Router> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Router.class, new ExtensionLoaderListener<Router>() {
@@ -77,7 +79,8 @@ public class RouterChain {
                     String alias = extensionClass.getAlias();
                     if (autoActive.providerSide()) {
                         PROVIDER_AUTO_ACTIVES.put(alias, extensionClass);
-                    } else if (autoActive.consumerSide()) {
+                    }
+                    if (autoActive.consumerSide()) {
                         CONSUMER_AUTO_ACTIVES.put(alias, extensionClass);
                     }
                     if (LOGGER.isDebugEnabled()) {

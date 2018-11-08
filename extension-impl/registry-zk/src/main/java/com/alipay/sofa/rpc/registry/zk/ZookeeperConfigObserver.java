@@ -27,6 +27,7 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * ZookeeperObserver for config node,subscribe interface level provider/consumer config.
@@ -38,13 +39,13 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                              LOGGER            = LoggerFactory
-                                                                                                   .getLogger(ZookeeperConfigObserver.class);
+    private final static Logger                                          LOGGER            = LoggerFactory
+                                                                                               .getLogger(ZookeeperConfigObserver.class);
 
     /**
      * The Config listener map.
      */
-    private ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
+    private ConcurrentMap<AbstractInterfaceConfig, List<ConfigListener>> configListenerMap = new ConcurrentHashMap<AbstractInterfaceConfig, List<ConfigListener>>();
 
     /**
      * Add config listener.
@@ -77,23 +78,15 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     public void updateConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+                LOGGER.infoWithApp(config.getAppName(), "Receive update data is null");
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                LOGGER.infoWithApp(config.getAppName(), "Receive update data: path=[" + data.getPath() + "]"
                     + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                     + ", stat=[" + data.getStat() + "]");
             }
-            List<ConfigListener> configListeners = configListenerMap.get(config);
-            if (CommonUtils.isNotEmpty(configListeners)) {
-                //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
-                    false);
-                for (ConfigListener listener : configListeners) {
-                    listener.configChanged(attribute);
-                }
-            }
+            notifyListeners(config, configPath, data, false);
         }
     }
 
@@ -107,13 +100,13 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     public void updateConfigAll(AbstractInterfaceConfig config, String configPath, List<ChildData> currentData) {
         if (CommonUtils.isEmpty(currentData)) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+                LOGGER.infoWithApp(config.getAppName(), "Receive updateAll data is null");
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 for (ChildData data : currentData) {
-                    LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                        + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                    LOGGER.infoWithApp(config.getAppName(), "Receive updateAll data: path=["
+                        + data.getPath() + "], data=[" + StringSerializer.decode(data.getData()) + "]"
                         + ", stat=[" + data.getStat() + "]");
                 }
             }
@@ -140,23 +133,15 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     public void removeConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+                LOGGER.infoWithApp(config.getAppName(), "Receive remove data is null");
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                LOGGER.infoWithApp(config.getAppName(), "Receive remove data: path=[" + data.getPath() + "]"
                     + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                     + ", stat=[" + data.getStat() + "]");
             }
-            List<ConfigListener> configListeners = configListenerMap.get(config);
-            if (CommonUtils.isNotEmpty(configListeners)) {
-                //转换子节点Data为接口级配置<配置属性名,null>,例如<timeout,null>
-                Map<String, String> attribute = ZookeeperRegistryHelper
-                    .convertConfigToAttribute(configPath, data, true);
-                for (ConfigListener listener : configListeners) {
-                    listener.configChanged(attribute);
-                }
-            }
+            notifyListeners(config, configPath, data, true);
         }
     }
 
@@ -170,22 +155,26 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     public void addConfig(AbstractInterfaceConfig config, String configPath, ChildData data) {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
+                LOGGER.infoWithApp(config.getAppName(), "Receive add data is null");
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
+                LOGGER.infoWithApp(config.getAppName(), "Receive add data: path=[" + data.getPath() + "]"
                     + ", data=[" + StringSerializer.decode(data.getData()) + "]"
                     + ", stat=[" + data.getStat() + "]");
             }
-            List<ConfigListener> configListeners = configListenerMap.get(config);
-            if (CommonUtils.isNotEmpty(configListeners)) {
-                //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
-                Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
-                    false);
-                for (ConfigListener listener : configListeners) {
-                    listener.configChanged(attribute);
-                }
+            notifyListeners(config, configPath, data, false);
+        }
+    }
+
+    private void notifyListeners(AbstractInterfaceConfig config, String configPath, ChildData data, boolean removeType) {
+        List<ConfigListener> configListeners = configListenerMap.get(config);
+        if (CommonUtils.isNotEmpty(configListeners)) {
+            //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
+            Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
+                removeType);
+            for (ConfigListener listener : configListeners) {
+                listener.configChanged(attribute);
             }
         }
     }

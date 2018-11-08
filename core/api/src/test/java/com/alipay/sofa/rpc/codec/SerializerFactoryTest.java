@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec;
 
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,6 +46,15 @@ public class SerializerFactoryTest {
     @Test
     public void getAliasByCode() {
         Assert.assertEquals("test", SerializerFactory.getAliasByCode((byte) 117));
+    }
+
+    @Test
+    public void getSerializerNotExist() {
+        try {
+            SerializerFactory.getSerializer((byte) 999);
+            Assert.fail();
+        } catch (SofaRpcRuntimeException e) {
+        }
     }
 
 }

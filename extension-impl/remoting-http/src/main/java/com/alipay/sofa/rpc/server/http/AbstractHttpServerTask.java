@@ -102,7 +102,10 @@ public abstract class AbstractHttpServerTask extends AbstractTask {
             HttpResponseStatus status = null;
             ProviderConfig providerConfig = null;
             String serviceName = request.getTargetServiceUniqueName();
-            Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
+            Serializer serializer = null;
+            if (request.getSerializeType() > 0) {
+                serializer = SerializerFactory.getSerializer(request.getSerializeType());
+            }
 
             try { // 这个try-catch 保证一定有Response
                 invoke:

@@ -27,7 +27,7 @@ import com.alipay.sofa.rpc.filter.FilterInvoker;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("rightxx1")
+@Extension(value = "rightxx1", order = 128)
 public class RightFilter1 extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {

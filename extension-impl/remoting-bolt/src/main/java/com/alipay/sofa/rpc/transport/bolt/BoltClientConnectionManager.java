@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -41,20 +42,20 @@ class BoltClientConnectionManager {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                LOGGER               = LoggerFactory
-                                                                                        .getLogger(BoltClientConnectionManager.class);
+    private final static Logger                            LOGGER               = LoggerFactory
+                                                                                    .getLogger(BoltClientConnectionManager.class);
 
     /**
      * 长连接复用时，共享长连接的连接池，一个服务端ip和端口同一协议只建立一个长连接，不管多少接口，共用长连接
      */
     @VisibleForTesting
-    final ConcurrentHashMap<ClientTransportConfig, Connection> urlConnectionMap     = new ConcurrentHashMap<ClientTransportConfig, Connection>();
+    final ConcurrentMap<ClientTransportConfig, Connection> urlConnectionMap     = new ConcurrentHashMap<ClientTransportConfig, Connection>();
 
     /**
      * 长连接复用时，共享长连接的计数器
      */
     @VisibleForTesting
-    final ConcurrentHashMap<Connection, AtomicInteger>         connectionRefCounter = new ConcurrentHashMap<Connection, AtomicInteger>();
+    final ConcurrentMap<Connection, AtomicInteger>         connectionRefCounter = new ConcurrentHashMap<Connection, AtomicInteger>();
 
     @VisibleForTesting
     protected BoltClientConnectionManager(boolean addHook) {
@@ -104,6 +105,10 @@ class BoltClientConnectionManager {
             return null;
         }
         Connection connection = urlConnectionMap.get(transportConfig);
+        if (connection != null && !connection.isFine()) {
+            closeConnection(rpcClient, transportConfig, url);
+            connection = null;
+        }
         if (connection == null) {
             try {
                 connection = rpcClient.getConnection(url, url.getConnectTimeout());
@@ -112,7 +117,9 @@ class BoltClientConnectionManager {
             } catch (RemotingException e) {
                 throw new SofaRpcRuntimeException(e);
             }
-
+            if (connection == null) {
+                return null;
+            }
             // 保存唯一长连接
             Connection oldConnection = urlConnectionMap.putIfAbsent(transportConfig, connection);
             if (oldConnection != null) {

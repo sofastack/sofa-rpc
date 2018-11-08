@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.module;
 
-import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
 import com.alipay.sofa.rpc.event.ClientEndInvokeEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.LookoutSubscriber;
@@ -36,7 +35,7 @@ public class LookoutModule implements Module {
     @Override
     public boolean needLoad() {
         try {
-            Class.forName("com.alipay.lookout.spi.DefaultMetricsImporterLocator");
+            Class.forName("com.alipay.lookout.spi.MetricsImporterLocator");
             return true;
         } catch (Exception e) {
             return false;

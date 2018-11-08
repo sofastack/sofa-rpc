@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 业务要支持多ClassLoader，需要缓存ClassLoader或者方法等相关信息
@@ -36,13 +37,13 @@ public final class ReflectCache {
      * 应用对应的ClassLoader
      */
     @VisibleForTesting
-    static final ConcurrentHashMap<String, ClassLoader> APPNAME_CLASSLOADER_MAP = new ConcurrentHashMap<String, ClassLoader>();
+    static final ConcurrentMap<String, ClassLoader> APPNAME_CLASSLOADER_MAP = new ConcurrentHashMap<String, ClassLoader>();
 
     /**
      * 服务对应的ClassLoader
      */
     @VisibleForTesting
-    static final ConcurrentHashMap<String, ClassLoader> SERVICE_CLASSLOADER_MAP = new ConcurrentHashMap<String, ClassLoader>();
+    static final ConcurrentMap<String, ClassLoader> SERVICE_CLASSLOADER_MAP = new ConcurrentHashMap<String, ClassLoader>();
 
     /**
      * 注册服务所在的ClassLoader
@@ -99,13 +100,13 @@ public final class ReflectCache {
      * String-->Class 缓存
      */
     @VisibleForTesting
-    static final ConcurrentHashMap<String, Class> CLASS_CACHE    = new ConcurrentHashMap<String, Class>();
+    static final ConcurrentMap<String, Class> CLASS_CACHE    = new ConcurrentHashMap<String, Class>();
 
     /**
-     * String-->Class 缓存
+     * Class-->String 缓存
      */
     @VisibleForTesting
-    static final ConcurrentHashMap<Class, String> TYPE_STR_CACHE = new ConcurrentHashMap<Class, String>();
+    static final ConcurrentMap<Class, String> TYPE_STR_CACHE = new ConcurrentHashMap<Class, String>();
 
     /**
      * 放入Class缓存
@@ -153,13 +154,13 @@ public final class ReflectCache {
      * 不支持重载的方法对象缓存 {service:{方法名:Method}}
      */
     @VisibleForTesting
-    static final ConcurrentHashMap<String, ConcurrentHashMap<String, Method>>   NOT_OVERLOAD_METHOD_CACHE      = new ConcurrentHashMap<String, ConcurrentHashMap<String, Method>>();
+    static final ConcurrentMap<String, ConcurrentHashMap<String, Method>>   NOT_OVERLOAD_METHOD_CACHE      = new ConcurrentHashMap<String, ConcurrentHashMap<String, Method>>();
 
     /**
      * 不支持重载的方法对象参数签名缓存 {service:{方法名:对象参数签名}}
      */
     @VisibleForTesting
-    static final ConcurrentHashMap<String, ConcurrentHashMap<String, String[]>> NOT_OVERLOAD_METHOD_SIGS_CACHE = new ConcurrentHashMap<String, ConcurrentHashMap<String, String[]>>();
+    static final ConcurrentMap<String, ConcurrentHashMap<String, String[]>> NOT_OVERLOAD_METHOD_SIGS_CACHE = new ConcurrentHashMap<String, ConcurrentHashMap<String, String[]>>();
 
     /**
      * 往缓存里放入方法
@@ -248,7 +249,7 @@ public final class ReflectCache {
      * 用于缓存参数列表，不是按接口，是按ServiceUniqueName
      */
     @VisibleForTesting
-    final static ConcurrentHashMap<String, ConcurrentHashMap<String, Method>> OVERLOAD_METHOD_CACHE = new ConcurrentHashMap<String, ConcurrentHashMap<String, Method>>();
+    final static ConcurrentMap<String, ConcurrentHashMap<String, Method>> OVERLOAD_METHOD_CACHE = new ConcurrentHashMap<String, ConcurrentHashMap<String, Method>>();
 
     /**
      * 往缓存里放入方法

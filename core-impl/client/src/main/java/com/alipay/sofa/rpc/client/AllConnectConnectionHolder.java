@@ -43,6 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -82,34 +83,34 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 未初始化的（从未连接过，例如lazy=true）
      */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> uninitializedConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> uninitializedConnections = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 存活的客户端列表（保持了长连接，且一切正常的）
      */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> aliveConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> aliveConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 存活但是亚健康节点（连续心跳超时，这种只发心跳，不发请求）
      */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> subHealthConnections     = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> subHealthConnections     = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 失败待重试的客户端列表（连上后断开的）
      */
-    private ConcurrentHashMap<ProviderInfo, ClientTransport> retryConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
+    protected ConcurrentMap<ProviderInfo, ClientTransport> retryConnections         = new ConcurrentHashMap<ProviderInfo, ClientTransport>();
 
     /**
      * 客户端变化provider的锁
      */
-    private Lock                                             providerLock             = new ReentrantLock();
+    private Lock                                           providerLock             = new ReentrantLock();
 
     /**
      * Gets retry connections.
      *
      * @return the retry connections
      */
-    public ConcurrentHashMap<ProviderInfo, ClientTransport> getRetryConnections() {
+    public ConcurrentMap<ProviderInfo, ClientTransport> getRetryConnections() {
         return retryConnections;
     }
 
@@ -406,23 +407,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 new NamedThreadFactory("CLI-CONN-" + interfaceId, true));
             int connectTimeout = consumerConfig.getConnectTimeout();
             for (final ProviderInfo providerInfo : providerInfoList) {
-                final ClientTransportConfig config = providerToClientConfig(providerInfo);
-                initPool.execute(new Runnable() {
-                    @Override
-                    public void run() {
-                        ClientTransport transport = ClientTransportFactory.getClientTransport(config);
-                        if (consumerConfig.isLazy()) {
-                            uninitializedConnections.put(providerInfo, transport);
-                            latch.countDown();
-                        } else {
-                            try {
-                                initClientTransport(interfaceId, providerInfo, transport);
-                            } finally {
-                                latch.countDown(); // 连上或者抛异常
-                            }
-                        }
-                    }
-                });
+                initClientRunnable(initPool, latch, providerInfo);
             }
 
             try {
@@ -437,7 +422,32 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         }
     }
 
-    private void initClientTransport(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
+    /**
+     * 线程池建立长连接
+     *
+     */
+    protected void initClientRunnable(ThreadPoolExecutor initPool, final CountDownLatch latch,
+                                      final ProviderInfo providerInfo) {
+        final ClientTransportConfig config = providerToClientConfig(providerInfo);
+        initPool.execute(new Runnable() {
+            @Override
+            public void run() {
+                ClientTransport transport = ClientTransportFactory.getClientTransport(config);
+                if (consumerConfig.isLazy()) {
+                    uninitializedConnections.put(providerInfo, transport);
+                    latch.countDown();
+                } else {
+                    try {
+                        initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
+                    } finally {
+                        latch.countDown(); // 连上或者抛异常
+                    }
+                }
+            }
+        });
+    }
+
+    protected void initClientTransport(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         try {
             transport.connect();
             if (doubleCheck(interfaceId, providerInfo, transport)) {
@@ -483,14 +493,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     @Override
-    public ConcurrentHashMap<ProviderInfo, ClientTransport> getAvailableConnections() {
+    public ConcurrentMap<ProviderInfo, ClientTransport> getAvailableConnections() {
         return aliveConnections.isEmpty() ? subHealthConnections : aliveConnections;
     }
 
     @Override
     public List<ProviderInfo> getAvailableProviders() {
         // 存活为空的，那就用亚健康的
-        ConcurrentHashMap<ProviderInfo, ClientTransport> map =
+        ConcurrentMap<ProviderInfo, ClientTransport> map =
                 aliveConnections.isEmpty() ? subHealthConnections : aliveConnections;
         return new ArrayList<ProviderInfo>(map.keySet());
     }
@@ -754,6 +764,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             try { // 睡一下下 防止被连上又被服务端踢下线
                 Thread.sleep(100);
             } catch (InterruptedException e) {
+                // ignore
             }
             if (transport.isAvailable()) { // double check
                 return true;

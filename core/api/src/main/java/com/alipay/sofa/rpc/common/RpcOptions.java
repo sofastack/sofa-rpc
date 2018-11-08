@@ -357,6 +357,18 @@ public class RpcOptions {
      * @since 5.2.0
      */
     public static final String CONSUMER_REPEATED_REFERENCE_LIMIT        = "consumer.repeated.reference.limit";
+    /**
+     * 初始化连接时建立连接的百分比
+     *
+     * @since 5.5.0
+     */
+    public static final String CONSUMER_CONNECT_ELASTIC_PRECENT         = "consumer.connect.elastic.precent";
+    /**
+     * 初始化连接时建立连接的个数
+     *
+     * @since 5.5.0
+     */
+    public static final String CONCUMER_CONNECT_ELASTIC_SIZE            = "consumer.connect.elastic.size";
 
     /**
      * 默认回调线程池最小
