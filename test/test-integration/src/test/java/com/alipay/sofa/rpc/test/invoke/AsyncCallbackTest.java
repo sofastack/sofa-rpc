@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.filter.Filter;
@@ -38,8 +39,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class AsyncCallbackTest extends ActivelyDestroyTest {
@@ -107,6 +106,74 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         Assert.assertNotNull(ret[0]);
         // 过滤器生效
         Assert.assertTrue(ret[0].endsWith("append by async filter"));
+
+        RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testTimeoutException() {
+
+        ServerConfig serverConfig2 = new ServerConfig()
+            .setPort(22222)
+            .setDaemon(false);
+
+        // C服务的服务端
+        ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(500))
+            .setServer(serverConfig2);
+        CProvider.export();
+
+        // B调C的客户端
+        Filter filter = new TestAsyncFilter();
+        ConsumerConfig<HelloService> BConsumer = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+            .setTimeout(1)
+            .setFilterRef(Arrays.asList(filter))
+            // .setOnReturn() // 不设置 调用级别设置
+            .setDirectUrl("bolt://127.0.0.1:22222");
+        HelloService helloService = BConsumer.refer();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final String[] ret = { null };
+
+        final boolean[] hasExp = { false };
+        RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                LOGGER.info("B get result: {}", appResponse);
+                latch.countDown();
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                LOGGER.info("B get app exception: {}", throwable);
+                latch.countDown();
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        RequestBase request) {
+                LOGGER.info("B get sofa exception: {}", sofaException);
+
+                if (sofaException instanceof SofaTimeOutException) {
+                    hasExp[0] = true;
+                }
+
+                latch.countDown();
+            }
+        });
+
+        String ret0 = helloService.sayHello("xxx", 22);
+        Assert.assertNull(ret0); // 第一次返回null
+
+        try {
+            latch.await(2000, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+        // 一定是一个超时异常
+        Assert.assertTrue(hasExp[0]);
 
         RpcInvokeContext.removeContext();
     }
