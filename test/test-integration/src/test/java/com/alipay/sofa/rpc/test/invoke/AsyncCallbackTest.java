@@ -183,6 +183,72 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         RpcInvokeContext.removeContext();
     }
 
+    @Test
+    public void testNoProviderException() {
+        //use bolt, so callback will throw connection closed exception
+        serverConfig = new ServerConfig()
+            .setPort(22222)
+            .setDaemon(false)
+            .setProtocol("rest");
+
+        serverConfig.buildIfAbsent().start();
+
+        // B调C的客户端
+        Filter filter = new TestAsyncFilter();
+        BConsumer = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+            .setTimeout(1000)
+            .setFilterRef(Arrays.asList(filter))
+            // .setOnReturn() // 不设置 调用级别设置
+            .setDirectUrl("bolt://127.0.0.1:22222");
+        HelloService helloService = BConsumer.refer();
+
+        final CountDownLatch latch = new CountDownLatch(1);
+        final String[] ret = { null };
+
+        final boolean[] hasExp = { false };
+        RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                LOGGER.info("B get result: {}", appResponse);
+                latch.countDown();
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                LOGGER.info("B get app exception: {}", throwable);
+                latch.countDown();
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        RequestBase request) {
+                LOGGER.info("B get sofa exception: {}", sofaException);
+
+                if ((sofaException instanceof SofaTimeOutException)) {
+                    hasExp[0] = false;
+                } else {
+                    hasExp[0] = true;
+                }
+
+                latch.countDown();
+            }
+        });
+
+        String ret0 = helloService.sayHello("xxx", 22);
+        Assert.assertNull(ret0); // 第一次返回null
+
+        try {
+            latch.await(1500, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+        // 一定是一个超时异常
+        Assert.assertTrue(hasExp[0]);
+
+        RpcInvokeContext.removeContext();
+    }
+
     @After
     public void after() {
         if (CProvider != null) {
