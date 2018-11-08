@@ -117,16 +117,11 @@ public class RestTracerTest extends ActivelyDestroyTest {
         latch.await();
         Assert.assertEquals(times * times, success.get());
 
-        TimeUnit.SECONDS.sleep(10);
+        TimeUnit.SECONDS.sleep(5);
+
         List<String> clientDigestContents = memoryReporter.getClientDigestHolder();
-        System.out.println("fuck" + clientDigestContents.size());
 
         List<String> serverDigestContents = memoryReporter.getServerDigestHolder();
-        System.out.println("fuck" + serverDigestContents.size());
-
-        //先不要校验了 ,这个需要把 tracer 这个日志方式改一下.否则校验很高概率失败.
-
-        //assret
 
         List<JSONObject> clientDigest = TracerChecker.convertContents2Json(clientDigestContents);
         List<String> clientTraceIds = readTraceId(clientDigest);
@@ -135,9 +130,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
         List<String> serverTraceIds = readTraceId(serverDigest);
 
-        System.out.println("clientTraceIds:" + clientTraceIds.size());
         Assert.assertTrue(CommonUtils.isNotEmpty(clientTraceIds));
-        System.out.println("serverTraceIds:" + serverTraceIds.size());
         Assert.assertTrue(CommonUtils.isNotEmpty(serverTraceIds));
 
         HashSet<String> hashSet = new HashSet<String>(200);

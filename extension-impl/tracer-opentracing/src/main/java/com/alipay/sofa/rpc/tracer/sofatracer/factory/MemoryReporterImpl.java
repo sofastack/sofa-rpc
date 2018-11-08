@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * don't use for production
@@ -61,14 +63,17 @@ public class MemoryReporterImpl extends AbstractReporter {
     private static List<String>         clientDigestHolder  = new ArrayList<String>();
     private static List<String>         serverDigestHolder  = new ArrayList<String>();
 
+    private static Lock                 lock                = new ReentrantLock();
+
     public MemoryReporterImpl(String digestLog, String digestRollingPolicy, String digestLogReserveConfig,
                               SpanEncoder<SofaTracerSpan> spanEncoder, SofaTracerStatisticReporter statReporter) {
         this.statReporter = statReporter;
     }
 
     @Override
-    public synchronized void doReport(SofaTracerSpan span) {
+    public void doReport(SofaTracerSpan span) {
 
+        lock.lock();
         if (span.isClient()) {
             try {
                 String result = clientDigestEncoder.encode(span);
@@ -89,6 +94,8 @@ public class MemoryReporterImpl extends AbstractReporter {
         if (statReporter != null) {
             statisticReport(span);
         }
+
+        lock.unlock();
     }
 
     @Override
