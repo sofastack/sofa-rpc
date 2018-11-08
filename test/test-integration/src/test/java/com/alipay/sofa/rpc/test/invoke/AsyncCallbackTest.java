@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,25 +44,29 @@ import java.util.concurrent.TimeUnit;
  */
 public class AsyncCallbackTest extends ActivelyDestroyTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncCallbackTest.class);
+    private static final Logger          LOGGER = LoggerFactory.getLogger(AsyncCallbackTest.class);
+
+    private ServerConfig                 serverConfig;
+    private ProviderConfig<HelloService> CProvider;
+    private ConsumerConfig<HelloService> BConsumer;
 
     @Test
     public void testAll() {
 
-        ServerConfig serverConfig2 = new ServerConfig()
+        serverConfig = new ServerConfig()
             .setPort(22222)
             .setDaemon(false);
 
         // C服务的服务端
-        ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
+        CProvider = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setRef(new HelloServiceImpl(1000))
-            .setServer(serverConfig2);
+            .setServer(serverConfig);
         CProvider.export();
 
         // B调C的客户端
         Filter filter = new TestAsyncFilter();
-        ConsumerConfig<HelloService> BConsumer = new ConsumerConfig<HelloService>()
+        BConsumer = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
             .setTimeout(50000)
@@ -113,20 +118,20 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     @Test
     public void testTimeoutException() {
 
-        ServerConfig serverConfig2 = new ServerConfig()
+        serverConfig = new ServerConfig()
             .setPort(22222)
             .setDaemon(false);
 
         // C服务的服务端
-        ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
+        CProvider = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setRef(new HelloServiceImpl(500))
-            .setServer(serverConfig2);
+            .setServer(serverConfig);
         CProvider.export();
 
         // B调C的客户端
         Filter filter = new TestAsyncFilter();
-        ConsumerConfig<HelloService> BConsumer = new ConsumerConfig<HelloService>()
+        BConsumer = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
             .setTimeout(1)
@@ -176,5 +181,18 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         Assert.assertTrue(hasExp[0]);
 
         RpcInvokeContext.removeContext();
+    }
+
+    @After
+    public void after() {
+        if (CProvider != null) {
+            CProvider.unExport();
+        }
+        if (BConsumer != null) {
+            BConsumer.unRefer();
+        }
+        if (serverConfig != null) {
+            serverConfig.destroy();
+        }
     }
 }
