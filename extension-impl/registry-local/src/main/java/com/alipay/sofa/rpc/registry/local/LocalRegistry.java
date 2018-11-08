@@ -82,9 +82,9 @@ public class LocalRegistry extends Registry {
     protected Map<String, List<ConsumerConfig>> notifyListeners = new ConcurrentHashMap<String, List<ConsumerConfig>>();
 
     /**
-     * 最后一次扫描文件时间
+     * 最后一次digest值
      */
-    private long                                lastLoadTime;
+    private String                              lastDigest;
 
     /**
      * 扫描周期，毫秒
@@ -116,7 +116,7 @@ public class LocalRegistry extends Registry {
             throw new SofaRpcRuntimeException("File of LocalRegistry is null");
         }
         // 先加载一些
-        lastLoadTime = LocalRegistryHelper.loadBackupFileToCache(regFile, memoryCache);
+        lastDigest = LocalRegistryHelper.calMD5Checksum(regFile);
         // 开始扫描
         this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.local.scan.period"),
             scanPeriod);
@@ -128,18 +128,17 @@ public class LocalRegistry extends Registry {
                     doWriteFile();
 
                     // 订阅变化（默认是不订阅的）
-                    // 检查最后修改时间，如果有有变，则自动重新加载
-                    if (subscribe && LocalRegistryHelper.checkModified(regFile, lastLoadTime)) {
+                    // 检查摘要，如果有有变，则自动重新加载
+                    if (subscribe && LocalRegistryHelper.checkModified(regFile, lastDigest)) {
                         // 加载到内存
-                        Map<String, ProviderGroup> tempCache = new ConcurrentHashMap<String, ProviderGroup>();
-                        long currentTime = LocalRegistryHelper.loadBackupFileToCache(regFile, tempCache);
+                        Map<String, ProviderGroup> tempCache = LocalRegistryHelper.loadBackupFileToCache(regFile);
                         // 比较旧列表和新列表，通知订阅者变化部分
                         notifyConsumer(tempCache);
 
                         // 通知完保存到内存
                         memoryCache = tempCache;
                         // 如果有文件更新,将上一次更新时间保持为当前时间
-                        lastLoadTime = currentTime;
+                        lastDigest = LocalRegistryHelper.calMD5Checksum(regFile);
                     }
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
