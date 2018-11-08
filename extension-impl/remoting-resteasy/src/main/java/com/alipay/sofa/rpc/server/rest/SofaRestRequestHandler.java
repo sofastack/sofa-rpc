@@ -115,7 +115,6 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
 
                 if (!request.getAsyncContext().isSuspended()) {
                     response.finish();
-                    ctx.flush();
                 }
             } finally {
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
