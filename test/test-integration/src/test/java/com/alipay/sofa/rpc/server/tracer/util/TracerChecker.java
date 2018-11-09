@@ -32,8 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author bystander
- * @version $Id: TracerChecker.java, v 0.1 2018年11月06日 10:20 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class TracerChecker {
 
@@ -63,6 +62,22 @@ public class TracerChecker {
         }
 
         LOGGER.info("end to read tracer file,jsonObjects" + jsonObjects);
+
+        return jsonObjects;
+    }
+
+    /**
+     * for json convert
+     *
+     * @param contents
+     * @return
+     */
+    public static List<JSONObject> convertContents2Json(List<String> contents) {
+        List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+        for (String content : contents) {
+            jsonObjects.add(JSON.parseObject(content));
+        }
 
         return jsonObjects;
     }

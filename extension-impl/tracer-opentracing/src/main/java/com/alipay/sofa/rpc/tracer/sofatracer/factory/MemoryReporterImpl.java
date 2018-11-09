@@ -23,26 +23,46 @@ import com.alipay.common.tracer.core.reporter.stat.model.StatKey;
 import com.alipay.common.tracer.core.reporter.stat.model.StatValues;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.annotation.JustForTest;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcClientDigestSpanJsonEncoder;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcServerDigestSpanJsonEncoder;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * don't use for production
- * @author bystander
- * @version $Id: MemoryReporterImpl.java, v 0.1 2018年05月17日 9:10 AM bystander Exp $
+ *
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 @JustForTest
 public class MemoryReporterImpl extends AbstractReporter {
 
-    private List<String>                stats      = new ArrayList<String>();
+    /**
+     * Logger for this class
+     */
+    private static final Logger         LOGGER              = LoggerFactory.getLogger(MemoryReporterImpl.class);
 
     private SofaTracerStatisticReporter statReporter;
 
-    private Map<StatKey, StatValues>    storeDatas = new HashMap<StatKey, StatValues>();
+    private Map<StatKey, StatValues>    storeDatas          = new HashMap<StatKey, StatValues>();
+
+    private SpanEncoder                 clientDigestEncoder = new RpcClientDigestSpanJsonEncoder();
+
+    private SpanEncoder                 serverDigestEncoder = new RpcServerDigestSpanJsonEncoder();
+
+    //客户端和服务端一起本地进行测试的时候,是两个当前类对象,所以这里用静态方法
+    private static List<String>         clientDigestHolder  = new ArrayList<String>();
+    private static List<String>         serverDigestHolder  = new ArrayList<String>();
+
+    private static Lock                 lock                = new ReentrantLock();
 
     public MemoryReporterImpl(String digestLog, String digestRollingPolicy, String digestLogReserveConfig,
                               SpanEncoder<SofaTracerSpan> spanEncoder, SofaTracerStatisticReporter statReporter) {
@@ -51,11 +71,30 @@ public class MemoryReporterImpl extends AbstractReporter {
 
     @Override
     public void doReport(SofaTracerSpan span) {
-        stats.add(span.toString());
+
+        lock.lock();
+        if (span.isClient()) {
+            try {
+                String result = clientDigestEncoder.encode(span);
+                clientDigestHolder.add(result);
+            } catch (IOException e) {
+                LOGGER.error("encode error", e);
+            }
+        } else {
+            try {
+                String result = serverDigestEncoder.encode(span);
+                serverDigestHolder.add(result);
+
+            } catch (IOException e) {
+                LOGGER.error("encode error", e);
+            }
+        }
 
         if (statReporter != null) {
             statisticReport(span);
         }
+
+        lock.unlock();
     }
 
     @Override
@@ -73,11 +112,19 @@ public class MemoryReporterImpl extends AbstractReporter {
             statDatas.setAccessible(true);
             datas = (Map<StatKey, StatValues>) statDatas.get(statReporter);
         } catch (IllegalAccessException e) {
-            e.printStackTrace();
+            LOGGER.error("statisticReport error", e);
         }
 
         storeDatas.putAll(datas);
 
+    }
+
+    public List<String> getClientDigestHolder() {
+        return clientDigestHolder;
+    }
+
+    public List<String> getServerDigestHolder() {
+        return serverDigestHolder;
     }
 
     public Map<StatKey, StatValues> getStoreDatas() {
@@ -104,5 +151,11 @@ public class MemoryReporterImpl extends AbstractReporter {
             }
         }
         return null;
+    }
+
+    public boolean clearAll() {
+        clientDigestHolder.clear();
+        serverDigestHolder.clear();
+        return true;
     }
 }

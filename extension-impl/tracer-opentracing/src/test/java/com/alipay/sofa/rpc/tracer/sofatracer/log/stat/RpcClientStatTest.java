@@ -32,7 +32,11 @@ import com.alipay.sofa.rpc.tracer.Tracers;
 import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.base.AbstractTracerBase;
 import com.alipay.sofa.rpc.tracer.sofatracer.factory.MemoryReporterImpl;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -41,10 +45,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author bystander
- * @version $Id: RpcClientStatTest.java, v 0.1 2018年05月16日 1:01 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class RpcClientStatTest extends AbstractTracerBase {
+    private MemoryReporterImpl memoryReporter;
 
     @Before
     public void before() {
@@ -85,6 +89,8 @@ public class RpcClientStatTest extends AbstractTracerBase {
             assertNotNull(clientReporter);
             assertTrue(clientReporter instanceof MemoryReporterImpl);
 
+            memoryReporter = (MemoryReporterImpl) clientReporter;
+
             final SofaRequest request = new SofaRequest();
             request.setInterfaceName("a");
             request.setTargetServiceUniqueName("app.service:1.0");
@@ -108,8 +114,7 @@ public class RpcClientStatTest extends AbstractTracerBase {
                 rpcSofaTracer.clientReceived(request, response, null);
             }
 
-            MemoryReporterImpl MemoryReporterImpl = (MemoryReporterImpl) clientReporter;
-            Map<StatKey, StatValues> datas = MemoryReporterImpl.getStoreDatas();
+            Map<StatKey, StatValues> datas = memoryReporter.getStoreDatas();
 
             System.out.println("1" + datas);
 
@@ -159,5 +164,9 @@ public class RpcClientStatTest extends AbstractTracerBase {
     @After
     public void afterClientClass() {
         System.setProperty("reporter_type", "DISK");
+
+        if (memoryReporter != null) {
+            memoryReporter.clearAll();
+        }
     }
 }
