@@ -17,13 +17,10 @@
 package com.alipay.sofa.rpc.server.rest;
 
 import com.alibaba.fastjson.JSONObject;
-import com.alipay.common.tracer.core.appender.TracerLogRootDeamon;
-import com.alipay.common.tracer.core.appender.manager.AsyncCommonDigestAppenderManager;
-import com.alipay.common.tracer.core.reporter.digest.manager.SofaTracerDigestReporterAsyncManager;
-import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterCycleTimesManager;
-import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterManager;
+import com.alipay.common.tracer.core.SofaTracer;
+import com.alipay.common.tracer.core.reporter.facade.Reporter;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.FileUtils;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -34,41 +31,42 @@ import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.Tracers;
 import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
+import com.alipay.sofa.rpc.tracer.sofatracer.factory.MemoryReporterImpl;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
 public class RestTracerTest extends ActivelyDestroyTest {
 
-    private static String logDirectory = TracerLogRootDeamon.LOG_FILE_DIR;
+    private MemoryReporterImpl memoryReporter;
 
     @Before
     public void before() throws Exception {
-        File traceLogDirectory = new File(logDirectory);
-        if (!traceLogDirectory.exists()) {
-            return;
-        }
-        boolean cleanResult = FileUtils.cleanDirectory(traceLogDirectory);
 
-        Assert.assertTrue(cleanResult);
-        reflectSetNewTracer();
+        System.setProperty("reporter_type", "MEMORY");
     }
 
     @Test
     public void testRestTracer() throws InterruptedException, IOException {
+
+        Reporter clientReporter = reflectToTracer();
+        memoryReporter = (MemoryReporterImpl) clientReporter;
 
         ServerConfig restServer = new ServerConfig()
             .setPort(8583)
@@ -119,28 +117,20 @@ public class RestTracerTest extends ActivelyDestroyTest {
         latch.await();
         Assert.assertEquals(times * times, success.get());
 
-        Thread.sleep(10000);
+        TimeUnit.SECONDS.sleep(5);
 
-        //先不要校验了 ,这个需要把 tracer 这个日志方式改一下.否则校验很高概率失败.
-        /*
-        //assret
-        final File clientFile = new File(logDirectory + File.separator
-            + RpcTracerLogEnum.RPC_CLIENT_DIGEST.getDefaultLogName());
+        List<String> clientDigestContents = memoryReporter.getClientDigestHolder();
 
-        System.out.println("clientfile" + clientFile.toURI());
-        List<JSONObject> clientDigest = readContent(clientFile);
+        List<String> serverDigestContents = memoryReporter.getServerDigestHolder();
+
+        List<JSONObject> clientDigest = TracerChecker.convertContents2Json(clientDigestContents);
         List<String> clientTraceIds = readTraceId(clientDigest);
 
-        final File serverFile = new File(logDirectory + File.separator
-            + RpcTracerLogEnum.RPC_SERVER_DIGEST.getDefaultLogName());
-
-        List<JSONObject> serverDigest = readContent(serverFile);
+        List<JSONObject> serverDigest = TracerChecker.convertContents2Json(serverDigestContents);
 
         List<String> serverTraceIds = readTraceId(serverDigest);
 
-        System.out.println("clientTraceIds:" + clientTraceIds.size());
         Assert.assertTrue(CommonUtils.isNotEmpty(clientTraceIds));
-        System.out.println("serverTraceIds:" + serverTraceIds.size());
         Assert.assertTrue(CommonUtils.isNotEmpty(serverTraceIds));
 
         HashSet<String> hashSet = new HashSet<String>(200);
@@ -158,15 +148,36 @@ public class RestTracerTest extends ActivelyDestroyTest {
         Assert.assertTrue(result);
         result = TracerChecker.validateTracerDigest(serverDigest.get(0), "server", RpcConstants.PROTOCOL_TYPE_REST);
         Assert.assertTrue(result);
-        */
+
     }
 
-    //readTracerDigest TraceId and spanId
-    public List<JSONObject> readContent(File file) throws IOException {
+    /**
+     * reflect to tracer
+     * @return
+     */
+    protected Reporter reflectToTracer() {
+        Tracer rpcSofaTracer = Tracers.getTracer();
 
-        List<JSONObject> jsonObjects = TracerChecker.readTracerDigest(file);
+        Field tracerField = null;
+        try {
+            tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+        tracerField.setAccessible(true);
 
-        return jsonObjects;
+        SofaTracer tracer = null;
+        //OpenTracing tracer 标准实现
+        try {
+            tracer = (SofaTracer) tracerField.get(rpcSofaTracer);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+        Reporter clientReporter = tracer.getClientReporter();
+        assertNotNull(clientReporter);
+        assertTrue(clientReporter instanceof MemoryReporterImpl);
+        return clientReporter;
     }
 
     //readTracerDigest TraceId and spanId
@@ -177,35 +188,15 @@ public class RestTracerTest extends ActivelyDestroyTest {
         return result;
     }
 
-    protected void reflectSetNewTracer() throws Exception {
-        removeRpcDigestStatLogType();
-        Tracer newTracerInstance = new RpcSofaTracer();
-        Field tracerField = Tracers.class.getDeclaredField("tracer");
-        tracerField.setAccessible(true);
-        tracerField.set(null, newTracerInstance);
-    }
-
-    protected void removeRpcDigestStatLogType() throws Exception {
-
-        AsyncCommonDigestAppenderManager asyncDigestManager = SofaTracerDigestReporterAsyncManager
-            .getSofaTracerDigestReporterAsyncManager();
-        //stat
-        Map<Long, SofaTracerStatisticReporterManager> cycleTimesManager = SofaTracerStatisticReporterCycleTimesManager
-            .getCycleTimesManager();
-        for (Map.Entry<Long, SofaTracerStatisticReporterManager> entry : cycleTimesManager.entrySet()) {
-            SofaTracerStatisticReporterManager manager = entry.getValue();
-            manager.getStatReporters().clear();
-        }
-    }
-
     @After
     public void after() {
+
+        System.setProperty("reporter_type", "DISK");
+
         RpcRuntimeContext.destroy();
-        File traceLogDirectory = new File(logDirectory);
-        if (!traceLogDirectory.exists()) {
-            return;
+        if (memoryReporter != null) {
+            memoryReporter.clearAll();
         }
-        FileUtils.cleanDirectory(traceLogDirectory);
     }
 
 }

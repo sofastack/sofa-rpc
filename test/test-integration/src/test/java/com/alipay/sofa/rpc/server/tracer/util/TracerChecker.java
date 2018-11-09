@@ -67,6 +67,22 @@ public class TracerChecker {
         return jsonObjects;
     }
 
+    /**
+     * for json convert
+     *
+     * @param contents
+     * @return
+     */
+    public static List<JSONObject> convertContents2Json(List<String> contents) {
+        List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+        for (String content : contents) {
+            jsonObjects.add(JSON.parseObject(content));
+        }
+
+        return jsonObjects;
+    }
+
     public static String extractField(JSONObject jsonObject, String fieldName) {
 
         String value;
