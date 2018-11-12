@@ -28,6 +28,9 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.ConsumerSubEvent;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.LogCodes;
@@ -198,6 +201,11 @@ public class LocalRegistry extends Registry {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
                 }
             }
+            if (EventBus.isEnable(ProviderPubEvent.class)) {
+                ProviderPubEvent event = new ProviderPubEvent(config);
+                EventBus.post(event);
+            }
+
         }
     }
 
@@ -311,6 +319,12 @@ public class LocalRegistry extends Registry {
             group = new ProviderGroup();
             memoryCache.put(key, group);
         }
+
+        if (EventBus.isEnable(ConsumerSubEvent.class)) {
+            ConsumerSubEvent event = new ConsumerSubEvent(config);
+            EventBus.post(event);
+        }
+
         return Collections.singletonList(group);
     }
 
