@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.ext;
 
 import com.alipay.sofa.rpc.client.LoadBalancer;
-import com.alipay.sofa.rpc.ext.ExtensionLoader;
-import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import org.junit.Assert;
 import org.junit.Test;
 

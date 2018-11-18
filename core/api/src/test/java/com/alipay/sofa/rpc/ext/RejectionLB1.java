@@ -21,17 +21,11 @@ import com.alipay.sofa.rpc.client.LoadBalancer;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.List;
 
 @Extension(value = "lb1", order = 1)
 public class RejectionLB1 extends LoadBalancer {
-    /**
-     * 构造函数
-     *
-     * @param consumerBootstrap 服务消费者配置
-     */
     public RejectionLB1(ConsumerBootstrap consumerBootstrap) {
         super(consumerBootstrap);
     }
