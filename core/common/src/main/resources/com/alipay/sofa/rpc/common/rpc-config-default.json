@@ -120,7 +120,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 是否启动epoll
   "server.epoll": false,
   // 是否hold住端口，true的话随主线程退出而退出，false的话则要主动退出
-  "server.daemon": true,
+  "server.daemon": false,
   // 端口是否自适应，如果端口被占用，自动+1
   "server.adaptive.port": false,
   // 服务端是否自动启动
