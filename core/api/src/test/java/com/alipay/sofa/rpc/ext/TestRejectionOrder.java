@@ -28,7 +28,8 @@ public class TestRejectionOrder {
     @Test
     public void testRejection() {
         boolean error = true;
-        ExtensionLoader<LoadBalancer> loader = ExtensionLoaderFactory.getExtensionLoader(LoadBalancer.class);
+        ExtensionLoader<LoadBalancer> loader = new ExtensionLoader<LoadBalancer>(LoadBalancer.class, false, null);
+        loader.loadFromFile("META-INF/ext5/");
         try {
             loader.getExtension("lb3");
         } catch (Exception e) {
