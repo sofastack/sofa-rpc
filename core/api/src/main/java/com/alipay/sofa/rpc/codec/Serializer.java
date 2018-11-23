@@ -40,7 +40,7 @@ public interface Serializer {
      * @return 序列化后的对象
      * @throws SofaRpcException 序列化异常
      */
-    public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException;
+    AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException;
 
     /**
      * 反序列化，只有类型，返回对象
@@ -51,7 +51,7 @@ public interface Serializer {
      * @return 反序列化后的对象
      * @throws SofaRpcException 序列化异常
      */
-    public Object decode(AbstractByteBuf data, Class clazz, Map<String, String> context) throws SofaRpcException;
+    Object decode(AbstractByteBuf data, Class clazz, Map<String, String> context) throws SofaRpcException;
 
     /**
      * 反序列化，已有数据，填充字段
@@ -61,5 +61,5 @@ public interface Serializer {
      * @param context  上下文
      * @throws SofaRpcException 序列化异常
      */
-    public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException;
+    void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException;
 }

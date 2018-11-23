@@ -307,6 +307,10 @@ public class ExtensionLoader<T> {
                     String[] rejection = extensionClass.getRejection();
                     if (CommonUtils.isNotEmpty(rejection)) {
                         for (String rej : rejection) {
+                            existed = all.get(rej);
+                            if (existed == null || extensionClass.getOrder() < existed.getOrder()) {
+                                continue;
+                            }
                             ExtensionClass removed = all.remove(rej);
                             if (removed != null) {
                                 if (LOGGER.isInfoEnabled()) {
