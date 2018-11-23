@@ -178,7 +178,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
         //OpenTracing tracer 标准实现
         try {
             tracer = (SofaTracer) tracerField.get(rpcSofaTracer);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -191,9 +191,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
             clientReporterField = SofaTracer.class.getDeclaredField("clientReporter");
             clientReporterField.setAccessible(true);
             clientReporterField.set(tracer, memoryReporter);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -201,9 +199,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
             serverReporterField = SofaTracer.class.getDeclaredField("serverReporter");
             serverReporterField.setAccessible(true);
             serverReporterField.set(tracer, memoryReporter);
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
@@ -230,7 +226,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
         try {
             clientReporterField.set(tracer, diskReporter);
             serverReporterField.set(tracer, diskReporter);
-        } catch (IllegalAccessException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
