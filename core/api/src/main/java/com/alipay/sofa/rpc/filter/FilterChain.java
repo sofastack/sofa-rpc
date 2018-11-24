@@ -158,44 +158,12 @@ public class FilterChain implements Invoker {
     }
 
     /**
-     * 判断是否需要排除系统过滤器
+     * 获取真正的过滤器列表
      *
-     * @param customFilters 自定义filter
-     * @return 是否排除
+     * @param config            provider配置或者consumer配置
+     * @param autoActiveFilters 系统自动激活的过滤器映射
+     * @return 真正的过滤器列表
      */
-    private static HashSet<String> parseExcludeFilter(List<Filter> customFilters) {
-        HashSet<String> excludeKeys = new HashSet<String>();
-        if (CommonUtils.isNotEmpty(customFilters)) {
-            for (Filter filter : customFilters) {
-                if (filter instanceof ExcludeFilter) {
-                    // 存在需要排除的过滤器
-                    ExcludeFilter excludeFilter = (ExcludeFilter) filter;
-                    String excludeName = excludeFilter.getExcludeName();
-                    if (StringUtils.isNotEmpty(excludeName)) {
-                        String excludeFilterName = startsWithExcludePrefix(excludeName) ?
-                            excludeName.substring(1)
-                            : excludeName;
-                        if (StringUtils.isNotEmpty(excludeFilterName)) {
-                            excludeKeys.add(excludeFilterName);
-                        }
-                    }
-                    customFilters.remove(filter);
-                }
-            }
-        }
-        if (!excludeKeys.isEmpty()) {
-            if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Find exclude filters: {}", excludeKeys);
-            }
-        }
-        return excludeKeys;
-    }
-
-    private static boolean startsWithExcludePrefix(String excludeName) {
-        char c = excludeName.charAt(0);
-        return c == '-' || c == '!';
-    }
-
     private static List<Filter> selectActualFilters(AbstractInterfaceConfig config,
                                                     Map<String, ExtensionClass<Filter>> autoActiveFilters) {
         /*
@@ -248,6 +216,45 @@ public class FilterChain implements Invoker {
         // 加入自定义的过滤器
         actualFilters.addAll(customFilters);
         return actualFilters;
+    }
+
+    /**
+     * 判断是否需要排除自定义过滤器
+     *
+     * @param customFilters 自定义filter列表
+     * @return 需要排除的过滤器的key列表
+     */
+    private static HashSet<String> parseExcludeFilter(List<Filter> customFilters) {
+        HashSet<String> excludeKeys = new HashSet<String>();
+        if (CommonUtils.isNotEmpty(customFilters)) {
+            for (Filter filter : customFilters) {
+                if (filter instanceof ExcludeFilter) {
+                    // 存在需要排除的过滤器
+                    ExcludeFilter excludeFilter = (ExcludeFilter) filter;
+                    String excludeName = excludeFilter.getExcludeName();
+                    if (StringUtils.isNotEmpty(excludeName)) {
+                        String excludeFilterName = startsWithExcludePrefix(excludeName) ?
+                            excludeName.substring(1)
+                            : excludeName;
+                        if (StringUtils.isNotEmpty(excludeFilterName)) {
+                            excludeKeys.add(excludeFilterName);
+                        }
+                    }
+                    customFilters.remove(filter);
+                }
+            }
+        }
+        if (!excludeKeys.isEmpty()) {
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Find exclude filters: {}", excludeKeys);
+            }
+        }
+        return excludeKeys;
+    }
+
+    private static boolean startsWithExcludePrefix(String excludeName) {
+        char c = excludeName.charAt(0);
+        return c == '-' || c == '!';
     }
 
     @Override
