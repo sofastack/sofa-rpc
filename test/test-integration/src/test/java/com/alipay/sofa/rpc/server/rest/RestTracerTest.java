@@ -58,6 +58,8 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
     private DiskReporterImpl   diskReporter;
 
+    private Field              tracerField         = null;
+
     private Field              clientReporterField = null;
 
     private Field              serverReporterField = null;
@@ -65,7 +67,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
     private SofaTracer         tracer              = null;
 
     @Before
-    public void before() throws Exception {
+    public void before() {
 
         System.setProperty("reporter_type", "MEMORY");
     }
@@ -145,6 +147,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
         for (String clientTraceId : clientTraceIds) {
             //will not duplicate
             Assert.assertTrue(!hashSet.contains(clientTraceId));
+            hashSet.add(clientTraceId);
             Assert.assertTrue(serverTraceIds.contains(clientTraceId));
         }
 
@@ -165,40 +168,30 @@ public class RestTracerTest extends ActivelyDestroyTest {
      * @return
      */
     protected Reporter reflectToTracer() {
-        Tracer rpcSofaTracer = Tracers.getTracer();
-
-        Field tracerField = null;
         try {
+            Tracer rpcSofaTracer = Tracers.getTracer();
             tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        tracerField.setAccessible(true);
+            tracerField.setAccessible(true);
 
-        //OpenTracing tracer 标准实现
-        try {
+            //OpenTracing tracer 标准实现
             tracer = (SofaTracer) tracerField.get(rpcSofaTracer);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        diskReporter = (DiskReporterImpl) tracer.getClientReporter();
-        assertNotNull(diskReporter);
-
-        memoryReporter = new MemoryReporterImpl(null, null, null, null, diskReporter.getStatReporter());
-
-        try {
+            Reporter tempReport = tracer.getClientReporter();
             clientReporterField = SofaTracer.class.getDeclaredField("clientReporter");
             clientReporterField.setAccessible(true);
-            clientReporterField.set(tracer, memoryReporter);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        try {
             serverReporterField = SofaTracer.class.getDeclaredField("serverReporter");
             serverReporterField.setAccessible(true);
-            serverReporterField.set(tracer, memoryReporter);
+            if (tempReport instanceof DiskReporterImpl) {
+                diskReporter = (DiskReporterImpl) tempReport;
+                assertNotNull(diskReporter);
+                memoryReporter = new MemoryReporterImpl(null, null, null, null, diskReporter.getStatReporter());
+                clientReporterField.set(tracer, memoryReporter);
+                serverReporterField.set(tracer, memoryReporter);
+
+            } else {
+                memoryReporter = (MemoryReporterImpl) tempReport;
+            }
+            //否则说明已经是 memory 了.主要是本地
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,16 +212,18 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
         System.setProperty("reporter_type", "DISK");
 
-        RpcRuntimeContext.destroy();
         if (memoryReporter != null) {
             memoryReporter.clearAll();
         }
+
         try {
             clientReporterField.set(tracer, diskReporter);
             serverReporterField.set(tracer, diskReporter);
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        RpcRuntimeContext.destroy();
     }
 
 }
