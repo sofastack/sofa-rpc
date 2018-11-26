@@ -103,7 +103,7 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
             temp = a % b;
             a = b;
             b = temp;
-            System.out.println("gcd(" + a + ", " + b + ")=");
+            LOGGER.info("gcd(" + a + ", " + b + ")=");
         }
         LOGGER.info(String.valueOf(a));
         return a;

@@ -16,13 +16,19 @@
  */
 package com.alipay.sofa.rpc.quickstart;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 /**
  * Quick Start demo implements
  */
 public class HelloServiceImpl implements HelloService {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(HelloServiceImpl.class);
+
     @Override
     public String sayHello(String string) {
-        System.out.println("Server receive: " + string);
+        LOGGER.info("Server receive: " + string);
         return "hello " + string + " ！";
     }
 }

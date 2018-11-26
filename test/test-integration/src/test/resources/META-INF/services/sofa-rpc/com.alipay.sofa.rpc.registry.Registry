@@ -1,2 +1,2 @@
-mocktest=com.alipay.sofa.registry.MockTestRegistry
-mocktestslow=com.alipay.sofa.registry.MockTestSlowRegistry
+mocktest=MockTestRegistry
+mocktestslow=MockTestSlowRegistry

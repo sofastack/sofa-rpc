@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -25,6 +24,7 @@ import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.Assert;

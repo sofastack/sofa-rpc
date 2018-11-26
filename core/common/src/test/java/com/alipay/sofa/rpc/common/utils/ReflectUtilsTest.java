@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.common.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -32,6 +34,9 @@ import static com.alipay.sofa.rpc.common.utils.ReflectUtils.isBeanPropertyWriteM
 import static com.alipay.sofa.rpc.common.utils.ReflectUtils.isPublicInstanceField;
 
 public class ReflectUtilsTest {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(ReflectUtilsTest.class);
+
     @Test
     public void isPrimitives() {
         Assert.assertTrue(ReflectUtils.isPrimitives(int.class));
@@ -50,11 +55,11 @@ public class ReflectUtilsTest {
         Assert.assertNull(ReflectUtils.getCodeBase(null));
 
         String codebase = ReflectUtils.getCodeBase(ReflectUtils.class);
-        System.out.println(codebase);
+        LOGGER.info(codebase);
         Assert.assertNotNull(codebase);
 
         String codebase2 = ReflectUtils.getCodeBase(ReflectUtilsTest.class);
-        System.out.println(codebase2);
+        LOGGER.info(codebase2);
         Assert.assertNotNull(codebase2);
     }
 

@@ -112,7 +112,6 @@ public class LocalPreferenceLoadBalancerTest extends BaseLoadBalancerTest {
             int per = total / count;
             Assert.assertTrue(cnt.get(22000) == 0);
             for (int i = 1; i < localps; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(per * i * 0.9 < cnt.get(22000 + i)
                     && per * i * 1.1 > cnt.get(22000 + i)); // 随机偏差不会太大，应该不超过10%
             }
