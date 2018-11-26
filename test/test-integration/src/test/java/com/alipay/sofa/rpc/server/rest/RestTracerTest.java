@@ -36,6 +36,7 @@ import com.alipay.sofa.rpc.tracer.sofatracer.factory.MemoryReporterImpl;
 import junit.framework.Assert;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -73,6 +74,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
     }
 
     @Test
+    @Ignore
     public void testRestTracer() throws InterruptedException, IOException {
 
         Reporter clientReporter = reflectToTracer();
