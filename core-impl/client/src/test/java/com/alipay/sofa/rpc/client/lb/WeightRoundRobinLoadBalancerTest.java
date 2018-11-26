@@ -61,7 +61,6 @@ public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(avg == cnt.get(9000 + i));
             }
         }

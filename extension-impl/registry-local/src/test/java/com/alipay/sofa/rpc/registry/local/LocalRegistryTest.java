@@ -27,6 +27,8 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -43,11 +45,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class LocalRegistryTest {
+
+    private final static Logger   LOGGER   = LoggerFactory.getLogger(LocalRegistryTest.class);
 
     private static String         filePath = System.getProperty("user.home") + File.separator
                                                + "localFileTest"
@@ -99,7 +101,8 @@ public class LocalRegistryTest {
             registry = null;
         } finally {
             // 清理数据
-            System.out.println(FileUtils.cleanDirectory(new File(filePath)));
+            final boolean cleanDirectory = FileUtils.cleanDirectory(new File(filePath));
+            LOGGER.info("clean result:" + cleanDirectory);
         }
     }
 
