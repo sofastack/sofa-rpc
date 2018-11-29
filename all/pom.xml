@@ -62,7 +62,7 @@
         <hessian.version>3.3.3</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
         <bolt.version>1.4.6</bolt.version>
-        <tracer.version>2.1.1</tracer.version>
+        <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
     </properties>
 
