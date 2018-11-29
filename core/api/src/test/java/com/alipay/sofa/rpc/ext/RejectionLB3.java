@@ -14,36 +14,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.core.invoke;
+package com.alipay.sofa.rpc.ext;
 
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.client.LoadBalancer;
+import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 
-/**
- * 表示是一个异步可链路返回的Callback
- * <p>
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
- */
-public interface SendableResponseCallback<T> extends SofaResponseCallback<T> {
+import java.util.List;
 
-    /**
-     * A-&gt;B(当前)-&gt;C的场景下，B将异常异步返回给调用者A
-     *
-     * @param appResponse 返回给A的值
-     */
-    void sendAppResponse(Object appResponse);
+@Extension(value = "lb3", order = 3)
+public class RejectionLB3 extends LoadBalancer {
+    public RejectionLB3(ConsumerBootstrap consumerBootstrap) {
+        super(consumerBootstrap);
+    }
 
-    /**
-     * A-&gt;B(当前)-&gt;C的场景下，B将异常异步返回给调用者A
-     *
-     * @param throwable 返回给A的异常
-     */
-    void sendAppException(Throwable throwable);
-
-    /**
-     * A-&gt;B(当前)-&gt;C的场景下，B将异常异步返回给调用者A
-     *
-     * @param exception 返回给A的异常
-     */
-    void sendSofaException(SofaRpcException exception);
+    @Override
+    public ProviderInfo select(SofaRequest request, List<ProviderInfo> providerInfos) throws SofaRpcException {
+        return null;
+    }
 }

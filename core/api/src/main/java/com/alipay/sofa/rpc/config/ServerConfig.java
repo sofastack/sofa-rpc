@@ -119,7 +119,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     protected String                          queueType        = getStringValue(SERVER_POOL_QUEUE_TYPE);
 
     /**
-     * 业务线程池回收时间
+     * 业务线程池队列大小
      */
     protected int                             queues           = getIntValue(SERVER_POOL_QUEUE);
 
