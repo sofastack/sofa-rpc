@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.server.rest;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.common.tracer.core.SofaTracer;
+import com.alipay.common.tracer.core.reporter.digest.DiskReporterImpl;
 import com.alipay.common.tracer.core.reporter.facade.Reporter;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -25,7 +26,6 @@ import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.server.tracer.util.TracerChecker;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.tracer.Tracer;
@@ -47,7 +47,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
@@ -56,8 +55,18 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
     private MemoryReporterImpl memoryReporter;
 
+    private DiskReporterImpl   diskReporter;
+
+    private Field              tracerField         = null;
+
+    private Field              clientReporterField = null;
+
+    private Field              serverReporterField = null;
+
+    private SofaTracer         tracer              = null;
+
     @Before
-    public void before() throws Exception {
+    public void before() {
 
         System.setProperty("reporter_type", "MEMORY");
     }
@@ -137,6 +146,7 @@ public class RestTracerTest extends ActivelyDestroyTest {
         for (String clientTraceId : clientTraceIds) {
             //will not duplicate
             Assert.assertTrue(!hashSet.contains(clientTraceId));
+            hashSet.add(clientTraceId);
             Assert.assertTrue(serverTraceIds.contains(clientTraceId));
         }
 
@@ -153,31 +163,39 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
     /**
      * reflect to tracer
+     *
      * @return
      */
     protected Reporter reflectToTracer() {
-        Tracer rpcSofaTracer = Tracers.getTracer();
-
-        Field tracerField = null;
         try {
+            Tracer rpcSofaTracer = Tracers.getTracer();
             tracerField = RpcSofaTracer.class.getDeclaredField("sofaTracer");
-        } catch (NoSuchFieldException e) {
-            e.printStackTrace();
-        }
-        tracerField.setAccessible(true);
+            tracerField.setAccessible(true);
 
-        SofaTracer tracer = null;
-        //OpenTracing tracer 标准实现
-        try {
+            //OpenTracing tracer 标准实现
             tracer = (SofaTracer) tracerField.get(rpcSofaTracer);
-        } catch (IllegalAccessException e) {
+            Reporter tempReport = tracer.getClientReporter();
+            clientReporterField = SofaTracer.class.getDeclaredField("clientReporter");
+            clientReporterField.setAccessible(true);
+            serverReporterField = SofaTracer.class.getDeclaredField("serverReporter");
+            serverReporterField.setAccessible(true);
+            if (tempReport instanceof DiskReporterImpl) {
+                diskReporter = (DiskReporterImpl) tempReport;
+                assertNotNull(diskReporter);
+                memoryReporter = new MemoryReporterImpl(null, null, null, null, diskReporter.getStatReporter());
+                clientReporterField.set(tracer, memoryReporter);
+                serverReporterField.set(tracer, memoryReporter);
+
+            } else {
+                memoryReporter = (MemoryReporterImpl) tempReport;
+            }
+            //否则说明已经是 memory 了.主要是本地
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
-        Reporter clientReporter = tracer.getClientReporter();
-        assertNotNull(clientReporter);
-        assertTrue(clientReporter instanceof MemoryReporterImpl);
-        return clientReporter;
+        return memoryReporter;
     }
 
     //readTracerDigest TraceId and spanId
@@ -193,9 +211,15 @@ public class RestTracerTest extends ActivelyDestroyTest {
 
         System.setProperty("reporter_type", "DISK");
 
-        RpcRuntimeContext.destroy();
         if (memoryReporter != null) {
             memoryReporter.clearAll();
+        }
+
+        try {
+            clientReporterField.set(tracer, diskReporter);
+            serverReporterField.set(tracer, diskReporter);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
