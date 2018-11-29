@@ -130,7 +130,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 LOGGER.infoWithApp(appName, "Export provider config : {} with bean id {}", key, providerConfig.getId());
             }
 
-            // 注意同一interface，同一uniqleId，不同server情况
+            // 注意同一interface，同一uniqueId，不同server情况
             AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
             if (cnt == null) { // 没有发布过
                 cnt = CommonUtils.putToConcurrentMap(EXPORTED_KEYS, key, new AtomicInteger(0));
@@ -173,7 +173,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             for (ServerConfig serverConfig : serverConfigs) {
                 try {
                     Server server = serverConfig.buildIfAbsent();
-                    // 注册序列化接口
+                    // 注册请求调用器
                     server.registerProcessor(providerConfig, providerProxyInvoker);
                     if (serverConfig.isAutoStart()) {
                         server.start();
@@ -331,7 +331,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * 订阅服务列表
+     * 注册服务
      */
     protected void register() {
         if (providerConfig.isRegister()) {
@@ -358,7 +358,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * 取消订阅服务列表
+     * 反注册服务
      */
     protected void unregister() {
         if (providerConfig.isRegister()) {
