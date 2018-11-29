@@ -63,7 +63,9 @@ public interface GenericService {
      * @param args       方法参数,参数类型支持GenericObject
      * @param context    上下文，传递超时以及LDC相关信息
      * @return 除了JDK等内置类型，其它对象是GenericObject类型
+     * @deprecated Use RpcInvokeContext instead of GenericContext
      */
+    @Deprecated
     Object $genericInvoke(String methodName, String[] argTypes, Object[] args, GenericContext context);
 
     /**
@@ -75,6 +77,8 @@ public interface GenericService {
      * @param clazz      返回类型
      * @param context    GenericContext
      * @return 返回指定的T类型返回对象
+     * @deprecated Use RpcInvokeContext instead of GenericContext
      */
+    @Deprecated
     <T> T $genericInvoke(String methodName, String[] argTypes, Object[] args, Class<T> clazz, GenericContext context);
 }
