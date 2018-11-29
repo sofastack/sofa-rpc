@@ -203,7 +203,7 @@ public class NacosRegistry extends Registry {
                 if (CommonUtils.isNotEmpty(instances)) {
                     for (Instance instance : instances) {
                         namingService.deregisterInstance(serviceName, instance.getIp(), instance.getPort(),
-                            instance.getCluster().getName());
+                            instance.getClusterName());
                     }
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,

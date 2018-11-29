@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "Downloading Nacos 0.2.1"
-wget https://github.com/alibaba/nacos/releases/download/0.2.1/nacos-server-0.2.1.zip -O nacos-server-0.2.1.zip
-unzip -qo nacos-server-0.2.1.zip
+echo "Downloading Nacos 0.5.0"
+wget https://github.com/alibaba/nacos/releases/download/0.5.0/nacos-server-0.5.0.zip -O nacos-server-0.5.0.zip
+unzip -qo nacos-server-0.5.0.zip
 
-bash $PWD/nacos/bin/startup.sh -m standalone
+nohup bash $PWD/nacos/bin/startup.sh -m standalone >> $PWD/nacos/start.out 2>&1 &
 sleep 10

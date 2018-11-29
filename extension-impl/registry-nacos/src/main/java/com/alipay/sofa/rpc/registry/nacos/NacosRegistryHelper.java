@@ -58,7 +58,7 @@ class NacosRegistryHelper {
             List<Instance> instances = new ArrayList<Instance>();
             for (ServerConfig server : servers) {
                 Instance instance = new Instance();
-                instance.setCluster(new Cluster(DEFAULT_CLUSTER));
+                instance.setClusterName(DEFAULT_CLUSTER);
 
                 // set host port
                 String host = server.getVirtualHost();

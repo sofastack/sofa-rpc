@@ -105,6 +105,7 @@ public class NacosRegistryTest extends BaseNacosTest {
 
         // 注册
         registry.register(provider);
+        Thread.sleep(1000);
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
         consumer.setInterfaceId("com.alipay.xxx.TestService")
