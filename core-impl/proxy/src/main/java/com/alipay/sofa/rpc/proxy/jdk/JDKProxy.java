@@ -41,6 +41,11 @@ public class JDKProxy implements Proxy {
     }
 
     @Override
+    public <T> T getProxyForClass(Class<T> clazz, Invoker proxyInvoker) {
+        return null;
+    }
+
+    @Override
     public Invoker getInvoker(Object proxyObject) {
         return parseInvoker(proxyObject);
     }

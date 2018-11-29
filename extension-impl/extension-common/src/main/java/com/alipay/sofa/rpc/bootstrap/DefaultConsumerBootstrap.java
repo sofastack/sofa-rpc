@@ -153,8 +153,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 // 构造Invoker对象（执行链）
                 proxyInvoker = buildClientProxyInvoker(this);
                 // 创建代理类
-                proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
-                    proxyInvoker);
+                proxyIns = buildProxy();
             } catch (Exception e) {
                 if (cluster != null) {
                     cluster.destroy();
@@ -182,6 +181,11 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     protected void checkParameters() {
 
+    }
+
+    protected T buildProxy() throws Exception {
+        return (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
+            proxyInvoker);
     }
 
     /**

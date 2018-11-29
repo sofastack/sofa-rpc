@@ -62,7 +62,7 @@
         <hessian.version>3.3.3</hessian.version>
         <resteasy.version>3.0.12.Final</resteasy.version>
         <bolt.version>1.4.6</bolt.version>
-        <tracer.version>2.1.1</tracer.version>
+        <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
     </properties>
 
@@ -146,6 +146,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-bootstrap-grpc</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-sofa-hessian</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
@@ -192,6 +197,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-resteasy</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-remoting-grpc</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
         <dependency>
@@ -353,6 +363,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-dubbo</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-rest</include>
+                                    <include>com.alipay.sofa:sofa-rpc-bootstrap-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
@@ -364,6 +375,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-remoting-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
                                     <!-- TODO -->

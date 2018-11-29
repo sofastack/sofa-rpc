@@ -14,30 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.proxy;
+package com.alipay.sofa.rpc.bootstrap.grpc;
 
-import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.bootstrap.DefaultClientProxyInvoker;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 
 /**
  *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author LiangEn.LiWei
+ * @date 2018.11.09 11:58 AM
  */
-@Extension("test")
-public class TestProxy implements Proxy {
-    @Override
-    public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
-        return null;
+public class GrpcClientProxyInvoker extends DefaultClientProxyInvoker {
+
+    public GrpcClientProxyInvoker(ConsumerBootstrap bootstrap) {
+        super(bootstrap);
     }
 
     @Override
-    public <T> T getProxyForClass(Class<T> clazz, Invoker proxyInvoker) {
-        return null;
-    }
-
-    @Override
-    public Invoker getInvoker(Object proxyObject) {
-        return null;
+    protected void cacheCommonData() {
+        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
     }
 }

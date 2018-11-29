@@ -20,6 +20,7 @@
         <module>bootstrap-dubbo</module>
         <module>bootstrap-http</module>
         <module>bootstrap-rest</module>
+        <module>bootstrap-grpc</module>
         <module>codec-protobuf</module>
         <module>codec-sofa-hessian</module>
         <module>fault-tolerance</module>
@@ -33,6 +34,7 @@
         <module>remoting-resteasy</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
+        <module>remoting-grpc</module>
     </modules>
 
     <dependencyManagement>

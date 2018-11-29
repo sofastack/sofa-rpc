@@ -14,30 +14,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.proxy;
+package com.alipay.sofa.rpc.bootstrap.grpc;
 
+import com.alipay.sofa.rpc.bootstrap.DefaultProviderBootstrap;
+import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.invoke.Invoker;
 
 /**
  *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author LiangEn.LiWei
+ * @date 2018.11.20 5:22 PM
  */
-@Extension("test")
-public class TestProxy implements Proxy {
-    @Override
-    public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
-        return null;
+@Extension("grpc")
+public class GrpcProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
+
+    /**
+     * 构造函数
+     *
+     * @param providerConfig 服务发布者配置
+     */
+    protected GrpcProviderBootstrap(ProviderConfig<T> providerConfig) {
+        super(providerConfig);
     }
 
     @Override
-    public <T> T getProxyForClass(Class<T> clazz, Invoker proxyInvoker) {
-        return null;
-    }
+    protected void checkParameters() {
 
-    @Override
-    public Invoker getInvoker(Object proxyObject) {
-        return null;
     }
 }

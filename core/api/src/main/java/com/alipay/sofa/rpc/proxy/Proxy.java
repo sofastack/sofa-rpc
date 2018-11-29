@@ -38,6 +38,15 @@ public interface Proxy {
     <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker);
 
     /**
+     * 根据类生产代理对象
+     * @param clazz
+     * @param proxyInvoker
+     * @param <T>
+     * @return
+     */
+    <T> T getProxyForClass(Class<T> clazz, final Invoker proxyInvoker);
+
+    /**
      * 从代理对象里解析Invoker
      *
      * @param proxyObject 代理对象

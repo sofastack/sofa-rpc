@@ -36,6 +36,9 @@ import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
 import javassist.LoaderClassPath;
+import javassist.util.proxy.MethodHandler;
+import javassist.util.proxy.ProxyFactory;
+import javassist.util.proxy.ProxyObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -65,6 +68,33 @@ public class JavassistProxy implements Proxy {
      * 原始类和代理类的映射
      */
     private static final Map<Class, Class> PROXY_CLASS_MAP = new ConcurrentHashMap<Class, Class>();
+
+    public <T> T getProxyForClass(Class<T> clazz, final Invoker proxyInvoker) {
+        ProxyFactory proxyFactory = new ProxyFactory();
+
+        proxyFactory.setSuperclass(clazz);
+        Class<ProxyObject> proxyClass = proxyFactory.createClass();
+
+        ProxyObject proxyObject = null;
+        try {
+            proxyObject = proxyClass.newInstance();
+            proxyObject.setHandler(new MethodHandler() {
+                @Override
+                public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable {
+                    SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(thisMethod.getDeclaringClass(),
+                        thisMethod,
+                        thisMethod.getParameterTypes(), args);
+
+                    return proxyInvoker.invoke(sofaRequest);
+
+                }
+            });
+        } catch (Exception e) {
+            throw new SofaRpcRuntimeException("", e);
+        }
+
+        return (T) proxyObject;
+    }
 
     @Override
     @SuppressWarnings("unchecked")
