@@ -45,7 +45,7 @@ import java.util.concurrent.Callable;
  */
 public abstract class FaultBaseTest {
 
-    private static final Logger                  LOGGER    = LoggerFactory.getLogger(FaultBaseTest.class);
+    protected static final Logger                LOGGER    = LoggerFactory.getLogger(FaultBaseTest.class);
 
     public static final String                   APP_NAME1 = "testApp";
     public static final String                   APP_NAME2 = "testAnotherApp";

@@ -91,7 +91,7 @@ public class RestTest extends ActivelyDestroyTest {
                 }
             }, "thread" + i);
             thread.start();
-            System.out.println("send " + i);
+            LOGGER.info("send " + i);
             try {
                 Thread.sleep(200);
             } catch (Exception ignore) {

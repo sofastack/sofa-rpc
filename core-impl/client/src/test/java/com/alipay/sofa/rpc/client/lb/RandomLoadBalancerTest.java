@@ -57,7 +57,6 @@ public class RandomLoadBalancerTest extends BaseLoadBalancerTest {
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(avg * 0.9 < cnt.get(9000 + i)
                     && avg * 1.1 > cnt.get(9000 + i)); // 随机偏差不会太大，应该不超过10%
             }
@@ -86,7 +85,6 @@ public class RandomLoadBalancerTest extends BaseLoadBalancerTest {
             }
             int per = total / count;
             for (int i = 1; i < size; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(per * i * 0.85 < cnt.get(9000 + i)
                     && per * i * 1.15 > cnt.get(9000 + i)); // 随机偏差不会太大，应该不超过15%
             }

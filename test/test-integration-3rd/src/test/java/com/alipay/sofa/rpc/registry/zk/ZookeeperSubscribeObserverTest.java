@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.client.AddressHolder;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -25,6 +24,7 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import com.alipay.sofa.rpc.test.TestUtils;
