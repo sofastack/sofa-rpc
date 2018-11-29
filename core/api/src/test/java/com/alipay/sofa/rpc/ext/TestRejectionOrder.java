@@ -14,30 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec;
+package com.alipay.sofa.rpc.ext;
 
-import com.alipay.sofa.rpc.ext.Extensible;
+import com.alipay.sofa.rpc.client.LoadBalancer;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- * Compressor
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * 测试 https://github.com/alipay/sofa-rpc/issues/367
  */
-@Extensible(coded = true)
-public interface Compressor {
-    /**
-     * 字节数组压缩
-     *
-     * @param src 未压缩的字节数组
-     * @return 压缩后的字节数组
-     */
-    byte[] compress(byte[] src);
+public class TestRejectionOrder {
 
-    /**
-     * 字节数组解压缩
-     *
-     * @param src 压缩后的源字节数组
-     * @return 解压缩后的字节数组
-     */
-    byte[] deCompress(byte[] src);
+    @Test
+    public void testRejection() {
+        boolean error = true;
+        ExtensionLoader<LoadBalancer> loader = new ExtensionLoader<LoadBalancer>(LoadBalancer.class, false, null);
+        loader.loadFromFile("META-INF/ext5/");
+        try {
+            loader.getExtension("lb3");
+        } catch (Exception e) {
+            error = false;
+        }
+        Assert.assertTrue(error);
+    }
 }

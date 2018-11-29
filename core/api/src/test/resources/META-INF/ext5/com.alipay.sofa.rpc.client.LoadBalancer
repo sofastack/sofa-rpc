@@ -1,0 +1,3 @@
+lb1=com.alipay.sofa.rpc.ext.RejectionLB1
+lb3=com.alipay.sofa.rpc.ext.RejectionLB3
+lb2=com.alipay.sofa.rpc.ext.RejectionLB2

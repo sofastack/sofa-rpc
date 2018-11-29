@@ -32,7 +32,7 @@ public interface SofaResponseCallback<T> {
      * @param methodName the invoked method
      * @param request the invoked request object
      */
-    public void onAppResponse(Object appResponse, String methodName, RequestBase request);
+    void onAppResponse(Object appResponse, String methodName, RequestBase request);
 
     /**
      * SOFA RPC will callback this method when server meet exception
@@ -41,7 +41,7 @@ public interface SofaResponseCallback<T> {
      * @param methodName the invoked method
      * @param request the invoked request
      */
-    public void onAppException(Throwable throwable, String methodName, RequestBase request);
+    void onAppException(Throwable throwable, String methodName, RequestBase request);
 
     /**
      * SOFA RPC will callback this method when framework meet exception
@@ -50,5 +50,5 @@ public interface SofaResponseCallback<T> {
      * @param methodName the invoked method
      * @param request the invoked request object
      */
-    public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request);
+    void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request);
 }
