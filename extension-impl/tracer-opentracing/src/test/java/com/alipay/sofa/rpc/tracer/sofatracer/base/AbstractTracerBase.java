@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.tracer.sofatracer.base;
 
-import com.alipay.common.tracer.core.appender.TracerLogRootDeamon;
+import com.alipay.common.tracer.core.appender.TracerLogRootDaemon;
 import com.alipay.common.tracer.core.appender.manager.AsyncCommonDigestAppenderManager;
 import com.alipay.common.tracer.core.reporter.digest.manager.SofaTracerDigestReporterAsyncManager;
 import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterCycleTimesManager;
@@ -40,7 +40,7 @@ import java.util.Map;
  */
 public abstract class AbstractTracerBase {
 
-    protected final static String logDirectory = TracerLogRootDeamon.LOG_FILE_DIR;
+    protected final static String logDirectory = TracerLogRootDaemon.LOG_FILE_DIR;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
