@@ -80,7 +80,6 @@ public class BeanSerializerTest {
         error = false;
         try {
             Map map = (Map) BeanSerializer.serialize(bean, true);
-            //System.out.println(map);
             Assert.assertEquals(map.get("Name"), "zzzgg");
             Assert.assertEquals(map.get("Sex"), true);
             Assert.assertEquals(map.get("age"), 111);
@@ -89,7 +88,6 @@ public class BeanSerializerTest {
             Assert.assertTrue(map.containsKey(JSON.CLASS_KEY));
 
             map = (Map) BeanSerializer.serialize(bean);
-            //System.out.println(map);
             Assert.assertEquals(map.get("Name"), "zzzgg");
             Assert.assertEquals(map.get("Sex"), true);
             Assert.assertEquals(map.get("age"), 111);

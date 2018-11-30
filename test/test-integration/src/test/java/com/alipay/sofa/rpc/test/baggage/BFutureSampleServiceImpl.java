@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
@@ -31,11 +33,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class BFutureSampleServiceImpl implements SampleService {
 
-    private SampleService sampleServiceC;
+    private final static Logger LOGGER = LoggerFactory.getLogger(BFutureSampleServiceImpl.class);
 
-    private SampleService sampleServiceD;
+    private SampleService       sampleServiceC;
 
-    private String        reqBaggage;
+    private SampleService       sampleServiceD;
+
+    private String              reqBaggage;
 
     public BFutureSampleServiceImpl(SampleService sampleServiceC, SampleService sampleServiceD) {
         this.sampleServiceC = sampleServiceC;
@@ -45,7 +49,7 @@ public class BFutureSampleServiceImpl implements SampleService {
     @Override
     public String hello() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("--b1-----:" + context);
+        LOGGER.info("--b1-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageB", "b2aaa");
@@ -70,7 +74,7 @@ public class BFutureSampleServiceImpl implements SampleService {
     @Override
     public EchoResponse echoObj(EchoRequest req) {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("--b1-----:" + context);
+        LOGGER.info("--b1-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageB", "b2aaa");
