@@ -14,24 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.base;
-
-import java.io.IOException;
-
-import org.apache.curator.test.TestingServer;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+package com.alipay.sofa.rpc.registry.base;
 
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import org.apache.curator.test.TestingServer;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
+
+import java.io.IOException;
 
 /**
  * @author bystander
  * @version $Id: BaseZkTest.java, v 0.1 2018年05月22日 7:55 PM bystander Exp $
  */
 public abstract class BaseZkTest {
+
+    protected final static Logger  LOGGER = LoggerFactory.getLogger(BaseZkTest.class);
+
     protected static TestingServer server = null;
 
     @BeforeClass

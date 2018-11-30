@@ -48,6 +48,7 @@ import static org.junit.Assert.assertTrue;
  * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class RpcClientStatTest extends AbstractTracerBase {
+
     private MemoryReporterImpl memoryReporter;
 
     @Before
@@ -116,7 +117,7 @@ public class RpcClientStatTest extends AbstractTracerBase {
 
             Map<StatKey, StatValues> datas = memoryReporter.getStoreDatas();
 
-            System.out.println("1" + datas);
+            LOGGER.info("1" + datas);
 
             Assert.assertEquals(1, datas.size());
 
@@ -139,7 +140,7 @@ public class RpcClientStatTest extends AbstractTracerBase {
                 rpcSofaTracer.clientReceived(request, response, null);
             }
 
-            System.out.println("2" + datas);
+            LOGGER.info("2" + datas);
 
             int i = 0;
             for (Map.Entry entry : datas.entrySet()) {
