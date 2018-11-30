@@ -115,7 +115,7 @@ public class TracerChecker {
      */
     public static boolean validateTracerDigest(JSONObject jsonObject, String type, String protocol) {
 
-        System.out.println("validateField,value=" + jsonObject.toJSONString());
+        LOGGER.info("validateField,value=" + jsonObject.toJSONString());
 
         String tracerId = jsonObject.getString(RpcSpanTags.TRACERID);
         String spanId = jsonObject.getString(RpcSpanTags.SPANID);
@@ -178,8 +178,6 @@ public class TracerChecker {
     }
 
     private static boolean validateField(String... fileds) {
-
-        System.out.println("validateField,value=" + StringUtils.join(fileds, ","));
 
         LOGGER.info("validateField,value=" + StringUtils.join(fileds, ","));
 

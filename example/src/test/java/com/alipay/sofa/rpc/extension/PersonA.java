@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.extension;
 
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  *
@@ -24,8 +26,11 @@ import com.alipay.sofa.rpc.ext.Extension;
  */
 @Extension("A")
 public class PersonA implements Person {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(PersonA.class);
+
     @Override
     public void getName() {
-        System.out.println("li wei");
+        LOGGER.info("li wei");
     }
 }
