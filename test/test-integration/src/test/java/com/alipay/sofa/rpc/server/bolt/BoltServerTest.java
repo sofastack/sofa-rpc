@@ -79,17 +79,17 @@ public class BoltServerTest extends ActivelyDestroyTest {
                 @Override
                 public void run() {
                     try {
-                        System.out.println(helloService.sayHello("xxx", 22));
+                        LOGGER.info(helloService.sayHello("xxx", 22));
                         count.incrementAndGet();
                     } catch (Exception e) {
-                        System.out.println(e.getMessage());
+                        LOGGER.info(e.getMessage());
                     } finally {
                         latch.countDown();
                     }
                 }
             }, "thread" + i);
             thread.start();
-            System.out.println("send " + i);
+            LOGGER.info("send " + i);
             try {
                 Thread.sleep(100);
             } catch (Exception ignore) {
@@ -140,7 +140,7 @@ public class BoltServerTest extends ActivelyDestroyTest {
                 @Override
                 public void run() {
                     try {
-                        System.out.println(helloService.sayHello("xxx", 22));
+                        LOGGER.info(helloService.sayHello("xxx", 22));
                         count.incrementAndGet();
                     } catch (Exception e) {
                         // TODO
@@ -150,7 +150,7 @@ public class BoltServerTest extends ActivelyDestroyTest {
                 }
             }, "thread" + i);
             thread.start();
-            System.out.println("send " + i);
+            LOGGER.info("send " + i);
             try {
                 Thread.sleep(100);
             } catch (Exception ignore) {

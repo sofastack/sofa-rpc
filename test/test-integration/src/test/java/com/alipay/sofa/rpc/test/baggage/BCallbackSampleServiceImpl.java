@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
@@ -33,11 +35,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class BCallbackSampleServiceImpl implements SampleService {
 
-    private SampleService sampleServiceC;
+    private final static Logger LOGGER = LoggerFactory.getLogger(BCallbackSampleServiceImpl.class);
 
-    private SampleService sampleServiceD;
+    private SampleService       sampleServiceC;
 
-    private String        reqBaggage;
+    private SampleService       sampleServiceD;
+
+    private String              reqBaggage;
 
     public BCallbackSampleServiceImpl(SampleService sampleServiceC, SampleService sampleServiceD) {
         this.sampleServiceC = sampleServiceC;
@@ -47,7 +51,7 @@ public class BCallbackSampleServiceImpl implements SampleService {
     @Override
     public String hello() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("--b1-----:" + context);
+        LOGGER.info("--b1-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageB", "b2aaa");
@@ -107,7 +111,7 @@ public class BCallbackSampleServiceImpl implements SampleService {
     @Override
     public EchoResponse echoObj(EchoRequest req) {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("--b1-----:" + context);
+        LOGGER.info("--b1-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageB", "b2aaa");
