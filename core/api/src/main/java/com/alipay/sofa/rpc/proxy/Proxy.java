@@ -38,7 +38,7 @@ public interface Proxy {
     <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker);
 
     /**
-     * 根据类生产代理对象
+     * 根据类生成代理对象
      * @param clazz
      * @param proxyInvoker
      * @param <T>

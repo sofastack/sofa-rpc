@@ -19,18 +19,18 @@
 
 package com.alipay.sofa.rpc.model.grpc;
 
-public interface GrpcTestService_Response_StringOrBuilder extends
-                                                         // @@protoc_insertion_point(interface_extends:GrpcTestService_Response_String)
-                                                         com.google.protobuf.MessageOrBuilder {
+public interface GrpcTestService_Request_StringOrBuilder extends
+                                                        // @@protoc_insertion_point(interface_extends:GrpcTestService_Request_String)
+                                                        com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>string result = 1;</code>
+     * <code>string name = 1;</code>
      */
-    java.lang.String getResult();
+    String getName();
 
     /**
-     * <code>string result = 1;</code>
+     * <code>string name = 1;</code>
      */
     com.google.protobuf.ByteString
-            getResultBytes();
+            getNameBytes();
 }

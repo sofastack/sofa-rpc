@@ -20,51 +20,32 @@ import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ *  Util for GRPC client transport
  *
  * @author LiangEn.LiWei
  * @date 2018.11.09 4:55 PM
  */
-public class GrpcUtil {
+public class GrpcClientTransportUtil {
 
-    private final static ConcurrentHashMap<String, ManagedChannel> CACHE_ADDRESS_CHANNEL         = new ConcurrentHashMap<String, ManagedChannel>();
+    private final static ConcurrentHashMap<String, Method> CACHE_SERVICE_NEW_STUB_METHOD = new ConcurrentHashMap<String, Method>();
 
-    private final static ConcurrentHashMap<String, Method>         CACHE_SERVICE_NEW_STUB_METHOD = new ConcurrentHashMap<String, Method>();
+    private final static String                            INNER_CLASS_SEPARATE          = "$";
 
-    private final static String                                    ADDRESS_KEY_SEPARATE          = "#";
+    private final static String                            NEW_STUB_METHOD_NAME          = "newStub";
 
-    private final static String                                    INNER_CLASS_SEPARATE          = "$";
-
-    private final static String                                    NEW_STUB_METHOD_NAME          = "newStub";
-
-
-    public static Object buildStub(String serviceName, ManagedChannel channel){
-        Method method = CACHE_SERVICE_NEW_STUB_METHOD.get(serviceName);
-        if(method == null){
-            method = getNewStubMethod(serviceName);
-            CACHE_SERVICE_NEW_STUB_METHOD.put(serviceName, method);
-        }
-
-        try {
-            return method.invoke(null, channel);
-        } catch (Exception e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
-        }
-    }
-
-    public static Object getStub(String serviceName, String host, int port) {
-        String channelKey = buildChannelKey(host, port);
-        ManagedChannel channel = CACHE_ADDRESS_CHANNEL.get(channelKey);
-        if (channel == null) {
-            channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
-            CACHE_ADDRESS_CHANNEL.put(channelKey, channel);
-        }
-
+    /**
+     * Create GRPC stub
+     *
+     * @param serviceName service name
+     * @param channel the ManagedChannel
+     * @return GRPC stub
+     */
+    public static Object buildStub(String serviceName, ManagedChannel channel) {
         Method method = CACHE_SERVICE_NEW_STUB_METHOD.get(serviceName);
         if (method == null) {
             method = getNewStubMethod(serviceName);
@@ -78,10 +59,13 @@ public class GrpcUtil {
         }
     }
 
-    public static ManagedChannel getChannel(String host, int port) {
-        ManagedChannel channel = CACHE_ADDRESS_CHANNEL.get(buildChannelKey(host, port));
-
-        return channel;
+    /**
+     * Remove build method for creating GRPC stub
+     *
+     * @param serviceName service name
+     */
+    public static void removeStubMethod(String serviceName) {
+        CACHE_SERVICE_NEW_STUB_METHOD.remove(serviceName);
     }
 
     private static Method getNewStubMethod(String serviceName) {
@@ -94,9 +78,5 @@ public class GrpcUtil {
         }
 
         return null;
-    }
-
-    private static String buildChannelKey(String host, int port) {
-        return host + ADDRESS_KEY_SEPARATE + port;
     }
 }

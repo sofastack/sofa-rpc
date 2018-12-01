@@ -570,6 +570,7 @@ public class ZookeeperRegistry extends Registry {
                     pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
                         @Override
                         public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
+                            System.out.println("*****()()())" + event.getType());
                             if (LOGGER.isDebugEnabled(config.getAppName())) {
                                 LOGGER.debugWithApp(config.getAppName(),
                                     "Receive zookeeper event: " + "type=[" + event.getType() + "]");

@@ -225,22 +225,34 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      * for check fields and parameters of consumer config 
      */
     protected void checkParameters() {
-        // 检查注入的ref是否接口实现类
-        Class proxyClass = providerConfig.getProxyClass();
+        Class proxyClass = getProxyClass(providerConfig);
         String key = providerConfig.buildKey();
         T ref = providerConfig.getRef();
+
         if (!proxyClass.isInstance(ref)) {
             throw ExceptionUtils.buildRuntime("provider.ref",
                 ref == null ? "null" : ref.getClass().getName(),
                 "This is not an instance of " + providerConfig.getInterfaceId()
                     + " in provider config with key " + key + " !");
         }
-        // server 不能为空
-        if (CommonUtils.isEmpty(providerConfig.getServer())) {
+        checkServer(providerConfig.getServer(), key);
+        checkMethods(proxyClass);
+    }
+
+    protected Class getProxyClass(ProviderConfig providerConfig) {
+        return providerConfig.getProxyClass();
+    }
+
+    /**
+     * check server
+     * @param serverConfigs
+     * @param key
+     */
+    protected void checkServer(List<ServerConfig> serverConfigs, String key) {
+        if (CommonUtils.isEmpty(serverConfigs)) {
             throw ExceptionUtils.buildRuntime("server", "NULL", "Value of \"server\" is not specified in provider" +
                 " config with key " + key + " !");
         }
-        checkMethods(proxyClass);
     }
 
     /**

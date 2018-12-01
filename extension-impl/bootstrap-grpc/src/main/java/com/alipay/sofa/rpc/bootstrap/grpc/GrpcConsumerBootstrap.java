@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.proxy.Proxy;
 
 /**
+ * GRPC consumer bootstrap
  *
  * @author LiangEn.LiWei
  * @date 2018.11.09 10:39 AM
@@ -36,9 +37,9 @@ import com.alipay.sofa.rpc.proxy.Proxy;
 public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
     /**
-     * 构造函数
+     * The constructor
      *
-     * @param consumerConfig 服务消费者配置
+     * @param consumerConfig consumer config
      */
     protected GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
         super(consumerConfig);

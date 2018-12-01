@@ -41,34 +41,34 @@ public final class GrpcTestServiceGrpc {
     private GrpcTestServiceGrpc() {
     }
 
-    public static final String                                                                                                                                                      SERVICE_NAME = "GrpcTestService";
+    public static final String                                                                                        SERVICE_NAME = "GrpcTestService";
 
     // Static method descriptors that strictly reflect the proto.
-    private static volatile io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringMethod;
+    private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
             fullMethodName = SERVICE_NAME + '/' + "reqString",
-            requestType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.class,
-            responseType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String.class,
+            requestType = GrpcTestService_Request_String.class,
+            responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-    public static io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringMethod() {
-        io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringMethod;
+    public static io.grpc.MethodDescriptor<GrpcTestService_Request_String,
+            GrpcTestService_Response_String> getReqStringMethod() {
+        io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringMethod;
         if ((getReqStringMethod = GrpcTestServiceGrpc.getReqStringMethod) == null) {
             synchronized (GrpcTestServiceGrpc.class) {
                 if ((getReqStringMethod = GrpcTestServiceGrpc.getReqStringMethod) == null) {
                     GrpcTestServiceGrpc.getReqStringMethod = getReqStringMethod =
                             io.grpc.MethodDescriptor
-                                .<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> newBuilder()
+                                .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
                                 .setFullMethodName(generateFullMethodName(
                                     "GrpcTestService", "reqString"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.getDefaultInstance()))
+                                    GrpcTestService_Request_String.getDefaultInstance()))
                                 .setResponseMarshaller(
                                     io.grpc.protobuf.ProtoUtils.marshaller(
-                                        com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String
+                                        GrpcTestService_Response_String
                                             .getDefaultInstance()))
                                 .setSchemaDescriptor(new GrpcTestServiceMethodDescriptorSupplier("reqString"))
                                 .build();
@@ -78,31 +78,31 @@ public final class GrpcTestServiceGrpc {
         return getReqStringMethod;
     }
 
-    private static volatile io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStrinClientStreamMethod;
+    private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStrinClientStreamMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
             fullMethodName = SERVICE_NAME + '/' + "reqStrin_clientStream",
-            requestType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.class,
-            responseType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String.class,
+            requestType = GrpcTestService_Request_String.class,
+            responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
-    public static io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStrinClientStreamMethod() {
-        io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStrinClientStreamMethod;
+    public static io.grpc.MethodDescriptor<GrpcTestService_Request_String,
+            GrpcTestService_Response_String> getReqStrinClientStreamMethod() {
+        io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStrinClientStreamMethod;
         if ((getReqStrinClientStreamMethod = GrpcTestServiceGrpc.getReqStrinClientStreamMethod) == null) {
             synchronized (GrpcTestServiceGrpc.class) {
                 if ((getReqStrinClientStreamMethod = GrpcTestServiceGrpc.getReqStrinClientStreamMethod) == null) {
                     GrpcTestServiceGrpc.getReqStrinClientStreamMethod = getReqStrinClientStreamMethod =
                             io.grpc.MethodDescriptor
-                                .<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> newBuilder()
+                                .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
                                 .setFullMethodName(generateFullMethodName(
                                     "GrpcTestService", "reqStrin_clientStream"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.getDefaultInstance()))
+                                    GrpcTestService_Request_String.getDefaultInstance()))
                                 .setResponseMarshaller(
                                     io.grpc.protobuf.ProtoUtils.marshaller(
-                                        com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String
+                                        GrpcTestService_Response_String
                                             .getDefaultInstance()))
                                 .setSchemaDescriptor(
                                     new GrpcTestServiceMethodDescriptorSupplier("reqStrin_clientStream"))
@@ -113,31 +113,31 @@ public final class GrpcTestServiceGrpc {
         return getReqStrinClientStreamMethod;
     }
 
-    private static volatile io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringServerStreamMethod;
+    private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringServerStreamMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
             fullMethodName = SERVICE_NAME + '/' + "reqString_serverStream",
-            requestType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.class,
-            responseType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String.class,
+            requestType = GrpcTestService_Request_String.class,
+            responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
-    public static io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringServerStreamMethod() {
-        io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringServerStreamMethod;
+    public static io.grpc.MethodDescriptor<GrpcTestService_Request_String,
+            GrpcTestService_Response_String> getReqStringServerStreamMethod() {
+        io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringServerStreamMethod;
         if ((getReqStringServerStreamMethod = GrpcTestServiceGrpc.getReqStringServerStreamMethod) == null) {
             synchronized (GrpcTestServiceGrpc.class) {
                 if ((getReqStringServerStreamMethod = GrpcTestServiceGrpc.getReqStringServerStreamMethod) == null) {
                     GrpcTestServiceGrpc.getReqStringServerStreamMethod = getReqStringServerStreamMethod =
                             io.grpc.MethodDescriptor
-                                .<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> newBuilder()
+                                .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
                                 .setFullMethodName(generateFullMethodName(
                                     "GrpcTestService", "reqString_serverStream"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.getDefaultInstance()))
+                                    GrpcTestService_Request_String.getDefaultInstance()))
                                 .setResponseMarshaller(
                                     io.grpc.protobuf.ProtoUtils.marshaller(
-                                        com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String
+                                        GrpcTestService_Response_String
                                             .getDefaultInstance()))
                                 .setSchemaDescriptor(
                                     new GrpcTestServiceMethodDescriptorSupplier("reqString_serverStream"))
@@ -148,31 +148,31 @@ public final class GrpcTestServiceGrpc {
         return getReqStringServerStreamMethod;
     }
 
-    private static volatile io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringBothStreamMethod;
+    private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringBothStreamMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
             fullMethodName = SERVICE_NAME + '/' + "reqString_bothStream",
-            requestType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.class,
-            responseType = com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String.class,
+            requestType = GrpcTestService_Request_String.class,
+            responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
-    public static io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringBothStreamMethod() {
-        io.grpc.MethodDescriptor<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> getReqStringBothStreamMethod;
+    public static io.grpc.MethodDescriptor<GrpcTestService_Request_String,
+            GrpcTestService_Response_String> getReqStringBothStreamMethod() {
+        io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringBothStreamMethod;
         if ((getReqStringBothStreamMethod = GrpcTestServiceGrpc.getReqStringBothStreamMethod) == null) {
             synchronized (GrpcTestServiceGrpc.class) {
                 if ((getReqStringBothStreamMethod = GrpcTestServiceGrpc.getReqStringBothStreamMethod) == null) {
                     GrpcTestServiceGrpc.getReqStringBothStreamMethod = getReqStringBothStreamMethod =
                             io.grpc.MethodDescriptor
-                                .<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String, com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> newBuilder()
+                                .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
                                 .setFullMethodName(generateFullMethodName(
                                     "GrpcTestService", "reqString_bothStream"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.getDefaultInstance()))
+                                    GrpcTestService_Request_String.getDefaultInstance()))
                                 .setResponseMarshaller(
                                     io.grpc.protobuf.ProtoUtils.marshaller(
-                                        com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String
+                                        GrpcTestService_Response_String
                                             .getDefaultInstance()))
                                 .setSchemaDescriptor(
                                     new GrpcTestServiceMethodDescriptorSupplier("reqString_bothStream"))
@@ -212,62 +212,62 @@ public final class GrpcTestServiceGrpc {
 
         /**
          */
-        public void reqString(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request,
-                              io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public void reqString(GrpcTestService_Request_String request,
+                              io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             asyncUnimplementedUnaryCall(getReqStringMethod(), responseObserver);
         }
 
         /**
          */
-        public io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String> reqStrinClientStream(
-                                                                                                                               io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStrinClientStream(
+                                                                                                io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             return asyncUnimplementedStreamingCall(getReqStrinClientStreamMethod(), responseObserver);
         }
 
         /**
          */
-        public void reqStringServerStream(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request,
-                                          io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public void reqStringServerStream(GrpcTestService_Request_String request,
+                                          io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             asyncUnimplementedUnaryCall(getReqStringServerStreamMethod(), responseObserver);
         }
 
         /**
          */
-        public io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String> reqStringBothStream(
-                                                                                                                              io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStringBothStream(
+                                                                                               io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             return asyncUnimplementedStreamingCall(getReqStringBothStreamMethod(), responseObserver);
         }
 
-        @java.lang.Override
+        @Override
         public final io.grpc.ServerServiceDefinition bindService() {
             return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
                 .addMethod(
                     getReqStringMethod(),
                     asyncUnaryCall(
                     new MethodHandlers<
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>(
+                    GrpcTestService_Request_String,
+                    GrpcTestService_Response_String>(
                         this, METHODID_REQ_STRING)))
                 .addMethod(
                     getReqStrinClientStreamMethod(),
                     asyncClientStreamingCall(
                     new MethodHandlers<
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>(
+                    GrpcTestService_Request_String,
+                    GrpcTestService_Response_String>(
                         this, METHODID_REQ_STRIN_CLIENT_STREAM)))
                 .addMethod(
                     getReqStringServerStreamMethod(),
                     asyncServerStreamingCall(
                     new MethodHandlers<
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>(
+                    GrpcTestService_Request_String,
+                    GrpcTestService_Response_String>(
                         this, METHODID_REQ_STRING_SERVER_STREAM)))
                 .addMethod(
                     getReqStringBothStreamMethod(),
                     asyncBidiStreamingCall(
                     new MethodHandlers<
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String,
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>(
+                    GrpcTestService_Request_String,
+                    GrpcTestService_Response_String>(
                         this, METHODID_REQ_STRING_BOTH_STREAM)))
                 .build();
         }
@@ -285,7 +285,7 @@ public final class GrpcTestServiceGrpc {
             super(channel, callOptions);
         }
 
-        @java.lang.Override
+        @Override
         protected GrpcTestServiceStub build(io.grpc.Channel channel,
                                             io.grpc.CallOptions callOptions) {
             return new GrpcTestServiceStub(channel, callOptions);
@@ -293,32 +293,32 @@ public final class GrpcTestServiceGrpc {
 
         /**
          */
-        public void reqString(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request,
-                              io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public void reqString(GrpcTestService_Request_String request,
+                              io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             asyncUnaryCall(
                 getChannel().newCall(getReqStringMethod(), getCallOptions()), request, responseObserver);
         }
 
         /**
          */
-        public io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String> reqStrinClientStream(
-                                                                                                                               io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStrinClientStream(
+                                                                                                io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             return asyncClientStreamingCall(
                 getChannel().newCall(getReqStrinClientStreamMethod(), getCallOptions()), responseObserver);
         }
 
         /**
          */
-        public void reqStringServerStream(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request,
-                                          io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public void reqStringServerStream(GrpcTestService_Request_String request,
+                                          io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             asyncServerStreamingCall(
                 getChannel().newCall(getReqStringServerStreamMethod(), getCallOptions()), request, responseObserver);
         }
 
         /**
          */
-        public io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String> reqStringBothStream(
-                                                                                                                              io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> responseObserver) {
+        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStringBothStream(
+                                                                                               io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             return asyncBidiStreamingCall(
                 getChannel().newCall(getReqStringBothStreamMethod(), getCallOptions()), responseObserver);
         }
@@ -337,7 +337,7 @@ public final class GrpcTestServiceGrpc {
             super(channel, callOptions);
         }
 
-        @java.lang.Override
+        @Override
         protected GrpcTestServiceBlockingStub build(io.grpc.Channel channel,
                                                     io.grpc.CallOptions callOptions) {
             return new GrpcTestServiceBlockingStub(channel, callOptions);
@@ -345,15 +345,15 @@ public final class GrpcTestServiceGrpc {
 
         /**
          */
-        public com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String reqString(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request) {
+        public GrpcTestService_Response_String reqString(GrpcTestService_Request_String request) {
             return blockingUnaryCall(
                 getChannel(), getReqStringMethod(), getCallOptions(), request);
         }
 
         /**
          */
-        public java.util.Iterator<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> reqStringServerStream(
-                                                                                                                        com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request) {
+        public java.util.Iterator<GrpcTestService_Response_String> reqStringServerStream(
+                                                                                         GrpcTestService_Request_String request) {
             return blockingServerStreamingCall(
                 getChannel(), getReqStringServerStreamMethod(), getCallOptions(), request);
         }
@@ -371,7 +371,7 @@ public final class GrpcTestServiceGrpc {
             super(channel, callOptions);
         }
 
-        @java.lang.Override
+        @Override
         protected GrpcTestServiceFutureStub build(io.grpc.Channel channel,
                                                   io.grpc.CallOptions callOptions) {
             return new GrpcTestServiceFutureStub(channel, callOptions);
@@ -379,8 +379,8 @@ public final class GrpcTestServiceGrpc {
 
         /**
          */
-        public com.google.common.util.concurrent.ListenableFuture<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String> reqString(
-                                                                                                                                            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String request) {
+        public com.google.common.util.concurrent.ListenableFuture<GrpcTestService_Response_String> reqString(
+                                                                                                             GrpcTestService_Request_String request) {
             return futureUnaryCall(
                 getChannel().newCall(getReqStringMethod(), getCallOptions()), request);
         }
@@ -404,40 +404,40 @@ public final class GrpcTestServiceGrpc {
             this.methodId = methodId;
         }
 
-        @java.lang.Override
-        @java.lang.SuppressWarnings("unchecked")
+        @Override
+        @SuppressWarnings("unchecked")
         public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
             switch (methodId) {
                 case METHODID_REQ_STRING:
                     serviceImpl
                         .reqString(
-                            (com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String) request,
-                            (io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>) responseObserver);
+                            (GrpcTestService_Request_String) request,
+                            (io.grpc.stub.StreamObserver<GrpcTestService_Response_String>) responseObserver);
                     break;
                 case METHODID_REQ_STRING_SERVER_STREAM:
                     serviceImpl
                         .reqStringServerStream(
-                            (com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String) request,
-                            (io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>) responseObserver);
+                            (GrpcTestService_Request_String) request,
+                            (io.grpc.stub.StreamObserver<GrpcTestService_Response_String>) responseObserver);
                     break;
                 default:
                     throw new AssertionError();
             }
         }
 
-        @java.lang.Override
-        @java.lang.SuppressWarnings("unchecked")
+        @Override
+        @SuppressWarnings("unchecked")
         public io.grpc.stub.StreamObserver<Req> invoke(
                                                        io.grpc.stub.StreamObserver<Resp> responseObserver) {
             switch (methodId) {
                 case METHODID_REQ_STRIN_CLIENT_STREAM:
                     return (io.grpc.stub.StreamObserver<Req>) serviceImpl
                         .reqStrinClientStream(
-                        (io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>) responseObserver);
+                        (io.grpc.stub.StreamObserver<GrpcTestService_Response_String>) responseObserver);
                 case METHODID_REQ_STRING_BOTH_STREAM:
                     return (io.grpc.stub.StreamObserver<Req>) serviceImpl
                         .reqStringBothStream(
-                        (io.grpc.stub.StreamObserver<com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String>) responseObserver);
+                        (io.grpc.stub.StreamObserver<GrpcTestService_Response_String>) responseObserver);
                 default:
                     throw new AssertionError();
             }
@@ -451,12 +451,12 @@ public final class GrpcTestServiceGrpc {
         GrpcTestServiceBaseDescriptorSupplier() {
         }
 
-        @java.lang.Override
+        @Override
         public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-            return com.alipay.sofa.rpc.model.grpc.GrpcTestServiceProto.getDescriptor();
+            return GrpcTestServiceProto.getDescriptor();
         }
 
-        @java.lang.Override
+        @Override
         public com.google.protobuf.Descriptors.ServiceDescriptor getServiceDescriptor() {
             return getFileDescriptor().findServiceByName("GrpcTestService");
         }
@@ -478,7 +478,7 @@ public final class GrpcTestServiceGrpc {
             this.methodName = methodName;
         }
 
-        @java.lang.Override
+        @Override
         public com.google.protobuf.Descriptors.MethodDescriptor getMethodDescriptor() {
             return getServiceDescriptor().findMethodByName(methodName);
         }

@@ -37,7 +37,7 @@ public final class GrpcTestService_Request_String extends
         name_ = "";
     }
 
-    @java.lang.Override
+    @Override
     public final com.google.protobuf.UnknownFieldSet
             getUnknownFields() {
         return this.unknownFields;
@@ -49,7 +49,7 @@ public final class GrpcTestService_Request_String extends
                                                                                                        throws com.google.protobuf.InvalidProtocolBufferException {
         this();
         if (extensionRegistry == null) {
-            throw new java.lang.NullPointerException();
+            throw new NullPointerException();
         }
         int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
@@ -70,7 +70,7 @@ public final class GrpcTestService_Request_String extends
                         break;
                     }
                     case 10: {
-                        java.lang.String s = input.readStringRequireUtf8();
+                        String s = input.readStringRequireUtf8();
 
                         name_ = s;
                         break;
@@ -90,31 +90,31 @@ public final class GrpcTestService_Request_String extends
 
     public static final com.google.protobuf.Descriptors.Descriptor
             getDescriptor() {
-        return com.alipay.sofa.rpc.model.grpc.GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_descriptor;
+        return GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_descriptor;
     }
 
-    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+    protected FieldAccessorTable
             internalGetFieldAccessorTable() {
-        return com.alipay.sofa.rpc.model.grpc.GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_fieldAccessorTable
+        return GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
-                com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.class,
-                com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.Builder.class);
+                GrpcTestService_Request_String.class,
+                Builder.class);
     }
 
-    public static final int           NAME_FIELD_NUMBER = 1;
-    private volatile java.lang.Object name_;
+    public static final int NAME_FIELD_NUMBER = 1;
+    private volatile Object name_;
 
     /**
      * <code>string name = 1;</code>
      */
-    public java.lang.String getName() {
-        java.lang.Object ref = name_;
-        if (ref instanceof java.lang.String) {
-            return (java.lang.String) ref;
+    public String getName() {
+        Object ref = name_;
+        if (ref instanceof String) {
+            return (String) ref;
         } else {
             com.google.protobuf.ByteString bs =
                     (com.google.protobuf.ByteString) ref;
-            java.lang.String s = bs.toStringUtf8();
+            String s = bs.toStringUtf8();
             name_ = s;
             return s;
         }
@@ -125,11 +125,11 @@ public final class GrpcTestService_Request_String extends
      */
     public com.google.protobuf.ByteString
             getNameBytes() {
-        java.lang.Object ref = name_;
-        if (ref instanceof java.lang.String) {
+        Object ref = name_;
+        if (ref instanceof String) {
             com.google.protobuf.ByteString b =
                     com.google.protobuf.ByteString.copyFromUtf8(
-                        (java.lang.String) ref);
+                        (String) ref);
             name_ = b;
             return b;
         } else {
@@ -172,15 +172,15 @@ public final class GrpcTestService_Request_String extends
         return size;
     }
 
-    @java.lang.Override
-    public boolean equals(final java.lang.Object obj) {
+    @Override
+    public boolean equals(final Object obj) {
         if (obj == this) {
             return true;
         }
-        if (!(obj instanceof com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String)) {
+        if (!(obj instanceof GrpcTestService_Request_String)) {
             return super.equals(obj);
         }
-        com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String other = (com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String) obj;
+        GrpcTestService_Request_String other = (GrpcTestService_Request_String) obj;
 
         boolean result = true;
         result = result && getName()
@@ -189,7 +189,7 @@ public final class GrpcTestService_Request_String extends
         return result;
     }
 
-    @java.lang.Override
+    @Override
     public int hashCode() {
         if (memoizedHashCode != 0) {
             return memoizedHashCode;
@@ -203,82 +203,82 @@ public final class GrpcTestService_Request_String extends
         return hash;
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          java.nio.ByteBuffer data)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           java.nio.ByteBuffer data)
         throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          java.nio.ByteBuffer data,
-                                                                                          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           java.nio.ByteBuffer data,
+                                                           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          com.google.protobuf.ByteString data)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           com.google.protobuf.ByteString data)
         throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          com.google.protobuf.ByteString data,
-                                                                                          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           com.google.protobuf.ByteString data,
+                                                           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(byte[] data)
+    public static GrpcTestService_Request_String parseFrom(byte[] data)
         throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          byte[] data,
-                                                                                          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           byte[] data,
+                                                           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
         return PARSER.parseFrom(data, extensionRegistry);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(java.io.InputStream input)
+    public static GrpcTestService_Request_String parseFrom(java.io.InputStream input)
         throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          java.io.InputStream input,
-                                                                                          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           java.io.InputStream input,
+                                                           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseDelimitedFrom(java.io.InputStream input)
+    public static GrpcTestService_Request_String parseDelimitedFrom(java.io.InputStream input)
         throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseDelimitedWithIOException(PARSER, input);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseDelimitedFrom(
-                                                                                                   java.io.InputStream input,
-                                                                                                   com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    public static GrpcTestService_Request_String parseDelimitedFrom(
+                                                                    java.io.InputStream input,
+                                                                    com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          com.google.protobuf.CodedInputStream input)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           com.google.protobuf.CodedInputStream input)
         throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input);
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parseFrom(
-                                                                                          com.google.protobuf.CodedInputStream input,
-                                                                                          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+    public static GrpcTestService_Request_String parseFrom(
+                                                           com.google.protobuf.CodedInputStream input,
+                                                           com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
         return com.google.protobuf.GeneratedMessageV3
             .parseWithIOException(PARSER, input, extensionRegistry);
@@ -292,7 +292,7 @@ public final class GrpcTestService_Request_String extends
         return DEFAULT_INSTANCE.toBuilder();
     }
 
-    public static Builder newBuilder(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String prototype) {
+    public static Builder newBuilder(GrpcTestService_Request_String prototype) {
         return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
     }
 
@@ -301,9 +301,9 @@ public final class GrpcTestService_Request_String extends
             ? new Builder() : new Builder().mergeFrom(this);
     }
 
-    @java.lang.Override
+    @Override
     protected Builder newBuilderForType(
-                                        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                                        BuilderParent parent) {
         Builder builder = new Builder(parent);
         return builder;
     }
@@ -315,18 +315,18 @@ public final class GrpcTestService_Request_String extends
                                      com.google.protobuf.GeneratedMessageV3.Builder<Builder>
                                                                                             implements
                                                                                             // @@protoc_insertion_point(builder_implements:GrpcTestService_Request_String)
-                                                                                            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_StringOrBuilder {
+                                                                                            GrpcTestService_Request_StringOrBuilder {
         public static final com.google.protobuf.Descriptors.Descriptor
                 getDescriptor() {
-            return com.alipay.sofa.rpc.model.grpc.GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_descriptor;
+            return GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_descriptor;
         }
 
-        protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        protected FieldAccessorTable
                 internalGetFieldAccessorTable() {
-            return com.alipay.sofa.rpc.model.grpc.GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_fieldAccessorTable
+            return GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_fieldAccessorTable
                 .ensureFieldAccessorsInitialized(
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.class,
-                    com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.Builder.class);
+                    GrpcTestService_Request_String.class,
+                    Builder.class);
         }
 
         // Construct using com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.newBuilder()
@@ -335,7 +335,7 @@ public final class GrpcTestService_Request_String extends
         }
 
         private Builder(
-                        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+                        BuilderParent parent) {
             super(parent);
             maybeForceBuilderInitialization();
         }
@@ -354,23 +354,23 @@ public final class GrpcTestService_Request_String extends
 
         public com.google.protobuf.Descriptors.Descriptor
                 getDescriptorForType() {
-            return com.alipay.sofa.rpc.model.grpc.GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_descriptor;
+            return GrpcTestServiceProto.internal_static_GrpcTestService_Request_String_descriptor;
         }
 
-        public com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String getDefaultInstanceForType() {
-            return com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.getDefaultInstance();
+        public GrpcTestService_Request_String getDefaultInstanceForType() {
+            return GrpcTestService_Request_String.getDefaultInstance();
         }
 
-        public com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String build() {
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String result = buildPartial();
+        public GrpcTestService_Request_String build() {
+            GrpcTestService_Request_String result = buildPartial();
             if (!result.isInitialized()) {
                 throw newUninitializedMessageException(result);
             }
             return result;
         }
 
-        public com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String buildPartial() {
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String result = new com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String(
+        public GrpcTestService_Request_String buildPartial() {
+            GrpcTestService_Request_String result = new GrpcTestService_Request_String(
                 this);
             result.name_ = name_;
             onBuilt();
@@ -383,7 +383,7 @@ public final class GrpcTestService_Request_String extends
 
         public Builder setField(
                                 com.google.protobuf.Descriptors.FieldDescriptor field,
-                                java.lang.Object value) {
+                                Object value) {
             return (Builder) super.setField(field, value);
         }
 
@@ -399,27 +399,27 @@ public final class GrpcTestService_Request_String extends
 
         public Builder setRepeatedField(
                                         com.google.protobuf.Descriptors.FieldDescriptor field,
-                                        int index, java.lang.Object value) {
+                                        int index, Object value) {
             return (Builder) super.setRepeatedField(field, index, value);
         }
 
         public Builder addRepeatedField(
                                         com.google.protobuf.Descriptors.FieldDescriptor field,
-                                        java.lang.Object value) {
+                                        Object value) {
             return (Builder) super.addRepeatedField(field, value);
         }
 
         public Builder mergeFrom(com.google.protobuf.Message other) {
-            if (other instanceof com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String) {
-                return mergeFrom((com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String) other);
+            if (other instanceof GrpcTestService_Request_String) {
+                return mergeFrom((GrpcTestService_Request_String) other);
             } else {
                 super.mergeFrom(other);
                 return this;
             }
         }
 
-        public Builder mergeFrom(com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String other) {
-            if (other == com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String.getDefaultInstance())
+        public Builder mergeFrom(GrpcTestService_Request_String other) {
+            if (other == GrpcTestService_Request_String.getDefaultInstance())
                 return this;
             if (!other.getName().isEmpty()) {
                 name_ = other.name_;
@@ -438,11 +438,11 @@ public final class GrpcTestService_Request_String extends
                                  com.google.protobuf.CodedInputStream input,
                                  com.google.protobuf.ExtensionRegistryLite extensionRegistry)
             throws java.io.IOException {
-            com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String parsedMessage = null;
+            GrpcTestService_Request_String parsedMessage = null;
             try {
                 parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
             } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-                parsedMessage = (com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String) e
+                parsedMessage = (GrpcTestService_Request_String) e
                     .getUnfinishedMessage();
                 throw e.unwrapIOException();
             } finally {
@@ -453,21 +453,21 @@ public final class GrpcTestService_Request_String extends
             return this;
         }
 
-        private java.lang.Object name_ = "";
+        private Object name_ = "";
 
         /**
          * <code>string name = 1;</code>
          */
-        public java.lang.String getName() {
-            java.lang.Object ref = name_;
-            if (!(ref instanceof java.lang.String)) {
+        public String getName() {
+            Object ref = name_;
+            if (!(ref instanceof String)) {
                 com.google.protobuf.ByteString bs =
                         (com.google.protobuf.ByteString) ref;
-                java.lang.String s = bs.toStringUtf8();
+                String s = bs.toStringUtf8();
                 name_ = s;
                 return s;
             } else {
-                return (java.lang.String) ref;
+                return (String) ref;
             }
         }
 
@@ -476,11 +476,11 @@ public final class GrpcTestService_Request_String extends
          */
         public com.google.protobuf.ByteString
                 getNameBytes() {
-            java.lang.Object ref = name_;
+            Object ref = name_;
             if (ref instanceof String) {
                 com.google.protobuf.ByteString b =
                         com.google.protobuf.ByteString.copyFromUtf8(
-                            (java.lang.String) ref);
+                            (String) ref);
                 name_ = b;
                 return b;
             } else {
@@ -492,7 +492,7 @@ public final class GrpcTestService_Request_String extends
          * <code>string name = 1;</code>
          */
         public Builder setName(
-                               java.lang.String value) {
+                               String value) {
             if (value == null) {
                 throw new NullPointerException();
             }
@@ -541,12 +541,12 @@ public final class GrpcTestService_Request_String extends
     }
 
     // @@protoc_insertion_point(class_scope:GrpcTestService_Request_String)
-    private static final com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String DEFAULT_INSTANCE;
+    private static final GrpcTestService_Request_String DEFAULT_INSTANCE;
     static {
-        DEFAULT_INSTANCE = new com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String();
+        DEFAULT_INSTANCE = new GrpcTestService_Request_String();
     }
 
-    public static com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String getDefaultInstance() {
+    public static GrpcTestService_Request_String getDefaultInstance() {
         return DEFAULT_INSTANCE;
     }
 
@@ -565,12 +565,12 @@ public final class GrpcTestService_Request_String extends
         return PARSER;
     }
 
-    @java.lang.Override
+    @Override
     public com.google.protobuf.Parser<GrpcTestService_Request_String> getParserForType() {
         return PARSER;
     }
 
-    public com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String getDefaultInstanceForType() {
+    public GrpcTestService_Request_String getDefaultInstanceForType() {
         return DEFAULT_INSTANCE;
     }
 

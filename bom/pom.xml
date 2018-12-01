@@ -21,7 +21,7 @@
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo.version>2.4.10</dubbo.version>
         <grpc.version>1.16.1</grpc.version>
-        <guava.version>22.0</guava.version>
+        <guava.version>20.0</guava.version>
         <!-- serialization -->
         <hessian.version>3.3.3</hessian.version>
         <thrift.version>0.9.2</thrift.version>

@@ -31,69 +31,8 @@ public class GrpcTestServiceImpl extends GrpcTestServiceGrpc.GrpcTestServiceImpl
     @Override
     public void reqString(GrpcTestService_Request_String request,
                           StreamObserver<GrpcTestService_Response_String> responseObserver) {
-        System.out.println("yes");
-        //try {
-        //    Thread.sleep(10000000);
-        //} catch (InterruptedException e) {
-        //    e.printStackTrace();
-        //}
-        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success").build());
+        String name = request.getName();
+        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success:" + name).build());
         responseObserver.onCompleted();
-
-    }
-
-    @Override
-    public StreamObserver<GrpcTestService_Request_String> reqStrinClientStream(final StreamObserver<GrpcTestService_Response_String> responseObserver) {
-        return new StreamObserver<GrpcTestService_Request_String>() {
-            @Override
-            public void onNext(GrpcTestService_Request_String grpcTestService_request_string) {
-                System.out.println("onNext:" + grpcTestService_request_string);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                System.out.println("onError:" + throwable.getMessage());
-            }
-
-            @Override
-            public void onCompleted() {
-                System.out.println("onCompleted");
-                responseObserver.onNext(GrpcTestService_Response_String.newBuilder().build());
-                responseObserver.onCompleted();
-            }
-        };
-    }
-
-    @Override
-    public void reqStringServerStream(GrpcTestService_Request_String request,
-                                      StreamObserver<GrpcTestService_Response_String> responseObserver) {
-        System.out.println("yes");
-
-        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().build());
-        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().build());
-        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().build());
-        responseObserver.onCompleted();
-    }
-
-    @Override
-    public StreamObserver<GrpcTestService_Request_String> reqStringBothStream(final StreamObserver<GrpcTestService_Response_String> responseObserver) {
-        return new StreamObserver<GrpcTestService_Request_String>() {
-            @Override
-            public void onNext(GrpcTestService_Request_String grpcTestService_request_string) {
-                System.out.println("both_onNext:" + grpcTestService_request_string);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                System.out.println("both_onError:" + throwable.getMessage());
-            }
-
-            @Override
-            public void onCompleted() {
-                System.out.println("both_onCompleted");
-                responseObserver.onNext(GrpcTestService_Response_String.newBuilder().build());
-                responseObserver.onCompleted();
-            }
-        };
     }
 }

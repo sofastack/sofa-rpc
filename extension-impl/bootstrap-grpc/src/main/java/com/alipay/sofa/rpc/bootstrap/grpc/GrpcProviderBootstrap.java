@@ -17,10 +17,15 @@
 package com.alipay.sofa.rpc.bootstrap.grpc;
 
 import com.alipay.sofa.rpc.bootstrap.DefaultProviderBootstrap;
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 
 /**
+ * GRPC provider bootstrap
  *
  * @author LiangEn.LiWei
  * @date 2018.11.20 5:22 PM
@@ -29,16 +34,33 @@ import com.alipay.sofa.rpc.ext.Extension;
 public class GrpcProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
 
     /**
-     * 构造函数
+     * The constructor
      *
-     * @param providerConfig 服务发布者配置
+     * @param providerConfig provider config
      */
     protected GrpcProviderBootstrap(ProviderConfig<T> providerConfig) {
         super(providerConfig);
     }
 
     @Override
-    protected void checkParameters() {
-
+    protected Class getProxyClass(ProviderConfig providerConfig) {
+        try {
+            String abstractClass = providerConfig.getInterfaceId();
+            if (StringUtils.isNotBlank(abstractClass)) {
+                Class proxyClass = ClassUtils.forName(abstractClass);
+                if (proxyClass.isInterface()) {
+                    throw ExceptionUtils.buildRuntime("GRPC service.AbstractClass",
+                        abstractClass, "GRPC service abstractClass must set abstract class, not interface class");
+                }
+                return proxyClass;
+            } else {
+                throw ExceptionUtils.buildRuntime("GRPC service.AbstractClass",
+                    "null", "abstractClass must be not null");
+            }
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
+        } catch (Throwable e) {
+            throw new SofaRpcRuntimeException(e.getMessage(), e);
+        }
     }
 }

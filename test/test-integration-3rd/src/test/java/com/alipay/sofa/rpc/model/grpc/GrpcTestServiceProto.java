@@ -44,7 +44,7 @@ public final class GrpcTestServiceProto {
 
     private static com.google.protobuf.Descriptors.FileDescriptor descriptor;
     static {
-        java.lang.String[] descriptorData = {
+        String[] descriptorData = {
             "\n\025GrpcTestService.proto\".\n\036GrpcTestServi" +
                 "ce_Request_String\022\014\n\004name\030\001 \001(\t\"1\n\037GrpcT" +
                 "estService_Response_String\022\016\n\006result\030\001 \001" +
@@ -78,13 +78,13 @@ public final class GrpcTestServiceProto {
         internal_static_GrpcTestService_Request_String_fieldAccessorTable = new
                 com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                     internal_static_GrpcTestService_Request_String_descriptor,
-                    new java.lang.String[] { "Name", });
+                    new String[] { "Name", });
         internal_static_GrpcTestService_Response_String_descriptor =
                 getDescriptor().getMessageTypes().get(1);
         internal_static_GrpcTestService_Response_String_fieldAccessorTable = new
                 com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
                     internal_static_GrpcTestService_Response_String_descriptor,
-                    new java.lang.String[] { "Result", });
+                    new String[] { "Result", });
     }
 
     // @@protoc_insertion_point(outer_class_scope)

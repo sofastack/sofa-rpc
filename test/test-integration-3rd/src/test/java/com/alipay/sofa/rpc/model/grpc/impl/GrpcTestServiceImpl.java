@@ -14,22 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.server.grpc;
+package com.alipay.sofa.rpc.model.grpc.impl;
 
-import com.alipay.sofa.rpc.config.ServerConfig;
-import org.junit.Test;
+import com.alipay.sofa.rpc.model.grpc.GrpcTestServiceGrpc;
+import com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String;
+import com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String;
+import io.grpc.stub.StreamObserver;
 
 /**
  *
  * @author LiangEn.LiWei
- * @date 2018.11.20 5:19 PM
+ * @date 2018.11.22 8:03 PM
  */
-public class GrpcServerTest {
+public class GrpcTestServiceImpl extends GrpcTestServiceGrpc.GrpcTestServiceImplBase {
 
-    @Test
-    public void start() {
-        ServerConfig serverConfig = new ServerConfig();
-        serverConfig.setPort(9090);
-        serverConfig.setProtocol("grpc");
+    @Override
+    public void reqString(GrpcTestService_Request_String request,
+                          StreamObserver<GrpcTestService_Response_String> responseObserver) {
+        String name = request.getName();
+        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success:" + name).build());
+        responseObserver.onCompleted();
     }
 }

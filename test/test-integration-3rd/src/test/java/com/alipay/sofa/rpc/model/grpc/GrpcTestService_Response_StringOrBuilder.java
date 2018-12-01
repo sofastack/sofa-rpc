@@ -26,7 +26,7 @@ public interface GrpcTestService_Response_StringOrBuilder extends
     /**
      * <code>string result = 1;</code>
      */
-    java.lang.String getResult();
+    String getResult();
 
     /**
      * <code>string result = 1;</code>

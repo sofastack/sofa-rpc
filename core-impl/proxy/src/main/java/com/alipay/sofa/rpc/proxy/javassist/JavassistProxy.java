@@ -70,10 +70,13 @@ public class JavassistProxy implements Proxy {
     private static final Map<Class, Class> PROXY_CLASS_MAP = new ConcurrentHashMap<Class, Class>();
 
     public <T> T getProxyForClass(Class<T> clazz, final Invoker proxyInvoker) {
-        ProxyFactory proxyFactory = new ProxyFactory();
-
-        proxyFactory.setSuperclass(clazz);
-        Class<ProxyObject> proxyClass = proxyFactory.createClass();
+        Class<ProxyObject> proxyClass = PROXY_CLASS_MAP.get(clazz);
+        if (proxyClass == null) {
+            ProxyFactory proxyFactory = new ProxyFactory();
+            proxyFactory.setSuperclass(clazz);
+            proxyClass = proxyFactory.createClass();
+            PROXY_CLASS_MAP.put(clazz, proxyClass);
+        }
 
         ProxyObject proxyObject = null;
         try {
@@ -82,10 +85,10 @@ public class JavassistProxy implements Proxy {
                 @Override
                 public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable {
                     SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(thisMethod.getDeclaringClass(),
-                        thisMethod,
-                        thisMethod.getParameterTypes(), args);
+                        thisMethod, thisMethod.getParameterTypes(), args);
 
-                    return proxyInvoker.invoke(sofaRequest);
+                    SofaResponse sofaResponse = proxyInvoker.invoke(sofaRequest);
+                    return sofaResponse;
 
                 }
             });
