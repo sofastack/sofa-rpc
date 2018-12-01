@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -27,6 +26,7 @@ import com.alipay.sofa.rpc.model.grpc.GrpcTestService_Request_String;
 import com.alipay.sofa.rpc.model.grpc.GrpcTestService_Response_String;
 import com.alipay.sofa.rpc.model.grpc.impl.GrpcTestServiceImpl;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import io.grpc.stub.StreamObserver;
 import org.junit.AfterClass;
 import org.junit.Assert;
