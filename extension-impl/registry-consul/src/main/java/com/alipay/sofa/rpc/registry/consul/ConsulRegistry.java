@@ -26,14 +26,24 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.ConsumerSubEvent;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
-import com.alipay.sofa.rpc.registry.consul.common.*;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulConstants;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulURLUtils;
 import com.alipay.sofa.rpc.registry.consul.internal.ConsulManager;
-import com.alipay.sofa.rpc.registry.consul.model.*;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulEphemeralNode;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulService;
+import com.alipay.sofa.rpc.registry.consul.model.ConsulServiceResp;
+import com.alipay.sofa.rpc.registry.consul.model.NotifyConsumerListner;
+import com.alipay.sofa.rpc.registry.consul.model.NotifyListener;
+import com.alipay.sofa.rpc.registry.consul.model.ThrallRoleType;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Lists;
@@ -42,7 +52,14 @@ import com.google.common.collect.Sets;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutorService;
@@ -226,6 +243,11 @@ public class ConsulRegistry extends Registry {
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to register provider to consulRegistry!", e);
             }
+
+            if (EventBus.isEnable(ProviderPubEvent.class)) {
+                ProviderPubEvent event = new ProviderPubEvent(config);
+                EventBus.post(event);
+            }
         }
     }
 
@@ -342,6 +364,11 @@ public class ConsulRegistry extends Registry {
                     consulManager.registerEphemralNode(ephemralNode);
                 } else {
                     notifyListener(consulURL, listener);
+                }
+
+                if (EventBus.isEnable(ConsumerSubEvent.class)) {
+                    ConsumerSubEvent event = new ConsumerSubEvent(config);
+                    EventBus.post(event);
                 }
 
                 return Collections.singletonList(new ProviderGroup().addAll(result));

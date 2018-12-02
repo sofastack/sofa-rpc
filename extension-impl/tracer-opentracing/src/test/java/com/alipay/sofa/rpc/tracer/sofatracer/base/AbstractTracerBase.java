@@ -22,6 +22,8 @@ import com.alipay.common.tracer.core.reporter.digest.manager.SofaTracerDigestRep
 import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterCycleTimesManager;
 import com.alipay.common.tracer.core.reporter.stat.manager.SofaTracerStatisticReporterManager;
 import com.alipay.sofa.rpc.common.utils.FileUtils;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.Tracers;
 import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
@@ -39,6 +41,8 @@ import java.util.Map;
  * @author <a href=mailto:guanchao.ygc@antfin.com>GuanChao Yang</a>
  */
 public abstract class AbstractTracerBase {
+
+    protected final static Logger LOGGER       = LoggerFactory.getLogger(AbstractTracerBase.class);
 
     protected final static String logDirectory = TracerLogRootDeamon.LOG_FILE_DIR;
 

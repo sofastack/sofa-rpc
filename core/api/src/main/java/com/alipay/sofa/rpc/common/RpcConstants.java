@@ -275,6 +275,14 @@ public class RpcConstants {
      * @since 5.4.0
      */
     public static final String  INTERNAL_KEY_CLIENT_SEND_TIME      = INTERNAL_KEY_PREFIX + "client_send_time";
+
+    /**
+     * 内部使用的key：_server_receive_time 服务端接收时间戳，long
+     *
+     * @since 5.4.8
+     */
+    public static final String  INTERNAL_KEY_SERVER_RECEIVE_TIME   = INTERNAL_KEY_PREFIX + "server_receive_time";
+
     /**
      * 内部使用的key：_router_record 路由记录，string
      */

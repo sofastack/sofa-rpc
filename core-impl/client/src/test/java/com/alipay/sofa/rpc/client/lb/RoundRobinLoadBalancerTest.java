@@ -52,8 +52,8 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
@@ -73,8 +73,8 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             // 忽略了权重
             int avg = total / size;
@@ -94,7 +94,7 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
             y = a[i + 1];
             temp = gcd(x, y);
         }
-        System.out.println(temp);
+        LOGGER.info(String.valueOf(temp));
     }
 
     public static int gcd(int a, int b) {
@@ -103,9 +103,9 @@ public class RoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
             temp = a % b;
             a = b;
             b = temp;
-            System.out.println("gcd(" + a + ", " + b + ")=");
+            LOGGER.info("gcd(" + a + ", " + b + ")=");
         }
-        System.out.println(a);
+        LOGGER.info(String.valueOf(a));
         return a;
     }
 }
