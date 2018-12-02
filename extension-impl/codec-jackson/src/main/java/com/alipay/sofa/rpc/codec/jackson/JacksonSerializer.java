@@ -57,7 +57,7 @@ import java.util.Map;
 @Extension(value = "jackson", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper  mapper        = new ObjectMapper();
 
     private JacksonHelper jacksonHelper = new JacksonHelper();
 
@@ -79,7 +79,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
-            throws SofaRpcException {
+        throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
         if (args.length > 1) {
             throw buildSerializeError("Protobuf only support one parameter!");
@@ -88,7 +88,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
-            throws SofaRpcException {
+        throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
             // 框架异常：错误则body序列化的是错误字符串
@@ -181,11 +181,11 @@ public class JacksonSerializer extends AbstractSerializer {
 
         // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
         Class requestClass = jacksonHelper.getReqClass(targetService,
-                sofaRequest.getMethodName());
+            sofaRequest.getMethodName());
 
         Object pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(new Object[]{pbReq});
-        sofaRequest.setMethodArgSigs(new String[]{requestClass.getName()});
+        sofaRequest.setMethodArgs(new Object[] { pbReq });
+        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
     }
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,
