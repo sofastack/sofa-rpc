@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.Server;
 import org.jboss.resteasy.spi.PropertyInjector;
 import org.jboss.resteasy.spi.ResteasyDeployment;
@@ -187,8 +188,9 @@ public class RestServer implements Server {
                 + serverConfig.getPort() + serverConfig.getContextPath());
         }
         try {
+            Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
             httpServer.getDeployment().getRegistry()
-                .addResourceFactory(new SofaResourceFactory(providerConfig), serverConfig.getContextPath());
+                .addResourceFactory(new SofaResourceFactory(providerConfig, obj), serverConfig.getContextPath());
 
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
