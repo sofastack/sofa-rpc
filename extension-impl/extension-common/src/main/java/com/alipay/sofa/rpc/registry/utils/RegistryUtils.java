@@ -16,6 +16,12 @@
  */
 package com.alipay.sofa.rpc.registry.utils;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
+
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
@@ -31,16 +37,14 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 /**
  * Common Utils for Registry extensions
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
 public class RegistryUtils {
+
+    private static final String JAVA = "java";
 
     /**
      * Convert provider to url.
@@ -49,6 +53,7 @@ public class RegistryUtils {
      * @return the url list
      */
     public static List<String> convertProviderToUrls(ProviderConfig providerConfig) {
+        @SuppressWarnings("unchecked")
         List<ServerConfig> servers = providerConfig.getServer();
         if (servers != null && !servers.isEmpty()) {
             List<String> urls = new ArrayList<String>();
@@ -61,32 +66,43 @@ public class RegistryUtils {
                         host = SystemInfo.getLocalHost();
                     }
                 }
+
+                Map<String, String> metaData = convertProviderToMap(providerConfig, server);
+                //noinspection unchecked
                 sb.append(server.getProtocol()).append("://").append(host).append(":")
                     .append(server.getPort()).append(server.getContextPath()).append("?version=1.0")
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, providerConfig.getUniqueId()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, providerConfig.getInterfaceId()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
-                    .append(getKeyPairs("delay", providerConfig.getDelay()))
-                    .append(getKeyPairs("id", providerConfig.getId()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
-                    .append(getKeyPairs("accepts", server.getAccepts()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()))
-                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
-                        providerConfig.getSerialization()))
-                    .append(convertMap2Pair(providerConfig.getParameters()));
-                addCommonAttrs(sb);
+                    .append(convertMap2Pair(metaData));
                 urls.add(sb.toString());
             }
             return urls;
         }
         return null;
+    }
+
+    public static Map<String, String> convertProviderToMap(ProviderConfig providerConfig, ServerConfig server) {
+        Map<String, String> metaData = new HashMap<String, String>();
+        metaData.put(RpcConstants.CONFIG_KEY_UNIQUEID, providerConfig.getUniqueId());
+        metaData.put(RpcConstants.CONFIG_KEY_INTERFACE, providerConfig.getInterfaceId());
+        metaData.put(RpcConstants.CONFIG_KEY_TIMEOUT, String.valueOf(providerConfig.getTimeout()));
+        metaData.put(RpcConstants.CONFIG_KEY_DELAY, String.valueOf(providerConfig.getDelay()));
+        metaData.put(RpcConstants.CONFIG_KEY_ID, providerConfig.getId());
+        metaData.put(RpcConstants.CONFIG_KEY_DYNAMIC, String.valueOf(providerConfig.isDynamic()));
+        metaData.put(ProviderInfoAttrs.ATTR_WEIGHT, String.valueOf(providerConfig.getWeight()));
+        metaData.put(RpcConstants.CONFIG_KEY_ACCEPTS, String.valueOf(server.getAccepts()));
+        metaData.put(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(RpcRuntimeContext.now()));
+        metaData.put(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName());
+        metaData.put(RpcConstants.CONFIG_KEY_SERIALIZATION, providerConfig.getSerialization());
+        metaData.put(RpcConstants.CONFIG_KEY_PROTOCOL, server.getProtocol());
+        if (null != providerConfig.getParameters()) {
+            //noinspection unchecked
+            metaData.putAll(providerConfig.getParameters());
+        }
+
+        // add common attr
+        metaData.put(RpcConstants.CONFIG_KEY_LANGUAGE, JAVA);
+        metaData.put(RpcConstants.CONFIG_KEY_PID, RpcRuntimeContext.PID);
+        metaData.put(RpcConstants.CONFIG_KEY_RPC_VERSION, String.valueOf(Version.RPC_VERSION));
+        return metaData;
     }
 
     /**
@@ -98,11 +114,12 @@ public class RegistryUtils {
     public static String convertConsumerToUrl(ConsumerConfig consumerConfig) {
         StringBuilder sb = new StringBuilder(200);
         String host = SystemInfo.getLocalHost();
+        //noinspection unchecked
         sb.append(consumerConfig.getProtocol()).append("://").append(host).append("?version=1.0")
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, consumerConfig.getUniqueId()))
-            .append(getKeyPairs("pid", RpcRuntimeContext.PID))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_PID, RpcRuntimeContext.PID))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
-            .append(getKeyPairs("id", consumerConfig.getId()))
+            .append(getKeyPairs(RpcConstants.CONFIG_KEY_ID, consumerConfig.getId()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, consumerConfig.getInterfaceId()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
@@ -135,8 +152,8 @@ public class RegistryUtils {
      * @param sb 属性
      */
     private static void addCommonAttrs(StringBuilder sb) {
-        sb.append(getKeyPairs("pid", RpcRuntimeContext.PID));
-        sb.append(getKeyPairs("language", "java"));
+        sb.append(getKeyPairs(RpcConstants.CONFIG_KEY_PID, RpcRuntimeContext.PID));
+        sb.append(getKeyPairs(RpcConstants.CONFIG_KEY_LANGUAGE, JAVA));
         sb.append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION + ""));
     }
 
@@ -172,11 +189,11 @@ public class RegistryUtils {
     }
 
     /**
-     * Read the warmup weight parameter,
+     * Read the warmUp weight parameter,
      * decide whether to switch the state to the preheating period,
      * and set the corresponding parameters during the preheating period.
      *
-     * @param providerInfo
+     * @param providerInfo the provider info
      */
     public static void processWarmUpWeight(ProviderInfo providerInfo) {
 
@@ -184,8 +201,8 @@ public class RegistryUtils {
         String warmupWeightStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
         String startTimeStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME);
 
-        if (StringUtils.isNotBlank(warmupTimeStr) && StringUtils.isNotBlank(warmupWeightStr)
-            && StringUtils.isNotBlank(startTimeStr)) {
+        if (StringUtils.isNotBlank(warmupTimeStr) && StringUtils.isNotBlank(warmupWeightStr) &&
+            StringUtils.isNotBlank(startTimeStr)) {
 
             long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
             int warmupWeight = CommonUtils.parseInt(warmupWeightStr,
@@ -203,5 +220,30 @@ public class RegistryUtils {
         providerInfo.getStaticAttrs().remove(ProviderInfoAttrs.ATTR_WARMUP_TIME);
         providerInfo.getStaticAttrs().remove(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT);
 
+    }
+
+    /**
+     * Init or add list.
+     *
+     * @param <K>
+     *         the key parameter
+     * @param <V>
+     *         the value parameter
+     * @param orginMap
+     *         the orgin map
+     * @param key
+     *         the key
+     * @param needAdd
+     *         the need add
+     */
+    public static <K, V> void initOrAddList(Map<K, List<V>> orginMap, K key, V needAdd) {
+        List<V> listeners = orginMap.get(key);
+        if (listeners == null) {
+            listeners = new CopyOnWriteArrayList<V>();
+            listeners.add(needAdd);
+            orginMap.put(key, listeners);
+        } else {
+            listeners.add(needAdd);
+        }
     }
 }
