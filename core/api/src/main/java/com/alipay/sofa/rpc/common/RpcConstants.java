@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.common;
 
-import java.nio.charset.Charset;
-
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
+
+import java.nio.charset.Charset;
 
 /**
  * Rpc Constants
@@ -416,6 +416,35 @@ public class RpcConstants {
      */
     public static final String  CONFIG_KEY_LOADBALANCER            = "loadBalancer";
 
+    /**
+     * 配置key:delay
+     */
+    public static final String  CONFIG_KEY_DELAY                   = "delay";
+
+    /**
+     * 配置key:id
+     */
+    public static final String  CONFIG_KEY_ID                      = "id";
+
+    /**
+     * 配置key:accepts
+     */
+    public static final String  CONFIG_KEY_ACCEPTS                 = "accepts";
+
+    /**
+     * 配置key:pid
+     */
+    public static final String  CONFIG_KEY_PID                     = "pid";
+
+    /**
+     * 配置key:language
+     */
+    public static final String  CONFIG_KEY_LANGUAGE                = "language";
+
+    /**
+     * 配置key:protocol
+     */
+    public static final String  CONFIG_KEY_PROTOCOL                = "protocol";
     /*--------配置项相关结束---------*/
 
     /*--------客户端相关开始---------*/

@@ -22,6 +22,8 @@ import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
+
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.util.List;
@@ -34,7 +36,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
+public class ZookeeperConfigObserver {
 
     /**
      * slf4j Logger for this class
@@ -55,7 +57,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
      */
     public void addConfigListener(AbstractInterfaceConfig config, ConfigListener listener) {
         if (listener != null) {
-            initOrAddList(configListenerMap, config, listener);
+            RegistryUtils.initOrAddList(configListenerMap, config, listener);
         }
     }
 
