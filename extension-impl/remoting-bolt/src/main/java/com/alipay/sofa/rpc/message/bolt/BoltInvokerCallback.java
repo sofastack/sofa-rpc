@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.message.bolt;
 
+import com.alipay.remoting.rpc.exception.InvokeTimeoutException;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
@@ -23,6 +24,7 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -136,8 +138,14 @@ public class BoltInvokerCallback extends AbstractInvokeCallback {
                 EventBus.post(new ClientEndInvokeEvent(request, null, e));
             }
 
-            SofaRpcException sofaRpcException = new SofaRpcException(
-                RpcErrorType.SERVER_UNDECLARED_ERROR, e.getMessage(), e);
+            //judge is timeout or others
+            SofaRpcException sofaRpcException = null;
+            if (e instanceof InvokeTimeoutException) {
+                sofaRpcException = new SofaTimeOutException(e);
+            } else {
+                sofaRpcException = new SofaRpcException(
+                    RpcErrorType.SERVER_UNDECLARED_ERROR, e.getMessage(), e);
+            }
             callback.onSofaException(sofaRpcException, request.getMethodName(), request);
         } finally {
             Thread.currentThread().setContextClassLoader(cl);

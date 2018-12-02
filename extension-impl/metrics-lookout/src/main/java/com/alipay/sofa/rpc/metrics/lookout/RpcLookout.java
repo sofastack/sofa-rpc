@@ -25,6 +25,8 @@ import com.alipay.lookout.api.Timer;
 import com.alipay.lookout.api.composite.MixinMetric;
 import com.alipay.lookout.api.info.Info;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -102,7 +104,7 @@ public class RpcLookout {
 
             final ThreadPoolConfig threadPoolConfig = new ThreadPoolConfig(coreSize, maxSize, queueSize);
 
-            Lookout.registry().info(rpcLookoutId.getServerThreadConfigId(serverConfig), new Info<ThreadPoolConfig>() {
+            Lookout.registry().info(rpcLookoutId.fetchServerThreadConfigId(serverConfig), new Info<ThreadPoolConfig>() {
 
                 @Override
                 public ThreadPoolConfig value() {
@@ -110,15 +112,16 @@ public class RpcLookout {
                 }
             });
 
-            Lookout.registry().gauge(rpcLookoutId.getServerThreadPoolActiveCountId(serverConfig), new Gauge<Integer>() {
+            Lookout.registry().gauge(rpcLookoutId.fetchServerThreadPoolActiveCountId(serverConfig),
+                new Gauge<Integer>() {
 
-                @Override
-                public Integer value() {
-                    return threadPoolExecutor.getActiveCount();
-                }
-            });
+                    @Override
+                    public Integer value() {
+                        return threadPoolExecutor.getActiveCount();
+                    }
+                });
 
-            Lookout.registry().gauge(rpcLookoutId.getServerThreadPoolIdleCountId(serverConfig), new Gauge<Integer>() {
+            Lookout.registry().gauge(rpcLookoutId.fetchServerThreadPoolIdleCountId(serverConfig), new Gauge<Integer>() {
 
                 @Override
                 public Integer value() {
@@ -126,7 +129,7 @@ public class RpcLookout {
                 }
             });
 
-            Lookout.registry().gauge(rpcLookoutId.getServerThreadPoolQueueSizeId(serverConfig), new Gauge<Integer>() {
+            Lookout.registry().gauge(rpcLookoutId.fetchServerThreadPoolQueueSizeId(serverConfig), new Gauge<Integer>() {
 
                 @Override
                 public Integer value() {
@@ -217,7 +220,7 @@ public class RpcLookout {
         tags.put("invoke_type", StringUtils.defaultString(model.getInvokeType()));
         tags.put("target_app", StringUtils.defaultString(model.getTargetApp()));
 
-        return rpcLookoutId.getConsumerId().withTags(tags);
+        return rpcLookoutId.fetchConsumerStatId().withTags(tags);
     }
 
     /**
@@ -235,7 +238,47 @@ public class RpcLookout {
         tags.put("protocol", StringUtils.defaultString(model.getProtocol()));
         tags.put("caller_app", StringUtils.defaultString(model.getCallerApp()));
 
-        return rpcLookoutId.getProviderId().withTags(tags);
+        return rpcLookoutId.fetchProviderStatId().withTags(tags);
+    }
+
+    /**
+     * Collect the RPC client information.
+     *
+     * @param providerConfig client information model
+     */
+    public void collectProvderPubInfo(final ProviderConfig providerConfig) {
+
+        try {
+            Id providerConfigId = rpcLookoutId.fetchProviderPubId();
+            Lookout.registry().info(providerConfigId, new Info<ProviderConfig>() {
+                @Override
+                public ProviderConfig value() {
+                    return providerConfig;
+                }
+            });
+        } catch (Throwable t) {
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_METRIC_REPORT_ERROR), t);
+        }
+    }
+
+    /**
+     * Collect the RPC client information.
+     *
+     * @param consumerConfig client information model
+     */
+    public void collectConsumerSubInfo(final ConsumerConfig consumerConfig) {
+
+        try {
+            Id consumerConfigId = rpcLookoutId.fetchConsumerSubId();
+            Lookout.registry().info(consumerConfigId, new Info<ConsumerConfig>() {
+                @Override
+                public ConsumerConfig value() {
+                    return consumerConfig;
+                }
+            });
+        } catch (Throwable t) {
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_METRIC_REPORT_ERROR), t);
+        }
     }
 
     /**
