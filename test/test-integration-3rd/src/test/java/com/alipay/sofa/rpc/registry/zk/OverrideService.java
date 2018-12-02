@@ -18,8 +18,8 @@ package com.alipay.sofa.rpc.registry.zk;
 
 /**
  *
- * @author zhuoyu.sjw
- * @version $Id: OverrideService.java, v 0.1 2018-06-16 09:45 zhuoyu.sjw Exp $$
+ * @author JervyShi
+ * @version $Id: OverrideService.java, v 0.1 2018-06-16 09:45 JervyShi Exp $$
  */
 public interface OverrideService {
 
