@@ -32,6 +32,15 @@ public class DefaultProviderBootstrapTest {
     }
 
     @Test
+    public void includeMultiListTest() {
+
+        ProviderConfig providerConfig = new ProviderConfig();
+        DefaultProviderBootstrap defaultProviderBootstra = new DefaultProviderBootstrap(providerConfig);
+        boolean result = defaultProviderBootstra.inList("hello1,hello3", "hello1,hello2,hello4", "hello1");
+        Assert.assertTrue(!result);
+    }
+
+    @Test
     public void excludeListTest() {
 
         ProviderConfig providerConfig = new ProviderConfig();
