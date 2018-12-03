@@ -14,11 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.base;
+package com.alipay.sofa.rpc.registry.nacos.base;
 
-import java.io.IOException;
-
-import org.apache.curator.test.TestingServer;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 
@@ -28,37 +25,27 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 
 /**
- * @author bystander
- * @version $Id: BaseZkTest.java, v 0.1 2018年05月22日 7:55 PM bystander Exp $
+ * The type Base nacos test.
+ * @author  <a href=mailto:jervyshi@gmail.com>JervyShi</a>  
+ * @version $Id : BaseNacosTest.java, v 0.1 2018-10-06 17:18 JervyShi Exp $$
  */
-public abstract class BaseZkTest {
-    protected static TestingServer server = null;
+public abstract class BaseNacosTest {
 
+    /**
+     * Ad before class.
+     */
     @BeforeClass
     public static void adBeforeClass() {
         RpcRunningState.setUnitTestMode(true);
-
-        try {
-            server = new TestingServer(2181, true);
-            server.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
+    /**
+     * Ad after class.
+     */
     @AfterClass
     public static void adAfterClass() {
         RpcRuntimeContext.destroy();
         RpcInternalContext.removeContext();
         RpcInvokeContext.removeContext();
-
-        if (server != null) {
-            try {
-                server.stop();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
     }
-
 }

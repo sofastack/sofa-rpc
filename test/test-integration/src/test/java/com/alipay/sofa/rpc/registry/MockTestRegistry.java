@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.registry;
+package com.alipay.sofa.rpc.registry;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
@@ -34,7 +34,6 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.registry.Registry;
 
 import java.util.ArrayList;
 import java.util.List;

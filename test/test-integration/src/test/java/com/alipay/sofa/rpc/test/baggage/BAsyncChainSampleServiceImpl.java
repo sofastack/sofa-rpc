@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.bolt.BoltSendableResponseCallback;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
@@ -32,11 +34,13 @@ import java.util.concurrent.TimeUnit;
  */
 public class BAsyncChainSampleServiceImpl implements SampleService {
 
-    private SampleService sampleServiceC;
+    private final static Logger LOGGER = LoggerFactory.getLogger(BAsyncChainSampleServiceImpl.class);
 
-    private SampleService sampleServiceD;
+    private SampleService       sampleServiceC;
 
-    private String        reqBaggage;
+    private SampleService       sampleServiceD;
+
+    private String              reqBaggage;
 
     public BAsyncChainSampleServiceImpl(SampleService sampleServiceC, SampleService sampleServiceD) {
         this.sampleServiceC = sampleServiceC;
@@ -46,7 +50,7 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
     @Override
     public String hello() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("--b1---:" + context);
+        LOGGER.info("--b1---:" + context);
         // 读取一定要在这里读取
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         context.putResponseBaggage("respBaggageB_useful1", "在返A之前写入有用");
@@ -57,7 +61,7 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
                 public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                     // 返回一定要写在这里
                     RpcInvokeContext context = RpcInvokeContext.getContext();
-                    System.out.println("--b3---:" + context);
+                    LOGGER.info("--b3---:" + context);
                     if (reqBaggage != null) {
                         context.putResponseBaggage("respBaggageB", "b2aaa");
                     } else {
@@ -66,20 +70,20 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
 
                     String s1 = (String) appResponse;
                     String reqBaggageD = context.getRequestBaggage("reqBaggageD"); // 这里已经取不到值了
-                    System.out.println("----reqBaggageD---:" + reqBaggageD);
+                    LOGGER.info("----reqBaggageD---:" + reqBaggageD);
                     String s2 = sampleServiceD.hello();
                     sendAppResponse(s1 + s2);
-                    System.out.println("--b4---:" + RpcInvokeContext.getContext());
+                    LOGGER.info("--b4---:" + RpcInvokeContext.getContext());
                     context.putResponseBaggage("respBaggageB_useless2", "在返A之前写后没用"); // 返回写在这里可能没用
                     latch.countDown();
                 }
             });
             sampleServiceC.hello();
             context.putResponseBaggage("respBaggageB_useful2", "在返A之前写入有用");
-            System.out.println("--b2---:" + RpcInvokeContext.getContext());
+            LOGGER.info("--b2---:" + RpcInvokeContext.getContext());
             latch.await(5000, TimeUnit.MILLISECONDS); // 模拟Callback更早回来的行为
             context.putResponseBaggage("respBaggageB_useless2", "在返A之前写后没用"); // 返回写在这里可能没用
-            System.out.println("--b3---:" + RpcInvokeContext.getContext());
+            LOGGER.info("--b3---:" + RpcInvokeContext.getContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,7 +93,7 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
     @Override
     public EchoResponse echoObj(final EchoRequest req) {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        System.out.println("--b1---:" + context);
+        LOGGER.info("--b1---:" + context);
         // 读取一定要在这里读取
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         context.putResponseBaggage("respBaggageB_useful1", "在返A之前写入有用");
@@ -100,7 +104,7 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
                 public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                     // 返回一定要写在这里
                     RpcInvokeContext context = RpcInvokeContext.getContext();
-                    System.out.println("--b3---:" + context);
+                    LOGGER.info("--b3---:" + context);
                     if (reqBaggage != null) {
                         context.putResponseBaggage("respBaggageB", "b2aaa");
                     } else {
@@ -109,21 +113,21 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
 
                     EchoResponse s1 = (EchoResponse) appResponse;
                     String reqBaggageD = context.getRequestBaggage("reqBaggageD"); // 这里已经取不到值了
-                    System.out.println("----reqBaggageD---:" + reqBaggageD);
+                    LOGGER.info("----reqBaggageD---:" + reqBaggageD);
                     EchoResponse s2 = sampleServiceD.echoObj(req);
                     sendAppResponse(EchoResponse.newBuilder().setCode(200)
                         .setMessage(s1.getMessage() + s2.getMessage()).build());
-                    System.out.println("--b4---:" + RpcInvokeContext.getContext());
+                    LOGGER.info("--b4---:" + RpcInvokeContext.getContext());
                     context.putResponseBaggage("respBaggageB_useless2", "在返A之前写后没用"); // 返回写在这里可能没用
                     latch.countDown();
                 }
             });
             sampleServiceC.echoObj(req);
             context.putResponseBaggage("respBaggageB_useful2", "在返A之前写入有用");
-            System.out.println("--b2---:" + RpcInvokeContext.getContext());
+            LOGGER.info("--b2---:" + RpcInvokeContext.getContext());
             latch.await(5000, TimeUnit.MILLISECONDS); // 模拟Callback更早回来的行为
             context.putResponseBaggage("respBaggageB_useless2", "在返A之前写后没用"); // 返回写在这里可能没用
-            System.out.println("--b3---:" + RpcInvokeContext.getContext());
+            LOGGER.info("--b3---:" + RpcInvokeContext.getContext());
         } catch (Exception e) {
             e.printStackTrace();
         }

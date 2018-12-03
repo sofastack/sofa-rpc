@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.transport.rest;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.RestTracerAdapter;
@@ -23,11 +25,11 @@ import com.alipay.sofa.rpc.tracer.sofatracer.RestTracerAdapter;
 import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- * 
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  * @author <a href="mailto:lw111072@alibaba-inc.com">liangen</a>
  */
@@ -40,6 +42,15 @@ public class TraceClientRequestFilter implements ClientRequestFilter {
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
         try {
+
+            if (RpcInternalContext.isAttachmentEnable()) {
+                // 补充客户端request长度
+                RpcInternalContext context = RpcInternalContext.getContext();
+                context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE,
+                    requestContext.getHeaderString(HttpHeaders.CONTENT_LENGTH));
+
+            }
+
             RestTracerAdapter.storeTracerInfo(requestContext);
         } catch (Exception e) {
             logger.error("the process of rest tracer client request occur error ", e);

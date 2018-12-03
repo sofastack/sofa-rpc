@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.client.lb;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +29,8 @@ import java.util.List;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class BaseLoadBalancerTest {
+
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseLoadBalancerTest.class);
 
     protected List<ProviderInfo> buildSameWeightProviderList(int size) {
         List<ProviderInfo> aliveConnections = new ArrayList<ProviderInfo>();
