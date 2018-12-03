@@ -17,7 +17,7 @@
         <resteasy.version>3.0.12.Final</resteasy.version>
         <cxf.version>3.0.14</cxf.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
-        <curator.version>2.9.1</curator.version>
+        <curator.version>4.0.1</curator.version>
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo.version>2.4.10</dubbo.version>
         <nacos.version>0.5.0</nacos.version>
