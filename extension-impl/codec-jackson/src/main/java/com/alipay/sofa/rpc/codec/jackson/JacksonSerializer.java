@@ -36,11 +36,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Protobuf serializer.
+ * Json serializer.
  * <p>
- * Encode: : Support MessageLite, String, SofaRequest and SofaResponse.
+ * Encode: : Support String, SofaRequest and SofaResponse.
  * <p>
- * Decode by class mode : Support MessageLite and String.
+ * Decode by class mode : Support String.
  * <p>
  * Decode by object template : Support SofaRequest and SofaResponse.
  * <ul>
@@ -52,7 +52,7 @@ import java.util.Map;
  * HEAD_METHOD_NAME </li>
  * </ul>
  *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author <a href=mailto:zhiyuan.lzy@antfin.com>zhiyuan.lzy</a>
  */
 @Extension(value = "jackson", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
