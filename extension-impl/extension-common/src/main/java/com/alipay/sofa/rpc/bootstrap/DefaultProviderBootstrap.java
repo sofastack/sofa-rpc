@@ -206,6 +206,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**
      * decrease counter
+     *
      * @param hasExportedInCurrent
      */
     private void decrementCounter(Map<String, Boolean> hasExportedInCurrent) {
@@ -221,7 +222,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * for check fields and parameters of consumer config 
+     * for check fields and parameters of consumer config
      */
     protected void checkParameters() {
         // 检查注入的ref是否接口实现类
@@ -244,7 +245,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**
      * 检查方法，例如方法名、多态（重载）方法
-     * 
+     *
      * @param itfClass 接口类
      */
     protected void checkMethods(Class<?> itfClass) {
@@ -450,19 +451,29 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     protected boolean inList(String includeMethods, String excludeMethods, String methodName) {
         //判断是否在白名单中
         if (includeMethods != null && !StringUtils.ALL.equals(includeMethods)) {
-            includeMethods = includeMethods + ",";
-            boolean inWhite = includeMethods.contains(methodName + ",");
-            if (!inWhite) {
-                return false;
+            String[] includeMethodCollections = StringUtils.splitWithCommaOrSemicolon(includeMethods);
+            boolean inWhite;
+            for (String includeMethodName : includeMethodCollections) {
+                inWhite = StringUtils.equals(includeMethodName, methodName);
+                if (inWhite) {
+                    return true;
+                }
             }
         }
         //判断是否在黑白单中
         if (StringUtils.isBlank(excludeMethods)) {
             return true;
         } else {
-            excludeMethods = excludeMethods + ",";
-            boolean inBlack = excludeMethods.contains(methodName + ",");
-            return !inBlack;
+            boolean inBlack;
+            String[] excludeMethodCollections = StringUtils.splitWithCommaOrSemicolon(excludeMethods);
+            for (String excludeMethodName : excludeMethodCollections) {
+                inBlack = StringUtils.equals(excludeMethodName, methodName);
+                if (inBlack) {
+                    return false;
+                }
+            }
+            //默认还是要发布
+            return true;
         }
     }
 }
