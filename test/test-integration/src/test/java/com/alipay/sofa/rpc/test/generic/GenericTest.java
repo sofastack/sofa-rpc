@@ -203,13 +203,13 @@ public class GenericTest extends ActivelyDestroyTest {
         Assert.assertFalse(isSuccess);
 
         // 3. 指定超时,结果序列化为People 类
-        People peopleResult = proxy.$genericInvoke("hello",
+        People peopleResult = proxy.$genericInvoke("helloTimeout",
             new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
             new Object[] { genericObject }, People.class, genericContext);
         assertEquals(peopleResult, people);
 
         // 4. 指定超时,结果序列化为GenericObject
-        GenericObject result = (GenericObject) proxy.$genericInvoke("hello",
+        GenericObject result = (GenericObject) proxy.$genericInvoke("helloTimeout",
             new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
             new Object[] { genericObject }, genericContext);
         isCorrect(result);

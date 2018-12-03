@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.codec;
 
 import com.alipay.sofa.rpc.common.struct.TwoWayMap;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
@@ -78,7 +79,11 @@ public final class SerializerFactory {
      * @return 序列化器
      */
     public static Serializer getSerializer(byte type) {
-        return TYPE_SERIALIZER_MAP.get(type);
+        Serializer serializer = TYPE_SERIALIZER_MAP.get(type);
+        if (serializer == null) {
+            throw new SofaRpcRuntimeException("Serializer Not Found :\"" + type + "\"!");
+        }
+        return serializer;
     }
 
     /**

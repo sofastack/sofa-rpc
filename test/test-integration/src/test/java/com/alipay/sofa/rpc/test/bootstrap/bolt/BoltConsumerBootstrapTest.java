@@ -105,7 +105,7 @@ public class BoltConsumerBootstrapTest extends ActivelyDestroyTest {
         long start = System.currentTimeMillis();
         consumerConfig3.refer();
         long end = System.currentTimeMillis();
-        System.out.println("elapsed time " + (end - start) + "ms");
+        LOGGER.info("elapsed time " + (end - start) + "ms");
         Assert.assertTrue((end - start) > 2000 && (end - start) < 4000);
         Assert.assertTrue(consumerConfig3.getConsumerBootstrap().isSubscribed());
         Assert.assertTrue(consumerConfig3.getConsumerBootstrap().getCluster()
@@ -163,7 +163,7 @@ public class BoltConsumerBootstrapTest extends ActivelyDestroyTest {
         start = System.currentTimeMillis();
         consumerConfig1.refer();
         end = System.currentTimeMillis();
-        System.out.println("elapsed time " + (end - start) + "ms");
+        LOGGER.info("elapsed time " + (end - start) + "ms");
         Assert.assertTrue((end - start) > 2000 && (end - start) < 4000);
         Assert.assertTrue(consumerConfig1.getConsumerBootstrap().isSubscribed());
         Assert.assertTrue(consumerConfig1.getConsumerBootstrap().getCluster()
@@ -180,7 +180,7 @@ public class BoltConsumerBootstrapTest extends ActivelyDestroyTest {
         start = System.currentTimeMillis();
         consumerConfig2.refer();
         end = System.currentTimeMillis();
-        System.out.println("elapsed time " + (end - start) + "ms");
+        LOGGER.info("elapsed time " + (end - start) + "ms");
         Assert.assertTrue((end - start) > 1000 && (end - start) < 3000);
         Assert.assertFalse(consumerConfig2.getConsumerBootstrap().isSubscribed());
 
@@ -222,7 +222,7 @@ public class BoltConsumerBootstrapTest extends ActivelyDestroyTest {
         try {
             proxy.sayHello("11", 11);
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOGGER.info(e.getMessage());
             error = true;
         }
         Assert.assertTrue(error);

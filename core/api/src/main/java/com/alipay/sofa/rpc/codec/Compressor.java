@@ -31,7 +31,7 @@ public interface Compressor {
      * @param src 未压缩的字节数组
      * @return 压缩后的字节数组
      */
-    public byte[] compress(byte[] src);
+    byte[] compress(byte[] src);
 
     /**
      * 字节数组解压缩
@@ -39,5 +39,5 @@ public interface Compressor {
      * @param src 压缩后的源字节数组
      * @return 解压缩后的字节数组
      */
-    public byte[] deCompress(byte[] src);
+    byte[] deCompress(byte[] src);
 }

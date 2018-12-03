@@ -118,7 +118,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
 
@@ -169,7 +169,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 RpcInvokeContext.getContext().getFuture().get();
             } catch (Exception e) {
-                System.out.println("future超时");
+                LOGGER.info("future超时");
             }
         }
         Thread.sleep(1000);
@@ -201,7 +201,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
@@ -217,7 +217,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         Assert.assertEquals(5, delayGetCount(invocationStat, 5));
@@ -237,7 +237,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             @Override
             public void onAppResponse(final Object appResponse, String methodName, RequestBase request) {
                 //放到 future 中方便测试.
-                System.out.println("回调成功" + appResponse);
+                LOGGER.info("回调成功" + appResponse);
                 context.setFuture(new ResponseFuture<String>() {
                     @Override
                     public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
@@ -279,12 +279,12 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
 
             @Override
             public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                System.out.println("回调发生应用异常" + throwable);
+                LOGGER.info("回调发生应用异常" + throwable);
             }
 
             @Override
             public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-                System.out.println("回调发生sofa异常" + sofaException);
+                LOGGER.info("回调发生sofa异常" + sofaException);
 
             }
         });

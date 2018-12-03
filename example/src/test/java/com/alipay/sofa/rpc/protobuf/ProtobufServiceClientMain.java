@@ -17,11 +17,15 @@
 package com.alipay.sofa.rpc.protobuf;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ProtobufServiceClientMain {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ProtobufServiceClientMain.class);
 
     public static void main(String[] args) {
         ConsumerConfig<ProtoService> consumerConfig = new ConsumerConfig<ProtoService>()
@@ -37,7 +41,7 @@ public class ProtobufServiceClientMain {
             try {
                 EchoRequest request = EchoRequest.newBuilder().setName("zhang").setGroup(Group.A).build();
                 EchoResponse response = helloService.echoObj(request);
-                System.out.println(response.getCode() + ": " + response.getMessage());
+                LOGGER.info(response.getCode() + ": " + response.getMessage());
             } catch (Exception e) {
                 e.printStackTrace();
             }

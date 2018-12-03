@@ -16,10 +16,11 @@
  */
 package com.alipay.sofa.rpc.module;
 
-import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
 import com.alipay.sofa.rpc.event.ClientEndInvokeEvent;
+import com.alipay.sofa.rpc.event.ConsumerSubEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.LookoutSubscriber;
+import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
@@ -36,7 +37,7 @@ public class LookoutModule implements Module {
     @Override
     public boolean needLoad() {
         try {
-            Class.forName("com.alipay.lookout.spi.DefaultMetricsImporterLocator");
+            Class.forName("com.alipay.lookout.spi.MetricsImporterLocator");
             return true;
         } catch (Exception e) {
             return false;
@@ -49,6 +50,9 @@ public class LookoutModule implements Module {
         EventBus.register(ClientEndInvokeEvent.class, subscriber);
         EventBus.register(ServerSendEvent.class, subscriber);
         EventBus.register(ServerStartedEvent.class, subscriber);
+        EventBus.register(ProviderPubEvent.class, subscriber);
+        EventBus.register(ConsumerSubEvent.class, subscriber);
+
     }
 
     @Override
@@ -57,6 +61,8 @@ public class LookoutModule implements Module {
             EventBus.unRegister(ClientEndInvokeEvent.class, subscriber);
             EventBus.unRegister(ServerSendEvent.class, subscriber);
             EventBus.unRegister(ServerStartedEvent.class, subscriber);
+            EventBus.unRegister(ProviderPubEvent.class, subscriber);
+            EventBus.unRegister(ConsumerSubEvent.class, subscriber);
         }
     }
 }

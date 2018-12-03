@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.common;
 
-import java.nio.charset.Charset;
-
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
+
+import java.nio.charset.Charset;
 
 /**
  * Rpc Constants
@@ -275,6 +275,14 @@ public class RpcConstants {
      * @since 5.4.0
      */
     public static final String  INTERNAL_KEY_CLIENT_SEND_TIME      = INTERNAL_KEY_PREFIX + "client_send_time";
+
+    /**
+     * 内部使用的key：_server_receive_time 服务端接收时间戳，long
+     *
+     * @since 5.4.8
+     */
+    public static final String  INTERNAL_KEY_SERVER_RECEIVE_TIME   = INTERNAL_KEY_PREFIX + "server_receive_time";
+
     /**
      * 内部使用的key：_router_record 路由记录，string
      */
@@ -408,6 +416,35 @@ public class RpcConstants {
      */
     public static final String  CONFIG_KEY_LOADBALANCER            = "loadBalancer";
 
+    /**
+     * 配置key:delay
+     */
+    public static final String  CONFIG_KEY_DELAY                   = "delay";
+
+    /**
+     * 配置key:id
+     */
+    public static final String  CONFIG_KEY_ID                      = "id";
+
+    /**
+     * 配置key:accepts
+     */
+    public static final String  CONFIG_KEY_ACCEPTS                 = "accepts";
+
+    /**
+     * 配置key:pid
+     */
+    public static final String  CONFIG_KEY_PID                     = "pid";
+
+    /**
+     * 配置key:language
+     */
+    public static final String  CONFIG_KEY_LANGUAGE                = "language";
+
+    /**
+     * 配置key:protocol
+     */
+    public static final String  CONFIG_KEY_PROTOCOL                = "protocol";
     /*--------配置项相关结束---------*/
 
     /*--------客户端相关开始---------*/

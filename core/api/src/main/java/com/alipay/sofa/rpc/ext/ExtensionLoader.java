@@ -213,6 +213,9 @@ public class ExtensionLoader<T> {
                 LOGGER.warn("Extension {} of extensible {} is disabled, cause by: {}",
                     className, interfaceName, ExceptionUtils.toShortString(e, 2));
             }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Extension " + className + " of extensible " + interfaceName + " is disabled.", e);
+            }
             return;
         }
         if (!interfaceClass.isAssignableFrom(tmp)) {
@@ -304,6 +307,10 @@ public class ExtensionLoader<T> {
                     String[] rejection = extensionClass.getRejection();
                     if (CommonUtils.isNotEmpty(rejection)) {
                         for (String rej : rejection) {
+                            existed = all.get(rej);
+                            if (existed == null || extensionClass.getOrder() < existed.getOrder()) {
+                                continue;
+                            }
                             ExtensionClass removed = all.remove(rej);
                             if (removed != null) {
                                 if (LOGGER.isInfoEnabled()) {

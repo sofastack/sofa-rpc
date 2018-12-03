@@ -29,19 +29,25 @@ import java.util.concurrent.ConcurrentMap;
 public class RpcLookoutId {
 
     private volatile Id                     consumerId;
-    private final Object                    consumerIdLock  = new Object();
+    private final Object                    consumerIdLock       = new Object();
 
     private volatile Id                     providerId;
-    private final Object                    providerIdLock  = new Object();
+    private final Object                    providerIdLock       = new Object();
 
-    private final ConcurrentMap<String, Id> serverConfigIds = new ConcurrentHashMap<String, Id>();
+    private final ConcurrentMap<String, Id> serverConfigIds      = new ConcurrentHashMap<String, Id>();
+
+    private volatile Id                     consumerConfigId;
+    private final Object                    consumerConfigIdLock = new Object();
+
+    private volatile Id                     providerConfigId;
+    private final Object                    providerConfigIdLock = new Object();
 
     /**
      * create consumerId
      *
      * @return consumerId
      */
-    public Id getConsumerId() {
+    public Id fetchConsumerStatId() {
 
         if (consumerId == null) {
             synchronized (consumerIdLock) {
@@ -59,7 +65,7 @@ public class RpcLookoutId {
      *
      * @return ProviderId
      */
-    public Id getProviderId() {
+    public Id fetchProviderStatId() {
 
         if (providerId == null) {
             synchronized (providerIdLock) {
@@ -72,27 +78,49 @@ public class RpcLookoutId {
         return providerId;
     }
 
-    public synchronized Id getServerThreadConfigId(ServerConfig serverConfig) {
+    public Id fetchConsumerSubId() {
+        if (consumerConfigId == null) {
+            synchronized (consumerConfigIdLock) {
+                if (consumerConfigId == null) {
+                    consumerConfigId = Lookout.registry().createId("rpc.consumer.info.stats");
+                }
+            }
+        }
+        return consumerConfigId;
+    }
+
+    public Id fetchProviderPubId() {
+        if (providerConfigId == null) {
+            synchronized (providerConfigIdLock) {
+                if (providerConfigId == null) {
+                    providerConfigId = Lookout.registry().createId("rpc.provider.info.stats");
+                }
+            }
+        }
+        return providerConfigId;
+    }
+
+    public synchronized Id fetchServerThreadConfigId(ServerConfig serverConfig) {
         String key = "rpc." + serverConfig.getProtocol() + ".threadpool.config";
-        return getId(key);
+        return fetchServerConfigId(key);
     }
 
-    public Id getServerThreadPoolActiveCountId(ServerConfig serverConfig) {
+    public Id fetchServerThreadPoolActiveCountId(ServerConfig serverConfig) {
         String key = "rpc." + serverConfig.getProtocol() + ".threadpool.active.count";
-        return getId(key);
+        return fetchServerConfigId(key);
     }
 
-    public Id getServerThreadPoolIdleCountId(ServerConfig serverConfig) {
+    public Id fetchServerThreadPoolIdleCountId(ServerConfig serverConfig) {
         String key = "rpc." + serverConfig.getProtocol() + ".threadpool.idle.count";
-        return getId(key);
+        return fetchServerConfigId(key);
     }
 
-    public Id getServerThreadPoolQueueSizeId(ServerConfig serverConfig) {
+    public Id fetchServerThreadPoolQueueSizeId(ServerConfig serverConfig) {
         String key = "rpc." + serverConfig.getProtocol() + ".threadpool.queue.size";
-        return getId(key);
+        return fetchServerConfigId(key);
     }
 
-    private Id getId(String key) {
+    private Id fetchServerConfigId(String key) {
         Id lookoutId = serverConfigIds.get(key);
         if (lookoutId == null) {
             synchronized (RpcLookout.class) {
