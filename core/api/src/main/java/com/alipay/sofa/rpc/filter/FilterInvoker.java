@@ -91,7 +91,7 @@ public class FilterInvoker implements Invoker {
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         if (nextFilter == null && invoker == null) {
-            throw new SofaRpcException(RpcErrorType.SERVER_FILTER, "Next filter or invoker is null!");
+            throw new SofaRpcException(RpcErrorType.SERVER_FILTER, "Next filter and invoker is null!");
         }
         return nextFilter == null ?
             invoker.invoke(request) :
