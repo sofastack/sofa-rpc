@@ -34,7 +34,6 @@
         <module>remoting-resteasy</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
-        <module>metrics-lookout</module>
         <module>fault-hystrix</module>
     </modules>
 
