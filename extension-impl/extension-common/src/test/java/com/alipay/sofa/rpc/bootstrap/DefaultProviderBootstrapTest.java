@@ -55,7 +55,7 @@ public class DefaultProviderBootstrapTest {
         ProviderConfig providerConfig = new ProviderConfig();
         DefaultProviderBootstrap defaultProviderBootstra = new DefaultProviderBootstrap(providerConfig);
         boolean result = defaultProviderBootstra.inList("hello1", "hello2", "hello3");
-        Assert.assertTrue(result);
+        Assert.assertTrue(!result);
     }
 
     @Test
@@ -64,6 +64,6 @@ public class DefaultProviderBootstrapTest {
         ProviderConfig providerConfig = new ProviderConfig();
         DefaultProviderBootstrap defaultProviderBootstra = new DefaultProviderBootstrap(providerConfig);
         boolean result = defaultProviderBootstra.inList("hello1", "hello1", "hello");
-        Assert.assertTrue(result);
+        Assert.assertTrue(!result);
     }
 }
