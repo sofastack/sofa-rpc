@@ -16,18 +16,16 @@
  */
 package com.alipay.sofa.rpc.registry.nacos.base;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 /**
  * The type Base nacos test.
- * @author  <a href=mailto:jervyshi@gmail.com>JervyShi</a>  
- * @version $Id : BaseNacosTest.java, v 0.1 2018-10-06 17:18 JervyShi Exp $$
+ * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
  */
 public abstract class BaseNacosTest {
 
