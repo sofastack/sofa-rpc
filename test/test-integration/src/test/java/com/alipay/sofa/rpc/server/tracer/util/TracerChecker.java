@@ -32,8 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author bystander
- * @version $Id: TracerChecker.java, v 0.1 2018年11月06日 10:20 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class TracerChecker {
 

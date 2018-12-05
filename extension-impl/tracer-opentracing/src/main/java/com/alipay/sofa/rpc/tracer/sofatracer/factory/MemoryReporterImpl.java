@@ -40,8 +40,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * don't use for production
  *
- * @author bystander
- * @version $Id: MemoryReporterImpl.java, v 0.1 2018年05月17日 9:10 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 @JustForTest
 public class MemoryReporterImpl extends AbstractReporter {

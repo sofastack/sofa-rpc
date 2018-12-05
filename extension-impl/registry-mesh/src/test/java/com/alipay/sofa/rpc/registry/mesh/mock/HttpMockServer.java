@@ -25,8 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 
 /**
- * @author bystander
- * @version $Id: HttpMockServer.java, v 0.1 2018年08月09日 7:52 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class HttpMockServer {
 

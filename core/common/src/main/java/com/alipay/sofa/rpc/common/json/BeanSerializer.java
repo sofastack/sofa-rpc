@@ -29,11 +29,11 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.Iterator;
 
 import static com.alipay.sofa.rpc.common.json.JSON.getSerializeFields;
 
@@ -242,7 +242,7 @@ public class BeanSerializer {
      *
      * @param src   原始对象
      * @param clazz 期望的对象
-     * @param <T> 反序列化类型
+     * @param <T>   反序列化类型
      * @return 转换后结果
      */
     public static <T> T deserializeByType(Object src, Class<T> clazz) {

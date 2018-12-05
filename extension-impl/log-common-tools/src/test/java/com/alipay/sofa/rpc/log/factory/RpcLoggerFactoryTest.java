@@ -17,8 +17,8 @@
 package com.alipay.sofa.rpc.log.factory;
 
 import org.junit.Assert;
-import org.slf4j.Logger;
 import org.junit.Test;
+import org.slf4j.Logger;
 
 /**
  *
