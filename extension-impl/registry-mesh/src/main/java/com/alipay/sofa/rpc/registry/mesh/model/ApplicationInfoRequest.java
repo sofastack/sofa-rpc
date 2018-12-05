@@ -22,8 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * @author bystander
- * @version $Id: ApplicationInfoRequest.java, v 0.1 2018年04月20日 3:19 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class ApplicationInfoRequest {
 

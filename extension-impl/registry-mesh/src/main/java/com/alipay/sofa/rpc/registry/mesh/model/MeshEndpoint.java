@@ -17,8 +17,7 @@
 package com.alipay.sofa.rpc.registry.mesh.model;
 
 /**
- * @author bystander
- * @version $Id: MeshEndpoint.java, v 0.1 2018年04月20日 3:08 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class MeshEndpoint {
 

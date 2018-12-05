@@ -17,9 +17,7 @@
 package com.alipay.sofa.rpc.registry.zk;
 
 /**
- *
- * @author zhuoyu.sjw
- * @version $Id: OverrideService.java, v 0.1 2018-06-16 09:45 zhuoyu.sjw Exp $$
+ * @author <a href="mailto:zhuoyu.sjw@antfin.com">Jianwei Shi</a>
  */
 public interface OverrideService {
 

@@ -37,8 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 /**
- * @author bystander
- * @version $Id: MeshApiClientTest.java, v 0.1 2018年08月07日 12:04 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class MeshApiClientTest extends BaseMeshTest {
 

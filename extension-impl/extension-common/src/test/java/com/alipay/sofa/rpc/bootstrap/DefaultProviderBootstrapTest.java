@@ -20,6 +20,9 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ */
 public class DefaultProviderBootstrapTest {
 
     @Test
