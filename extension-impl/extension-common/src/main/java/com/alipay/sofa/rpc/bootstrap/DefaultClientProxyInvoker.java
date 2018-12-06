@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.bootstrap;
 
 import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
-import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.context.BaggageResolver;
@@ -36,44 +35,59 @@ import static com.alipay.sofa.rpc.common.RpcConstants.HIDDEN_KEY_PINPOINT;
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_PROTOCOL_NAME;
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_RESULT_CODE;
+import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN;
+import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
+import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_JAVA;
+import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_PROTOBUF;
 
 /**
  * 默认调用端代理执行器
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
     /**
      * 缓存接口名
      */
-    protected String serviceName;
+    private String serviceName;
 
     /**
      * 缓存序列化类型
      */
-    protected Byte   serializeType;
+    private Byte serializeType;
 
     /**
      * 构造执行链
      *
      * @param bootstrap 调用端配置
      */
+    // TODO: 2018/7/6 by zmyer
     public DefaultClientProxyInvoker(ConsumerBootstrap bootstrap) {
         super(bootstrap);
         cacheCommonData();
     }
 
-    protected void cacheCommonData() {
+    // TODO: 2018/7/6 by zmyer
+    private void cacheCommonData() {
         // 缓存数据
-        this.serviceName = ConfigUniqueNameGenerator.getServiceName(consumerConfig);
+        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
         this.serializeType = parseSerializeType(consumerConfig.getSerialization());
     }
 
-    protected Byte parseSerializeType(String serialization) {
-        Byte serializeType = SerializerFactory.getCodeByAlias(serialization);
-        if (serializeType == null) {
-            throw new SofaRpcRuntimeException("Unsupported serialization type: " + serialization);
+    // TODO: 2018/7/6 by zmyer
+    private Byte parseSerializeType(String serialization) {
+        Byte serializeType;
+        if (SERIALIZE_HESSIAN.equals(serialization)
+                || SERIALIZE_HESSIAN2.equals(serialization)) {
+            serializeType = RemotingConstants.SERIALIZE_CODE_HESSIAN;
+        } else if (SERIALIZE_PROTOBUF.equals(serialization)) {
+            serializeType = RemotingConstants.SERIALIZE_CODE_PROTOBUF;
+        } else if (SERIALIZE_JAVA.equals(serialization)) {
+            serializeType = RemotingConstants.SERIALIZE_CODE_JAVA;
+        } else {
+            throw new SofaRpcRuntimeException("Unsupported serialization type");
         }
         return serializeType;
     }
@@ -85,7 +99,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
         // 缓存是为了加快速度
         request.setTargetServiceUniqueName(serviceName);
-        request.setSerializeType(serializeType == null ? 0 : serializeType);
+        request.setSerializeType(serializeType);
 
         if (!consumerConfig.isGeneric()) {
             // 找到调用类型， generic的时候类型在filter里进行判断
@@ -101,7 +115,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
                 request.setSofaResponseCallback(responseCallback);
                 invokeCtx.setResponseCallback(null); // 一次性用完
                 invokeCtx.put(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN,
-                    isSendableResponseCallback(responseCallback));
+                        isSendableResponseCallback(responseCallback));
             }
             // 如果用户设置了调用级别超时时间
             Integer timeout = invokeCtx.getTimeout();
@@ -178,6 +192,6 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
     @Override
     public String toString() {
-        return consumerConfig != null ? ConfigUniqueNameGenerator.getServiceName(consumerConfig) : super.toString();
+        return consumerConfig != null ? ConfigUniqueNameGenerator.getUniqueName(consumerConfig) : super.toString();
     }
 }

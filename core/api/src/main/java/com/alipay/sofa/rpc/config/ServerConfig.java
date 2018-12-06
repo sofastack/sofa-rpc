@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.server.ServerFactory;
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
@@ -54,121 +53,121 @@ import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_TELNET;
 import static com.alipay.sofa.rpc.common.RpcOptions.SEVER_ADAPTIVE_PORT;
 import static com.alipay.sofa.rpc.common.RpcOptions.SEVER_AUTO_START;
 import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_PAYLOAD_MAX;
-import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_SERVER_KEEPALIVE;
 
 /**
  * 服务端配置
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ServerConfig extends AbstractIdConfig implements Serializable {
     /**
      * The constant serialVersionUID.
      */
-    private static final long                 serialVersionUID = -574374673831680403L;
+    private static final long serialVersionUID = -574374673831680403L;
 
     /*------------- 参数配置项开始-----------------*/
     /**
      * 配置名称
      */
-    protected String                          protocol         = getStringValue(DEFAULT_PROTOCOL);
+    protected String protocol = getStringValue(DEFAULT_PROTOCOL);
 
     /**
      * 实际监听IP，与网卡对应
      */
-    protected String                          host             = getStringValue(SERVER_HOST);
+    protected String host = getStringValue(SERVER_HOST);
 
     /**
      * 监听端口
      */
-    protected int                             port             = getIntValue(SERVER_PORT_START);
+    protected int port = getIntValue(SERVER_PORT_START);
 
     /**
      * 基本路径
      */
-    protected String                          contextPath      = getStringValue(SERVER_CONTEXT_PATH);
+    protected String contextPath = getStringValue(SERVER_CONTEXT_PATH);
 
     /**
      * io线程池大小
      */
-    protected int                             ioThreads        = getIntValue(SERVER_IOTHREADS);
+    protected int ioThreads = getIntValue(SERVER_IOTHREADS);
 
     /**
      * 线程池类型
      */
-    protected String                          threadPoolType   = getStringValue(SERVER_POOL_TYPE);
+    protected String threadPoolType = getStringValue(SERVER_POOL_TYPE);
 
     /**
      * 业务线程池大小
      */
-    protected int                             coreThreads      = getIntValue(SERVER_POOL_CORE);
+    protected int coreThreads = getIntValue(SERVER_POOL_CORE);
 
     /**
      * 业务线程池大小
      */
-    protected int                             maxThreads       = getIntValue(SERVER_POOL_MAX);
+    protected int maxThreads = getIntValue(SERVER_POOL_MAX);
 
     /**
      * 是否允许telnet，针对自定义协议
      */
-    protected boolean                         telnet           = getBooleanValue(SERVER_TELNET);
+    protected boolean telnet = getBooleanValue(SERVER_TELNET);
 
     /**
      * 线程池类型，默认普通线程池
      */
-    protected String                          queueType        = getStringValue(SERVER_POOL_QUEUE_TYPE);
+    protected String queueType = getStringValue(SERVER_POOL_QUEUE_TYPE);
 
     /**
-     * 业务线程池队列大小
+     * 业务线程池回收时间
      */
-    protected int                             queues           = getIntValue(SERVER_POOL_QUEUE);
+    protected int queues = getIntValue(SERVER_POOL_QUEUE);
 
     /**
      * 线程池回收时间
      */
-    protected int                             aliveTime        = getIntValue(SERVER_POOL_ALIVETIME);
+    protected int aliveTime = getIntValue(SERVER_POOL_ALIVETIME);
 
     /**
      * 线程池是否初始化核心线程
      */
-    protected boolean                         preStartCore     = getBooleanValue(SERVER_POOL_PRE_START);
+    protected boolean preStartCore = getBooleanValue(SERVER_POOL_PRE_START);
 
     /**
      * 服务端允许客户端建立的连接数
      */
-    protected int                             accepts          = getIntValue(SERVER_ACCEPTS);
+    protected int accepts = getIntValue(SERVER_ACCEPTS);
 
     /**
      * 最大数据包大小
      */
     @Deprecated
-    protected int                             payload          = getIntValue(TRANSPORT_PAYLOAD_MAX);
+    protected int payload = getIntValue(TRANSPORT_PAYLOAD_MAX);
 
     /**
      * 序列化方式
      */
-    protected String                          serialization    = getStringValue(DEFAULT_SERIALIZATION);
+    protected String serialization = getStringValue(DEFAULT_SERIALIZATION);
 
     /**
      * 事件分发规则。
      */
     @Deprecated
-    protected String                          dispatcher       = RpcConstants.DISPATCHER_MESSAGE;
+    protected String dispatcher = RpcConstants.DISPATCHER_MESSAGE;
 
     /**
      * The Parameters. 自定义参数
      */
-    protected Map<String, String>             parameters;
+    protected Map<String, String> parameters;
 
     /**
      * 镜像ip，例如监听地址是1.2.3.4，告诉注册中心的确是3.4.5.6
      */
-    protected String                          virtualHost;
+    protected String virtualHost;
 
     /**
      * 镜像端口
      */
-    protected Integer                         virtualPort;
+    protected Integer virtualPort;
 
     /**
      * 连接事件监听器实例，连接或者断开时触发
@@ -178,54 +177,50 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     /**
      * 是否启动epoll
      */
-    protected boolean                         epoll            = getBooleanValue(SERVER_EPOLL);
+    protected boolean epoll = getBooleanValue(SERVER_EPOLL);
 
     /**
      * 是否hold住端口，true的话随主线程退出而退出，false的话则要主动退出
      */
-    protected boolean                         daemon           = getBooleanValue(SERVER_DAEMON);
+    protected boolean daemon = getBooleanValue(SERVER_DAEMON);
 
     /**
      * The Adaptive port.
      */
-    protected boolean                         adaptivePort     = getBooleanValue(SEVER_ADAPTIVE_PORT);
+    protected boolean adaptivePort = getBooleanValue(SEVER_ADAPTIVE_PORT);
 
     /**
      * 传输层
      */
-    protected String                          transport        = getStringValue(DEFAULT_TRANSPORT);
+    protected String transport = getStringValue(DEFAULT_TRANSPORT);
 
     /**
      * 是否自动启动
      */
-    protected boolean                         autoStart        = getBooleanValue(SEVER_AUTO_START);
+    protected boolean autoStart = getBooleanValue(SEVER_AUTO_START);
 
     /**
      * 服务端关闭超时时间
      */
-    protected int                             stopTimeout      = getIntValue(SERVER_STOP_TIMEOUT);
-
-    /**
-     * 是否维持长连接
-     */
-    protected boolean                         keepAlive        = getBooleanValue(TRANSPORT_SERVER_KEEPALIVE);
+    protected int stopTimeout = getIntValue(SERVER_STOP_TIMEOUT);
 
     /*------------- 参数配置项结束-----------------*/
     /**
      * 服务端对象
      */
-    private transient volatile Server         server;
+    private transient volatile Server server;
 
     /**
      * 绑定的地址。是某个网卡，还是全部地址
      */
-    private transient String                  boundHost;
+    private transient String boundHost;
 
     /**
      * 启动服务
      *
      * @return the server
      */
+    // TODO: 2018/7/6 by zmyer
     public synchronized Server buildIfAbsent() {
         if (server != null) {
             return server;
@@ -305,7 +300,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     public ServerConfig setPort(int port) {
         if (!NetUtils.isRandomPort(port) && NetUtils.isInvalidPort(port)) {
             throw ExceptionUtils.buildRuntime("server.port", port + "",
-                "port must between -1 and 65535 (-1 means random port)");
+                    "port must between -1 and 65535 (-1 means random port)");
         }
         this.port = port;
         return this;
@@ -611,10 +606,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      * @return the parameters
      */
     public ServerConfig setParameters(Map<String, String> parameters) {
-        if (this.parameters == null) {
-            this.parameters = new ConcurrentHashMap<String, String>();
-            this.parameters.putAll(parameters);
-        }
+        this.parameters = parameters;
         return this;
     }
 
@@ -828,25 +820,11 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     }
 
     /**
-     * Get KeepAlive
+     * Hash code.
      *
-     * @return 是否长连接
+     * @return int int
+     * @see Object#hashCode()
      */
-    public boolean isKeepAlive() {
-        return keepAlive;
-    }
-
-    /**
-     * set KeepAlive
-     *
-     * @param keepAlive 是否长连接
-     * @return this
-     */
-    public ServerConfig setKeepAlive(boolean keepAlive) {
-        this.keepAlive = keepAlive;
-        return this;
-    }
-
     @Override
     public int hashCode() {
         final int prime = 31;
@@ -854,10 +832,17 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
         result = prime * result + ((host == null) ? 0 : host.hashCode());
         result = prime * result + port;
         result = prime * result
-            + ((protocol == null) ? 0 : protocol.hashCode());
+                + ((protocol == null) ? 0 : protocol.hashCode());
         return result;
     }
 
+    /**
+     * Equals boolean.
+     *
+     * @param obj the obj
+     * @return boolean boolean
+     * @see Object#equals(Object)
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -890,6 +875,12 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
         return true;
     }
 
+    /**
+     * To string.
+     *
+     * @return string string
+     * @see Object#toString()
+     */
     @Override
     public String toString() {
         return "ServerConfig [protocol=" + protocol + ", port=" + port + ", host=" + host + "]";

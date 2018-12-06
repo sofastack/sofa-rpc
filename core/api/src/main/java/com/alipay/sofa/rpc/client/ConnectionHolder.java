@@ -26,13 +26,14 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ConnectionHolder SPI
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 @ThreadSafe
 public abstract class ConnectionHolder implements Initializable, Destroyable, ProviderInfoListener {
@@ -64,7 +65,7 @@ public abstract class ConnectionHolder implements Initializable, Destroyable, Pr
      * @return the alive connections
      */
     @Deprecated
-    public abstract ConcurrentMap<ProviderInfo, ClientTransport> getAvailableConnections();
+    public abstract ConcurrentHashMap<ProviderInfo, ClientTransport> getAvailableConnections();
 
     /**
      * 存活的全部provider

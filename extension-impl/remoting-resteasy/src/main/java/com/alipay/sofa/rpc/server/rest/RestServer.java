@@ -38,43 +38,44 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("rest")
 public class RestServer implements Server {
 
     /**
      * Logger
      */
-    private static final Logger    LOGGER     = LoggerFactory.getLogger(RestServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RestServer.class);
 
     /**
      * 是否已经启动
      */
-    protected volatile boolean     started;
+    protected volatile boolean started;
 
     /**
-     * Rest服务端
+     * Bolt服务端
      */
     protected SofaNettyJaxrsServer httpServer;
 
     /**
      * 服务端配置
      */
-    protected ServerConfig         serverConfig;
+    protected ServerConfig serverConfig;
 
     /**
      * invoker数量
      */
-    protected AtomicInteger        invokerCnt = new AtomicInteger();
+    protected AtomicInteger invokerCnt = new AtomicInteger();
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        httpServer = buildServer();
     }
 
     private SofaNettyJaxrsServer buildServer() {
         // 生成Server对象
-        SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer(serverConfig);
+        SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer();
 
         int bossThreads = serverConfig.getIoThreads();
         if (bossThreads > 0) {
@@ -84,6 +85,9 @@ public class RestServer implements Server {
         httpServer.setMaxRequestSize(serverConfig.getPayload());
         httpServer.setHostname(serverConfig.getBoundHost());
         httpServer.setPort(serverConfig.getPort());
+        httpServer.setTelnet(serverConfig.isTelnet());
+        httpServer.setKeepAlive(true); // keepAlive TODO 可配置
+        httpServer.setDaemon(serverConfig.isDaemon());
 
         ResteasyDeployment resteasyDeployment = httpServer.getDeployment();
         resteasyDeployment.start();
@@ -107,8 +111,8 @@ public class RestServer implements Server {
         if (CommonUtils.isNotEmpty(customProviderInstances)) {
             for (Object provider : customProviderInstances) {
                 PropertyInjector propertyInjector = providerFactory.getInjectorFactory()
-                    .createPropertyInjector(
-                        JAXRSProviderManager.getTargetClass(provider), providerFactory);
+                        .createPropertyInjector(
+                                JAXRSProviderManager.getTargetClass(provider), providerFactory);
                 propertyInjector.inject(provider);
                 providerFactory.registerProviderInstance(provider);
             }
@@ -137,13 +141,15 @@ public class RestServer implements Server {
             }
             // 绑定到端口
             try {
+                httpServer = buildServer();
                 httpServer.start();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
                 }
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(
-                    "Failed to start jetty server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(), e);
+                        "Failed to start jetty server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(),
+                        e);
             }
             started = true;
         }
@@ -170,6 +176,7 @@ public class RestServer implements Server {
                 LOGGER.info("Stop the http rest server at port {}", serverConfig.getPort());
             }
             httpServer.stop();
+            httpServer = null;
         } catch (Exception e) {
             LOGGER.error("Stop the http rest server at port " + serverConfig.getPort() + " error !", e);
         }
@@ -184,11 +191,11 @@ public class RestServer implements Server {
         // 在httpserver中注册此jaxrs服务
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Register jaxrs service to base url http://" + serverConfig.getHost() + ":"
-                + serverConfig.getPort() + serverConfig.getContextPath());
+                    + serverConfig.getPort() + serverConfig.getContextPath());
         }
         try {
             httpServer.getDeployment().getRegistry()
-                .addResourceFactory(new SofaResourceFactory(providerConfig), serverConfig.getContextPath());
+                    .addResourceFactory(new SofaResourceFactory(providerConfig), serverConfig.getContextPath());
 
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
@@ -203,11 +210,11 @@ public class RestServer implements Server {
         }
         if (LOGGER.isInfoEnabled()) {
             LOGGER.info("Unregister jaxrs service to port {} and base path is {}", serverConfig.getPort(),
-                serverConfig.getContextPath());
+                    serverConfig.getContextPath());
         }
         try {
             httpServer.getDeployment().getRegistry()
-                .removeRegistrations(providerConfig.getRef().getClass(), serverConfig.getContextPath());
+                    .removeRegistrations(providerConfig.getRef().getClass(), serverConfig.getContextPath());
             invokerCnt.decrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Unregister jaxrs service error", e);
@@ -221,17 +228,12 @@ public class RestServer implements Server {
     @Override
     public void destroy() {
         stop();
-        httpServer = null;
     }
 
     @Override
     public void destroy(DestroyHook hook) {
-        if (hook != null) {
-            hook.preDestroy();
-        }
+        hook.preDestroy();
         destroy();
-        if (hook != null) {
-            hook.postDestroy();
-        }
+        hook.postDestroy();
     }
 }

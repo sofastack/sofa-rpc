@@ -38,44 +38,45 @@ import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_USE_EPOLL;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ClientTransportConfig {
 
     /**
      * 客户端的一些信息（请只读）
      */
-    private ConsumerConfig        consumerConfig;
+    private ConsumerConfig consumerConfig;
     /**
      * 对应的Provider信息（请只读）
      */
-    private ProviderInfo          providerInfo;
+    private ProviderInfo providerInfo;
     /**
      * 默认传输实现（一般和协议一致）
      */
-    private String                container         = getStringValue(DEFAULT_TRANSPORT);
+    private String container = getStringValue(DEFAULT_TRANSPORT);
     /**
      * 默认连接超时时间
      */
-    private int                   connectTimeout    = getIntValue(CONSUMER_CONNECT_TIMEOUT);
+    private int connectTimeout = getIntValue(CONSUMER_CONNECT_TIMEOUT);
     /**
      * 默认断开连接超时时间
      */
-    private int                   disconnectTimeout = getIntValue(CONSUMER_DISCONNECT_TIMEOUT);
+    private int disconnectTimeout = getIntValue(CONSUMER_DISCONNECT_TIMEOUT);
     /**
      * 默认的调用超时时间（长连接调用时会被覆盖）
      */
-    private int                   invokeTimeout     = getIntValue(CONSUMER_INVOKE_TIMEOUT);
+    private int invokeTimeout = getIntValue(CONSUMER_INVOKE_TIMEOUT);
     /**
      * 默认一个地址建立长连接的数量
      */
-    private int                   connectionNum     = getIntValue(CONSUMER_CONNECTION_NUM);
+    private int connectionNum = getIntValue(CONSUMER_CONNECTION_NUM);
     /**
      * 最大数据量
      */
-    private int                   payload           = getIntValue(TRANSPORT_PAYLOAD_MAX);
+    private int payload = getIntValue(TRANSPORT_PAYLOAD_MAX);
     /**
      * 是否使用Epoll
      */
-    private boolean               useEpoll          = getBooleanValue(TRANSPORT_USE_EPOLL);
+    private boolean useEpoll = getBooleanValue(TRANSPORT_USE_EPOLL);
     /**
      * 连接事件监听器
      */
@@ -279,21 +280,5 @@ public class ClientTransportConfig {
     public ClientTransportConfig setChannelListeners(List<ChannelListener> channelListeners) {
         this.channelListeners = channelListeners;
         return this;
-    }
-
-    @Override
-    public String toString() {
-        return super.toString() + "{" +
-            "consumerConfig=" + consumerConfig +
-            ", providerInfo=" + providerInfo +
-            ", container='" + container + '\'' +
-            ", connectTimeout=" + connectTimeout +
-            ", disconnectTimeout=" + disconnectTimeout +
-            ", invokeTimeout=" + invokeTimeout +
-            ", connectionNum=" + connectionNum +
-            ", payload=" + payload +
-            ", useEpoll=" + useEpoll +
-            ", channelListeners=" + channelListeners +
-            '}';
     }
 }

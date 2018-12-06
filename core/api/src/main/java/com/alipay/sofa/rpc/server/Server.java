@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 public interface Server extends Destroyable {
     /**
@@ -34,31 +35,31 @@ public interface Server extends Destroyable {
      *
      * @param serverConfig ServerConfig
      */
-    void init(ServerConfig serverConfig);
+    public void init(ServerConfig serverConfig);
 
     /**
      * 启动
      */
-    void start();
+    public void start();
 
     /**
      * 是否已经启动
      *
      * @return 是否启动
      */
-    boolean isStarted();
+    public boolean isStarted();
 
     /**
      * 是否还绑定了服务（没有可以销毁）
      *
      * @return has service entry
      */
-    boolean hasNoEntry();
+    public boolean hasNoEntry();
 
     /**
      * 停止
      */
-    void stop();
+    public void stop();
 
     /**
      * 注册服务
@@ -66,7 +67,7 @@ public interface Server extends Destroyable {
      * @param providerConfig 服务提供者配置
      * @param instance       服务提供者实例
      */
-    void registerProcessor(ProviderConfig providerConfig, Invoker instance);
+    public void registerProcessor(ProviderConfig providerConfig, Invoker instance);
 
     /**
      * 取消注册服务
@@ -74,5 +75,5 @@ public interface Server extends Destroyable {
      * @param providerConfig 服务提供者配置
      * @param closeIfNoEntry 如果没有注册服务，最后一个关闭Server
      */
-    void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry);
+    public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry);
 }

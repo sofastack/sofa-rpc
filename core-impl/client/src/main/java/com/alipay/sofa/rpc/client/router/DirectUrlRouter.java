@@ -34,6 +34,7 @@ import java.util.List;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.2.0
  */
+// TODO: 2018/7/9 by zmyer
 @Extension(value = "directUrl", order = -20000)
 @AutoActive(consumerSide = true)
 public class DirectUrlRouter extends Router {
@@ -41,7 +42,7 @@ public class DirectUrlRouter extends Router {
     /**
      * 请求路径：直连
      */
-    public static final String  RPC_DIRECT_URL_ROUTER = "DIRECT";
+    public static final String RPC_DIRECT_URL_ROUTER = "DIRECT";
 
     /**
      * 服务消费者配置

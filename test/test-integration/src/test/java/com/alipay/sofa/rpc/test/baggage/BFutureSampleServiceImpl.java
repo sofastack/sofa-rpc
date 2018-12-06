@@ -18,10 +18,6 @@ package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
-import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
@@ -33,13 +29,11 @@ import java.util.concurrent.TimeUnit;
  */
 public class BFutureSampleServiceImpl implements SampleService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(BFutureSampleServiceImpl.class);
+    private SampleService sampleServiceC;
 
-    private SampleService       sampleServiceC;
+    private SampleService sampleServiceD;
 
-    private SampleService       sampleServiceD;
-
-    private String              reqBaggage;
+    private String        reqBaggage;
 
     public BFutureSampleServiceImpl(SampleService sampleServiceC, SampleService sampleServiceD) {
         this.sampleServiceC = sampleServiceC;
@@ -49,7 +43,7 @@ public class BFutureSampleServiceImpl implements SampleService {
     @Override
     public String hello() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        LOGGER.info("--b1-----:" + context);
+        System.out.println("--b1-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageB");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageB", "b2aaa");
@@ -69,31 +63,6 @@ public class BFutureSampleServiceImpl implements SampleService {
             e.printStackTrace();
         }
         return s1 + s2;
-    }
-
-    @Override
-    public EchoResponse echoObj(EchoRequest req) {
-        RpcInvokeContext context = RpcInvokeContext.getContext();
-        LOGGER.info("--b1-----:" + context);
-        reqBaggage = context.getRequestBaggage("reqBaggageB");
-        if (reqBaggage != null) {
-            context.putResponseBaggage("respBaggageB", "b2aaa");
-        } else {
-            context.putResponseBaggage("respBaggageB_force", "b2aaaff");
-        }
-        EchoResponse s1 = null;
-        EchoResponse s2 = null;
-        try {
-            s1 = sampleServiceC.echoObj(req);
-            Future futureC = SofaResponseFuture.getFuture(true);
-            s2 = sampleServiceD.echoObj(req);
-            Future futureD = SofaResponseFuture.getFuture();
-            s1 = (EchoResponse) futureC.get();
-            s2 = (EchoResponse) futureD.get(2000, TimeUnit.MILLISECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return EchoResponse.newBuilder().setCode(200).setMessage(s1.getMessage() + s2.getMessage()).build();
     }
 
     public String getReqBaggage() {

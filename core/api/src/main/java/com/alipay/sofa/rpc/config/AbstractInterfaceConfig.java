@@ -58,111 +58,109 @@ import static com.alipay.sofa.rpc.config.ConfigValueHelper.checkNormalWithCommaC
  * @param <S> the sub class of AbstractInterfaceConfig
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConfig>
-                                                                                    extends AbstractIdConfig<S>
-                                                                                                               implements
-                                                                                                               Serializable {
+        extends AbstractIdConfig<S> implements Serializable {
 
     /**
      * The constant serialVersionUID.
      */
-    private static final long                        serialVersionUID = -8738241729920479618L;
+    private static final long serialVersionUID = -8738241729920479618L;
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                      LOGGER           = LoggerFactory
-                                                                          .getLogger(AbstractInterfaceConfig.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(AbstractInterfaceConfig.class);
 
     /*-------------配置项开始----------------*/
     /**
      * 应用信息
      */
-    protected ApplicationConfig                      application      = new ApplicationConfig();
+    protected ApplicationConfig application = new ApplicationConfig();
 
     /**
      * 服务接口：做为服务唯一标识的组成部分<br>
      * 不管普通调用和泛化调用，都是设置实际的接口类名称，
      *
      * @see #uniqueId
+     * @see #version
      */
-    protected String                                 interfaceId;
+    protected String interfaceId;
 
     /**
      * 服务标签：做为服务唯一标识的组成部分
      *
      * @see #interfaceId
+     * @see #version
      */
-    protected String                                 uniqueId         = getStringValue(DEFAULT_UNIQUEID);
+    protected String uniqueId = getStringValue(DEFAULT_UNIQUEID);
 
     /**
      * 过滤器配置实例
      */
-    protected transient List<Filter>                 filterRef;
+    protected transient List<Filter> filterRef;
 
     /**
      * 过滤器配置别名，多个用逗号隔开
      */
-    protected List<String>                           filter;
+    protected List<String> filter;
 
     /**
      * 注册中心配置，可配置多个
      */
-    protected List<RegistryConfig>                   registry;
+    protected List<RegistryConfig> registry;
 
     /**
      * 方法配置，可配置多个
      */
-    protected Map<String, MethodConfig>              methods;
+    protected Map<String, MethodConfig> methods;
 
     /**
      * 默认序列化
      */
-    protected String                                 serialization    = getStringValue(DEFAULT_SERIALIZATION);
+    protected String serialization = getStringValue(DEFAULT_SERIALIZATION);
 
     /**
      * 是否注册，如果是false只订阅不注册
      */
-    protected boolean                                register         = getBooleanValue(SERVICE_REGISTER);
+    protected boolean register = getBooleanValue(SERVICE_REGISTER);
 
     /**
      * 是否订阅服务
      */
-    protected boolean                                subscribe        = getBooleanValue(SERVICE_SUBSCRIBE);
+    protected boolean subscribe = getBooleanValue(SERVICE_SUBSCRIBE);
 
     /**
      * 代理类型
      */
-    protected String                                 proxy            = getStringValue(DEFAULT_PROXY);
+    protected String proxy = getStringValue(DEFAULT_PROXY);
 
     /**
-     * 服务分组：不做为服务唯一标识的一部分
-     * @deprecated 不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
+     * 服务分组：不做为服务唯一标识
      */
-    @Deprecated
-    protected String                                 group            = getStringValue(DEFAULT_GROUP);
+    protected String group = getStringValue(DEFAULT_GROUP);
     /**
-     * 服务版本：不做为服务唯一标识的一部分
+     * 版本：做为服务唯一标识的一部分
      *
+     * @see #version
      * @see #interfaceId
-     * @see #uniqueId
-     * @deprecated 从5.4.0开始，不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
-    protected String                                 version          = getStringValue(DEFAULT_VERSION);
+    protected String version = getStringValue(DEFAULT_VERSION);
     /**
      * 结果缓存实现类
      */
-    protected transient Cache                        cacheRef;
+    protected transient Cache cacheRef;
 
     /**
      * Mock实现类
      */
-    protected transient T                            mockRef;
+    protected transient T mockRef;
 
     /**
      * 自定义参数
      */
-    protected Map<String, String>                    parameters;
+    protected Map<String, String> parameters;
 
     /*-------- 下面是方法级配置 --------*/
 
@@ -174,22 +172,22 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 是否启动结果缓存
      */
-    protected boolean                                cache;
+    protected boolean cache;
 
     /**
      * 是否开启mock
      */
-    protected boolean                                mock;
+    protected boolean mock;
 
     /**
      * 是否开启参数验证(jsr303)
      */
-    protected boolean                                validation;
+    protected boolean validation;
 
     /**
      * 压缩算法，为空则不压缩
      */
-    protected String                                 compress;
+    protected String compress;
 
     /*-------------配置项结束----------------*/
 
@@ -201,12 +199,12 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 代理接口类，和T对应，主要针对泛化调用
      */
-    protected transient volatile Class               proxyClass;
+    protected transient volatile Class proxyClass;
 
     /**
      * 服务配置的listener
      */
-    protected transient volatile ConfigListener      configListener;
+    protected transient volatile ConfigListener configListener;
 
     /**
      * Gets proxy class.
@@ -334,6 +332,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @return the registry
      */
+    // TODO: 2018/7/9 by zmyer
     public List<RegistryConfig> getRegistry() {
         return registry;
     }
@@ -454,7 +453,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @return the group
      */
-    @Deprecated
     public String getGroup() {
         return group;
     }
@@ -464,9 +462,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param group the group
      * @return the group
-     * @deprecated Use {@link #setUniqueId(String)} 
      */
-    @Deprecated
     public S setGroup(String group) {
         this.group = group;
         return castThis();
@@ -477,7 +473,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @return the version
      */
-    @Deprecated
     public String getVersion() {
         return version;
     }
@@ -487,9 +482,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param version the version
      * @return the version
-     * @deprecated Use {@link #setUniqueId(String)} 
      */
-    @Deprecated
     public S setVersion(String version) {
         this.version = version;
         return castThis();
@@ -551,10 +544,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the parameters
      */
     public S setParameters(Map<String, String> parameters) {
-        if (this.parameters == null) {
-            this.parameters = new ConcurrentHashMap<String, String>();
-        }
-        this.parameters.putAll(parameters);
+        this.parameters = parameters;
         return castThis();
     }
 
@@ -863,6 +853,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @param overwrite   是否覆盖 true直接覆盖，false为检查
      * @return 是否有变更 boolean
      */
+    // TODO: 2018/7/9 by zmyer
     public boolean updateAttribute(String property, String newValueStr, boolean overwrite) {
         try {
             boolean changed = false;
@@ -872,7 +863,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 int index = methodAndP.indexOf(RpcConstants.HIDE_KEY_PREFIX);
                 if (index <= 0) {
                     throw ExceptionUtils.buildRuntime(property, newValueStr,
-                        "Unknown update attribute key!");
+                            "Unknown update attribute key!");
                 }
                 String methodName = methodAndP.substring(0, index);
                 String methodProperty = methodAndP.substring(index + 1);
@@ -904,7 +895,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                     BeanUtils.setProperty(methodConfig, methodProperty, propertyClazz, newValue);// 覆盖属性
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Property \"" + methodName + "." + methodProperty + "\" changed from {} to {}",
-                            oldValue, newValueStr);
+                                oldValue, newValueStr);
                     }
                 }
             } else { // 接口级配置 例如timeout
@@ -931,7 +922,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
             return changed;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Exception when update attribute, The key is "
-                + property + " and value is " + newValueStr, e);
+                    + property + " and value is " + newValueStr, e);
         }
     }
 

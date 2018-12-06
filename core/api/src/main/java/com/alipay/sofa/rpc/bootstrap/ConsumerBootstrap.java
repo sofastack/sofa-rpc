@@ -24,10 +24,11 @@ import com.alipay.sofa.rpc.ext.Extensible;
 import java.util.List;
 
 /**
- * 引用服务的包装类，包括具体的启动后的对象
+ * <p>引用服务的包装类，包括具体的启动后的对象</p>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 public abstract class ConsumerBootstrap<T> {
 

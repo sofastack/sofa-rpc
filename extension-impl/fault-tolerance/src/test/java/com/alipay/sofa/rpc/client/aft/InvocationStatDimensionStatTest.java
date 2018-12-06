@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.client.aft;
 
-import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.aft.impl.ServiceExceptionInvocationStat;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -53,8 +52,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
 
     @Test
     public void testInvocationStatFactory() {
-        InvocationStatDimension invocation = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip"),
-            consumerConfig);
+        InvocationStatDimension invocation = new InvocationStatDimension(ProviderInfo.valueOf("ip"), consumerConfig);
         InvocationStat InvocationStat1Result = InvocationStatFactory.getInvocationStat(invocation);
         InvocationStat InvocationStat2Result = InvocationStatFactory.getInvocationStat(invocation);
 
@@ -64,8 +62,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
     @Test
     public void testInvocationStatStatic() {
 
-        InvocationStatDimension invocation = new InvocationStatDimension(ProviderHelper.toProviderInfo("ip"),
-            consumerConfig);
+        InvocationStatDimension invocation = new InvocationStatDimension(ProviderInfo.valueOf("ip"), consumerConfig);
         InvocationStat invocationStat = new ServiceExceptionInvocationStat(invocation);
 
         /**test info static*/
@@ -118,7 +115,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
 
@@ -169,7 +166,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 RpcInvokeContext.getContext().getFuture().get();
             } catch (Exception e) {
-                LOGGER.info("future超时");
+                System.out.println("future超时");
             }
         }
         Thread.sleep(1000);
@@ -201,7 +198,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
@@ -217,7 +214,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
         Assert.assertEquals(5, delayGetCount(invocationStat, 5));
@@ -237,7 +234,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             @Override
             public void onAppResponse(final Object appResponse, String methodName, RequestBase request) {
                 //放到 future 中方便测试.
-                LOGGER.info("回调成功" + appResponse);
+                System.out.println("回调成功" + appResponse);
                 context.setFuture(new ResponseFuture<String>() {
                     @Override
                     public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
@@ -279,12 +276,12 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
 
             @Override
             public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                LOGGER.info("回调发生应用异常" + throwable);
+                System.out.println("回调发生应用异常" + throwable);
             }
 
             @Override
             public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-                LOGGER.info("回调发生sofa异常" + sofaException);
+                System.out.println("回调发生sofa异常" + sofaException);
 
             }
         });

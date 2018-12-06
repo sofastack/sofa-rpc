@@ -26,98 +26,60 @@ import java.io.Serializable;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class RequestBase implements Serializable {
 
-    private static final long  serialVersionUID = -7323141575870688636L;
+    private static final long serialVersionUID = -7323141575870688636L;
 
     /**
-     * Method name
+     * 方法名
      */
-    private String             methodName;
+    private String methodName;
 
     /**
-     * Argument type strings of method
+     * 方法参数签名invoke method arguments name
      */
-    private String[]           methodArgSigs;
+    private String[] methodArgSigs;
 
     /**
-     * Argument values of method
+     * 方法参数值 invoke method arguments object
      */
     private transient Object[] methodArgs;
 
     /**
-     * Target service unique name, contains interfaceName, uniqueId and etc.
+     * 服务唯一名称 traget service unique name
      */
-    private String             targetServiceUniqueName;
+    private String targetServiceUniqueName;
 
-    /**
-     * Gets method name.
-     *
-     * @return the method name
-     */
     public String getMethodName() {
         return methodName;
     }
 
-    /**
-     * Get method args object [ ].
-     *
-     * @return the object [ ]
-     */
     public Object[] getMethodArgs() {
         return methodArgs;
     }
 
-    /**
-     * Get method arg sigs string [ ].
-     *
-     * @return the string [ ]
-     */
     public String[] getMethodArgSigs() {
         return methodArgSigs;
     }
 
-    /**
-     * Gets target service unique name.
-     *
-     * @return the target service unique name
-     */
+    // TODO: 2018/6/22 by zmyer
     public String getTargetServiceUniqueName() {
         return targetServiceUniqueName;
     }
 
-    /**
-     * Sets method name.
-     *
-     * @param methodName the method name
-     */
     public void setMethodName(String methodName) {
         this.methodName = methodName;
     }
 
-    /**
-     * Sets method args.
-     *
-     * @param methodArgs the method args
-     */
     public void setMethodArgs(Object[] methodArgs) {
         this.methodArgs = methodArgs;
     }
 
-    /**
-     * Sets method arg sigs.
-     *
-     * @param methodArgSigs the method arg sigs
-     */
     public void setMethodArgSigs(String[] methodArgSigs) {
         this.methodArgSigs = methodArgSigs;
     }
 
-    /**
-     * Sets target service unique name.
-     *
-     * @param targetServiceUniqueName the target service unique name
-     */
     public void setTargetServiceUniqueName(String targetServiceUniqueName) {
         this.targetServiceUniqueName = targetServiceUniqueName;
     }

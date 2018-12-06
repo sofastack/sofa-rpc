@@ -43,9 +43,4 @@ public class TestExceptionServiceImpl implements TestExceptionService {
     public String throwDeclaredException() throws TestException {
         throw new TestException("TestException");
     }
-
-    @Override
-    public void throwDeclaredExceptionWithoutReturn() throws TestException {
-        throw new TestException("DeclaredExceptionWithoutReturn");
-    }
 }

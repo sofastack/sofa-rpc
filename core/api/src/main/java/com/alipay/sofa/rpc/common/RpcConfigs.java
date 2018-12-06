@@ -35,23 +35,24 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * 配置加载器和操作入口
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class RpcConfigs {
 
     /**
      * 全部配置
      */
-    private final static ConcurrentMap<String, Object>                  CFG          = new ConcurrentHashMap<String, Object>();
+    private final static ConcurrentHashMap<String, Object> CFG = new ConcurrentHashMap<String, Object>();
     /**
      * 配置变化监听器
      */
-    private final static ConcurrentMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String, List<RpcConfigListener>>();
+    private final static ConcurrentHashMap<String, List<RpcConfigListener>> CFG_LISTENER =
+            new ConcurrentHashMap<String, List<RpcConfigListener>>();
 
     static {
         init(); // 加载配置文件
@@ -84,7 +85,7 @@ public class RpcConfigs {
     private static void loadCustom(String fileName) throws IOException {
         ClassLoader classLoader = ClassLoaderUtils.getClassLoader(RpcConfigs.class);
         Enumeration<URL> urls = classLoader != null ? classLoader.getResources(fileName)
-            : ClassLoader.getSystemResources(fileName);
+                : ClassLoader.getSystemResources(fileName);
         if (urls != null) { // 可能存在多个文件
             List<CfgFile> allFile = new ArrayList<CfgFile>();
             while (urls.hasMoreElements()) {
@@ -327,8 +328,8 @@ public class RpcConfigs {
      */
     protected static boolean changed(Object oldObj, Object newObj) {
         return oldObj == null ?
-            newObj != null :
-            !oldObj.equals(newObj);
+                newObj != null :
+                !oldObj.equals(newObj);
     }
 
     /**

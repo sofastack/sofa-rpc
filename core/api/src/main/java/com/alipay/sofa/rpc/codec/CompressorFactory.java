@@ -16,14 +16,12 @@
  */
 package com.alipay.sofa.rpc.codec;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of Compressor
@@ -36,17 +34,17 @@ public final class CompressorFactory {
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{编码：压缩器}
      */
-    private final static ConcurrentMap<Byte, Compressor> TYPE_COMPRESSOR_MAP = new ConcurrentHashMap<Byte, Compressor>();
+    private final static ConcurrentHashMap<Byte, Compressor> TYPE_COMPRESSOR_MAP = new ConcurrentHashMap<Byte, Compressor>();
     /**
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static ConcurrentMap<String, Byte>     TYPE_CODE_MAP       = new ConcurrentHashMap<String, Byte>();
+    private final static ConcurrentHashMap<String, Byte>     TYPE_CODE_MAP       = new ConcurrentHashMap<String, Byte>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Compressor>     EXTENSION_LOADER    = buildLoader();
+    private final static ExtensionLoader<Compressor>         EXTENSION_LOADER    = buildLoader();
 
     private static ExtensionLoader<Compressor> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Compressor.class, new ExtensionLoaderListener<Compressor>() {
@@ -77,11 +75,7 @@ public final class CompressorFactory {
      * @return Compressor
      */
     public static Compressor getCompressor(byte code) {
-        Compressor compressor = TYPE_COMPRESSOR_MAP.get(code);
-        if (compressor == null) {
-            throw new SofaRpcRuntimeException("Compressor Not Found :\"" + code + "\"!");
-        }
-        return compressor;
+        return TYPE_COMPRESSOR_MAP.get(code);
     }
 
     /**

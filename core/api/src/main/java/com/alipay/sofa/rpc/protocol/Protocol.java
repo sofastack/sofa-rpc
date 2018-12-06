@@ -33,26 +33,26 @@ public interface Protocol {
      *
      * @return ProtocolInfo
      */
-    ProtocolInfo protocolInfo();
+    public ProtocolInfo protocolInfo();
 
     /**
      * 协议编码器
      *
      * @return ProtocolEncoder
      */
-    ProtocolEncoder encoder();
+    public ProtocolEncoder encoder();
 
     /**
      * 协议解码器
      *
      * @return ProtocolEncoder
      */
-    ProtocolDecoder decoder();
+    public ProtocolDecoder decoder();
 
     /**
      * 协议协商器
      *
      * @return ProtocolEncoder
      */
-    ProtocolNegotiator negotiator();
+    public ProtocolNegotiator negotiator();
 }

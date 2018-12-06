@@ -32,12 +32,12 @@ public interface ChannelListener {
      *
      * @param channel Channel
      */
-    void onConnected(AbstractChannel channel);
+    public void onConnected(AbstractChannel channel);
 
     /**
      * Handle disconnect event on channel closed
      *
      * @param channel Channel
      */
-    void onDisconnected(AbstractChannel channel);
+    public void onDisconnected(AbstractChannel channel);
 }

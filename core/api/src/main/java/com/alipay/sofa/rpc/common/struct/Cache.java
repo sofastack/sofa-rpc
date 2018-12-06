@@ -29,7 +29,7 @@ public interface Cache {
      * @param args        方法参数
      * @return 关键字，可以返回null
      */
-    Object buildKey(String interfaceId, String methodName, Object[] args);
+    public Object buildKey(String interfaceId, String methodName, Object[] args);
 
     /**
      * 放入缓存
@@ -37,7 +37,7 @@ public interface Cache {
      * @param key    方法参数得到的关键字
      * @param result 缓存的调用结果
      */
-    void put(Object key, Object result);
+    public void put(Object key, Object result);
 
     /**
      * 拿出缓存
@@ -45,5 +45,5 @@ public interface Cache {
      * @param key 方法参数得到的关键字
      * @return 缓存的调用结果
      */
-    Object get(Object key);
+    public Object get(Object key);
 }

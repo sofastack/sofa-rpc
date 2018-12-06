@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extensible
 public interface Proxy {
 
@@ -35,7 +36,7 @@ public interface Proxy {
      * @param <T>            类型
      * @return 代理对象
      */
-    <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker);
+    public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker);
 
     /**
      * 从代理对象里解析Invoker
@@ -43,5 +44,5 @@ public interface Proxy {
      * @param proxyObject 代理对象
      * @return Invoker
      */
-    Invoker getInvoker(Object proxyObject);
+    public Invoker getInvoker(Object proxyObject);
 }

@@ -144,7 +144,7 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         context.putRequestBaggage("reqBaggageC", "a2ccc");
         context.putRequestBaggage("reqBaggageD", "a2ddd");
 
-        LOGGER.info("-----A1-----" + RpcInvokeContext.getContext());
+        System.out.println("-----A1-----" + RpcInvokeContext.getContext());
         String ret = service.hello(); // 测试传递数据
         Assert.assertEquals(ret, null);
         latch[0].await(5000, TimeUnit.MILLISECONDS);
@@ -172,7 +172,7 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         str[0] = null;
         ret = null;
 
-        LOGGER.info("-----A3-----" + RpcInvokeContext.getContext());
+        System.out.println("-----A3-----" + RpcInvokeContext.getContext());
         ret = service.hello(); // 测试不传数据
         Assert.assertEquals(ret, null);
         latch[0].await(5000, TimeUnit.MILLISECONDS);

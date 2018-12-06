@@ -17,21 +17,20 @@
 package com.alipay.sofa.rpc.ext;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of ExtensionLoader
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ExtensionLoaderFactory {
-    private ExtensionLoaderFactory() {
-    }
 
     /**
      * All extension loader {Class : ExtensionLoader}
      */
-    private static final ConcurrentMap<Class, ExtensionLoader> LOADER_MAP = new ConcurrentHashMap<Class, ExtensionLoader>();
+    public static final ConcurrentHashMap<Class, ExtensionLoader> LOADER_MAP =
+            new ConcurrentHashMap<Class, ExtensionLoader>();
 
     /**
      * Get extension loader by extensible class with listener
@@ -41,6 +40,7 @@ public class ExtensionLoaderFactory {
      * @param <T>      Class
      * @return ExtensionLoader of this class
      */
+    // TODO: 2018/7/6 by zmyer
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> clazz, ExtensionLoaderListener<T> listener) {
         ExtensionLoader<T> loader = LOADER_MAP.get(clazz);
         if (loader == null) {
@@ -62,6 +62,7 @@ public class ExtensionLoaderFactory {
      * @param <T>   Class
      * @return ExtensionLoader of this class
      */
+    // TODO: 2018/7/6 by zmyer
     public static <T> ExtensionLoader<T> getExtensionLoader(Class<T> clazz) {
         return getExtensionLoader(clazz, null);
     }

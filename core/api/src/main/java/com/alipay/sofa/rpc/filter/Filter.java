@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.ext.Extensible;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 public abstract class Filter {
 
@@ -58,10 +59,10 @@ public abstract class Filter {
 
     /**
      * Do filtering after asynchronous respond, only supported in CONSUMER SIDE. <p>
-     * 
+     *
      * Because when do async invoke, the code after invoke has been executed after invoker return dummy empty response.
      * We need execute filter code after get true response from server.<p>
-     * 
+     *
      * NOTICE: The thread run {@link #onAsyncResponse} is different with the thread run {@link #invoke}
      *
      * @param config    ConsumerConfig, READ ONLY PLEASE.
@@ -72,7 +73,8 @@ public abstract class Filter {
      * @see #invoke(FilterInvoker, SofaRequest)
      * @see SofaRequest#isAsync()
      */
+    // TODO: 2018/6/22 by zmyer
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable exception)
-        throws SofaRpcException {
+            throws SofaRpcException {
     }
 }

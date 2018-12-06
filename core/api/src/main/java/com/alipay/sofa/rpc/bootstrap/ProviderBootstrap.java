@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.ext.Extensible;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 public abstract class ProviderBootstrap<T> {
 
@@ -56,7 +57,7 @@ public abstract class ProviderBootstrap<T> {
     public abstract void export();
 
     /**
-     * 取消发布一个服务
+     * 反引用一个服务
      */
     public abstract void unExport();
 }

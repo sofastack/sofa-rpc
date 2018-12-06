@@ -29,8 +29,6 @@ public class BeanIdMatchFilterTest {
     @Test
     public void testBeanIdMatch() {
         TestCustomizeFilter testCustomizeFilter = new TestCustomizeFilter();
-        testCustomizeFilter.setIdRule("AAA,!BBB");
-        Assert.assertEquals("AAA,!BBB", testCustomizeFilter.getIdRule());
 
         AbstractInterfaceConfig configA = new ProviderConfig();
         configA.setId("AAA");
@@ -48,20 +46,6 @@ public class BeanIdMatchFilterTest {
         Assert.assertEquals(false, testCustomizeFilter.needToLoad(filterInvokerB));
         Assert.assertEquals(true, testCustomizeFilter.needToLoad(filterInvokerC));
 
-    }
-
-    @Test
-    public void testIsMatch() {
-        TestCustomizeFilter testCustomizeFilter = new TestCustomizeFilter();
-        Assert.assertTrue(testCustomizeFilter.isMatch(""));
-
-        testCustomizeFilter = new TestCustomizeFilter();
-        testCustomizeFilter.setIdRule("AAA,BBB");
-
-        AbstractInterfaceConfig configA = new ProviderConfig();
-        configA.setId("AAA");
-        FilterInvoker filterInvokerA = new FilterInvoker(null, null, configA);
-        Assert.assertEquals(true, testCustomizeFilter.needToLoad(filterInvokerA));
     }
 
 }

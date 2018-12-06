@@ -18,8 +18,6 @@ package com.alipay.sofa.rpc.client.lb;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -33,9 +31,6 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(WeightRoundRobinLoadBalancerTest.class);
-
     @Test
     public void doSelect() throws Exception {
         WeightRoundRobinLoadBalancer loadBalancer = new WeightRoundRobinLoadBalancer(null);
@@ -56,11 +51,12 @@ public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            LOGGER.info("elapsed" + (end - start) + "ms");
-            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            System.out.println("elapsed" + (end - start) + "ms");
+            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
+                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(avg == cnt.get(9000 + i));
             }
         }
@@ -77,8 +73,8 @@ public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            LOGGER.info("elapsed" + (end - start) + "ms");
-            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            System.out.println("elapsed" + (end - start) + "ms");
+            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             Assert.assertTrue(cnt.get(9000) == 0);
             int count = 0;

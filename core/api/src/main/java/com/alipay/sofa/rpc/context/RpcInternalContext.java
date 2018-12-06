@@ -27,32 +27,34 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import java.net.InetSocketAddress;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于ThreadLocal的内部使用的上下文传递。一般存在于：客户端请求线程、服务端业务线程池、客户端异步线程<br>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class RpcInternalContext implements Cloneable {
 
     /**
      * 是否允许携带上下文附件，关闭后只能传递"."开头的key，"_" 开头的Key将不被保持和传递。<br>
      * 在性能测试等场景可能关闭此传递功能。
      */
-    private static final boolean                                ATTACHMENT_ENABLE = RpcConfigs
-                                                                                      .getBooleanValue(RpcOptions.CONTEXT_ATTACHMENT_ENABLE);
+    private static final boolean ATTACHMENT_ENABLE = RpcConfigs
+            .getBooleanValue(RpcOptions.CONTEXT_ATTACHMENT_ENABLE);
 
     /**
      * The constant LOCAL.
      */
-    private static final ThreadLocal<RpcInternalContext>        LOCAL             = new ThreadLocal<RpcInternalContext>();
+    private static final ThreadLocal<RpcInternalContext> LOCAL = new ThreadLocal<RpcInternalContext>();
 
     /**
      * The constant DEQUE_LOCAL.
      */
-    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new ThreadLocal<Deque<RpcInternalContext>>();
+    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL =
+            new ThreadLocal<Deque<RpcInternalContext>>();
 
     /**
      * 设置上下文
@@ -96,6 +98,7 @@ public class RpcInternalContext implements Cloneable {
     /**
      * 上下文往下放一层（例如服务端B接到A的请求后再作为C的客户端调用，调用前这里就先把放A-B的上下文存起来）
      */
+    // TODO: 2018/7/6 by zmyer
     public static void pushContext() {
         RpcInternalContext context = LOCAL.get();
         if (context != null) {
@@ -148,17 +151,17 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The Future.
      */
-    private ResponseFuture<?>   future;
+    private ResponseFuture<?> future;
 
     /**
      * The Local address.
      */
-    private InetSocketAddress   localAddress;
+    private InetSocketAddress localAddress;
 
     /**
      * The Remote address.
      */
-    private InetSocketAddress   remoteAddress;
+    private InetSocketAddress remoteAddress;
 
     /**
      * 附带属性功能，遵循谁使用谁清理的原则。Key必须为 "_" 和 "."开头<br>
@@ -166,22 +169,22 @@ public class RpcInternalContext implements Cloneable {
      *
      * @see #ATTACHMENT_ENABLE
      */
-    private Map<String, Object> attachments = new ConcurrentHashMap<String, Object>();
+    private Map<String, Object> attachments = new HashMap<String, Object>();
 
     /**
      * The Stopwatch
      */
-    private StopWatch           stopWatch   = new StopWatch();
+    private StopWatch stopWatch = new StopWatch();
 
     /**
      * The Provider side.
      */
-    private Boolean             providerSide;
+    private Boolean providerSide;
 
     /**
      * 要调用的服务端信息
      */
-    private ProviderInfo        providerInfo;
+    private ProviderInfo providerInfo;
 
     /**
      * Is provider side.
@@ -329,7 +332,7 @@ public class RpcInternalContext implements Cloneable {
      * @return attachment attachment
      */
     public Object getAttachment(String key) {
-        return key == null ? null : attachments.get(key);
+        return attachments.get(key);
     }
 
     /**
@@ -351,7 +354,7 @@ public class RpcInternalContext implements Cloneable {
         } else {
             if (!isValidInternalParamKey(key)) { // 打开附件传递功能，只能传 "_" 和 "." 开头的Key
                 throw new IllegalArgumentException("key must start with" + RpcConstants.INTERNAL_KEY_PREFIX
-                    + " or " + RpcConstants.HIDE_KEY_PREFIX);
+                        + " or " + RpcConstants.HIDE_KEY_PREFIX);
             }
         }
         if (value == null) {
@@ -366,10 +369,11 @@ public class RpcInternalContext implements Cloneable {
      * remove attachment.
      *
      * @param key the key
-     * @return Old value
+     * @return context rpc context
      */
-    public Object removeAttachment(String key) {
-        return attachments.remove(key);
+    public RpcInternalContext removeAttachment(String key) {
+        attachments.remove(key);
+        return this;
     }
 
     /**
@@ -421,9 +425,9 @@ public class RpcInternalContext implements Cloneable {
      * Clear context for next user
      */
     public void clear() {
-        this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(null)
-            .setProviderInfo(null);
-        this.attachments = new ConcurrentHashMap<String, Object>();
+        this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(false)
+                .setProviderInfo(null);
+        this.attachments = new HashMap<String, Object>();
         this.stopWatch.reset();
     }
 
@@ -449,15 +453,15 @@ public class RpcInternalContext implements Cloneable {
 
     @Override
     public String toString() {
-        return super.toString() + "{" +
-            "future=" + future +
-            ", localAddress=" + localAddress +
-            ", remoteAddress=" + remoteAddress +
-            ", attachments=" + attachments +
-            ", stopWatch=" + stopWatch +
-            ", providerSide=" + providerSide +
-            ", providerInfo=" + providerInfo +
-            '}';
+        return "RpcInternalContext{" +
+                "future=" + future +
+                ", localAddress=" + localAddress +
+                ", remoteAddress=" + remoteAddress +
+                ", attachments=" + attachments +
+                ", stopWatch=" + stopWatch +
+                ", providerSide=" + providerSide +
+                ", providerInfo=" + providerInfo +
+                '}';
     }
 
     @Override

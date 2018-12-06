@@ -17,39 +17,28 @@
 package com.alipay.sofa.rpc.quickstart;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  * Quick Start client
  */
 public class QuickStartClient {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(QuickStartClient.class);
-
     public static void main(String[] args) {
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName()) // 指定接口
             .setProtocol("bolt") // 指定协议
-            .setDirectUrl("bolt://127.0.0.1:12200") // 指定直连地址
-            .setConnectTimeout(10 * 1000);
+            .setDirectUrl("bolt://127.0.0.1:9696"); // 指定直连地址
 
         HelloService helloService = consumerConfig.refer();
 
         while (true) {
-            try {
-                LOGGER.info(helloService.sayHello("world"));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
+            System.out.println(helloService.sayHello("world"));
             try {
                 Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            } catch (Exception e) {
 
+            }
         }
     }
 }

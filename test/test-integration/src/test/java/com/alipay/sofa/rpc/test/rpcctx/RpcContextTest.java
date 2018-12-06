@@ -80,7 +80,7 @@ public class RpcContextTest extends ActivelyDestroyTest {
 
             Assert.assertEquals(serviceContext.getCallerAppName(), "test-client");
             Assert.assertEquals(referenceContext.getTargetAppName(), "test-server");
-            Assert.assertNotNull(referenceContext.getClientIP());
+            Assert.assertNotNull(referenceContext.getClinetIP());
             Assert.assertTrue(referenceContext.getClientPort() > 0);
         }
         {
@@ -125,7 +125,7 @@ public class RpcContextTest extends ActivelyDestroyTest {
 
             Assert.assertEquals(serviceContext.getCallerAppName(), "test-client");
             Assert.assertEquals(referenceContext.getTargetAppName(), "test-server");
-            Assert.assertNotNull(referenceContext.getClientIP());
+            Assert.assertNotNull(referenceContext.getClinetIP());
             Assert.assertTrue(referenceContext.getClientPort() > 0);
 
             try {

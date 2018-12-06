@@ -21,6 +21,7 @@ package com.alipay.sofa.rpc.common.utils;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ClassLoaderUtils {
 
     /**
@@ -28,6 +29,7 @@ public class ClassLoaderUtils {
      *
      * @return ClassLoader
      */
+    // TODO: 2018/7/6 by zmyer
     public static ClassLoader getCurrentClassLoader() {
         ClassLoader cl = Thread.currentThread().getContextClassLoader();
         if (cl == null) {

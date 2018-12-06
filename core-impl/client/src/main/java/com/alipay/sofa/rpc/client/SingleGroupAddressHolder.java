@@ -16,41 +16,42 @@
  */
 package com.alipay.sofa.rpc.client;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.ext.Extension;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 只支持单个分组的地址选择器（额外存一个直连分组）
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extension("singleGroup")
 public class SingleGroupAddressHolder extends AddressHolder {
 
     /**
      * 配置的直连地址列表
      */
-    protected ProviderGroup        directUrlGroup;
+    protected ProviderGroup directUrlGroup;
     /**
      * 注册中心来的地址列表
      */
-    protected ProviderGroup        registryGroup;
+    protected ProviderGroup registryGroup;
 
     /**
      * 地址变化的锁
      */
-    private ReentrantReadWriteLock lock  = new ReentrantReadWriteLock();
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
     // 读锁，允许并发读
-    private Lock                   rLock = lock.readLock();
+    private Lock rLock = lock.readLock();
     // 写锁，写的时候不允许读
-    private Lock                   wLock = lock.writeLock();
+    private Lock wLock = lock.writeLock();
 
     /**
      * 构造函数
@@ -78,8 +79,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public ProviderGroup getProviderGroup(String groupName) {
         rLock.lock();
         try {
-            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup
-                : registryGroup;
+            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup : registryGroup;
         } finally {
             rLock.unlock();
         }
@@ -100,12 +100,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
 
     @Override
     public int getAllProviderSize() {
-        rLock.lock();
-        try {
-            return directUrlGroup.size() + registryGroup.size();
-        } finally {
-            rLock.unlock();
-        }
+        return directUrlGroup.size() + registryGroup.size();
     }
 
     @Override
@@ -138,13 +133,13 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public void updateProviders(ProviderGroup providerGroup) {
         wLock.lock();
         try {
-            getProviderGroup(providerGroup.getName())
-                .setProviderInfos(new ArrayList<ProviderInfo>(providerGroup.getProviderInfos()));
+            getProviderGroup(providerGroup.getName()).setProviderInfos(new ArrayList(providerGroup.getProviderInfos()));
         } finally {
             wLock.unlock();
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void updateAllProviders(List<ProviderGroup> providerGroups) {
         ConcurrentHashSet<ProviderInfo> tmpDirectUrl = new ConcurrentHashSet<ProviderInfo>();

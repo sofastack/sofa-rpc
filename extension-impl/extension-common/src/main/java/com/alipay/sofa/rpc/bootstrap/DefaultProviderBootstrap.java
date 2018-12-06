@@ -16,16 +16,15 @@
  */
 package com.alipay.sofa.rpc.bootstrap;
 
-import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
+import com.alipay.sofa.rpc.common.utils.ReflectUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -40,8 +39,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -49,7 +46,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-@Extension("sofa")
+// TODO: 2018/6/22 by zmyer
 public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**
@@ -69,29 +66,24 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 是否已发布
      */
-    protected transient volatile boolean                        exported;
+    protected transient volatile boolean exported;
 
     /**
      * 服务端Invoker对象
      */
-    protected transient Invoker                                 providerProxyInvoker;
+    protected transient Invoker providerProxyInvoker;
 
     /**
      * 发布的服务配置
      */
-    protected final static ConcurrentMap<String, AtomicInteger> EXPORTED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
+    protected final ConcurrentHashMap<String, AtomicInteger> EXPORTED_KEYS =
+            new ConcurrentHashMap<String, AtomicInteger>();
 
-    /**
-     * 延迟加载的线程名工厂
-     */
-    private final ThreadFactory                                 factory       = new NamedThreadFactory(
-                                                                                  "DELAY-EXPORT",
-                                                                                  true);
-
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void export() {
         if (providerConfig.getDelay() > 0) { // 延迟加载,单位毫秒
-            Thread thread = factory.newThread(new Runnable() {
+            Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
@@ -101,60 +93,49 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     doExport();
                 }
             });
+            thread.setDaemon(true);
+            thread.setName("DelayExportThread");
             thread.start();
         } else {
             doExport();
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     private void doExport() {
         if (exported) {
             return;
         }
-
+        String key = providerConfig.buildKey();
+        String appName = providerConfig.getAppName();
         // 检查参数
         checkParameters();
+        if (LOGGER.isInfoEnabled(appName)) {
+            LOGGER.infoWithApp(appName, "Export provider config : {} with bean id {}", key, providerConfig.getId());
+        }
 
-        String appName = providerConfig.getAppName();
-
-        //key  is the protocol of server,for concurrent safe
-        Map<String, Boolean> hasExportedInCurrent = new ConcurrentHashMap<String, Boolean>();
-        // 将处理器注册到server
-        List<ServerConfig> serverConfigs = providerConfig.getServer();
-        for (ServerConfig serverConfig : serverConfigs) {
-            String protocol = serverConfig.getProtocol();
-
-            String key = providerConfig.buildKey() + ":" + protocol;
-
-            if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, "Export provider config : {} with bean id {}", key, providerConfig.getId());
-            }
-
-            // 注意同一interface，同一uniqueId，不同server情况
-            AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
-            if (cnt == null) { // 没有发布过
-                cnt = CommonUtils.putToConcurrentMap(EXPORTED_KEYS, key, new AtomicInteger(0));
-            }
-            int c = cnt.incrementAndGet();
-            hasExportedInCurrent.put(serverConfig.getProtocol(), true);
-            int maxProxyCount = providerConfig.getRepeatedExportLimit();
-            if (maxProxyCount > 0) {
-                if (c > maxProxyCount) {
-                    decrementCounter(hasExportedInCurrent);
-                    // 超过最大数量，直接抛出异常
-                    throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
+        // 注意同一interface，同一uniqleId，不同server情况
+        AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
+        if (cnt == null) { // 没有发布过
+            cnt = CommonUtils.putToConcurrentMap(EXPORTED_KEYS, key, new AtomicInteger(0));
+        }
+        int c = cnt.incrementAndGet();
+        int maxProxyCount = providerConfig.getRepeatedExportLimit();
+        if (maxProxyCount > 0) {
+            if (c > maxProxyCount) {
+                cnt.decrementAndGet();
+                // 超过最大数量，直接抛出异常
+                throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
                         + " has been exported more than " + maxProxyCount + " times!"
                         + " Maybe it's wrong config, please check it."
                         + " Ignore this if you did that on purpose!");
-                } else if (c > 1) {
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName, "Duplicate provider config with key {} has been exported!"
+            } else if (c > 1) {
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, "Duplicate provider config with key {} has been exported!"
                             + " Maybe it's wrong config, please check it."
                             + " Ignore this if you did that on purpose!", key);
-                    }
                 }
             }
-
         }
 
         try {
@@ -170,20 +151,20 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 }
             }
             // 将处理器注册到server
+            List<ServerConfig> serverConfigs = providerConfig.getServer();
             for (ServerConfig serverConfig : serverConfigs) {
                 try {
                     Server server = serverConfig.buildIfAbsent();
-                    // 注册请求调用器
+                    // 注册序列化接口
                     server.registerProcessor(providerConfig, providerProxyInvoker);
                     if (serverConfig.isAutoStart()) {
                         server.start();
                     }
-
                 } catch (SofaRpcRuntimeException e) {
                     throw e;
                 } catch (Exception e) {
                     LOGGER.errorWithApp(appName, "Catch exception when register processor to server: "
-                        + serverConfig.getId(), e);
+                            + serverConfig.getId(), e);
                 }
             }
 
@@ -191,8 +172,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerConfig.setConfigListener(new ProviderAttributeListener());
             register();
         } catch (Exception e) {
-            decrementCounter(hasExportedInCurrent);
-
+            cnt.decrementAndGet();
             if (e instanceof SofaRpcRuntimeException) {
                 throw (SofaRpcRuntimeException) e;
             } else {
@@ -206,25 +186,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * decrease counter
-     *
-     * @param hasExportedInCurrent
+     * for check fields and parameters of consumer config 
      */
-    private void decrementCounter(Map<String, Boolean> hasExportedInCurrent) {
-        //once error, we decrementAndGet the counter
-        for (Map.Entry<String, Boolean> entry : hasExportedInCurrent.entrySet()) {
-            String protocol = entry.getKey();
-            String key = providerConfig.buildKey() + ":" + protocol;
-            AtomicInteger cnt = EXPORTED_KEYS.get(key); // 计数器
-            if (cnt != null && cnt.get() > 0) {
-                cnt.decrementAndGet();
-            }
-        }
-    }
-
-    /**
-     * for check fields and parameters of consumer config
-     */
+    // TODO: 2018/6/22 by zmyer
     protected void checkParameters() {
         // 检查注入的ref是否接口实现类
         Class proxyClass = providerConfig.getProxyClass();
@@ -232,14 +196,14 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         T ref = providerConfig.getRef();
         if (!proxyClass.isInstance(ref)) {
             throw ExceptionUtils.buildRuntime("provider.ref",
-                ref == null ? "null" : ref.getClass().getName(),
-                "This is not an instance of " + providerConfig.getInterfaceId()
-                    + " in provider config with key " + key + " !");
+                    ref == null ? "null" : ref.getClass().getName(),
+                    "This is not an instance of " + providerConfig.getInterfaceId()
+                            + " in provider config with key " + key + " !");
         }
         // server 不能为空
         if (CommonUtils.isEmpty(providerConfig.getServer())) {
             throw ExceptionUtils.buildRuntime("server", "NULL", "Value of \"server\" is not specified in provider" +
-                " config with key " + key + " !");
+                    " config with key " + key + " !");
         }
         checkMethods(proxyClass);
     }
@@ -249,6 +213,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      *
      * @param itfClass 接口类
      */
+    // TODO: 2018/6/22 by zmyer
     protected void checkMethods(Class<?> itfClass) {
         ConcurrentHashMap<String, Boolean> methodsLimit = new ConcurrentHashMap<String, Boolean>();
         for (Method method : itfClass.getMethods()) {
@@ -257,7 +222,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 // 重名的方法
                 if (LOGGER.isWarnEnabled(providerConfig.getAppName())) {
                     LOGGER.warnWithApp(providerConfig.getAppName(), "Method with same name \"" + itfClass.getName()
-                        + "." + methodName + "\" exists ! The usage of overloading method in rpc is deprecated.");
+                            + "." + methodName + "\" exists ! The usage of overloading method in rpc is deprecated.");
                 }
             }
             // 判断服务下方法的黑白名单
@@ -266,10 +231,12 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 include = inList(providerConfig.getInclude(), providerConfig.getExclude(), methodName); // 检查是否在黑白名单中
                 methodsLimit.putIfAbsent(methodName, include);
             }
+            ReflectUtils.cacheMethodArgsType(providerConfig.getInterfaceId(), methodName, method.getParameterTypes());
             providerConfig.setMethodsLimit(methodsLimit);
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void unExport() {
         if (!exported) {
@@ -279,16 +246,12 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             if (!exported) {
                 return;
             }
-            String appName = providerConfig.getAppName();
 
-            List<ServerConfig> serverConfigs = providerConfig.getServer();
-            for (ServerConfig serverConfig : serverConfigs) {
-                String protocol = serverConfig.getProtocol();
-                String key = providerConfig.buildKey() + ":" + protocol;
-                if (LOGGER.isInfoEnabled(appName)) {
-                    LOGGER.infoWithApp(appName, "Unexport provider config : {} {}", key, providerConfig.getId() != null
+            String key = providerConfig.buildKey();
+            String appName = providerConfig.getAppName();
+            if (LOGGER.isInfoEnabled(appName)) {
+                LOGGER.infoWithApp(appName, "Unexport provider config : {} {}", key, providerConfig.getId() != null
                         ? "with bean id " + providerConfig.getId() : "");
-                }
             }
 
             // 取消注册到注册中心
@@ -297,6 +260,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerProxyInvoker = null;
 
             // 取消将处理器注册到server
+            List<ServerConfig> serverConfigs = providerConfig.getServer();
             if (serverConfigs != null) {
                 for (ServerConfig serverConfig : serverConfigs) {
                     Server server = serverConfig.getServer();
@@ -306,8 +270,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                         } catch (Exception e) {
                             if (LOGGER.isWarnEnabled(appName)) {
                                 LOGGER.warnWithApp(appName, "Catch exception when unRegister processor to server: " +
-                                    serverConfig.getId()
-                                    + ", but you can ignore if it's called by JVM shutdown hook", e);
+                                        serverConfig.getId()
+                                        + ", but you can ignore if it's called by JVM shutdown hook", e);
                             }
                         }
                     }
@@ -317,23 +281,19 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             providerConfig.setConfigListener(null);
 
             // 清除缓存状态
-            for (ServerConfig serverConfig : serverConfigs) {
-                String protocol = serverConfig.getProtocol();
-                String key = providerConfig.buildKey() + ":" + protocol;
-                AtomicInteger cnt = EXPORTED_KEYS.get(key);
-                if (cnt != null && cnt.decrementAndGet() <= 0) {
-                    EXPORTED_KEYS.remove(key);
-                }
+            AtomicInteger cnt = EXPORTED_KEYS.get(key);
+            if (cnt != null && cnt.decrementAndGet() <= 0) {
+                EXPORTED_KEYS.remove(key);
             }
-
             RpcRuntimeContext.invalidateProviderConfig(this);
             exported = false;
         }
     }
 
     /**
-     * 注册服务
+     * 订阅服务列表
      */
+    // TODO: 2018/7/6 by zmyer
     protected void register() {
         if (providerConfig.isRegister()) {
             List<RegistryConfig> registryConfigs = providerConfig.getRegistry();
@@ -350,7 +310,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {
                             LOGGER.warnWithApp(appName, "Catch exception when register to registry: "
-                                + registryConfig.getId(), e);
+                                    + registryConfig.getId(), e);
                         }
                     }
                 }
@@ -359,8 +319,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * 反注册服务
+     * 取消订阅服务列表
      */
+    // TODO: 2018/7/6 by zmyer
     protected void unregister() {
         if (providerConfig.isRegister()) {
             List<RegistryConfig> registryConfigs = providerConfig.getRegistry();
@@ -373,8 +334,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {
                             LOGGER.warnWithApp(appName, "Catch exception when unRegister from registry: " +
-                                registryConfig.getId()
-                                + ", but you can ignore if it's called by JVM shutdown hook", e);
+                                    registryConfig.getId()
+                                    + ", but you can ignore if it's called by JVM shutdown hook", e);
                         }
                     }
                 }
@@ -385,6 +346,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * Provider配置发生变化监听器
      */
+    // TODO: 2018/7/6 by zmyer
     private class ProviderAttributeListener implements ConfigListener {
 
         @Override
@@ -401,7 +363,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
             // TODO 可能需要处理ServerConfig的配置变化
             try { // 检查是否有变化
-                  // 是否过滤map?
+                // 是否过滤map?
                 for (Map.Entry<String, String> entry : newValues.entrySet()) {
                     String newValue = entry.getValue();
                     String oldValue = providerConfig.queryAttribute(entry.getKey());
@@ -442,44 +404,30 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * 接口可以按方法发布,不在黑名单里且在白名单里,*算在白名单
+     * 接口可以按方法发布
      *
      * @param includeMethods 包含的方法列表
      * @param excludeMethods 不包含的方法列表
      * @param methodName     方法名
      * @return 方法
      */
+    // TODO: 2018/6/22 by zmyer
     protected boolean inList(String includeMethods, String excludeMethods, String methodName) {
         //判断是否在白名单中
-        if (!StringUtils.ALL.equals(includeMethods)) {
-            if (!inMethodConfigs(includeMethods, methodName)) {
+        if (includeMethods != null && !StringUtils.ALL.equals(includeMethods)) {
+            includeMethods = includeMethods + ",";
+            boolean inWhite = includeMethods.contains(methodName + ",");
+            if (!inWhite) {
                 return false;
             }
         }
         //判断是否在黑白单中
-        if (inMethodConfigs(excludeMethods, methodName)) {
-            return false;
+        if (StringUtils.isBlank(excludeMethods)) {
+            return true;
+        } else {
+            excludeMethods = excludeMethods + ",";
+            boolean inBlack = excludeMethods.contains(methodName + ",");
+            return !inBlack;
         }
-        //默认还是要发布
-        return true;
-
-    }
-
-    /**
-     * 否则存在method configs 字符串中
-     *
-     * @param methodConfigs
-     * @param methodName
-     * @return
-     */
-    private boolean inMethodConfigs(String methodConfigs, String methodName) {
-        String[] excludeMethodCollections = StringUtils.splitWithCommaOrSemicolon(methodConfigs);
-        for (String excludeMethodName : excludeMethodCollections) {
-            boolean exist = StringUtils.equals(excludeMethodName, methodName);
-            if (exist) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -3,7 +3,6 @@
 [![Build Status](https://travis-ci.org/alipay/sofa-rpc.svg?branch=master)](https://travis-ci.org/alipay/sofa-rpc)
 [![Coverage Status](https://codecov.io/gh/alipay/sofa-rpc/branch/master/graph/badge.svg)](https://codecov.io/gh/alipay/sofa-rpc)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
-[![Maven](https://img.shields.io/github/release/alipay/sofa-rpc.svg)](https://github.com/alipay/sofa-rpc/releases)
 
 ## Overview
 
@@ -23,7 +22,7 @@ SOFARPC is a high-performance, high-extensibility, production-level Java RPC fra
 
 - [sofa-rpc-boot-project](https://github.com/alipay/sofa-rpc-boot-projects) SOFABoot projects for SOFARPC, include starter and samples.
 
-## Requirements
+## How to build
 
 Build-time requirement: JDK 7 or above and Maven 3.2.5 or above.
 
@@ -32,16 +31,16 @@ Runtime requirement: JDK 6 or above.
 
 ## Documents
 
-- [Getting Started](http://www.sofastack.tech/sofa-rpc/docs/Getting-Started-With-SOFA-Boot)
-- [User Guide](http://www.sofastack.tech/sofa-rpc/docs/Programming)
-- [Developer Guide](http://www.sofastack.tech/sofa-rpc/docs/How-To-Build)
-- [Release Notes](http://www.sofastack.tech/sofa-rpc/docs/ReleaseNotes)
-- [Road Map](http://www.sofastack.tech/sofa-rpc/docs/RoadMap)
+- [Getting Started](https://github.com/alipay/sofa-rpc/wiki/GettingStarted)
+- [User Guide](https://github.com/alipay/sofa-rpc/wiki/UserGuide)
+- [Developer Guide](https://github.com/alipay/sofa-rpc/wiki/DeveloperGuide)
+- [Release Notes](https://github.com/alipay/sofa-rpc/wiki/ReleaseNotes)
+- [Road Map](https://github.com/alipay/sofa-rpc/wiki/RoadMap)
 
 ## Contribution 
 
-[How to Contributing](http://www.sofastack.tech/sofa-rpc/docs/Contributing)
+[How to Contributing](https://github.com/alipay/sofa-rpc/blob/master/CONTRIBUTING.md)
 
 ## License
 
-SOFARPC is licensed under the [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE), and SOFARPC uses some third-party components, you can view their open source license here [NOTICE](https://github.com/alipay/sofa-rpc/wiki/NOTICE).
+SOFARPC is released under the [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE).

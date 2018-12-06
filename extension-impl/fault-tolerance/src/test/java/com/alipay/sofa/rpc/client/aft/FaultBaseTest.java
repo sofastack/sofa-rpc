@@ -29,8 +29,6 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.module.FaultToleranceModule;
 import com.alipay.sofa.rpc.module.Module;
 import org.junit.After;
@@ -44,14 +42,10 @@ import java.util.concurrent.Callable;
  * @version $Id: FaultBaseTest.java, v 0.1 2017年11月16日 下午3:14 bystander Exp $
  */
 public abstract class FaultBaseTest {
-
-    protected static final Logger                LOGGER    = LoggerFactory.getLogger(FaultBaseTest.class);
-
     public static final String                   APP_NAME1 = "testApp";
     public static final String                   APP_NAME2 = "testAnotherApp";
 
     protected ServerConfig                       serverConfig;
-    protected ConsumerConfig<FaultHelloService>  consumerConfigNotUse;
     protected ConsumerConfig<FaultHelloService>  consumerConfig;
     protected ConsumerConfig<FaultHelloService2> consumerConfig2;
     protected ConsumerConfig<FaultHelloService>  consumerConfigAnotherApp;
@@ -77,15 +71,6 @@ public abstract class FaultBaseTest {
             .setServer(serverConfig)
             .setRegister(false)
             .setApplication(providerAconfig);
-
-        // just for test
-        consumerConfigNotUse = new ConsumerConfig<FaultHelloService>()
-            .setInterfaceId(FaultHelloService.class.getName())
-            .setTimeout(500)
-            .setDirectUrl("127.0.0.1:12299")
-            .setRegister(false)
-            .setUniqueId("xxx")
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
 
         ApplicationConfig applicationConfig = new ApplicationConfig();
         applicationConfig.setAppName(APP_NAME1);

@@ -16,15 +16,12 @@
  */
 package com.alipay.sofa.rpc.codec;
 
-import com.alipay.sofa.rpc.common.struct.TwoWayMap;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * 序列化工厂
@@ -37,17 +34,18 @@ public final class SerializerFactory {
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{编码：序列化器}
      */
-    private final static ConcurrentMap<Byte, Serializer> TYPE_SERIALIZER_MAP = new ConcurrentHashMap<Byte, Serializer>();
+    private final static ConcurrentHashMap<Byte, Serializer> TYPE_SERIALIZER_MAP = new ConcurrentHashMap<Byte, Serializer>();
 
     /**
-     * 除了托管给扩展加载器的工厂模式（保留alias：实例）外，还需要额外保留编码和实例的映射：{别名：编码}
+     * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
+     * 还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static TwoWayMap<String, Byte>         TYPE_CODE_MAP       = new TwoWayMap<String, Byte>();
+    private final static ConcurrentHashMap<String, Byte>     TYPE_CODE_MAP       = new ConcurrentHashMap<String, Byte>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Serializer>     EXTENSION_LOADER    = buildLoader();
+    private final static ExtensionLoader<Serializer>         EXTENSION_LOADER    = buildLoader();
 
     private static ExtensionLoader<Serializer> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Serializer.class,
@@ -79,11 +77,7 @@ public final class SerializerFactory {
      * @return 序列化器
      */
     public static Serializer getSerializer(byte type) {
-        Serializer serializer = TYPE_SERIALIZER_MAP.get(type);
-        if (serializer == null) {
-            throw new SofaRpcRuntimeException("Serializer Not Found :\"" + type + "\"!");
-        }
-        return serializer;
+        return TYPE_SERIALIZER_MAP.get(type);
     }
 
     /**
@@ -92,18 +86,8 @@ public final class SerializerFactory {
      * @param serializer 序列化的名字
      * @return 序列化编码
      */
-    public static Byte getCodeByAlias(String serializer) {
+    public static byte getCodeByAlias(String serializer) {
         return TYPE_CODE_MAP.get(serializer);
-    }
-
-    /**
-     * 通过Code获取别名
-     *
-     * @param code 序列化的Code
-     * @return 序列化别名
-     */
-    public static String getAliasByCode(byte code) {
-        return TYPE_CODE_MAP.getKey(code);
     }
 
 }

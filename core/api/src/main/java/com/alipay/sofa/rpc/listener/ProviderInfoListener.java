@@ -25,6 +25,7 @@ import java.util.List;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public interface ProviderInfoListener {
 
     /**
@@ -32,26 +33,26 @@ public interface ProviderInfoListener {
      *
      * @param providerGroup 服务端列表组
      */
-    void addProvider(ProviderGroup providerGroup);
+    public void addProvider(ProviderGroup providerGroup);
 
     /**
      * 删除某标签的服务端列表（增量）
      *
      * @param providerGroup 服务端列表组
      */
-    void removeProvider(ProviderGroup providerGroup);
+    public void removeProvider(ProviderGroup providerGroup);
 
     /**
      * 更新某标签的服务端列表（全量）
      *
      * @param providerGroup 服务端列表组
      */
-    void updateProviders(ProviderGroup providerGroup);
+    public void updateProviders(ProviderGroup providerGroup);
 
     /**
      * 更新全部服务端列表（全量）
      *
      * @param providerGroups 全部服务端列表，为空代表清空已有列表
      */
-    void updateAllProviders(List<ProviderGroup> providerGroups);
+    public void updateAllProviders(List<ProviderGroup> providerGroups);
 }

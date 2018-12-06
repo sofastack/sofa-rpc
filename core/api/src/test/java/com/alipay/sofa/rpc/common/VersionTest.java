@@ -28,7 +28,6 @@ public class VersionTest {
 
     @Test
     public void test() {
-        Version version = new Version();
         Assert.assertTrue(Version.BUILD_VERSION.startsWith(Version.VERSION));
         String s = Version.RPC_VERSION / 10000 + "." + Version.RPC_VERSION % 10000 / 100 + "." + Version.RPC_VERSION %
             100;

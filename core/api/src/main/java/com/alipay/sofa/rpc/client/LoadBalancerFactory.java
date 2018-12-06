@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class LoadBalancerFactory {
 
     /**
@@ -35,16 +36,17 @@ public class LoadBalancerFactory {
      * @param consumerBootstrap 服务订阅者配置
      * @return LoadBalancer
      */
+    // TODO: 2018/6/22 by zmyer
     public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap) {
         try {
             String loadBalancer = consumerBootstrap.getConsumerConfig().getLoadBalancer();
             ExtensionClass<LoadBalancer> ext = ExtensionLoaderFactory
-                .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
+                    .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.loadBalancer",
-                    loadBalancer, "Unsupported loadBalancer of client!");
+                        loadBalancer, "Unsupported loadBalancer of client!");
             }
-            return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
+            return ext.getExtInstance(new Class[]{ ConsumerBootstrap.class }, new Object[]{ consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {

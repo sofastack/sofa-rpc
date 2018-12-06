@@ -60,7 +60,7 @@ public class FailFastClusterTest extends ActivelyDestroyTest {
                         } catch (Exception ignore) {
                         }
                     }
-                    LOGGER.info("xxxxxxxxxxxxxxxxx" + age);
+                    System.out.println("xxxxxxxxxxxxxxxxx" + age);
                     return "hello " + name + " from server! age: " + age;
                 }
             })

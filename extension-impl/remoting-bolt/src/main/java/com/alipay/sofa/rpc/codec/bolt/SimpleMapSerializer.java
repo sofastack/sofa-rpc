@@ -18,7 +18,7 @@ package com.alipay.sofa.rpc.codec.bolt;
 
 import com.alipay.remoting.exception.DeserializationException;
 import com.alipay.remoting.exception.SerializationException;
-import com.alipay.sofa.rpc.codec.common.StringSerializer;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -35,6 +35,7 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SimpleMapSerializer {
 
     /**
@@ -90,7 +91,7 @@ public class SimpleMapSerializer {
 
     /**
      * 写一个String
-     * 
+     *
      * @param out 输出流
      * @param str 字符串
      * @throws IOException 写入异常
@@ -101,7 +102,7 @@ public class SimpleMapSerializer {
         } else if (str.isEmpty()) {
             writeInt(out, 0);
         } else {
-            byte[] bs = StringSerializer.encode(str);
+            byte[] bs = str.getBytes(RpcConstants.DEFAULT_CHARSET);
             writeInt(out, bs.length);
             out.write(bs);
         }
@@ -109,7 +110,7 @@ public class SimpleMapSerializer {
 
     /**
      * 读取一个字符串
-     * 
+     *
      * @param in 输入流程
      * @return 字符串
      * @throws IOException 读取异常
@@ -123,13 +124,13 @@ public class SimpleMapSerializer {
         } else {
             byte[] value = new byte[length];
             in.read(value);
-            return StringSerializer.decode(value);
+            return new String(value, RpcConstants.DEFAULT_CHARSET);
         }
     }
 
     /**
      * OutputStream.write(int) 仅 write 第一个 byte, 而不是整个 int
-     * 
+     *
      * @param out OutputStream
      * @param i int value
      * @throws IOException if an I/O error occurs.
@@ -143,15 +144,15 @@ public class SimpleMapSerializer {
 
     /**
      * InputStream.read 仅 read 一个 byte
-     * 
+     *
      * @param in InputStream
      * @return int value
      * @throws IOException if an I/O error occurs.
      */
     public int readInt(InputStream in) throws IOException {
         return ((byte) in.read() & 0xff) << 24
-            | ((byte) in.read() & 0xff) << 16
-            | ((byte) in.read() & 0xff) << 8
-            | (byte) in.read() & 0xff;
+                | ((byte) in.read() & 0xff) << 16
+                | ((byte) in.read() & 0xff) << 8
+                | (byte) in.read() & 0xff;
     }
 }

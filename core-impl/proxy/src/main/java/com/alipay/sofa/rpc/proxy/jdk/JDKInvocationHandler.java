@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.proxy.jdk;
 
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -29,15 +28,17 @@ import java.lang.reflect.Method;
 
 /**
  * JDK代理处理器，拦截请求变为invocation进行调用
+ * <p>
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class JDKInvocationHandler implements InvocationHandler {
 
     /**
      * 代理类
      */
-    private Class   proxyClass;
+    private Class proxyClass;
 
     /**
      * 代理调用器
@@ -50,14 +51,16 @@ public class JDKInvocationHandler implements InvocationHandler {
      * @param proxyClass   the proxy class
      * @param proxyInvoker the proxy invoker
      */
+    // TODO: 2018/7/6 by zmyer
     public JDKInvocationHandler(Class proxyClass, Invoker proxyInvoker) {
         this.proxyClass = proxyClass;
         this.proxyInvoker = proxyInvoker;
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public Object invoke(Object proxy, Method method, Object[] paramValues)
-        throws Throwable {
+            throws Throwable {
         String methodName = method.getName();
         Class[] paramTypes = method.getParameterTypes();
         if ("toString".equals(methodName) && paramTypes.length == 0) {
@@ -67,10 +70,10 @@ public class JDKInvocationHandler implements InvocationHandler {
         } else if ("equals".equals(methodName) && paramTypes.length == 1) {
             Object another = paramValues[0];
             return proxy == another ||
-                (proxy.getClass().isInstance(another) && proxyInvoker.equals(JDKProxy.parseInvoker(another)));
+                    (proxy.getClass().isInstance(another) && proxyInvoker.equals(JDKProxy.parseInvoker(another)));
         }
         SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(method.getDeclaringClass(),
-            method, paramTypes, paramValues);
+                method, paramTypes, paramValues);
         SofaResponse response = proxyInvoker.invoke(sofaRequest);
         if (response.isError()) {
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, response.getErrorMsg());
@@ -79,9 +82,6 @@ public class JDKInvocationHandler implements InvocationHandler {
         if (ret instanceof Throwable) {
             throw (Throwable) ret;
         } else {
-            if (ret == null) {
-                return ClassUtils.getDefaultPrimitiveValue(method.getReturnType());
-            }
             return ret;
         }
     }

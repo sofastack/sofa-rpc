@@ -28,25 +28,26 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of Registry
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class RegistryFactory {
 
     /**
      * 保存全部的配置和注册中心实例
      */
-    private final static ConcurrentMap<RegistryConfig, Registry> ALL_REGISTRIES = new ConcurrentHashMap<RegistryConfig, Registry>();
+    private final static ConcurrentHashMap<RegistryConfig, Registry> ALL_REGISTRIES =
+            new ConcurrentHashMap<RegistryConfig, Registry>();
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                  LOGGER         = LoggerFactory
-                                                                                    .getLogger(RegistryFactory.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(RegistryFactory.class);
 
     /**
      * 得到注册中心对象
@@ -54,6 +55,7 @@ public class RegistryFactory {
      * @param registryConfig RegistryConfig类
      * @return Registry实现
      */
+    // TODO: 2018/7/6 by zmyer
     public static synchronized Registry getRegistry(RegistryConfig registryConfig) {
         if (ALL_REGISTRIES.size() > 3) { // 超过3次 是不是配错了？
             if (LOGGER.isWarnEnabled()) {
@@ -65,12 +67,12 @@ public class RegistryFactory {
             Registry registry = ALL_REGISTRIES.get(registryConfig);
             if (registry == null) {
                 ExtensionClass<Registry> ext = ExtensionLoaderFactory.getExtensionLoader(Registry.class)
-                    .getExtensionClass(registryConfig.getProtocol());
+                        .getExtensionClass(registryConfig.getProtocol());
                 if (ext == null) {
                     throw ExceptionUtils.buildRuntime("registry.protocol", registryConfig.getProtocol(),
-                        "Unsupported protocol of registry config !");
+                            "Unsupported protocol of registry config !");
                 }
-                registry = ext.getExtInstance(new Class[] { RegistryConfig.class }, new Object[] { registryConfig });
+                registry = ext.getExtInstance(new Class[]{ RegistryConfig.class }, new Object[]{ registryConfig });
                 ALL_REGISTRIES.put(registryConfig, registry);
             }
             return registry;
@@ -111,7 +113,7 @@ public class RegistryFactory {
                 ALL_REGISTRIES.remove(config);
             } catch (Exception e) {
                 LOGGER.error("Error when destroy registry :" + config
-                    + ", but you can ignore if it's called by JVM shutdown hook", e);
+                        + ", but you can ignore if it's called by JVM shutdown hook", e);
             }
         }
     }

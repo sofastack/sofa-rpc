@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.test.generic;
 
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.generic.bean.BasicBean;
 import com.alipay.sofa.rpc.test.generic.bean.ComplexBean;
 import com.alipay.sofa.rpc.test.generic.bean.People;
@@ -27,9 +25,6 @@ import com.alipay.sofa.rpc.test.generic.bean.People;
  * @since 2016/07/28
  */
 public class TestClass implements TestInterface {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(TestClass.class);
-
     @Override
     public People hello(People people) {
         return people;
@@ -62,7 +57,7 @@ public class TestClass implements TestInterface {
 
     @Override
     public void helloOneway(People people) {
-        LOGGER.info("Hello, oneway! " + people.getName());
+        System.out.println("Hello, oneway! " + people.getName());
     }
 
     @Override

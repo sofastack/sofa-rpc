@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public final class ProxyFactory {
 
     /**
@@ -39,13 +40,14 @@ public final class ProxyFactory {
      * @return 代理类实例
      * @throws Exception
      */
+    // TODO: 2018/7/6 by zmyer
     public static <T> T buildProxy(String proxyType, Class<T> clazz, Invoker proxyInvoker) throws Exception {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-                .getExtensionClass(proxyType);
+                    .getExtensionClass(proxyType);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.proxy", proxyType,
-                    "Unsupported proxy of client!");
+                        "Unsupported proxy of client!");
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getProxy(clazz, proxyInvoker);
@@ -62,13 +64,14 @@ public final class ProxyFactory {
      * @param proxyObject 代理类实现
      * @return Invoker对象
      */
+    // TODO: 2018/7/6 by zmyer
     public static Invoker getInvoker(Object proxyObject, String proxyType) {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-                .getExtensionClass(proxyType);
+                    .getExtensionClass(proxyType);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.proxy", proxyType,
-                    "Unsupported proxy of client!");
+                        "Unsupported proxy of client!");
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getInvoker(proxyObject);

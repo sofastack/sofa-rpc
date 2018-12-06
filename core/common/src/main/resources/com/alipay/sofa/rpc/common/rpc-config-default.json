@@ -41,13 +41,13 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
 
   /*-------------默认配置值开始-------------*/
   // 默认Provider启动器
-  "default.provider.bootstrap": "sofa",
+  "default.provider.bootstrap": "bolt",
   // 默认Consumer启动器
-  "default.consumer.bootstrap": "sofa",
+  "default.consumer.bootstrap": "bolt",
   // 默认uniqueId 做为服务唯一标识
   "default.uniqueId": "",
-  // 默认version 不做为服务唯一标识
-  "default.version": "",
+  // 默认version 做为服务唯一标识
+  "default.version": "1.0",
   // 默认分组 不做为服务唯一标识
   "default.group": "",
   // 默认注册中心
@@ -92,7 +92,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认绑定网卡
   "server.host": "0.0.0.0",
   // 端口段开始
-  "server.port.start": 12200,
+  "server.port.start": 22000,
   // 端口段结束
   "server.port.end": 65535,
   // 默认contextPath
@@ -120,7 +120,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 是否启动epoll
   "server.epoll": false,
   // 是否hold住端口，true的话随主线程退出而退出，false的话则要主动退出
-  "server.daemon": false,
+  "server.daemon": true,
   // 端口是否自适应，如果端口被占用，自动+1
   "server.adaptive.port": false,
   // 服务端是否自动启动
@@ -203,10 +203,6 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "stream.observer.max.size": 10000,
   // 本地缓存的Callback最大实例数
   "callback.max.size": 1000,
-  // 弹性连接的连接数，按照服务者数量的百分比进行计算
-  "consumer.connect.elastic.precent": 0,
-  // 弹性连接的连接数
-  "consumer.connect.elastic.size": 5,
   /*-------------Consumer相关配置结束-------------*/
 
 
@@ -262,8 +258,6 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "compress.open": false,
   // 开启压缩的大小基线
   "compress.size.baseline": 2048,
-  //Whether the Http2 Cleartext protocol client uses Prior Knowledge to start Http2
-  "transport.client.h2c.usePriorKnowledge": true,
   /*-------------Transport层相关配置结束-------------*/
 
   /*
@@ -294,7 +288,5 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 协商请求在IO线程执行吗？ TODO
   "transport.negotiator.async": false,
   //是否所有客户端共享一个重连线程
-  "consumer.share.reconnect.thread": false,
-  //是否禁止开启lookout采集信息
-  "lookout.collect.disable": false
+  "consumer.share.reconnect.thread": false
 }

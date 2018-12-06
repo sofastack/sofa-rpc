@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of module
@@ -40,12 +39,12 @@ public class ModuleFactory {
     /**
      * logger for this class
      */
-    private static final Logger                LOGGER            = LoggerFactory.getLogger(ModuleFactory.class);
+    private static final Logger                    LOGGER            = LoggerFactory.getLogger(ModuleFactory.class);
 
     /**
      * 已加载的模块
      */
-    static final ConcurrentMap<String, Module> INSTALLED_MODULES = new ConcurrentHashMap<String, Module>();
+    static final ConcurrentHashMap<String, Module> INSTALLED_MODULES = new ConcurrentHashMap<String, Module>();
 
     /**
      * parse module load config
@@ -58,7 +57,7 @@ public class ModuleFactory {
         String[] activatedModules = StringUtils.splitWithCommaOrSemicolon(moduleLoadList);
         boolean match = false;
         for (String activatedModule : activatedModules) {
-            if (StringUtils.ALL.equals(activatedModule)) {
+            if ("*".equals(activatedModule)) {
                 match = true;
             } else if (activatedModule.equals(moduleName)) {
                 match = true;

@@ -24,7 +24,6 @@ import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -43,7 +42,7 @@ public class ServiceHorizontalRegulationStrategy implements RegulationStrategy {
     /**
      * Key（应用，服务）降级的不同ip列表
      */
-    protected final ConcurrentMap<String, ConcurrentHashSet<String>> appServiceDegradeIps = new ConcurrentHashMap<String, ConcurrentHashSet<String>>();
+    protected final ConcurrentHashMap<String, ConcurrentHashSet<String>> appServiceDegradeIps = new ConcurrentHashMap<String, ConcurrentHashSet<String>>();
 
     protected ConcurrentHashSet<String> getDegradeProviders(String key) {
         ConcurrentHashSet<String> ips = appServiceDegradeIps.get(key);

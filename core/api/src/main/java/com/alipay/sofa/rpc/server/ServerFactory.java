@@ -34,24 +34,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of server
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public final class ServerFactory {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                        LOGGER     = LoggerFactory
-                                                                      .getLogger(ServerFactory.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(ServerFactory.class);
     /**
      * 全部服务端
      */
-    private final static ConcurrentMap<String, Server> SERVER_MAP = new ConcurrentHashMap<String, Server>();
+    private final static ConcurrentHashMap<String, Server> SERVER_MAP = new ConcurrentHashMap<String, Server>();
 
     /**
      * 初始化Server实例
@@ -59,6 +59,7 @@ public final class ServerFactory {
      * @param serverConfig 服务端配置
      * @return Server
      */
+    // TODO: 2018/7/6 by zmyer
     public synchronized static Server getServer(ServerConfig serverConfig) {
         try {
             Server server = SERVER_MAP.get(Integer.toString(serverConfig.getPort()));
@@ -67,10 +68,10 @@ public final class ServerFactory {
                 resolveServerConfig(serverConfig);
 
                 ExtensionClass<Server> ext = ExtensionLoaderFactory.getExtensionLoader(Server.class)
-                    .getExtensionClass(serverConfig.getProtocol());
+                        .getExtensionClass(serverConfig.getProtocol());
                 if (ext == null) {
                     throw ExceptionUtils.buildRuntime("server.protocol", serverConfig.getProtocol(),
-                        "Unsupported protocol of server!");
+                            "Unsupported protocol of server!");
                 }
                 server = ext.getExtInstance();
                 server.init(serverConfig);
@@ -89,6 +90,7 @@ public final class ServerFactory {
      *
      * @param serverConfig 服务器配置
      */
+    // TODO: 2018/7/6 by zmyer
     private static void resolveServerConfig(ServerConfig serverConfig) {
         // 绑定到指定网卡 或全部网卡
         String boundHost = serverConfig.getBoundHost();
@@ -109,7 +111,7 @@ public final class ServerFactory {
         if (serverConfig.isAdaptivePort()) {
             int oriPort = serverConfig.getPort();
             int port = NetUtils.getAvailablePort(boundHost, oriPort,
-                RpcConfigs.getIntValue(RpcOptions.SERVER_PORT_END));
+                    RpcConfigs.getIntValue(RpcOptions.SERVER_PORT_END));
             if (port != oriPort) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Changed port from {} to {} because the config port is disabled", oriPort, port);

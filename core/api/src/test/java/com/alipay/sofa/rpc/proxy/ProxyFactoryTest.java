@@ -28,12 +28,12 @@ import org.junit.Test;
 public class ProxyFactoryTest {
     @Test
     public void buildProxy() throws Exception {
-        TestProxyInterface testInterface = ProxyFactory.buildProxy("test", TestProxyInterface.class, null);
+        TestInterface testInterface = ProxyFactory.buildProxy("test", TestInterface.class, null);
         Assert.assertEquals(testInterface, null);
 
         boolean error = false;
         try {
-            ProxyFactory.buildProxy("xasdasd", TestProxyInterface.class, null);
+            ProxyFactory.buildProxy("xasdasd", TestInterface.class, null);
         } catch (Exception e) {
             error = true;
         }
@@ -41,7 +41,7 @@ public class ProxyFactoryTest {
     }
 
     @Test
-    public void getInvoker() {
+    public void getInvoker() throws Exception {
         Invoker invoke = ProxyFactory.getInvoker(null, "test");
         Assert.assertEquals(invoke, null);
     }

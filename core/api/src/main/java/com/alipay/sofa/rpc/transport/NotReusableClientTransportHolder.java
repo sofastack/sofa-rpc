@@ -22,7 +22,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * ClientTransport of same provider will not be reused.
@@ -33,13 +32,13 @@ public class NotReusableClientTransportHolder implements ClientTransportHolder {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                         LOGGER        = LoggerFactory
-                                                                                          .getLogger(NotReusableClientTransportHolder.class);
+    private final static Logger                                             LOGGER        = LoggerFactory
+                                                                                              .getLogger(NotReusableClientTransportHolder.class);
 
     /**
      * 长连接不复用的时候，一个ClientTransportConfig对应一个ClientTransport
      */
-    private final ConcurrentMap<ClientTransportConfig, ClientTransport> allTransports = new ConcurrentHashMap<ClientTransportConfig, ClientTransport>();
+    private final ConcurrentHashMap<ClientTransportConfig, ClientTransport> allTransports = new ConcurrentHashMap<ClientTransportConfig, ClientTransport>();
 
     @Override
     public ClientTransport getClientTransport(ClientTransportConfig config) {

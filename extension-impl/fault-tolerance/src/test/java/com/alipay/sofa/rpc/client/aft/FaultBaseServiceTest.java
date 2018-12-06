@@ -20,8 +20,6 @@ import com.alipay.sofa.rpc.client.aft.bean.FaultHelloService;
 import com.alipay.sofa.rpc.client.aft.bean.HelloServiceTimeOutImpl;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 
@@ -37,15 +35,12 @@ public abstract class FaultBaseServiceTest extends FaultBaseTest {
     public void beforeClass() throws Exception {
         providerConfig.setRef(new HelloServiceTimeOutImpl());
         providerConfig.export();
-        // test reuse client transport
-        consumerConfigNotUse.refer();
         helloService = consumerConfig.refer();
     }
 
     @After
     public void afterClass() {
         providerConfig.unExport();
-        consumerConfigNotUse.unRefer();
         consumerConfig.unRefer();
         consumerConfig = null;
         consumerConfig2 = null;

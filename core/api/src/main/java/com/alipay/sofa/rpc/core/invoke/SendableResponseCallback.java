@@ -31,19 +31,19 @@ public interface SendableResponseCallback<T> extends SofaResponseCallback<T> {
      *
      * @param appResponse 返回给A的值
      */
-    void sendAppResponse(Object appResponse);
+    public void sendAppResponse(Object appResponse);
 
     /**
      * A-&gt;B(当前)-&gt;C的场景下，B将异常异步返回给调用者A
      *
      * @param throwable 返回给A的异常
      */
-    void sendAppException(Throwable throwable);
+    public void sendAppException(Throwable throwable);
 
     /**
      * A-&gt;B(当前)-&gt;C的场景下，B将异常异步返回给调用者A
      *
      * @param exception 返回给A的异常
      */
-    void sendSofaException(SofaRpcException exception);
+    public void sendSofaException(SofaRpcException exception);
 }

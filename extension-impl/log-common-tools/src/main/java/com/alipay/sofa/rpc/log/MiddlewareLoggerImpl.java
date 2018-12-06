@@ -25,7 +25,7 @@ import com.alipay.sofa.rpc.log.factory.RpcLoggerFactory;
  */
 public class MiddlewareLoggerImpl implements Logger {
 
-    private final String           name;
+    private final String name;
 
     private final org.slf4j.Logger DEFAULT_LOGGER;
 

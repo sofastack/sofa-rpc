@@ -16,13 +16,12 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
-import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.RestServerReceiveEvent;
+import com.alipay.sofa.rpc.event.RestServerSendEvent;
 import com.alipay.sofa.rpc.event.ServerEndHandleEvent;
-import com.alipay.sofa.rpc.event.rest.RestServerReceiveEvent;
-import com.alipay.sofa.rpc.event.rest.RestServerSendEvent;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -49,9 +48,10 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @see org.jboss.resteasy.plugins.server.netty.RequestHandler
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
     protected final RequestDispatcher dispatcher;
-    private final static Logger       logger = Logger.getLogger(SofaRestRequestHandler.class);
+    private final static Logger logger = Logger.getLogger(SofaRestRequestHandler.class);
 
     public SofaRestRequestHandler(RequestDispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -68,9 +68,13 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                     EventBus.post(new RestServerReceiveEvent(request));
                 }
 
-                if (request.getUri().getPath().endsWith(RemotingConstants.IGNORE_WEB_BROWSER)) {
+                if (request.getUri().getPath().endsWith("/favicon.ico")) {
                     HttpResponse response = new DefaultHttpResponse(HTTP_1_1, NOT_FOUND);
                     ctx.writeAndFlush(response);
+
+                    if (EventBus.isEnable(RestServerSendEvent.class)) {
+                        EventBus.post(new RestServerSendEvent(request, null, null));
+                    }
                     return;
                 }
 
@@ -81,21 +85,20 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                 NettyHttpResponse response = request.getResponse();
                 Exception exception = null;
                 try {
-                    RpcInternalContext context = RpcInternalContext.getContext();
-                    context.setProviderSide(true);
-                    // 获取远程ip 兼容 nignx 转发和 vip 等
+                    // 获取远程ip 兼容nignx转发和vip等
                     HttpHeaders httpHeaders = request.getHttpHeaders();
-                    String remoteIP = httpHeaders.getHeaderString("X-Forwarded-For");
-                    if (remoteIP == null) {
-                        remoteIP = httpHeaders.getHeaderString("X-Real-IP");
+                    String remoteip = httpHeaders.getHeaderString("X-Forwarded-For");
+                    if (remoteip == null) {
+                        remoteip = httpHeaders.getHeaderString("X-Real-IP");
                     }
-                    if (remoteIP != null) {
-                        context.setRemoteAddress(remoteIP, 0);
+                    if (remoteip != null) {
+                        RpcInternalContext.getContext().setRemoteAddress(remoteip, 0);
                     } else { // request取不到就从channel里取
-                        context.setRemoteAddress((InetSocketAddress) ctx.channel().remoteAddress());
+                        RpcInternalContext.getContext().setRemoteAddress(
+                                (InetSocketAddress) ctx.channel().remoteAddress());
                     }
                     // 设置本地地址
-                    context.setLocalAddress((InetSocketAddress) ctx.channel().localAddress());
+                    RpcInternalContext.getContext().setLocalAddress((InetSocketAddress) ctx.channel().localAddress());
 
                     dispatcher.service(ctx, request, response, true);
                 } catch (Failure e1) {
@@ -115,6 +118,7 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
 
                 if (!request.getAsyncContext().isSuspended()) {
                     response.finish();
+                    ctx.flush();
                 }
             } finally {
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
@@ -133,7 +137,7 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable e)
-        throws Exception {
+            throws Exception {
         // handle the case of to big requests.
         if (e.getCause() instanceof TooLongFrameException) {
             DefaultHttpResponse response = new DefaultHttpResponse(HTTP_1_1, REQUEST_ENTITY_TOO_LARGE);

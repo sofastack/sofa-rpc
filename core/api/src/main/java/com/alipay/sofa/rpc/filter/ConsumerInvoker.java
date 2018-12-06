@@ -30,6 +30,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ConsumerInvoker extends FilterInvoker {
 
     /**
@@ -47,6 +48,7 @@ public class ConsumerInvoker extends FilterInvoker {
         this.consumerBootstrap = consumerBootstrap;
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest sofaRequest) throws SofaRpcException {
         // 设置下服务器应用

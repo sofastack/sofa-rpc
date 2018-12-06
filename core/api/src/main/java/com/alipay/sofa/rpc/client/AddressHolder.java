@@ -24,9 +24,10 @@ import java.util.List;
 
 /**
  * 地址管理器
- * 
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extensible(singleton = false)
 public abstract class AddressHolder implements ProviderInfoListener {
 

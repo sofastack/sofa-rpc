@@ -17,8 +17,8 @@
 package com.alipay.sofa.rpc.message.bolt;
 
 import com.alipay.remoting.AsyncContext;
-import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.context.BaggageResolver;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -28,7 +28,6 @@ import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.event.EventBus;
-import com.alipay.sofa.rpc.event.ServerEndHandleEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 
 /**
@@ -112,6 +111,7 @@ public abstract class BoltSendableResponseCallback<T> implements SendableRespons
     @Override
     public void sendSofaException(SofaRpcException sofaException) {
         checkState();
+        checkState();
         SofaResponse response = new SofaResponse();
         response.setErrorMsg(sofaException.getMessage());
         sendSofaResponse(response, sofaException);
@@ -142,9 +142,6 @@ public abstract class BoltSendableResponseCallback<T> implements SendableRespons
         } finally {
             if (EventBus.isEnable(ServerSendEvent.class)) {
                 EventBus.post(new ServerSendEvent(request, response, sofaException));
-            }
-            if (EventBus.isEnable(ServerEndHandleEvent.class)) {
-                EventBus.post(new ServerEndHandleEvent());
             }
         }
     }

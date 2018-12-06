@@ -32,47 +32,26 @@ public class StringUtils {
      *
      * @since 5.0.0
      */
-    public static final String   EMPTY              = "";
+    public static final String EMPTY = "";
 
     /**
      * The context path separator String {@code "/"}.
      */
-    public static final String   CONTEXT_SEP        = "/";
+    public static final String CONTEXT_SEP = "/";
 
     /**
      * The string {@code "*"}.
      *
      * @since 5.3.1
      */
-    public static final String   ALL                = "*";
+    public static final String ALL = "*";
 
     /**
      * The string {@code "default"}.
      *
      * @since 5.3.1
      */
-    public static final String   DEFAULT            = "default";
-
-    /**
-     * The string {@code "true"}.
-     *
-     * @since 5.4.0
-     */
-    public static final String   TRUE               = "true";
-
-    /**
-     * The string {@code "false"}.
-     *
-     * @since 5.4.0
-     */
-    public static final String   FALSE              = "false";
-
-    /**
-     * The string {@code "null"}.
-     *
-     * @since 5.4.0
-     */
-    public static final String   NULL               = "null";
+    public static final String DEFAULT = "default";
 
     /**
      * 空数组
@@ -263,17 +242,6 @@ public class StringUtils {
     /**
      * 对象转string
      *
-     * @param o          对象
-     * @param defaultVal 默认值
-     * @return 不为null执行toString方法
-     */
-    public static String toString(Object o, String defaultVal) {
-        return o == null ? defaultVal : o.toString();
-    }
-
-    /**
-     * 对象转string
-     *
      * @param o 对象
      * @return 不为null执行toString方法
      */
@@ -282,25 +250,14 @@ public class StringUtils {
     }
 
     /**
-     * 对象数组转string
+     * 对象转string
      *
-     * @param args 对象
+     * @param o          对象
+     * @param defaultVal 默认值
      * @return 不为null执行toString方法
-     * @since 5.4.0
      */
-    public static String objectsToString(Object[] args) {
-        if (args == null) {
-            return null;
-        } else if (args.length == 0) {
-            return "[]";
-        } else {
-            StringBuilder sb = new StringBuilder().append("[");
-            for (Object arg : args) {
-                sb.append(arg.toString()).append(",");
-            }
-            sb.setCharAt(sb.length() - 1, ']');
-            return sb.toString();
-        }
+    public static String toString(Object o, String defaultVal) {
+        return o == null ? defaultVal : o.toString();
     }
 
     /**
@@ -324,7 +281,7 @@ public class StringUtils {
      */
     public static String[] split(String src, String separator) {
         if (isEmpty(separator)) {
-            return new String[] { src };
+            return new String[]{ src };
         }
         if (isEmpty(src)) {
             return StringUtils.EMPTY_STRING_ARRAY;
@@ -340,6 +297,7 @@ public class StringUtils {
      * @param src 原始值
      * @return 字符串数组
      */
+    // TODO: 2018/6/22 by zmyer
     public static String[] splitWithCommaOrSemicolon(String src) {
         if (isEmpty(src)) {
             return StringUtils.EMPTY_STRING_ARRAY;

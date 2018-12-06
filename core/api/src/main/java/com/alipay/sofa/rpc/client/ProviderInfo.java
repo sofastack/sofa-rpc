@@ -18,11 +18,12 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * 抽象的服务提供列表
@@ -30,44 +31,45 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderInfo implements Serializable {
 
-    private static final long                             serialVersionUID = -6438690329875954051L;
+    private static final long serialVersionUID = -6438690329875954051L;
 
     /**
      * 原始地址
      */
-    private transient String                              originUrl;
+    private transient String originUrl;
 
     /**
      * The Protocol type.
      */
-    private String                                        protocolType     = RpcConfigs
-                                                                               .getStringValue(RpcOptions.DEFAULT_PROTOCOL);
+    private String protocolType = RpcConfigs
+            .getStringValue(RpcOptions.DEFAULT_PROTOCOL);
     /**
      * The Ip.
      */
-    private String                                        host;
+    private String host;
 
     /**
      * The Port.
      */
-    private int                                           port             = 80;
+    private int port = 80;
 
     /**
      * The path
      */
-    private String                                        path;
+    private String path;
 
     /**
      * 序列化方式，服务端指定，以服务端的为准
      */
-    private String                                        serializationType;
+    private String serializationType;
 
     /**
      * The rpc Version
      */
-    private int                                           rpcVersion;
+    private int rpcVersion;
 
     /**
      * 权重
@@ -75,25 +77,25 @@ public class ProviderInfo implements Serializable {
      * @see ProviderInfoAttrs#ATTR_WEIGHT 原始权重
      * @see ProviderInfoAttrs#ATTR_WARMUP_WEIGHT 预热权重
      */
-    private transient volatile int                        weight           = RpcConfigs
-                                                                               .getIntValue(RpcOptions.PROVIDER_WEIGHT);
+    private transient volatile int weight = RpcConfigs
+            .getIntValue(RpcOptions.PROVIDER_WEIGHT);
 
     /**
      * 服务状态
      */
-    private transient volatile ProviderStatus             status           = ProviderStatus.AVAILABLE;
+    private transient volatile ProviderStatus status = ProviderStatus.AVAILABLE;
 
     /**
      * 静态属性，不会变的
      */
-    private final ConcurrentMap<String, String>           staticAttrs      = new ConcurrentHashMap<String, String>();
+    private final ConcurrentHashMap<String, String> staticAttrs = new ConcurrentHashMap<String, String>();
 
     /**
      * 动态属性，会动态变的 <br />
      * <p>
      * 例如动态权重，是否启用，预热标记等  invocationOptimizing
      */
-    private final transient ConcurrentMap<String, Object> dynamicAttrs     = new ConcurrentHashMap<String, Object>();
+    private final transient ConcurrentHashMap<String, Object> dynamicAttrs = new ConcurrentHashMap<String, Object>();
 
     /**
      * Instantiates a new Provider.
@@ -127,26 +129,114 @@ public class ProviderInfo implements Serializable {
     }
 
     /**
-     * 从URL里解析Provider
+     * Instantiates a new Provider.
+     *
+     * @param url the url
+     */
+    private ProviderInfo(final String url) {
+        this.setOriginUrl(url);
+        try {
+            int protocolIndex = url.indexOf("://");
+            String remainUrl;
+            if (protocolIndex > -1) {
+                String protocol = url.substring(0, protocolIndex).toLowerCase();
+                this.setProtocolType(protocol);
+                remainUrl = url.substring(protocolIndex + 3);
+            } else { // 默认
+                remainUrl = url;
+            }
+
+            int addressIndex = remainUrl.indexOf(StringUtils.CONTEXT_SEP);
+            String address;
+            if (addressIndex > -1) {
+                address = remainUrl.substring(0, addressIndex);
+                remainUrl = remainUrl.substring(addressIndex);
+            } else {
+                int itfIndex = remainUrl.indexOf('?');
+                if (itfIndex > -1) {
+                    address = remainUrl.substring(0, itfIndex);
+                    remainUrl = remainUrl.substring(itfIndex);
+                } else {
+                    address = remainUrl;
+                    remainUrl = "";
+                }
+            }
+            String[] ipAndPort = address.split(":", -1); // TODO 不支持ipv6
+            this.setHost(ipAndPort[0]);
+            if (ipAndPort.length > 1) {
+                this.setPort(CommonUtils.parseInt(ipAndPort[1], port));
+            }
+
+            // 后面可以解析remainUrl得到interface等 /xxx?a=1&b=2
+            if (remainUrl.length() > 0) {
+                int itfIndex = remainUrl.indexOf('?');
+                if (itfIndex > -1) {
+                    String itf = remainUrl.substring(0, itfIndex);
+                    this.setPath(itf);
+                    // 剩下是params,例如a=1&b=2
+                    remainUrl = remainUrl.substring(itfIndex + 1);
+                    String[] params = remainUrl.split("&", -1);
+                    for (String parm : params) {
+                        String[] kvpair = parm.split("=", -1);
+                        if (ProviderInfoAttrs.ATTR_WEIGHT.equals(kvpair[0]) && StringUtils.isNotEmpty(kvpair[1])) {
+                            int weight = CommonUtils.parseInt(kvpair[1], getWeight());
+                            this.setWeight(weight);
+                            this.setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, String.valueOf(weight));
+                        } else if (ProviderInfoAttrs.ATTR_RPC_VERSION.equals(kvpair[0]) &&
+                                StringUtils.isNotEmpty(kvpair[1])) {
+                            this.setRpcVersion(CommonUtils.parseInt(kvpair[1], getRpcVersion()));
+                        } else if (ProviderInfoAttrs.ATTR_SERIALIZATION.equals(kvpair[0]) &&
+                                StringUtils.isNotEmpty(kvpair[1])) {
+                            this.setSerializationType(kvpair[1]);
+                        } else {
+                            this.staticAttrs.put(kvpair[0], kvpair[1]);
+                        }
+
+                    }
+                } else {
+                    String itf = remainUrl;
+                    this.setPath(itf);
+                }
+            } else {
+                this.setPath(StringUtils.EMPTY);
+            }
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Failed to convert url to provider, the wrong url is:" + url, e);
+        }
+    }
+
+    /**
+     * 从thrift://10.12.120.121:9090 得到Provider
      *
      * @param url url地址
      * @return Provider对象 provider
-     * @deprecated use {@link ProviderHelper#toProviderInfo(String)}
      */
-    @Deprecated
     public static ProviderInfo valueOf(String url) {
-        return ProviderHelper.toProviderInfo(url);
+        return new ProviderInfo(url);
     }
 
     /**
      * 序列化到url.
      *
      * @return the string
-     * @deprecated use {@link ProviderHelper#toUrl(ProviderInfo)}
      */
-    @Deprecated
     public String toUrl() {
-        return ProviderHelper.toUrl(this);
+        String uri = protocolType + "://" + host + ":" + port;
+        uri += StringUtils.trimToEmpty(path);
+        StringBuilder sb = new StringBuilder();
+        if (rpcVersion > 0) {
+            sb.append("&").append(ProviderInfoAttrs.ATTR_RPC_VERSION).append("=").append(rpcVersion);
+        }
+        if (serializationType != null) {
+            sb.append("&").append(ProviderInfoAttrs.ATTR_SERIALIZATION).append("=").append(serializationType);
+        }
+        for (Map.Entry<String, String> entry : staticAttrs.entrySet()) {
+            sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+        }
+        if (sb.length() > 0) {
+            uri += sb.replace(0, 1, "?").toString();
+        }
+        return uri;
     }
 
     @Override
@@ -176,7 +266,7 @@ public class ProviderInfo implements Serializable {
             return false;
         }
         if (serializationType != null ? !serializationType.equals(that.serializationType)
-            : that.serializationType != null) {
+                : that.serializationType != null) {
             return false;
         }
         // return staticAttrs != null ? staticAttrs.equals(that.staticAttrs) : that.staticAttrs == null;
@@ -399,7 +489,7 @@ public class ProviderInfo implements Serializable {
      *
      * @return the static attribute
      */
-    public ConcurrentMap<String, String> getStaticAttrs() {
+    public ConcurrentHashMap<String, String> getStaticAttrs() {
         return staticAttrs;
     }
 
@@ -420,7 +510,7 @@ public class ProviderInfo implements Serializable {
      *
      * @return the dynamic attribute
      */
-    public ConcurrentMap<String, Object> getDynamicAttrs() {
+    public ConcurrentHashMap<String, Object> getDynamicAttrs() {
         return dynamicAttrs;
     }
 

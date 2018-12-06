@@ -23,7 +23,11 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.*;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.ArrayList;
@@ -35,6 +39,7 @@ import java.util.Map;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/9 by zmyer
 @Extension("dubbo")
 public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
 
@@ -55,8 +60,9 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * Dubbo的配置
      */
-    private ServiceConfig<T>             serviceConfig;
+    private ServiceConfig<T> serviceConfig;
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void export() {
         if (exported) {
@@ -69,6 +75,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         exported = true;
     }
 
+    // TODO: 2018/7/9 by zmyer
     private void covert(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
         copyApplication(providerConfig, serviceConfig);
         copyRegistries(providerConfig, serviceConfig);
@@ -124,8 +131,9 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         protocolConfig.setParameters(serverConfig.getParameters());
     }
 
+    // TODO: 2018/7/9 by zmyer
     private void copyRegistries(ProviderConfig providerConfig,
-                                ServiceConfig serviceConfig) {
+            ServiceConfig serviceConfig) {
         List<RegistryConfig> registryConfigs = providerConfig.getRegistry();
         if (CommonUtils.isNotEmpty(registryConfigs)) {
             List<com.alibaba.dubbo.config.RegistryConfig> dubboRegistryConfigs =
@@ -133,12 +141,12 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
             for (RegistryConfig registryConfig : registryConfigs) {
                 // 生成并丢到缓存里
                 com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
-                    .get(registryConfig);
+                        .get(registryConfig);
                 if (dubboRegistryConfig == null) {
                     dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
                     copyRegistryFields(registryConfig, dubboRegistryConfig);
                     com.alibaba.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
-                        registryConfig, dubboRegistryConfig);
+                            registryConfig, dubboRegistryConfig);
                     if (old != null) {
                         dubboRegistryConfig = old;
                     }
@@ -150,7 +158,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     private void copyRegistryFields(RegistryConfig registryConfig,
-                                    com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig) {
+            com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig) {
         dubboRegistryConfig.setAddress(registryConfig.getAddress());
         dubboRegistryConfig.setProtocol(registryConfig.getProtocol());
         dubboRegistryConfig.setRegister(registryConfig.isRegister());
@@ -220,19 +228,19 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
                 for (ServerConfig server : servers) {
                     StringBuilder sb = new StringBuilder(200);
                     sb.append(server.getProtocol()).append("://").append(server.getHost())
-                        .append(":").append(server.getPort()).append(server.getContextPath())
-                        .append(providerConfig.getInterfaceId())
-                        .append("?uniqueId=").append(providerConfig.getUniqueId())
-                        .append(getKeyPairs("version", "1.0"))
-                        .append(getKeyPairs("delay", providerConfig.getDelay()))
-                        .append(getKeyPairs("weight", providerConfig.getWeight()))
-                        .append(getKeyPairs("register", providerConfig.isRegister()))
-                        .append(getKeyPairs("maxThreads", server.getMaxThreads()))
-                        .append(getKeyPairs("ioThreads", server.getIoThreads()))
-                        .append(getKeyPairs("threadPoolType", server.getThreadPoolType()))
-                        .append(getKeyPairs("accepts", server.getAccepts()))
-                        .append(getKeyPairs("dynamic", providerConfig.isDynamic()))
-                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION));
+                            .append(":").append(server.getPort()).append(server.getContextPath())
+                            .append(providerConfig.getInterfaceId())
+                            .append("?uniqueId=").append(providerConfig.getUniqueId())
+                            .append(getKeyPairs("version", "1.0"))
+                            .append(getKeyPairs("delay", providerConfig.getDelay()))
+                            .append(getKeyPairs("weight", providerConfig.getWeight()))
+                            .append(getKeyPairs("register", providerConfig.isRegister()))
+                            .append(getKeyPairs("maxThreads", server.getMaxThreads()))
+                            .append(getKeyPairs("ioThreads", server.getIoThreads()))
+                            .append(getKeyPairs("threadPoolType", server.getThreadPoolType()))
+                            .append(getKeyPairs("accepts", server.getAccepts()))
+                            .append(getKeyPairs("dynamic", providerConfig.isDynamic()))
+                            .append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION));
                     urls.add(sb.toString());
                 }
                 return urls;
