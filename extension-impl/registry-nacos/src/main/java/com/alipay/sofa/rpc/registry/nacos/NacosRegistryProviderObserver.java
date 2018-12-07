@@ -16,11 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.nacos;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
@@ -31,10 +26,14 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 /**
  * The type Nacos registry provider observer.
- * @author  <a href=mailto:jervyshi@gmail.com>JervyShi</a>   
- * @version $Id : NacosRegistryProviderObserver.java, v 0.1 2018-10-06 12:00 JervyShi Exp $$
+ * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
  */
 public class NacosRegistryProviderObserver {
 

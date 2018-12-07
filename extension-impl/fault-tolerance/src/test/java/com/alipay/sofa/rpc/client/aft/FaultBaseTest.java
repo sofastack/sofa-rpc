@@ -40,8 +40,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
- * @author bystander
- * @version $Id: FaultBaseTest.java, v 0.1 2017年11月16日 下午3:14 bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public abstract class FaultBaseTest {
 

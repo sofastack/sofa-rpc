@@ -245,7 +245,7 @@ public class BeanSerializer {
      *
      * @param src   原始对象
      * @param clazz 期望的对象
-     * @param <T> 反序列化类型
+     * @param <T>   反序列化类型
      * @return 转换后结果
      */
     public static <T> T deserializeByType(Object src, Class<T> clazz) {
