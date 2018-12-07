@@ -38,7 +38,6 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * 
  * @see CleartextHttp2ServerUpgradeHandler
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
 @Unstable
@@ -53,12 +52,12 @@ public class Http2ServerUpgradeHandler extends ChannelHandlerAdapter {
     /**
      * Creates the channel handler provide cleartext HTTP/2 upgrade from HTTP
      * upgrade or prior knowledge
-     *  
-     *  @param bizGroup the EventLoopGroup
-     * @param httpServerCodec the http server codec
+     *
+     * @param bizGroup                 the EventLoopGroup
+     * @param httpServerCodec          the http server codec
      * @param httpServerUpgradeHandler the http server upgrade handler for HTTP/2
-     * @param http2ServerHandler the http2 server handler, will be added into pipeline
-     *                           when starting HTTP/2 by prior knowledge
+     * @param http2ServerHandler       the http2 server handler, will be added into pipeline
+     *                                 when starting HTTP/2 by prior knowledge
      */
     public Http2ServerUpgradeHandler(EventLoopGroup bizGroup,
                                      HttpServerCodec httpServerCodec,

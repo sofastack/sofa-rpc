@@ -23,7 +23,6 @@ import com.alipay.common.tracer.core.configuration.SofaTracerConfiguration;
 import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
-import com.alipay.common.tracer.core.reporter.digest.DiskReporterImpl;
 import com.alipay.common.tracer.core.reporter.facade.Reporter;
 import com.alipay.common.tracer.core.reporter.stat.SofaTracerStatisticReporter;
 import com.alipay.common.tracer.core.span.LogData;

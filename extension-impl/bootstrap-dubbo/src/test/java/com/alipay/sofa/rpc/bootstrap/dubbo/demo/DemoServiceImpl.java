@@ -18,8 +18,7 @@ package com.alipay.sofa.rpc.bootstrap.dubbo.demo;
 
 /**
  *
- * @author bystander
- * @version $Id: DemoServiceImpl.java, v 0.1 2017年10月30日 下午9:24 bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class DemoServiceImpl implements DemoService {
     public String sayHello(String name) {

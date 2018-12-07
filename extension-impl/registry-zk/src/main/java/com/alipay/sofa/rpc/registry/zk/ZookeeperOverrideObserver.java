@@ -16,14 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
-import org.apache.curator.framework.recipes.cache.ChildData;
-
 import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
@@ -31,6 +23,13 @@ import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
+import org.apache.curator.framework.recipes.cache.ChildData;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * ZookeeperObserver for override node,subscribe ip level provider/consumer config.

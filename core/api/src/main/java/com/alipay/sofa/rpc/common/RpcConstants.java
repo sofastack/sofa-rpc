@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.common;
 
-import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
-
 import java.nio.charset.Charset;
+
+import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
 
 /**
  * Rpc Constants
