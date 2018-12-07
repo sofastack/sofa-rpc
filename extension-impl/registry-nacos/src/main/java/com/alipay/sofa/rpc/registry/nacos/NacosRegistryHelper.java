@@ -57,6 +57,7 @@ class NacosRegistryHelper {
             for (ServerConfig server : servers) {
                 Instance instance = new Instance();
                 instance.setClusterName(DEFAULT_CLUSTER);
+                instance.setServiceName(providerConfig.getInterfaceId());
 
                 // set host port
                 String host = server.getVirtualHost();
@@ -126,8 +127,12 @@ class NacosRegistryHelper {
         if (metaData == null) {
             metaData = new HashMap<String, String>();
         }
-        String uri = metaData.get(RpcConstants.CONFIG_KEY_PROTOCOL) + "://" + instance.getIp() + ":" +
-            instance.getPort();
+        String uri = "";
+        String protocol = metaData.get(RpcConstants.CONFIG_KEY_PROTOCOL);
+        if (StringUtils.isNotEmpty(protocol)) {
+            uri = protocol + "://";
+        }
+        uri += instance.getIp() + ":" + instance.getPort();
 
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, String> entry : metaData.entrySet()) {
