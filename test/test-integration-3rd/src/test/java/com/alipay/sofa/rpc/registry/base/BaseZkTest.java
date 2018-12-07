@@ -29,8 +29,7 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 
 /**
- * @author bystander
- * @version $Id: BaseZkTest.java, v 0.1 2018年05月22日 7:55 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public abstract class BaseZkTest {
 

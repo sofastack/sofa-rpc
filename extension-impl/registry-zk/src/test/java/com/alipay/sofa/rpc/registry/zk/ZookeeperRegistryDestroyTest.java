@@ -16,15 +16,14 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.zk.base.BaseZkTest;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  * @author tian

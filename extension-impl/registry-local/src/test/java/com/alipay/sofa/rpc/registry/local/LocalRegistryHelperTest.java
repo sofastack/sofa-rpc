@@ -25,8 +25,7 @@ import java.io.IOException;
 import java.util.Random;
 
 /**
- * @author bystander
- * @version $Id: LocalRegistryHelperTest.java, v 0.1 2018年11月07日 11:34 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class LocalRegistryHelperTest {
 

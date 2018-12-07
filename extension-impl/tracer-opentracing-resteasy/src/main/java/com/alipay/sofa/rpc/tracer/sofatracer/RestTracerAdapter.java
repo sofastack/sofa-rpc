@@ -49,8 +49,7 @@ import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
  * 客户端：startRpc ——> filter --> beforeSend --> 存入tracer信息 --> clientReceived
  * 服务端：serverReceived --> filter --> serverSend
  *
- * @author liangen
- * @version $Id: RestTracerAdapter.java, v 0.1 2017年11月29日 上午9:56 liangen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RestTracerAdapter {
 
