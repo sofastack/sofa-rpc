@@ -62,7 +62,7 @@ public abstract class AbstractHttp2ServerTransport extends ServerTransport {
     /**
      * ServerBootstrap
      */
-    private ServerBootstrap serverBootstrap;
+    private volatile ServerBootstrap serverBootstrap;
 
     /**
      * 业务线程池
