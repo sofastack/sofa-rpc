@@ -67,7 +67,7 @@ public abstract class AbstractHttp2ServerTransport extends ServerTransport {
     /**
      * 业务线程池
      */
-    private EventLoopGroup  bizGroup;
+    private EventLoopGroup           bizGroup;
 
     @Override
     public boolean start() {
