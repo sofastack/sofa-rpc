@@ -1,0 +1,1 @@
+etcd=com.alipay.sofa.rpc.registry.etcd.EtcdRegistry
