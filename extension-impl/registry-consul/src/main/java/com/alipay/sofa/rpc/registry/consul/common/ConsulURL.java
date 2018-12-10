@@ -459,59 +459,6 @@ public class ConsulURL implements Serializable {
         return addParameter(key, encode(value));
     }
 
-    public ConsulURL addParameter(String key, boolean value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, char value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, byte value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, short value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, int value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, long value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, float value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, double value) {
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, Enum<?> value) {
-        if (value == null) {
-            return this;
-        }
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, Number value) {
-        if (value == null) {
-            return this;
-        }
-        return addParameter(key, String.valueOf(value));
-    }
-
-    public ConsulURL addParameter(String key, CharSequence value) {
-        if (value == null || value.length() == 0) {
-            return this;
-        }
-        return addParameter(key, String.valueOf(value));
-    }
-
     public ConsulURL addParameter(String key, String value) {
         if (key == null || key.length() == 0 || value == null || value.length() == 0) {
             return this;
