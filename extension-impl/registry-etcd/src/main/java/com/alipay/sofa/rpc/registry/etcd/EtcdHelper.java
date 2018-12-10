@@ -50,8 +50,8 @@ public class EtcdHelper {
         client.revokeLease(EtcdRegistryHelper.buildUniqueKey(instance));
     }
 
-    public List<ServiceInstance> getInstances(String serviceName, String protocol) {
-        String keyPrefix = EtcdRegistryHelper.buildKeyPrefix(serviceName, protocol);
+    public List<ServiceInstance> getInstances(String serviceName, String protocol, String uniqueId) {
+        String keyPrefix = EtcdRegistryHelper.buildKeyPrefix(serviceName, protocol, uniqueId);
         List<KeyValue> keyValues = client.getWithPrefix(keyPrefix);
         List<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>(keyValues.size());
         for (KeyValue keyValue : keyValues) {

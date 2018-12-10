@@ -42,11 +42,12 @@ public class EtcdRegistryHelper extends RegistryUtils {
      * make unique key by appending uuid to config path
      */
     public static String buildUniqueKey(ServiceInstance instance) {
-        return instance.getServiceName() + ":" + instance.getProtocol() + ":" + instance.getUniqueId();
+        return instance.getServiceName() + ":" + instance.getProtocol() + ":" + instance.getUniqueId() + ":" +
+            instance.getUuid();
     }
 
-    public static String buildKeyPrefix(String serviceName, String protocol) {
-        return serviceName + ":" + protocol;
+    public static String buildKeyPrefix(String serviceName, String protocol, String unqiueId) {
+        return serviceName + ":" + protocol + ":" + unqiueId;
     }
 
     static List<ServiceInstance> convertProviderToInstances(ProviderConfig config) {
@@ -55,7 +56,8 @@ public class EtcdRegistryHelper extends RegistryUtils {
             List<ServiceInstance> instances = new ArrayList<ServiceInstance>();
             for (ServerConfig server : servers) {
                 ServiceInstance instance = new ServiceInstance();
-                instance.setUniqueId(UUID.randomUUID().toString());
+                instance.setUuid(UUID.randomUUID().toString());
+                instance.setUniqueId(config.getUniqueId());
                 instance.setServiceName(config.getInterfaceId());
 
                 // set host port

@@ -36,6 +36,8 @@ public class ServiceInstance implements Serializable {
     @Expose
     private String              uniqueId;
     @Expose
+    private String              uuid;
+    @Expose
     private String              serviceName;
     @Expose
     private String              protocol;
@@ -92,5 +94,13 @@ public class ServiceInstance implements Serializable {
 
     public String toJson() {
         return gson.toJson(this);
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 }

@@ -262,18 +262,14 @@ public class EtcdClient implements Closeable {
     }
 
     public void startWatch(String key, final Watcher watcher) {
-        System.out.println("key:"+key);
         StreamObserver<WatchRequest> request = watchStub.watch(new StreamObserver<WatchResponse>() {
             @Override
             public void onNext(WatchResponse watchResponse) {
-                System.out.println("watcher id:"+ watchResponse.getWatchId());
-                System.out.println("watcher id event:"+ watchResponse.getEventsCount());
                 if (watchResponse.getCreated()) {
                     watcher.setWatchId(watchResponse.getWatchId());
                 }
 
                 if (watchResponse.getCanceled()) {
-                    System.out.println("watcher id canceled:"+ watchResponse.getWatchId());
                     LOGGER.debug("watch:{} is canceled", watchResponse.getWatchId());
                 }
                 if (watchResponse.getEventsList().size() > 0) {

@@ -35,13 +35,11 @@ public class Main {
         List<KeyValue> keyValues = client.getWithPrefix("key");
         for (int i = 0; i < keyValues.size(); i++) {
             KeyValue keyValue = keyValues.get(i);
-            System.out.println(keyValue.getKey().toStringUtf8() + " - " + keyValue.getValue().toStringUtf8());
         }
 
         //        for (int i = 0; i < 10; i++) {
         Long id = client
             .putWithLease("key-with-uuid:111", "some value for key");
-        System.out.println(id);
         client.keepAlive(id);
         //        }
 

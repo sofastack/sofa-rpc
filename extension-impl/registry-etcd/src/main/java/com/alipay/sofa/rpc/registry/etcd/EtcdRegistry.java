@@ -192,7 +192,8 @@ public class EtcdRegistry extends Registry {
             }
 
             try {
-                List<ServiceInstance> allInstances = etcdHelper.getInstances(serviceName, config.getProtocol());
+                List<ServiceInstance> allInstances = etcdHelper.getInstances(serviceName, config.getProtocol(),
+                    config.getUniqueId());
                 List<ProviderInfo> providerInfos = EtcdRegistryHelper.convertInstancesToProviders(allInstances);
                 List<ProviderInfo> matchProviders = EtcdRegistryHelper.matchProviderInfos(config, providerInfos);
                 List<ProviderGroup> providerGroups = Collections.singletonList(new ProviderGroup()

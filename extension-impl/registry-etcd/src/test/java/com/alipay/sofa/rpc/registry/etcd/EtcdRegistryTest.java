@@ -226,15 +226,12 @@ public class EtcdRegistryTest {
 
         @Override
         public void updateAllProviders(List<ProviderGroup> providerGroups) {
-            System.out.println("------s--------");
             ps.clear();
             for (ProviderGroup providerGroup : providerGroups) {
-                System.out.println(providerGroup.getProviderInfos().size());
                 for (ProviderInfo providerInfo : providerGroup.getProviderInfos()) {
                     ps.put(providerInfo.getHost() + ":" + providerInfo.getPort(), providerInfo);
                 }
             }
-            System.out.println("------e--------");
         }
 
         public Map<String, ProviderInfo> getData() {

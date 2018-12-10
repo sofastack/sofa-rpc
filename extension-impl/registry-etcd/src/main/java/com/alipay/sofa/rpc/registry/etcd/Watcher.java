@@ -34,14 +34,16 @@ public class Watcher implements Callable {
 
     @Override
     public Object call() throws Exception {
-        System.out.println("called----");
-        observer.updateProviders(consumerConfig,
-            etcdHelper.getInstances(consumerConfig.getAppName(), consumerConfig.getProtocol()));
+        observer.updateProviders(
+            consumerConfig,
+            etcdHelper.getInstances(consumerConfig.getInterfaceId(), consumerConfig.getProtocol(),
+                consumerConfig.getUniqueId()));
         return null;
     }
 
     String getKeyPrefix() {
-        return EtcdRegistryHelper.buildKeyPrefix(consumerConfig.getAppName(), consumerConfig.getProtocol());
+        return EtcdRegistryHelper.buildKeyPrefix(consumerConfig.getInterfaceId(), consumerConfig.getProtocol(),
+            consumerConfig.getUniqueId());
     }
 
     public ConsumerConfig getConfig() {
