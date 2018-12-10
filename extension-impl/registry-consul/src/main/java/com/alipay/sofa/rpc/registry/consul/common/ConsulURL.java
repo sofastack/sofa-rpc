@@ -87,39 +87,6 @@ public class ConsulURL implements Serializable {
         this.parameters = null;
     }
 
-    public ConsulURL(String protocol, String host, int port) {
-        this(protocol, host, port, null, "", "", (Map<String, String>) null);
-    }
-
-    public ConsulURL(String protocol, String host, int port, String[] pairs) {
-        this(protocol, host, port, null, "", "", toStringMap(pairs));
-    }
-
-    public ConsulURL(String protocol, String host, int port, Map<String, String> parameters) {
-        this(protocol, host, port, "", "", null, parameters);
-    }
-
-    public ConsulURL(String protocol, String host, int port, String path) {
-        this(protocol, host, port, path, "", "", (Map<String, String>) null);
-    }
-
-    public ConsulURL(String protocol, String host, int port, String path, String... pairs) {
-        this(protocol, host, port, path, "", "", toStringMap(pairs));
-    }
-
-    public ConsulURL(String protocol, String host, int port, String path, Map<String, String> parameters) {
-        this(protocol, host, port, path, "", "", parameters);
-    }
-
-    public ConsulURL(String protocol, String username, String host, int port, String path) {
-        this(protocol, host, port, path, "", "", (Map<String, String>) null);
-    }
-
-    public ConsulURL(String protocol, String username, String host, int port, String path,
-                     String... pairs) {
-        this(protocol, host, port, path, "", "", toStringMap(pairs));
-    }
-
     public ConsulURL(String protocol, String host, int port, String path, String group,
                      String interfaceId,
                      Map<String, String> parameters) {
