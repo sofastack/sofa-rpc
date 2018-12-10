@@ -26,7 +26,7 @@ import java.util.List;
  * @author bystander
  * @version $Id: DubboConvetor.java, v 0.1 2018年12月10日 20:24 bystander Exp $
  */
-public class DubboConvetor {
+public class DubboConvertor {
 
     public static void copyRegistries(com.alipay.sofa.rpc.config.AbstractInterfaceConfig sofaConfig,
                                       com.alibaba.dubbo.config.AbstractInterfaceConfig dubboConfig) {

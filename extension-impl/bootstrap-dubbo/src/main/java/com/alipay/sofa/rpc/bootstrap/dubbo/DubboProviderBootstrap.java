@@ -74,7 +74,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     private void covert(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
         copyApplication(providerConfig, serviceConfig);
-        DubboConvetor.copyRegistries(providerConfig, serviceConfig);
+        DubboConvertor.copyRegistries(providerConfig, serviceConfig);
         copyServers(providerConfig, serviceConfig);
         copyProvider(providerConfig, serviceConfig);
         copyMethods(providerConfig, serviceConfig);

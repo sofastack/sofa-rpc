@@ -24,13 +24,10 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -270,14 +267,6 @@ public class ConsulURL implements Serializable {
         return value;
     }
 
-    public String[] getParameter(String key, String[] defaultValue) {
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        return ConsulConstants.COMMA_SPLIT_PATTERN.split(value);
-    }
-
     private Map<String, Number> getNumbers() {
         if (numbers == null) { // 允许并发重复创建
             numbers = new ConcurrentHashMap<String, Number>();
@@ -290,112 +279,6 @@ public class ConsulURL implements Serializable {
             urls = new ConcurrentHashMap<String, ConsulURL>();
         }
         return urls;
-    }
-
-    public ConsulURL getUrlParameter(String key) {
-        ConsulURL u = getUrls().get(key);
-        if (u != null) {
-            return u;
-        }
-        String value = getParameterAndDecoded(key);
-        if (value == null || value.length() == 0) {
-            return null;
-        }
-        u = ConsulURL.valueOf(value);
-        getUrls().put(key, u);
-        return u;
-    }
-
-    public double getParameter(String key, double defaultValue) {
-        Number n = getNumbers().get(key);
-        if (n != null) {
-            return n.doubleValue();
-        }
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        double d = Double.parseDouble(value);
-        getNumbers().put(key, d);
-        return d;
-    }
-
-    public float getParameter(String key, float defaultValue) {
-        Number n = getNumbers().get(key);
-        if (n != null) {
-            return n.floatValue();
-        }
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        float f = Float.parseFloat(value);
-        getNumbers().put(key, f);
-        return f;
-    }
-
-    public long getParameter(String key, long defaultValue) {
-        Number n = getNumbers().get(key);
-        if (n != null) {
-            return n.longValue();
-        }
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        long l = Long.parseLong(value);
-        getNumbers().put(key, l);
-        return l;
-    }
-
-    public int getParameter(String key, int defaultValue) {
-        Number n = getNumbers().get(key);
-        if (n != null) {
-            return n.intValue();
-        }
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        int i = Integer.parseInt(value);
-        getNumbers().put(key, i);
-        return i;
-    }
-
-    public short getParameter(String key, short defaultValue) {
-        Number n = getNumbers().get(key);
-        if (n != null) {
-            return n.shortValue();
-        }
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        short s = Short.parseShort(value);
-        getNumbers().put(key, s);
-        return s;
-    }
-
-    public byte getParameter(String key, byte defaultValue) {
-        Number n = getNumbers().get(key);
-        if (n != null) {
-            return n.byteValue();
-        }
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        byte b = Byte.parseByte(value);
-        getNumbers().put(key, b);
-        return b;
-    }
-
-    public char getParameter(String key, char defaultValue) {
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        return value.charAt(0);
     }
 
     public boolean getParameter(String key, boolean defaultValue) {
@@ -482,21 +365,6 @@ public class ConsulURL implements Serializable {
         return new ConsulURL(protocol, host, port, path, interfaceId, group, map);
     }
 
-    public ConsulURL addParameters(String... pairs) {
-        if (pairs == null || pairs.length == 0) {
-            return this;
-        }
-        if (pairs.length % 2 != 0) {
-            throw new IllegalArgumentException("Map pairs can not be odd number.");
-        }
-        Map<String, String> map = new HashMap<String, String>();
-        int len = pairs.length / 2;
-        for (int i = 0; i < len; i++) {
-            map.put(pairs[2 * i], pairs[2 * i + 1]);
-        }
-        return addParameters(map);
-    }
-
     public ConsulURL addParameterString(String query) {
         if (query == null || query.length() == 0) {
             return this;
@@ -509,13 +377,6 @@ public class ConsulURL implements Serializable {
             return this;
         }
         return removeParameters(key);
-    }
-
-    public ConsulURL removeParameters(Collection<String> keys) {
-        if (keys == null || keys.size() == 0) {
-            return this;
-        }
-        return removeParameters(keys.toArray(new String[0]));
     }
 
     public ConsulURL removeParameters(String... keys) {
@@ -692,14 +553,6 @@ public class ConsulURL implements Serializable {
             buildParameters(buf, true, parameters);
         }
         return buf.toString();
-    }
-
-    public URI toJavaURI() {
-        try {
-            return new URI(toString());
-        } catch (URISyntaxException e) {
-            throw new IllegalStateException(e.getMessage(), e);
-        }
     }
 
     public InetSocketAddress toInetSocketAddress() {

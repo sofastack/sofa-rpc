@@ -32,7 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.alipay.sofa.rpc.bootstrap.dubbo.DubboConvetor.copyRegistries;
+import static com.alipay.sofa.rpc.bootstrap.dubbo.DubboConvertor.copyRegistries;
 
 /**
  * Consumer bootstrap for dubbo

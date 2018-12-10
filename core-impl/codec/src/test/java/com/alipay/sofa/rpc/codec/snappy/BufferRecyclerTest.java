@@ -19,6 +19,10 @@ package com.alipay.sofa.rpc.codec.snappy;
 import org.junit.Assert;
 import org.junit.Test;
 
+/**
+ * @author bystander
+ * @version $Id: BufferRecyclerTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
+ */
 public class BufferRecyclerTest {
 
     @Test
