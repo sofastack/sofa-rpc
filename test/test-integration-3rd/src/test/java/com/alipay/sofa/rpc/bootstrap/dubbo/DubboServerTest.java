@@ -94,7 +94,7 @@ public class DubboServerTest extends BaseZkTest {
         String result = demoService.sayHello("xxx", 22);
         Assert.assertNotNull(result);
 
-        ConsumerBootstrap bootstrap = consumerConfig.getConsumerBootstrap();
+        ConsumerBootstrap<HelloService> bootstrap = consumerConfig.getConsumerBootstrap();
         Assert.assertTrue(bootstrap instanceof DubboConsumerBootstrap);
         Assert.assertTrue(bootstrap.isSubscribed());
         Assert.assertNotNull(bootstrap.getProxyIns());

@@ -55,7 +55,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * The constant serialVersionUID.
      */
-    private static final long                                   serialVersionUID    = -3058073881775315962L;
+    private static final long                                   serialVersionUID    = -305807388177315962L;
 
     /*---------- 参数配置项开始 ------------*/
 

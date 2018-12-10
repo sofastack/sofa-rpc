@@ -46,7 +46,7 @@
 
     <properties>
         <!-- Build args -->
-        <module.install.skip>true</module.install.skip>
+        <module.install.skip>false</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <module.jacoco.skip>true</module.jacoco.skip>
@@ -229,7 +229,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
             </plugin>
-            <plugin>
+            <!-- <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
@@ -250,7 +250,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin> -->
         </plugins>
     </build>
 

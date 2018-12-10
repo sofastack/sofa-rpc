@@ -98,9 +98,9 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>
-                <configuration>
+                <!-- <configuration>
                     <skip>${module.install.skip}</skip>
-                </configuration>
+                </configuration> -->
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

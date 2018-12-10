@@ -18,6 +18,7 @@
         <module>extension-common</module>
         <module>bootstrap-bolt</module>
         <module>bootstrap-dubbo</module>
+        <module>bootstrap-grpc</module>
         <module>bootstrap-http</module>
         <module>bootstrap-rest</module>
         <module>codec-protobuf</module>
