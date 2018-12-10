@@ -29,7 +29,7 @@ public class Main {
 
     public static void main(String[] args) throws InterruptedException {
         final EtcdClient client = EtcdClient.builder().endpoints("127.0.0.1")
-            .auth("root", "root123")
+            //            .auth("root", "root123")
             .build();
 
         List<KeyValue> keyValues = client.getWithPrefix("key");
@@ -38,12 +38,13 @@ public class Main {
             System.out.println(keyValue.getKey().toStringUtf8() + " - " + keyValue.getValue().toStringUtf8());
         }
 
-        for (int i = 0; i < 10; i++) {
-            Long id = client
-                .putWithLease("key-with-uuid:" + UUID.randomUUID().toString(), "some value for key");
-            System.out.println(id);
-            client.keepAlive(id);
-        }
+        //        for (int i = 0; i < 10; i++) {
+        Long id = client
+            .putWithLease("key-with-uuid:111", "some value for key");
+        System.out.println(id);
+        client.keepAlive(id);
+        //        }
+
         while (true) {
             List<KeyValue> keyValues1 = client.getWithPrefix("key");
             for (int i = 0; i < keyValues1.size(); i++) {

@@ -64,7 +64,7 @@ public class ClientBuilder {
     private AuthGrpc.AuthBlockingStub         authBlockingStub;
     private ByteString                        name;
     private ByteString                        password;
-    private final AtomicBoolean authEnabled = new AtomicBoolean(true);
+    private final AtomicBoolean               authEnabled       = new AtomicBoolean(true);
 
     public ClientBuilder auth(String name, String password) {
         if (StringUtil.isNullOrEmpty(name)) {
@@ -86,7 +86,7 @@ public class ClientBuilder {
     }
 
     public EtcdClient build() {
-        if(this.name == null || this.password == null){
+        if (this.name == null || this.password == null) {
             authEnabled.set(false);
         }
         ManagedChannel channel = channelBuilder.usePlaintext().intercept(new AddTokenInterceptor())
@@ -110,7 +110,7 @@ public class ClientBuilder {
                 next.newCall(method, callOptions)) {
                 @Override
                 public void start(Listener<RespT> responseListener, Metadata headers) {
-                    if(authEnabled.get()){
+                    if (authEnabled.get()) {
                         headers.put(TOKEN_KEY, getToken(next));
                     }
                     super.start(new SimpleForwardingClientCallListener<RespT>(responseListener) {
@@ -153,7 +153,7 @@ public class ClientBuilder {
      * @return token from etcd server
      */
     private String auth(Channel channel) {
-        if(!authEnabled.get()){
+        if (!authEnabled.get()) {
             return "";
         }
         if (authBlockingStub == null) {

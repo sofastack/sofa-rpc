@@ -16,27 +16,54 @@
  */
 package com.alipay.sofa.rpc.registry.etcd.client;
 
-import com.alipay.sofa.rpc.registry.etcd.grpc.api.*;
+import static com.google.common.base.Preconditions.checkArgument;
+
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.registry.etcd.EtcdRegistry;
+import com.alipay.sofa.rpc.registry.etcd.Watcher;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.Event;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.KVGrpc;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.KeyValue;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseGrantRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseGrantResponse;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseGrpc;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseKeepAliveRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseKeepAliveResponse;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseRevokeRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseRevokeResponse;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.PutRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.PutResponse;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.RangeRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchCancelRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchCreateRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchGrpc;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchRequest;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchResponse;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.ByteString;
 import io.grpc.ManagedChannel;
 import io.grpc.stub.StreamObserver;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.internal.StringUtil;
-
 import java.io.Closeable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.*;
-
-import static com.google.common.base.Preconditions.checkArgument;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author Fuwenming
  * @created 2018/6/5
  **/
 public class EtcdClient implements Closeable {
+
+    private final static Logger                    LOGGER               = LoggerFactory
+                                                                            .getLogger(EtcdRegistry.class);
 
     protected static final long                    DEFAULT_TTL          = 10;                                   // default ttl time for the key in seconds
     private static final Map<String, Long>         KEY_LEASEID_MAPPING  = new ConcurrentHashMap<String, Long>();
@@ -45,6 +72,7 @@ public class EtcdClient implements Closeable {
     private final KVGrpc.KVBlockingStub            kvBlockingStub;
     private final LeaseGrpc.LeaseBlockingStub      leaseBlockingStub;
     private final LeaseGrpc.LeaseStub              leaseStub;
+    private final WatchGrpc.WatchStub              watchStub;
     private final Map<Long, KeepAliveTask>         keepAliveTaskMap;
     private volatile boolean                       keepAliveTaskStarted = false;
     private StreamObserver<LeaseKeepAliveResponse> leaseKeepAliveResponseObserver;
@@ -58,6 +86,7 @@ public class EtcdClient implements Closeable {
         this.kvBlockingStub = KVGrpc.newBlockingStub(this.channel);
         this.leaseBlockingStub = LeaseGrpc.newBlockingStub(this.channel);
         this.leaseStub = LeaseGrpc.newStub(this.channel);
+        this.watchStub = WatchGrpc.newStub(this.channel);
         this.keepAliveTaskMap = new ConcurrentHashMap<Long, KeepAliveTask>();
         this.scheduledExecutorService = MoreExecutors.listeningDecorator(
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(),
@@ -125,7 +154,7 @@ public class EtcdClient implements Closeable {
 
             @Override
             public void onError(Throwable t) {
-                //log it
+                LOGGER.debug("error happened when keep alive with lease id:" + id, t);
             }
 
             @Override
@@ -228,8 +257,80 @@ public class EtcdClient implements Closeable {
         }
     }
 
-    protected synchronized void removeKeepAlive(long leaseId) {
+    private synchronized void removeKeepAlive(long leaseId) {
         this.keepAliveTaskMap.remove(leaseId);
+    }
+
+    public void startWatch(String key, final Watcher watcher) {
+        System.out.println("key:"+key);
+        StreamObserver<WatchRequest> request = watchStub.watch(new StreamObserver<WatchResponse>() {
+            @Override
+            public void onNext(WatchResponse watchResponse) {
+                System.out.println("watcher id:"+ watchResponse.getWatchId());
+                System.out.println("watcher id event:"+ watchResponse.getEventsCount());
+                if (watchResponse.getCreated()) {
+                    watcher.setWatchId(watchResponse.getWatchId());
+                }
+
+                if (watchResponse.getCanceled()) {
+                    System.out.println("watcher id canceled:"+ watchResponse.getWatchId());
+                    LOGGER.debug("watch:{} is canceled", watchResponse.getWatchId());
+                }
+                if (watchResponse.getEventsList().size() > 0) {
+                    try {
+                        watcher.call();
+                    } catch (Exception e) {
+                        StringBuilder stringBuilder = new StringBuilder(
+                            "call watcher update method error, watch id:{}, events:");
+                        for (Event event : watchResponse.getEventsList()) {
+                            stringBuilder.append(event.getType().name()).append(" ");
+                        }
+                        LOGGER.debug(stringBuilder.toString(), watchResponse.getWatchId(), e);
+                    }
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                LOGGER.debug("start watch error for watcher: {}", watcher.toString());
+            }
+
+            @Override
+            public void onCompleted() {
+                //do nothing
+            }
+        });
+        ByteString keyByte = ByteString.copyFromUtf8(key);
+        WatchCreateRequest createRequest = WatchCreateRequest.newBuilder().setKey(keyByte)
+            .setRangeEnd(Utils.plusOne(keyByte)).build();
+        request.onNext(WatchRequest.newBuilder().setCreateRequest(createRequest).build());
+    }
+
+    public void cancelWatch(final Watcher watcher) {
+        if (watcher.getWatchId() == null) {
+            LOGGER.info("watch id is blank when cancel watch, return with doing nothing");
+            return;
+        }
+        StreamObserver<WatchRequest> watchRequest = watchStub.watch(new StreamObserver<WatchResponse>() {
+            @Override
+            public void onNext(WatchResponse watchResponse) {
+                if (watchResponse.getCanceled()) {
+                    watcher.setWatchId(null);
+                }
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                LOGGER.debug("error happened when cancel watch for watcher:{}", watcher, throwable);
+            }
+
+            @Override
+            public void onCompleted() {
+                //do nothing
+            }
+        });
+        watchRequest.onNext(WatchRequest.newBuilder()
+            .setCancelRequest(WatchCancelRequest.newBuilder().setWatchId(watcher.getWatchId()).build()).build());
     }
 
     @Override
@@ -237,12 +338,15 @@ public class EtcdClient implements Closeable {
         if (channel != null) {
             this.channel.shutdown();
         }
-
         if (!keepAliveTaskStarted) {
             return;
         }
-        leaseKeepAliveRequestObserver.onCompleted();
-        leaseKeepAliveResponseObserver.onCompleted();
+        try {
+            leaseKeepAliveRequestObserver.onCompleted();
+            leaseKeepAliveResponseObserver.onCompleted();
+        } catch (Exception e) {
+            //do nothing
+        }
         keepAliveTaskFuture.cancel(true);
         removeExpiredTaskFuture.cancel(true);
         keepAliveTaskMap.clear();
