@@ -17,13 +17,10 @@
 package com.alipay.sofa.rpc.registry.consul.common;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
@@ -33,7 +30,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ConsulURL
@@ -42,37 +38,33 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ConsulURL implements Serializable {
 
-    private static final long                         serialVersionUID = -1985165475234910535L;
+    private static final long         serialVersionUID = -1985165475234910535L;
 
-    private final String                              protocol;
+    final static String               UTF8_ENCODING    = "UTF-8";
 
-    private final String                              host;
+    final static String               UNIQUE_ID        = "uniqueId";
 
-    private final int                                 port;
+    final static String               GROUP_KEY        = "group";
 
-    private final String                              group;
+    private final String              protocol;
 
-    private final String                              interfaceId;
+    private final String              host;
 
-    private final String                              path;
+    private final int                 port;
 
-    private final Map<String, String>                 parameters;
+    private final String              group;
 
-    // ==== cache ====
+    private final String              interfaceId;
 
-    private volatile transient Map<String, Number>    numbers;
+    private final String              path;
 
-    private volatile transient Map<String, ConsulURL> urls;
+    private final Map<String, String> parameters;
 
-    private volatile transient String                 ip;
+    private volatile transient String ip;
 
-    private volatile transient String                 full;
+    private volatile transient String full;
 
-    private volatile transient String                 identity;
-
-    private volatile transient String                 parameter;
-
-    private volatile transient String                 string;
+    private volatile transient String string;
 
     protected ConsulURL() {
         this.protocol = null;
@@ -106,7 +98,7 @@ public class ConsulURL implements Serializable {
 
     public static ConsulURL valueOf(String url) {
         if (url == null || (url = url.trim()).length() == 0) {
-            throw new IllegalArgumentException("url == null");
+            throw new IllegalArgumentException("url is null");
         }
         String protocol = null;
         String host = null;
@@ -115,8 +107,9 @@ public class ConsulURL implements Serializable {
         int port = 0;
         String path = null;
         Map<String, String> parameters = null;
-        int i = url.indexOf("?"); // seperator between body and parameters
+        int i = url.indexOf("?");
         if (i >= 0) {
+            //seperate with & to key=value
             String[] parts = url.substring(i + 1).split("\\&");
             parameters = new HashMap<String, String>();
             for (String part : parts) {
@@ -130,8 +123,8 @@ public class ConsulURL implements Serializable {
                     }
                 }
             }
-            interfaceId = parameters.get("uniqueId");
-            group = parameters.get("group");
+            interfaceId = parameters.get(UNIQUE_ID);
+            group = parameters.get(GROUP_KEY);
             url = url.substring(0, i);
         }
         i = url.indexOf("://");
@@ -142,7 +135,7 @@ public class ConsulURL implements Serializable {
             protocol = url.substring(0, i);
             url = url.substring(i + 3);
         } else {
-            // case: file:/path/to/file.txt
+            // maybe: file:/path/to/file
             i = url.indexOf(":/");
             if (i >= 0) {
                 if (i == 0) {
@@ -202,18 +195,7 @@ public class ConsulURL implements Serializable {
         return path;
     }
 
-    public String getAbsolutePath() {
-        if (path != null && !path.startsWith("/")) {
-            return "/" + path;
-        }
-        return path;
-    }
-
     public ConsulURL setProtocol(String protocol) {
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, getParameters());
-    }
-
-    public ConsulURL setUsername(String username) {
         return new ConsulURL(protocol, host, port, path, interfaceId, group, getParameters());
     }
 
@@ -230,28 +212,12 @@ public class ConsulURL implements Serializable {
         return new ConsulURL(protocol, host, port, path, interfaceId, group, getParameters());
     }
 
-    public ConsulURL setHost(String host) {
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, getParameters());
-    }
-
     public ConsulURL setPort(int port) {
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, getParameters());
-    }
-
-    public ConsulURL setPath(String path) {
         return new ConsulURL(protocol, host, port, path, interfaceId, group, getParameters());
     }
 
     public Map<String, String> getParameters() {
         return parameters;
-    }
-
-    public String getParameterAndDecoded(String key) {
-        return getParameterAndDecoded(key, null);
-    }
-
-    public String getParameterAndDecoded(String key, String defaultValue) {
-        return decode(getParameter(key, defaultValue));
     }
 
     public String getParameter(String key) {
@@ -267,192 +233,16 @@ public class ConsulURL implements Serializable {
         return value;
     }
 
-    private Map<String, Number> getNumbers() {
-        if (numbers == null) { // 允许并发重复创建
-            numbers = new ConcurrentHashMap<String, Number>();
-        }
-        return numbers;
-    }
-
-    private Map<String, ConsulURL> getUrls() {
-        if (urls == null) { // 允许并发重复创建
-            urls = new ConcurrentHashMap<String, ConsulURL>();
-        }
-        return urls;
-    }
-
-    public boolean getParameter(String key, boolean defaultValue) {
-        String value = getParameter(key);
-        if (value == null || value.length() == 0) {
-            return defaultValue;
-        }
-        return Boolean.parseBoolean(value);
-    }
-
-    public boolean hasParameter(String key) {
-        String value = getParameter(key);
-        return value != null && value.length() > 0;
-    }
-
-    public boolean isLocalHost() {
-        return NetUtils.isLocalHost(host) || getParameter(ConsulConstants.LOCALHOST_KEY, false);
-    }
-
-    public boolean isAnyHost() {
-        return ConsulConstants.ANYHOST_VALUE.equals(host) || getParameter(ConsulConstants.ANYHOST_KEY, false);
-    }
-
-    public ConsulURL addParameterAndEncoded(String key, String value) {
-        if (value == null || value.length() == 0) {
-            return this;
-        }
-        return addParameter(key, encode(value));
-    }
-
-    public ConsulURL addParameter(String key, String value) {
-        if (key == null || key.length() == 0 || value == null || value.length() == 0) {
-            return this;
-        }
-        // 如果没有修改，直接返回。
-        if (value.equals(getParameters().get(key))) { // value != null
-            return this;
-        }
-        Map<String, String> map = new HashMap<String, String>(getParameters());
-        map.put(key, value);
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, map);
-    }
-
-    public ConsulURL addParameterIfAbsent(String key, String value) {
-        if (key == null || key.length() == 0 || value == null || value.length() == 0) {
-            return this;
-        }
-        if (hasParameter(key)) {
-            return this;
-        }
-        Map<String, String> map = new HashMap<String, String>(getParameters());
-        map.put(key, value);
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, map);
-    }
-
-    public ConsulURL addParameters(Map<String, String> parameters) {
-        if (parameters == null || parameters.size() == 0) {
-            return this;
-        }
-        boolean hasAndEqual = true;
-        for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            String value = getParameters().get(entry.getKey());
-            if (value == null && entry.getValue() != null || !value.equals(entry.getValue())) {
-                hasAndEqual = false;
-                break;
-            }
-        }
-        // 如果没有修改，直接返回。
-        if (hasAndEqual) {
-            return this;
-        }
-
-        Map<String, String> map = new HashMap<String, String>(getParameters());
-        map.putAll(parameters);
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, map);
-    }
-
-    public ConsulURL addParametersIfAbsent(Map<String, String> parameters) {
-        if (parameters == null || parameters.size() == 0) {
-            return this;
-        }
-        Map<String, String> map = new HashMap<String, String>(parameters);
-        map.putAll(getParameters());
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, map);
-    }
-
-    public ConsulURL addParameterString(String query) {
-        if (query == null || query.length() == 0) {
-            return this;
-        }
-        return addParameters(ConsulURLUtils.parseQueryString(query));
-    }
-
-    public ConsulURL removeParameter(String key) {
-        if (key == null || key.length() == 0) {
-            return this;
-        }
-        return removeParameters(key);
-    }
-
-    public ConsulURL removeParameters(String... keys) {
-        if (keys == null || keys.length == 0) {
-            return this;
-        }
-        Map<String, String> map = new HashMap<String, String>(getParameters());
-        for (String key : keys) {
-            map.remove(key);
-        }
-        if (map.size() == getParameters().size()) {
-            return this;
-        }
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, map);
-    }
-
-    public ConsulURL clearParameters() {
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, new HashMap<String, String>());
-    }
-
-    public String getRawParameter(String key) {
-        if ("protocol".equals(key)) {
-            return protocol;
-        }
-        if ("host".equals(key)) {
-            return host;
-        }
-        if ("port".equals(key)) {
-            return String.valueOf(port);
-        }
-        if ("path".equals(key)) {
-            return path;
-        }
-        return getParameter(key);
-    }
-
-    public Map<String, String> toMap() {
-        Map<String, String> map = new HashMap<String, String>(parameters);
-        if (protocol != null) {
-            map.put("protocol", protocol);
-        }
-        if (host != null) {
-            map.put("host", host);
-        }
-        if (port > 0) {
-            map.put("port", String.valueOf(port));
-        }
-        if (path != null) {
-            map.put("path", path);
-        }
-        return map;
-    }
-
     @Override
     public String toString() {
         if (string != null) {
             return string;
         }
-        return string = buildString(false, true); // no show username
+        return string = buildString(false, true);
     }
 
     public String toString(String... parameters) {
-        return buildString(false, true, parameters); // no show username
-    }
-
-    public String toIdentityString() {
-        if (identity != null) {
-            return identity;
-        }
-        return identity = buildString(true, false); // only return identity message, see the method "equals" and
-        // "hashCode"
-    }
-
-    public String toIdentityString(String... parameters) {
-        return buildString(true, false, parameters); // only return identity message, see the method "equals" and
-        // "hashCode"
+        return buildString(false, true, parameters);
     }
 
     public String toFullString() {
@@ -460,36 +250,6 @@ public class ConsulURL implements Serializable {
             return full;
         }
         return full = buildString(true, true);
-    }
-
-    public static Map<String, String> toStringMap(String... pairs) {
-        Map<String, String> parameters = new HashMap<String, String>();
-        if (pairs.length > 0) {
-            if (pairs.length % 2 != 0) {
-                throw new IllegalArgumentException("pairs must be even.");
-            }
-            for (int i = 0; i < pairs.length; i = i + 2) {
-                parameters.put(pairs[i], pairs[i + 1]);
-            }
-        }
-        return parameters;
-    }
-
-    public String toFullString(String... parameters) {
-        return buildString(true, true, parameters);
-    }
-
-    public String toParameterString() {
-        if (parameter != null) {
-            return parameter;
-        }
-        return parameter = toParameterString(new String[0]);
-    }
-
-    public String toParameterString(String... parameters) {
-        StringBuilder buf = new StringBuilder();
-        buildParameters(buf, false, parameters);
-        return buf.toString();
     }
 
     private void buildParameters(StringBuilder buf, boolean concat, String[] parameters) {
@@ -555,10 +315,6 @@ public class ConsulURL implements Serializable {
         return buf.toString();
     }
 
-    public InetSocketAddress toInetSocketAddress() {
-        return new InetSocketAddress(host, port);
-    }
-
     public String getServiceKey() {
         String inf = getServiceInterface();
         if (inf == null) {
@@ -589,18 +345,7 @@ public class ConsulURL implements Serializable {
 
     public String getServiceInterface() {
         String interfaceId = getParameter(RpcConstants.CONFIG_KEY_INTERFACE, "");
-        if (StringUtils.isEmpty(interfaceId)) {
-            interfaceId = getParameter("interfaceId");
-        }
         return interfaceId;
-    }
-
-    public String toServiceString() {
-        return buildString(true, false, true, true);
-    }
-
-    public ConsulURL setServiceInterface(String service) {
-        return addParameter(RpcConstants.CONFIG_KEY_INTERFACE, service);
     }
 
     public static String encode(String value) {
@@ -608,7 +353,7 @@ public class ConsulURL implements Serializable {
             return "";
         }
         try {
-            return URLEncoder.encode(value, "UTF-8");
+            return URLEncoder.encode(value, UTF8_ENCODING);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
@@ -619,7 +364,7 @@ public class ConsulURL implements Serializable {
             return "";
         }
         try {
-            return URLDecoder.decode(value, "UTF-8");
+            return URLDecoder.decode(value, UTF8_ENCODING);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e.getMessage(), e);
         }
