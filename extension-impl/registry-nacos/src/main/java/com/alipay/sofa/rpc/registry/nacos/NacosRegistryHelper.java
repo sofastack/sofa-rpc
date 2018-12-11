@@ -16,30 +16,25 @@
  */
 package com.alipay.sofa.rpc.registry.nacos;
 
+import com.alibaba.nacos.api.naming.pojo.Instance;
+import com.alipay.sofa.rpc.client.ProviderHelper;
+import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.SystemInfo;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.alibaba.nacos.api.naming.pojo.Cluster;
-import com.alibaba.nacos.api.naming.pojo.Instance;
-import com.alipay.sofa.rpc.client.ProviderHelper;
-import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
-import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.SystemInfo;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
-
 /**
  * The type Nacos registry helper.
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
- * @version $Id : NacosRegistryHelper.java, v 0.1 2018-10-05 21:47 JervyShi Exp $$
  */
 class NacosRegistryHelper {
 
@@ -100,27 +95,6 @@ class NacosRegistryHelper {
             providerInfos.add(providerInfo);
         }
         return providerInfos;
-    }
-
-    /**
-     * Match provider infos list.
-     *
-     * @param consumerConfig the consumer config 
-     * @param providerInfos the provider infos 
-     * @return the list
-     */
-    static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig,
-                                                 List<ProviderInfo> providerInfos) {
-        String protocol = consumerConfig.getProtocol();
-        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol) &&
-                StringUtils.equals(consumerConfig.getUniqueId(),
-                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
-                result.add(providerInfo);
-            }
-        }
-        return result;
     }
 
     private static String convertInstanceToUrl(Instance instance) {

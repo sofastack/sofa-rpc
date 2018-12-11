@@ -16,12 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.utils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
@@ -36,6 +30,12 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Common Utils for Registry extensions
@@ -77,6 +77,19 @@ public class RegistryUtils {
             return urls;
         }
         return null;
+    }
+
+    public static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
+        String protocol = consumerConfig.getProtocol();
+        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
+        for (ProviderInfo providerInfo : providerInfos) {
+            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
+                && StringUtils.equals(consumerConfig.getUniqueId(),
+                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
+                result.add(providerInfo);
+            }
+        }
+        return result;
     }
 
     public static Map<String, String> convertProviderToMap(ProviderConfig providerConfig, ServerConfig server) {

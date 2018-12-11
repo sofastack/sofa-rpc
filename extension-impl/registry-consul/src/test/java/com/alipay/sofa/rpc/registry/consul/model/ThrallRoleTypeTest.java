@@ -14,12 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.client.aft.bean;
+package com.alipay.sofa.rpc.registry.consul.model;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: ThrallRoleTypeTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
  */
-public interface FaultHelloService {
+public class ThrallRoleTypeTest {
 
-    public String sayHello(String name);
+    @Test
+    public void testConvert() {
+        ThrallRoleType type = ThrallRoleType.forNumber(ThrallRoleType.CONSUMER.getNumber());
+        Assert.assertEquals(type, ThrallRoleType.CONSUMER);
+        type = ThrallRoleType.forNumber(ThrallRoleType.PROVIDER.getNumber());
+        Assert.assertEquals(type, ThrallRoleType.PROVIDER);
+    }
 }

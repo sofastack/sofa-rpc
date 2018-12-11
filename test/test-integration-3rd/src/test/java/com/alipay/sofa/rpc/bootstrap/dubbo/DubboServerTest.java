@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author bystander
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class DubboServerTest extends BaseZkTest {
 

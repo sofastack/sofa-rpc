@@ -33,8 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: ZookeeperRegistryHelperTest.java, v 0.1 2018年04月25日 下午7:09 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class ZookeeperRegistryHelperTest {
 
