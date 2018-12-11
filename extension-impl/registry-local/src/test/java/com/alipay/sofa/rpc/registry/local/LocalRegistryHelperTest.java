@@ -56,6 +56,8 @@ public class LocalRegistryHelperTest {
         String newDigest = LocalRegistryHelper.calMD5Checksum(filePath);
 
         Assert.assertNotSame("digest不能一样", oldDigest, newDigest);
+        Assert.assertTrue(LocalRegistryHelper.checkModified(filePath, oldDigest));
+        Assert.assertFalse(LocalRegistryHelper.checkModified(filePath, newDigest));
     }
 
     @Test
@@ -75,5 +77,6 @@ public class LocalRegistryHelperTest {
         String newDigest = LocalRegistryHelper.calMD5Checksum(filePath);
 
         Assert.assertEquals("digest不一样", oldDigest, newDigest);
+        Assert.assertFalse(LocalRegistryHelper.checkModified(filePath, oldDigest));
     }
 }
