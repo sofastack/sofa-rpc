@@ -14,39 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.snappy;
+package com.alipay.sofa.rpc.registry.consul.model;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author bystander
+ * @version $Id: ThrallRoleTypeTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
  */
-public class Crc32CTest {
+public class ThrallRoleTypeTest {
 
     @Test
-    public void testSimple() {
-        Crc32C c = new Crc32C();
-        c.update(new byte[] { 1, 2, 3, 4 }, 1, 0);
-        c.getMaskedValue();
-        c.getIntValue();
-        c.getValue();
-    }
-
-    @Test
-    public void testBigCrc() {
-        Crc32C c = new Crc32C();
-        c.update(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 0, 9);
-        c.getMaskedValue();
-        c.getIntValue();
-        c.getValue();
-    }
-
-    @Test
-    public void testUpdate() {
-        Crc32C c = new Crc32C();
-        c.update(1);
-        c.getMaskedValue();
-        c.getIntValue();
-        c.getValue();
+    public void testConvert() {
+        ThrallRoleType type = ThrallRoleType.forNumber(ThrallRoleType.CONSUMER.getNumber());
+        Assert.assertEquals(type, ThrallRoleType.CONSUMER);
+        type = ThrallRoleType.forNumber(ThrallRoleType.PROVIDER.getNumber());
+        Assert.assertEquals(type, ThrallRoleType.PROVIDER);
     }
 }

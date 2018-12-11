@@ -16,37 +16,39 @@
  */
 package com.alipay.sofa.rpc.codec.snappy;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author bystander
+ * @version $Id: BufferRecyclerTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
  */
-public class Crc32CTest {
+public class BufferRecyclerTest {
 
     @Test
-    public void testSimple() {
-        Crc32C c = new Crc32C();
-        c.update(new byte[] { 1, 2, 3, 4 }, 1, 0);
-        c.getMaskedValue();
-        c.getIntValue();
-        c.getValue();
+    public void encodingBuffer() {
+        byte[] b = BufferRecycler.instance().allocEncodingBuffer(10);
+        Assert.assertEquals(4000, b.length);
+
+        BufferRecycler.instance().releaseEncodeBuffer(b);
+
     }
 
     @Test
-    public void testBigCrc() {
-        Crc32C c = new Crc32C();
-        c.update(new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 }, 0, 9);
-        c.getMaskedValue();
-        c.getIntValue();
-        c.getValue();
+    public void inputBuffer() {
+
+        byte[] b = BufferRecycler.instance().allocInputBuffer(10);
+        Assert.assertEquals(8000, b.length);
+
+        BufferRecycler.instance().releaseInputBuffer(b);
     }
 
     @Test
-    public void testUpdate() {
-        Crc32C c = new Crc32C();
-        c.update(1);
-        c.getMaskedValue();
-        c.getIntValue();
-        c.getValue();
+    public void allocDecodeBuffer() {
+
+        byte[] b = BufferRecycler.instance().allocDecodeBuffer(10);
+        Assert.assertEquals(10, b.length);
+
+        BufferRecycler.instance().releaseDecodeBuffer(b);
     }
 }
