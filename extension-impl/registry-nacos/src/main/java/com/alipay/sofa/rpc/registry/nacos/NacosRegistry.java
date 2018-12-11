@@ -39,6 +39,7 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -278,7 +279,7 @@ public class NacosRegistry extends Registry {
                 List<Instance> allInstances = namingService.getAllInstances(serviceName, defaultCluster);
 
                 List<ProviderInfo> providerInfos = NacosRegistryHelper.convertInstancesToProviders(allInstances);
-                List<ProviderInfo> matchProviders = NacosRegistryHelper.matchProviderInfos(config, providerInfos);
+                List<ProviderInfo> matchProviders = RegistryUtils.matchProviderInfos(config, providerInfos);
                 return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(
