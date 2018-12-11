@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
