@@ -84,7 +84,7 @@ public class NacosRegistryProviderObserver {
         List<ProviderInfoListener> providerInfoListeners = providerListenerMap.get(config);
         if (CommonUtils.isNotEmpty(providerInfoListeners)) {
             List<ProviderInfo> providerInfos = NacosRegistryHelper.convertInstancesToProviders(instances);
-            List<ProviderInfo> matchProviders = NacosRegistryHelper.matchProviderInfos(config, providerInfos);
+            List<ProviderInfo> matchProviders = RegistryUtils.matchProviderInfos(config, providerInfos);
 
             for (ProviderInfoListener providerInfoListener : providerInfoListeners) {
                 providerInfoListener
