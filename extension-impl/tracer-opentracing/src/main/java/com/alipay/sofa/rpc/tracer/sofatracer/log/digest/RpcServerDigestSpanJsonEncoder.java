@@ -17,23 +17,22 @@
 package com.alipay.sofa.rpc.tracer.sofatracer.log.digest;
 
 import com.alipay.common.tracer.core.appender.builder.JsonStringBuilder;
-import com.alipay.common.tracer.core.appender.encoder.SpanEncoder;
 import com.alipay.common.tracer.core.appender.self.Timestamp;
-import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
 
 import java.io.IOException;
-import java.util.Map;
 
 /**
  * Encode RpcServerDigestSpan to json string
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class RpcServerDigestSpanJsonEncoder implements SpanEncoder<SofaTracerSpan> {
+public class RpcServerDigestSpanJsonEncoder extends AbstractRpcDigestSpanJsonEncoder {
 
+    /**
+     * for cocurrent consider ,we do not put it to parent class
+     */
     private JsonStringBuilder jsb = new JsonStringBuilder();
 
     @Override
@@ -47,37 +46,4 @@ public class RpcServerDigestSpanJsonEncoder implements SpanEncoder<SofaTracerSpa
         return jsb.toString();
     }
 
-    public void appendSlot(JsonStringBuilder xsb, SofaTracerSpan span) {
-        SofaTracerSpanContext spanContext = span.getSofaTracerSpanContext();
-        //traceId
-        jsb.append(RpcSpanTags.TRACERID, spanContext.getTraceId());
-        //spanId
-        jsb.append(RpcSpanTags.SPANID, spanContext.getSpanId());
-        //tags
-        Map<String, String> tagsWithStr = span.getTagsWithStr();
-        if (CommonUtils.isNotEmpty(tagsWithStr)) {
-            for (Map.Entry<String, String> entry : tagsWithStr.entrySet()) {
-                jsb.append(entry.getKey(), entry.getValue());
-            }
-        }
-        Map<String, Number> tagsWithNumber = span.getTagsWithNumber();
-        if (CommonUtils.isNotEmpty(tagsWithNumber)) {
-            for (Map.Entry<String, Number> entry : tagsWithNumber.entrySet()) {
-                Number value = entry.getValue();
-                jsb.append(entry.getKey(), value == null ? null : String.valueOf(value));
-            }
-        }
-        Map<String, Boolean> tagsWithBool = span.getTagsWithBool();
-        if (CommonUtils.isNotEmpty(tagsWithBool)) {
-            for (Map.Entry<String, Boolean> entry : tagsWithBool.entrySet()) {
-                jsb.append(entry.getKey(), entry.getValue());
-            }
-        }
-        jsb.append(RpcSpanTags.BAGGAGE, baggageSerialized(spanContext));
-    }
-
-    protected String baggageSerialized(SofaTracerSpanContext spanContext) {
-        //业务 baggage
-        return spanContext.getBizSerializedBaggage();
-    }
 }

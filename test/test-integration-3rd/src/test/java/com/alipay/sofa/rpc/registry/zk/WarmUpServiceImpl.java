@@ -18,8 +18,7 @@ package com.alipay.sofa.rpc.registry.zk;
 
 /**
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: WamUpServiceImpl.java, v 0.1 2018年04月23日 上午11:06 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class WarmUpServiceImpl implements WarmUpService {
 

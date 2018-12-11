@@ -20,14 +20,11 @@ import com.alipay.sofa.rpc.client.aft.bean.FaultHelloService;
 import com.alipay.sofa.rpc.client.aft.bean.HelloServiceTimeOutImpl;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.After;
 import org.junit.Before;
 
 /**
- * @author bystander
- * @version $Id: FaultBaseTest.java, v 0.1 2017年11月16日 下午3:14 bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public abstract class FaultBaseServiceTest extends FaultBaseTest {
 

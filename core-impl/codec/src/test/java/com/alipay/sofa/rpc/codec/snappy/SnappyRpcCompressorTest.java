@@ -22,14 +22,12 @@ import org.junit.Test;
 import java.io.UnsupportedEncodingException;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class SnappyRpcCompressorTest {
 
     @Test
-    public void testAll() throws UnsupportedEncodingException {
+    public void testCompress() throws UnsupportedEncodingException {
         SnappyRpcCompressor compressor = new SnappyRpcCompressor();
         String s = "xxxxasdasdasd0as8d0asdkmasldjalsd";
         byte[] bs = compressor.compress(s.getBytes("utf-8"));
@@ -37,5 +35,48 @@ public class SnappyRpcCompressorTest {
 
         String s1 = new String(compressor.deCompress(bs), "utf-8");
         Assert.assertEquals(s, s1);
+    }
+
+    @Test
+    public void testUnCompressSpecifySize() throws UnsupportedEncodingException {
+        SnappyRpcCompressor compressor = new SnappyRpcCompressor();
+        String s = "xxxxasdasdasd0as8d0asdkmasldjalsd";
+        byte[] bs = compressor.compress(s.getBytes("utf-8"));
+        Assert.assertNotNull(s);
+
+        String s1 = new String(compressor.uncompress(bs, 0, bs.length), "utf-8");
+        Assert.assertEquals(s, s1);
+    }
+
+    @Test
+    public void testPartCompressSpecifySize() throws UnsupportedEncodingException {
+        SnappyRpcCompressor compressor = new SnappyRpcCompressor();
+        String s = "xxxxasdasdasd0as8d0asdkmasldjalsd";
+        byte[] bs = compressor.compress(s.getBytes("utf-8"));
+        Assert.assertNotNull(s);
+
+        String s1 = null;
+        try {
+            s1 = new String(compressor.uncompress(bs, 0, 1), "utf-8");
+            Assert.fail();
+        } catch (CorruptionException e) {
+            Assert.assertTrue(true);
+
+        }
+    }
+
+    @Test
+    public void testBadUnCompressSpecifySize() throws UnsupportedEncodingException {
+        SnappyRpcCompressor compressor = new SnappyRpcCompressor();
+        String s = "xxxxasdasdasd0as8d0asdkmasldjalsd";
+        byte[] bs = compressor.compress(s.getBytes("utf-8"));
+        Assert.assertNotNull(s);
+
+        try {
+            String s1 = new String(compressor.uncompress(bs, 0, bs.length + 1), "utf-8");
+            Assert.fail();
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Assert.assertTrue(true);
+        }
     }
 }

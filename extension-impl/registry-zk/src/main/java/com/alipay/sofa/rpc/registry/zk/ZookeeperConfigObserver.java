@@ -23,7 +23,6 @@ import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
-
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.util.List;

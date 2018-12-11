@@ -14,29 +14,41 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.log.factory;
+package com.alipay.sofa.rpc.codec.snappy;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
 
 /**
- *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author bystander
+ * @version $Id: BufferRecyclerTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
  */
-public class RpcLoggerFactoryTest {
-    @Test
-    public void getLogger() throws Exception {
+public class BufferRecyclerTest {
 
-        Assert.assertNull(RpcLoggerFactory.getLogger(null, "appname1"));
-        Logger logger1 = RpcLoggerFactory.getLogger("xxx", "appname1");
-        Assert.assertNotNull(logger1);
-        Logger logger2 = RpcLoggerFactory.getLogger("xxx", "appname1");
-        Assert.assertNotNull(logger1);
-        Assert.assertEquals(logger1, logger2);
-        Logger logger3 = RpcLoggerFactory.getLogger("xxx", "appname2");
-        Assert.assertFalse(logger1.equals(logger3));
+    @Test
+    public void encodingBuffer() {
+        byte[] b = BufferRecycler.instance().allocEncodingBuffer(10);
+        Assert.assertEquals(4000, b.length);
+
+        BufferRecycler.instance().releaseEncodeBuffer(b);
+
     }
 
+    @Test
+    public void inputBuffer() {
+
+        byte[] b = BufferRecycler.instance().allocInputBuffer(10);
+        Assert.assertEquals(8000, b.length);
+
+        BufferRecycler.instance().releaseInputBuffer(b);
+    }
+
+    @Test
+    public void allocDecodeBuffer() {
+
+        byte[] b = BufferRecycler.instance().allocDecodeBuffer(10);
+        Assert.assertEquals(10, b.length);
+
+        BufferRecycler.instance().releaseDecodeBuffer(b);
+    }
 }

@@ -14,12 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.client.aft.bean;
+package com.alipay.sofa.rpc.registry.consul.model;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: HeartbeatServiceTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
  */
-public interface FaultHelloService {
+public class HeartbeatServiceTest {
 
-    public String sayHello(String name);
+    @Test
+    public void test() {
+        HeartbeatService heartbeatService1 = new HeartbeatService(null, null);
+        HeartbeatService heartbeatService2 = new HeartbeatService(null, null);
+        Assert.assertEquals(heartbeatService1, heartbeatService2);
+    }
+
 }

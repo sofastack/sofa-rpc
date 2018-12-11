@@ -17,8 +17,7 @@
 package com.alipay.sofa.rpc.client.aft.bean;
 
 /**
- * @author bystander
- * @version $Id: FaultHelloService.java, v 0.1 2017年11月17日 下午3:47 bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public interface FaultHelloService2 {
 

@@ -16,15 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.nacos;
 
-import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
@@ -48,6 +39,16 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
+import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 
 /**
  * <p>Simple Nacos registry. Features: <br/>
@@ -69,7 +70,6 @@ import com.alipay.sofa.rpc.registry.Registry;
  * </p>
  * 
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
- * @version $Id : NacosRegistry.java, v 0.1 2018-10-05 20:12 JervyShi Exp $$
  */
 @Extension("nacos")
 public class NacosRegistry extends Registry {
@@ -279,7 +279,7 @@ public class NacosRegistry extends Registry {
                 List<Instance> allInstances = namingService.getAllInstances(serviceName, defaultCluster);
 
                 List<ProviderInfo> providerInfos = NacosRegistryHelper.convertInstancesToProviders(allInstances);
-                List<ProviderInfo> matchProviders = NacosRegistryHelper.matchProviderInfos(config, providerInfos);
+                List<ProviderInfo> matchProviders = RegistryUtils.matchProviderInfos(config, providerInfos);
                 return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(
