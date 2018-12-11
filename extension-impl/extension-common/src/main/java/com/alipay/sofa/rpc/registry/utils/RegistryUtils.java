@@ -79,6 +79,19 @@ public class RegistryUtils {
         return null;
     }
 
+    public static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
+        String protocol = consumerConfig.getProtocol();
+        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
+        for (ProviderInfo providerInfo : providerInfos) {
+            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
+                && StringUtils.equals(consumerConfig.getUniqueId(),
+                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
+                result.add(providerInfo);
+            }
+        }
+        return result;
+    }
+
     public static Map<String, String> convertProviderToMap(ProviderConfig providerConfig, ServerConfig server) {
         Map<String, String> metaData = new HashMap<String, String>();
         metaData.put(RpcConstants.CONFIG_KEY_UNIQUEID, providerConfig.getUniqueId());

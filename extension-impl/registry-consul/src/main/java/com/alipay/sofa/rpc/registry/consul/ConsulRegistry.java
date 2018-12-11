@@ -327,9 +327,7 @@ public class ConsulRegistry extends Registry {
                     Collection<List<ConsulURL>> consulURLList = entry.getValue().values();
 
                     List<ProviderInfo> matchProviders = new ArrayList<ProviderInfo>();
-                    Iterator<List<ConsulURL>> consulListIt = consulURLList.iterator();
-                    while (consulListIt.hasNext()) {
-                        List<ConsulURL> next = consulListIt.next();
+                    for (List<ConsulURL> next : consulURLList) {
                         matchConsulUrls.addAll(next);
                         matchProviders.addAll(ConsulRegistryHelper.convertUrl2ProviderInfos(next));
                     }

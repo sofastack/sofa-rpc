@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -49,25 +48,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class ZookeeperRegistryHelper extends RegistryUtils {
-
-    /**
-     * 转换 map to url pair
-     *
-     * @param map 属性
-     */
-    private static String convertMap2Pair(Map<String, String> map) {
-
-        if (CommonUtils.isEmpty(map)) {
-            return StringUtils.EMPTY;
-        }
-
-        StringBuilder sb = new StringBuilder(128);
-        for (Map.Entry<String, String> entry : map.entrySet()) {
-            sb.append(getKeyPairs(entry.getKey(), entry.getValue()));
-        }
-
-        return sb.toString();
-    }
 
     /**
      * Convert url to provider list.
@@ -217,19 +197,5 @@ public class ZookeeperRegistryHelper extends RegistryUtils {
 
     static String buildOverridePath(String rootPath, AbstractInterfaceConfig config) {
         return rootPath + "sofa-rpc/" + config.getInterfaceId() + "/overrides";
-    }
-
-    static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig,
-                                                 List<ProviderInfo> providerInfos) {
-        String protocol = consumerConfig.getProtocol();
-        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
-                && StringUtils.equals(consumerConfig.getUniqueId(),
-                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
-                result.add(providerInfo);
-            }
-        }
-        return result;
     }
 }
