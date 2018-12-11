@@ -27,6 +27,8 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Simply event bus for internal event transport.
@@ -121,18 +123,26 @@ public class EventBus {
                     handleEvent(subscriber, event);
                 } else { // 异步
                     final RpcInternalContext context = RpcInternalContext.peekContext();
-                    AsyncRuntime.getAsyncThreadPool().execute(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    RpcInternalContext.setContext(context);
-                                    handleEvent(subscriber, event);
-                                } catch (Exception e) {
-                                    RpcInternalContext.removeContext();
+                    final ThreadPoolExecutor asyncThreadPool = AsyncRuntime.getAsyncThreadPool();
+                    try {
+                        asyncThreadPool.execute(
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        RpcInternalContext.setContext(context);
+                                        handleEvent(subscriber, event);
+                                    } catch (Exception e) {
+                                        RpcInternalContext.removeContext();
+                                    }
                                 }
-                            }
-                        });
+                            });
+                    } catch (RejectedExecutionException e) {
+                        LOGGER
+                            .warn("This queue is full when post event to async execute, queue size is " +
+                                asyncThreadPool.getQueue().size() +
+                                ", please optimize this async thread pool of eventbus.");
+                    }
                 }
             }
         }
