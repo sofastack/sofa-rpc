@@ -119,7 +119,9 @@ public class LocalRegistry extends Registry {
             throw new SofaRpcRuntimeException("File of LocalRegistry is null");
         }
         // 先加载一些
-        lastDigest = LocalRegistryHelper.calMD5Checksum(regFile);
+        if (subscribe) {
+            doLoadCache();
+        }
         // 开始扫描
         this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.local.scan.period"),
             scanPeriod);
@@ -133,15 +135,7 @@ public class LocalRegistry extends Registry {
                     // 订阅变化（默认是不订阅的）
                     // 检查摘要，如果有有变，则自动重新加载
                     if (subscribe && LocalRegistryHelper.checkModified(regFile, lastDigest)) {
-                        // 加载到内存
-                        Map<String, ProviderGroup> tempCache = LocalRegistryHelper.loadBackupFileToCache(regFile);
-                        // 比较旧列表和新列表，通知订阅者变化部分
-                        notifyConsumer(tempCache);
-
-                        // 通知完保存到内存
-                        memoryCache = tempCache;
-                        // 如果有文件更新,将上一次更新时间保持为当前时间
-                        lastDigest = LocalRegistryHelper.calMD5Checksum(regFile);
+                        doLoadCache();
                     }
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
@@ -157,6 +151,18 @@ public class LocalRegistry extends Registry {
             TimeUnit.MILLISECONDS
                 ).start();
 
+    }
+
+    protected void doLoadCache() {
+        // 加载到内存
+        Map<String, ProviderGroup> tempCache = LocalRegistryHelper.loadBackupFileToCache(regFile);
+        // 比较旧列表和新列表，通知订阅者变化部分
+        notifyConsumer(tempCache);
+
+        // 通知完保存到内存
+        memoryCache = tempCache;
+        // 如果有文件更新,将上一次更新时间保持为当前时间
+        lastDigest = LocalRegistryHelper.calMD5Checksum(regFile);
     }
 
     /**
