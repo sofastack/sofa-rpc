@@ -113,16 +113,16 @@ public class LocalRegistryTest {
     @Test
     public void testLoadFile() {
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol("bolt")
-                .setHost("0.0.0.0")
-                .setPort(12200);
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200);
 
         ProviderConfig<?> provider = new ProviderConfig();
         provider.setInterfaceId("com.alipay.xxx.TestService")
-                .setUniqueId("unique123Id")
-                .setRegister(true)
-                .setRegistry(registryConfig)
-                .setServer(serverConfig);
+            .setUniqueId("unique123Id")
+            .setRegister(true)
+            .setRegistry(registryConfig)
+            .setServer(serverConfig);
 
         registry.register(provider);
         registry.destroy();
@@ -132,11 +132,11 @@ public class LocalRegistryTest {
 
         // 创建一个新的 localRegistry，会立即加载到缓存
         RegistryConfig newRegistryConfig = new RegistryConfig()
-                .setProtocol("local")
-                //.setParameter("registry.local.scan.period", "1000")
-                .setSubscribe(true)
-                .setFile(file)
-                .setRegister(true);
+            .setProtocol("local")
+            //.setParameter("registry.local.scan.period", "1000")
+            .setSubscribe(true)
+            .setFile(file)
+            .setRegister(true);
 
         LocalRegistry newRegistry = (LocalRegistry) RegistryFactory.getRegistry(newRegistryConfig);
 
@@ -146,9 +146,9 @@ public class LocalRegistryTest {
         // consumer 订阅时应该能立刻读到数据
         ConsumerConfig<?> consumer = new ConsumerConfig();
         consumer.setInterfaceId("com.alipay.xxx.TestService")
-                .setUniqueId("unique123Id")
-                .setRegistry(registryConfig)
-                .setSubscribe(true);
+            .setUniqueId("unique123Id")
+            .setRegistry(registryConfig)
+            .setSubscribe(true);
 
         List<ProviderGroup> subscribe = newRegistry.subscribe(consumer);
         Assert.assertFalse(subscribe.isEmpty());
