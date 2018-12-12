@@ -26,11 +26,12 @@ import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import com.netflix.config.ConfigurationManager;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 /**
@@ -38,9 +39,15 @@ import java.util.Collections;
  */
 public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
+    @Before
+    public void init() {
+        ConfigurationManager.getConfigInstance()
+            .setProperty("hystrix.command.default.circuitBreaker.forceClosed", true);
+    }
+
     @Test
     public void testSuccess() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(0);
+        ProviderConfig<HelloService> providerConfig = defaultServer(0, false);
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient();
@@ -59,7 +66,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
     @Test
     public void testHystrixTimeout() {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        ProviderConfig<HelloService> providerConfig = defaultServer(2000, false);
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
@@ -83,7 +90,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
     @Test
     public void testHystrixFallback() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        ProviderConfig<HelloService> providerConfig = defaultServer(2000, false);
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
@@ -106,7 +113,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
     @Test
     public void testHystrixFallbackFactory() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        ProviderConfig<HelloService> providerConfig = defaultServer(2000, false);
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
@@ -129,14 +136,51 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         }
     }
 
-    private ProviderConfig<HelloService> defaultServer(int sleep) {
+    @Test
+    public void testHystrixCircuitBreakerFallback() throws InterruptedException {
+        // 强制开启熔断
+        ConfigurationManager.getConfigInstance().setProperty("hystrix.command.default.circuitBreaker.forceOpen", true);
+
+        ProviderConfig<HelloService> providerConfig = defaultServer(0, true);
+        providerConfig.export();
+
+        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+            .setTimeout(10000)
+            .setRetries(1)
+            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+
+        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
+
+        HelloService helloService = consumerConfig.refer();
+
+        try {
+            for (int i = 0; i < 20; i++) {
+                helloService.sayHello("abc", 24);
+                String result = (String) SofaResponseFuture.getResponse(10000, true);
+                Assert.assertEquals(
+                    "fallback abc from server! age: 24, error: java.lang.RuntimeException",
+                    result);
+            }
+            // 熔断时服务端不应该接收到任何请求
+            Assert.assertEquals(((InvokeFailedHelloService) providerConfig.getRef()).getExecuteCount(), 0);
+        } finally {
+            providerConfig.unExport();
+            consumerConfig.unRefer();
+        }
+    }
+
+    private ProviderConfig<HelloService> defaultServer(int sleep, boolean error) {
+        HelloService helloService = error ?
+            new InvokeFailedHelloService() :
+            new HelloServiceImpl(sleep);
+
         ServerConfig serverConfig = new ServerConfig()
             .setPort(22222)
             .setDaemon(false);
 
         return new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(sleep))
+            .setRef(helloService)
             .setServer(serverConfig);
     }
 

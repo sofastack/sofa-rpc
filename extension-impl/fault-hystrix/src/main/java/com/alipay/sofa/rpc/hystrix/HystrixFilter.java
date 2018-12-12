@@ -75,15 +75,8 @@ public class HystrixFilter extends Filter {
                     LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is Opened, interfaceId: {}",
                         invoker.getConfig().getInterfaceId());
                 }
-                RpcInternalContext.getContext().setFuture(command.toFallbackFuture());
-                return new SofaResponse();
             }
-            SofaResponse response = invoker.invoke(request);
-            ResponseFuture responseFuture = RpcInternalContext.getContext().getFuture();
-            command.setResponseFuture(responseFuture);
-            responseFuture = command.toResponseFuture();
-            RpcInternalContext.getContext().setFuture(responseFuture);
-            return response;
+            return command.execute();
         }
         return invoker.invoke(request);
     }

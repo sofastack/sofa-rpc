@@ -41,10 +41,6 @@ public class HystrixResponseFuture implements ResponseFuture {
         this.responseFuture = responseFuture;
     }
 
-    public HystrixResponseFuture(Future delegate) {
-        this.delegate = delegate;
-    }
-
     @Override
     public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
         if (responseFuture == null) {

@@ -17,8 +17,10 @@
 package com.alipay.sofa.rpc.hystrix;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.netflix.hystrix.HystrixObservableCommand;
@@ -40,6 +42,8 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
 
     private SofaRequest    request;
 
+    private SofaResponse   sofaResponse;
+
     private ResponseFuture responseFuture;
 
     public SofaHystrixObservableCommand(FilterInvoker invoker, SofaRequest request) {
@@ -49,13 +53,11 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
         this.request = request;
     }
 
-    public void setResponseFuture(ResponseFuture responseFuture) {
-        this.responseFuture = responseFuture;
-    }
-
     @Override
     protected Observable construct() {
-        return Observable.from(responseFuture);
+        this.sofaResponse = invoker.invoke(request);
+        this.responseFuture = RpcInternalContext.getContext().getFuture();
+        return Observable.from(this.responseFuture);
     }
 
     @Override
@@ -94,13 +96,13 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
         });
     }
 
-    public ResponseFuture toResponseFuture() {
-        Future delegate = toObservable().toBlocking().toFuture();
-        return new HystrixResponseFuture(delegate, responseFuture);
-    }
-
-    public ResponseFuture toFallbackFuture() {
-        Future delegate = resumeWithFallback().toBlocking().toFuture();
-        return new HystrixResponseFuture(delegate);
+    public SofaResponse execute() {
+        Future delegate = this.toObservable().toBlocking().toFuture();
+        RpcInternalContext.getContext().setFuture(new HystrixResponseFuture(delegate, this.responseFuture));
+        if (this.sofaResponse == null && this.responseFuture == null) {
+            // 没有执行 construct，熔断或是线程池拒绝
+            return new SofaResponse();
+        }
+        return this.sofaResponse;
     }
 }
