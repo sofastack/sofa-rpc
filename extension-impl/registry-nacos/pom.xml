@@ -38,7 +38,7 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <plugins>
             <plugin>
@@ -48,7 +48,7 @@
                 <executions>
                     <execution>
                         <id>start-nacos-server</id>
-                        <phase>compile</phase>
+                        <phase>test-compile</phase>
                         <goals>
                             <goal>exec</goal>
                         </goals>
@@ -56,7 +56,7 @@
                             <workingDirectory>${project.basedir}</workingDirectory>
                             <executable>bash</executable>
                             <arguments>
-                                <argument>${project.basedir}/src/test/scripts/start-nacos-server.sh</argument>
+                                <argument>${project.basedir}${file.separator}src${file.separator}test${file.separator}scripts${file.separator}start-nacos-server.sh</argument>
                             </arguments>
                             <skip>${skipTests}</skip>
                         </configuration>
@@ -71,7 +71,7 @@
                             <workingDirectory>${project.basedir}</workingDirectory>
                             <executable>bash</executable>
                             <arguments>
-                                <argument>${project.basedir}/src/test/scripts/stop-nacos-server.sh</argument>
+                                <argument>${project.basedir}${file.separator}src${file.separator}test${file.separator}scripts${file.separator}stop-nacos-server.sh</argument>
                             </arguments>
                             <skip>${skipTests}</skip>
                         </configuration>

@@ -72,7 +72,7 @@ public class LocalRegistryHelper {
     public static boolean checkModified(String address, String lastDigest) {
         // 检查文件是否被修改了
         String newDigest = calMD5Checksum(address);
-        return StringUtils.equals(newDigest, lastDigest);
+        return !StringUtils.equals(newDigest, lastDigest);
     }
 
     /**
