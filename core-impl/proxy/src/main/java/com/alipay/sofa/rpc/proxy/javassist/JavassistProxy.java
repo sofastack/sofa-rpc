@@ -272,17 +272,12 @@ public class JavassistProxy implements Proxy {
      * @return proxy invoker
      */
     public static Invoker parseInvoker(Object proxyObject) {
-        Field field;
         try {
-            field = proxyObject.getClass().getField("proxyInvoker");
-            if (field != null) {
-                if (!field.isAccessible()) {
-                    field.setAccessible(true);
-                }
-                return (Invoker) field.get(proxyObject);
-            } else {
-                return null;
+            Field field = proxyObject.getClass().getField("proxyInvoker");
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
             }
+            return (Invoker) field.get(proxyObject);
         } catch (Exception e) {
             return null;
         }
