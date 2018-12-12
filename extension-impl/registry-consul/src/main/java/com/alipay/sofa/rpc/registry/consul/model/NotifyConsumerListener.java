@@ -26,13 +26,13 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
-public class NotifyConsumerListner implements NotifyListener {
+public class NotifyConsumerListener implements NotifyListener {
 
     private ConsulURL                        subscribeUrl;
 
     private AtomicReference<List<ConsulURL>> providerUrls;
 
-    public NotifyConsumerListner(ConsulURL subscribeUrl, List<ConsulURL> urls) {
+    public NotifyConsumerListener(ConsulURL subscribeUrl, List<ConsulURL> urls) {
 
         this.subscribeUrl = subscribeUrl;
         this.providerUrls = new AtomicReference<List<ConsulURL>>(urls);
