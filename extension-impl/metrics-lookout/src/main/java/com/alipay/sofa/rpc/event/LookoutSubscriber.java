@@ -24,8 +24,8 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.metrics.lookout.RpcLookout;
 import com.alipay.sofa.rpc.metrics.lookout.RpcClientLookoutModel;
+import com.alipay.sofa.rpc.metrics.lookout.RpcLookout;
 import com.alipay.sofa.rpc.metrics.lookout.RpcServerLookoutModel;
 
 /**

@@ -21,7 +21,11 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * @author 景竹 2018/8/13 since 5.5.0

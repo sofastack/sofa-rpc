@@ -18,7 +18,11 @@ package com.alipay.sofa.rpc.registry.consul.model;
 
 import com.ecwid.consul.v1.agent.model.NewService;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.Collections.unmodifiableSet;

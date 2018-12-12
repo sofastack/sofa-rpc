@@ -26,7 +26,6 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.event.ServerStoppedEvent;
-import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
