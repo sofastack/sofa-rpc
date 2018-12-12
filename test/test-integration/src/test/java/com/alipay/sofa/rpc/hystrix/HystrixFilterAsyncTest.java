@@ -152,9 +152,10 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
                 String groupKey = invoker.getConfig().getInterfaceId();
                 String commandKey = request.getMethodName() + "_invoke_failed";
                 return HystrixObservableCommand.Setter
-                        .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
-                        .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
-                        .andCommandPropertiesDefaults(HystrixCommandProperties.defaultSetter().withCircuitBreakerForceOpen(true));
+                    .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
+                    .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
+                    .andCommandPropertiesDefaults(
+                        HystrixCommandProperties.defaultSetter().withCircuitBreakerForceOpen(true));
             }
         };
 

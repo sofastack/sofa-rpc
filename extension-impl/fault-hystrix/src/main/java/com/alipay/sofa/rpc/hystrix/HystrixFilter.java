@@ -70,8 +70,8 @@ public class HystrixFilter extends Filter {
             if (command.isCircuitBreakerOpen()) {
                 // 直接进行 fallback，不进行真实调用
                 if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is Opened, interfaceId: {}",
-                        invoker.getConfig().getInterfaceId());
+                    LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
+                        invoker.getConfig().getInterfaceId(), request.getMethodName());
                 }
             }
             return command.execute();
