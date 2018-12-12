@@ -22,14 +22,19 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.filter.Filter;
+import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
-import com.netflix.config.ConfigurationManager;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandKey;
+import com.netflix.hystrix.HystrixCommandProperties;
+import com.netflix.hystrix.HystrixObservableCommand;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -38,12 +43,6 @@ import java.util.Collections;
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
-
-    @Before
-    public void init() {
-        ConfigurationManager.getConfigInstance()
-            .setProperty("hystrix.command.default.circuitBreaker.forceClosed", true);
-    }
 
     @Test
     public void testSuccess() throws InterruptedException {
@@ -139,7 +138,25 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
     @Test
     public void testHystrixCircuitBreakerFallback() throws InterruptedException {
         // 强制开启熔断
-        ConfigurationManager.getConfigInstance().setProperty("hystrix.command.default.circuitBreaker.forceOpen", true);
+        SetterFactory setterFactory = new SetterFactory() {
+
+            private DefaultSetterFactory defaultSetterFactory = new DefaultSetterFactory();
+
+            @Override
+            public HystrixCommand.Setter createSetter(FilterInvoker invoker, SofaRequest request) {
+                return defaultSetterFactory.createSetter(invoker, request);
+            }
+
+            @Override
+            public HystrixObservableCommand.Setter createObservableSetter(FilterInvoker invoker, SofaRequest request) {
+                String groupKey = invoker.getConfig().getInterfaceId();
+                String commandKey = request.getMethodName() + "_invoke_failed";
+                return HystrixObservableCommand.Setter
+                        .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
+                        .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
+                        .andCommandPropertiesDefaults(HystrixCommandProperties.defaultSetter().withCircuitBreakerForceOpen(true));
+            }
+        };
 
         ProviderConfig<HelloService> providerConfig = defaultServer(0, true);
         providerConfig.export();
@@ -150,6 +167,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
 
         SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
+        SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
 
         HelloService helloService = consumerConfig.refer();
 

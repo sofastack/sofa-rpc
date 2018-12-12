@@ -24,10 +24,8 @@ import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
-import com.netflix.config.ConfigurationManager;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collections;
@@ -36,12 +34,6 @@ import java.util.Collections;
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class HystrixFilterSyncTest extends ActivelyDestroyTest {
-
-    @Before
-    public void init() {
-        ConfigurationManager.getConfigInstance()
-            .setProperty("hystrix.command.default.circuitBreaker.forceClosed", true);
-    }
 
     @Test
     public void testSuccess() {
