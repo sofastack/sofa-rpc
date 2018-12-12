@@ -218,18 +218,18 @@ public class ZookeeperRegistry extends Registry {
         }
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
         CuratorFrameworkFactory.Builder zkClientuilder = CuratorFrameworkFactory.builder()
-                .connectString(address)
-                .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
-                .connectionTimeoutMs(registryConfig.getConnectTimeout())
-                .canBeReadOnly(false)
-                .retryPolicy(retryPolicy)
-                .defaultData(null);
+            .connectString(address)
+            .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
+            .connectionTimeoutMs(registryConfig.getConnectTimeout())
+            .canBeReadOnly(false)
+            .retryPolicy(retryPolicy)
+            .defaultData(null);
 
         //是否需要添加zk的认证信息
         List<AuthInfo> authInfos = buildAuthInfo();
         if (CommonUtils.isNotEmpty(authInfos)) {
             zkClientuilder = zkClientuilder.aclProvider(getDefaultAclProvider())
-                    .authorization(authInfos);
+                .authorization(authInfos);
         }
 
         zkClient = zkClientuilder.build();
