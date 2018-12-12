@@ -23,6 +23,8 @@ import com.netflix.hystrix.HystrixObservableCommand;
 
 /**
  * Control the properties of a hystrix command, such as group key, command key...
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public interface SetterFactory {
 

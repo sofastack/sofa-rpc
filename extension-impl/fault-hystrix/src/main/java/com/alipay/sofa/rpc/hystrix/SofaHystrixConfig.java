@@ -21,6 +21,11 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * Hystrix Config
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class SofaHystrixConfig {
 
     private static final Map<ConsumerConfig, FallbackFactory> FALLBACK_FACTORY_MAPPING = new ConcurrentHashMap<ConsumerConfig, FallbackFactory>();

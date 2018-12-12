@@ -22,6 +22,9 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 
+/**
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class MockInvokeFailedFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {

@@ -33,6 +33,9 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Collections;
 
+/**
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
     @Test

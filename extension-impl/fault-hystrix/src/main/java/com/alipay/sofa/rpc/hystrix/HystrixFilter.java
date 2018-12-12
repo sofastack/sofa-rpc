@@ -19,6 +19,8 @@ package com.alipay.sofa.rpc.hystrix;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -27,15 +29,33 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.filter.AutoActive;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
+/**
+ * Hystrix instrumentation
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 @Extension("hystrix")
 @AutoActive(consumerSide = true)
 public class HystrixFilter extends Filter {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(HystrixFilter.class);
+
     @Override
     public boolean needToLoad(FilterInvoker invoker) {
-        String consumerHystrixEnabled = invoker.getConfig().getParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED);
+        AbstractInterfaceConfig config = invoker.getConfig();
+        // 只支持 consumer 侧
+        if (!(config instanceof ConsumerConfig)) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warnWithApp(config.getAppName(), "HystrixFilter is not allowed on provider, interfaceId: {}",
+                    config.getInterfaceId());
+            }
+            return false;
+        }
+        String consumerHystrixEnabled = config.getParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED);
         if (StringUtils.isNotBlank(consumerHystrixEnabled)) {
             return Boolean.valueOf(consumerHystrixEnabled);
         }
@@ -51,6 +71,10 @@ public class HystrixFilter extends Filter {
             final SofaHystrixObservableCommand command = new SofaHystrixObservableCommand(invoker, request);
             if (command.isCircuitBreakerOpen()) {
                 // 直接进行 fallback，不进行真实调用
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is Opened, interfaceId: {}",
+                        invoker.getConfig().getInterfaceId());
+                }
                 RpcInternalContext.getContext().setFuture(command.toFallbackFuture());
                 return new SofaResponse();
             }

@@ -27,6 +27,11 @@ import com.netflix.hystrix.HystrixCommand;
 
 import java.lang.reflect.InvocationTargetException;
 
+/**
+ * {@link HystrixCommand} for sync requests
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class SofaHystrixCommand extends HystrixCommand<SofaResponse> {
 
     private RpcInternalContext rpcInternalContext;

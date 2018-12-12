@@ -29,6 +29,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Default implements, uses interface id as group key, method name as command key
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class DefaultSetterFactory implements SetterFactory {
 

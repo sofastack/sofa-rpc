@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 
 /**
  * Default implements, returns a constant fallback
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class DefaultFallbackFactory<T> implements FallbackFactory<T> {
 

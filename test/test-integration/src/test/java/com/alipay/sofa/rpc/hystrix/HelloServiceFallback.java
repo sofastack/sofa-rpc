@@ -18,6 +18,9 @@ package com.alipay.sofa.rpc.hystrix;
 
 import com.alipay.sofa.rpc.test.HelloService;
 
+/**
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class HelloServiceFallback implements HelloService {
     @Override
     public String sayHello(String name, int age) {

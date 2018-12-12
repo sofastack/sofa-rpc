@@ -19,6 +19,9 @@ package com.alipay.sofa.rpc.hystrix;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.test.HelloService;
 
+/**
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class HelloServiceFallbackFactory implements FallbackFactory<HelloService> {
     @Override
     public HelloService create(SofaResponse response, final Throwable t) {

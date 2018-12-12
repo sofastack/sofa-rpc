@@ -21,6 +21,8 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 /**
  * Construct a instance by exception when the hystrix execute failed
  * @param <T>
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public interface FallbackFactory<T> {
 

@@ -16,6 +16,11 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
+/**
+ * Hystrix Constants
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class HystrixConstants {
 
     public static final String SOFA_HYSTRIX_ENABLED = "sofa.hystrix.enabled";

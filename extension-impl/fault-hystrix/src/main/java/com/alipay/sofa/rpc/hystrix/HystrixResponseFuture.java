@@ -27,6 +27,8 @@ import java.util.concurrent.TimeoutException;
 
 /**
  * the {@link Future}(from {@link rx.Observable}) wrapper that can be used as a {@link ResponseFuture}
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class HystrixResponseFuture implements ResponseFuture {
 
@@ -46,7 +48,8 @@ public class HystrixResponseFuture implements ResponseFuture {
     @Override
     public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
         if (responseFuture == null) {
-            this.addListener(sofaResponseCallback);
+            // TODO 因为熔断了，没有发出真实请求，无法获得真实实现类是如何处理的
+            throw new UnsupportedOperationException("Not supported, Please use callback function");
         }
         return responseFuture.addListener(sofaResponseCallback);
     }
@@ -54,7 +57,7 @@ public class HystrixResponseFuture implements ResponseFuture {
     @Override
     public ResponseFuture addListeners(List list) {
         if (responseFuture == null) {
-            this.addListeners(list);
+            throw new UnsupportedOperationException("Not supported, Please use callback function");
         }
         return responseFuture.addListeners(list);
     }

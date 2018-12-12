@@ -29,6 +29,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 
+/**
+ * {@link HystrixObservableCommand} for sync requests
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class SofaHystrixObservableCommand extends HystrixObservableCommand {
 
     private FilterInvoker  invoker;
@@ -95,7 +100,7 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
     }
 
     public ResponseFuture toFallbackFuture() {
-        Future delegate = toObservable().toBlocking().toFuture();
+        Future delegate = resumeWithFallback().toBlocking().toFuture();
         return new HystrixResponseFuture(delegate);
     }
 }

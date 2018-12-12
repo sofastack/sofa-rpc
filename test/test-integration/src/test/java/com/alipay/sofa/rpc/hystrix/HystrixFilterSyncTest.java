@@ -30,6 +30,9 @@ import org.junit.Test;
 
 import java.util.Collections;
 
+/**
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class HystrixFilterSyncTest extends ActivelyDestroyTest {
 
     @Test
