@@ -1,1 +1,1 @@
-jackson=com.alipay.sofa.rpc.codec.jackson.JacksonSerializer
+json=com.alipay.sofa.rpc.codec.jackson.JacksonSerializer

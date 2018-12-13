@@ -54,7 +54,7 @@ import java.util.Map;
  *
  * @author <a href=mailto:zhiyuan.lzy@antfin.com>zhiyuan.lzy</a>
  */
-@Extension(value = "jackson", code = 12)
+@Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
     private ObjectMapper  mapper        = new ObjectMapper();
@@ -113,7 +113,7 @@ public class JacksonSerializer extends AbstractSerializer {
 
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
-        } else if (data.array().length <= 0) {
+        } else if (data.readableBytes() <= 0) {
             try {
                 result = clazz.newInstance();
             } catch (InstantiationException e) {
