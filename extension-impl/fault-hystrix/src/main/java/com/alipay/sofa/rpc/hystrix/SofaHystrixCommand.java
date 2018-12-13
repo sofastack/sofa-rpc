@@ -32,7 +32,7 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class SofaHystrixCommand extends HystrixCommand<SofaResponse> {
+public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements SofaHystrixInvokable<SofaResponse> {
 
     private RpcInternalContext rpcInternalContext;
     private RpcInvokeContext   rpcInvokeContext;

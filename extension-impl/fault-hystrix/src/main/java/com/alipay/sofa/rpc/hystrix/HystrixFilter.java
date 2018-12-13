@@ -61,21 +61,25 @@ public class HystrixFilter extends Filter {
     }
 
     @Override
-    public SofaResponse invoke(final FilterInvoker invoker, final SofaRequest request) throws SofaRpcException {
+    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
+        SofaHystrixInvokable command;
         if (RpcConstants.INVOKER_TYPE_SYNC.equals(request.getInvokeType())) {
-            return new SofaHystrixCommand(invoker, request).execute();
+            command = new SofaHystrixCommand(invoker, request);
+        } else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(request.getInvokeType())) {
+            command = new SofaHystrixObservableCommand(invoker, request);
+        } else {
+            return invoker.invoke(request);
         }
-        else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(request.getInvokeType())) {
-            final SofaHystrixObservableCommand command = new SofaHystrixObservableCommand(invoker, request);
-            if (command.isCircuitBreakerOpen()) {
-                // 直接进行 fallback，不进行真实调用
-                if (LOGGER.isWarnEnabled()) {
-                    LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
-                        invoker.getConfig().getInterfaceId(), request.getMethodName());
-                }
+        logOnCircuitBreakerOpened(command, invoker, request);
+        return command.execute();
+    }
+
+    private void logOnCircuitBreakerOpened(SofaHystrixInvokable command, FilterInvoker invoker, SofaRequest request) {
+        if (command.isCircuitBreakerOpen()) {
+            if (LOGGER.isWarnEnabled()) {
+                LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
+                    invoker.getConfig().getInterfaceId(), request.getMethodName());
             }
-            return command.execute();
         }
-        return invoker.invoke(request);
     }
 }

@@ -36,7 +36,7 @@ import java.util.concurrent.Future;
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class SofaHystrixObservableCommand extends HystrixObservableCommand {
+public class SofaHystrixObservableCommand extends HystrixObservableCommand implements SofaHystrixInvokable {
 
     private FilterInvoker  invoker;
 
@@ -96,6 +96,7 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand {
         });
     }
 
+    @Override
     public SofaResponse execute() {
         Future delegate = this.toObservable().toBlocking().toFuture();
         RpcInternalContext.getContext().setFuture(new HystrixResponseFuture(delegate, this.responseFuture));
