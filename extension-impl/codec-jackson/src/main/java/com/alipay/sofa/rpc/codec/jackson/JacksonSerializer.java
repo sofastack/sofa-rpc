@@ -82,7 +82,7 @@ public class JacksonSerializer extends AbstractSerializer {
         throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
         if (args.length > 1) {
-            throw buildSerializeError("Protobuf only support one parameter!");
+            throw buildSerializeError("Jackson only support one parameter!");
         }
         return encode(args[0], context);
     }
@@ -94,7 +94,7 @@ public class JacksonSerializer extends AbstractSerializer {
             // 框架异常：错误则body序列化的是错误字符串
             byteBuf = encode(sofaResponse.getErrorMsg(), context);
         } else {
-            // 正确返回则解析序列化的protobuf返回对象
+            // 正确返回则解析序列化的json返回对象
             Object appResponse = sofaResponse.getAppResponse();
             if (appResponse instanceof Throwable) {
                 // 业务异常序列化的是错误字符串

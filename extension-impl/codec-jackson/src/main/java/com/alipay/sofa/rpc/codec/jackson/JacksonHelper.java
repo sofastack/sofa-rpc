@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
-import com.alipay.sofa.rpc.common.RpcConfigs;
-import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -31,30 +29,14 @@ import java.util.concurrent.ConcurrentHashMap;
 public class JacksonHelper {
 
     /**
-     * Support multiple classloader?
-     */
-    private static final boolean             MULTIPLE_CLASSLOADER = RpcConfigs
-                                                                      .getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
-
-    /**
-     * Cache of parseFrom method
-     */
-    ConcurrentHashMap<Class, Method>         parseFromMethodMap   = new ConcurrentHashMap<Class, Method>();
-
-    /**
-     * Cache of toByteArray method
-     */
-    ConcurrentHashMap<Class, Method>         toByteArrayMethodMap = new ConcurrentHashMap<Class, Method>();
-
-    /**
      * 请求参数类型缓存 {service+method:class}
      */
-    private ConcurrentHashMap<String, Class> requestClassCache    = new ConcurrentHashMap<String, Class>();
+    private ConcurrentHashMap<String, Class> requestClassCache  = new ConcurrentHashMap<String, Class>();
 
     /**
      * 返回结果类型缓存 {service+method:class}
      */
-    private ConcurrentHashMap<String, Class> responseClassCache   = new ConcurrentHashMap<String, Class>();
+    private ConcurrentHashMap<String, Class> responseClassCache = new ConcurrentHashMap<String, Class>();
 
     /**
      * 从缓存中获取请求值类
@@ -71,7 +53,7 @@ public class JacksonHelper {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
-            loadProtoClassToCache(key, clazz, methodName);
+            loadClassToCache(key, clazz, methodName);
         }
         return requestClassCache.get(key);
     }
@@ -90,7 +72,7 @@ public class JacksonHelper {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
-            loadProtoClassToCache(key, clazz, methodName);
+            loadClassToCache(key, clazz, methodName);
         }
         return responseClassCache.get(key);
     }
@@ -107,13 +89,13 @@ public class JacksonHelper {
     }
 
     /**
-     * 加载protobuf接口里方法的参数和返回值类型到缓存，不需要传递
+     * 加载接口里方法的参数和返回值类型到缓存，不需要传递
      *
      * @param key        缓存的key
      * @param clazz      接口名
      * @param methodName 方法名
      */
-    private void loadProtoClassToCache(String key, Class clazz, String methodName) {
+    private void loadClassToCache(String key, Class clazz, String methodName) {
         Method pbMethod = null;
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
@@ -123,49 +105,21 @@ public class JacksonHelper {
             }
         }
         if (pbMethod == null) {
-            throw new SofaRpcRuntimeException("Cannot found protobuf method: " + clazz.getName() + "." + methodName);
+            throw new SofaRpcRuntimeException("Cannot found method: " + clazz.getName() + "." + methodName);
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
         if (parameterTypes == null
-            || parameterTypes.length != 1
-            || isProtoBufMessageObject(parameterTypes[0])) {
-            throw new SofaRpcRuntimeException("class based protobuf: " + clazz.getName()
-                + ", only support one protobuf parameter!");
+            || parameterTypes.length != 1) {
+            throw new SofaRpcRuntimeException("class based jackson: " + clazz.getName()
+                + ", only support one parameter!");
         }
         Class reqClass = parameterTypes[0];
         requestClassCache.put(key, reqClass);
         Class resClass = pbMethod.getReturnType();
         if (resClass == void.class) {
-            throw new SofaRpcRuntimeException("class based protobuf: " + clazz.getName()
-                + ", only support return protobuf message!");
+            throw new SofaRpcRuntimeException("class based jackson: " + clazz.getName()
+                + ", do not support void return type!");
         }
         responseClassCache.put(key, resClass);
-    }
-
-    /**
-     * Is this object instanceof MessageLite
-     *
-     * @param object unknown object
-     * @return instanceof MessageLite
-     */
-    boolean isProtoBufMessageObject(Object object) {
-        if (object == null) {
-            return false;
-        }
-        if (MULTIPLE_CLASSLOADER) {
-            return isProtoBufMessageClass(object.getClass());
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Is this class is assignable from MessageLite
-     *
-     * @param clazz unknown class
-     * @return is assignable from MessageLite
-     */
-    boolean isProtoBufMessageClass(Class clazz) {
-        return false;
     }
 }
