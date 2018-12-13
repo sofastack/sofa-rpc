@@ -24,33 +24,33 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
  */
 public class JacksonHelper {
 
     /**
-     * 请求参数类型缓存 {service+method:class}
+     * Request service and method cache {service+method:class}
      */
     private ConcurrentHashMap<String, Class> requestClassCache  = new ConcurrentHashMap<String, Class>();
 
     /**
-     * 返回结果类型缓存 {service+method:class}
+     * Response service and method cache {service+method:class}
      */
     private ConcurrentHashMap<String, Class> responseClassCache = new ConcurrentHashMap<String, Class>();
 
     /**
-     * 从缓存中获取请求值类
+     * Fetch request class for cache according  service and method
      *
-     * @param service    接口名
-     * @param methodName 方法名
-     * @return 请求参数类
+     * @param service    interface name
+     * @param methodName method name
+     * @return request class
      */
     public Class getReqClass(String service, String methodName) {
 
         String key = buildMethodKey(service, methodName);
         Class reqClass = requestClassCache.get(key);
         if (reqClass == null) {
-            // 读取接口里的方法参数和返回值
+            //read interface and method from cache
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
             loadClassToCache(key, clazz, methodName);
@@ -59,11 +59,11 @@ public class JacksonHelper {
     }
 
     /**
-     * 从缓存中获取返回值类
+     * Fetch result class for cache according  service and method
      *
-     * @param service    接口名
-     * @param methodName 方法名
-     * @return 请求参数类
+     * @param service    interface name
+     * @param methodName method name
+     * @return response class
      */
     public Class getResClass(String service, String methodName) {
         String key = service + "#" + methodName;
@@ -78,10 +78,10 @@ public class JacksonHelper {
     }
 
     /**
-     * 拼装缓存的key
+     * build cache key
      *
-     * @param serviceName 接口名
-     * @param methodName  方法名
+     * @param serviceName interface name
+     * @param methodName  method name
      * @return Key
      */
     private String buildMethodKey(String serviceName, String methodName) {
@@ -89,11 +89,11 @@ public class JacksonHelper {
     }
 
     /**
-     * 加载接口里方法的参数和返回值类型到缓存，不需要传递
+     * load method paramters and return types to cache, will not pass through to next
      *
-     * @param key        缓存的key
-     * @param clazz      接口名
-     * @param methodName 方法名
+     * @param key        key
+     * @param clazz      interface name
+     * @param methodName method name
      */
     private void loadClassToCache(String key, Class clazz, String methodName) {
         Method pbMethod = null;

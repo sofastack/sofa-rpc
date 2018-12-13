@@ -91,13 +91,13 @@ public class JacksonSerializer extends AbstractSerializer {
         throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
-            // 框架异常：错误则body序列化的是错误字符串
+            // rpc exception：error when body is illegal string
             byteBuf = encode(sofaResponse.getErrorMsg(), context);
         } else {
-            // 正确返回则解析序列化的json返回对象
+            //ok: when json can be deserialize correctly.
             Object appResponse = sofaResponse.getAppResponse();
             if (appResponse instanceof Throwable) {
-                // 业务异常序列化的是错误字符串
+                // biz exception：error when body is illegal string
                 byteBuf = encode(((Throwable) appResponse).getMessage(), context);
             } else {
                 byteBuf = encode(appResponse, context);
@@ -170,7 +170,7 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaRequest.setTargetAppName(targetApp);
         }
 
-        // 解析tracer等信息
+        // parse tracer and baggage
         parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, head, sofaRequest);
         if (RpcInvokeContext.isBaggageEnable()) {
             parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, head, sofaRequest);
@@ -179,7 +179,7 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
         }
 
-        // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
+        // according interface and method name to find paramter types
         Class requestClass = jacksonHelper.getReqClass(targetService,
             sofaRequest.getMethodName());
 
@@ -221,7 +221,7 @@ public class JacksonSerializer extends AbstractSerializer {
             String errorMessage = (String) decode(data, String.class, head);
             sofaResponse.setErrorMsg(errorMessage);
         } else {
-            // 根据接口+方法名找到参数类型
+            // according interface and method name to find paramter types
             Class responseClass = jacksonHelper.getResClass(targetService, methodName);
             Object pbRes = decode(data, responseClass, head);
             sofaResponse.setAppResponse(pbRes);
