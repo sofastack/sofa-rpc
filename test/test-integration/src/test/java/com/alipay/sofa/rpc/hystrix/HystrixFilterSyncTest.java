@@ -59,8 +59,7 @@ public class HystrixFilterSyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+            .setTimeout(10000);
 
         HelloService helloService = consumerConfig.refer();
 
@@ -104,8 +103,7 @@ public class HystrixFilterSyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+            .setTimeout(10000);
 
         SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
 

@@ -23,7 +23,6 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
@@ -36,8 +35,6 @@ import com.netflix.hystrix.HystrixObservableCommand;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Collections;
 
 /**
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
@@ -69,8 +66,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+            .setTimeout(10000);
 
         HelloService helloService = consumerConfig.refer();
 
@@ -93,8 +89,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+            .setTimeout(10000);
 
         SofaHystrixConfig.registerFallback(consumerConfig, new HelloServiceFallback());
 
@@ -116,8 +111,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+            .setTimeout(10000);
 
         SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
 
@@ -163,9 +157,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setTimeout(10000)
-            .setRetries(1)
-            .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
+            .setTimeout(10000);
 
         SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
         SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
