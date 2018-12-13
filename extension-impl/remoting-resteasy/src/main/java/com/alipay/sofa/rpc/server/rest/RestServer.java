@@ -116,8 +116,9 @@ public class RestServer implements Server {
             for (String allowDomain : domains) {
                 corsFilter.getAllowedOrigins().add(allowDomain);
             }
-            JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
         }
+        JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
+
         // 注册自定义
         Set<Object> customProviderInstances = JAXRSProviderManager.getCustomProviderInstances();
         if (CommonUtils.isNotEmpty(customProviderInstances)) {
