@@ -16,21 +16,14 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
+import com.alipay.sofa.rpc.test.HelloService;
+
 /**
- * Default implements, returns a constant fallback
- *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class DefaultFallbackFactory<T> implements FallbackFactory<T> {
-
-    private T fallback;
-
-    public DefaultFallbackFactory(T fallback) {
-        this.fallback = fallback;
-    }
-
+public class HelloServiceErrorFallback implements HelloService {
     @Override
-    public T create(FallbackContext context) {
-        return fallback;
+    public String sayHello(String name, int age) {
+        throw new RuntimeException("Fallback error.");
     }
 }

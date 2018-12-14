@@ -64,36 +64,43 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand imple
     protected Observable resumeWithFallback() {
         return Observable.fromCallable(new Callable<FallbackFactory>() {
             @Override
-            public FallbackFactory call() throws Exception {
+            public FallbackFactory call() {
                 return SofaHystrixConfig.loadFallbackFactory((ConsumerConfig) invoker.getConfig());
             }
-        }).flatMap(new Func1<FallbackFactory, Observable<?>>() {
-            @Override
-            public Observable<?> call(final FallbackFactory fallbackFactory) {
-                if (fallbackFactory != null) {
-                    return Observable.fromCallable(new Callable<Object>() {
-                        @Override
-                        public Object call() throws Exception {
-                            return fallbackFactory.create(null, getExecutionException());
-                        }
-                    }).map(new Func1<Object, Object>() {
-                        @Override
-                        public Object call(Object fallback) {
-                            try {
-                                return request.getMethod().invoke(fallback, request.getMethodArgs());
-                            } catch (IllegalAccessException e) {
-                                throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
-                            } catch (InvocationTargetException e) {
-                                throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
-                                    e.getTargetException());
-                            }
-                        }
-                    });
-                } else {
-                    return SofaHystrixObservableCommand.super.resumeWithFallback();
+        })
+            .filter(new Func1<FallbackFactory, Boolean>() {
+                @Override
+                public Boolean call(FallbackFactory fallbackFactory) {
+                    return fallbackFactory != null;
                 }
-            }
-        });
+            })
+            .map(new Func1<FallbackFactory, Object>() {
+                @Override
+                public Object call(FallbackFactory fallbackFactory) {
+                    return fallbackFactory.create(new FallbackContext(invoker, request, sofaResponse,
+                        getExecutionException()));
+                }
+            })
+            .filter(new Func1<Object, Boolean>() {
+                @Override
+                public Boolean call(Object fallback) {
+                    return fallback != null;
+                }
+            })
+            .map(new Func1<Object, Object>() {
+                @Override
+                public Object call(final Object fallback) {
+                    try {
+                        return request.getMethod().invoke(fallback, request.getMethodArgs());
+                    } catch (IllegalAccessException e) {
+                        throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
+                    } catch (InvocationTargetException e) {
+                        throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
+                            e.getTargetException());
+                    }
+                }
+            })
+            .switchIfEmpty(super.resumeWithFallback());
     }
 
     @Override

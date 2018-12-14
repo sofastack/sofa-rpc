@@ -72,7 +72,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
         try {
             helloService.sayHello("abc", 24);
-            String result = (String) SofaResponseFuture.getResponse(10000, true);
+            SofaResponseFuture.getResponse(10000, true);
             Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcException);
@@ -99,6 +99,53 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             helloService.sayHello("abc", 24);
             String result = (String) SofaResponseFuture.getResponse(10000, true);
             Assert.assertEquals("fallback abc from server! age: 24", result);
+        } finally {
+            providerConfig.unExport();
+            consumerConfig.unRefer();
+        }
+    }
+
+    @Test
+    public void testHystrixNoopFallback() throws InterruptedException {
+        ProviderConfig<HelloService> providerConfig = defaultServer(2000, false);
+        providerConfig.export();
+
+        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+            .setTimeout(10000);
+
+        SofaHystrixConfig.registerFallback(consumerConfig, new HelloServiceNoopFallback());
+
+        HelloService helloService = consumerConfig.refer();
+
+        try {
+            helloService.sayHello("abc", 24);
+            String result = (String) SofaResponseFuture.getResponse(10000, true);
+            Assert.assertNull(result);
+        } finally {
+            providerConfig.unExport();
+            consumerConfig.unRefer();
+        }
+    }
+
+    @Test
+    public void testHystrixErrorFallback() {
+        ProviderConfig<HelloService> providerConfig = defaultServer(2000, false);
+        providerConfig.export();
+
+        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+            .setTimeout(10000);
+
+        SofaHystrixConfig.registerFallback(consumerConfig, new HelloServiceErrorFallback());
+
+        HelloService helloService = consumerConfig.refer();
+
+        try {
+            helloService.sayHello("abc", 24);
+            SofaResponseFuture.getResponse(10000, true);
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof SofaRpcException);
+            Assert.assertTrue(e.getCause() instanceof HystrixRuntimeException);
+            Assert.assertEquals("sayHello timed-out and fallback failed.", e.getMessage());
         } finally {
             providerConfig.unExport();
             consumerConfig.unRefer();
