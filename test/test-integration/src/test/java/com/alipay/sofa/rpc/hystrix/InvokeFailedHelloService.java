@@ -20,6 +20,9 @@ import com.alipay.sofa.rpc.test.HelloService;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+/**
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class InvokeFailedHelloService implements HelloService {
 
     private AtomicInteger executeCount = new AtomicInteger(0);

@@ -22,6 +22,11 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.netflix.hystrix.HystrixCommand;
 
+/**
+ * The fallback context
+ *
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ */
 public class FallbackContext {
 
     /**
