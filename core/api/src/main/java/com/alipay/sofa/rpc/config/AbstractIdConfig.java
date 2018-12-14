@@ -27,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @param <S> the sub class of AbstractIdConfig
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class AbstractIdConfig<S extends AbstractIdConfig> implements Serializable {
 
     private static final long          serialVersionUID = -1932911135229369183L;

@@ -21,6 +21,7 @@ package com.alipay.sofa.rpc.common;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class RpcOptions {
     /**
      * 决定本配置文件的加载顺序，越大越往后加载
@@ -36,7 +37,7 @@ public class RpcOptions {
     public static final String EXTENSION_LOAD_PATH                      = "extension.load.path";
     /**
      * 需要被加载的模块列表，多个用逗号隔开
-     * 
+     *
      * @since 5.3.0
      */
     public static final String MODULE_LOAD_LIST                         = "module.load.list";

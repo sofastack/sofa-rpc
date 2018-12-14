@@ -61,6 +61,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_SERVER_KEEPALIVE;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ServerConfig extends AbstractIdConfig implements Serializable {
     /**
      * The constant serialVersionUID.
@@ -226,6 +227,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      *
      * @return the server
      */
+    // TODO: 2018/7/6 by zmyer
     public synchronized Server buildIfAbsent() {
         if (server != null) {
             return server;

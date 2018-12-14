@@ -49,6 +49,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @see org.jboss.resteasy.plugins.server.netty.RequestHandler
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
     protected final RequestDispatcher dispatcher;
     private final static Logger       logger = Logger.getLogger(SofaRestRequestHandler.class);
@@ -81,10 +82,9 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                 NettyHttpResponse response = request.getResponse();
                 Exception exception = null;
                 try {
-                    RpcInternalContext context = RpcInternalContext.getContext();
-                    context.setProviderSide(true);
-                    // 获取远程ip 兼容 nignx 转发和 vip 等
+                    // 获取远程ip 兼容nignx转发和vip等
                     HttpHeaders httpHeaders = request.getHttpHeaders();
+                    RpcInternalContext context = RpcInternalContext.getContext();
                     String remoteIP = httpHeaders.getHeaderString("X-Forwarded-For");
                     if (remoteIP == null) {
                         remoteIP = httpHeaders.getHeaderString("X-Real-IP");

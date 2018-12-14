@@ -104,6 +104,7 @@ public class LocalRegistry extends Registry {
         super(registryConfig);
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void init() {
 
@@ -160,6 +161,7 @@ public class LocalRegistry extends Registry {
     /**
      * 写文件
      */
+    // TODO: 2018/7/9 by zmyer
     protected void doWriteFile() {
         if (needBackup) {
             if (LocalRegistryHelper.backup(regFile, memoryCache)) {
@@ -168,11 +170,13 @@ public class LocalRegistry extends Registry {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public boolean start() {
         return false;
     }
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void register(ProviderConfig config) {
         String appName = config.getAppName();
@@ -209,6 +213,7 @@ public class LocalRegistry extends Registry {
      * @param serviceName  服务关键字
      * @param providerInfo 服务提供者数据
      */
+    // TODO: 2018/7/9 by zmyer
     protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo) {
         if (LOGGER.isInfoEnabled(appName)) {
             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, serviceName));
@@ -231,6 +236,7 @@ public class LocalRegistry extends Registry {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void unRegister(ProviderConfig config) {
         String appName = config.getAppName();

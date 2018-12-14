@@ -90,6 +90,7 @@ import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProvi
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extension("zookeeper")
 public class ZookeeperRegistry extends Registry {
 
@@ -246,6 +247,7 @@ public class ZookeeperRegistry extends Registry {
 
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public synchronized boolean start() {
         if (zkClient == null) {
@@ -299,6 +301,7 @@ public class ZookeeperRegistry extends Registry {
      */
     private static final ConcurrentMap<String, PathChildrenCache>         INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void register(ProviderConfig config) {
         String appName = config.getAppName();
@@ -356,7 +359,8 @@ public class ZookeeperRegistry extends Registry {
                     try {
                         getAndCheckZkClient().create().creatingParentContainersIfNeeded()
                             .withMode(ephemeralNode ? CreateMode.EPHEMERAL : CreateMode.PERSISTENT) // 是否永久节点
-                            .forPath(providerUrl, config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
+                            .forPath(providerUrl,
+                                config.isDynamic() ? PROVIDER_ONLINE : PROVIDER_OFFLINE); // 是否默认上下线
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
                         }
@@ -468,6 +472,7 @@ public class ZookeeperRegistry extends Registry {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void unRegister(ProviderConfig config) {
         String appName = config.getAppName();
@@ -697,6 +702,7 @@ public class ZookeeperRegistry extends Registry {
         return zkClient;
     }
 
+    // TODO: 2018/7/9 by zmyer
     private CuratorFramework getAndCheckZkClient() {
         if (zkClient == null || zkClient.getState() != CuratorFrameworkState.STARTED) {
             throw new SofaRpcRuntimeException("Zookeeper client is not available");

@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
+// TODO: 2018/7/9 by zmyer
 @Extension("rest")
 public class RestProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
     /**

@@ -135,7 +135,7 @@ public class ClassTypeUtils {
      *
      * @param types Class[]
      * @return 对象描述
-     * @see #getClasses(String[]) 
+     * @see #getClasses(String[])
      */
     public static String[] getTypeStrs(Class[] types) {
         return getTypeStrs(types, false);

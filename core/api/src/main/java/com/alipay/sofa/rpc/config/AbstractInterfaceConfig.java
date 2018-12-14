@@ -58,6 +58,7 @@ import static com.alipay.sofa.rpc.config.ConfigValueHelper.checkNormalWithCommaC
  * @param <S> the sub class of AbstractInterfaceConfig
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConfig>
                                                                                     extends AbstractIdConfig<S>
                                                                                                                implements
@@ -334,6 +335,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @return the registry
      */
+    // TODO: 2018/7/9 by zmyer
     public List<RegistryConfig> getRegistry() {
         return registry;
     }
@@ -464,7 +466,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param group the group
      * @return the group
-     * @deprecated Use {@link #setUniqueId(String)} 
+     * @deprecated Use {@link #setUniqueId(String)}
      */
     @Deprecated
     public S setGroup(String group) {
@@ -487,7 +489,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param version the version
      * @return the version
-     * @deprecated Use {@link #setUniqueId(String)} 
+     * @deprecated Use {@link #setUniqueId(String)}
      */
     @Deprecated
     public S setVersion(String version) {
@@ -863,6 +865,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @param overwrite   是否覆盖 true直接覆盖，false为检查
      * @return 是否有变更 boolean
      */
+    // TODO: 2018/7/9 by zmyer
     public boolean updateAttribute(String property, String newValueStr, boolean overwrite) {
         try {
             boolean changed = false;

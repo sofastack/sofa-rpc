@@ -34,6 +34,7 @@ import javax.annotation.concurrent.ThreadSafe;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @ThreadSafe
 public class ClientProxyInvoker implements Invoker {
 
@@ -64,6 +65,7 @@ public class ClientProxyInvoker implements Invoker {
      * @param request 请求消息
      * @return 调用结果
      */
+    // TODO: 2018/7/6 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         SofaResponse response = null;
@@ -106,6 +108,7 @@ public class ClientProxyInvoker implements Invoker {
      *
      * @param request 请求
      */
+    // TODO: 2018/7/6 by zmyer
     protected void decorateRequest(SofaRequest request) {
         /* 暂时不支持隐式传参 
         String methodName = request.getMethodName();

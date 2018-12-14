@@ -60,6 +60,7 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @see org.jboss.resteasy.plugins.server.netty.NettyJaxrsServer
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
     private final ServerConfig         serverConfig;
@@ -211,11 +212,13 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         this.domain = sc;
     }
 
+    // TODO: 2018/6/22 by zmyer
     protected RequestDispatcher createRequestDispatcher() {
         return new RequestDispatcher((SynchronousDispatcher) deployment.getDispatcher(),
             deployment.getProviderFactory(), domain);
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void start() {
         // CHANGE: 增加线程名字
@@ -253,6 +256,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         bootstrap.bind(socketAddress).syncUninterruptibly();
     }
 
+    // TODO: 2018/6/22 by zmyer
     private ChannelInitializer<SocketChannel> createChannelInitializer() {
         final RequestDispatcher dispatcher = createRequestDispatcher();
         if (sslContext == null) {
@@ -275,6 +279,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     private void setupHandlers(SocketChannel ch, RequestDispatcher dispatcher,
                                RestEasyHttpRequestDecoder.Protocol protocol) {
         ChannelPipeline channelPipeline = ch.pipeline();

@@ -48,6 +48,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class RpcRuntimeContext {
 
     /**
@@ -76,17 +77,20 @@ public class RpcRuntimeContext {
     /**
      * 发布的服务配置
      */
-    private final static ConcurrentHashSet<ProviderBootstrap> EXPORTED_PROVIDER_CONFIGS = new ConcurrentHashSet<ProviderBootstrap>();
+    private final static ConcurrentHashSet<ProviderBootstrap> EXPORTED_PROVIDER_CONFIGS =
+                                                                                                new ConcurrentHashSet<ProviderBootstrap>();
 
     /**
      * 发布的订阅配置
      */
-    private final static ConcurrentHashSet<ConsumerBootstrap> REFERRED_CONSUMER_CONFIGS = new ConcurrentHashSet<ConsumerBootstrap>();
+    private final static ConcurrentHashSet<ConsumerBootstrap> REFERRED_CONSUMER_CONFIGS =
+                                                                                                new ConcurrentHashSet<ConsumerBootstrap>();
 
     /**
      * 关闭资源的钩子
      */
-    private final static List<Destroyable.DestroyHook>        DESTROY_HOOKS             = new CopyOnWriteArrayList<Destroyable.DestroyHook>();
+    private final static List<Destroyable.DestroyHook>        DESTROY_HOOKS             =
+                                                                                                new CopyOnWriteArrayList<Destroyable.DestroyHook>();
 
     static {
         if (LOGGER.isInfoEnabled()) {
@@ -225,6 +229,7 @@ public class RpcRuntimeContext {
      *
      * @param providerConfig the provider config
      */
+    // TODO: 2018/7/9 by zmyer
     public static void cacheProviderConfig(ProviderBootstrap providerConfig) {
         EXPORTED_PROVIDER_CONFIGS.add(providerConfig);
     }

@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderProxyInvoker implements Invoker {
 
     /**
@@ -46,6 +47,7 @@ public class ProviderProxyInvoker implements Invoker {
      *
      * @param providerConfig 服务端配置
      */
+    // TODO: 2018/6/22 by zmyer
     public ProviderProxyInvoker(ProviderConfig providerConfig) {
         this.providerConfig = providerConfig;
         // 最底层是调用过滤器
@@ -60,6 +62,7 @@ public class ProviderProxyInvoker implements Invoker {
      * @return 调用结果
      * @throws SofaRpcException rpc异常
      */
+    // TODO: 2018/7/6 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         return filterChain.invoke(request);

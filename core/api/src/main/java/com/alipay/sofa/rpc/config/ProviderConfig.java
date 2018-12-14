@@ -50,6 +50,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_WEIGHT;
  * @param <T> the type parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig<T>> implements Serializable {
 
     /**
@@ -149,6 +150,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      *
      * @return the proxyClass
      */
+    // TODO: 2018/7/6 by zmyer
     @Override
     public Class<?> getProxyClass() {
         if (proxyClass != null) {
@@ -178,6 +180,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      *
      * @return the string
      */
+    // TODO: 2018/7/6 by zmyer
     @Override
     public String buildKey() {
         return interfaceId + ":" + uniqueId;
@@ -188,6 +191,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      *
      * @return the ref
      */
+    // TODO: 2018/7/6 by zmyer
     public T getRef() {
         return ref;
     }

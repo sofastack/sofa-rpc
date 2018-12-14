@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class ClientStartInvokeEvent implements Event {
 
     private final SofaRequest request;

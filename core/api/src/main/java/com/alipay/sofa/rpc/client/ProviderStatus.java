@@ -22,6 +22,7 @@ package com.alipay.sofa.rpc.client;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.2.0
  */
+// TODO: 2018/6/22 by zmyer
 public enum ProviderStatus {
     /**
      * 可用

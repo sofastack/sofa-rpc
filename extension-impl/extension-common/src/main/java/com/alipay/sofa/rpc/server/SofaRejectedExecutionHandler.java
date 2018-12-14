@@ -29,10 +29,12 @@ import java.util.concurrent.ThreadPoolExecutor;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRejectedExecutionHandler implements RejectedExecutionHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SofaRejectedExecutionHandler.class);
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         if (LOGGER.isWarnEnabled()) {

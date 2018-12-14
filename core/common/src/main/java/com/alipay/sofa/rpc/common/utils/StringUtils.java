@@ -340,6 +340,7 @@ public class StringUtils {
      * @param src 原始值
      * @return 字符串数组
      */
+    // TODO: 2018/6/22 by zmyer
     public static String[] splitWithCommaOrSemicolon(String src) {
         if (isEmpty(src)) {
             return StringUtils.EMPTY_STRING_ARRAY;

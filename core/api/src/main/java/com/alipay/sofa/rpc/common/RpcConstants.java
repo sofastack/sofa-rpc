@@ -25,6 +25,7 @@ import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class RpcConstants {
 
     /*--------Config配置值相关开始---------*/
@@ -178,7 +179,7 @@ public class RpcConstants {
      */
     public static final String  PROTOCOL_TYPE_H2C                  = "h2c";
     /**
-     * 协议类型：http2 
+     * 协议类型：http2
      *
      * @since 5.4.0
      */
@@ -271,7 +272,7 @@ public class RpcConstants {
     public static final String  INTERNAL_KEY_CLIENT_ELAPSE         = INTERNAL_KEY_PREFIX + "client_elapse";
     /**
      * 内部使用的key：_client_send_time 客户端发送时间戳，long
-     * 
+     *
      * @since 5.4.0
      */
     public static final String  INTERNAL_KEY_CLIENT_SEND_TIME      = INTERNAL_KEY_PREFIX + "client_send_time";

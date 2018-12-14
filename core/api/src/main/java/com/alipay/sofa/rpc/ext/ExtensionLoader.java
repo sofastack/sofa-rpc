@@ -44,6 +44,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ExtensionLoader<T> {
     /**
      * slf4j Logger for this class
@@ -87,6 +88,7 @@ public class ExtensionLoader<T> {
      * @param interfaceClass 接口类
      * @param listener       加载后的监听器
      */
+    // TODO: 2018/7/6 by zmyer
     public ExtensionLoader(Class<T> interfaceClass, ExtensionLoaderListener<T> listener) {
         this(interfaceClass, true, listener);
     }
@@ -107,6 +109,7 @@ public class ExtensionLoader<T> {
      * @param autoLoad       是否自动开始加载
      * @param listener       扩展加载监听器
      */
+    // TODO: 2018/7/6 by zmyer
     protected ExtensionLoader(Class<T> interfaceClass, boolean autoLoad, ExtensionLoaderListener<T> listener) {
         if (RpcRunningState.isShuttingDown()) {
             this.interfaceClass = null;
@@ -292,7 +295,8 @@ public class ExtensionLoader<T> {
                     // 如果不能被覆盖，抛出已存在异常
                     throw new IllegalStateException(
                         "Error when load extension of extensible " + interfaceClass + " from file:" + url +
-                            ", Duplicate class with same alias: " + alias + ", " + old.getClazz() + " and " + implClass);
+                            ", Duplicate class with same alias: " + alias + ", " + old.getClazz() + " and " +
+                            implClass);
                 }
             }
         } else {
@@ -410,6 +414,7 @@ public class ExtensionLoader<T> {
      * @param alias 扩展别名
      * @return 扩展类对象
      */
+    // TODO: 2018/7/6 by zmyer
     public ExtensionClass<T> getExtensionClass(String alias) {
         return all == null ? null : all.get(alias);
     }
@@ -451,6 +456,7 @@ public class ExtensionLoader<T> {
      * @param args     扩展初始化需要的参数
      * @return 扩展实例（已判断是否单例）
      */
+    // TODO: 2018/7/9 by zmyer
     public T getExtension(String alias, Class[] argTypes, Object[] args) {
         ExtensionClass<T> extensionClass = getExtensionClass(alias);
         if (extensionClass == null) {

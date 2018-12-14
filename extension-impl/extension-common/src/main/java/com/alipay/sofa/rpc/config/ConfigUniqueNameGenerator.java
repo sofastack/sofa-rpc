@@ -23,11 +23,12 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class ConfigUniqueNameGenerator {
 
     /**
      * 得到服务唯一名称，无需兼容之前的版本
-     * 
+     *
      * @param interfaceConfig 服务提供者或者服务消费者配置
      * @return 服务唯一名称
      * @since 5.4.0

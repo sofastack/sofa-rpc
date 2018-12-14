@@ -39,6 +39,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_SUBSCRIBE;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class RegistryConfig extends AbstractIdConfig implements Serializable {
     /**
      * The constant serialVersionUID.

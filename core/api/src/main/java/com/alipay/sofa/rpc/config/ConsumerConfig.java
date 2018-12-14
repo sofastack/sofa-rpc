@@ -60,7 +60,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROTOCOL;
 
 /**
  * 服务消费者配置
- * 
+ *
  * @param <T> the type parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */

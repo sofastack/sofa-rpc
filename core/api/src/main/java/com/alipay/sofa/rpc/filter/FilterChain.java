@@ -47,6 +47,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class FilterChain implements Invoker {
 
     /**
@@ -142,6 +143,7 @@ public class FilterChain implements Invoker {
      * @param lastFilter     最后一个filter
      * @return filter执行链
      */
+    // TODO: 2018/6/22 by zmyer
     public static FilterChain buildProviderChain(ProviderConfig<?> providerConfig, FilterInvoker lastFilter) {
         return new FilterChain(selectActualFilters(providerConfig, PROVIDER_AUTO_ACTIVES), lastFilter, providerConfig);
     }
@@ -153,6 +155,7 @@ public class FilterChain implements Invoker {
      * @param lastFilter     最后一个filter
      * @return filter执行链
      */
+    // TODO: 2018/6/22 by zmyer
     public static FilterChain buildConsumerChain(ConsumerConfig<?> consumerConfig, FilterInvoker lastFilter) {
         return new FilterChain(selectActualFilters(consumerConfig, CONSUMER_AUTO_ACTIVES), lastFilter, consumerConfig);
     }
@@ -224,6 +227,7 @@ public class FilterChain implements Invoker {
      * @param customFilters 自定义filter列表
      * @return 需要排除的过滤器的key列表
      */
+    // TODO: 2018/7/6 by zmyer
     private static HashSet<String> parseExcludeFilter(List<Filter> customFilters) {
         HashSet<String> excludeKeys = new HashSet<String>();
         if (CommonUtils.isNotEmpty(customFilters)) {
@@ -252,11 +256,13 @@ public class FilterChain implements Invoker {
         return excludeKeys;
     }
 
+    // TODO: 2018/7/9 by zmyer
     private static boolean startsWithExcludePrefix(String excludeName) {
         char c = excludeName.charAt(0);
         return c == '-' || c == '!';
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest sofaRequest) throws SofaRpcException {
         return invokerChain.invoke(sofaRequest);
@@ -271,6 +277,7 @@ public class FilterChain implements Invoker {
      * @param throwable Throwable when invoke
      * @throws SofaRpcException occur error
      */
+    // TODO: 2018/6/22 by zmyer
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
         throws SofaRpcException {
         try {
@@ -278,8 +285,8 @@ public class FilterChain implements Invoker {
                 loadedFilter.onAsyncResponse(config, request, response, throwable);
             }
         } catch (SofaRpcException e) {
-            LOGGER
-                .errorWithApp(config.getAppName(), "Catch exception when do filtering after asynchronous respond.", e);
+            LOGGER.errorWithApp(config.getAppName(), "Catch exception when do filtering after asynchronous respond.",
+                e);
         }
     }
 

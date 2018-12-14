@@ -35,6 +35,7 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension(value = "registry", order = -18000)
 @AutoActive(consumerSide = true)
 public class RegistryRouter extends Router {
@@ -63,6 +64,7 @@ public class RegistryRouter extends Router {
         return StringUtils.isEmpty(consumerConfig.getDirectUrl()) && consumerConfig.isSubscribe();
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
         AddressHolder addressHolder = consumerBootstrap.getCluster().getAddressHolder();

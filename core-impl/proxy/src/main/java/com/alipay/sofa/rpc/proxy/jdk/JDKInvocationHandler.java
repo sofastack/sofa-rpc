@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class JDKInvocationHandler implements InvocationHandler {
 
     /**
@@ -50,11 +51,13 @@ public class JDKInvocationHandler implements InvocationHandler {
      * @param proxyClass   the proxy class
      * @param proxyInvoker the proxy invoker
      */
+    // TODO: 2018/7/6 by zmyer
     public JDKInvocationHandler(Class proxyClass, Invoker proxyInvoker) {
         this.proxyClass = proxyClass;
         this.proxyInvoker = proxyInvoker;
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public Object invoke(Object proxy, Method method, Object[] paramValues)
         throws Throwable {

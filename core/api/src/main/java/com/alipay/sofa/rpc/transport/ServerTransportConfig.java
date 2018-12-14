@@ -32,6 +32,7 @@ import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class ServerTransportConfig {
 
     private String                host             = getStringValue(RpcOptions.SERVER_HOST);
@@ -44,7 +45,8 @@ public class ServerTransportConfig {
     private boolean               reuseAddr        = getBooleanValue(RpcOptions.TRANSPORT_SERVER_REUSE_ADDR);
     private boolean               keepAlive        = getBooleanValue(RpcOptions.TRANSPORT_SERVER_KEEPALIVE);
     private boolean               tcpNoDelay       = getBooleanValue(RpcOptions.TRANSPORT_SERVER_TCPNODELAY);
-    private int                   bizMaxThreads    = getIntValue(RpcOptions.SERVER_POOL_MAX);                //default business pool set to 200
+    private int                   bizMaxThreads    = getIntValue(RpcOptions.SERVER_POOL_MAX);
+    //default business pool set to 200
     private String                bizPoolType      = getStringValue(RpcOptions.SERVER_POOL_TYPE);
 
     private boolean               useEpoll         = getBooleanValue(RpcOptions.TRANSPORT_USE_EPOLL);

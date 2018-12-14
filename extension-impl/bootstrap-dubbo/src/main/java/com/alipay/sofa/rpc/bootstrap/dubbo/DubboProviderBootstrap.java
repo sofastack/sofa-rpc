@@ -23,7 +23,11 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.*;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.ArrayList;
@@ -35,6 +39,7 @@ import java.util.Map;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/9 by zmyer
 @Extension("dubbo")
 public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
 
@@ -57,6 +62,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
      */
     private ServiceConfig<T>             serviceConfig;
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void export() {
         if (exported) {
@@ -69,6 +75,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         exported = true;
     }
 
+    // TODO: 2018/7/9 by zmyer
     private void covert(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
         copyApplication(providerConfig, serviceConfig);
         copyRegistries(providerConfig, serviceConfig);
@@ -124,6 +131,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         protocolConfig.setParameters(serverConfig.getParameters());
     }
 
+    // TODO: 2018/7/9 by zmyer
     private void copyRegistries(ProviderConfig providerConfig,
                                 ServiceConfig serviceConfig) {
         List<RegistryConfig> registryConfigs = providerConfig.getRegistry();

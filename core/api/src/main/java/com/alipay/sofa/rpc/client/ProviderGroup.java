@@ -29,6 +29,7 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ProviderGroup {
 
     /**
@@ -91,6 +92,7 @@ public class ProviderGroup {
      *
      * @return the provider infos
      */
+    // TODO: 2018/7/6 by zmyer
     public List<ProviderInfo> getProviderInfos() {
         return providerInfos;
     }

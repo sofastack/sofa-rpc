@@ -46,6 +46,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaResteasyDeployment extends ResteasyDeployment {
 
     /**
@@ -54,8 +55,7 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
     private static final Logger LOGGER = LoggerFactory.getLogger(SofaResteasyDeployment.class);
 
     @Override
-    public void start()
-    {
+    public void start() {
         // it is very important that each deployment create their own provider factory
         // this allows each WAR to have their own set of providers 
         if (providerFactory == null) {
@@ -63,29 +63,23 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
         }
         providerFactory.setRegisterBuiltins(registerBuiltin);
 
-        if (deploymentSensitiveFactoryEnabled)
-        {
+        if (deploymentSensitiveFactoryEnabled) {
             // the ThreadLocalResteasyProviderFactory pushes and pops this deployments parentProviderFactory
             // on a ThreadLocal stack.  This allows each application/WAR to have their own parentProviderFactory
             // and still be able to call ResteasyProviderFactory.getInstance()
-            if (!(providerFactory instanceof ThreadLocalResteasyProviderFactory))
-            {
+            if (!(providerFactory instanceof ThreadLocalResteasyProviderFactory)) {
                 if (ResteasyProviderFactory.peekInstance() == null ||
-                    !(ResteasyProviderFactory.peekInstance() instanceof ThreadLocalResteasyProviderFactory))
-                {
+                    !(ResteasyProviderFactory.peekInstance() instanceof ThreadLocalResteasyProviderFactory)) {
 
                     threadLocalProviderFactory = new ThreadLocalResteasyProviderFactory(providerFactory);
                     ResteasyProviderFactory.setInstance(threadLocalProviderFactory);
                 }
             }
-        }
-        else
-        {
+        } else {
             ResteasyProviderFactory.setInstance(providerFactory);
         }
 
-        if (asyncJobServiceEnabled)
-        {
+        if (asyncJobServiceEnabled) {
             AsynchronousDispatcher asyncDispatcher = new AsynchronousDispatcher(providerFactory);
             asyncDispatcher.setMaxCacheSize(asyncJobServiceMaxJobResults);
             asyncDispatcher.setMaxWaitMilliSeconds(asyncJobServiceMaxWait);
@@ -94,16 +88,13 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
             asyncDispatcher.getUnwrappedExceptions().addAll(unwrappedExceptions);
             dispatcher = asyncDispatcher;
             asyncDispatcher.start();
-        }
-        else
-        {
+        } else {
             SynchronousDispatcher dis = new SofaSynchronousDispatcher(providerFactory); // CHANGE: 只改了这里
             dis.getUnwrappedExceptions().addAll(unwrappedExceptions);
             dispatcher = dis;
         }
         registry = dispatcher.getRegistry();
-        if (widerRequestMatching)
-        {
+        if (widerRequestMatching) {
             ((ResourceMethodRegistry) registry).setWiderMatching(widerRequestMatching);
         }
 
@@ -118,20 +109,15 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
         Map contextDataMap = ResteasyProviderFactory.getContextDataMap();
         contextDataMap.putAll(dispatcher.getDefaultContextObjects());
 
-        try
-        {
-            if (injectorFactoryClass != null)
-            {
+        try {
+            if (injectorFactoryClass != null) {
                 InjectorFactory injectorFactory;
-                try
-                {
+                try {
                     Class<?> clazz = Thread.currentThread().getContextClassLoader().loadClass(injectorFactoryClass);
                     injectorFactory = (InjectorFactory) clazz.newInstance();
-                } catch (ClassNotFoundException cnfe)
-                {
+                } catch (ClassNotFoundException cnfe) {
                     throw new RuntimeException("Unable to find InjectorFactory implementation.", cnfe);
-                } catch (Exception e)
-                {
+                } catch (Exception e) {
                     throw new RuntimeException("Unable to instantiate InjectorFactory implementation.", e);
                 }
 
@@ -140,16 +126,12 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
 
             // feed context data map with constructed objects 
             // see ResteasyContextParameters.RESTEASY_CONTEXT_OBJECTS
-            if (constructedDefaultContextObjects != null && constructedDefaultContextObjects.size() > 0)
-            {
-                for (Map.Entry<String, String> entry : constructedDefaultContextObjects.entrySet())
-                {
+            if (constructedDefaultContextObjects != null && constructedDefaultContextObjects.size() > 0) {
+                for (Map.Entry<String, String> entry : constructedDefaultContextObjects.entrySet()) {
                     Class<?> key = null;
-                    try
-                    {
+                    try {
                         key = Thread.currentThread().getContextClassLoader().loadClass(entry.getKey());
-                    } catch (ClassNotFoundException e)
-                    {
+                    } catch (ClassNotFoundException e) {
                         throw new RuntimeException("Unable to instantiate context object " + entry.getKey(), e);
                     }
                     Object obj = createFromInjectorFactory(entry.getValue(), providerFactory);
@@ -165,36 +147,28 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
 
             // Interceptor preferences should come before provider registration or builtin.
 
-            if (interceptorPrecedences != null)
-            {
-                for (String precedence : interceptorPrecedences)
-                {
+            if (interceptorPrecedences != null) {
+                for (String precedence : interceptorPrecedences) {
                     providerFactory.appendInterceptorPrecedence(precedence.trim());
                 }
             }
 
-            if (interceptorBeforePrecedences != null)
-            {
-                for (Map.Entry<String, String> ext : interceptorBeforePrecedences.entrySet())
-                {
+            if (interceptorBeforePrecedences != null) {
+                for (Map.Entry<String, String> ext : interceptorBeforePrecedences.entrySet()) {
                     providerFactory.insertInterceptorPrecedenceBefore(ext.getKey().trim(), ext.getValue().trim());
                 }
             }
-            if (interceptorAfterPrecedences != null)
-            {
-                for (Map.Entry<String, String> ext : interceptorAfterPrecedences.entrySet())
-                {
+            if (interceptorAfterPrecedences != null) {
+                for (Map.Entry<String, String> ext : interceptorAfterPrecedences.entrySet()) {
                     providerFactory.insertInterceptorPrecedenceAfter(ext.getKey().trim(), ext.getValue().trim());
                 }
             }
 
-            if (securityEnabled)
-            {
+            if (securityEnabled) {
                 providerFactory.register(RoleBasedSecurityFeature.class);
             }
 
-            if (registerBuiltin)
-            {
+            if (registerBuiltin) {
                 providerFactory.setRegisterBuiltins(true);
                 RegisterBuiltin.register(providerFactory);
 
@@ -204,14 +178,11 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
                 // com/sun/ts/tests/jaxrs/spec/provider/standardwithjaxrsclient/JAXRSClient.java#mapElementProviderTest_from_standalone                                             Failed. Test case throws exception: returned MultivaluedMap is null
                 providerFactory.registerProviderInstance(new ServerFormUrlEncodedProvider(useContainerFormParams),
                     null, null, true);
-            }
-            else
-            {
+            } else {
                 providerFactory.setRegisterBuiltins(false);
             }
 
-            if (applicationClass != null)
-            {
+            if (applicationClass != null) {
                 application = createApplication(applicationClass, dispatcher, providerFactory);
 
             }
@@ -219,41 +190,34 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
             // register all providers
             registration();
 
-            if (paramMapping != null)
-            {
+            if (paramMapping != null) {
                 providerFactory.getContainerRequestFilterRegistry().registerSingleton(
                     new AcceptParameterHttpPreprocessor(paramMapping));
             }
 
             AcceptHeaderByFileSuffixFilter suffixNegotiationFilter = null;
-            if (mediaTypeMappings != null)
-            {
+            if (mediaTypeMappings != null) {
                 Map<String, MediaType> extMap = new HashMap<String, MediaType>();
-                for (Map.Entry<String, String> ext : mediaTypeMappings.entrySet())
-                {
+                for (Map.Entry<String, String> ext : mediaTypeMappings.entrySet()) {
                     String value = ext.getValue();
                     extMap.put(ext.getKey().trim(), MediaType.valueOf(value.trim()));
                 }
 
-                if (suffixNegotiationFilter == null)
-                {
+                if (suffixNegotiationFilter == null) {
                     suffixNegotiationFilter = new AcceptHeaderByFileSuffixFilter();
                     providerFactory.getContainerRequestFilterRegistry().registerSingleton(suffixNegotiationFilter);
                 }
                 suffixNegotiationFilter.setMediaTypeMappings(extMap);
             }
 
-            if (languageExtensions != null)
-            {
-                if (suffixNegotiationFilter == null)
-                {
+            if (languageExtensions != null) {
+                if (suffixNegotiationFilter == null) {
                     suffixNegotiationFilter = new AcceptHeaderByFileSuffixFilter();
                     providerFactory.getContainerRequestFilterRegistry().registerSingleton(suffixNegotiationFilter);
                 }
                 suffixNegotiationFilter.setLanguageMappings(languageExtensions);
             }
-        } finally
-        {
+        } finally {
             ResteasyProviderFactory.removeContextDataLevel();
         }
     }

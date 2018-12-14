@@ -28,6 +28,7 @@ import java.util.List;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 public abstract class ConsumerBootstrap<T> {
 

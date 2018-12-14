@@ -31,6 +31,7 @@ import java.util.Map;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SofaRequest extends RequestBase {
 
     private static final long   serialVersionUID = 7329530374415722876L;

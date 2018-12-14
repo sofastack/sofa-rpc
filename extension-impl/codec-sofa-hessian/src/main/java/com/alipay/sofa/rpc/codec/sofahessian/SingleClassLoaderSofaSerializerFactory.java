@@ -32,9 +32,10 @@ import com.caucho.hessian.io.SerializerFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
 
-    /** 
+    /**
      * logger for this class 
      */
     private static final Logger LOGGER = LoggerFactory

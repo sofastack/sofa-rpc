@@ -35,6 +35,7 @@ import javax.annotation.concurrent.ThreadSafe;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extensible(singleton = false)
 @ThreadSafe
 public abstract class Cluster implements Invoker, ProviderInfoListener, Initializable, Destroyable {
@@ -54,6 +55,7 @@ public abstract class Cluster implements Invoker, ProviderInfoListener, Initiali
      *
      * @param consumerBootstrap 服务端消费者启动器
      */
+    // TODO: 2018/7/6 by zmyer
     public Cluster(ConsumerBootstrap consumerBootstrap) {
         this.consumerBootstrap = consumerBootstrap;
         this.consumerConfig = consumerBootstrap.getConsumerConfig();

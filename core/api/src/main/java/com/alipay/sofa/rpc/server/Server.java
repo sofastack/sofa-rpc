@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extensible(singleton = false)
 public interface Server extends Destroyable {
     /**

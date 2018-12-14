@@ -37,6 +37,7 @@ import java.util.regex.Pattern;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class NetUtils {
 
     /**
@@ -483,6 +484,7 @@ public class NetUtils {
      * @param timeout 连接超时
      * @return 是否可连接
      */
+    // TODO: 2018/6/22 by zmyer
     public static boolean canTelnet(String ip, int port, int timeout) {
         Socket socket = null;
         try {

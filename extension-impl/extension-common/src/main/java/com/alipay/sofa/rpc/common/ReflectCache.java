@@ -14,24 +14,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.event;
-
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-
-/**
- * ServerReceiveEvent
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
- */
-// TODO: 2018/7/6 by zmyer
-public class ServerReceiveEvent implements Event {
-    private final SofaRequest request;
-
-    public ServerReceiveEvent(SofaRequest request) {
-        this.request = request;
-    }
-
-    public SofaRequest getRequest() {
-        return request;
-    }
-}

@@ -100,6 +100,8 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     protected final static ConcurrentMap<String, AtomicInteger> REFERRED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
 
+    // TODO: 2018/7/6 by zmyer
+    @SuppressWarnings("unchecked")
     @Override
     public T refer() {
         if (proxyIns != null) {
@@ -180,6 +182,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     /**
      * for check fields and parameters of consumer config 
      */
+    // TODO: 2018/7/6 by zmyer
     protected void checkParameters() {
 
     }
@@ -190,6 +193,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @param bootstrap ConsumerBootstrap
      * @return ConfigListener
      */
+    // TODO: 2018/7/6 by zmyer
     protected ConfigListener buildConfigListener(ConsumerBootstrap bootstrap) {
         return new ConsumerAttributeListener();
     }
@@ -200,6 +204,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @param bootstrap ConsumerBootstrap
      * @return ProviderInfoListener
      */
+    // TODO: 2018/7/6 by zmyer
     protected ProviderInfoListener buildProviderInfoListener(ConsumerBootstrap bootstrap) {
         return new ClusterProviderInfoListener(bootstrap.getCluster());
     }
@@ -210,10 +215,12 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @param bootstrap ConsumerBootstrap
      * @return ClientProxyInvoker
      */
+    // TODO: 2018/7/6 by zmyer
     protected ClientProxyInvoker buildClientProxyInvoker(ConsumerBootstrap bootstrap) {
         return new DefaultClientProxyInvoker(bootstrap);
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void unRefer() {
         if (proxyIns == null) {
@@ -246,6 +253,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         unSubscribe();
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public List<ProviderGroup> subscribe() {
         List<ProviderGroup> result = null;
@@ -275,6 +283,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @param directUrl direct url of consume config
      * @return Provider group list
      */
+    // TODO: 2018/6/22 by zmyer
     protected List<ProviderGroup> subscribeFromDirectUrl(String directUrl) {
         List<ProviderGroup> result = new ArrayList<ProviderGroup>();
         List<ProviderInfo> tmpProviderInfoList = new ArrayList<ProviderInfo>();
@@ -297,6 +306,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * @param providerStr provider url
      * @return ProviderInfo
      */
+    // TODO: 2018/6/22 by zmyer
     protected ProviderInfo convertToProviderInfo(String providerStr) {
         return ProviderHelper.toProviderInfo(providerStr);
     }
@@ -382,6 +392,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     /**
      * 取消订阅服务列表
      */
+    // TODO: 2018/7/6 by zmyer
     public void unSubscribe() {
         if (StringUtils.isEmpty(consumerConfig.getDirectUrl()) && consumerConfig.isSubscribe()) {
             List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
@@ -461,6 +472,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     /**
      * Consumer配置发生变化监听器
      */
+    // TODO: 2018/7/6 by zmyer
     private class ConsumerAttributeListener implements ConfigListener {
 
         @Override
@@ -527,6 +539,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
          *
          * @throws Exception the exception
          */
+        // TODO: 2018/7/9 by zmyer
         private void switchCluster() throws Exception {
             Cluster newCluster = null;
             Cluster oldCluster;
@@ -554,6 +567,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public Cluster getCluster() {
         return cluster;

@@ -41,6 +41,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public final class ServerFactory {
 
     /**
@@ -59,6 +60,7 @@ public final class ServerFactory {
      * @param serverConfig 服务端配置
      * @return Server
      */
+    // TODO: 2018/7/6 by zmyer
     public synchronized static Server getServer(ServerConfig serverConfig) {
         try {
             Server server = SERVER_MAP.get(Integer.toString(serverConfig.getPort()));
@@ -89,6 +91,7 @@ public final class ServerFactory {
      *
      * @param serverConfig 服务器配置
      */
+    // TODO: 2018/7/6 by zmyer
     private static void resolveServerConfig(ServerConfig serverConfig) {
         // 绑定到指定网卡 或全部网卡
         String boundHost = serverConfig.getBoundHost();

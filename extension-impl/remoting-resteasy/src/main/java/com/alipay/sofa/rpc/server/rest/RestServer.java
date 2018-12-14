@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("rest")
 public class RestServer implements Server {
 
@@ -66,6 +67,7 @@ public class RestServer implements Server {
      */
     protected AtomicInteger        invokerCnt = new AtomicInteger();
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
@@ -143,7 +145,8 @@ public class RestServer implements Server {
                 }
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(
-                    "Failed to start jetty server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(), e);
+                    "Failed to start jetty server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(),
+                    e);
             }
             started = true;
         }

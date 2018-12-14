@@ -27,6 +27,7 @@ import java.util.Map;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public final class SofaResponse implements Serializable {
 
     private static final long         serialVersionUID = -4364536436151723421L;

@@ -27,6 +27,7 @@ import java.util.Comparator;
  * @param <T> the type parameter
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class OrderedComparator<T extends Sortable> implements Comparator<T>, Serializable {
 
     /**

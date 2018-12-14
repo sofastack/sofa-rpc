@@ -34,6 +34,7 @@ import java.util.Map;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @ThreadSafe
 public class FilterInvoker implements Invoker {
 
@@ -88,6 +89,7 @@ public class FilterInvoker implements Invoker {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         if (nextFilter == null && invoker == null) {

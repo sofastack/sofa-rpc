@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extension("consistentHash")
 public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
@@ -75,6 +76,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
     /**
      * 选择器
      */
+    // TODO: 2018/7/6 by zmyer
     private static class Selector {
 
         /**
@@ -180,6 +182,7 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
          * @param value the value
          * @return the byte [ ]
          */
+        // TODO: 2018/7/6 by zmyer
         private byte[] messageDigest(String value) {
             MessageDigest md5;
             try {

@@ -33,6 +33,7 @@ import static com.alipay.sofa.rpc.common.utils.ClassLoaderUtils.getCurrentClassL
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public final class ClassUtils {
 
     /**
@@ -129,6 +130,7 @@ public final class ClassUtils {
      * @return 对象实例
      * @throws SofaRpcRuntimeException 没有找到方法，或者无法处理，或者初始化方法异常等
      */
+    // TODO: 2018/7/9 by zmyer
     public static <T> T newInstance(Class<T> clazz) throws SofaRpcRuntimeException {
         if (clazz.isPrimitive()) {
             return (T) getDefaultPrimitiveValue(clazz);
@@ -192,6 +194,7 @@ public final class ClassUtils {
      * @return 对象实例
      * @throws SofaRpcRuntimeException 没有找到方法，或者无法处理，或者初始化方法异常等
      */
+    // TODO: 2018/7/6 by zmyer
     public static <T> T newInstanceWithArgs(Class<T> clazz, Class<?>[] argTypes, Object[] args)
         throws SofaRpcRuntimeException {
         if (CommonUtils.isEmpty(argTypes)) {

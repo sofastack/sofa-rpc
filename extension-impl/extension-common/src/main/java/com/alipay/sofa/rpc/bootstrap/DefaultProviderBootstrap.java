@@ -88,6 +88,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                                                                                   "DELAY-EXPORT",
                                                                                   true);
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void export() {
         if (providerConfig.getDelay() > 0) { // 延迟加载,单位毫秒
@@ -107,6 +108,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     private void doExport() {
         if (exported) {
             return;
@@ -224,6 +226,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * for check fields and parameters of consumer config 
      */
+    // TODO: 2018/6/22 by zmyer
     protected void checkParameters() {
         // 检查注入的ref是否接口实现类
         Class proxyClass = providerConfig.getProxyClass();
@@ -245,9 +248,10 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**
      * 检查方法，例如方法名、多态（重载）方法
-     * 
+     *
      * @param itfClass 接口类
      */
+    // TODO: 2018/6/22 by zmyer
     protected void checkMethods(Class<?> itfClass) {
         ConcurrentHashMap<String, Boolean> methodsLimit = new ConcurrentHashMap<String, Boolean>();
         for (Method method : itfClass.getMethods()) {
@@ -269,6 +273,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void unExport() {
         if (!exported) {
@@ -333,6 +338,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 注册服务
      */
+    // TODO: 2018/7/6 by zmyer
     protected void register() {
         if (providerConfig.isRegister()) {
             List<RegistryConfig> registryConfigs = providerConfig.getRegistry();
@@ -360,6 +366,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 反注册服务
      */
+    // TODO: 2018/7/6 by zmyer
     protected void unregister() {
         if (providerConfig.isRegister()) {
             List<RegistryConfig> registryConfigs = providerConfig.getRegistry();
@@ -384,6 +391,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * Provider配置发生变化监听器
      */
+    // TODO: 2018/7/6 by zmyer
     private class ProviderAttributeListener implements ConfigListener {
 
         @Override
@@ -448,6 +456,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      * @param methodName     方法名
      * @return 方法
      */
+    // TODO: 2018/6/22 by zmyer
     protected boolean inList(String includeMethods, String excludeMethods, String methodName) {
         //判断是否在白名单中
         if (includeMethods != null && !StringUtils.ALL.equals(includeMethods)) {

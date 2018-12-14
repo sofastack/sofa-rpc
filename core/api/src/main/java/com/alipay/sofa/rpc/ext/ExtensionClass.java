@@ -30,6 +30,7 @@ import java.util.Arrays;
  * @see Extension
  * @see Extensible
  */
+// TODO: 2018/6/22 by zmyer
 public class ExtensionClass<T> implements Sortable {
 
     /**
@@ -85,6 +86,7 @@ public class ExtensionClass<T> implements Sortable {
      *
      * @return 扩展点对象实例
      */
+    // TODO: 2018/7/6 by zmyer
     public T getExtInstance() {
         return getExtInstance(null, null);
     }
@@ -96,6 +98,7 @@ public class ExtensionClass<T> implements Sortable {
      * @param args     构造函数参数值
      * @return 扩展点对象实例 ext instance
      */
+    // TODO: 2018/7/6 by zmyer
     public T getExtInstance(Class[] argTypes, Object[] args) {
         if (clazz != null) {
             try {

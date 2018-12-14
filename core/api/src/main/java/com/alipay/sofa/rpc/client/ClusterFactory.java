@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ClusterFactory {
 
     /**
@@ -36,6 +37,7 @@ public class ClusterFactory {
      * @param consumerBootstrap 客户端配置
      * @return Cluster对象
      */
+    // TODO: 2018/6/22 by zmyer
     public static Cluster getCluster(ConsumerBootstrap consumerBootstrap) {
         try {
             ConsumerConfig consumerConfig = consumerBootstrap.getConsumerConfig();

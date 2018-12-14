@@ -98,6 +98,7 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
      */
     protected abstract Object buildProxy(ClientTransportConfig transportConfig) throws SofaRpcException;
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void connect() {
         ProviderInfo provider = transportConfig.getProviderInfo();
@@ -135,6 +136,7 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
         return 0;
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public ResponseFuture asyncSend(SofaRequest message, int timeout) throws SofaRpcException {
         throw new UnsupportedOperationException("Unsupported asynchronous RPC in short connection");
@@ -149,6 +151,7 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
      */
     protected abstract Method getMethod(SofaRequest request) throws SofaRpcException;
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
@@ -236,7 +239,8 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
             Throwable realException = ie.getCause(); // 真正的原因
             if (realException != null) {
                 if (realException instanceof SocketTimeoutException) {
-                    exception = new SofaRpcException(RpcErrorType.CLIENT_TIMEOUT, "Client read timeout!", realException);
+                    exception = new SofaRpcException(RpcErrorType.CLIENT_TIMEOUT, "Client read timeout!",
+                        realException);
                 } else if (realException instanceof ConnectException) {
                     open = false;
                     exception = new SofaRpcException(RpcErrorType.CLIENT_NETWORK,
@@ -257,6 +261,7 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
         return exception;
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void oneWaySend(SofaRequest message, int timeout) throws SofaRpcException {
         throw new UnsupportedOperationException("Not supported");

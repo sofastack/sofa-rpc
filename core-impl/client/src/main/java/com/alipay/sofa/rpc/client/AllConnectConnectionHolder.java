@@ -57,6 +57,7 @@ import java.util.concurrent.locks.ReentrantLock;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("all")
 public class AllConnectConnectionHolder extends ConnectionHolder {
 
@@ -142,6 +143,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      * @param providerInfo Provider
      * @param transport    连接
      */
+    // TODO: 2018/6/22 by zmyer
     protected void aliveToRetry(ProviderInfo providerInfo, ClientTransport transport) {
         providerLock.lock();
         try {
@@ -179,6 +181,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      * @param clientTransport 客户端长连接
      * @return 状态是否可用
      */
+    // TODO: 2018/6/22 by zmyer
     protected boolean checkState(ProviderInfo providerInfo, ClientTransport clientTransport) {
         //        Protocol protocol = ProtocolFactory.getProtocol(providerInfo.getProtocolType());
         //        ProtocolNegotiator negotiator = protocol.negotiator();
@@ -318,6 +321,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     @Override
     public void init() {
         if (reconThread == null) {
@@ -505,6 +509,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         return new ArrayList<ProviderInfo>(map.keySet());
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public ClientTransport getAvailableClientTransport(ProviderInfo providerInfo) {
         // 先去存活列表
@@ -759,6 +764,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      * @param transport   ClientTransport对象
      * @return 是否存活
      */
+    // TODO: 2018/7/6 by zmyer
     protected boolean doubleCheck(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         if (transport.isAvailable()) {
             try { // 睡一下下 防止被连上又被服务端踢下线
@@ -792,6 +798,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 启动重连+心跳线程
      */
+    // TODO: 2018/6/22 by zmyer
     protected void startReconnectThread() {
         final String interfaceId = consumerConfig.getInterfaceId();
         // 启动线程池
@@ -822,6 +829,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 重连断开和死亡的节点
      */
+    // TODO: 2018/6/22 by zmyer
     private void doReconnect() {
         String interfaceId = consumerConfig.getInterfaceId();
         String appName = consumerConfig.getAppName();

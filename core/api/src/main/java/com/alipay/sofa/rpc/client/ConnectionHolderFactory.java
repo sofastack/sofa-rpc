@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class ConnectionHolderFactory {
 
     /**
@@ -35,6 +36,7 @@ public class ConnectionHolderFactory {
      * @param consumerBootstrap 服务消费者配置
      * @return ConnectionHolder
      */
+    // TODO: 2018/6/22 by zmyer
     public static ConnectionHolder getConnectionHolder(ConsumerBootstrap consumerBootstrap) {
         try {
             String connectionHolder = consumerBootstrap.getConsumerConfig().getConnectionHolder();

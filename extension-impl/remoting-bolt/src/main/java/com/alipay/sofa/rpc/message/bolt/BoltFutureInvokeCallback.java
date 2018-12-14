@@ -54,6 +54,7 @@ public class BoltFutureInvokeCallback extends AbstractInvokeCallback {
      * @param context        the context
      * @param classLoader    the class loader
      */
+    // TODO: 2018/6/22 by zmyer
     public BoltFutureInvokeCallback(ConsumerConfig consumerConfig, ProviderInfo providerInfo,
                                     BoltResponseFuture rpcFuture, SofaRequest request,
                                     RpcInternalContext context, ClassLoader classLoader) {

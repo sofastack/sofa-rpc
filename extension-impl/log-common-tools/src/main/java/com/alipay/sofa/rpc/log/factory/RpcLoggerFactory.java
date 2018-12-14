@@ -24,7 +24,7 @@ import java.util.Map;
 
 /**
  * 自定义 rpc 的打印日志工厂
- * 
+ *
  * @author <a href=mailto:guanchao.ygc@antfin.com>Guanchao Yang</a>
  */
 public class RpcLoggerFactory {

@@ -30,6 +30,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/9 by zmyer
 public class Bootstraps {
 
     /**
@@ -39,6 +40,7 @@ public class Bootstraps {
      * @param <T>            接口类型
      * @return 发布启动类
      */
+    // TODO: 2018/7/9 by zmyer
     public static <T> ProviderBootstrap<T> from(ProviderConfig<T> providerConfig) {
         String bootstrap = providerConfig.getBootstrap();
         if (StringUtils.isEmpty(bootstrap)) {
@@ -58,6 +60,7 @@ public class Bootstraps {
      * @param <T>            接口类型
      * @return 引用启动类
      */
+    // TODO: 2018/7/9 by zmyer
     public static <T> ConsumerBootstrap<T> from(ConsumerConfig<T> consumerConfig) {
         String bootstrap = consumerConfig.getBootstrap();
         ConsumerBootstrap consumerBootstrap;

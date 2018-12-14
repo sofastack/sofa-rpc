@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extension("singleGroup")
 public class SingleGroupAddressHolder extends AddressHolder {
 
@@ -145,6 +146,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void updateAllProviders(List<ProviderGroup> providerGroups) {
         ConcurrentHashSet<ProviderInfo> tmpDirectUrl = new ConcurrentHashSet<ProviderInfo>();

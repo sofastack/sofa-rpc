@@ -58,6 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
     /**
@@ -82,6 +83,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      *
      * @param boltServer 所在的Server
      */
+    // TODO: 2018/7/6 by zmyer
     public BoltServerProcessor(BoltServer boltServer) {
         this.boltServer = boltServer;
         this.executorSelector = new UserThreadPoolSelector(); // 支持自定义业务线程池
@@ -92,6 +94,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      */
     AtomicInteger processingCount = new AtomicInteger(0);
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void handleRequest(BizContext bizCtx, AsyncContext asyncCtx, SofaRequest request) {
         // RPC内置上下文
@@ -216,6 +219,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     private SofaResponse doInvoke(String serviceName, Invoker invoker, SofaRequest request) throws SofaRpcException {
         // 开始调用，先记下当前的ClassLoader
         ClassLoader rpcCl = Thread.currentThread().getContextClassLoader();
@@ -229,6 +233,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     private void putToContextIfNotNull(InvokeContext invokeContext, String oldKey,
                                        RpcInternalContext context, String key) {
         Object value = invokeContext.get(oldKey);
@@ -321,6 +326,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      * @author zhanggeng
      * @since 4.10.0
      */
+    // TODO: 2018/6/22 by zmyer
     public class UserThreadPoolSelector implements UserProcessor.ExecutorSelector {
 
         @Override

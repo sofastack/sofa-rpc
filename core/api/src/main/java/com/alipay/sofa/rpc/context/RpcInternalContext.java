@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class RpcInternalContext implements Cloneable {
 
     /**
@@ -52,7 +53,8 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The constant DEQUE_LOCAL.
      */
-    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new ThreadLocal<Deque<RpcInternalContext>>();
+    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       =
+                                                                                          new ThreadLocal<Deque<RpcInternalContext>>();
 
     /**
      * 设置上下文
@@ -96,6 +98,7 @@ public class RpcInternalContext implements Cloneable {
     /**
      * 上下文往下放一层（例如服务端B接到A的请求后再作为C的客户端调用，调用前这里就先把放A-B的上下文存起来）
      */
+    // TODO: 2018/7/6 by zmyer
     public static void pushContext() {
         RpcInternalContext context = LOCAL.get();
         if (context != null) {

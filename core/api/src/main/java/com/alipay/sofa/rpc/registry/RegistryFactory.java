@@ -35,6 +35,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class RegistryFactory {
 
     /**
@@ -54,6 +55,7 @@ public class RegistryFactory {
      * @param registryConfig RegistryConfig类
      * @return Registry实现
      */
+    // TODO: 2018/7/6 by zmyer
     public static synchronized Registry getRegistry(RegistryConfig registryConfig) {
         if (ALL_REGISTRIES.size() > 3) { // 超过3次 是不是配错了？
             if (LOGGER.isWarnEnabled()) {

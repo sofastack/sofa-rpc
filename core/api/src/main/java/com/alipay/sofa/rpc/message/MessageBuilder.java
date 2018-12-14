@@ -28,6 +28,7 @@ import java.lang.reflect.Method;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 public class MessageBuilder {
 
     /**
@@ -59,6 +60,7 @@ public class MessageBuilder {
      * @param args     方法参数值
      * @return 远程调用请求
      */
+    // TODO: 2018/7/6 by zmyer
     public static SofaRequest buildSofaRequest(Class<?> clazz, Method method, Class[] argTypes, Object[] args) {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(clazz.getName());

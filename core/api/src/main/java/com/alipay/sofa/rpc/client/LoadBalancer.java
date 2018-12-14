@@ -30,6 +30,7 @@ import java.util.List;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/7/6 by zmyer
 @Extensible(singleton = false)
 @ThreadSafe
 public abstract class LoadBalancer {
@@ -49,6 +50,7 @@ public abstract class LoadBalancer {
      *
      * @param consumerBootstrap 服务消费者配置
      */
+    // TODO: 2018/7/6 by zmyer
     public LoadBalancer(ConsumerBootstrap consumerBootstrap) {
         this.consumerBootstrap = consumerBootstrap;
         this.consumerConfig = consumerBootstrap != null ? consumerBootstrap.getConsumerConfig() : null;

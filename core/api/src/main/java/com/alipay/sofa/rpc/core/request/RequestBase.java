@@ -26,6 +26,7 @@ import java.io.Serializable;
  *
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
+// TODO: 2018/6/22 by zmyer
 public abstract class RequestBase implements Serializable {
 
     private static final long  serialVersionUID = -7323141575870688636L;

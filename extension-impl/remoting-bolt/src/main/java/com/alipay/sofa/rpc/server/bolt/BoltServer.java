@@ -47,6 +47,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("bolt")
 public class BoltServer implements Server {
 
@@ -81,6 +82,7 @@ public class BoltServer implements Server {
      */
     protected Map<String, Invoker> invokerMap = new ConcurrentHashMap<String, Invoker>();
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
@@ -89,6 +91,7 @@ public class BoltServer implements Server {
         boltServerProcessor = new BoltServerProcessor(this);
     }
 
+    // TODO: 2018/7/6 by zmyer
     protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
         ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
         threadPool.setThreadFactory(new NamedThreadFactory(
@@ -100,6 +103,7 @@ public class BoltServer implements Server {
         return threadPool;
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void start() {
         if (started) {
@@ -134,6 +138,7 @@ public class BoltServer implements Server {
         }
     }
 
+    // TODO: 2018/6/22 by zmyer
     protected RemotingServer initRemotingServer() {
         // 绑定到端口
         RemotingServer remotingServer = new RpcServer(serverConfig.getPort());
@@ -151,6 +156,7 @@ public class BoltServer implements Server {
         return invokerMap.isEmpty();
     }
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void stop() {
         if (!started) {
@@ -173,6 +179,7 @@ public class BoltServer implements Server {
         }
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
         // 缓存Invoker对象
@@ -184,6 +191,7 @@ public class BoltServer implements Server {
         }
     }
 
+    // TODO: 2018/7/9 by zmyer
     @Override
     public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry) {
         // 取消缓存Invoker对象
@@ -251,6 +259,7 @@ public class BoltServer implements Server {
      * @param serviceName 服务名
      * @return Invoker对象
      */
+    // TODO: 2018/6/22 by zmyer
     public Invoker findInvoker(String serviceName) {
         return invokerMap.get(serviceName);
     }

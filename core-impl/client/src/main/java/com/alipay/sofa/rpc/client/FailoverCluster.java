@@ -36,6 +36,7 @@ import java.util.List;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 @Extension("failover")
 public class FailoverCluster extends AbstractCluster {
 
@@ -53,6 +54,7 @@ public class FailoverCluster extends AbstractCluster {
         super(consumerBootstrap);
     }
 
+    // TODO: 2018/7/6 by zmyer
     @Override
     public SofaResponse doInvoke(SofaRequest request) throws SofaRpcException {
         String methodName = request.getMethodName();
