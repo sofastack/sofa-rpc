@@ -22,9 +22,11 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.model.grpc.GrpcTestServiceGrpc.GrpcTestServiceImplBase;
 import com.alipay.sofa.rpc.model.grpc.impl.GrpcTestServiceImpl;
+import com.alipay.sofa.rpc.server.ServerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.fail;
@@ -36,17 +38,19 @@ import static org.junit.Assert.fail;
  */
 public class GrpcInvokeTest extends ActivelyDestroyTest {
 
-    private static GrpcTestServiceImplBase                 grpcTestService;
+    private GrpcTestServiceImplBase                 grpcTestService;
 
-    private static ProviderConfig<GrpcTestServiceImplBase> providerConfig;
+    private ServerConfig                            serverConfig;
 
-    private static ConsumerConfig<GrpcTestServiceImplBase> consumerConfig;
+    private ProviderConfig<GrpcTestServiceImplBase> providerConfig;
 
-    @BeforeClass
-    public static void before() {
+    private ConsumerConfig<GrpcTestServiceImplBase> consumerConfig;
+
+    @Before
+    public void before() {
         SystemInfo.getLocalHost();
 
-        ServerConfig serverConfig = new ServerConfig()
+        serverConfig = new ServerConfig()
             .setPort(9091)
             .setProtocol("grpc");
 
@@ -66,6 +70,11 @@ public class GrpcInvokeTest extends ActivelyDestroyTest {
             .setLazy(true)
             .setRegister(false);
         grpcTestService = consumerConfig.refer();
+    }
+
+    @After
+    public void after() {
+        ServerFactory.destroyAll();
     }
 
     @Test
