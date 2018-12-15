@@ -32,9 +32,12 @@ import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.MethodDescriptor;
+import io.grpc.ServiceDescriptor;
 
 import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.Map;
 
 /**
  * GRPC client transport
@@ -46,6 +49,8 @@ import java.net.InetSocketAddress;
 public class GrpcClientTransport extends ClientTransport {
 
     private ProviderInfo      providerInfo;
+
+    private ServiceDescriptor serviceDescriptor;
 
     private ManagedChannel    channel;
 
@@ -63,6 +68,7 @@ public class GrpcClientTransport extends ClientTransport {
     public GrpcClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
         providerInfo = transportConfig.getProviderInfo();
+        serviceDescriptor = GrpcClientTransportUtil.getServiceDescriptor(transportConfig.getConsumerConfig().getInterfaceId());
         String host = providerInfo.getHost();
         int port = providerInfo.getPort();
         connect();
@@ -138,9 +144,13 @@ public class GrpcClientTransport extends ClientTransport {
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
 
+
+
         String serviceName = request.getInterfaceName();
         String methodName = request.getMethodName();
         String[] methodSigns = request.getMethodArgSigs();
+        //MethodDescriptor methodDescriptor = serviceDescriptor.getMethods();
+
 
         Method method = ReflectCache.getOverloadMethodCache(serviceName, methodName, methodSigns);
         if (method == null) {

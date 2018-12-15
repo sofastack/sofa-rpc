@@ -20,8 +20,11 @@ import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import io.grpc.ManagedChannel;
+import io.grpc.MethodDescriptor;
+import io.grpc.ServiceDescriptor;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -34,9 +37,36 @@ public class GrpcClientTransportUtil {
 
     private final static ConcurrentHashMap<String, Method> CACHE_SERVICE_NEW_STUB_METHOD = new ConcurrentHashMap<String, Method>();
 
+    private final static ConcurrentHashMap<String, ServiceDescriptor> CACHE_SERVICE_DESCRIPTOR = new ConcurrentHashMap<String,
+            ServiceDescriptor>();
+
     private final static String                            INNER_CLASS_SEPARATE          = "$";
 
-    private final static String                            NEW_STUB_METHOD_NAME          = "newStub";
+    private final static String                            GRPC_NEW_STUB_METHOD_NAME          = "newStub";
+
+    private final static String                            GRPC_GET_SERVICE_DESCRIPTOR_NAME = "getServiceDescriptor";
+
+    public static ServiceDescriptor getServiceDescriptor(String serviceName){
+        ServiceDescriptor serviceDescriptor = CACHE_SERVICE_DESCRIPTOR.get(serviceName);
+        if (serviceDescriptor == null){
+            String grpcClassName = getGrpcClassName(serviceName);
+            try {
+                Method method =  ClassUtils.forName(grpcClassName).getMethod(GRPC_GET_SERVICE_DESCRIPTOR_NAME, null);
+                serviceDescriptor = (ServiceDescriptor) method.invoke(null, null);
+                CACHE_SERVICE_DESCRIPTOR.put(serviceName, serviceDescriptor);
+            }catch (Exception e){
+                throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
+            }
+        }
+       return serviceDescriptor;
+    }
+
+    public static MethodDescriptor getMethodDescriptor(ServiceDescriptor serviceDescriptor, String methodName){
+        for(MethodDescriptor methodDescriptor : serviceDescriptor.getMethods()){
+            //methodDescriptor.getFullMethodName()
+        }
+        return null;
+    }
 
     /**
      * Create GRPC stub
@@ -69,14 +99,23 @@ public class GrpcClientTransportUtil {
     }
 
     private static Method getNewStubMethod(String serviceName) {
-        String grpcClassName = serviceName.substring(0, serviceName.indexOf(INNER_CLASS_SEPARATE));
+        String grpcClassName = getGrpcClassName(serviceName);
         Method[] methods = ClassUtils.forName(grpcClassName).getMethods();
         for (Method method : methods) {
-            if (method.getName().equals(NEW_STUB_METHOD_NAME)) {
+            if (method.getName().equals(GRPC_NEW_STUB_METHOD_NAME)) {
                 return method;
             }
         }
 
         return null;
+    }
+
+    /**
+     *
+     * @param serviceName
+     * @return
+     */
+    private static String getGrpcClassName(String serviceName){
+        return serviceName.substring(0, serviceName.indexOf(INNER_CLASS_SEPARATE));
     }
 }
