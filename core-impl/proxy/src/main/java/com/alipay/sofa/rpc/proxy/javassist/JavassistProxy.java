@@ -69,7 +69,7 @@ public class JavassistProxy implements Proxy {
      */
     private static final Map<Class, Class> PROXY_CLASS_MAP = new ConcurrentHashMap<Class, Class>();
 
-    public <T> T getProxyForClass(Class<T> clazz, final Invoker proxyInvoker) {
+    public <T> T getProxyForClass(final Class<T> clazz, final Invoker proxyInvoker) {
         Class<ProxyObject> proxyClass = PROXY_CLASS_MAP.get(clazz);
         if (proxyClass == null) {
             ProxyFactory proxyFactory = new ProxyFactory();
@@ -77,7 +77,6 @@ public class JavassistProxy implements Proxy {
             proxyClass = proxyFactory.createClass();
             PROXY_CLASS_MAP.put(clazz, proxyClass);
         }
-
         ProxyObject proxyObject = null;
         try {
             proxyObject = proxyClass.newInstance();
@@ -88,8 +87,14 @@ public class JavassistProxy implements Proxy {
                         thisMethod, thisMethod.getParameterTypes(), args);
 
                     SofaResponse sofaResponse = proxyInvoker.invoke(sofaRequest);
+                    if (sofaResponse.isError()) {
+                        throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, sofaResponse.getErrorMsg());
+                    }
+                    Object appResponse = sofaResponse.getAppResponse();
+                    if (appResponse instanceof Throwable) {
+                        throw (Throwable) appResponse;
+                    }
                     return sofaResponse.getAppResponse();
-
                 }
             });
         } catch (Exception e) {
