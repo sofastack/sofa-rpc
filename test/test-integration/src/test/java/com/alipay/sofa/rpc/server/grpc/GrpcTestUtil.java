@@ -81,7 +81,7 @@ public class GrpcTestUtil {
                 });
         }
 
-        countDownLatch.await(1, TimeUnit.SECONDS);
+        countDownLatch.await(3, TimeUnit.SECONDS);
         return result;
     }
 
