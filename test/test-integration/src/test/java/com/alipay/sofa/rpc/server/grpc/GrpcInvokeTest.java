@@ -91,6 +91,9 @@ public class GrpcInvokeTest extends ActivelyDestroyTest {
 
         //invoke2
         String[] result2 = GrpcTestUtil.invokeUNARY(grpcTestService);
+        for (String string : result2) {
+            LOGGER.info("testUNARY:" + string);
+        }
         Assert.assertEquals("", result2[0]);
         Assert.assertEquals("UNAVAILABLE: HTTP/2 error code: NO_ERROR\nReceived Goaway", result2[1]);
         Assert.assertEquals("", result2[2]);
@@ -119,6 +122,9 @@ public class GrpcInvokeTest extends ActivelyDestroyTest {
 
         //invoke2
         String[] result2 = GrpcTestUtil.invokeServerStream(grpcTestService);
+        for (String string : result2) {
+            LOGGER.info("testUNARY:" + string);
+        }
         Assert.assertEquals("", result2[0]);
         Assert.assertEquals("UNAVAILABLE: HTTP/2 error code: NO_ERROR\nReceived Goaway", result2[1]);
         Assert.assertEquals("", result2[2]);
