@@ -27,9 +27,8 @@ import org.junit.BeforeClass;
 import java.io.IOException;
 
 /**
- * @author bystander
  * if you use zk to be registry ,your test case must be extends this class
- * @version $Id: BaseZkTest.java, v 0.1 2018年05月22日 7:55 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public abstract class BaseZkTest {
     protected static TestingServer server = null;

@@ -18,18 +18,16 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -39,7 +37,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
+public class ZookeeperProviderObserver {
 
     /**
      * slf4j Logger for this class
@@ -60,7 +58,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
      */
     public void addProviderListener(ConsumerConfig consumerConfig, ProviderInfoListener listener) {
         if (listener != null) {
-            initOrAddList(providerListenerMap, consumerConfig, listener);
+            RegistryUtils.initOrAddList(providerListenerMap, consumerConfig, listener);
         }
     }
 
@@ -85,9 +83,10 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
     public void updateProvider(ConsumerConfig config, String providerPath, ChildData data, List<ChildData> currentData)
         throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
-            LOGGER.infoWithApp(config.getAppName(), "Receive update provider: path=[" + data.getPath() + "]"
-                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                + ", stat=[" + data.getStat() + "]" + ", list=[" + currentData.size() + "]");
+            LOGGER.infoWithApp(config.getAppName(),
+                "Receive update provider: path=[" + data.getPath() + "]" + ", data=[" +
+                    StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]" + ", list=[" +
+                    currentData.size() + "]");
         }
         notifyListeners(config, providerPath, currentData, false);
     }
@@ -104,16 +103,17 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
     public void removeProvider(ConsumerConfig config, String providerPath, ChildData data, List<ChildData> currentData)
         throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
-            LOGGER.infoWithApp(config.getAppName(), "Receive remove provider: path=[" + data.getPath() + "]"
-                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                + ", stat=[" + data.getStat() + "]" + ", list=[" + currentData.size() + "]");
+            LOGGER.infoWithApp(config.getAppName(),
+                "Receive remove provider: path=[" + data.getPath() + "]" + ", data=[" +
+                    StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]" + ", list=[" +
+                    currentData.size() + "]");
         }
         notifyListeners(config, providerPath, currentData, false);
     }
 
     /**
      * Add provider
-     * 
+     *
      * @param config       ConsumerConfig
      * @param providerPath Provider path of zookeeper
      * @param data         Event data
@@ -123,9 +123,10 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
     public void addProvider(ConsumerConfig config, String providerPath, ChildData data, List<ChildData> currentData)
         throws UnsupportedEncodingException {
         if (LOGGER.isInfoEnabled(config.getAppName())) {
-            LOGGER.infoWithApp(config.getAppName(), "Receive add provider: path=[" + data.getPath() + "]"
-                + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                + ", stat=[" + data.getStat() + "]" + ", list=[" + currentData.size() + "]");
+            LOGGER.infoWithApp(config.getAppName(),
+                "Receive add provider: path=[" + data.getPath() + "]" + ", data=[" +
+                    StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]" + ", list=[" +
+                    currentData.size() + "]");
         }
         notifyListeners(config, providerPath, currentData, true);
     }
@@ -136,7 +137,7 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
         if (CommonUtils.isNotEmpty(providerInfoListeners)) {
             List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(providerPath,
                 currentData);
-            List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config, providerInfos);
+            List<ProviderInfo> providerInfosForProtocol = RegistryUtils.matchProviderInfos(config, providerInfos);
             for (ProviderInfoListener listener : providerInfoListeners) {
                 if (add) {
                     listener.addProvider(new ProviderGroup(providerInfosForProtocol));
@@ -145,18 +146,5 @@ public class ZookeeperProviderObserver extends AbstractZookeeperObserver {
                 }
             }
         }
-    }
-
-    private List<ProviderInfo> filterByProtocol(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
-        String protocol = consumerConfig.getProtocol();
-        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
-                && StringUtils.equals(consumerConfig.getUniqueId(),
-                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
-                result.add(providerInfo);
-            }
-        }
-        return result;
     }
 }

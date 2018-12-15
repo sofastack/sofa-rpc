@@ -23,7 +23,10 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.*;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.ArrayList;
@@ -71,7 +74,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     private void covert(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
         copyApplication(providerConfig, serviceConfig);
-        copyRegistries(providerConfig, serviceConfig);
+        DubboConvertor.copyRegistries(providerConfig, serviceConfig);
         copyServers(providerConfig, serviceConfig);
         copyProvider(providerConfig, serviceConfig);
         copyMethods(providerConfig, serviceConfig);
@@ -122,43 +125,6 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         protocolConfig.setQueues(serverConfig.getQueues());
 
         protocolConfig.setParameters(serverConfig.getParameters());
-    }
-
-    private void copyRegistries(ProviderConfig providerConfig,
-                                ServiceConfig serviceConfig) {
-        List<RegistryConfig> registryConfigs = providerConfig.getRegistry();
-        if (CommonUtils.isNotEmpty(registryConfigs)) {
-            List<com.alibaba.dubbo.config.RegistryConfig> dubboRegistryConfigs =
-                    new ArrayList<com.alibaba.dubbo.config.RegistryConfig>();
-            for (RegistryConfig registryConfig : registryConfigs) {
-                // 生成并丢到缓存里
-                com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
-                    .get(registryConfig);
-                if (dubboRegistryConfig == null) {
-                    dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
-                    copyRegistryFields(registryConfig, dubboRegistryConfig);
-                    com.alibaba.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
-                        registryConfig, dubboRegistryConfig);
-                    if (old != null) {
-                        dubboRegistryConfig = old;
-                    }
-                }
-                dubboRegistryConfigs.add(dubboRegistryConfig);
-            }
-            serviceConfig.setRegistries(dubboRegistryConfigs);
-        }
-    }
-
-    private void copyRegistryFields(RegistryConfig registryConfig,
-                                    com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig) {
-        dubboRegistryConfig.setAddress(registryConfig.getAddress());
-        dubboRegistryConfig.setProtocol(registryConfig.getProtocol());
-        dubboRegistryConfig.setRegister(registryConfig.isRegister());
-        dubboRegistryConfig.setSubscribe(registryConfig.isSubscribe());
-        dubboRegistryConfig.setAddress(registryConfig.getAddress());
-        dubboRegistryConfig.setTimeout(registryConfig.getTimeout());
-        dubboRegistryConfig.setId(registryConfig.getId());
-        dubboRegistryConfig.setParameters(registryConfig.getParameters());
     }
 
     private void copyProvider(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {

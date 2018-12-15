@@ -19,9 +19,6 @@ package com.alipay.sofa.rpc.registry.consul.common;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.registry.consul.model.ThrallRoleType;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -31,31 +28,13 @@ import java.util.regex.Pattern;
  */
 public class ConsulURLUtils {
 
-    private ConsulURLUtils() {
-
-    }
-
-    private static final Pattern KVP_PATTERN = Pattern.compile("([_.a-zA-Z0-9][-_.a-zA-Z0-9]*)[=](.*)");
-
-    public static Map<String, String> parseQueryString(String qs) {
-        if (qs == null || qs.length() == 0) {
-            return new HashMap<String, String>();
-        }
-        String[] tmp = qs.split("\\&");
-        Map<String, String> map = new HashMap<String, String>(tmp.length);
-        for (int i = 0; i < tmp.length; i++) {
-            Matcher matcher = KVP_PATTERN.matcher(tmp[i]);
-            if (matcher.matches() == false) {
-                continue;
-            }
-            map.put(matcher.group(1), matcher.group(2));
-        }
-        return map;
-    }
-
     private static final Pattern ADDRESS_PATTERN =
                                                          Pattern
                                                              .compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
+
+    private ConsulURLUtils() {
+
+    }
 
     public static boolean isValidAddress(String address) {
         String[] ipAndHost = StringUtils.split(address, ":");
@@ -63,15 +42,8 @@ public class ConsulURLUtils {
         return ipAndHost.length == 2 && ADDRESS_PATTERN.matcher(ipAndHost[0]).matches();
     }
 
-    /**** help method *****/
     public static String toServiceName(String group) {
         return ConsulConstants.CONSUL_SERVICE_PRE + group;
-    }
-
-    public static String toRoutePath(ConsulURL url) {
-        String name = url.getServiceInterface();
-        String group = url.getGroup();
-        return ConsulConstants.CONSUL_SERVICE_PRE + group + ConsulConstants.PATH_SEPARATOR + name;
     }
 
     private static String toServicePath(ConsulURL url) {

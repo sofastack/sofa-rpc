@@ -82,11 +82,11 @@ public class SofaHessianSerializer extends AbstractSerializer {
         try {
             ClassUtils.forName("com.caucho.hessian.io.ShortHandle");
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.warn("Version of sofa-hessian is v4.x");
+                LOGGER.info("Version of sofa-hessian is v4.x");
             }
         } catch (Exception e) {
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.warn("Version of sofa-hessian is v3.x");
+                LOGGER.info("Version of sofa-hessian is v3.x");
             }
         }
         boolean enableMultipleClassLoader = RpcConfigs.getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE);
