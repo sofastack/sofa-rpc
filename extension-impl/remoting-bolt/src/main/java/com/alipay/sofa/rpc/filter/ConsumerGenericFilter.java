@@ -61,6 +61,13 @@ public class ConsumerGenericFilter extends Filter {
             String type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
             request.addRequestProp(RemotingConstants.HEAD_GENERIC_TYPE, type);
 
+            // 修正超时时间
+            Long clientTimeout = getClientTimeoutFromGenericContext(request.getMethodName(),
+                request.getMethodArgs());
+            if (clientTimeout != null) {
+                request.setTimeout(clientTimeout.intValue());
+            }
+
             // 修正请求对象
             Object[] genericArgs = request.getMethodArgs();
             String methodName = (String) genericArgs[0];
@@ -108,5 +115,16 @@ public class ConsumerGenericFilter extends Filter {
             }
         }
         throw new SofaRpcException(RpcErrorType.CLIENT_FILTER, "Unsupported method of generic service");
+    }
+
+    private Long getClientTimeoutFromGenericContext(String method, Object[] args) throws SofaRpcException {
+        if (METHOD_GENERIC_INVOKE.equals(method)) {
+            if (args.length == 4 && args[3] instanceof GenericContext) {
+                return ((GenericContext) args[3]).getClientTimeout();
+            } else if (args.length == 5 && args[4] instanceof GenericContext) {
+                return ((GenericContext) args[4]).getClientTimeout();
+            }
+        }
+        return null;
     }
 }

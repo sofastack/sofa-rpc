@@ -166,6 +166,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-fault-hystrix</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-log-common-tools</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
@@ -182,6 +187,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-zk</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-registry-nacos</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
         <dependency>
@@ -372,6 +382,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-consul</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-local</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
+                                    <include>com.alipay.sofa:sofa-rpc-registry-nacos</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>

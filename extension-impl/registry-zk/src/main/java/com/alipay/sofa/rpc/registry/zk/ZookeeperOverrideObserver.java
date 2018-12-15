@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.io.UnsupportedEncodingException;
@@ -35,7 +36,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
+public class ZookeeperOverrideObserver {
 
     /**
      * slf4j Logger for this class
@@ -56,7 +57,7 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      */
     public void addConfigListener(AbstractInterfaceConfig config, ConfigListener listener) {
         if (listener != null) {
-            initOrAddList(configListenerMap, config, listener);
+            RegistryUtils.initOrAddList(configListenerMap, config, listener);
         }
     }
 
@@ -84,9 +85,8 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive update data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
+                LOGGER.infoWithApp(config.getAppName(), "Receive update data: path=[" + data.getPath() + "]" +
+                    ", data=[" + StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]");
             }
             notifyListeners(config, overridePath, data, false, null);
         }
@@ -109,9 +109,9 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 for (ChildData data : currentData) {
-                    LOGGER.infoWithApp(config.getAppName(), "Receive updateAll data: path=["
-                        + data.getPath() + "], data=[" + StringSerializer.decode(data.getData()) + "]"
-                        + ", stat=[" + data.getStat() + "]");
+                    LOGGER.infoWithApp(config.getAppName(),
+                        "Receive updateAll data: path=[" + data.getPath() + "], data=[" +
+                            StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]");
                 }
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
@@ -137,7 +137,8 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
      * @throws Exception 转换配置异常
      */
     public void removeConfig(AbstractInterfaceConfig config, String overridePath, ChildData data,
-                             AbstractInterfaceConfig registerConfig) throws Exception {
+                             AbstractInterfaceConfig registerConfig)
+        throws Exception {
         if (data == null) {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive data is null");
@@ -148,9 +149,8 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
+                LOGGER.infoWithApp(config.getAppName(), "Receive data: path=[" + data.getPath() + "]" + ", data=[" +
+                    StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]");
             }
             notifyListeners(config, overridePath, data, true, registerConfig);
         }
@@ -171,16 +171,16 @@ public class ZookeeperOverrideObserver extends AbstractZookeeperObserver {
             }
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER.infoWithApp(config.getAppName(), "Receive add data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
+                LOGGER.infoWithApp(config.getAppName(), "Receive add data: path=[" + data.getPath() + "]" + ", data=[" +
+                    StringSerializer.decode(data.getData()) + "]" + ", stat=[" + data.getStat() + "]");
             }
             notifyListeners(config, overridePath, data, false, null);
         }
     }
 
     private void notifyListeners(AbstractInterfaceConfig config, String overridePath, ChildData data,
-                                 boolean removeType, AbstractInterfaceConfig interfaceConfig) throws Exception {
+                                 boolean removeType, AbstractInterfaceConfig interfaceConfig)
+        throws Exception {
         List<ConfigListener> configListeners = configListenerMap.get(config);
         if (CommonUtils.isNotEmpty(configListeners)) {
             //转换子节点Data为IP级配置<配置属性名,配置属性值>,例如<timeout,200>

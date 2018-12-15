@@ -41,7 +41,7 @@ import com.alipay.sofa.rpc.registry.consul.internal.ConsulManager;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulEphemeralNode;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulService;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulServiceResp;
-import com.alipay.sofa.rpc.registry.consul.model.NotifyConsumerListner;
+import com.alipay.sofa.rpc.registry.consul.model.NotifyConsumerListener;
 import com.alipay.sofa.rpc.registry.consul.model.NotifyListener;
 import com.alipay.sofa.rpc.registry.consul.model.ThrallRoleType;
 import com.google.common.cache.Cache;
@@ -327,16 +327,14 @@ public class ConsulRegistry extends Registry {
                     Collection<List<ConsulURL>> consulURLList = entry.getValue().values();
 
                     List<ProviderInfo> matchProviders = new ArrayList<ProviderInfo>();
-                    Iterator<List<ConsulURL>> consulListIt = consulURLList.iterator();
-                    while (consulListIt.hasNext()) {
-                        List<ConsulURL> next = consulListIt.next();
+                    for (List<ConsulURL> next : consulURLList) {
                         matchConsulUrls.addAll(next);
                         matchProviders.addAll(ConsulRegistryHelper.convertUrl2ProviderInfos(next));
                     }
                     result.addAll(ConsulRegistryHelper.matchProviderInfos(config, matchProviders));
                 }
 
-                NotifyConsumerListner listener = new NotifyConsumerListner(consulURL, matchConsulUrls);
+                NotifyConsumerListener listener = new NotifyConsumerListener(consulURL, matchConsulUrls);
 
                 consumerUrls.put(config, url);
 
