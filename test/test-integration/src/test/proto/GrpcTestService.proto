@@ -10,11 +10,11 @@ option java_outer_classname = "GrpcTestServiceProto";
 service GrpcTestService {
     rpc reqString (GrpcTestService_Request_String) returns (GrpcTestService_Response_String) {};
 
-    rpc reqStrin_clientStream (stream GrpcTestService_Request_String) returns (GrpcTestService_Response_String){};
+    rpc reqStringClientStream (stream GrpcTestService_Request_String) returns (GrpcTestService_Response_String){};
 
-    rpc reqString_serverStream (GrpcTestService_Request_String) returns(stream GrpcTestService_Response_String){};
+    rpc reqStringServerStream (GrpcTestService_Request_String) returns(stream GrpcTestService_Response_String){};
 
-    rpc reqString_bothStream (stream GrpcTestService_Request_String) returns(stream GrpcTestService_Response_String){};
+    rpc reqStringBothStream (stream GrpcTestService_Request_String) returns(stream GrpcTestService_Response_String){};
 }
 
 message GrpcTestService_Request_String {

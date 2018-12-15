@@ -88,7 +88,7 @@ public class JavassistProxy implements Proxy {
                         thisMethod, thisMethod.getParameterTypes(), args);
 
                     SofaResponse sofaResponse = proxyInvoker.invoke(sofaRequest);
-                    return sofaResponse;
+                    return sofaResponse.getAppResponse();
 
                 }
             });

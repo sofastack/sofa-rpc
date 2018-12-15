@@ -56,7 +56,7 @@ public class GrpcServerTest {
         //invoke
         ManagedChannel managedChannel = ManagedChannelBuilder.forAddress("127.0.0.1", port).usePlaintext().build();
         GrpcTestServiceStub stub = GrpcTestServiceGrpc.newStub(managedChannel);
-        String[] result = GrpcTestUtil.invoke(stub);
+        String[] result = GrpcTestUtil.invokeUNARY(stub);
         Assert.assertEquals("success:AAA", result[0]);
         Assert.assertEquals("", result[1]);
         Assert.assertEquals("onCompleted", result[2]);
@@ -65,7 +65,7 @@ public class GrpcServerTest {
         server.unRegisterProcessor(providerConfig, false);
 
         //invoke2
-        String[] result2 = GrpcTestUtil.invoke(stub);
+        String[] result2 = GrpcTestUtil.invokeUNARY(stub);
         Assert.assertEquals("", result2[0]);
         Assert.assertEquals("UNIMPLEMENTED: Method not found: GrpcTestService/reqString", result2[1]);
         Assert.assertEquals("", result2[2]);
@@ -74,7 +74,7 @@ public class GrpcServerTest {
         server.registerProcessor(providerConfig, null);
 
         //invoke3
-        String[] result3 = GrpcTestUtil.invoke(stub);
+        String[] result3 = GrpcTestUtil.invokeUNARY(stub);
         Assert.assertEquals("success:AAA", result3[0]);
         Assert.assertEquals("", result3[1]);
         Assert.assertEquals("onCompleted", result3[2]);
@@ -83,7 +83,7 @@ public class GrpcServerTest {
         server.stop();
 
         //invoke4
-        String[] result4 = GrpcTestUtil.invoke(stub);
+        String[] result4 = GrpcTestUtil.invokeUNARY(stub);
         Assert.assertEquals("", result4[0]);
         Assert.assertEquals("UNAVAILABLE: HTTP/2 error code: NO_ERROR\nReceived Goaway", result4[1]);
         Assert.assertEquals("", result4[2]);

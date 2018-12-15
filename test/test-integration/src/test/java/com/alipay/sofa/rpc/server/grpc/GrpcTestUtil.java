@@ -31,9 +31,9 @@ import java.util.concurrent.TimeUnit;
  * @date 2018.11.30 12:15 PM
  */
 public class GrpcTestUtil {
-    public static String[] invoke(Object invoke) throws InterruptedException {
+    public static String[] invokeUNARY(Object invoke) throws InterruptedException {
         final String[] result = { "", "", "" };
-        final CountDownLatch countDownLatch = new CountDownLatch(3);
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
 
         if (invoke instanceof GrpcTestServiceStub) {
             ((GrpcTestServiceStub) invoke).reqString(
@@ -81,6 +81,37 @@ public class GrpcTestUtil {
                 });
         }
 
+        countDownLatch.await(1, TimeUnit.SECONDS);
+        return result;
+    }
+
+    public static String[] invokeServerStream(GrpcTestServiceImplBase invoke) throws InterruptedException {
+        final String[] result = { "", "", "" };
+        final CountDownLatch countDownLatch = new CountDownLatch(4);
+
+        invoke.reqStringServerStream(GrpcTestService_Request_String.newBuilder().setName("AAA")
+            .build(),
+            new StreamObserver<GrpcTestService_Response_String>() {
+                @Override
+                public void onNext(GrpcTestService_Response_String value) {
+                    result[0] = result[0] + value.getResult() + ";";
+                    countDownLatch.countDown();
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    result[1] = result[1] + t.getMessage();
+                    countDownLatch.countDown();
+
+                }
+
+                @Override
+                public void onCompleted() {
+                    result[2] = result[2] + "onCompleted";
+                    countDownLatch.countDown();
+
+                }
+            });
         countDownLatch.await(1, TimeUnit.SECONDS);
         return result;
     }

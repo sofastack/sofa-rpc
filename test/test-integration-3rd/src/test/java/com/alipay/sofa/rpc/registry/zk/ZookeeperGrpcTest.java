@@ -92,7 +92,7 @@ public class ZookeeperGrpcTest extends BaseZkTest {
         Thread.sleep(1000);
 
         final String[] result = { "", "", "" };
-        final CountDownLatch countDownLatch = new CountDownLatch(3);
+        final CountDownLatch countDownLatch = new CountDownLatch(2);
         grpcTestService.reqString(GrpcTestService_Request_String.newBuilder().setName("YYY").build(),
             new StreamObserver<GrpcTestService_Response_String>() {
                 @Override

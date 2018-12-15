@@ -24,24 +24,33 @@ import com.alipay.sofa.rpc.model.grpc.GrpcTestServiceGrpc.GrpcTestServiceImplBas
 import com.alipay.sofa.rpc.model.grpc.impl.GrpcTestServiceImpl;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
+import static org.junit.Assert.fail;
 
 /**
  *
  * @author LiangEn.LiWei
  * @date 2018.11.22 8:00 PM
  */
-public class GrpcTest extends ActivelyDestroyTest {
+public class GrpcInvokeTest extends ActivelyDestroyTest {
 
-    @Test
-    public void test() throws InterruptedException {
+    private static GrpcTestServiceImplBase                 grpcTestService;
+
+    private static ProviderConfig<GrpcTestServiceImplBase> providerConfig;
+
+    private static ConsumerConfig<GrpcTestServiceImplBase> consumerConfig;
+
+    @BeforeClass
+    public static void before() {
         SystemInfo.getLocalHost();
 
         ServerConfig serverConfig = new ServerConfig()
             .setPort(9091)
             .setProtocol("grpc");
 
-        ProviderConfig<GrpcTestServiceImplBase> providerConfig = new ProviderConfig<GrpcTestServiceImplBase>()
+        providerConfig = new ProviderConfig<GrpcTestServiceImplBase>()
             .setInterfaceId(GrpcTestServiceImplBase.class.getName())
             .setRef(new GrpcTestServiceImpl())
             .setServer(serverConfig)
@@ -49,17 +58,21 @@ public class GrpcTest extends ActivelyDestroyTest {
             .setRegister(false);
         providerConfig.export();
 
-        ConsumerConfig<GrpcTestServiceImplBase> consumerConfig = new ConsumerConfig<GrpcTestServiceImplBase>()
+        consumerConfig = new ConsumerConfig<GrpcTestServiceImplBase>()
             .setInterfaceId(GrpcTestServiceImplBase.class.getName())
             .setDirectUrl("grpc://127.0.0.1:9091")
             .setProtocol("grpc")
             .setBootstrap("grpc")
             .setLazy(true)
             .setRegister(false);
-        GrpcTestServiceImplBase grpcTestService = consumerConfig.refer();
+        grpcTestService = consumerConfig.refer();
+    }
+
+    @Test
+    public void testUNARY() throws InterruptedException {
 
         //invoke1
-        String[] result = GrpcTestUtil.invoke(grpcTestService);
+        String[] result = GrpcTestUtil.invokeUNARY(grpcTestService);
         Assert.assertEquals("success:AAA", result[0]);
         Assert.assertEquals("", result[1]);
         Assert.assertEquals("onCompleted", result[2]);
@@ -68,7 +81,7 @@ public class GrpcTest extends ActivelyDestroyTest {
         providerConfig.unExport();
 
         //invoke2
-        String[] result2 = GrpcTestUtil.invoke(grpcTestService);
+        String[] result2 = GrpcTestUtil.invokeUNARY(grpcTestService);
         Assert.assertEquals("", result2[0]);
         Assert.assertEquals("UNAVAILABLE: HTTP/2 error code: NO_ERROR\nReceived Goaway", result2[1]);
         Assert.assertEquals("", result2[2]);
@@ -76,7 +89,36 @@ public class GrpcTest extends ActivelyDestroyTest {
         //unRefer
         consumerConfig.unRefer();
         try {
-            String[] result3 = GrpcTestUtil.invoke(grpcTestService);
+            GrpcTestUtil.invokeUNARY(grpcTestService);
+            fail("Expected an Exception to be thrown");
+        } catch (Exception e) {
+            Assert.assertEquals("Client has been destroyed!", e.getMessage());
+        }
+    }
+
+    @Test
+    public void testServerStream() throws InterruptedException {
+
+        //invoke1
+        String[] result = GrpcTestUtil.invokeServerStream(grpcTestService);
+        Assert.assertEquals("success_1:AAA;success_2:AAA;success_3:AAA;", result[0]);
+        Assert.assertEquals("", result[1]);
+        Assert.assertEquals("onCompleted", result[2]);
+
+        //unExport
+        providerConfig.unExport();
+
+        //invoke2
+        String[] result2 = GrpcTestUtil.invokeServerStream(grpcTestService);
+        Assert.assertEquals("", result2[0]);
+        Assert.assertEquals("UNAVAILABLE: HTTP/2 error code: NO_ERROR\nReceived Goaway", result2[1]);
+        Assert.assertEquals("", result2[2]);
+
+        //unRefer
+        consumerConfig.unRefer();
+        try {
+            GrpcTestUtil.invokeServerStream(grpcTestService);
+            fail("Expected an Exception to be thrown");
         } catch (Exception e) {
             Assert.assertEquals("Client has been destroyed!", e.getMessage());
         }

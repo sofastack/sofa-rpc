@@ -37,15 +37,15 @@ public abstract class GrpcTestService
                                        com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
 
         /**
-         * <code>rpc reqStrin_clientStream(stream .GrpcTestService_Request_String) returns (.GrpcTestService_Response_String);</code>
+         * <code>rpc reqStringClientStream(stream .GrpcTestService_Request_String) returns (.GrpcTestService_Response_String);</code>
          */
-        public abstract void reqStrinClientStream(
-                                                  com.google.protobuf.RpcController controller,
-                                                  GrpcTestService_Request_String request,
-                                                  com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
+        public abstract void reqStringClientStream(
+                                                   com.google.protobuf.RpcController controller,
+                                                   GrpcTestService_Request_String request,
+                                                   com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
 
         /**
-         * <code>rpc reqString_serverStream(.GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
+         * <code>rpc reqStringServerStream(.GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
          */
         public abstract void reqStringServerStream(
                                                    com.google.protobuf.RpcController controller,
@@ -53,7 +53,7 @@ public abstract class GrpcTestService
                                                    com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
 
         /**
-         * <code>rpc reqString_bothStream(stream .GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
+         * <code>rpc reqStringBothStream(stream .GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
          */
         public abstract void reqStringBothStream(
                                                  com.google.protobuf.RpcController controller,
@@ -74,11 +74,11 @@ public abstract class GrpcTestService
             }
 
             @Override
-            public void reqStrinClientStream(
-                                             com.google.protobuf.RpcController controller,
-                                             GrpcTestService_Request_String request,
-                                             com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done) {
-                impl.reqStrinClientStream(controller, request, done);
+            public void reqStringClientStream(
+                                              com.google.protobuf.RpcController controller,
+                                              GrpcTestService_Request_String request,
+                                              com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done) {
+                impl.reqStringClientStream(controller, request, done);
             }
 
             @Override
@@ -123,7 +123,7 @@ public abstract class GrpcTestService
                         return impl.reqString(controller,
                             (GrpcTestService_Request_String) request);
                     case 1:
-                        return impl.reqStrinClientStream(controller,
+                        return impl.reqStringClientStream(controller,
                             (GrpcTestService_Request_String) request);
                     case 2:
                         return impl.reqStringServerStream(controller,
@@ -192,15 +192,15 @@ public abstract class GrpcTestService
                                    com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
 
     /**
-     * <code>rpc reqStrin_clientStream(stream .GrpcTestService_Request_String) returns (.GrpcTestService_Response_String);</code>
+     * <code>rpc reqStringClientStream(stream .GrpcTestService_Request_String) returns (.GrpcTestService_Response_String);</code>
      */
-    public abstract void reqStrinClientStream(
-                                              com.google.protobuf.RpcController controller,
-                                              GrpcTestService_Request_String request,
-                                              com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
+    public abstract void reqStringClientStream(
+                                               com.google.protobuf.RpcController controller,
+                                               GrpcTestService_Request_String request,
+                                               com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
 
     /**
-     * <code>rpc reqString_serverStream(.GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
+     * <code>rpc reqStringServerStream(.GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
      */
     public abstract void reqStringServerStream(
                                                com.google.protobuf.RpcController controller,
@@ -208,7 +208,7 @@ public abstract class GrpcTestService
                                                com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done);
 
     /**
-     * <code>rpc reqString_bothStream(stream .GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
+     * <code>rpc reqStringBothStream(stream .GrpcTestService_Request_String) returns (stream .GrpcTestService_Response_String);</code>
      */
     public abstract void reqStringBothStream(
                                              com.google.protobuf.RpcController controller,
@@ -244,7 +244,7 @@ public abstract class GrpcTestService
                         done));
                 return;
             case 1:
-                this.reqStrinClientStream(controller,
+                this.reqStringClientStream(controller,
                     (GrpcTestService_Request_String) request,
                     com.google.protobuf.RpcUtil
                         .<GrpcTestService_Response_String> specializeCallback(
@@ -344,10 +344,10 @@ public abstract class GrpcTestService
                     GrpcTestService_Response_String.getDefaultInstance()));
         }
 
-        public void reqStrinClientStream(
-                                         com.google.protobuf.RpcController controller,
-                                         GrpcTestService_Request_String request,
-                                         com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done) {
+        public void reqStringClientStream(
+                                          com.google.protobuf.RpcController controller,
+                                          GrpcTestService_Request_String request,
+                                          com.google.protobuf.RpcCallback<GrpcTestService_Response_String> done) {
             channel.callMethod(
                 getDescriptor().getMethods().get(1),
                 controller,
@@ -401,9 +401,9 @@ public abstract class GrpcTestService
                                                          GrpcTestService_Request_String request)
             throws com.google.protobuf.ServiceException;
 
-        public GrpcTestService_Response_String reqStrinClientStream(
-                                                                    com.google.protobuf.RpcController controller,
-                                                                    GrpcTestService_Request_String request)
+        public GrpcTestService_Response_String reqStringClientStream(
+                                                                     com.google.protobuf.RpcController controller,
+                                                                     GrpcTestService_Request_String request)
             throws com.google.protobuf.ServiceException;
 
         public GrpcTestService_Response_String reqStringServerStream(
@@ -435,9 +435,9 @@ public abstract class GrpcTestService
                 GrpcTestService_Response_String.getDefaultInstance());
         }
 
-        public GrpcTestService_Response_String reqStrinClientStream(
-                                                                    com.google.protobuf.RpcController controller,
-                                                                    GrpcTestService_Request_String request)
+        public GrpcTestService_Response_String reqStringClientStream(
+                                                                     com.google.protobuf.RpcController controller,
+                                                                     GrpcTestService_Request_String request)
             throws com.google.protobuf.ServiceException {
             return (GrpcTestService_Response_String) channel.callBlockingMethod(
                 getDescriptor().getMethods().get(1),

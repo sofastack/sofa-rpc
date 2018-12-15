@@ -18,8 +18,6 @@ package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.SystemInfo;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
-import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -33,9 +31,7 @@ import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.MethodDescriptor;
-import io.grpc.ServiceDescriptor;
 
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
@@ -48,17 +44,15 @@ import java.util.Map;
 @Extension("grpc")
 public class GrpcClientTransport extends ClientTransport {
 
-    private ProviderInfo      providerInfo;
+    private ProviderInfo                  providerInfo;
 
-    private ServiceDescriptor serviceDescriptor;
+    private Map<String, MethodDescriptor> methodDescriptors;
 
-    private ManagedChannel    channel;
+    private ManagedChannel                channel;
 
-    private Object            grpcStub;
+    private InetSocketAddress             localAddress;
 
-    private InetSocketAddress localAddress;
-
-    private InetSocketAddress remoteAddress;
+    private InetSocketAddress             remoteAddress;
 
     /**
      * The constructor
@@ -68,12 +62,10 @@ public class GrpcClientTransport extends ClientTransport {
     public GrpcClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
         providerInfo = transportConfig.getProviderInfo();
-        serviceDescriptor = GrpcClientTransportUtil.getServiceDescriptor(transportConfig.getConsumerConfig().getInterfaceId());
-        String host = providerInfo.getHost();
-        int port = providerInfo.getPort();
+        methodDescriptors = GrpcClientTransportUtil.getMethodDescriptors(transportConfig.getConsumerConfig()
+            .getInterfaceId());
         connect();
-
-        remoteAddress = InetSocketAddress.createUnresolved(host, port);
+        remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
         localAddress = InetSocketAddress.createUnresolved(SystemInfo.getLocalHost(), 0);// 端口不准
     }
 
@@ -83,36 +75,26 @@ public class GrpcClientTransport extends ClientTransport {
             return;
         }
         ProviderInfo providerInfo = transportConfig.getProviderInfo();
-        String serviceName = transportConfig.getConsumerConfig().getInterfaceId();
-        String host = providerInfo.getHost();
-        int port = providerInfo.getPort();
-
-        try {
-            channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
-            grpcStub = GrpcClientTransportUtil.buildStub(serviceName, channel);
-        } catch (SofaRpcException e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_NETWORK, e);
-        }
+        channel = ManagedChannelBuilder.forAddress(providerInfo.getHost(), providerInfo.getPort()).usePlaintext()
+            .build();
     }
 
     @Override
     public void disconnect() {
         if (channel != null) {
             channel.shutdown();
+            channel = null;
         }
-        channel = null;
-        grpcStub = null;
     }
 
     @Override
     public void destroy() {
         disconnect();
-        GrpcClientTransportUtil.removeStubMethod(transportConfig.getConsumerConfig().getInterfaceId());
     }
 
     @Override
     public boolean isAvailable() {
-        if (grpcStub == null || channel == null) {
+        if (channel == null) {
             return false;
         }
 
@@ -143,34 +125,14 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
-
-
-
-        String serviceName = request.getInterfaceName();
         String methodName = request.getMethodName();
-        String[] methodSigns = request.getMethodArgSigs();
-        //MethodDescriptor methodDescriptor = serviceDescriptor.getMethods();
-
-
-        Method method = ReflectCache.getOverloadMethodCache(serviceName, methodName, methodSigns);
-        if (method == null) {
-            try {
-                method = grpcStub.getClass().getMethod(methodName, ClassTypeUtils.getClasses(methodSigns));
-                ReflectCache.putOverloadMethodCache(serviceName, method);
-            } catch (NoSuchMethodException e) {
-                throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Method not found", e);
-            }
-        }
-
+        MethodDescriptor methodDescriptor = methodDescriptors.get(methodName);
         try {
-
-            method.invoke(grpcStub, request.getMethodArgs());
-
+            new GrpcClientInvoker(request, methodDescriptor, channel).invoke();
+            return new SofaResponse();
         } catch (Exception e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Method not found", e);
+            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);
         }
-
-        return new SofaResponse();
     }
 
     @Override

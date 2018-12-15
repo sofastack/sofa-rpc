@@ -245,6 +245,7 @@
 
     </dependencies>
     <build>
+        <!-- used to generate Grpc stubs -->
         <!--<extensions>-->
             <!--<extension>-->
                 <!--<groupId>kr.motd.maven</groupId>-->
@@ -301,6 +302,7 @@
                     <forkMode>once</forkMode>
                 </configuration>
             </plugin>
+            <!-- used to generate Grpc stubs -->
             <!--<plugin>-->
                 <!--<groupId>org.xolstice.maven.plugins</groupId>-->
                 <!--<artifactId>protobuf-maven-plugin</artifactId>-->

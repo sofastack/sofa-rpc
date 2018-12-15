@@ -48,18 +48,18 @@ public final class GrpcTestServiceProto {
             "\n\025GrpcTestService.proto\".\n\036GrpcTestServi" +
                 "ce_Request_String\022\014\n\004name\030\001 \001(\t\"1\n\037GrpcT" +
                 "estService_Response_String\022\016\n\006result\030\001 \001" +
-                "(\t2\205\003\n\017GrpcTestService\022P\n\treqString\022\037.Gr" +
+                "(\t2\203\003\n\017GrpcTestService\022P\n\treqString\022\037.Gr" +
                 "pcTestService_Request_String\032 .GrpcTestS" +
-                "ervice_Response_String\"\000\022^\n\025reqStrin_cli" +
+                "ervice_Response_String\"\000\022^\n\025reqStringCli" +
                 "entStream\022\037.GrpcTestService_Request_Stri" +
                 "ng\032 .GrpcTestService_Response_String\"\000(\001" +
-                "\022_\n\026reqString_serverStream\022\037.GrpcTestSer" +
-                "vice_Request_String\032 .GrpcTestService_Re" +
-                "sponse_String\"\0000\001\022_\n\024reqString_bothStrea" +
-                "m\022\037.GrpcTestService_Request_String\032 .Grp" +
-                "cTestService_Response_String\"\000(\0010\001B;\n\036co" +
-                "m.alipay.sofa.rpc.model.grpcB\024GrpcTestSe" +
-                "rviceProtoP\001\210\001\001b\006proto3"
+                "\022^\n\025reqStringServerStream\022\037.GrpcTestServ" +
+                "ice_Request_String\032 .GrpcTestService_Res" +
+                "ponse_String\"\0000\001\022^\n\023reqStringBothStream\022" +
+                "\037.GrpcTestService_Request_String\032 .GrpcT" +
+                "estService_Response_String\"\000(\0010\001B;\n\036com." +
+                "alipay.sofa.rpc.model.grpcB\024GrpcTestServ" +
+                "iceProtoP\001\210\001\001b\006proto3"
         };
         com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
                 new com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner() {

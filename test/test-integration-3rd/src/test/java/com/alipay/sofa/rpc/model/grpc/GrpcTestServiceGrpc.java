@@ -78,25 +78,25 @@ public final class GrpcTestServiceGrpc {
         return getReqStringMethod;
     }
 
-    private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStrinClientStreamMethod;
+    private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringClientStreamMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
-            fullMethodName = SERVICE_NAME + '/' + "reqStrin_clientStream",
+            fullMethodName = SERVICE_NAME + '/' + "reqStringClientStream",
             requestType = GrpcTestService_Request_String.class,
             responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
     public static io.grpc.MethodDescriptor<GrpcTestService_Request_String,
-            GrpcTestService_Response_String> getReqStrinClientStreamMethod() {
-        io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStrinClientStreamMethod;
-        if ((getReqStrinClientStreamMethod = GrpcTestServiceGrpc.getReqStrinClientStreamMethod) == null) {
+            GrpcTestService_Response_String> getReqStringClientStreamMethod() {
+        io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringClientStreamMethod;
+        if ((getReqStringClientStreamMethod = GrpcTestServiceGrpc.getReqStringClientStreamMethod) == null) {
             synchronized (GrpcTestServiceGrpc.class) {
-                if ((getReqStrinClientStreamMethod = GrpcTestServiceGrpc.getReqStrinClientStreamMethod) == null) {
-                    GrpcTestServiceGrpc.getReqStrinClientStreamMethod = getReqStrinClientStreamMethod =
+                if ((getReqStringClientStreamMethod = GrpcTestServiceGrpc.getReqStringClientStreamMethod) == null) {
+                    GrpcTestServiceGrpc.getReqStringClientStreamMethod = getReqStringClientStreamMethod =
                             io.grpc.MethodDescriptor
                                 .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.CLIENT_STREAMING)
                                 .setFullMethodName(generateFullMethodName(
-                                    "GrpcTestService", "reqStrin_clientStream"))
+                                    "GrpcTestService", "reqStringClientStream"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                                     GrpcTestService_Request_String.getDefaultInstance()))
@@ -105,18 +105,18 @@ public final class GrpcTestServiceGrpc {
                                         GrpcTestService_Response_String
                                             .getDefaultInstance()))
                                 .setSchemaDescriptor(
-                                    new GrpcTestServiceMethodDescriptorSupplier("reqStrin_clientStream"))
+                                    new GrpcTestServiceMethodDescriptorSupplier("reqStringClientStream"))
                                 .build();
                 }
             }
         }
-        return getReqStrinClientStreamMethod;
+        return getReqStringClientStreamMethod;
     }
 
     private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringServerStreamMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
-            fullMethodName = SERVICE_NAME + '/' + "reqString_serverStream",
+            fullMethodName = SERVICE_NAME + '/' + "reqStringServerStream",
             requestType = GrpcTestService_Request_String.class,
             responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
@@ -131,7 +131,7 @@ public final class GrpcTestServiceGrpc {
                                 .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.SERVER_STREAMING)
                                 .setFullMethodName(generateFullMethodName(
-                                    "GrpcTestService", "reqString_serverStream"))
+                                    "GrpcTestService", "reqStringServerStream"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                                     GrpcTestService_Request_String.getDefaultInstance()))
@@ -140,7 +140,7 @@ public final class GrpcTestServiceGrpc {
                                         GrpcTestService_Response_String
                                             .getDefaultInstance()))
                                 .setSchemaDescriptor(
-                                    new GrpcTestServiceMethodDescriptorSupplier("reqString_serverStream"))
+                                    new GrpcTestServiceMethodDescriptorSupplier("reqStringServerStream"))
                                 .build();
                 }
             }
@@ -151,7 +151,7 @@ public final class GrpcTestServiceGrpc {
     private static volatile io.grpc.MethodDescriptor<GrpcTestService_Request_String, GrpcTestService_Response_String> getReqStringBothStreamMethod;
 
     @io.grpc.stub.annotations.RpcMethod(
-            fullMethodName = SERVICE_NAME + '/' + "reqString_bothStream",
+            fullMethodName = SERVICE_NAME + '/' + "reqStringBothStream",
             requestType = GrpcTestService_Request_String.class,
             responseType = GrpcTestService_Response_String.class,
             methodType = io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
@@ -166,7 +166,7 @@ public final class GrpcTestServiceGrpc {
                                 .<GrpcTestService_Request_String, GrpcTestService_Response_String> newBuilder()
                                 .setType(io.grpc.MethodDescriptor.MethodType.BIDI_STREAMING)
                                 .setFullMethodName(generateFullMethodName(
-                                    "GrpcTestService", "reqString_bothStream"))
+                                    "GrpcTestService", "reqStringBothStream"))
                                 .setSampledToLocalTracing(true)
                                 .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                                     GrpcTestService_Request_String.getDefaultInstance()))
@@ -174,8 +174,7 @@ public final class GrpcTestServiceGrpc {
                                     io.grpc.protobuf.ProtoUtils.marshaller(
                                         GrpcTestService_Response_String
                                             .getDefaultInstance()))
-                                .setSchemaDescriptor(
-                                    new GrpcTestServiceMethodDescriptorSupplier("reqString_bothStream"))
+                                .setSchemaDescriptor(new GrpcTestServiceMethodDescriptorSupplier("reqStringBothStream"))
                                 .build();
                 }
             }
@@ -219,9 +218,9 @@ public final class GrpcTestServiceGrpc {
 
         /**
          */
-        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStrinClientStream(
-                                                                                                io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
-            return asyncUnimplementedStreamingCall(getReqStrinClientStreamMethod(), responseObserver);
+        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStringClientStream(
+                                                                                                 io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
+            return asyncUnimplementedStreamingCall(getReqStringClientStreamMethod(), responseObserver);
         }
 
         /**
@@ -249,12 +248,12 @@ public final class GrpcTestServiceGrpc {
                     GrpcTestService_Response_String>(
                         this, METHODID_REQ_STRING)))
                 .addMethod(
-                    getReqStrinClientStreamMethod(),
+                    getReqStringClientStreamMethod(),
                     asyncClientStreamingCall(
                     new MethodHandlers<
                     GrpcTestService_Request_String,
                     GrpcTestService_Response_String>(
-                        this, METHODID_REQ_STRIN_CLIENT_STREAM)))
+                        this, METHODID_REQ_STRING_CLIENT_STREAM)))
                 .addMethod(
                     getReqStringServerStreamMethod(),
                     asyncServerStreamingCall(
@@ -301,10 +300,10 @@ public final class GrpcTestServiceGrpc {
 
         /**
          */
-        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStrinClientStream(
-                                                                                                io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
+        public io.grpc.stub.StreamObserver<GrpcTestService_Request_String> reqStringClientStream(
+                                                                                                 io.grpc.stub.StreamObserver<GrpcTestService_Response_String> responseObserver) {
             return asyncClientStreamingCall(
-                getChannel().newCall(getReqStrinClientStreamMethod(), getCallOptions()), responseObserver);
+                getChannel().newCall(getReqStringClientStreamMethod(), getCallOptions()), responseObserver);
         }
 
         /**
@@ -388,7 +387,7 @@ public final class GrpcTestServiceGrpc {
 
     private static final int METHODID_REQ_STRING               = 0;
     private static final int METHODID_REQ_STRING_SERVER_STREAM = 1;
-    private static final int METHODID_REQ_STRIN_CLIENT_STREAM  = 2;
+    private static final int METHODID_REQ_STRING_CLIENT_STREAM = 2;
     private static final int METHODID_REQ_STRING_BOTH_STREAM   = 3;
 
     private static final class MethodHandlers<Req, Resp> implements
@@ -430,9 +429,9 @@ public final class GrpcTestServiceGrpc {
         public io.grpc.stub.StreamObserver<Req> invoke(
                                                        io.grpc.stub.StreamObserver<Resp> responseObserver) {
             switch (methodId) {
-                case METHODID_REQ_STRIN_CLIENT_STREAM:
+                case METHODID_REQ_STRING_CLIENT_STREAM:
                     return (io.grpc.stub.StreamObserver<Req>) serviceImpl
-                        .reqStrinClientStream(
+                        .reqStringClientStream(
                         (io.grpc.stub.StreamObserver<GrpcTestService_Response_String>) responseObserver);
                 case METHODID_REQ_STRING_BOTH_STREAM:
                     return (io.grpc.stub.StreamObserver<Req>) serviceImpl
@@ -495,7 +494,7 @@ public final class GrpcTestServiceGrpc {
                     serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
                         .setSchemaDescriptor(new GrpcTestServiceFileDescriptorSupplier())
                         .addMethod(getReqStringMethod())
-                        .addMethod(getReqStrinClientStreamMethod())
+                        .addMethod(getReqStringClientStreamMethod())
                         .addMethod(getReqStringServerStreamMethod())
                         .addMethod(getReqStringBothStreamMethod())
                         .build();

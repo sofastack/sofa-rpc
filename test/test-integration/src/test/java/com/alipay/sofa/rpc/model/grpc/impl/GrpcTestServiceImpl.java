@@ -35,4 +35,14 @@ public class GrpcTestServiceImpl extends GrpcTestServiceGrpc.GrpcTestServiceImpl
         responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success:" + name).build());
         responseObserver.onCompleted();
     }
+
+    @Override
+    public void reqStringServerStream(GrpcTestService_Request_String request,
+                                      StreamObserver<GrpcTestService_Response_String> responseObserver) {
+        String name = request.getName();
+        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success_1:" + name).build());
+        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success_2:" + name).build());
+        responseObserver.onNext(GrpcTestService_Response_String.newBuilder().setResult("success_3:" + name).build());
+        responseObserver.onCompleted();
+    }
 }
