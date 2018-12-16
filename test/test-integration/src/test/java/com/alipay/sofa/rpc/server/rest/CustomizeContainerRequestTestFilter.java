@@ -16,28 +16,28 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.filter.Filter;
-import com.alipay.sofa.rpc.filter.FilterInvoker;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import java.io.IOException;
 
 /**
  * @author zhangchengxi
  * Date 2018/12/2
  */
-public class TestCustomizeFilter extends Filter {
+public class CustomizeContainerRequestTestFilter implements ContainerRequestFilter {
 
-    private boolean invoked = false;
+    private static boolean invoked = false;
 
-    public boolean isInvoked() {
+    public static boolean isInvoked() {
         return invoked;
     }
 
-    @Override
-    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        invoked = true;
-        return invoker.invoke(request);
+    public static void reset() {
+        invoked = false;
     }
 
+    @Override
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        invoked = true;
+    }
 }
