@@ -17,8 +17,7 @@
 package com.alipay.sofa.rpc.registry.mesh.model;
 
 /**
- * @author bystander
- * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class UnPublishServiceResult {
 

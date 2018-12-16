@@ -18,8 +18,6 @@ package com.alipay.sofa.rpc.client.lb;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 

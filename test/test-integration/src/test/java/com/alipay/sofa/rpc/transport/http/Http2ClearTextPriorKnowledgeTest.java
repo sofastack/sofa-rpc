@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.transport.http;
 
-import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -34,7 +33,6 @@ import com.alipay.sofa.rpc.server.http.HttpService;
 import com.alipay.sofa.rpc.server.http.HttpServiceImpl;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;

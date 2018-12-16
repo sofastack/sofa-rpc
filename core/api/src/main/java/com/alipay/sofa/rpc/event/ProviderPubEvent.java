@@ -19,8 +19,7 @@ package com.alipay.sofa.rpc.event;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 
 /**
- * @author bystander
- * @version $Id: ProviderPubEvent.java, v 0.1 2018年11月07日 9:41 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class ProviderPubEvent implements Event {
 

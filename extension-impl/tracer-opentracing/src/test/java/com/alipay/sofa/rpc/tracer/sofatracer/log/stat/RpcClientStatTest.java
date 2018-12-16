@@ -45,8 +45,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author bystander
- * @version $Id: RpcClientStatTest.java, v 0.1 2018年05月16日 1:01 PM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class RpcClientStatTest extends AbstractTracerBase {
 

@@ -24,8 +24,7 @@ import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 /**
- * @author bystander
- * @version $Id: ReporterFactory.java, v 0.1 2018年05月17日 9:00 AM bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class ReporterFactory {
 
