@@ -152,11 +152,11 @@ public class ConsulRegistry extends Registry {
     private ConsulService buildConsulHealthService(ConsulURL url) {
         return ConsulService.newService()//
             .withAddress(url.getHost())//
-            .withPort(Integer.valueOf(url.getPort()).toString())//
+            .withPort(Integer.toString(url.getPort()))//
             .withName(ConsulURLUtils.toServiceName(url.getGroup()))//
             .withTag(ConsulURLUtils.healthServicePath(url, ThrallRoleType.PROVIDER))//
             .withId(url.getHost() + ":" + url.getPort() + "-" + url.getPath() + "-" + url.getVersion())//
-            .withCheckInterval(Integer.valueOf(ConsulConstants.TTL).toString()).build();
+            .withCheckInterval(Integer.toString(ConsulConstants.TTL)).build();
     }
 
     private ConsulEphemeralNode buildEphemralNode(ConsulURL url, ThrallRoleType roleType) {
@@ -448,7 +448,7 @@ public class ConsulRegistry extends Registry {
 
     private Map<String, List<ConsulURL>> lookupServiceUpdate(String group) {
         Long lastConsulIndexId =
-                lookupGroupServices.get(group) == null ? 0L : lookupGroupServices.get(group);
+                lookupGroupServices.get(group) == null ? Long.valueOf(0L) : lookupGroupServices.get(group);
         String serviceName = ConsulURLUtils.toServiceName(group);
         ConsulServiceResp consulResp = consulManager.lookupHealthService(serviceName, lastConsulIndexId);
         if (consulResp != null) {

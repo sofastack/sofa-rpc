@@ -182,7 +182,7 @@ public class RpcConfigs {
         if (val == null) {
             throw new SofaRpcRuntimeException("Not found key: " + primaryKey);
         } else {
-            return Integer.valueOf(val.toString());
+            return Integer.parseInt(val.toString());
         }
     }
 
@@ -201,7 +201,7 @@ public class RpcConfigs {
                 throw new SofaRpcRuntimeException("Not found key: " + primaryKey + "/" + secondaryKey);
             }
         }
-        return Integer.valueOf(val.toString());
+        return Integer.parseInt(val.toString());
     }
 
     /**
