@@ -104,10 +104,10 @@ public class CustomizeFilterTest extends ActivelyDestroyTest {
 
     @AfterClass
     public static void afterClass() {
-        JAXRSProviderManager.registerCustomProviderInstance(customizeContainerRequestTestFilter);
-        JAXRSProviderManager.registerCustomProviderInstance(customizeContainerResponseTestFilter);
-        JAXRSProviderManager.registerCustomProviderInstance(customizeClientRequestTestFilter);
-        JAXRSProviderManager.registerCustomProviderInstance(customizeClientResponseTestFilter);
+        JAXRSProviderManager.removeCustomProviderInstance(customizeContainerRequestTestFilter);
+        JAXRSProviderManager.removeCustomProviderInstance(customizeContainerResponseTestFilter);
+        JAXRSProviderManager.removeCustomProviderInstance(customizeClientRequestTestFilter);
+        JAXRSProviderManager.removeCustomProviderInstance(customizeClientResponseTestFilter);
     }
 
     @Before
