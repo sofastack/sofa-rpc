@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.base.Destroyable.DestroyHook;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.model.grpc.GrpcTestServiceGrpc;
@@ -80,7 +81,20 @@ public class GrpcServerTest {
         Assert.assertEquals("onCompleted", result3[2]);
 
         //stop server
-        server.stop();
+        final boolean[] destroyFlag = {false, false};
+        server.destroy(new DestroyHook() {
+            @Override
+            public void preDestroy() {
+                destroyFlag[0] = true;
+            }
+
+            @Override
+            public void postDestroy() {
+                destroyFlag[1] = true;
+            }
+        });
+        Assert.assertTrue(destroyFlag[0]);
+        Assert.assertTrue(destroyFlag[1]);
 
         //invoke4
         String[] result4 = GrpcTestUtil.invokeUNARY(stub);
