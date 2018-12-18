@@ -277,7 +277,7 @@ public class JSONSerializer {
             char b = "-+".indexOf(substr.charAt(0)) < 0 ? substr.charAt(0) : substr.charAt(1);
             if (b >= '0' && b <= '9') {
                 try {
-                    Long l = new Long(substr.trim());
+                    Long l = Long.valueOf(substr.trim());
                     if (l.intValue() == l) {
                         return l.intValue();
                     }
