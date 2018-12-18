@@ -25,7 +25,9 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -38,18 +40,33 @@ import java.util.List;
  */
 public class CustomizeFilterTest extends ActivelyDestroyTest {
 
-    static RestService                 filterRestService;
+    private static RestService                          filterRestService;
 
-    static CustomizeTestFilter         providerFilter;
+    private static CustomizeTestFilter                  providerFilter;
 
-    static CustomizeTestFilter         clientFilter;
-    static ProviderConfig<RestService> providerConfig;
+    private static CustomizeTestFilter                  clientFilter;
 
-    static {
-        JAXRSProviderManager.registerCustomProviderInstance(new CustomizeContainerRequestTestFilter());
-        JAXRSProviderManager.registerCustomProviderInstance(new CustomizeContainerResponseTestFilter());
-        JAXRSProviderManager.registerCustomProviderInstance(new CustomizeClientRequestTestFilter());
-        JAXRSProviderManager.registerCustomProviderInstance(new CustomizeClientResponseTestFilter());
+    private static ProviderConfig<RestService>          providerConfig;
+
+    private static CustomizeContainerRequestTestFilter  customizeContainerRequestTestFilter;
+
+    private static CustomizeContainerResponseTestFilter customizeContainerResponseTestFilter;
+
+    private static CustomizeClientRequestTestFilter     customizeClientRequestTestFilter;
+
+    private static CustomizeClientResponseTestFilter    customizeClientResponseTestFilter;
+
+    @BeforeClass
+    public static void beforeClass() {
+        customizeContainerRequestTestFilter = new CustomizeContainerRequestTestFilter();
+        customizeContainerResponseTestFilter = new CustomizeContainerResponseTestFilter();
+        customizeClientRequestTestFilter = new CustomizeClientRequestTestFilter();
+        customizeClientResponseTestFilter = new CustomizeClientResponseTestFilter();
+
+        JAXRSProviderManager.registerCustomProviderInstance(customizeContainerRequestTestFilter);
+        JAXRSProviderManager.registerCustomProviderInstance(customizeContainerResponseTestFilter);
+        JAXRSProviderManager.registerCustomProviderInstance(customizeClientRequestTestFilter);
+        JAXRSProviderManager.registerCustomProviderInstance(customizeClientResponseTestFilter);
 
         providerFilter = new CustomizeTestFilter();
         List<Filter> providerFilters = new ArrayList<Filter>(2);
@@ -83,6 +100,14 @@ public class CustomizeFilterTest extends ActivelyDestroyTest {
             .setFilterRef(clientFilters)
             .setApplication(new ApplicationConfig().setAppName("TestClientRest"));
         filterRestService = consumerConfigRest.refer();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        JAXRSProviderManager.registerCustomProviderInstance(customizeContainerRequestTestFilter);
+        JAXRSProviderManager.registerCustomProviderInstance(customizeContainerResponseTestFilter);
+        JAXRSProviderManager.registerCustomProviderInstance(customizeClientRequestTestFilter);
+        JAXRSProviderManager.registerCustomProviderInstance(customizeClientResponseTestFilter);
     }
 
     @Before
