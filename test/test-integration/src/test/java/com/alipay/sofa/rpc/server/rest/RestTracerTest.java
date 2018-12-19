@@ -32,7 +32,7 @@ import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.Tracers;
 import com.alipay.sofa.rpc.tracer.sofatracer.RpcSofaTracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.factory.MemoryReporterImpl;
-import junit.framework.Assert;
+import org.junit.Assert;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
