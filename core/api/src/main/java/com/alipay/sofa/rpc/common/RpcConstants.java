@@ -184,6 +184,13 @@ public class RpcConstants {
      */
     public static final String  PROTOCOL_TYPE_H2                   = "h2";
 
+    /**
+     * rest allow origins key
+     *
+     * @since 5.5.0
+     */
+    public static final String  ALLOWED_ORIGINS                    = "allowedOrigins";
+
     /*--------Config配置值相关结束---------*/
 
     /*--------上下文KEY相关开始---------*/
