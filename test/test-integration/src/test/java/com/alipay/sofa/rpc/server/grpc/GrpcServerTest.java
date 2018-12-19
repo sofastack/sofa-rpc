@@ -81,7 +81,7 @@ public class GrpcServerTest {
         Assert.assertEquals("onCompleted", result3[2]);
 
         //stop server
-        final boolean[] destroyFlag = {false, false};
+        final boolean[] destroyFlag = { false, false };
         server.destroy(new DestroyHook() {
             @Override
             public void preDestroy() {
