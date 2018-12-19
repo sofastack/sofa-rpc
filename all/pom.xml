@@ -366,6 +366,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
+                                    <include>com.alipay.sofa:sofa-rpc-fault-hystrix</include>
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>
                                     <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-consul</include>
