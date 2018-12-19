@@ -45,13 +45,13 @@ public class ClientRequestTestFilter implements ClientRequestFilter {
     public void filter(ClientRequestContext requestContext) throws IOException {
         LOGGER.info("客户端request filter生效");
         name = "A";
-        LOGGER.info("客户端customerAnnotion  code:" + code);
+        LOGGER.info("客户端customerAnnotation  code:" + code);
     }
 
     @CustomerAnnotation()
     public void setCode(String code2) {
         this.code2 = code2;
-        LOGGER.info("客户端customerAnnotion  code2:" + this.code2);
+        LOGGER.info("客户端customerAnnotation  code2:" + this.code2);
 
     }
 
