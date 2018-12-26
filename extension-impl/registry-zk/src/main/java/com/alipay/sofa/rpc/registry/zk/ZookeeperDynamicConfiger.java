@@ -16,22 +16,31 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.dynamic.DynamicConfiger;
+import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheListener;
+import org.apache.curator.retry.ExponentialBackoffRetry;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildConfigPath;
 import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildOverridePath;
 
@@ -39,7 +48,8 @@ import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildOverr
  * @author bystander
  * @version $Id: ZookeeperDynamicConfiger.java, v 0.1 2018年12月26日 20:06 bystander Exp $
  */
-public class ZookeeperDynamicConfiger {
+@Extension("zookeeper")
+public class ZookeeperDynamicConfiger implements DynamicConfiger {
 
     /**
      * Root path of registry data
@@ -79,9 +89,59 @@ public class ZookeeperDynamicConfiger {
      */
     private static final ConcurrentMap<String, PathChildrenCache> INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
-    public ZookeeperDynamicConfiger(String rootPath, CuratorFramework zkClient) {
-        this.rootPath = rootPath;
-        this.zkClient = zkClient;
+    /**
+     * 配置项：是否本地优先
+     */
+    public final static String                                    PARAM_PREFER_LOCAL_FILE  = "preferLocalFile";
+
+    /**
+     * 配置项：是否使用临时节点。<br>
+     * 如果使用临时节点：那么断开连接的时候，将zookeeper将自动消失。好处是如果服务端异常关闭，也不会有垃圾数据。<br>
+     * 坏处是如果和zookeeper的网络闪断也通知客户端，客户端以为是服务端下线<br>
+     * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
+     * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
+     */
+    public final static String                                    PARAM_CREATE_EPHEMERAL   = "createEphemeral";
+
+    public ZookeeperDynamicConfiger(RegistryConfig registryConfig) {
+        if (zkClient != null) {
+            return;
+        }
+        String addressInput = registryConfig.getAddress(); // xxx:2181,yyy:2181/path1/paht2
+        if (StringUtils.isEmpty(addressInput)) {
+            throw new SofaRpcRuntimeException("Address of zookeeper registry is empty.");
+        }
+        int idx = addressInput.indexOf(CONTEXT_SEP);
+        String address; // IP地址
+        if (idx > 0) {
+            address = addressInput.substring(0, idx);
+            rootPath = addressInput.substring(idx);
+            if (!rootPath.endsWith(CONTEXT_SEP)) {
+                rootPath += CONTEXT_SEP; // 保证以"/"结尾
+            }
+        } else {
+            address = addressInput;
+            rootPath = CONTEXT_SEP;
+        }
+        boolean preferLocalFile = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_PREFER_LOCAL_FILE));
+        boolean ephemeralNode = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_CREATE_EPHEMERAL));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                "Init ZookeeperRegistry with address {}, root path is {}. preferLocalFile:{}, ephemeralNode:{}",
+                address, rootPath, preferLocalFile, ephemeralNode);
+        }
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+        zkClient = CuratorFrameworkFactory.builder()
+            .connectString(address)
+            .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
+            .connectionTimeoutMs(registryConfig.getConnectTimeout())
+            .canBeReadOnly(false)
+            .retryPolicy(retryPolicy)
+            .defaultData(null)
+            .build();
+
+        zkClient.start();
+
     }
 
     /**
@@ -90,7 +150,8 @@ public class ZookeeperDynamicConfiger {
      * @param config   provider/consumer config
      * @param listener config listener
      */
-    public void subscribeConfig(final AbstractInterfaceConfig config, ConfigListener listener) {
+    @Override
+    public void subscribeInterfaceConfig(final AbstractInterfaceConfig config, ConfigListener listener) {
         try {
 
             if (INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
@@ -134,7 +195,8 @@ public class ZookeeperDynamicConfiger {
         }
     }
 
-    public void unSubscribeProviderConfig(final AbstractInterfaceConfig config) {
+    @Override
+    public void unSubscribeConfig(final AbstractInterfaceConfig config) {
         try {
             if (null != configObserver) {
                 configObserver.removeConfigListener(config);
@@ -150,25 +212,15 @@ public class ZookeeperDynamicConfiger {
         }
     }
 
-    public void unSubscribeConsumerConfig(final AbstractInterfaceConfig config) {
-        try {
-            configObserver.removeConfigListener(config);
-        } catch (Exception e) {
-            if (!RpcRunningState.isShuttingDown()) {
-                throw new SofaRpcRuntimeException("Failed to unsubscribe consumer config from zookeeperRegistry!",
-                    e);
-            }
-        }
-    }
-
     /**
      * 订阅IP级配置（服务发布暂时不支持动态配置,暂时支持订阅ConsumerConfig参数设置）
      *
      * @param config   consumer config
      * @param listener config listener
      */
-    protected void subscribeOverride(ConcurrentMap<ConsumerConfig, String> consumerUrls, final ConsumerConfig config,
-                                     ConfigListener listener) {
+    @Override
+    public void subscribeOverride(ConcurrentMap<ConsumerConfig, String> consumerUrls, final ConsumerConfig config,
+                                  ConfigListener listener) {
         try {
 
             if (INTERFACE_OVERRIDE_CACHE.containsKey(buildOverridePath(rootPath, config))) {
@@ -213,7 +265,8 @@ public class ZookeeperDynamicConfiger {
         }
     }
 
-    public void closePathChildrenCache() {
+    @Override
+    public void clearConfigCache() {
 
         for (Map.Entry<String, PathChildrenCache> entry : INTERFACE_CONFIG_CACHE.entrySet()) {
             try {

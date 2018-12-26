@@ -25,6 +25,8 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.dynamic.DynamicConfiger;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigerFactory;
 import com.alipay.sofa.rpc.event.ConsumerSubEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderPubEvent;
@@ -76,11 +78,6 @@ import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProvi
  *             |       |     |--bolt://192.168.3.100?xxx=yyy []
  *             |       |     |--bolt://192.168.3.110?xxx=yyy []
  *             |       |     └--bolt://192.168.3.120?xxx=yyy []
- *             |       |-configs （接口级配置）
- *             |       |     |--invoke.blacklist ["xxxx"]
- *             |       |     └--monitor.open ["true"]
- *             |       └overrides （IP级配置）
- *             |       |     └--bolt://192.168.3.100?xxx=yyy []
  *             |--com.alipay.sofa.rpc.example.EchoService （下一个服务）
  *             | ......
  *  </pre>
@@ -163,7 +160,7 @@ public class ZookeeperRegistry extends Registry {
      */
     private ConcurrentMap<ConsumerConfig, String>                         consumerUrls             = new ConcurrentHashMap<ConsumerConfig, String>();
 
-    private ZookeeperDynamicConfiger                                      zookeeperDynamicConfiger;
+    private DynamicConfiger                                               zookeeperDynamicConfiger;
 
     /**
      * 服务列表观察者
@@ -227,7 +224,7 @@ public class ZookeeperRegistry extends Registry {
             }
         });
 
-        zookeeperDynamicConfiger = new ZookeeperDynamicConfiger(rootPath, zkClient);
+        zookeeperDynamicConfiger = DynamicConfigerFactory.getDynamicConfig(registryConfig);
     }
 
     //recover data when connect with zk again.
@@ -263,7 +260,7 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void destroy() {
-        zookeeperDynamicConfiger.closePathChildrenCache();
+        zookeeperDynamicConfiger.clearConfigCache();
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             zkClient.close();
         }
@@ -295,7 +292,7 @@ public class ZookeeperRegistry extends Registry {
 
         if (config.isSubscribe()) {
             //订阅接口级配置
-            zookeeperDynamicConfiger.subscribeConfig(config, config.getConfigListener());
+            zookeeperDynamicConfiger.subscribeInterfaceConfig(config, config.getConfigListener());
 
         }
     }
@@ -394,7 +391,7 @@ public class ZookeeperRegistry extends Registry {
         }
         // 反订阅配置节点
         if (config.isSubscribe()) {
-            zookeeperDynamicConfiger.unSubscribeProviderConfig(config);
+            zookeeperDynamicConfiger.unSubscribeConfig(config);
         }
     }
 
@@ -425,7 +422,7 @@ public class ZookeeperRegistry extends Registry {
             List<ProviderInfo> matchProviders;
             // 订阅配置
             //订阅接口级配置
-            zookeeperDynamicConfiger.subscribeConfig(config, config.getConfigListener());
+            zookeeperDynamicConfiger.subscribeInterfaceConfig(config, config.getConfigListener());
             //订阅IP级配置
             zookeeperDynamicConfiger.subscribeOverride(consumerUrls, config, config.getConfigListener());
 
@@ -562,7 +559,7 @@ public class ZookeeperRegistry extends Registry {
                 }
             }
 
-            zookeeperDynamicConfiger.unSubscribeConsumerConfig(config);
+            zookeeperDynamicConfiger.unSubscribeConfig(config);
 
         }
     }
