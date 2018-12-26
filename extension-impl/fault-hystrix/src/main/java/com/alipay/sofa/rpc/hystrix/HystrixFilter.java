@@ -47,9 +47,22 @@ public class HystrixFilter extends Filter {
         AbstractInterfaceConfig config = invoker.getConfig();
         // 只支持 consumer 侧
         if (!(config instanceof ConsumerConfig)) {
-            if (LOGGER.isWarnEnabled()) {
+            if (LOGGER.isWarnEnabled(config.getAppName())) {
                 LOGGER.warnWithApp(config.getAppName(), "HystrixFilter is not allowed on provider, interfaceId: {}",
                     config.getInterfaceId());
+            }
+            return false;
+        }
+        // check hystrix in classpath
+        try {
+            Class.forName("com.netflix.hystrix.HystrixCommand");
+        } catch (ClassNotFoundException e) {
+            if (LOGGER.isInfoEnabled(config.getAppName())) {
+                LOGGER
+                    .info(
+                        config.getAppName(),
+                        "HystrixFilter is disabled because 'com.netflix.hystrix:hystrix-core' does not exist on the classpath");
+
             }
             return false;
         }
@@ -70,16 +83,7 @@ public class HystrixFilter extends Filter {
         } else {
             return invoker.invoke(request);
         }
-        logOnCircuitBreakerOpened(command, invoker, request);
-        return command.execute();
+        return command.invoke();
     }
 
-    private void logOnCircuitBreakerOpened(SofaHystrixInvokable command, FilterInvoker invoker, SofaRequest request) {
-        if (command.isCircuitBreakerOpen()) {
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
-                    invoker.getConfig().getInterfaceId(), request.getMethodName());
-            }
-        }
-    }
 }
