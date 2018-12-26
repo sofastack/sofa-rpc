@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -30,7 +29,6 @@ import com.alipay.sofa.rpc.event.ConsumerSubEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -52,14 +50,11 @@ import org.apache.zookeeper.KeeperException;
 import java.net.URLEncoder;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
-import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildConfigPath;
 import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildConsumerPath;
-import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildOverridePath;
 import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProviderPath;
 
 /**
@@ -113,7 +108,7 @@ public class ZookeeperRegistry extends Registry {
     /**
      * 配置项：是否本地优先
      */
-    public final static String                          PARAM_PREFER_LOCAL_FILE = "preferLocalFile";
+    public final static String                                            PARAM_PREFER_LOCAL_FILE  = "preferLocalFile";
 
     /**
      * 配置项：是否使用临时节点。<br>
@@ -122,32 +117,32 @@ public class ZookeeperRegistry extends Registry {
      * 如果使用永久节点：好处：网络闪断时不会影响服务端，而是由客户端进行自己判断长连接<br>
      * 坏处：服务端如果是异常关闭（无反注册），那么数据里就由垃圾节点，得由另外的哨兵程序进行判断
      */
-    public final static String                          PARAM_CREATE_EPHEMERAL  = "createEphemeral";
+    public final static String                                            PARAM_CREATE_EPHEMERAL   = "createEphemeral";
     /**
      * 服务被下线
      */
-    private final static byte[]                         PROVIDER_OFFLINE        = new byte[] { 0 };
+    private final static byte[]                                           PROVIDER_OFFLINE         = new byte[] { 0 };
     /**
      * 正常在线服务
      */
-    private final static byte[]                         PROVIDER_ONLINE         = new byte[] { 1 };
+    private final static byte[]                                           PROVIDER_ONLINE          = new byte[] { 1 };
 
     /**
      * Zookeeper zkClient
      */
-    private CuratorFramework                            zkClient;
+    private CuratorFramework                                              zkClient;
 
     /**
      * Root path of registry data
      */
-    private String                                      rootPath;
+    private String                                                        rootPath;
 
     /**
      * Prefer get data from local file to remote zk cluster.
      *
      * @see ZookeeperRegistry#PARAM_PREFER_LOCAL_FILE
      */
-    private boolean                                     preferLocalFile         = false;
+    private boolean                                                       preferLocalFile          = false;
 
     /**
      * Create EPHEMERAL node when true, otherwise PERSISTENT
@@ -156,32 +151,30 @@ public class ZookeeperRegistry extends Registry {
      * @see CreateMode#PERSISTENT
      * @see CreateMode#EPHEMERAL
      */
-    private boolean                                     ephemeralNode           = true;
-
-    /**
-     * 接口级配置项观察者
-     */
-    private ZookeeperConfigObserver                     configObserver;
-
-    /**
-     * IP级配置项观察者
-     */
-    private ZookeeperOverrideObserver                   overrideObserver;
-
-    /**
-     * 服务列表观察者
-     */
-    private ZookeeperProviderObserver                   providerObserver;
+    private boolean                                                       ephemeralNode            = true;
 
     /**
      * 保存服务发布者的url
      */
-    private ConcurrentMap<ProviderConfig, List<String>> providerUrls            = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private ConcurrentMap<ProviderConfig, List<String>>                   providerUrls             = new ConcurrentHashMap<ProviderConfig, List<String>>();
 
     /**
      * 保存服务消费者的url
      */
-    private ConcurrentMap<ConsumerConfig, String>       consumerUrls            = new ConcurrentHashMap<ConsumerConfig, String>();
+    private ConcurrentMap<ConsumerConfig, String>                         consumerUrls             = new ConcurrentHashMap<ConsumerConfig, String>();
+
+    private ZookeeperDynamicConfiger                                      zookeeperDynamicConfiger;
+
+    /**
+     * 服务列表观察者
+     */
+    private ZookeeperProviderObserver                                     providerObserver;
+
+    /**
+     * 接口配置{ConsumerConfig：PathChildrenCache} <br>
+     * 例如：{ConsumerConfig ： PathChildrenCache }
+     */
+    private static final ConcurrentMap<ConsumerConfig, PathChildrenCache> INTERFACE_PROVIDER_CACHE = new ConcurrentHashMap<ConsumerConfig, PathChildrenCache>();
 
     @Override
     public synchronized void init() {
@@ -233,6 +226,8 @@ public class ZookeeperRegistry extends Registry {
                 }
             }
         });
+
+        zookeeperDynamicConfiger = new ZookeeperDynamicConfiger(rootPath, zkClient);
     }
 
     //recover data when connect with zk again.
@@ -268,8 +263,7 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void destroy() {
-        closePathChildrenCache(INTERFACE_CONFIG_CACHE);
-        closePathChildrenCache(INTERFACE_OVERRIDE_CACHE);
+        zookeeperDynamicConfiger.closePathChildrenCache();
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             zkClient.close();
         }
@@ -283,24 +277,6 @@ public class ZookeeperRegistry extends Registry {
         destroy();
         hook.postDestroy();
     }
-
-    /**
-     * 接口配置{ConsumerConfig：PathChildrenCache} <br>
-     * 例如：{ConsumerConfig ： PathChildrenCache }
-     */
-    private static final ConcurrentMap<ConsumerConfig, PathChildrenCache> INTERFACE_PROVIDER_CACHE = new ConcurrentHashMap<ConsumerConfig, PathChildrenCache>();
-
-    /**
-     * 接口配置{接口配置路径：PathChildrenCache} <br>
-     * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/configs ： PathChildrenCache }
-     */
-    private static final ConcurrentMap<String, PathChildrenCache>         INTERFACE_CONFIG_CACHE   = new ConcurrentHashMap<String, PathChildrenCache>();
-
-    /**
-     * IP配置{接口配置路径：PathChildrenCache} <br>
-     * 例如：{/sofa-rpc/com.alipay.sofa.rpc.example/overrides ： PathChildrenCache }
-     */
-    private static final ConcurrentMap<String, PathChildrenCache>         INTERFACE_OVERRIDE_CACHE = new ConcurrentHashMap<String, PathChildrenCache>();
 
     @Override
     public void register(ProviderConfig config) {
@@ -318,11 +294,9 @@ public class ZookeeperRegistry extends Registry {
         }
 
         if (config.isSubscribe()) {
-            // 订阅配置节点
-            if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
-                //订阅接口级配置
-                subscribeConfig(config, config.getConfigListener());
-            }
+            //订阅接口级配置
+            zookeeperDynamicConfiger.subscribeConfig(config, config.getConfigListener());
+
         }
     }
 
@@ -387,95 +361,6 @@ public class ZookeeperRegistry extends Registry {
         }
     }
 
-    /**
-     * 订阅接口级配置
-     *
-     * @param config   provider/consumer config
-     * @param listener config listener
-     */
-    protected void subscribeConfig(final AbstractInterfaceConfig config, ConfigListener listener) {
-        try {
-            if (configObserver == null) { // 初始化
-                configObserver = new ZookeeperConfigObserver();
-            }
-            configObserver.addConfigListener(config, listener);
-            final String configPath = buildConfigPath(rootPath, config);
-            // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
-            PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, configPath, true);
-            pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
-                @Override
-                public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
-                    if (LOGGER.isDebugEnabled(config.getAppName())) {
-                        LOGGER.debug("Receive zookeeper event: " + "type=[" + event.getType() + "]");
-                    }
-                    switch (event.getType()) {
-                        case CHILD_ADDED: //新增接口级配置
-                            configObserver.addConfig(config, configPath, event.getData());
-                            break;
-                        case CHILD_REMOVED: //删除接口级配置
-                            configObserver.removeConfig(config, configPath, event.getData());
-                            break;
-                        case CHILD_UPDATED:// 更新接口级配置
-                            configObserver.updateConfig(config, configPath, event.getData());
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
-            pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
-            INTERFACE_CONFIG_CACHE.put(configPath, pathChildrenCache);
-            configObserver.updateConfigAll(config, configPath, pathChildrenCache.getCurrentData());
-        } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
-        }
-    }
-
-    /**
-     * 订阅IP级配置（服务发布暂时不支持动态配置,暂时支持订阅ConsumerConfig参数设置）
-     *
-     * @param config   consumer config
-     * @param listener config listener
-     */
-    protected void subscribeOverride(final ConsumerConfig config, ConfigListener listener) {
-        try {
-            if (overrideObserver == null) { // 初始化
-                overrideObserver = new ZookeeperOverrideObserver();
-            }
-            overrideObserver.addConfigListener(config, listener);
-            final String overridePath = buildOverridePath(rootPath, config);
-            final AbstractInterfaceConfig registerConfig = getRegisterConfig(config);
-            // 监听配置节点下 子节点增加、子节点删除、子节点Data修改事件
-            PathChildrenCache pathChildrenCache = new PathChildrenCache(zkClient, overridePath, true);
-            pathChildrenCache.getListenable().addListener(new PathChildrenCacheListener() {
-                @Override
-                public void childEvent(CuratorFramework client1, PathChildrenCacheEvent event) throws Exception {
-                    if (LOGGER.isDebugEnabled(config.getAppName())) {
-                        LOGGER.debug("Receive zookeeper event: " + "type=[" + event.getType() + "]");
-                    }
-                    switch (event.getType()) {
-                        case CHILD_ADDED: //新增IP级配置
-                            overrideObserver.addConfig(config, overridePath, event.getData());
-                            break;
-                        case CHILD_REMOVED: //删除IP级配置
-                            overrideObserver.removeConfig(config, overridePath, event.getData(), registerConfig);
-                            break;
-                        case CHILD_UPDATED:// 更新IP级配置
-                            overrideObserver.updateConfig(config, overridePath, event.getData());
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            });
-            pathChildrenCache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
-            INTERFACE_OVERRIDE_CACHE.put(overridePath, pathChildrenCache);
-            overrideObserver.updateConfigAll(config, overridePath, pathChildrenCache.getCurrentData());
-        } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
-        }
-    }
-
     @Override
     public void unRegister(ProviderConfig config) {
         String appName = config.getAppName();
@@ -509,19 +394,7 @@ public class ZookeeperRegistry extends Registry {
         }
         // 反订阅配置节点
         if (config.isSubscribe()) {
-            try {
-                if (null != configObserver) {
-                    configObserver.removeConfigListener(config);
-                }
-                if (null != overrideObserver) {
-                    overrideObserver.removeConfigListener(config);
-                }
-            } catch (Exception e) {
-                if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unsubscribe provider config from zookeeperRegistry!",
-                        e);
-                }
-            }
+            zookeeperDynamicConfiger.unSubscribeProviderConfig(config);
         }
     }
 
@@ -551,14 +424,10 @@ public class ZookeeperRegistry extends Registry {
 
             List<ProviderInfo> matchProviders;
             // 订阅配置
-            if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
-                //订阅接口级配置
-                subscribeConfig(config, config.getConfigListener());
-            }
-            if (!INTERFACE_OVERRIDE_CACHE.containsKey(buildOverridePath(rootPath, config))) {
-                //订阅IP级配置
-                subscribeOverride(config, config.getConfigListener());
-            }
+            //订阅接口级配置
+            zookeeperDynamicConfiger.subscribeConfig(config, config.getConfigListener());
+            //订阅IP级配置
+            zookeeperDynamicConfiger.subscribeOverride(consumerUrls, config, config.getConfigListener());
 
             // 订阅Providers节点
             try {
@@ -680,14 +549,7 @@ public class ZookeeperRegistry extends Registry {
                     throw new SofaRpcRuntimeException("Failed to unsubscribe provider from zookeeperRegistry!", e);
                 }
             }
-            try {
-                configObserver.removeConfigListener(config);
-            } catch (Exception e) {
-                if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unsubscribe consumer config from zookeeperRegistry!",
-                        e);
-                }
-            }
+
             PathChildrenCache childrenCache = INTERFACE_PROVIDER_CACHE.remove(config);
             if (childrenCache != null) {
                 try {
@@ -699,6 +561,9 @@ public class ZookeeperRegistry extends Registry {
                     }
                 }
             }
+
+            zookeeperDynamicConfiger.unSubscribeConsumerConfig(config);
+
         }
     }
 
@@ -719,32 +584,5 @@ public class ZookeeperRegistry extends Registry {
             throw new SofaRpcRuntimeException("Zookeeper client is not available");
         }
         return zkClient;
-    }
-
-    /**
-     * 获取注册配置
-     *
-     * @param config consumer config
-     * @return
-     */
-    private AbstractInterfaceConfig getRegisterConfig(ConsumerConfig config) {
-        String url = ZookeeperRegistryHelper.convertConsumerToUrl(config);
-        String addr = url.substring(0, url.indexOf("?"));
-        for (Map.Entry<ConsumerConfig, String> consumerUrl : consumerUrls.entrySet()) {
-            if (consumerUrl.getValue().contains(addr)) {
-                return consumerUrl.getKey();
-            }
-        }
-        return null;
-    }
-
-    private void closePathChildrenCache(Map<String, PathChildrenCache> map) {
-        for (Map.Entry<String, PathChildrenCache> entry : map.entrySet()) {
-            try {
-                entry.getValue().close();
-            } catch (Exception e) {
-                LOGGER.error("Close PathChildrenCache error!", e);
-            }
-        }
     }
 }
