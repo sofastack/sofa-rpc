@@ -582,4 +582,12 @@ public class ZookeeperRegistry extends Registry {
         }
         return zkClient;
     }
+
+    public DynamicConfiger getZookeeperDynamicConfiger() {
+        return zookeeperDynamicConfiger;
+    }
+
+    public ConcurrentMap<ConsumerConfig, String> getConsumerUrls() {
+        return consumerUrls;
+    }
 }

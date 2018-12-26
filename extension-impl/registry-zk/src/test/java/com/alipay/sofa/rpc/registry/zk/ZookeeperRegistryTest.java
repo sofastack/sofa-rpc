@@ -226,7 +226,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         CountDownLatch latch = new CountDownLatch(1);
         MockConfigListener configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.subscribeConfig(providerConfig, configListener);
+        registry.getZookeeperDynamicConfiger().subscribeInterfaceConfig(providerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap("timeout", "2000"));
         Map<String, String> configData = configListener.getData();
         Assert.assertEquals(1, configData.size());
@@ -248,7 +248,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         latch = new CountDownLatch(1);
         configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.subscribeConfig(consumerConfig, configListener);
+        registry.getZookeeperDynamicConfiger().subscribeInterfaceConfig(consumerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap(RpcConstants.CONFIG_KEY_TIMEOUT, "3333"));
         configData = configListener.getData();
         Assert.assertEquals(1, configData.size());
@@ -283,7 +283,8 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         CountDownLatch latch = new CountDownLatch(1);
         MockConfigListener configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.subscribeOverride(consumerConfig, configListener);
+        registry.getZookeeperDynamicConfiger().subscribeOverride(registry.getConsumerUrls(), consumerConfig,
+            configListener);
         Map<String, String> attributes = new ConcurrentHashMap<String, String>();
         attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "3333");
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server");
@@ -302,7 +303,8 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setTimeout(5555);
         configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.subscribeOverride(consumerConfig, configListener);
+        registry.getZookeeperDynamicConfiger().subscribeOverride(registry.getConsumerUrls(), consumerConfig,
+            configListener);
         attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "4444");
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server2");
         configListener.attrUpdated(attributes);
