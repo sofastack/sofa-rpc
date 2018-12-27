@@ -82,7 +82,7 @@ public class NacosRegistryTest extends BaseNacosTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 1000;
+        int timeoutPerSub = 4000;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
