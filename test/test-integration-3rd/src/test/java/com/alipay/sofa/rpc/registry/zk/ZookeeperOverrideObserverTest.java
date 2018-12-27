@@ -81,11 +81,11 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
 
             AddressHolder addressHolder = consumerConfig.getConsumerBootstrap().getCluster()
                 .getAddressHolder();
-            Assert.assertTrue(addressHolder.getAllProviderSize() == 2);
+            Assert.assertEquals(2, addressHolder.getAllProviderSize());
 
             providerConfig2.unExport();
 
-            Assert.assertTrue(delayGetSize(addressHolder, 1, 100) == 1);
+            Assert.assertEquals(1, delayGetSize(addressHolder, 1, 100));
 
             List<String> path = registry.getZkClient().getChildren()
                 .forPath("/sofa-rpc/" + OverrideService.class.getCanonicalName() + "/providers");
@@ -99,12 +99,12 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
                 + URLEncoder.encode(override1, "UTF-8");
             registry.getZkClient().create().creatingParentContainersIfNeeded()
                 .withMode(CreateMode.PERSISTENT).forPath(overridePath1);
-            Assert.assertTrue(delayGetTimeout(consumerConfig, 2345, 100) == 2345);
+            Assert.assertEquals(2345, delayGetTimeout(consumerConfig, 2345, 100));
 
             // 删除目前没有影响
             registry.getZkClient().delete().forPath(overridePath1);
             Thread.sleep(500);
-            Assert.assertTrue(delayGetTimeout(consumerConfig, 2345, 100) == 2345);
+            Assert.assertEquals(2345, delayGetTimeout(consumerConfig, 2345, 100));
 
             // 恢复到3333
             String override2 = providerInfo.getProtocolType() + "://" + providerInfo.getHost() + ":"
@@ -113,13 +113,15 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
                 + URLEncoder.encode(override2, "UTF-8");
             registry.getZkClient().create().creatingParentContainersIfNeeded()
                 .withMode(CreateMode.PERSISTENT).forPath(overridePath2);
-            Assert.assertTrue(delayGetTimeout(consumerConfig, 3333, 100) == 3333);
+
+            Thread.sleep(500);
+            Assert.assertEquals(3333, delayGetTimeout(consumerConfig, 3333, 100));
 
             // 清除持久化的 path
             registry.getZkClient().delete().forPath(overridePath2);
         } catch (Throwable e) {
             LOGGER.error("ZookeeperOverrideObserver test case failed", e);
-            Assert.assertTrue(e.getMessage(), false);
+            Assert.fail(e.getMessage());
         }
     }
 

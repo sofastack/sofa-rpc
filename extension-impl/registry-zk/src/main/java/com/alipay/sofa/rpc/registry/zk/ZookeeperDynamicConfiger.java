@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -201,8 +202,12 @@ public class ZookeeperDynamicConfiger implements DynamicConfiger {
             if (null != configObserver) {
                 configObserver.removeConfigListener(config);
             }
-            if (null != overrideObserver) {
-                overrideObserver.removeConfigListener(config);
+
+            //FIXME maybe we also need unsub config consumer override
+            if (config instanceof ProviderConfig) {
+                if (null != overrideObserver) {
+                    overrideObserver.removeConfigListener(config);
+                }
             }
         } catch (Exception e) {
             if (!RpcRunningState.isShuttingDown()) {
