@@ -46,31 +46,23 @@ public class HystrixFilter extends Filter {
     public boolean needToLoad(FilterInvoker invoker) {
         AbstractInterfaceConfig config = invoker.getConfig();
         // 只支持 consumer 侧
-        if (!(config instanceof ConsumerConfig)) {
+        if (!isConsumerSide(config)) {
             if (LOGGER.isWarnEnabled(config.getAppName())) {
                 LOGGER.warnWithApp(config.getAppName(), "HystrixFilter is not allowed on provider, interfaceId: {}",
                     config.getInterfaceId());
             }
             return false;
         }
-        // check hystrix in classpath
-        try {
-            Class.forName("com.netflix.hystrix.HystrixCommand");
-        } catch (ClassNotFoundException e) {
-            if (LOGGER.isInfoEnabled(config.getAppName())) {
-                LOGGER
-                    .info(
-                        config.getAppName(),
-                        "HystrixFilter is disabled because 'com.netflix.hystrix:hystrix-core' does not exist on the classpath");
-
+        if (!isHystrixEnabled(config)) {
+            return false;
+        }
+        if (!isHystrixOnClasspath()) {
+            if (LOGGER.isWarnEnabled(config.getAppName())) {
+                LOGGER.warnWithApp(config.getAppName(), "HystrixFilter is disabled because 'com.netflix.hystrix:hystrix-core' does not exist on the classpath");
             }
             return false;
         }
-        String consumerHystrixEnabled = config.getParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED);
-        if (StringUtils.isNotBlank(consumerHystrixEnabled)) {
-            return Boolean.valueOf(consumerHystrixEnabled);
-        }
-        return RpcConfigs.getOrDefaultValue(HystrixConstants.SOFA_HYSTRIX_ENABLED, false);
+        return true;
     }
 
     @Override
@@ -86,4 +78,25 @@ public class HystrixFilter extends Filter {
         return command.invoke();
     }
 
+
+    private boolean isConsumerSide(AbstractInterfaceConfig config) {
+        return config instanceof ConsumerConfig;
+    }
+
+    private boolean isHystrixEnabled(AbstractInterfaceConfig config) {
+        String consumerHystrixEnabled = config.getParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED);
+        if (StringUtils.isNotBlank(consumerHystrixEnabled)) {
+            return Boolean.valueOf(consumerHystrixEnabled);
+        }
+        return RpcConfigs.getOrDefaultValue(HystrixConstants.SOFA_HYSTRIX_ENABLED, false);
+    }
+
+    private boolean isHystrixOnClasspath() {
+        try {
+            Class.forName("com.netflix.hystrix.HystrixCommand");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
 }
