@@ -209,12 +209,18 @@ final class SnappyDecompressor {
         switch (trailerBytes) {
             case 4:
                 trailer = (input[ipIndex + 3] & 0xff) << 24;
+                break;
             case 3:
                 trailer |= (input[ipIndex + 2] & 0xff) << 16;
+                break;
             case 2:
                 trailer |= (input[ipIndex + 1] & 0xff) << 8;
+                break;
             case 1:
                 trailer |= (input[ipIndex] & 0xff);
+                break;
+            default:
+                break;
         }
 
         // advance the ipIndex past the op codes
