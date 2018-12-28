@@ -23,6 +23,8 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.netflix.hystrix.HystrixCommand;
 
 import java.lang.reflect.InvocationTargetException;
@@ -32,12 +34,14 @@ import java.lang.reflect.InvocationTargetException;
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements SofaHystrixInvokable<SofaResponse> {
+public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements SofaHystrixInvokable {
 
-    private RpcInternalContext rpcInternalContext;
-    private RpcInvokeContext   rpcInvokeContext;
-    protected FilterInvoker    invoker;
-    protected SofaRequest      request;
+    private final static Logger LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
+
+    private RpcInternalContext  rpcInternalContext;
+    private RpcInvokeContext    rpcInvokeContext;
+    protected FilterInvoker     invoker;
+    protected SofaRequest       request;
 
     public SofaHystrixCommand(FilterInvoker invoker, SofaRequest request) {
         super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createSetter(invoker, request));
@@ -45,6 +49,15 @@ public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements 
         this.rpcInvokeContext = RpcInvokeContext.peekContext();
         this.invoker = invoker;
         this.request = request;
+    }
+
+    @Override
+    public SofaResponse invoke() {
+        if (isCircuitBreakerOpen() && LOGGER.isWarnEnabled(invoker.getConfig().getAppName())) {
+            LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
+                invoker.getConfig().getInterfaceId(), request.getMethodName());
+        }
+        return execute();
     }
 
     @Override
