@@ -58,7 +58,9 @@ public class HystrixFilter extends Filter {
         }
         if (!isHystrixOnClasspath()) {
             if (LOGGER.isWarnEnabled(config.getAppName())) {
-                LOGGER.warnWithApp(config.getAppName(), "HystrixFilter is disabled because 'com.netflix.hystrix:hystrix-core' does not exist on the classpath");
+                LOGGER
+                    .warnWithApp(config.getAppName(),
+                        "HystrixFilter is disabled because 'com.netflix.hystrix:hystrix-core' does not exist on the classpath");
             }
             return false;
         }
@@ -77,7 +79,6 @@ public class HystrixFilter extends Filter {
         }
         return command.invoke();
     }
-
 
     private boolean isConsumerSide(AbstractInterfaceConfig config) {
         return config instanceof ConsumerConfig;
