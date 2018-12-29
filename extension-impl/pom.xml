@@ -30,6 +30,7 @@
         <module>registry-local</module>
         <module>registry-zk</module>
         <module>registry-nacos</module>
+        <module>registry-mesh</module>
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>
