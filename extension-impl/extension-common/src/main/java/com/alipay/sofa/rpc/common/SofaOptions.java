@@ -188,4 +188,9 @@ public class SofaOptions {
      * TR心跳间隔
      */
     public static final String CONFIG_RPC_HEART_BEAT_INTERVAL      = "rpc_tr_heart_beat_interval";
+
+    // ========== mesh相关 ===========
+
+    public static final String CONFIG_RPC_MESH_SWITCH              = "rpc_mesh_switch";
+
 }
