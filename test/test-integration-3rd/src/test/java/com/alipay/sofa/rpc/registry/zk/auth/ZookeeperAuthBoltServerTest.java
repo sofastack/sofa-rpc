@@ -144,6 +144,27 @@ public class ZookeeperAuthBoltServerTest {
                 Assert.fail("auth is not right, but throw not auth error exception");
             }
         }
+
+        ConsumerConfig<EchoService> consumerConfig = new ConsumerConfig<EchoService>()
+            .setRegistry(registryConfig)
+            .setInterfaceId(EchoService.class.getName()) // 指定接口
+            .setProtocol("bolt") // 指定协议
+            .setTimeout(3000)
+            .setConnectTimeout(10 * 1000);
+
+        try {
+            consumerConfig.refer();// 引用服务
+            Assert.fail("auth is not right, but consumer refer success");
+        } catch (Exception ex) {
+
+            LOGGER.error("exception is", ex);
+
+            if (ex.getCause() instanceof KeeperException.NoAuthException) {
+                Assert.assertTrue(true);
+            } else {
+                Assert.fail("auth is not right, but throw not auth error exception");
+            }
+        }
     }
 
     /**
