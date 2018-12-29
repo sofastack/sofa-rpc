@@ -49,7 +49,7 @@ public abstract class BeanIdMatchFilter extends Filter {
     private List<String>        excludeId;
 
     private volatile boolean    formatComplete;
-    private final    Object     formatLock   = new Object();
+    private final Object        formatLock   = new Object();
 
     @Override
     public boolean needToLoad(FilterInvoker invoker) {
