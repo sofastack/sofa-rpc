@@ -36,8 +36,8 @@ import java.util.Map;
  */
 public class ZookeeperAuthBoltServerTest extends BaseZkTest {
 
-    private static ServerConfig   serverConfig;
-    private static RegistryConfig registryConfig;
+    private static ServerConfig        serverConfig;
+    private static RegistryConfig      registryConfig;
 
     private static Map<String, String> parameters = new HashMap<String, String>();
 
@@ -48,16 +48,15 @@ public class ZookeeperAuthBoltServerTest extends BaseZkTest {
         parameters.put("addAuth", "sofazk:rpc1");
 
         registryConfig = new RegistryConfig()
-                .setProtocol("zookeeper")
-                .setAddress("127.0.0.1:2181/authtest")
-                .setParameters(parameters);
+            .setProtocol("zookeeper")
+            .setAddress("127.0.0.1:2181/authtest")
+            .setParameters(parameters);
 
         serverConfig = new ServerConfig()
-                .setProtocol("bolt") // 设置一个协议，默认bolt
-                .setPort(12200) // 设置一个端口，默认12200
-                .setDaemon(false); // 非守护线程
+            .setProtocol("bolt") // 设置一个协议，默认bolt
+            .setPort(12200) // 设置一个端口，默认12200
+            .setDaemon(false); // 非守护线程
     }
-
 
     @AfterClass
     public static void destroy() {
@@ -68,10 +67,10 @@ public class ZookeeperAuthBoltServerTest extends BaseZkTest {
     public void testAll() {
 
         ProviderConfig<EchoService> providerConfig = new ProviderConfig<EchoService>()
-                .setRegistry(registryConfig)
-                .setInterfaceId(EchoService.class.getName()) // 指定接口
-                .setRef(new EchoServiceImpl()) // 指定实现
-                .setServer(serverConfig); // 指定服务端
+            .setRegistry(registryConfig)
+            .setInterfaceId(EchoService.class.getName()) // 指定接口
+            .setRef(new EchoServiceImpl()) // 指定实现
+            .setServer(serverConfig); // 指定服务端
         providerConfig.export(); // 发布服务
 
         ConsumerConfig<EchoService> consumerConfig = new ConsumerConfig<EchoService>()
@@ -87,6 +86,5 @@ public class ZookeeperAuthBoltServerTest extends BaseZkTest {
         Assert.assertEquals("auth test", result);
 
     }
-
 
 }
