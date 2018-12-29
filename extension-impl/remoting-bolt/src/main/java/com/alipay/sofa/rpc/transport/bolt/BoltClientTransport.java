@@ -128,10 +128,14 @@ public class BoltClientTransport extends ClientTransport {
         Url boltUrl = new Url(providerInfo.toString(), providerInfo.getHost(), providerInfo.getPort());
 
         boltUrl.setConnectTimeout(transportConfig.getConnectTimeout());
-        // 注意：禁用了connectionNum方法
-        // boltUrl.setConnNum(transportConfig.getConnectionNum());
-        boltUrl.setConnNum(1); // 默认初始化connNum个长连接
-        boltUrl.setConnWarmup(false); // true的话 
+        // 默认初始化connNum个长连接,为了slb和vip的情况
+        final int connectionNum = transportConfig.getConnectionNum();
+        if (connectionNum > 0) {
+            boltUrl.setConnNum(connectionNum);
+        } else {
+            boltUrl.setConnNum(1);
+        }
+        boltUrl.setConnWarmup(false); // true的话
         if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(providerInfo.getProtocolType())) {
             boltUrl.setProtocol(RemotingConstants.PROTOCOL_BOLT);
         } else {
