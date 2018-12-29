@@ -22,6 +22,8 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.netflix.hystrix.HystrixObservableCommand;
 import rx.Observable;
@@ -38,13 +40,15 @@ import java.util.concurrent.Future;
  */
 public class SofaHystrixObservableCommand extends HystrixObservableCommand implements SofaHystrixInvokable {
 
-    private FilterInvoker  invoker;
+    private final static Logger LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
 
-    private SofaRequest    request;
+    private FilterInvoker       invoker;
 
-    private SofaResponse   sofaResponse;
+    private SofaRequest         request;
 
-    private ResponseFuture responseFuture;
+    private SofaResponse        sofaResponse;
+
+    private ResponseFuture      responseFuture;
 
     public SofaHystrixObservableCommand(FilterInvoker invoker, SofaRequest request) {
         super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createObservableSetter(invoker,
@@ -97,7 +101,11 @@ public class SofaHystrixObservableCommand extends HystrixObservableCommand imple
     }
 
     @Override
-    public SofaResponse execute() {
+    public SofaResponse invoke() {
+        if (isCircuitBreakerOpen() && LOGGER.isWarnEnabled(invoker.getConfig().getAppName())) {
+            LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
+                invoker.getConfig().getInterfaceId(), request.getMethodName());
+        }
         Future delegate = this.toObservable().toBlocking().toFuture();
         RpcInternalContext.getContext().setFuture(new HystrixResponseFuture(delegate, this.responseFuture));
         if (this.sofaResponse == null && this.responseFuture == null) {

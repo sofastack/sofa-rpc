@@ -14,16 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.hystrix;
+package com.alipay.sofa.rpc.server.rest;
 
-import com.alipay.sofa.rpc.core.response.SofaResponse;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerResponseContext;
+import javax.ws.rs.container.ContainerResponseFilter;
+import java.io.IOException;
 
 /**
- * Basic interface for {@link SofaHystrixCommand} and {@link SofaHystrixObservableCommand}
- *
- * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ * @author zhangchengxi
+ * Date 2018/12/2
  */
-public interface SofaHystrixInvokable {
+public class CustomizeContainerResponseTestFilter implements ContainerResponseFilter {
 
-    SofaResponse invoke();
+    private static boolean invoked = false;
+
+    public static void reset() {
+        invoked = false;
+    }
+
+    public static boolean isInvoked() {
+        return invoked;
+    }
+
+    @Override
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
+        throws IOException {
+        invoked = true;
+    }
 }
