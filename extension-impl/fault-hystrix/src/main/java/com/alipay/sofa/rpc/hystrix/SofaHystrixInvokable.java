@@ -17,15 +17,13 @@
 package com.alipay.sofa.rpc.hystrix;
 
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.netflix.hystrix.HystrixInvokableInfo;
 
 /**
  * Basic interface for {@link SofaHystrixCommand} and {@link SofaHystrixObservableCommand}
- * @param <R>
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public interface SofaHystrixInvokable<R> extends HystrixInvokableInfo<R> {
+public interface SofaHystrixInvokable {
 
-    SofaResponse execute();
+    SofaResponse invoke();
 }
