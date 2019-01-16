@@ -20,14 +20,11 @@ import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.AbstractLoadBalancer;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.HashUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.ext.Extension;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -125,9 +122,9 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
             int num = 128;
             for (ProviderInfo providerInfo : actualNodes) {
                 for (int i = 0; i < num / 4; i++) {
-                    byte[] digest = messageDigest(providerInfo.getHost() + providerInfo.getPort() + i);
+                    byte[] digest = HashUtils.messageDigest(providerInfo.getHost() + providerInfo.getPort() + i);
                     for (int h = 0; h < 4; h++) {
-                        long m = hash(digest, h);
+                        long m = HashUtils.hash(digest, h);
                         virtualNodes.put(m, providerInfo);
                     }
                 }
@@ -142,8 +139,8 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
          */
         public ProviderInfo select(SofaRequest request) {
             String key = buildKeyOfHash(request.getMethodArgs());
-            byte[] digest = messageDigest(key);
-            return selectForKey(hash(digest, 0));
+            byte[] digest = HashUtils.messageDigest(key);
+            return selectForKey(HashUtils.hash(digest, 0));
         }
 
         /**
@@ -172,41 +169,6 @@ public class ConsistentHashLoadBalancer extends AbstractLoadBalancer {
                 entry = virtualNodes.firstEntry();
             }
             return entry.getValue();
-        }
-
-        /**
-         * 换算法？ MD5  SHA-1 MurMurHash???
-         *
-         * @param value the value
-         * @return the byte [ ]
-         */
-        private byte[] messageDigest(String value) {
-            MessageDigest md5;
-            try {
-                md5 = MessageDigest.getInstance("MD5");
-                // md5.reset();
-                md5.update(value.getBytes("UTF-8"));
-                return md5.digest();
-            } catch (NoSuchAlgorithmException e) {
-                throw new SofaRpcRuntimeException("No such algorithm named md5", e);
-            } catch (UnsupportedEncodingException e) {
-                throw new SofaRpcRuntimeException("Unsupported encoding of" + value, e);
-            }
-        }
-
-        /**
-         * Hash long.
-         *
-         * @param digest the digest
-         * @param index  the number
-         * @return the long
-         */
-        private long hash(byte[] digest, int index) {
-            long f = ((long) (digest[3 + index * 4] & 0xFF) << 24)
-                | ((long) (digest[2 + index * 4] & 0xFF) << 16)
-                | ((long) (digest[1 + index * 4] & 0xFF) << 8)
-                | (digest[index * 4] & 0xFF);
-            return f & 0xFFFFFFFFL;
         }
 
         /**

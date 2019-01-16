@@ -350,6 +350,10 @@ public abstract class AbstractCluster extends Cluster {
         }
         // 原始服务列表数据 --> 路由结果
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
+
+        //保存一下原始地址,为了打印
+        List<ProviderInfo> orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
+
         if (CommonUtils.isEmpty(providerInfos)) {
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         }
@@ -387,7 +391,8 @@ public abstract class AbstractCluster extends Cluster {
                 providerInfos.remove(providerInfo);
             } while (!providerInfos.isEmpty());
         }
-        throw noAvailableProviderException(message.getTargetServiceUniqueName());
+        throw unavailableProviderException(message.getTargetServiceUniqueName(),
+            convertProviders2Urls(orginalProviderInfos));
     }
 
     /**
@@ -760,6 +765,18 @@ public abstract class AbstractCluster extends Cluster {
             }
         }
         return providerInfos;
+    }
+
+    private String convertProviders2Urls(List<ProviderInfo> providerInfos) {
+
+        StringBuilder sb = new StringBuilder();
+        if (CommonUtils.isNotEmpty(providerInfos)) {
+            for (ProviderInfo providerInfo : providerInfos) {
+                sb.append(providerInfo).append(",");
+            }
+        }
+
+        return sb.toString();
     }
 
     /**

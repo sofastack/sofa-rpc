@@ -22,6 +22,8 @@ import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -31,10 +33,11 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liengen</a>
- * @version $Id: ZookeeperRegistryHelperTest.java, v 0.1 2018年04月25日 下午7:09 LiWei.Liengen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class ZookeeperRegistryHelperTest {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperRegistryHelperTest.class);
 
     @Test
     public void testWarmup() throws UnsupportedEncodingException, InterruptedException {
@@ -61,7 +64,7 @@ public class ZookeeperRegistryHelperTest {
         Assert.assertEquals(700, providerInfo.getWeight());
 
         long elapsed = System.currentTimeMillis() - now;
-        System.out.println("elapsed time: " + elapsed + "ms");
+        LOGGER.info("elapsed time: " + elapsed + "ms");
 
         long sleepTime = 300 - elapsed;
         if (sleepTime >= 0) {
@@ -129,7 +132,7 @@ public class ZookeeperRegistryHelperTest {
         ServerConfig server = new ServerConfig();
         providerConfig.setServer(server);
         List<String> urls = ZookeeperRegistryHelper.convertProviderToUrls(providerConfig);
-        System.out.println(urls);
+        LOGGER.info(urls.toString());
 
         Assert.assertNotNull(urls);
         Assert.assertEquals(1, urls.size());
@@ -138,7 +141,7 @@ public class ZookeeperRegistryHelperTest {
 
         ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
 
-        System.out.println(providerInfo);
+        LOGGER.info(providerInfo.toString());
 
         Assert.assertEquals("b", providerInfo.getStaticAttr("a"));
         Assert.assertEquals("y", providerInfo.getStaticAttr("x"));

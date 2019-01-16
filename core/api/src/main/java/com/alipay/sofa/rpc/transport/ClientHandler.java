@@ -31,19 +31,19 @@ public interface ClientHandler {
      *
      * @param result response
      */
-    public void onResponse(final Object result);
+    void onResponse(final Object result);
 
     /**
      * On exception caught.
      *
      * @param e exception
      */
-    public void onException(final Throwable e);
+    void onException(final Throwable e);
 
     /**
      * User defined executor.
      *
      * @return executor
      */
-    public Executor getExecutor();
+    Executor getExecutor();
 }

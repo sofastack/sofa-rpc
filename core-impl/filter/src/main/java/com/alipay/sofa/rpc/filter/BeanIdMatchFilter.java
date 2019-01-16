@@ -48,8 +48,8 @@ public abstract class BeanIdMatchFilter extends Filter {
     private List<String>        effectiveId;
     private List<String>        excludeId;
 
-    private boolean             formatComplete;
-    private Object              formatLock   = new Object();
+    private volatile boolean    formatComplete;
+    private final Object        formatLock   = new Object();
 
     @Override
     public boolean needToLoad(FilterInvoker invoker) {

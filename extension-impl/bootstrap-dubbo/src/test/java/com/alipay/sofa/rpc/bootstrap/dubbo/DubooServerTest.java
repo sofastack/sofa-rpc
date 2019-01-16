@@ -41,8 +41,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 /**
- * @author bystander
- * @version $Id: DubooServerTest.java, v 0.1 2017年10月30日 下午9:23 bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class DubooServerTest {
 

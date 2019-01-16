@@ -45,7 +45,7 @@ public class DegradeStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
@@ -64,7 +64,7 @@ public class DegradeStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
 
@@ -98,7 +98,7 @@ public class DegradeStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
@@ -116,7 +116,7 @@ public class DegradeStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         Assert.assertEquals(5, delayGetCount(invocationStat, 5));
@@ -149,7 +149,7 @@ public class DegradeStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
@@ -168,7 +168,7 @@ public class DegradeStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                System.out.println("超时");
+                LOGGER.info("超时");
             }
         }
         Assert.assertEquals(1, delayGetCount(invocationStat, 1));

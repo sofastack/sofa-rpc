@@ -31,6 +31,7 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
+
     @Test
     public void doSelect() throws Exception {
         WeightRoundRobinLoadBalancer loadBalancer = new WeightRoundRobinLoadBalancer(null);
@@ -51,12 +52,11 @@ public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             int avg = total / size;
             for (int i = 0; i < size; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(avg == cnt.get(9000 + i));
             }
         }
@@ -73,8 +73,8 @@ public class WeightRoundRobinLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             Assert.assertTrue(cnt.get(9000) == 0);
             int count = 0;

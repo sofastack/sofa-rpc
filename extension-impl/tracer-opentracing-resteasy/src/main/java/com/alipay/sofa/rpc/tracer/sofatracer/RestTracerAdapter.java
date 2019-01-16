@@ -46,13 +46,10 @@ import java.util.Map;
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
 
 /**
- *
  * 客户端：startRpc ——> filter --> beforeSend --> 存入tracer信息 --> clientReceived
  * 服务端：serverReceived --> filter --> serverSend
  *
- *
- * @author liangen
- * @version $Id: RestTracerAdapter.java, v 0.1 2017年11月29日 上午9:56 liangen Exp $
+ * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RestTracerAdapter {
 
@@ -65,7 +62,7 @@ public class RestTracerAdapter {
 
     /**
      * 存入tracer信息
-     * 
+     *
      * @param requestContext ClientRequestContext
      */
     public static void storeTracerInfo(ClientRequestContext requestContext) {
@@ -126,7 +123,7 @@ public class RestTracerAdapter {
 
     /**
      * 适配服务端filter
-     * 
+     *
      * @param requestContext ContainerRequestContext
      */
     public static void serverFilter(ContainerRequestContext requestContext) {
@@ -135,6 +132,9 @@ public class RestTracerAdapter {
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 RpcInternalContext context = RpcInternalContext.getContext();
+
+                context.setAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME, RpcRuntimeContext.now());
+
                 SofaResourceMethodInvoker resourceMethodInvoker = (SofaResourceMethodInvoker)
                         ((PostMatchContainerRequestContext) requestContext)
                             .getResourceMethod();
@@ -199,6 +199,16 @@ public class RestTracerAdapter {
                     }
                     sofaRequest.setMethodArgSigs(methodTypeString);
                 }
+            }
+
+            SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+            SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
+
+            RpcInternalContext context = RpcInternalContext.getContext();
+
+            if (serverSpan != null) {
+                serverSpan.setTag(RpcSpanTags.SERVER_BIZ_TIME,
+                    (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE));
             }
 
             Tracers.serverSend(sofaRequest, sofaResponse, null);

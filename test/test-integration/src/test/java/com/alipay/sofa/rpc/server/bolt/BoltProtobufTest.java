@@ -54,7 +54,7 @@ public class BoltProtobufTest extends ActivelyDestroyTest {
 
         EchoRequest request = EchoRequest.newBuilder().setName("sofa").setGroup(Group.A).build();
         EchoResponse response = helloService.echoObj(request);
-        System.out.println(response.getCode() + ": " + response.getMessage());
+        LOGGER.info(response.getCode() + ": " + response.getMessage());
 
         boolean error = false;
         try {
