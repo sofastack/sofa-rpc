@@ -21,7 +21,6 @@ import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
-import com.netflix.hystrix.HystrixObservableCommand;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -34,9 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultSetterFactory implements SetterFactory {
 
-    private static final Map<Method, HystrixCommand.Setter>           SETTER_CACHE            = new ConcurrentHashMap<Method, HystrixCommand.Setter>();
-
-    private static final Map<Method, HystrixObservableCommand.Setter> OBSERVABLE_SETTER_CACHE = new ConcurrentHashMap<Method, HystrixObservableCommand.Setter>();
+    private static final Map<Method, HystrixCommand.Setter> SETTER_CACHE = new ConcurrentHashMap<Method, HystrixCommand.Setter>();
 
     @Override
     public HystrixCommand.Setter createSetter(FilterInvoker invoker, SofaRequest request) {
@@ -54,23 +51,5 @@ public class DefaultSetterFactory implements SetterFactory {
             }
         }
         return SETTER_CACHE.get(clientMethod);
-    }
-
-    @Override
-    public HystrixObservableCommand.Setter createObservableSetter(FilterInvoker invoker, SofaRequest request) {
-        Method clientMethod = request.getMethod();
-        if (!OBSERVABLE_SETTER_CACHE.containsKey(clientMethod)) {
-            synchronized (DefaultSetterFactory.class) {
-                if (!OBSERVABLE_SETTER_CACHE.containsKey(clientMethod)) {
-                    String groupKey = invoker.getConfig().getInterfaceId();
-                    String commandKey = request.getMethodName();
-                    HystrixObservableCommand.Setter setter = HystrixObservableCommand.Setter
-                        .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
-                        .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey));
-                    OBSERVABLE_SETTER_CACHE.put(clientMethod, setter);
-                }
-            }
-        }
-        return OBSERVABLE_SETTER_CACHE.get(clientMethod);
     }
 }
