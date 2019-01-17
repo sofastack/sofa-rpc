@@ -31,6 +31,7 @@ import com.netflix.hystrix.HystrixCommand;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.CountDownLatch;
 
 /**
  * {@link HystrixCommand} for async requests
@@ -48,7 +49,9 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
     private RpcInternalContext    rpcInternalContext;
     private RpcInvokeContext      rpcInvokeContext;
 
-    private HystrixResponseFuture delegate;
+    private SofaResponse sofaResponse;
+
+    private CountDownLatch lock = new CountDownLatch(1);
 
     public SofaAsyncHystrixCommand(FilterInvoker invoker, SofaRequest request) {
         super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createSetter(invoker,
@@ -60,7 +63,49 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
     }
 
     @Override
+    public SofaResponse invoke() {
+        if (isCircuitBreakerOpen() && LOGGER.isWarnEnabled(invoker.getConfig().getAppName())) {
+            LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
+                invoker.getConfig().getInterfaceId(), request.getMethodName());
+        }
+        HystrixResponseFuture delegate = new HystrixResponseFuture(this.queue());
+        try {
+            lock.await();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        RpcInternalContext.getContext().setFuture(delegate);
+        return this.sofaResponse;
+    }
+
+    @Override
+    protected Object run() throws Exception {
+        RpcInternalContext.setContext(rpcInternalContext);
+        RpcInvokeContext.setContext(rpcInvokeContext);
+
+        this.sofaResponse = invoker.invoke(request);
+        ResponseFuture responseFuture = RpcInternalContext.getContext().getFuture();
+        lock.countDown();
+        return responseFuture.get();
+    }
+
+    // Copy from AbstractCluster#buildEmptyResponse
+    private SofaResponse buildEmptyResponse(SofaRequest request) {
+        SofaResponse response = new SofaResponse();
+        Method method = request.getMethod();
+        if (method != null) {
+            response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
+        }
+        return response;
+    }
+
+    @Override
     protected Object getFallback() {
+        if (lock.getCount() > 0) {
+            // > 0 说明 run 方法没有执行，或是执行时立刻失败了
+            this.sofaResponse = buildEmptyResponse(request);
+            lock.countDown();
+        }
         FallbackFactory fallbackFactory = SofaHystrixConfig.loadFallbackFactory((ConsumerConfig) invoker.getConfig());
         if (fallbackFactory == null) {
             return super.getFallback();
@@ -75,41 +120,7 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
             throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
         } catch (InvocationTargetException e) {
             throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
-                e.getTargetException());
+                    e.getTargetException());
         }
-    }
-
-    @Override
-    public SofaResponse invoke() {
-        if (isCircuitBreakerOpen() && LOGGER.isWarnEnabled(invoker.getConfig().getAppName())) {
-            LOGGER.warnWithApp(invoker.getConfig().getAppName(), "Circuit Breaker is opened, method: {}#{}",
-                invoker.getConfig().getInterfaceId(), request.getMethodName());
-        }
-        this.delegate = new HystrixResponseFuture(this.queue());
-        RpcInternalContext.getContext().setFuture(this.delegate);
-        // TODO 因为变成了异步执行，这里会丢失 invoker.invoke(request) 的结果/异常，暂时只能这样
-        return buildEmptyResponse(request);
-    }
-
-    @Override
-    protected Object run() throws Exception {
-        RpcInternalContext.setContext(rpcInternalContext);
-        RpcInvokeContext.setContext(rpcInvokeContext);
-
-        invoker.invoke(request);
-        ResponseFuture responseFuture = RpcInternalContext.getContext().getFuture();
-        // invoker.invoke 会设置真实请求的 Future，这里要重新覆盖为 Hystrix 的 Future
-        RpcInternalContext.getContext().setFuture(delegate);
-        return responseFuture.get();
-    }
-
-    // Copy from AbstractCluster#buildEmptyResponse
-    private SofaResponse buildEmptyResponse(SofaRequest request) {
-        SofaResponse response = new SofaResponse();
-        Method method = request.getMethod();
-        if (method != null) {
-            response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
-        }
-        return response;
     }
 }
