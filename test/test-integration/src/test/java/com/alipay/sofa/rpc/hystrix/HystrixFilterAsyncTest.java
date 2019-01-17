@@ -212,10 +212,10 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
                 String groupKey = invoker.getConfig().getInterfaceId() + "thread_pool_rejected";
                 String commandKey = request.getMethodName() + "thread_pool_rejected";
                 return HystrixCommand.Setter
-                        .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
-                        .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
-                        .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionTimeoutEnabled(false))
-                        .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter().withCoreSize(1));
+                    .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
+                    .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey))
+                    .andCommandPropertiesDefaults(HystrixCommandProperties.Setter().withExecutionTimeoutEnabled(false))
+                    .andThreadPoolPropertiesDefaults(HystrixThreadPoolProperties.Setter().withCoreSize(1));
             }
         };
 
@@ -223,7 +223,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = defaultClient()
-                .setTimeout(10000);
+            .setTimeout(10000);
 
         SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
         SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
@@ -241,8 +241,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
                     Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
                     String result = (String) SofaResponseFuture.getResponse(10000, true);
                     Assert.assertEquals(
-                            "fallback abc from server! age: 24, error: java.util.concurrent.RejectedExecutionException",
-                            result);
+                        "fallback abc from server! age: 24, error: java.util.concurrent.RejectedExecutionException",
+                        result);
                     Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
                 }
             }

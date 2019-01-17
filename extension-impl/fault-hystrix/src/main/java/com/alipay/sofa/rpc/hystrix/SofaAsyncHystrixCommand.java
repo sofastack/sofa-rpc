@@ -40,18 +40,18 @@ import java.util.concurrent.CountDownLatch;
  */
 public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystrixInvokable {
 
-    private final static Logger   LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(SofaAsyncHystrixCommand.class);
 
-    private FilterInvoker         invoker;
+    private FilterInvoker       invoker;
 
-    private SofaRequest           request;
+    private SofaRequest         request;
 
-    private RpcInternalContext    rpcInternalContext;
-    private RpcInvokeContext      rpcInvokeContext;
+    private RpcInternalContext  rpcInternalContext;
+    private RpcInvokeContext    rpcInvokeContext;
 
-    private SofaResponse sofaResponse;
+    private SofaResponse        sofaResponse;
 
-    private CountDownLatch lock = new CountDownLatch(1);
+    private CountDownLatch      lock   = new CountDownLatch(1);
 
     public SofaAsyncHystrixCommand(FilterInvoker invoker, SofaRequest request) {
         super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createSetter(invoker,
@@ -120,7 +120,7 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
             throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
         } catch (InvocationTargetException e) {
             throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
-                    e.getTargetException());
+                e.getTargetException());
         }
     }
 }
