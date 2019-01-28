@@ -17,6 +17,9 @@
 package com.alipay.sofa.rpc.ext;
 
 import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.ext.proxy.TestExtensible;
+import com.alipay.sofa.rpc.ext.singleton.TestSingleton;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -214,6 +217,138 @@ public class ExtensionLoaderTest {
         Assert.assertFalse(loader.all.isEmpty());
         Assert.assertTrue(loader.all.size() == 1);
         Assert.assertTrue(loader.getExtensionClass("rrr6") != null);
+    }
+
+    @Test
+    public void testSingleton() throws Exception {
+        // test for rejection
+        ExtensionLoader<TestSingleton> loader = new ExtensionLoader<TestSingleton>(TestSingleton.class, false, null);
+        URL url = TestSingleton.class.getResource("/META-INF/sofa-rpc/" + TestSingleton.class.getName());
+        ;
+        try {
+            loader.readLine(url, "com.alipay.sofa.rpc.ext.singleton.TestSingleton1");
+            loader.readLine(url, "com.alipay.sofa.rpc.ext.singleton.TestSingleton2");
+        } catch (Throwable t) {
+            LOGGER.error(t.getMessage());
+        }
+
+        Assert.assertFalse(loader.all.isEmpty());
+        Assert.assertTrue(loader.all.size() == 2);
+        Assert.assertTrue(loader.allProxy.size() == 0);
+
+        TestSingleton test1 = loader.getExtension("test1");
+        Assert.assertEquals("test1x", test1.echo("x"));
+        TestSingleton test11 = loader.getExtension("test1");
+        Assert.assertEquals(test1, test11);
+
+        TestSingleton test2 = loader.getExtension("test2", new Class[] { String.class }, new Object[] { "xxx" });
+        Assert.assertEquals("test2x", test2.echo("x"));
+        TestSingleton test22 = loader.getExtension("test2", new Class[] { String.class }, new Object[] { "xxx" });
+        Assert.assertEquals(test2, test22);
+    }
+
+    @Test
+    public void testProxy() throws Exception {
+        // test for rejection
+        ExtensionLoader<TestExtensible> loader = new ExtensionLoader<TestExtensible>(TestExtensible.class, false, null);
+        URL url = TestExtensible.class.getResource("/META-INF/sofa-rpc/" + TestExtensible.class.getName());
+
+        {
+            try {
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtension1");
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtension2");
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+            }
+            Assert.assertFalse(loader.all.isEmpty());
+            Assert.assertTrue(loader.all.size() == 2);
+            Assert.assertTrue(loader.allProxy.size() == 0);
+
+            TestExtensible test1 = loader.getExtension("test1");
+            Assert.assertEquals("test1x", test1.echo("x"));
+            TestExtensible test2 = loader.getExtension("test2", new Class[] { String.class }, new Object[] { "y" });
+            Assert.assertEquals("test2yx", test2.echo("x"));
+        }
+
+        {
+            try {
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtension3");
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+            }
+            Assert.assertTrue(loader.all.size() == 3);
+            Assert.assertTrue(loader.allProxy.size() == 1);
+
+            TestExtensible test1 = loader.getExtension("test1");
+            Assert.assertEquals("test3test1x", test1.echo("x"));
+            TestExtensible test2 = loader.getExtension("test2", new Class[] { String.class }, new Object[] { "y" });
+            Assert.assertEquals("test3test2yx", test2.echo("x"));
+
+            TestExtensible test3 = loader.getExtension("test3");
+            try {
+                Assert.assertEquals("test3x", test3.echo("x"));
+                Assert.fail();
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+                Assert.assertTrue(t instanceof NullPointerException);
+            }
+        }
+
+        {
+            try {
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtension4");
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtension5");
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+            }
+            Assert.assertTrue(loader.all.size() == 5);
+            Assert.assertTrue(loader.allProxy.size() == 3);
+
+            TestExtensible test1 = loader.getExtension("test1");
+            Assert.assertEquals("test5test3test4test1x", test1.echo("x"));
+            TestExtensible test4 = loader.getExtension("test4");
+            try {
+                Assert.assertEquals("test4x", test4.echo("x"));
+                Assert.fail();
+            } catch (Exception e) {
+                Assert.assertTrue(e instanceof NullPointerException);
+            }
+        }
+
+        {
+            try {
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtensionWrong2");
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+            }
+            Assert.assertTrue(loader.all.size() == 5);
+            Assert.assertTrue(loader.allProxy.size() == 3);
+        }
+        {
+            try {
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtensionWrong3");
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+            }
+            Assert.assertTrue(loader.all.size() == 5);
+            Assert.assertTrue(loader.allProxy.size() == 3);
+        }
+        {
+            try {
+                loader.readLine(url, "com.alipay.sofa.rpc.ext.proxy.TestExtensionWrong1");
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+            }
+            Assert.assertTrue(loader.all.size() == 6);
+            Assert.assertTrue(loader.allProxy.size() == 4);
+            try {
+                TestExtensible test1 = loader.getExtension("test1");
+                Assert.fail();
+            } catch (Throwable t) {
+                LOGGER.error(t.getMessage());
+                Assert.assertTrue(t instanceof SofaRpcRuntimeException);
+            }
+        }
     }
 
     @Test

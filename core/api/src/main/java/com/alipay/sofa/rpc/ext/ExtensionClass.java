@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.base.Sortable;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 
 /**
@@ -68,6 +70,26 @@ public class ExtensionClass<T> implements Sortable {
      * 服务端实例对象（只在是单例的时候保留）
      */
     private volatile transient T       instance;
+
+    /**
+     * 是否代理扩展点
+     * 
+     * @since 6.0.0
+     */
+    protected boolean                  proxy;
+
+    /**
+     * cached proxy method
+     * 
+     * @since 6.0.0
+     */
+    private transient Method           proxyMethod;
+    /**
+     * cached proxy field (if proxyMethod is null)
+     * 
+     * @since 6.0.0
+     */
+    private transient Field            proxyField;
 
     /**
      * 构造函数
@@ -235,6 +257,66 @@ public class ExtensionClass<T> implements Sortable {
         return this;
     }
 
+    /**
+     * Is proxy boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isProxy() {
+        return proxy;
+    }
+
+    /**
+     * Sets proxy.
+     *
+     * @param proxy the proxy
+     * @return the proxy
+     */
+    public ExtensionClass<T> setProxy(boolean proxy) {
+        this.proxy = proxy;
+        return this;
+    }
+
+    /**
+     * Get proxy method.
+     *
+     * @return the proxy method
+     */
+    Method getProxyMethod() {
+        return proxyMethod;
+    }
+
+    /**
+     * Sets proxy method
+     *
+     * @param proxyMethod the proxy method
+     * @return the proxy method
+     */
+    ExtensionClass<T> setProxyMethod(Method proxyMethod) {
+        this.proxyMethod = proxyMethod;
+        return this;
+    }
+
+    /**
+     * Get proxy field.
+     *
+     * @return the proxy field
+     */
+    Field getProxyField() {
+        return proxyField;
+    }
+
+    /**
+     * Sets proxy field.
+     *
+     * @param proxyField the proxy field
+     * @return the proxy field
+     */
+    ExtensionClass<T> setProxyField(Field proxyField) {
+        this.proxyField = proxyField;
+        return this;
+    }
+
     @Override
     public String toString() {
         return "ExtensionClass{" +
@@ -245,6 +327,7 @@ public class ExtensionClass<T> implements Sortable {
             ", order=" + order +
             ", override=" + override +
             ", rejection=" + Arrays.toString(rejection) +
+            ", proxy=" + proxy +
             ", instance=" + instance +
             '}';
     }

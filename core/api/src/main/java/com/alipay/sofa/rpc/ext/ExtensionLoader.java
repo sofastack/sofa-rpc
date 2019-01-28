@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.ext;
 
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
@@ -31,8 +32,12 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -70,6 +75,13 @@ public class ExtensionLoader<T> {
      * 全部的加载的实现类 {"alias":ExtensionClass}
      */
     protected final ConcurrentMap<String, ExtensionClass<T>> all;
+
+    /**
+     * All proxy extension {"alias":ExtensionClass(proxy=true)}
+     * 
+     * @since 6.0.0
+     */
+    protected final ConcurrentMap<String, ExtensionClass<T>> allProxy;
 
     /**
      * 如果是单例，那么factory不为空
@@ -115,6 +127,7 @@ public class ExtensionLoader<T> {
             this.factory = null;
             this.extensible = null;
             this.all = null;
+            this.allProxy = null;
             return;
         }
         // 接口为空，既不是接口，也不是抽象类
@@ -135,6 +148,7 @@ public class ExtensionLoader<T> {
 
         this.factory = extensible.singleton() ? new ConcurrentHashMap<String, T>() : null;
         this.all = new ConcurrentHashMap<String, ExtensionClass<T>>();
+        this.allProxy = new ConcurrentHashMap<String, ExtensionClass<T>>();
         if (autoLoad) {
             List<String> paths = RpcConfigs.getListValue(RpcOptions.EXTENSION_LOAD_PATH);
             for (String path : paths) {
@@ -338,6 +352,33 @@ public class ExtensionLoader<T> {
                     }
                 }
             }
+            if (extensionClass.isProxy()) {
+                boolean notCheck = false;
+                try {
+                    Method setProxyMethod = implClass.getDeclaredMethod("setProxy", interfaceClass);
+                    setProxyMethod.setAccessible(true);
+                    extensionClass.setProxyMethod(setProxyMethod);
+                } catch (NoSuchMethodException e) {
+                    try {
+                        Field proxyField = implClass.getDeclaredField("proxy");
+                        if (proxyField.getType() == interfaceClass) {
+                            proxyField.setAccessible(true);
+                            extensionClass.setProxyField(proxyField);
+                        } else {
+                            notCheck = true;
+                        }
+                    } catch (NoSuchFieldException e1) {
+                        notCheck = true;
+                    }
+                }
+                if (notCheck) {
+                    throw new IllegalStateException("Error when load extension of extensible "
+                        + interfaceClass + " from file:" + url
+                        + ", Proxy is true in " + implClass.getName()
+                        + " but not exist method 'setProxy(" + interfaceClass.getName()
+                        + ")' or filed '" + interfaceClass.getName() + " proxy;'");
+                }
+            }
 
             loadSuccess(alias, extensionClass);
         }
@@ -350,6 +391,7 @@ public class ExtensionLoader<T> {
         extensionClass.setOrder(extension.order());
         extensionClass.setOverride(extension.override());
         extensionClass.setRejection(extension.rejection());
+        extensionClass.setProxy(extension.proxy());
         return extensionClass;
     }
 
@@ -357,13 +399,20 @@ public class ExtensionLoader<T> {
         if (listener != null) {
             try {
                 listener.onLoad(extensionClass); // 加载完毕，通知监听器
-                all.put(alias, extensionClass);
+                putToCache(alias, extensionClass);
             } catch (Exception e) {
                 LOGGER.error("Error when load extension of extensible " + interfaceClass + " with alias: "
                     + alias + ".", e);
             }
         } else {
-            all.put(alias, extensionClass);
+            putToCache(alias, extensionClass);
+        }
+    }
+
+    private void putToCache(String alias, ExtensionClass<T> extensionClass) {
+        all.put(alias, extensionClass);
+        if (extensionClass.isProxy()) {
+            allProxy.put(alias, extensionClass);
         }
     }
 
@@ -431,14 +480,14 @@ public class ExtensionLoader<T> {
                     synchronized (this) {
                         t = factory.get(alias);
                         if (t == null) {
-                            t = extensionClass.getExtInstance();
+                            t = buildInstance(extensionClass, null, null);
                             factory.put(alias, t);
                         }
                     }
                 }
                 return t;
             } else {
-                return extensionClass.getExtInstance();
+                return buildInstance(extensionClass, null, null);
             }
         }
     }
@@ -462,15 +511,43 @@ public class ExtensionLoader<T> {
                     synchronized (this) {
                         t = factory.get(alias);
                         if (t == null) {
-                            t = extensionClass.getExtInstance(argTypes, args);
+                            t = buildInstance(extensionClass, argTypes, args);
                             factory.put(alias, t);
                         }
                     }
                 }
                 return t;
             } else {
-                return extensionClass.getExtInstance(argTypes, args);
+                return buildInstance(extensionClass, argTypes, args);
             }
         }
+    }
+
+    private T buildInstance(ExtensionClass<T> extensionClass, Class[] argTypes, Object[] args) {
+        T instance = (argTypes == null || args == null) ?
+            extensionClass.getExtInstance() :
+            extensionClass.getExtInstance(argTypes, args);
+        // warp instance and inject proxy 
+        if (!extensionClass.isProxy() && CommonUtils.isNotEmpty(allProxy)) {
+            List<ExtensionClass<T>> allProxyClass = new ArrayList<ExtensionClass<T>>(allProxy.values());
+            Collections.sort(allProxyClass, new OrderedComparator<ExtensionClass>(false));
+            for (ExtensionClass<T> proxyClass : allProxyClass) {
+                try {
+                    T tmp = (argTypes == null || args == null) ?
+                        getExtension(proxyClass.getAlias()) :
+                        getExtension(proxyClass.getAlias(), argTypes, args);
+                    if (proxyClass.getProxyMethod() != null) {
+                        proxyClass.getProxyMethod().invoke(tmp, instance);
+                        instance = tmp;
+                    } else if (proxyClass.getProxyField() != null) {
+                        proxyClass.getProxyField().set(tmp, instance);
+                        instance = tmp;
+                    }
+                } catch (Exception e) {
+                    throw new SofaRpcRuntimeException("Build proxy extension error!", e);
+                }
+            }
+        }
+        return instance;
     }
 }

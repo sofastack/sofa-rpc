@@ -69,4 +69,12 @@ public @interface Extension {
      * @since 5.2.0
      */
     String[] rejection() default {};
+
+    /**
+     * 是否代理扩展点，代理扩展点可以代理所有其他扩展点
+     * 
+     * @return 是否代理扩展点
+     * @since 6.0.0
+     */
+    boolean proxy() default false;
 }
