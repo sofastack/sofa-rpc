@@ -30,9 +30,13 @@ import com.alipay.sofa.rpc.client.aft.MeasureStrategy;
 import com.alipay.sofa.rpc.client.aft.RecoverStrategy;
 import com.alipay.sofa.rpc.client.aft.RegulationStrategy;
 import com.alipay.sofa.rpc.client.aft.Regulator;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
+import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -51,6 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+@Extension("timeWindow")
 public class TimeWindowRegulator implements Regulator {
 
     /** Logger for this class */
@@ -115,11 +120,23 @@ public class TimeWindowRegulator implements Regulator {
 
     @Override
     public void init() {
-        measureStrategy = new ServiceHorizontalMeasureStrategy();
-        regulationStrategy = new ServiceHorizontalRegulationStrategy();
-        weightDegradeStrategy = new WeightDegradeStrategy();
+        String measureStrategyAlias = RpcConfigs
+            .getOrDefaultValue(RpcOptions.AFT_MEASURE_STRATEGY, "serviceHorizontal");
+        String regulationStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_REGULATION_STRATEGY,
+            "serviceHorizontal");
+        String degradeStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_DEGRADE_STRATEGY, "weight");
+        String recoverStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_RECOVER_STRATEGY, "weight");
+
+        measureStrategy = ExtensionLoaderFactory.getExtensionLoader(MeasureStrategy.class).getExtension(
+            measureStrategyAlias);
+        regulationStrategy = ExtensionLoaderFactory.getExtensionLoader(RegulationStrategy.class).getExtension(
+            regulationStrategyAlias);
+        weightDegradeStrategy = ExtensionLoaderFactory.getExtensionLoader(DegradeStrategy.class).getExtension(
+            degradeStrategyAlias);
+        recoverStrategy = ExtensionLoaderFactory.getExtensionLoader(RecoverStrategy.class).getExtension(
+            recoverStrategyAlias);
+
         logDegradeStrategy = new LogPrintDegradeStrategy();
-        recoverStrategy = new WeightRecoverStrategy();
 
         InvocationStatFactory.addListener(listener);
     }

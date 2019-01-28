@@ -18,11 +18,14 @@ package com.alipay.sofa.rpc.module;
 
 import com.alipay.sofa.rpc.client.aft.Regulator;
 import com.alipay.sofa.rpc.client.aft.impl.TimeWindowRegulator;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.FaultToleranceSubscriber;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 
 /**
  * FaultToleranceModule
@@ -53,7 +56,8 @@ public class FaultToleranceModule implements Module {
         EventBus.register(ClientSyncReceiveEvent.class, subscriber);
         EventBus.register(ClientAsyncReceiveEvent.class, subscriber);
 
-        regulator = new TimeWindowRegulator();
+        String regulatorAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_REGULATOR, "timeWindow");
+        regulator = ExtensionLoaderFactory.getExtensionLoader(Regulator.class).getExtension(regulatorAlias);
         regulator.init();
     }
 
