@@ -66,7 +66,7 @@ public interface Server extends Destroyable {
      * @param providerConfig 服务提供者配置
      * @param instance       服务提供者实例
      */
-    void registerProcessor(ProviderConfig providerConfig, Invoker instance);
+    void registerProcessor(ProviderConfig providerConfig, Invoker instance) throws Exception;
 
     /**
      * 取消注册服务

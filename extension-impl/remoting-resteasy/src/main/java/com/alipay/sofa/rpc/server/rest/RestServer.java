@@ -195,7 +195,7 @@ public class RestServer implements Server {
     }
 
     @Override
-    public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
+    public void registerProcessor(ProviderConfig providerConfig, Invoker instance) throws Exception {
         if (!isStarted()) {
             start();
         }
@@ -204,15 +204,12 @@ public class RestServer implements Server {
             LOGGER.info("Register jaxrs service to base url http://" + serverConfig.getHost() + ":"
                 + serverConfig.getPort() + serverConfig.getContextPath());
         }
-        try {
-            Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
-            httpServer.getDeployment().getRegistry()
-                .addResourceFactory(new SofaResourceFactory(providerConfig, obj), serverConfig.getContextPath());
+        Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
 
-            invokerCnt.incrementAndGet();
-        } catch (Exception e) {
-            LOGGER.error("Register jaxrs service error", e);
-        }
+        httpServer.getDeployment().getRegistry()
+            .addResourceFactory(new SofaResourceFactory(providerConfig, obj), serverConfig.getContextPath());
+
+        invokerCnt.incrementAndGet();
     }
 
     @Override
