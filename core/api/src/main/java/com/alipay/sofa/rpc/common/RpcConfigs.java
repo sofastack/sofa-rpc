@@ -17,10 +17,12 @@
 package com.alipay.sofa.rpc.common;
 
 import com.alipay.sofa.rpc.base.Sortable;
+import com.alipay.sofa.rpc.common.annotation.JustForTest;
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.CompatibleTypeUtils;
 import com.alipay.sofa.rpc.common.utils.FileUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
@@ -133,6 +135,25 @@ public class RpcConfigs {
             if (CommonUtils.isNotEmpty(rpcConfigListeners)) {
                 for (RpcConfigListener rpcConfigListener : rpcConfigListeners) {
                     rpcConfigListener.onChange(oldValue, newValue);
+                }
+            }
+        }
+    }
+
+    /**
+     * Remove value 
+     * 
+     * @param key Key
+     */
+    @JustForTest
+    synchronized static void removeValue(String key) {
+        Object oldValue = CFG.get(key);
+        if (oldValue != null) {
+            CFG.remove(key);
+            List<RpcConfigListener> rpcConfigListeners = CFG_LISTENER.get(key);
+            if (CommonUtils.isNotEmpty(rpcConfigListeners)) {
+                for (RpcConfigListener rpcConfigListener : rpcConfigListeners) {
+                    rpcConfigListener.onChange(oldValue, null);
                 }
             }
         }
@@ -282,7 +303,7 @@ public class RpcConfigs {
      */
     public static <T> T getOrDefaultValue(String primaryKey, T defaultValue) {
         Object val = CFG.get(primaryKey);
-        return val == null ? defaultValue : (T) val;
+        return val == null ? defaultValue : (T) CompatibleTypeUtils.convert(val, defaultValue.getClass());
     }
 
     /**
