@@ -23,7 +23,7 @@ import com.alipay.sofa.rpc.ext.Extensible;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extensible
+@Extensible(singleton = false)
 public interface Regulator {
 
     /**
