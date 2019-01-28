@@ -353,7 +353,7 @@ public class ExtensionLoader<T> {
                 }
             }
             if (extensionClass.isProxy()) {
-                boolean notCheck = false;
+                boolean illegal = false;
                 try {
                     Method setProxyMethod = implClass.getDeclaredMethod("setProxy", interfaceClass);
                     setProxyMethod.setAccessible(true);
@@ -365,13 +365,13 @@ public class ExtensionLoader<T> {
                             proxyField.setAccessible(true);
                             extensionClass.setProxyField(proxyField);
                         } else {
-                            notCheck = true;
+                            illegal = true;
                         }
                     } catch (NoSuchFieldException e1) {
-                        notCheck = true;
+                        illegal = true;
                     }
                 }
-                if (notCheck) {
+                if (illegal) {
                     throw new IllegalStateException("Error when load extension of extensible "
                         + interfaceClass + " from file:" + url
                         + ", Proxy is true in " + implClass.getName()
