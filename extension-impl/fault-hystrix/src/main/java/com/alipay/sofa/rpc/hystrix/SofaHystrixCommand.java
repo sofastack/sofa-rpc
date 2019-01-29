@@ -36,7 +36,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements SofaHystrixInvokable {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
 
     private RpcInternalContext  rpcInternalContext;
     private RpcInvokeContext    rpcInvokeContext;

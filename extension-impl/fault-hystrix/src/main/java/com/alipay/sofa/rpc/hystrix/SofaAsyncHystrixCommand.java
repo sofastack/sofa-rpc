@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
@@ -32,6 +33,7 @@ import com.netflix.hystrix.HystrixCommand;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * {@link HystrixCommand} for async requests
@@ -40,7 +42,9 @@ import java.util.concurrent.CountDownLatch;
  */
 public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystrixInvokable {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SofaAsyncHystrixCommand.class);
+    private static final Logger LOGGER               = LoggerFactory.getLogger(SofaAsyncHystrixCommand.class);
+
+    private static final long   DEFAULT_LOCK_TIMEOUT = 1000;
 
     private FilterInvoker       invoker;
 
@@ -51,7 +55,7 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
 
     private SofaResponse        sofaResponse;
 
-    private CountDownLatch      lock   = new CountDownLatch(1);
+    private CountDownLatch      lock                 = new CountDownLatch(1);
 
     public SofaAsyncHystrixCommand(FilterInvoker invoker, SofaRequest request) {
         super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createSetter(invoker,
@@ -70,11 +74,17 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
         }
         HystrixResponseFuture delegate = new HystrixResponseFuture(this.queue());
         try {
-            lock.await();
+            boolean finished = lock.await(getLockTimeout(), TimeUnit.MILLISECONDS);
+            if (!finished && !this.isExecutionComplete()) {
+                throw new SofaTimeOutException("Asynchronous execution timed out, please check Hystrix configuration");
+            }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
         RpcInternalContext.getContext().setFuture(delegate);
+        if (this.sofaResponse == null) {
+            this.sofaResponse = buildEmptyResponse(request);
+        }
         return this.sofaResponse;
     }
 
@@ -87,16 +97,6 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
         ResponseFuture responseFuture = RpcInternalContext.getContext().getFuture();
         lock.countDown();
         return responseFuture.get();
-    }
-
-    // Copy from AbstractCluster#buildEmptyResponse
-    private SofaResponse buildEmptyResponse(SofaRequest request) {
-        SofaResponse response = new SofaResponse();
-        Method method = request.getMethod();
-        if (method != null) {
-            response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
-        }
-        return response;
     }
 
     @Override
@@ -122,5 +122,22 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
             throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
                 e.getTargetException());
         }
+    }
+
+    // Copy from AbstractCluster#buildEmptyResponse
+    private SofaResponse buildEmptyResponse(SofaRequest request) {
+        SofaResponse response = new SofaResponse();
+        Method method = request.getMethod();
+        if (method != null) {
+            response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
+        }
+        return response;
+    }
+
+    private long getLockTimeout() {
+        if (this.getProperties().executionTimeoutEnabled().get()) {
+            return this.getProperties().executionTimeoutInMilliseconds().get();
+        }
+        return DEFAULT_LOCK_TIMEOUT;
     }
 }
