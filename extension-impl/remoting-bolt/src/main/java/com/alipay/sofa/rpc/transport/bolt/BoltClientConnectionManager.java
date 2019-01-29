@@ -27,10 +27,30 @@ import com.alipay.sofa.rpc.transport.ClientTransportConfig;
  */
 public interface BoltClientConnectionManager {
 
+    /**
+     * get connection
+     * @param rpcClient
+     * @param transportConfig
+     * @param url
+     * @return
+     */
     public Connection getConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
+    /**
+     * close connection
+     * @param rpcClient
+     * @param transportConfig
+     * @param url
+     */
     public void closeConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
+    /**
+     * judge connection status
+     * @param rpcClient
+     * @param transportConfig
+     * @param url
+     * @return
+     */
     public boolean isConnectionFine(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
 }
