@@ -32,9 +32,9 @@ import com.alipay.remoting.rpc.exception.InvokeTimeoutException;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
-import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -78,12 +78,17 @@ public class BoltClientTransport extends ClientTransport {
      */
     protected static final RpcClient             RPC_CLIENT        = new RpcClient();
 
+    protected static final boolean               REUSE_CONNECTION  = RpcConfigs.getOrDefaultValue(
+                                                                       "com.alipay.sofa.rpc.bolt.reuse", true);
+
     /**
      * Connection manager for reuse connection
      *
      * @since 5.4.0
      */
-    protected static BoltClientConnectionManager connectionManager = new BoltClientConnectionManager(true);
+    protected static BoltClientConnectionManager connectionManager = REUSE_CONNECTION ? new ReuseBoltClientConnectionManager(
+                                                                       true) : new AloneBoltClientConnectionManager(
+                                                                       true);
 
     static {
         RPC_CLIENT.init();
@@ -94,12 +99,6 @@ public class BoltClientTransport extends ClientTransport {
      * bolt需要的URL的缓存
      */
     protected final Url                          url;
-
-    /**
-     * Connection的实时状态<br>
-     * 因为一个url在bolt里对应多个connect的，但是我们禁用，只保留一个
-     */
-    protected volatile Connection                connection;
 
     /**
      * 正在发送的调用数量
@@ -146,32 +145,13 @@ public class BoltClientTransport extends ClientTransport {
 
     @Override
     public void connect() {
-        if (connection != null) {
-            if (!connection.isFine()) {
-                connection.close();
-                connection = null;
-            }
-        }
-        if (connection == null) {
-            synchronized (this) {
-                if (connection == null) {
-                    connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
-                }
-            }
-        }
+        connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
     }
 
     @Override
     public void disconnect() {
         try {
-            if (connection != null) {
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Try disconnect client transport now. The connection is {}.",
-                        NetUtils.channelToString(localAddress(), remoteAddress()));
-                }
-                connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
-                connection = null;
-            }
+            connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("", e);
         }
@@ -184,7 +164,7 @@ public class BoltClientTransport extends ClientTransport {
 
     @Override
     public boolean isAvailable() {
-        return connection != null && connection.isFine();
+        return connectionManager.isConnectionFine(RPC_CLIENT, transportConfig, url);
     }
 
     @Override
@@ -435,15 +415,19 @@ public class BoltClientTransport extends ClientTransport {
 
     @Override
     public InetSocketAddress remoteAddress() {
+        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
         return connection == null ? null : connection.getRemoteAddress();
     }
 
     @Override
     public InetSocketAddress localAddress() {
-        return connection == null ? null : connection.getLocalAddress();
+        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
+        return connection == null ? null : connection.getRemoteAddress();
     }
 
     protected void checkConnection() throws SofaRpcException {
+
+        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
         if (connection == null) {
             throw new SofaRpcException(RpcErrorType.CLIENT_NETWORK, "connection is null");
         }
@@ -458,5 +442,11 @@ public class BoltClientTransport extends ClientTransport {
         if (value != null) {
             context.setAttachment(key, value);
         }
+    }
+
+    public Connection fetchConnection() {
+        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
+
+        return connection;
     }
 }

@@ -39,11 +39,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class BoltClientConnectionManagerTest extends ActivelyDestroyTest {
+public class ReuseBoltClientConnectionManagerTest extends ActivelyDestroyTest {
 
-    private BoltClientConnectionManager manager   = new BoltClientConnectionManager(false);
+    private ReuseBoltClientConnectionManager manager   = new ReuseBoltClientConnectionManager(false);
 
-    private RpcClient                   rpcClient = new RpcClient();
+    private RpcClient                        rpcClient = new RpcClient();
 
     @Before
     public void init() {
