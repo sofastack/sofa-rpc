@@ -18,14 +18,12 @@ package com.alipay.sofa.rpc.transport.bolt;
 
 import com.alipay.remoting.Connection;
 import com.alipay.remoting.Url;
-import com.alipay.remoting.exception.RemotingException;
 import com.alipay.remoting.rpc.RpcClient;
 import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
@@ -113,10 +111,8 @@ class ReuseBoltClientConnectionManager implements BoltClientConnectionManager {
         if (connection == null) {
             try {
                 connection = rpcClient.getConnection(url, url.getConnectTimeout());
-            } catch (InterruptedException e) {
-                throw new SofaRpcRuntimeException(e);
-            } catch (RemotingException e) {
-                throw new SofaRpcRuntimeException(e);
+            } catch (Exception e) {
+                LOGGER.warn("get connection failed in url," + url);
             }
             if (connection == null) {
                 return null;
