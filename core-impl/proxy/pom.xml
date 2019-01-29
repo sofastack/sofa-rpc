@@ -24,6 +24,12 @@
         </dependency>
 
         <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.7.9</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-log</artifactId>
             <version>${project.parent.version}</version>
