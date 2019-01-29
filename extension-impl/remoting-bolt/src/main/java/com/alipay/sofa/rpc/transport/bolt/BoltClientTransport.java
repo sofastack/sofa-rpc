@@ -87,8 +87,9 @@ public class BoltClientTransport extends ClientTransport {
      * @since 5.4.0
      */
     protected static BoltClientConnectionManager connectionManager = REUSE_CONNECTION ? new ReuseBoltClientConnectionManager(
-                                                                       true) : new AloneBoltClientConnectionManager(
-                                                                       true);
+                                                                       true)
+                                                                       : new AloneBoltClientConnectionManager(
+                                                                           true);
 
     static {
         RPC_CLIENT.init();
