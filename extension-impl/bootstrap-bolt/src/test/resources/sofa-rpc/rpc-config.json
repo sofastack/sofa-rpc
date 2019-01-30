@@ -1,0 +1,4 @@
+{
+  "rpc.config.order": 999,  // 加载顺序，越大越后加载
+  "logger.impl": "com.alipay.sofa.rpc.log.SLF4JLoggerImpl"
+}
