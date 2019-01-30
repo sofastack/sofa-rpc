@@ -32,7 +32,7 @@ public interface BoltClientConnectionManager {
      * @param rpcClient
      * @param transportConfig
      * @param url
-     * @return
+     * @return the connection or null
      */
     public Connection getConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
@@ -49,7 +49,7 @@ public interface BoltClientConnectionManager {
      * @param rpcClient
      * @param transportConfig
      * @param url
-     * @return
+     * @return true /false
      */
     public boolean isConnectionFine(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
