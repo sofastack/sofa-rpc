@@ -61,7 +61,7 @@ public class BytebuddyProxy implements Proxy {
         try {
             return cls.newInstance();
         } catch (Throwable t) {
-            throw new SofaRpcRuntimeException("", t);
+            throw new SofaRpcRuntimeException("construct proxy with bytebuddy occurs error", t);
         }
 
     }
