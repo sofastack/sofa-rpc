@@ -54,7 +54,6 @@ public class BytebuddyInvocationHandler {
         String name = method.getName();
         if ("equals".equals(name)) {
             Object another = args[0];
-            final Invoker invoker = this.getProxyInvoker();
             return proxy == another ||
                 (proxy.getClass().isInstance(another) && proxyInvoker.equals(BytebuddyProxy.parseInvoker(another)));
         } else if ("hashCode".equals(name)) {
