@@ -109,16 +109,18 @@ public class RestServer implements Server {
         }
 
         // 注册cors filter
-        final CorsFilter corsFilter = new CorsFilter();
         Map<String, String> parameters = serverConfig.getParameters();
         if (CommonUtils.isNotEmpty(parameters)) {
             String crossDomainStr = parameters.get(RpcConstants.ALLOWED_ORIGINS);
-            String[] domains = StringUtils.splitWithCommaOrSemicolon(crossDomainStr);
-            for (String allowDomain : domains) {
-                corsFilter.getAllowedOrigins().add(allowDomain);
+            if (StringUtils.isNotBlank(crossDomainStr)) {
+                final CorsFilter corsFilter = new CorsFilter();
+                String[] domains = StringUtils.splitWithCommaOrSemicolon(crossDomainStr);
+                for (String allowDomain : domains) {
+                    corsFilter.getAllowedOrigins().add(allowDomain);
+                }
+                JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
             }
         }
-        JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
 
         // 注册自定义
         Set<Object> customProviderInstances = JAXRSProviderManager.getCustomProviderInstances();
