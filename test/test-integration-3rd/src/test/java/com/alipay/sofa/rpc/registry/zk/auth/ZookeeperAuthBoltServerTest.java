@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.zk.auth;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -78,7 +79,7 @@ public class ZookeeperAuthBoltServerTest {
         parameters.put("addAuth", "sofazk:rpc1");
 
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181/authtest")
             .setParameters(parameters);
 
@@ -116,7 +117,7 @@ public class ZookeeperAuthBoltServerTest {
         parameters.put("addAuth", "sofazk:rpc2");
 
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181/authtest")
             .setParameters(parameters);
 
