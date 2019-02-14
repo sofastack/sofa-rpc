@@ -64,6 +64,7 @@
         <bolt.version>1.4.6</bolt.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
+        <bytebuddy.version>1.9.8</bytebuddy.version>
     </properties>
 
     <dependencies>
@@ -254,6 +255,12 @@
             <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
             <version>${javassist.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>${bytebuddy.version}</version>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
