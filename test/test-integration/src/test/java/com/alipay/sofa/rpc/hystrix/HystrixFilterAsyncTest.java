@@ -22,7 +22,9 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
@@ -35,6 +37,7 @@ import com.netflix.hystrix.exception.HystrixRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.Collections;
 import java.util.concurrent.Future;
 
 /**
@@ -252,6 +255,30 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             providerConfig.unExport();
             consumerConfig.unRefer();
         }
+    }
+
+    @Test
+    public void testHystrixLockNotRelease() {
+        // 通过 filter mock 锁超时的情况
+        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig.export();
+
+        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+            .setFilterRef(Collections.<Filter> singletonList(new MockTimeoutFilter(2000)))
+            .setTimeout(10000);
+        HelloService helloService = consumerConfig.refer();
+
+        try {
+            helloService.sayHello("abc", 24);
+            Assert.fail();
+        } catch (Exception e) {
+            Assert.assertTrue(e instanceof SofaTimeOutException);
+            Assert
+                .assertEquals(
+                    "Asynchronous execution timed out, please check Hystrix configuration. Events: [SofaAsyncHystrixEvent#EMIT]",
+                    e.getMessage());
+        }
+
     }
 
     private ProviderConfig<HelloService> defaultServer(int sleep) {
