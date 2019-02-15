@@ -36,7 +36,7 @@ public class WarmUpTest extends BaseZkTest {
     public void testWarmUp() throws InterruptedException {
 
         RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
