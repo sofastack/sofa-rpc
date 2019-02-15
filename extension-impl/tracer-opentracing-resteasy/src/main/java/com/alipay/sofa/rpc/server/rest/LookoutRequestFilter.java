@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.lookout.RestConstants;
 import org.jboss.resteasy.core.interception.PostMatchContainerRequestContext;
 
 import javax.annotation.Priority;
@@ -58,8 +59,8 @@ public class LookoutRequestFilter implements ContainerRequestFilter {
             String methodName = resourceMethodInvoker.getMethod().getName();
 
             RpcInternalContext context = RpcInternalContext.getContext();
-            context.setAttachment(INTERNAL_KEY_PREFIX + "rest_service", serviceName);
-            context.setAttachment(INTERNAL_KEY_PREFIX + "rest_methodname", methodName);
+            context.setAttachment(INTERNAL_KEY_PREFIX + RestConstants.REST_SERVICE_KEY, serviceName);
+            context.setAttachment(INTERNAL_KEY_PREFIX + RestConstants.REST_METHODNAME_KEY, methodName);
 
             context.setAttachment(RemotingConstants.HEAD_APP_NAME, appName);
         } catch (Exception e) {
