@@ -69,11 +69,10 @@ public class RestLookoutTest extends ActivelyDestroyTest {
     @BeforeClass
     public static void beforeCurrentClass() {
 
-        ActivelyDestroyTest.adBeforeClass();
+        RpcRunningState.setUnitTestMode(false);
+
         Registry registry = new DefaultRegistry();
         Lookout.setRegistry(registry);
-
-        RpcRunningState.setUnitTestMode(false);
 
         // 只有1个线程 执行
         serverConfig = new ServerConfig()
@@ -87,8 +86,8 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     @AfterClass
     public static void afterCurrentClass() {
-        ActivelyDestroyTest.adAfterClass();
         RpcRunningState.setUnitTestMode(true);
+        ActivelyDestroyTest.adAfterClass();
     }
 
     /**
