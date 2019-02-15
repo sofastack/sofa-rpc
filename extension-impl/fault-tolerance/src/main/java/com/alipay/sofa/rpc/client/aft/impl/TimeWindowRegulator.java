@@ -104,7 +104,7 @@ public class TimeWindowRegulator implements Regulator {
      * 降级策略: 例如调整权重 
      */
     private DegradeStrategy                          degradeStrategy;
-    
+
     /**
      * 恢复策略：例如调整权重 
      */
