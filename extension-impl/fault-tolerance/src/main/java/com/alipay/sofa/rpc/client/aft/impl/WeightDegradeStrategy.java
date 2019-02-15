@@ -39,8 +39,13 @@ public class WeightDegradeStrategy extends LogPrintDegradeStrategy {
 
     @Override
     public void degrade(MeasureResultDetail measureResultDetail) {
+
         super.degrade(measureResultDetail);
 
+        if (measureResultDetail.isLogOnly()) {
+            return;
+        }
+        
         InvocationStatDimension statDimension = measureResultDetail.getInvocationStatDimension();
         String appName = statDimension.getAppName();
 

@@ -101,15 +101,12 @@ public class TimeWindowRegulator implements Regulator {
     private RegulationStrategy                       regulationStrategy;
 
     /**
-     * 降级策略: 调整权重 
+     * 降级策略: 例如调整权重 
      */
-    private DegradeStrategy                          weightDegradeStrategy;
+    private DegradeStrategy                          degradeStrategy;
+    
     /**
-     * 降级策略: 只打印日志 
-     */
-    private DegradeStrategy                          logDegradeStrategy;
-    /**
-     * 恢复策略：调整权重 
+     * 恢复策略：例如调整权重 
      */
     private RecoverStrategy                          recoverStrategy;
 
@@ -131,12 +128,10 @@ public class TimeWindowRegulator implements Regulator {
             measureStrategyAlias);
         regulationStrategy = ExtensionLoaderFactory.getExtensionLoader(RegulationStrategy.class).getExtension(
             regulationStrategyAlias);
-        weightDegradeStrategy = ExtensionLoaderFactory.getExtensionLoader(DegradeStrategy.class).getExtension(
+        degradeStrategy = ExtensionLoaderFactory.getExtensionLoader(DegradeStrategy.class).getExtension(
             degradeStrategyAlias);
         recoverStrategy = ExtensionLoaderFactory.getExtensionLoader(RecoverStrategy.class).getExtension(
             recoverStrategyAlias);
-
-        logDegradeStrategy = new LogPrintDegradeStrategy();
 
         InvocationStatFactory.addListener(listener);
     }
@@ -168,8 +163,7 @@ public class TimeWindowRegulator implements Regulator {
         // release strategy
         measureStrategy = null;
         regulationStrategy = null;
-        weightDegradeStrategy = null;
-        logDegradeStrategy = null;
+        degradeStrategy = null;
         recoverStrategy = null;
     }
 
@@ -239,10 +233,11 @@ public class TimeWindowRegulator implements Regulator {
 
             boolean isDegradeEffective = regulationStrategy.isDegradeEffective(measureResultDetail);
             if (isDegradeEffective) {
+                measureResultDetail.setLogOnly(false);
                 if (measureState.equals(MeasureState.ABNORMAL)) {
                     boolean isReachMaxDegradeIpCount = regulationStrategy.isReachMaxDegradeIpCount(measureResultDetail);
                     if (!isReachMaxDegradeIpCount) {
-                        weightDegradeStrategy.degrade(measureResultDetail);
+                        degradeStrategy.degrade(measureResultDetail);
                     } else {
                         String appName = measureResult.getMeasureModel().getAppName();
                         if (LOGGER.isInfoEnabled(appName)) {
@@ -260,8 +255,9 @@ public class TimeWindowRegulator implements Regulator {
                     //没有被降级过，因此不需要被恢复。
                 }
             } else {
+                measureResultDetail.setLogOnly(true);
                 if (measureState.equals(MeasureState.ABNORMAL)) {
-                    logDegradeStrategy.degrade(measureResultDetail);
+                    degradeStrategy.degrade(measureResultDetail);
                     String appName = measureResult.getMeasureModel().getAppName();
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGULATION_ABNORMAL_NOT_DEGRADE,
