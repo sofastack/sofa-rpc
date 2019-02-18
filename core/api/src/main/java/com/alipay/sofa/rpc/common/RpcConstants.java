@@ -31,7 +31,7 @@ public class RpcConstants {
     /**
      * zookeeper注册中心
      */
-    public static final String  REGISTRY_PROTOCOL_ZK               = "zooKeeper";
+    public static final String  REGISTRY_PROTOCOL_ZK               = "zookeeper";
 
     /**
      * mesh注册中心

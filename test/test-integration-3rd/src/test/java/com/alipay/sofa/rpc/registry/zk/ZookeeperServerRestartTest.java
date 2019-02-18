@@ -44,7 +44,7 @@ public class ZookeeperServerRestartTest extends BaseZkTest {
 
     @Test
     public void testAll() throws Exception {
-        final RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
+        final RegistryConfig registryConfig = new RegistryConfig().setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181").setConnectTimeout(100);
         final ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
             .getRegistry(registryConfig);
