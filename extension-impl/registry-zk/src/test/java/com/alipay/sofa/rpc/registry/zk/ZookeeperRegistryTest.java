@@ -55,7 +55,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @BeforeClass
     public static void setUp() {
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setSubscribe(true)
             .setAddress("127.0.0.1:2181")
             .setRegister(true);

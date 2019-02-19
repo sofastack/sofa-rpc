@@ -42,7 +42,7 @@ public class ConsulURL implements Serializable {
 
     final static String               UTF8_ENCODING    = "UTF-8";
 
-    final static String               UNIQUE_ID        = "uniqueId";
+    final static String               INTERFACE        = "interface";
 
     final static String               GROUP_KEY        = "group";
 
@@ -123,7 +123,7 @@ public class ConsulURL implements Serializable {
                     }
                 }
             }
-            interfaceId = parameters.get(UNIQUE_ID);
+            interfaceId = parameters.get(INTERFACE);
             group = parameters.get(GROUP_KEY);
             url = url.substring(0, i);
         }
@@ -159,7 +159,7 @@ public class ConsulURL implements Serializable {
         if (url.length() > 0) {
             host = url;
         }
-        return new ConsulURL(protocol, host, port, path, interfaceId, group, parameters);
+        return new ConsulURL(protocol, host, port, path, group, interfaceId, parameters);
     }
 
     public String getProtocol() {
@@ -257,8 +257,8 @@ public class ConsulURL implements Serializable {
             List<String> includes = (parameters == null || parameters.length == 0 ? null : Arrays.asList(parameters));
             boolean first = true;
             for (Map.Entry<String, String> entry : new TreeMap<String, String>(getParameters()).entrySet()) {
-                if (entry.getKey() != null && entry.getKey().length() > 0
-                    && (includes == null || includes.contains(entry.getKey()))) {
+                if (entry.getKey() != null && entry.getKey().length() > 0 &&
+                    (includes == null || includes.contains(entry.getKey()))) {
                     if (first) {
                         if (concat) {
                             buf.append("?");
@@ -334,18 +334,15 @@ public class ConsulURL implements Serializable {
     }
 
     public String getGroup() {
-        String group = getParameter(RpcConstants.CONFIG_KEY_UNIQUEID, RpcConstants.ADDRESS_DEFAULT_GROUP);
-        return group;
+        return getParameter(RpcConstants.CONFIG_KEY_UNIQUEID, RpcConstants.ADDRESS_DEFAULT_GROUP);
     }
 
     public String getVersion() {
-        String group = getParameter(RpcConstants.CONFIG_KEY_RPC_VERSION, ConsulConstants.DEFAULT_VERSION);
-        return group;
+        return getParameter(RpcConstants.CONFIG_KEY_RPC_VERSION, ConsulConstants.DEFAULT_VERSION);
     }
 
     public String getServiceInterface() {
-        String interfaceId = getParameter(RpcConstants.CONFIG_KEY_INTERFACE, "");
-        return interfaceId;
+        return getParameter(RpcConstants.CONFIG_KEY_INTERFACE, "");
     }
 
     public static String encode(String value) {
