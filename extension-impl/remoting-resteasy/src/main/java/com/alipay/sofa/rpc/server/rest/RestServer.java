@@ -77,7 +77,7 @@ public class RestServer implements Server {
         httpServer = buildServer();
     }
 
-    private SofaNettyJaxrsServer buildServer() {
+    protected SofaNettyJaxrsServer buildServer() {
         // 生成Server对象
         SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer(serverConfig);
 
@@ -99,7 +99,7 @@ public class RestServer implements Server {
         return httpServer;
     }
 
-    private void registerProvider(ResteasyProviderFactory providerFactory) {
+    protected void registerProvider(ResteasyProviderFactory providerFactory) {
         // 注册内置
         Set<Class> internalProviderClasses = JAXRSProviderManager.getInternalProviderClasses();
         if (CommonUtils.isNotEmpty(internalProviderClasses)) {
