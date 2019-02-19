@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.dynamic;
 
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
-import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.DynamicConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
@@ -34,14 +34,15 @@ public class DynamicConfigerFactory {
     /**
      * 保存全部的配置和注册中心实例
      */
-    private final static ConcurrentMap<RegistryConfig, DynamicConfiger> ALL_DYNAMIC_CONFIGER = new ConcurrentHashMap<RegistryConfig, DynamicConfiger>();
+    private final static ConcurrentMap<DynamicConfig, DynamicConfiger> ALL_DYNAMIC_CONFIGER = new ConcurrentHashMap<DynamicConfig, DynamicConfiger>();
 
     /**
      * may add paramter to RegistryConfig
+     *
      * @param registryConfig
      * @return
      */
-    public static synchronized DynamicConfiger getDynamicConfig(RegistryConfig registryConfig) {
+    public static synchronized DynamicConfiger getDynamicConfig(DynamicConfig registryConfig) {
 
         try {
             // 注意：RegistryConfig重写了equals方法，如果多个RegistryConfig属性一样，则认为是一个对象
@@ -53,7 +54,11 @@ public class DynamicConfigerFactory {
                     throw ExceptionUtils.buildRuntime("registry.protocol", registryConfig.getProtocol(),
                         "Unsupported protocol of registry config !");
                 }
-                registry = ext.getExtInstance(new Class[] { RegistryConfig.class }, new Object[] { registryConfig });
+                registry = ext.getExtInstance(new Class[] { DynamicConfig.class }, new Object[] { registryConfig });
+
+                //TODO optimize me
+                registry.init();
+
                 ALL_DYNAMIC_CONFIGER.put(registryConfig, registry);
             }
             return registry;

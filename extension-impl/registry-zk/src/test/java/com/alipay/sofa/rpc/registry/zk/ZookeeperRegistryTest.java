@@ -22,9 +22,12 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.DynamicConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.dynamic.DynamicConfiger;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigerFactory;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
@@ -50,7 +53,11 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
     private static RegistryConfig    registryConfig;
 
+    private static DynamicConfig     dynamicConfig;
+
     private static ZookeeperRegistry registry;
+
+    private static DynamicConfiger   dynamicConfiger;
 
     @BeforeClass
     public static void setUp() {
@@ -63,6 +70,17 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         registry = (ZookeeperRegistry) RegistryFactory.getRegistry(registryConfig);
         registry.init();
         Assert.assertTrue(registry.start());
+
+        dynamicConfig = new DynamicConfig()
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
+            .setSubscribe(true)
+            .setAddress("127.0.0.1:2181")
+            .setRegister(true);
+
+        dynamicConfiger = DynamicConfigerFactory.getDynamicConfig(dynamicConfig);
+
+        dynamicConfiger.init();
+
     }
 
     @AfterClass
@@ -96,7 +114,8 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setSerialization("hessian2")
             .setServer(serverConfig)
             .setWeight(222)
-            .setTimeout(3000);
+            .setTimeout(3000)
+            .setDynamicConfig(dynamicConfig);
 
         // 注册
         registry.register(provider);
@@ -217,7 +236,8 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setSerialization("hessian2")
             .setServer(serverConfig)
             .setWeight(222)
-            .setTimeout(3000);
+            .setTimeout(3000)
+            .setDynamicConfig(dynamicConfig);
 
         // 注册Provider Config
         registry.register(providerConfig);
@@ -226,7 +246,9 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         CountDownLatch latch = new CountDownLatch(1);
         MockConfigListener configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.getZookeeperDynamicConfiger().subscribeInterfaceConfig(providerConfig, configListener);
+
+        DynamicConfiger dynamicConfiger = DynamicConfigerFactory.getDynamicConfig(providerConfig.getDynamicConfig());
+        dynamicConfiger.subscribeInterfaceConfig(providerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap("timeout", "2000"));
         Map<String, String> configData = configListener.getData();
         Assert.assertEquals(1, configData.size());
@@ -248,7 +270,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         latch = new CountDownLatch(1);
         configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.getZookeeperDynamicConfiger().subscribeInterfaceConfig(consumerConfig, configListener);
+        dynamicConfiger.subscribeInterfaceConfig(consumerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap(RpcConstants.CONFIG_KEY_TIMEOUT, "3333"));
         configData = configListener.getData();
         Assert.assertEquals(1, configData.size());
@@ -283,7 +305,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         CountDownLatch latch = new CountDownLatch(1);
         MockConfigListener configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.getZookeeperDynamicConfiger().subscribeOverride(registry.getConsumerUrls(), consumerConfig,
+        dynamicConfiger.subscribeOverride(registry.getConsumerUrls(), consumerConfig,
             configListener);
         Map<String, String> attributes = new ConcurrentHashMap<String, String>();
         attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "3333");
@@ -303,7 +325,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setTimeout(5555);
         configListener = new MockConfigListener();
         configListener.setCountDownLatch(latch);
-        registry.getZookeeperDynamicConfiger().subscribeOverride(registry.getConsumerUrls(), consumerConfig,
+        dynamicConfiger.subscribeOverride(registry.getConsumerUrls(), consumerConfig,
             configListener);
         attributes.put(RpcConstants.CONFIG_KEY_TIMEOUT, "4444");
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server2");

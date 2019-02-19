@@ -16,8 +16,11 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.rpc.base.Destroyable;
+import com.alipay.sofa.rpc.base.Initializable;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.DynamicConfig;
 import com.alipay.sofa.rpc.ext.Extensible;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 
@@ -28,25 +31,34 @@ import java.util.concurrent.ConcurrentMap;
  * @version $Id: DynamicConfiger.java, v 0.1 2018年12月26日 20:29 bystander Exp $
  */
 @Extensible(singleton = false)
-public interface DynamicConfiger {
+public abstract class DynamicConfiger implements Initializable, Destroyable {
+
+    /**
+     * 注册中心服务配置
+     */
+    protected DynamicConfig dynamicConfig;
+
+    public DynamicConfiger(DynamicConfig dynamicConfig) {
+        this.dynamicConfig = dynamicConfig;
+    }
 
     /**
      * 清理cache
      */
-    void clearConfigCache();
+    public abstract void clearConfigCache();
 
     /**
      * 订阅接口级别的配置
      * @param config
      * @param listener
      */
-    void subscribeInterfaceConfig(final AbstractInterfaceConfig config, ConfigListener listener);
+    public abstract void subscribeInterfaceConfig(final AbstractInterfaceConfig config, ConfigListener listener);
 
     /**
      * 取消订阅配置
      * @param config
      */
-    void unSubscribeConfig(final AbstractInterfaceConfig config);
+    public abstract void unSubscribeConfig(final AbstractInterfaceConfig config);
 
     /**
      * 取消override订阅
@@ -54,7 +66,8 @@ public interface DynamicConfiger {
      * @param config
      * @param listener
      */
-    void subscribeOverride(ConcurrentMap<ConsumerConfig, String> consumerUrls, final ConsumerConfig config,
-                           ConfigListener listener);
+    public abstract void subscribeOverride(ConcurrentMap<ConsumerConfig, String> consumerUrls,
+                                           final ConsumerConfig config,
+                                           ConfigListener listener);
 
 }

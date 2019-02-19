@@ -20,8 +20,8 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.DynamicConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.dynamic.DynamicConfiger;
@@ -50,7 +50,7 @@ import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildOverr
  * @version $Id: ZookeeperDynamicConfiger.java, v 0.1 2018年12月26日 20:06 bystander Exp $
  */
 @Extension("zookeeper")
-public class ZookeeperDynamicConfiger implements DynamicConfiger {
+public class ZookeeperDynamicConfiger extends DynamicConfiger {
 
     /**
      * Root path of registry data
@@ -104,45 +104,8 @@ public class ZookeeperDynamicConfiger implements DynamicConfiger {
      */
     public final static String                                    PARAM_CREATE_EPHEMERAL   = "createEphemeral";
 
-    public ZookeeperDynamicConfiger(RegistryConfig registryConfig) {
-        if (zkClient != null) {
-            return;
-        }
-        String addressInput = registryConfig.getAddress(); // xxx:2181,yyy:2181/path1/paht2
-        if (StringUtils.isEmpty(addressInput)) {
-            throw new SofaRpcRuntimeException("Address of zookeeper registry is empty.");
-        }
-        int idx = addressInput.indexOf(CONTEXT_SEP);
-        String address; // IP地址
-        if (idx > 0) {
-            address = addressInput.substring(0, idx);
-            rootPath = addressInput.substring(idx);
-            if (!rootPath.endsWith(CONTEXT_SEP)) {
-                rootPath += CONTEXT_SEP; // 保证以"/"结尾
-            }
-        } else {
-            address = addressInput;
-            rootPath = CONTEXT_SEP;
-        }
-        boolean preferLocalFile = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_PREFER_LOCAL_FILE));
-        boolean ephemeralNode = !CommonUtils.isFalse(registryConfig.getParameter(PARAM_CREATE_EPHEMERAL));
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info(
-                "Init ZookeeperRegistry with address {}, root path is {}. preferLocalFile:{}, ephemeralNode:{}",
-                address, rootPath, preferLocalFile, ephemeralNode);
-        }
-        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        zkClient = CuratorFrameworkFactory.builder()
-            .connectString(address)
-            .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
-            .connectionTimeoutMs(registryConfig.getConnectTimeout())
-            .canBeReadOnly(false)
-            .retryPolicy(retryPolicy)
-            .defaultData(null)
-            .build();
-
-        zkClient.start();
-
+    public ZookeeperDynamicConfiger(DynamicConfig dynamicConfig) {
+        super(dynamicConfig);
     }
 
     /**
@@ -308,4 +271,57 @@ public class ZookeeperDynamicConfiger implements DynamicConfiger {
         return null;
     }
 
+    @Override
+    public void destroy() {
+        //TODO
+        throw new RuntimeException("TODO");
+    }
+
+    @Override
+    public void destroy(DestroyHook hook) {
+
+        //TODO
+        throw new RuntimeException("hook");
+    }
+
+    @Override
+    public void init() {
+        if (zkClient != null) {
+            return;
+        }
+        String addressInput = dynamicConfig.getAddress(); // xxx:2181,yyy:2181/path1/paht2
+        if (StringUtils.isEmpty(addressInput)) {
+            throw new SofaRpcRuntimeException("Address of zookeeper registry is empty.");
+        }
+        int idx = addressInput.indexOf(CONTEXT_SEP);
+        String address; // IP地址
+        if (idx > 0) {
+            address = addressInput.substring(0, idx);
+            rootPath = addressInput.substring(idx);
+            if (!rootPath.endsWith(CONTEXT_SEP)) {
+                rootPath += CONTEXT_SEP; // 保证以"/"结尾
+            }
+        } else {
+            address = addressInput;
+            rootPath = CONTEXT_SEP;
+        }
+        boolean preferLocalFile = !CommonUtils.isFalse(dynamicConfig.getParameter(PARAM_PREFER_LOCAL_FILE));
+        boolean ephemeralNode = !CommonUtils.isFalse(dynamicConfig.getParameter(PARAM_CREATE_EPHEMERAL));
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info(
+                "Init ZookeeperRegistry with address {}, root path is {}. preferLocalFile:{}, ephemeralNode:{}",
+                address, rootPath, preferLocalFile, ephemeralNode);
+        }
+        RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
+        zkClient = CuratorFrameworkFactory.builder()
+            .connectString(address)
+            .sessionTimeoutMs(dynamicConfig.getConnectTimeout() * 3)
+            .connectionTimeoutMs(dynamicConfig.getConnectTimeout())
+            .canBeReadOnly(false)
+            .retryPolicy(retryPolicy)
+            .defaultData(null)
+            .build();
+
+        zkClient.start();
+    }
 }

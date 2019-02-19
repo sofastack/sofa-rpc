@@ -165,8 +165,6 @@ public class ZookeeperRegistry extends Registry {
      */
     private ConcurrentMap<ConsumerConfig, String>                         consumerUrls             = new ConcurrentHashMap<ConsumerConfig, String>();
 
-    private DynamicConfiger                                               zookeeperDynamicConfiger;
-
     /**
      * 服务列表观察者
      */
@@ -236,8 +234,6 @@ public class ZookeeperRegistry extends Registry {
                 }
             }
         });
-
-        zookeeperDynamicConfiger = DynamicConfigerFactory.getDynamicConfig(registryConfig);
     }
 
     //recover data when connect with zk again.
@@ -273,7 +269,7 @@ public class ZookeeperRegistry extends Registry {
 
     @Override
     public void destroy() {
-        zookeeperDynamicConfiger.clearConfigCache();
+
         if (zkClient != null && zkClient.getState() == CuratorFrameworkState.STARTED) {
             zkClient.close();
         }
@@ -305,7 +301,12 @@ public class ZookeeperRegistry extends Registry {
 
         if (config.isSubscribe()) {
             //订阅接口级配置
-            zookeeperDynamicConfiger.subscribeInterfaceConfig(config, config.getConfigListener());
+            final DynamicConfiger zookeeperDynamicConfiger = DynamicConfigerFactory.getDynamicConfig(config
+                .getDynamicConfig());
+
+            if (zookeeperDynamicConfiger != null) {
+                zookeeperDynamicConfiger.subscribeInterfaceConfig(config, config.getConfigListener());
+            }
 
         }
     }
@@ -404,7 +405,12 @@ public class ZookeeperRegistry extends Registry {
         }
         // 反订阅配置节点
         if (config.isSubscribe()) {
-            zookeeperDynamicConfiger.unSubscribeConfig(config);
+            final DynamicConfiger zookeeperDynamicConfiger = DynamicConfigerFactory.getDynamicConfig(config
+                .getDynamicConfig());
+
+            if (zookeeperDynamicConfiger != null) {
+                zookeeperDynamicConfiger.unSubscribeConfig(config);
+            }
         }
     }
 
@@ -433,12 +439,17 @@ public class ZookeeperRegistry extends Registry {
         if (config.isSubscribe()) {
 
             List<ProviderInfo> matchProviders;
-            // 订阅配置
-            //订阅接口级配置
-            zookeeperDynamicConfiger.subscribeInterfaceConfig(config, config.getConfigListener());
-            //订阅IP级配置
-            zookeeperDynamicConfiger.subscribeOverride(consumerUrls, config, config.getConfigListener());
 
+            final DynamicConfiger zookeeperDynamicConfiger = DynamicConfigerFactory.getDynamicConfig(config
+                .getDynamicConfig());
+
+            if (zookeeperDynamicConfiger != null) {
+                // 订阅配置
+                //订阅接口级配置
+                zookeeperDynamicConfiger.subscribeInterfaceConfig(config, config.getConfigListener());
+                //订阅IP级配置
+                zookeeperDynamicConfiger.subscribeOverride(consumerUrls, config, config.getConfigListener());
+            }
             // 订阅Providers节点
             try {
                 if (providerObserver == null) { // 初始化
@@ -572,7 +583,12 @@ public class ZookeeperRegistry extends Registry {
                 }
             }
 
-            zookeeperDynamicConfiger.unSubscribeConfig(config);
+            final DynamicConfiger zookeeperDynamicConfiger = DynamicConfigerFactory.getDynamicConfig(config
+                .getDynamicConfig());
+
+            if (zookeeperDynamicConfiger != null) {
+                zookeeperDynamicConfiger.unSubscribeConfig(config);
+            }
 
         }
     }
@@ -596,16 +612,13 @@ public class ZookeeperRegistry extends Registry {
         return zkClient;
     }
 
-    public DynamicConfiger getZookeeperDynamicConfiger() {
-        return zookeeperDynamicConfiger;
-    }
-
     public ConcurrentMap<ConsumerConfig, String> getConsumerUrls() {
         return consumerUrls;
     }
 
     /**
      * 获取默认的AclProvider
+     *
      * @return
      */
     private ACLProvider getDefaultAclProvider() {
@@ -624,6 +637,7 @@ public class ZookeeperRegistry extends Registry {
 
     /**
      * 创建认证信息
+     *
      * @return
      */
     private List<AuthInfo> buildAuthInfo() {

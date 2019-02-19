@@ -111,6 +111,11 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected List<RegistryConfig>                   registry;
 
     /**
+     * 配置中心配置，一个
+     */
+    protected DynamicConfig                          dynamicConfig;
+
+    /**
      * 方法配置，可配置多个
      */
     protected Map<String, MethodConfig>              methods;
@@ -137,6 +142,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
 
     /**
      * 服务分组：不做为服务唯一标识的一部分
+     *
      * @deprecated 不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
     @Deprecated
@@ -464,7 +470,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param group the group
      * @return the group
-     * @deprecated Use {@link #setUniqueId(String)} 
+     * @deprecated Use {@link #setUniqueId(String)}
      */
     @Deprecated
     public S setGroup(String group) {
@@ -487,7 +493,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param version the version
      * @return the version
-     * @deprecated Use {@link #setUniqueId(String)} 
+     * @deprecated Use {@link #setUniqueId(String)}
      */
     @Deprecated
     public S setVersion(String version) {
@@ -787,7 +793,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * 接口属性和方法属性加载配置到缓存
      *
      * @param rebuild 是否重建
-     * @return Map<String Object> unmodifiableMap
+     * @return Map<String                               Object> unmodifiableMap
      */
     public synchronized Map<String, Object> getConfigValueCache(boolean rebuild) {
         if (configValueCache != null && !rebuild) {
@@ -1010,5 +1016,20 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      */
     public String getAppName() {
         return application.getAppName();
+    }
+
+    public DynamicConfig getDynamicConfig() {
+        return dynamicConfig;
+    }
+
+    /**
+     * 设置配置中心
+     *
+     * @param config DynamicConfig
+     * @return the config
+     */
+    public S setDynamicConfig(DynamicConfig config) {
+        this.dynamicConfig = config;
+        return castThis();
     }
 }
