@@ -39,11 +39,11 @@ import java.util.concurrent.TimeUnit;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class BoltClientConnectionManagerTest extends ActivelyDestroyTest {
+public class ReuseBoltClientConnectionManagerTest extends ActivelyDestroyTest {
 
-    private BoltClientConnectionManager manager   = new BoltClientConnectionManager(false);
+    private ReuseBoltClientConnectionManager manager   = new ReuseBoltClientConnectionManager(false);
 
-    private RpcClient                   rpcClient = new RpcClient();
+    private RpcClient                        rpcClient = new RpcClient();
 
     @Before
     public void init() {
@@ -65,12 +65,9 @@ public class BoltClientConnectionManagerTest extends ActivelyDestroyTest {
         Assert.assertNull(connection);
 
         // 连不上的端口
-        try {
-            manager.getConnection(rpcClient, wrongConfig, buildUrl(wrongConfig));
-            Assert.fail();
-        } catch (Exception e) {
 
-        }
+        Connection result = manager.getConnection(rpcClient, wrongConfig, buildUrl(wrongConfig));
+        Assert.assertNull(result);
 
         // ok
         final ClientTransportConfig config = buildConfig(12222);
