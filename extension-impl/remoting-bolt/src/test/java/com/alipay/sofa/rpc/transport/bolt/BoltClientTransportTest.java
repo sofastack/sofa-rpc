@@ -56,8 +56,14 @@ public class BoltClientTransportTest extends ActivelyDestroyTest {
 
         BoltClientTransport clientTransport = new BoltClientTransport(clientTransportConfig);
         clientTransport.disconnect();
-        Assert.assertTrue(BoltClientTransport.connectionManager.urlConnectionMap.size() == 0);
-        Assert.assertTrue(BoltClientTransport.connectionManager.connectionRefCounter.size() == 0);
+        final BoltClientConnectionManager connectionManager = BoltClientTransport.connectionManager;
+
+        if (connectionManager instanceof ReuseBoltClientConnectionManager) {
+            Assert.assertTrue(((ReuseBoltClientConnectionManager) connectionManager).urlConnectionMap.size() == 0);
+            Assert.assertTrue(((ReuseBoltClientConnectionManager) connectionManager).connectionRefCounter.size() == 0);
+        } else {
+            Assert.fail();
+        }
 
         ClientTransportConfig config1 = new ClientTransportConfig();
         config1.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12222))
@@ -74,7 +80,7 @@ public class BoltClientTransportTest extends ActivelyDestroyTest {
             .getClientTransport(config2);
         clientTransport2.connect();
         Assert.assertFalse(clientTransport1 == clientTransport2);
-        Assert.assertTrue(clientTransport1.connection == clientTransport2.connection);
+        Assert.assertTrue(clientTransport1.fetchConnection() == clientTransport2.fetchConnection());
 
         ClientTransportConfig config3 = new ClientTransportConfig();
         config3.setProviderInfo(new ProviderInfo().setHost("127.0.0.1").setPort(12223))
@@ -83,7 +89,7 @@ public class BoltClientTransportTest extends ActivelyDestroyTest {
             .getClientTransport(config3);
         clientTransport3.connect();
         Assert.assertFalse(clientTransport1 == clientTransport3);
-        Assert.assertFalse(clientTransport1.connection == clientTransport3.connection);
+        Assert.assertFalse(clientTransport1.fetchConnection() == clientTransport3.fetchConnection());
 
         ClientTransportFactory.releaseTransport(null, 500);
 
