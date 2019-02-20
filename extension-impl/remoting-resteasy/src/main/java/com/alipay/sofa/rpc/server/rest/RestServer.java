@@ -206,14 +206,16 @@ public class RestServer implements Server {
             LOGGER.info("Register jaxrs service to base url http://" + serverConfig.getHost() + ":"
                 + serverConfig.getPort() + serverConfig.getContextPath());
         }
+        Object obj = null;
         try {
-            Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
+            obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
             httpServer.getDeployment().getRegistry()
                 .addResourceFactory(new SofaResourceFactory(providerConfig, obj), serverConfig.getContextPath());
 
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Register jaxrs service error", e);
+            throw new SofaRpcRuntimeException("Register jaxrs service error", e);
         }
     }
 
