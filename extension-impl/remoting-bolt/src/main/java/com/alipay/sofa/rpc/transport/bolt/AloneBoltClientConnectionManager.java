@@ -20,47 +20,21 @@ import com.alipay.remoting.Connection;
 import com.alipay.remoting.Url;
 import com.alipay.remoting.exception.RemotingException;
 import com.alipay.remoting.rpc.RpcClient;
-import com.alipay.sofa.rpc.base.Destroyable;
-import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
  */
-class AloneBoltClientConnectionManager implements BoltClientConnectionManager {
+class AloneBoltClientConnectionManager extends BoltClientConnectionManager {
 
-    /**
-     * slf4j Logger for this class
-     */
-    private final static Logger LOGGER = LoggerFactory
-                                           .getLogger(AloneBoltClientConnectionManager.class);
-
-    @VisibleForTesting
-    protected AloneBoltClientConnectionManager(boolean addHook) {
-        if (addHook) {
-            RpcRuntimeContext.registryDestroyHook(new Destroyable.DestroyHook() {
-                @Override
-                public void preDestroy() {
-
-                }
-
-                @Override
-                public void postDestroy() {
-                    checkLeak();
-                }
-            });
-        }
+    public AloneBoltClientConnectionManager(boolean addHook) {
+        super(addHook);
     }
 
-    /**
-     * 检查是否有没回收
-     */
+    @Override
     protected void checkLeak() {
-
+        //do not check
     }
 
     /**

@@ -19,11 +19,9 @@ package com.alipay.sofa.rpc.transport.bolt;
 import com.alipay.remoting.Connection;
 import com.alipay.remoting.Url;
 import com.alipay.remoting.rpc.RpcClient;
-import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
@@ -35,7 +33,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-class ReuseBoltClientConnectionManager implements BoltClientConnectionManager {
+class ReuseBoltClientConnectionManager extends BoltClientConnectionManager {
 
     /**
      * slf4j Logger for this class
@@ -55,21 +53,8 @@ class ReuseBoltClientConnectionManager implements BoltClientConnectionManager {
     @VisibleForTesting
     final ConcurrentMap<Connection, AtomicInteger>         connectionRefCounter = new ConcurrentHashMap<Connection, AtomicInteger>();
 
-    @VisibleForTesting
-    protected ReuseBoltClientConnectionManager(boolean addHook) {
-        if (addHook) {
-            RpcRuntimeContext.registryDestroyHook(new Destroyable.DestroyHook() {
-                @Override
-                public void preDestroy() {
-
-                }
-
-                @Override
-                public void postDestroy() {
-                    checkLeak();
-                }
-            });
-        }
+    public ReuseBoltClientConnectionManager(boolean addHook) {
+        super(addHook);
     }
 
     /**

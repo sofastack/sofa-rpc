@@ -19,13 +19,38 @@ package com.alipay.sofa.rpc.transport.bolt;
 import com.alipay.remoting.Connection;
 import com.alipay.remoting.Url;
 import com.alipay.remoting.rpc.RpcClient;
+import com.alipay.sofa.rpc.base.Destroyable;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 /**
  * @author bystander
  * @version $Id: BoltClientConnectionManager.java, v 0.1 2019年01月29日 11:58 bystander Exp $
  */
-public interface BoltClientConnectionManager {
+public abstract class BoltClientConnectionManager {
+
+    @VisibleForTesting
+    public BoltClientConnectionManager(boolean addHook) {
+        if (addHook) {
+            RpcRuntimeContext.registryDestroyHook(new Destroyable.DestroyHook() {
+                @Override
+                public void preDestroy() {
+
+                }
+
+                @Override
+                public void postDestroy() {
+                    checkLeak();
+                }
+            });
+        }
+    }
+
+    /**
+     * 检查是否有没回收
+     */
+    protected abstract void checkLeak();
 
     /**
      * get connection
@@ -34,7 +59,7 @@ public interface BoltClientConnectionManager {
      * @param url
      * @return the connection or null
      */
-    public Connection getConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
+    public abstract Connection getConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
     /**
      * close connection
@@ -42,7 +67,7 @@ public interface BoltClientConnectionManager {
      * @param transportConfig
      * @param url
      */
-    public void closeConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
+    public abstract void closeConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
     /**
      * judge connection status
@@ -51,6 +76,6 @@ public interface BoltClientConnectionManager {
      * @param url
      * @return true /false
      */
-    public boolean isConnectionFine(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
+    public abstract boolean isConnectionFine(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url);
 
 }
