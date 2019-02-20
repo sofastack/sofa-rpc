@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.metrics.lookout;
 import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Measurement;
 import com.alipay.lookout.api.Metric;
+import com.alipay.lookout.api.NoopRegistry;
 import com.alipay.lookout.api.Registry;
 import com.alipay.lookout.api.Tag;
 import com.alipay.lookout.core.DefaultRegistry;
@@ -84,8 +85,10 @@ public class RpcLookoutTest {
         }
 
         Registry registry = new DefaultRegistry();
-        Lookout.setRegistry(registry);
-
+        final Registry currentRegistry = Lookout.registry();
+        if (currentRegistry == NoopRegistry.INSTANCE) {
+            Lookout.setRegistry(registry);
+        }
         RpcRunningState.setUnitTestMode(false);
 
         try {
