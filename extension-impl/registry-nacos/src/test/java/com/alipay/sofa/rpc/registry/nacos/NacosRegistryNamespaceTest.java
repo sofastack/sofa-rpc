@@ -68,7 +68,7 @@ public class NacosRegistryNamespaceTest {
 
         Assert.assertEquals("127.0.0.1:8848", address);
         String namespace = properties.getProperty(PropertyKeyConst.NAMESPACE);
-        Assert.assertEquals("", namespace);
+        Assert.assertEquals("sofa-rpc", namespace);
 
     }
 

@@ -119,6 +119,10 @@ public class NacosRegistry extends Registry {
         if (idx > 0) {
             address = addressInput.substring(0, idx);
             namespace = addressInput.substring(idx + 1);
+            //for host:port/ this scene
+            if (StringUtils.isBlank(namespace)) {
+                namespace = DEFAULT_NAMESPACE;
+            }
         } else {
             address = addressInput;
             namespace = DEFAULT_NAMESPACE;
