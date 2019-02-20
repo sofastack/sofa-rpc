@@ -34,6 +34,7 @@ import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
@@ -79,7 +80,7 @@ public class BoltClientTransport extends ClientTransport {
     protected static final RpcClient             RPC_CLIENT        = new RpcClient();
 
     protected static final boolean               REUSE_CONNECTION  = RpcConfigs.getOrDefaultValue(
-                                                                       "com.alipay.sofa.rpc.bolt.reuse", true);
+                                                                       RpcOptions.TRANSPORT_CONNECTION_REUSE, true);
 
     /**
      * Connection manager for reuse connection
