@@ -69,22 +69,18 @@ public class ReconnectTest extends ActivelyDestroyTest {
         providerConfig.unExport();
         ServerFactory.destroyAll();
 
-        TestUtils.delayGet(new Callable<Boolean>() {
-            @Override
-            public Boolean call() throws Exception {
-                return consumerConfig.getConsumerBootstrap().getCluster().getConnectionHolder().isAvailableEmpty();
-            }
-        }, true, 100, 30);
-
         BoltClientTransport clientTransport = (BoltClientTransport) consumerConfig.getConsumerBootstrap().getCluster()
             .getConnectionHolder()
             .getAvailableClientTransport(ProviderHelper.toProviderInfo("bolt://127.0.0.1:22221"));
 
         clientTransport.disconnect();
 
-        //关闭过快的话，此时可能不一定能判断出来没有地址。因为bolt关闭链接是异步的。
-
-        Thread.sleep(3 * 1000);
+        TestUtils.delayGet(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                return consumerConfig.getConsumerBootstrap().getCluster().getConnectionHolder().isAvailableEmpty();
+            }
+        }, true, 100, 30);
 
         try {
             helloService.sayHello("xxx", 11);
