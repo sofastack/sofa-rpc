@@ -32,6 +32,7 @@ public class MeasureResultDetail {
     private double                        averageAbnormalRate;
     private double                        leastAbnormalRateMultiple;
     private boolean                       recoveredOriginWeight;
+    private transient boolean             logOnly;
 
     /**
      * Instantiates a new Measure result detail.
@@ -186,5 +187,25 @@ public class MeasureResultDetail {
      */
     public void setRecoveredOriginWeight(boolean recoveredOriginWeight) {
         this.recoveredOriginWeight = recoveredOriginWeight;
+    }
+
+    /**
+     * Is log only boolean.
+     *
+     * @return the boolean
+     */
+    public boolean isLogOnly() {
+        return logOnly;
+    }
+
+    /**
+     * Sets log only.
+     *
+     * @param logOnly the log only
+     * @return the log only
+     */
+    public MeasureResultDetail setLogOnly(boolean logOnly) {
+        this.logOnly = logOnly;
+        return this;
     }
 }

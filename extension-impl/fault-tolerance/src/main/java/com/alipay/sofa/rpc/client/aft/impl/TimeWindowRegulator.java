@@ -30,9 +30,13 @@ import com.alipay.sofa.rpc.client.aft.MeasureStrategy;
 import com.alipay.sofa.rpc.client.aft.RecoverStrategy;
 import com.alipay.sofa.rpc.client.aft.RegulationStrategy;
 import com.alipay.sofa.rpc.client.aft.Regulator;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
+import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -51,6 +55,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+@Extension("timeWindow")
 public class TimeWindowRegulator implements Regulator {
 
     /** Logger for this class */
@@ -96,15 +101,12 @@ public class TimeWindowRegulator implements Regulator {
     private RegulationStrategy                       regulationStrategy;
 
     /**
-     * 降级策略: 调整权重 
+     * 降级策略: 例如调整权重 
      */
-    private DegradeStrategy                          weightDegradeStrategy;
+    private DegradeStrategy                          degradeStrategy;
+
     /**
-     * 降级策略: 只打印日志 
-     */
-    private DegradeStrategy                          logDegradeStrategy;
-    /**
-     * 恢复策略：调整权重 
+     * 恢复策略：例如调整权重 
      */
     private RecoverStrategy                          recoverStrategy;
 
@@ -115,11 +117,21 @@ public class TimeWindowRegulator implements Regulator {
 
     @Override
     public void init() {
-        measureStrategy = new ServiceHorizontalMeasureStrategy();
-        regulationStrategy = new ServiceHorizontalRegulationStrategy();
-        weightDegradeStrategy = new WeightDegradeStrategy();
-        logDegradeStrategy = new LogPrintDegradeStrategy();
-        recoverStrategy = new WeightRecoverStrategy();
+        String measureStrategyAlias = RpcConfigs
+            .getOrDefaultValue(RpcOptions.AFT_MEASURE_STRATEGY, "serviceHorizontal");
+        String regulationStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_REGULATION_STRATEGY,
+            "serviceHorizontal");
+        String degradeStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_DEGRADE_STRATEGY, "weight");
+        String recoverStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_RECOVER_STRATEGY, "weight");
+
+        measureStrategy = ExtensionLoaderFactory.getExtensionLoader(MeasureStrategy.class).getExtension(
+            measureStrategyAlias);
+        regulationStrategy = ExtensionLoaderFactory.getExtensionLoader(RegulationStrategy.class).getExtension(
+            regulationStrategyAlias);
+        degradeStrategy = ExtensionLoaderFactory.getExtensionLoader(DegradeStrategy.class).getExtension(
+            degradeStrategyAlias);
+        recoverStrategy = ExtensionLoaderFactory.getExtensionLoader(RecoverStrategy.class).getExtension(
+            recoverStrategyAlias);
 
         InvocationStatFactory.addListener(listener);
     }
@@ -151,8 +163,7 @@ public class TimeWindowRegulator implements Regulator {
         // release strategy
         measureStrategy = null;
         regulationStrategy = null;
-        weightDegradeStrategy = null;
-        logDegradeStrategy = null;
+        degradeStrategy = null;
         recoverStrategy = null;
     }
 
@@ -222,10 +233,11 @@ public class TimeWindowRegulator implements Regulator {
 
             boolean isDegradeEffective = regulationStrategy.isDegradeEffective(measureResultDetail);
             if (isDegradeEffective) {
+                measureResultDetail.setLogOnly(false);
                 if (measureState.equals(MeasureState.ABNORMAL)) {
                     boolean isReachMaxDegradeIpCount = regulationStrategy.isReachMaxDegradeIpCount(measureResultDetail);
                     if (!isReachMaxDegradeIpCount) {
-                        weightDegradeStrategy.degrade(measureResultDetail);
+                        degradeStrategy.degrade(measureResultDetail);
                     } else {
                         String appName = measureResult.getMeasureModel().getAppName();
                         if (LOGGER.isInfoEnabled(appName)) {
@@ -243,8 +255,9 @@ public class TimeWindowRegulator implements Regulator {
                     //没有被降级过，因此不需要被恢复。
                 }
             } else {
+                measureResultDetail.setLogOnly(true);
                 if (measureState.equals(MeasureState.ABNORMAL)) {
-                    logDegradeStrategy.degrade(measureResultDetail);
+                    degradeStrategy.degrade(measureResultDetail);
                     String appName = measureResult.getMeasureModel().getAppName();
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGULATION_ABNORMAL_NOT_DEGRADE,
