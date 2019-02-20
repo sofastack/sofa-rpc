@@ -446,7 +446,6 @@ public class BoltClientTransport extends ClientTransport {
     }
 
     public Connection fetchConnection() {
-        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
-        return connection;
+        return connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
     }
 }

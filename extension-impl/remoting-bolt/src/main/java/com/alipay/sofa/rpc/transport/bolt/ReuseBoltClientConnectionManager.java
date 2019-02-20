@@ -123,7 +123,7 @@ class ReuseBoltClientConnectionManager implements BoltClientConnectionManager {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Multiple threads init ClientTransport with same key:" + url);
                 }
-                connection.close(); //如果同时有人插入，则使用第一个
+                rpcClient.closeStandaloneConnection(connection); //如果同时有人插入，则使用第一个
                 connection = oldConnection;
             } else {
 
@@ -186,7 +186,7 @@ class ReuseBoltClientConnectionManager implements BoltClientConnectionManager {
             }
         }
         if (needDestroy) {
-            rpcClient.closeConnection(url);
+            rpcClient.closeStandaloneConnection(connection);
         }
     }
 
