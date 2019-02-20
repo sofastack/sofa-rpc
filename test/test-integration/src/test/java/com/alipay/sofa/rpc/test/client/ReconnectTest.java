@@ -82,6 +82,10 @@ public class ReconnectTest extends ActivelyDestroyTest {
 
         clientTransport.disconnect();
 
+        //关闭过快的话，此时可能不一定能判断出来没有地址。因为bolt关闭链接是异步的。
+
+        Thread.sleep(3 * 1000);
+
         try {
             helloService.sayHello("xxx", 11);
             Assert.fail();
