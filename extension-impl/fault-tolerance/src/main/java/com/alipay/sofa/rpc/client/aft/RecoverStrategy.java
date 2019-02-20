@@ -23,7 +23,7 @@ import com.alipay.sofa.rpc.ext.Extensible;
  * 
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
-@Extensible
+@Extensible(singleton = false)
 public interface RecoverStrategy {
 
     /**
