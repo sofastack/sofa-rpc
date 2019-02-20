@@ -146,7 +146,7 @@ public class BoltClientTransport extends ClientTransport {
 
     @Override
     public void connect() {
-        connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
+        fetchConnection();
     }
 
     @Override
@@ -416,19 +416,19 @@ public class BoltClientTransport extends ClientTransport {
 
     @Override
     public InetSocketAddress remoteAddress() {
-        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
+        Connection connection = fetchConnection();
         return connection == null ? null : connection.getRemoteAddress();
     }
 
     @Override
     public InetSocketAddress localAddress() {
-        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
+        Connection connection = fetchConnection();
         return connection == null ? null : connection.getRemoteAddress();
     }
 
     protected void checkConnection() throws SofaRpcException {
 
-        Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
+        Connection connection = fetchConnection();
         if (connection == null) {
             throw new SofaRpcException(RpcErrorType.CLIENT_NETWORK, "connection is null");
         }
@@ -447,7 +447,6 @@ public class BoltClientTransport extends ClientTransport {
 
     public Connection fetchConnection() {
         Connection connection = connectionManager.getConnection(RPC_CLIENT, transportConfig, url);
-
         return connection;
     }
 }
