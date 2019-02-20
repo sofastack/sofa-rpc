@@ -48,7 +48,6 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_DISCONNECT_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_HEARTBEAT_PERIOD;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INJVM;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TYPE;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_LAZY;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_LOAD_BALANCER;
@@ -209,7 +208,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 客户端调用超时时间(毫秒)
      */
-    protected int                                   timeout            = getIntValue(CONSUMER_INVOKE_TIMEOUT);
+    protected int                                   timeout            = -1;
 
     /**
      * The Retries. 失败后重试次数
