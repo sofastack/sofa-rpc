@@ -14,39 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.ext;
-
-import com.alipay.sofa.rpc.protocol.Protocol;
-import com.alipay.sofa.rpc.protocol.ProtocolDecoder;
-import com.alipay.sofa.rpc.protocol.ProtocolEncoder;
-import com.alipay.sofa.rpc.protocol.ProtocolInfo;
-import com.alipay.sofa.rpc.protocol.ProtocolNegotiator;
+package com.alipay.sofa.rpc.lookout;
 
 /**
- *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author bystander
+ * @version $Id: RestConstants.java, v 0.1 2019年02月15日 13:17 bystander Exp $
  */
-@Extension(value = "wp", code = -1)
-public class WrongProtocol implements Protocol {
+public class RestConstants {
 
-    @Override
-    public ProtocolInfo protocolInfo() {
-        return null;
-    }
-
-    @Override
-    public ProtocolEncoder encoder() {
-        return null;
-    }
-
-    @Override
-    public ProtocolDecoder decoder() {
-        return null;
-    }
-
-    @Override
-    public ProtocolNegotiator negotiator() {
-        return null;
-    }
+    public static final String REST_SERVICE_KEY    = "rest_service";
+    public static final String REST_METHODNAME_KEY = "rest_methodname";
 }
