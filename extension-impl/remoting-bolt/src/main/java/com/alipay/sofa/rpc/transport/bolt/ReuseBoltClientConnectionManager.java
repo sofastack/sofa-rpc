@@ -108,8 +108,11 @@ class ReuseBoltClientConnectionManager extends BoltClientConnectionManager {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Multiple threads init ClientTransport with same key:" + url);
                 }
-                rpcClient.closeStandaloneConnection(connection); //如果同时有人插入，则使用第一个
-                connection = oldConnection;
+                //only if new connection is not equals old connection,we can close it
+                if (connection != oldConnection) {
+                    rpcClient.closeStandaloneConnection(connection); //如果同时有人插入，则使用第一个
+                    connection = oldConnection;
+                }
             } else {
 
                 // 增加计数器
