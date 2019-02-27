@@ -35,27 +35,31 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ReuseBoltClientConnectionManagerTest extends ActivelyDestroyTest {
 
-    private ReuseBoltClientConnectionManager manager   = new ReuseBoltClientConnectionManager(false);
-
-    private RpcClient                        rpcClient = new RpcClient();
+    private RpcClient rpcClient = new RpcClient();
+    ServerConfig      serverConfig;
+    ServerConfig      serverConfig2;
 
     @Before
     public void init() {
         rpcClient.init();
-        ServerConfig serverConfig = new ServerConfig().setPort(12222).setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+        serverConfig = new ServerConfig().setPort(12222).setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         serverConfig.buildIfAbsent().start();
-        ServerConfig serverConfig2 = new ServerConfig().setPort(12223).setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+        serverConfig2 = new ServerConfig().setPort(12223).setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         serverConfig2.buildIfAbsent().start();
     }
 
     @Test
     public void testAll() throws Exception {
+
+        ReuseBoltClientConnectionManager manager = new ReuseBoltClientConnectionManager(false);
+
         Connection connection = manager.getConnection(null, null, null);
         Assert.assertNull(connection);
         connection = manager.getConnection(rpcClient, null, null);
@@ -131,15 +135,31 @@ public class ReuseBoltClientConnectionManagerTest extends ActivelyDestroyTest {
         Assert.assertTrue(manager.urlConnectionMap.size() == 0);
         Assert.assertTrue(manager.connectionRefCounter.size() == 0);
 
+        // 检查泄漏
+        manager.checkLeak();
+
+        Assert.assertTrue(CommonUtils.isEmpty(manager.urlConnectionMap));
+        Assert.assertTrue(CommonUtils.isEmpty(manager.connectionRefCounter));
+    }
+
+    @Test
+    public void testConcurrentCreate() throws Exception {
+
+        final ReuseBoltClientConnectionManager manager = new ReuseBoltClientConnectionManager(false);
+
+        final ClientTransportConfig config = buildConfig(12222);
+
         // 并发创建
         final CountDownLatch latch = new CountDownLatch(5);
         List<Thread> threads = new ArrayList<Thread>(5);
+        final Url url = buildUrl(config);
         for (int i = 0; i < 5; i++) {
             Thread thread = new Thread(new Runnable() {
                 @Override
                 public void run() {
                     try {
-                        manager.getConnection(rpcClient, config, buildUrl(config));
+                        Connection innerConnection = manager.getConnection(rpcClient, config, url);
+                        System.out.println("url=" + url + ",connection=" + innerConnection);
                     } catch (Exception e) {
                         e.printStackTrace();
                     } finally {
@@ -156,8 +176,12 @@ public class ReuseBoltClientConnectionManagerTest extends ActivelyDestroyTest {
 
         Assert.assertEquals(1, manager.urlConnectionMap.size());
         Assert.assertEquals(1, manager.connectionRefCounter.size());
-        connection = manager.getConnection(rpcClient, config, buildUrl(config));
-        Assert.assertTrue(manager.connectionRefCounter.get(connection).get() == 1);
+
+        Connection connection = manager.getConnection(rpcClient, config, url);
+
+        Assert.assertNotNull(connection);
+        final AtomicInteger atomicInteger = manager.connectionRefCounter.get(connection);
+        Assert.assertEquals(1, atomicInteger.get());
 
         // 检查泄漏
         manager.checkLeak();
@@ -186,5 +210,7 @@ public class ReuseBoltClientConnectionManagerTest extends ActivelyDestroyTest {
     @After
     public void close() {
         rpcClient.shutdown();
+        serverConfig.destroy();
+        serverConfig2.destroy();
     }
 }
