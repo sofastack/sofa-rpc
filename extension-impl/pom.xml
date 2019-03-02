@@ -22,6 +22,7 @@
         <module>bootstrap-rest</module>
         <module>codec-protobuf</module>
         <module>codec-jackson</module>
+        <module>codec-protostuff</module>
         <module>codec-sofa-hessian</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
