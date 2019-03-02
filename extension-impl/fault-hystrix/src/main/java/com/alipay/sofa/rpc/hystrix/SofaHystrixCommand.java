@@ -36,12 +36,14 @@ import java.lang.reflect.InvocationTargetException;
  */
 public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements SofaHystrixInvokable {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
+    private static final Logger      LOGGER = LoggerFactory.getLogger(SofaHystrixCommand.class);
 
-    private RpcInternalContext  rpcInternalContext;
-    private RpcInvokeContext    rpcInvokeContext;
-    protected FilterInvoker     invoker;
-    protected SofaRequest       request;
+    private final RpcInternalContext rpcInternalContext;
+
+    private final RpcInvokeContext   rpcInvokeContext;
+
+    private final FilterInvoker      invoker;
+    private final SofaRequest        request;
 
     public SofaHystrixCommand(FilterInvoker invoker, SofaRequest request) {
         super(SofaHystrixConfig.loadSetterFactory((ConsumerConfig) invoker.getConfig()).createSetter(invoker, request));
