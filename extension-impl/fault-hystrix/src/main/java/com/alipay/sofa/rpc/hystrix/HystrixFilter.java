@@ -73,7 +73,7 @@ public class HystrixFilter extends Filter {
         if (RpcConstants.INVOKER_TYPE_SYNC.equals(request.getInvokeType())) {
             command = new SofaHystrixCommand(invoker, request);
         } else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(request.getInvokeType())) {
-            command = new SofaHystrixObservableCommand(invoker, request);
+            command = new SofaAsyncHystrixCommand(invoker, request);
         } else {
             return invoker.invoke(request);
         }

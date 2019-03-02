@@ -16,14 +16,25 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
-/**
- * Basic interface for {@link SofaHystrixCommand} and {@link SofaAsyncHystrixCommand}
- *
- * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
- */
-public interface SofaHystrixInvokable {
+import java.util.concurrent.atomic.AtomicInteger;
 
-    SofaResponse invoke();
+public class InvokeCounterHelloService extends HelloServiceImpl {
+
+    private AtomicInteger executeCount = new AtomicInteger(0);
+
+    public InvokeCounterHelloService(int sleep) {
+        super(sleep);
+    }
+
+    @Override
+    public String sayHello(String name, int age) {
+        executeCount.incrementAndGet();
+        return super.sayHello(name, age);
+    }
+
+    public int getExecuteCount() {
+        return executeCount.get();
+    }
 }
