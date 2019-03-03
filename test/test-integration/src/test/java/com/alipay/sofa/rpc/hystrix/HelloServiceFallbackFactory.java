@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.test.HelloService;
 
 /**
@@ -24,11 +23,12 @@ import com.alipay.sofa.rpc.test.HelloService;
  */
 public class HelloServiceFallbackFactory implements FallbackFactory<HelloService> {
     @Override
-    public HelloService create(SofaResponse response, final Throwable t) {
+    public HelloService create(final FallbackContext context) {
         return new HelloService() {
             @Override
             public String sayHello(String name, int age) {
-                return "fallback " + name + " from server! age: " + age + ", error: " + t.getClass().getName();
+                return "fallback " + name + " from server! age: " + age + ", error: " +
+                    context.getException().getClass().getName();
             }
         };
     }
