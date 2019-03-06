@@ -14,33 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.consul.model;
+package com.alipay.sofa.rpc.server.rest;
 
-import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import java.io.IOException;
 
 /**
- * 消费者通知器
- *
- * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
+ * @author zhangchengxi
+ * Date 2018/12/2
  */
-public class NotifyConsumerListner implements NotifyListener {
+public class CustomizeContainerRequestTestFilter implements ContainerRequestFilter {
 
-    private ConsulURL                        subscribeUrl;
+    private static boolean invoked = false;
 
-    private AtomicReference<List<ConsulURL>> providerUrls;
+    public static boolean isInvoked() {
+        return invoked;
+    }
 
-    public NotifyConsumerListner(ConsulURL subscribeUrl, List<ConsulURL> urls) {
-
-        this.subscribeUrl = subscribeUrl;
-        this.providerUrls = new AtomicReference<List<ConsulURL>>(urls);
-
+    public static void reset() {
+        invoked = false;
     }
 
     @Override
-    public void notify(ConsulURL subscribeUrl, List<ConsulURL> urls) {
-        this.providerUrls = new AtomicReference<List<ConsulURL>>(urls);
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        invoked = true;
     }
 }

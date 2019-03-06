@@ -14,39 +14,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.ext;
+package com.alipay.sofa.rpc.registry.consul.model;
 
-import com.alipay.sofa.rpc.protocol.Protocol;
-import com.alipay.sofa.rpc.protocol.ProtocolDecoder;
-import com.alipay.sofa.rpc.protocol.ProtocolEncoder;
-import com.alipay.sofa.rpc.protocol.ProtocolInfo;
-import com.alipay.sofa.rpc.protocol.ProtocolNegotiator;
+import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
+ * 消费者通知器
  *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
-@Extension(value = "wp", code = -1)
-public class WrongProtocol implements Protocol {
+public class NotifyConsumerListener implements NotifyListener {
 
-    @Override
-    public ProtocolInfo protocolInfo() {
-        return null;
+    private ConsulURL                        subscribeUrl;
+
+    private AtomicReference<List<ConsulURL>> providerUrls;
+
+    public NotifyConsumerListener(ConsulURL subscribeUrl, List<ConsulURL> urls) {
+
+        this.subscribeUrl = subscribeUrl;
+        this.providerUrls = new AtomicReference<List<ConsulURL>>(urls);
+
     }
 
     @Override
-    public ProtocolEncoder encoder() {
-        return null;
-    }
-
-    @Override
-    public ProtocolDecoder decoder() {
-        return null;
-    }
-
-    @Override
-    public ProtocolNegotiator negotiator() {
-        return null;
+    public void notify(ConsulURL subscribeUrl, List<ConsulURL> urls) {
+        this.providerUrls = new AtomicReference<List<ConsulURL>>(urls);
     }
 }

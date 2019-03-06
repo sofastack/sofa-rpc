@@ -16,19 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.nacos;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-
-import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -39,11 +26,22 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.nacos.base.BaseNacosTest;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /**
  * The type Nacos registry test.
- * @author  <a href=mailto:jervyshi@gmail.com>JervyShi</a> 
- * @version $Id : NacosRegistryTest.java, v 0.1 2018-10-06 17:17 JervyShi Exp $$
+ * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
  */
 public class NacosRegistryTest extends BaseNacosTest {
 

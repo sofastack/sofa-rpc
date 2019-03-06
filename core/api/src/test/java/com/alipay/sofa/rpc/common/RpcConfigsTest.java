@@ -51,7 +51,10 @@ public class RpcConfigsTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcRuntimeException);
         }
+    }
 
+    @Test
+    public void subscribe() {
         RpcConfigs.putValue("ps001", ProviderStatus.RECOVERING.toString());
         Assert.assertEquals(ProviderStatus.RECOVERING, RpcConfigs.getEnumValue("ps001", ProviderStatus.class));
         try {
@@ -59,26 +62,59 @@ public class RpcConfigsTest {
             Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcRuntimeException);
+        } finally {
+            RpcConfigs.putValue("ps001", "");
         }
 
-        String protocol = RpcConfigs.getStringValue(RpcOptions.DEFAULT_PROTOCOL);
+        String testSubKey = "testSubKey";
+        RpcConfigs.putValue(testSubKey, "111");
+        String protocol = RpcConfigs.getStringValue(testSubKey);
+        final Object[] values = new Object[2];
+        RpcConfigs.RpcConfigListener listener = new RpcConfigs.RpcConfigListener() {
+            @Override
+            public void onChange(Object oldValue, Object newValue) {
+                values[0] = oldValue;
+                values[1] = newValue;
+            }
+        };
         try {
-            final Object[] values = new Object[2];
-            RpcConfigs.RpcConfigListener listener = new RpcConfigs.RpcConfigListener() {
-                @Override
-                public void onChange(Object oldValue, Object newValue) {
-                    values[0] = oldValue;
-                    values[1] = newValue;
-                }
-            };
-            RpcConfigs.subscribe(RpcOptions.DEFAULT_PROTOCOL, listener);
+            RpcConfigs.subscribe(testSubKey, listener);
 
-            RpcConfigs.putValue(RpcOptions.DEFAULT_PROTOCOL, "xxx");
+            RpcConfigs.putValue(testSubKey, "xxx");
             Assert.assertEquals(protocol, values[0]);
             Assert.assertEquals("xxx", values[1]);
-            RpcConfigs.unSubscribe(RpcOptions.DEFAULT_PROTOCOL, listener);
+
+            RpcConfigs.removeValue(testSubKey);
         } finally {
-            RpcConfigs.putValue(RpcOptions.DEFAULT_PROTOCOL, protocol);
+            RpcConfigs.removeValue(testSubKey);
+            RpcConfigs.unSubscribe(testSubKey, listener);
         }
+    }
+
+    @Test
+    public void getOrDefaultValue() {
+        boolean xxx = RpcConfigs.getOrDefaultValue("xxx", true);
+        Assert.assertTrue(xxx);
+        RpcConfigs.putValue("xxx", "false");
+        try {
+            xxx = RpcConfigs.getOrDefaultValue("xxx", true);
+            Assert.assertFalse(xxx);
+        } finally {
+            RpcConfigs.removeValue("xxx");
+        }
+        xxx = RpcConfigs.getOrDefaultValue("xxx", true);
+        Assert.assertTrue(xxx);
+
+        int yyy = RpcConfigs.getOrDefaultValue("yyy", 111);
+        Assert.assertTrue(yyy == 111);
+        RpcConfigs.putValue("yyy", "123");
+        try {
+            yyy = RpcConfigs.getOrDefaultValue("yyy", 111);
+            Assert.assertTrue(yyy == 123);
+        } finally {
+            RpcConfigs.removeValue("yyy");
+        }
+        yyy = RpcConfigs.getOrDefaultValue("yyy", 123);
+        Assert.assertTrue(yyy == 123);
     }
 }

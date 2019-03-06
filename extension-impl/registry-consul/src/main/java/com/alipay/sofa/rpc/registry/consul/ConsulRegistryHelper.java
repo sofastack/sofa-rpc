@@ -18,9 +18,6 @@ package com.alipay.sofa.rpc.registry.consul;
 
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
 import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 
@@ -33,19 +30,6 @@ import java.util.List;
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
  */
 public class ConsulRegistryHelper extends RegistryUtils {
-
-    static List<ProviderInfo> matchProviderInfos(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
-        String protocol = consumerConfig.getProtocol();
-        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol)
-                && StringUtils.equals(consumerConfig.getUniqueId(),
-                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
-                result.add(providerInfo);
-            }
-        }
-        return result;
-    }
 
     static List<ProviderInfo> convertUrl2ProviderInfos(List<ConsulURL> consulUrls) {
         List<ProviderInfo> result = new ArrayList<ProviderInfo>();

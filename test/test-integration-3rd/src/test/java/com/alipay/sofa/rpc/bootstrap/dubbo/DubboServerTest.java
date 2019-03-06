@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -34,7 +35,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author bystander
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class DubboServerTest extends BaseZkTest {
 
@@ -55,7 +56,7 @@ public class DubboServerTest extends BaseZkTest {
         RegistryConfig registryConfig;
 
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181")
             .setSubscribe(true)
             .setRegister(true);

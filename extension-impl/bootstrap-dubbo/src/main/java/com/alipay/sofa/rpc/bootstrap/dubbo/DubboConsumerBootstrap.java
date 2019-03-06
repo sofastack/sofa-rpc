@@ -25,13 +25,14 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.MethodConfig;
-import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.alipay.sofa.rpc.bootstrap.dubbo.DubboConvertor.copyRegistries;
 
 /**
  * Consumer bootstrap for dubbo
@@ -97,43 +98,6 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         com.alibaba.dubbo.config.ApplicationConfig dubboConfig = new com.alibaba.dubbo.config.ApplicationConfig();
         dubboConfig.setName(applicationConfig.getAppName());
         referenceConfig.setApplication(dubboConfig);
-    }
-
-    private void copyRegistries(ConsumerConfig consumerConfig,
-                                ReferenceConfig referenceConfig) {
-        List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
-        if (CommonUtils.isNotEmpty(registryConfigs)) {
-            List<com.alibaba.dubbo.config.RegistryConfig> dubboRegistryConfigs =
-                    new ArrayList<com.alibaba.dubbo.config.RegistryConfig>();
-            for (RegistryConfig registryConfig : registryConfigs) {
-                // 生成并丢到缓存里
-                com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
-                    .get(registryConfig);
-                if (dubboRegistryConfig == null) {
-                    dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
-                    copyRegistryFields(registryConfig, dubboRegistryConfig);
-                    com.alibaba.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
-                        registryConfig, dubboRegistryConfig);
-                    if (old != null) {
-                        dubboRegistryConfig = old;
-                    }
-                }
-                dubboRegistryConfigs.add(dubboRegistryConfig);
-            }
-            referenceConfig.setRegistries(dubboRegistryConfigs);
-        }
-    }
-
-    private void copyRegistryFields(RegistryConfig registryConfig,
-                                    com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig) {
-        dubboRegistryConfig.setAddress(registryConfig.getAddress());
-        dubboRegistryConfig.setProtocol(registryConfig.getProtocol());
-        dubboRegistryConfig.setRegister(registryConfig.isRegister());
-        dubboRegistryConfig.setSubscribe(registryConfig.isSubscribe());
-        dubboRegistryConfig.setAddress(registryConfig.getAddress());
-        dubboRegistryConfig.setTimeout(registryConfig.getTimeout());
-        dubboRegistryConfig.setId(registryConfig.getId());
-        dubboRegistryConfig.setParameters(registryConfig.getParameters());
     }
 
     private void copyConsumer(ConsumerConfig<T> consumerConfig, ReferenceConfig<T> referenceConfig) {

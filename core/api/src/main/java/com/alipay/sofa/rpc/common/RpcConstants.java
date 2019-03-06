@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.common;
 
-import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
-
 import java.nio.charset.Charset;
+
+import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
 
 /**
  * Rpc Constants
@@ -31,7 +31,13 @@ public class RpcConstants {
     /**
      * zookeeper注册中心
      */
-    public static final String  REGISTRY_PROTOCOL_ZK               = "zooKeeper";
+    public static final String  REGISTRY_PROTOCOL_ZK               = "zookeeper";
+
+    /**
+     * mesh注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_MESH             = "mesh";
+
     /**
      * xml文件注册中心
      */
@@ -183,6 +189,13 @@ public class RpcConstants {
      * @since 5.4.0
      */
     public static final String  PROTOCOL_TYPE_H2                   = "h2";
+
+    /**
+     * rest allow origins key
+     *
+     * @since 5.5.0
+     */
+    public static final String  ALLOWED_ORIGINS                    = "allowedOrigins";
 
     /*--------Config配置值相关结束---------*/
 

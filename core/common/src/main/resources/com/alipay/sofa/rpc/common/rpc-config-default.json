@@ -190,7 +190,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认consumer断开时等待结果的超时时间
   "consumer.disconnect.timeout": 10000,
   // 默认consumer调用provider超时时间
-  "consumer.invoke.timeout": 5000,
+  "consumer.invoke.timeout": 3000,
   // 心跳发送间隔
   "consumer.heartbeat.period": 30000,
   // 重建连接间隔
