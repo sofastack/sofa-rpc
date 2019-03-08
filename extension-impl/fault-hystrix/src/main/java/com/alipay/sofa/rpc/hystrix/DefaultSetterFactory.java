@@ -41,15 +41,29 @@ public class DefaultSetterFactory implements SetterFactory {
         if (!SETTER_CACHE.containsKey(clientMethod)) {
             synchronized (DefaultSetterFactory.class) {
                 if (!SETTER_CACHE.containsKey(clientMethod)) {
-                    String groupKey = invoker.getConfig().getInterfaceId();
-                    String commandKey = request.getMethodName();
+                    String interfaceId = invoker.getConfig().getInterfaceId();
+                    String commandKey = generateCommandKey(interfaceId, request.getMethod());
                     HystrixCommand.Setter setter = HystrixCommand.Setter
-                        .withGroupKey(HystrixCommandGroupKey.Factory.asKey(groupKey))
+                        .withGroupKey(HystrixCommandGroupKey.Factory.asKey(interfaceId))
                         .andCommandKey(HystrixCommandKey.Factory.asKey(commandKey));
                     SETTER_CACHE.put(clientMethod, setter);
                 }
             }
         }
         return SETTER_CACHE.get(clientMethod);
+    }
+
+    public static String generateCommandKey(String interfaceId, Method method) {
+        StringBuilder builder = new StringBuilder(interfaceId)
+            .append("#")
+            .append(method.getName())
+            .append("(");
+        if (method.getParameterTypes().length > 0) {
+            for (Class<?> parameterType : method.getParameterTypes()) {
+                builder.append(parameterType.getSimpleName()).append(",");
+            }
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        return builder.append(")").toString();
     }
 }
