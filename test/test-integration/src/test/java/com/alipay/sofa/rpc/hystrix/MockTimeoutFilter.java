@@ -16,21 +16,27 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.test.HelloService;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.filter.Filter;
+import com.alipay.sofa.rpc.filter.FilterInvoker;
 
-import java.util.concurrent.atomic.AtomicInteger;
+public class MockTimeoutFilter extends Filter {
 
-public class InvokeFailedHelloService implements HelloService {
+    private long sleep;
 
-    private AtomicInteger executeCount = new AtomicInteger(0);
-
-    @Override
-    public String sayHello(String name, int age) {
-        executeCount.incrementAndGet();
-        throw new RuntimeException("invoke failed");
+    public MockTimeoutFilter(long sleep) {
+        this.sleep = sleep;
     }
 
-    public int getExecuteCount() {
-        return executeCount.get();
+    @Override
+    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
+        try {
+            Thread.sleep(sleep);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+        return invoker.invoke(request);
     }
 }

@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
@@ -42,6 +43,8 @@ public class LazyConnectTest extends ActivelyDestroyTest {
 
     @BeforeClass
     public static void startServer() {
+
+        RpcRunningState.setUnitTestMode(true);
         // 只有2个线程 执行
         serverConfig = new ServerConfig()
             .setStopTimeout(0)

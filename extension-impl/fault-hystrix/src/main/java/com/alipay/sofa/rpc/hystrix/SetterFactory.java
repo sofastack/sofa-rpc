@@ -36,12 +36,4 @@ public interface SetterFactory {
      */
     HystrixCommand.Setter createSetter(FilterInvoker invoker, SofaRequest request);
 
-    /**
-     * Create a {@link HystrixObservableCommand.Setter} with the given invoker and request
-     * @param invoker
-     * @param request
-     * @return
-     */
-    HystrixObservableCommand.Setter createObservableSetter(FilterInvoker invoker, SofaRequest request);
-
 }

@@ -1,0 +1,2 @@
+log=com.alipay.sofa.rpc.client.aft.impl.LogPrintDegradeStrategy
+weight=com.alipay.sofa.rpc.client.aft.impl.WeightDegradeStrategy

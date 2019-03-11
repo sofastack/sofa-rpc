@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.core.response.SofaResponse;
-
 /**
  * Default implements, returns a constant fallback
  *
@@ -32,7 +30,7 @@ public class DefaultFallbackFactory<T> implements FallbackFactory<T> {
     }
 
     @Override
-    public T create(SofaResponse response, Throwable t) {
+    public T create(FallbackContext context) {
         return fallback;
     }
 }

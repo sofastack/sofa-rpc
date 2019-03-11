@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.hystrix;
 
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import com.netflix.hystrix.HystrixCommand;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -26,36 +27,26 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 /**
- * the {@link Future}(from {@link rx.Observable}) wrapper that can be used as a {@link ResponseFuture}
+ * the {@link Future}(from {@link HystrixCommand#queue()}) wrapper that can be used as a {@link ResponseFuture}
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class HystrixResponseFuture implements ResponseFuture {
 
-    private Future         delegate;
+    private Future delegate;
 
-    private ResponseFuture responseFuture;
-
-    public HystrixResponseFuture(Future delegate, ResponseFuture responseFuture) {
+    public HystrixResponseFuture(Future delegate) {
         this.delegate = delegate;
-        this.responseFuture = responseFuture;
     }
 
     @Override
     public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
-        if (responseFuture == null) {
-            // TODO 因为熔断了，没有发出真实请求，无法获得真实实现类是如何处理的
-            throw new UnsupportedOperationException("Not supported, Please use callback function");
-        }
-        return responseFuture.addListener(sofaResponseCallback);
+        throw new UnsupportedOperationException("addListener is not supported when using Hystrix");
     }
 
     @Override
     public ResponseFuture addListeners(List list) {
-        if (responseFuture == null) {
-            throw new UnsupportedOperationException("Not supported, Please use callback function");
-        }
-        return responseFuture.addListeners(list);
+        throw new UnsupportedOperationException("addListeners is not supported when using Hystrix");
     }
 
     @Override
