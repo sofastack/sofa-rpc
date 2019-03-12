@@ -84,7 +84,10 @@ public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements 
         if (fallbackFactory == null) {
             return super.getFallback();
         }
-        Object fallback = fallbackFactory.create(response, t);
+        Object fallback = fallbackFactory.create(new FallbackContext(invoker, request, response, t));
+        if (fallback == null) {
+            return super.getFallback();
+        }
         try {
             Object fallbackResult = request.getMethod().invoke(fallback, request.getMethodArgs());
             SofaResponse actualResponse = new SofaResponse();

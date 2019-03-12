@@ -128,7 +128,8 @@ public class SofaAsyncHystrixCommand extends HystrixCommand implements SofaHystr
         if (fallbackFactory == null) {
             return super.getFallback();
         }
-        Object fallback = fallbackFactory.create(null, this.getExecutionException());
+        Object fallback = fallbackFactory.create(new FallbackContext(invoker, request, this.sofaResponse, this
+            .getExecutionException()));
         if (fallback == null) {
             return super.getFallback();
         }

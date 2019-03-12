@@ -24,6 +24,11 @@
             <artifactId>hystrix-core</artifactId>
             <version>1.5.12</version>
         </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -17,20 +17,14 @@
 package com.alipay.sofa.rpc.hystrix;
 
 /**
- * Default implements, returns a constant fallback
+ * Default implements, always returns null
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class DefaultFallbackFactory<T> implements FallbackFactory<T> {
-
-    private T fallback;
-
-    public DefaultFallbackFactory(T fallback) {
-        this.fallback = fallback;
-    }
+public class NoopFallbackFactory<T> implements FallbackFactory<T> {
 
     @Override
     public T create(FallbackContext context) {
-        return fallback;
+        return null;
     }
 }
