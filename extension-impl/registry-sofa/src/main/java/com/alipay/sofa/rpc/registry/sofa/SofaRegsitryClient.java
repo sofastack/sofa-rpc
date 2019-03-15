@@ -25,7 +25,7 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 
 /**
  * @author bystander
- * @version $Id: ConfregClient.java, v 0.1 2018年03月13日 10:20 AM bystander Exp $
+ * @version $Id: SofaRegsitryClient.java, v 0.1 2018年03月13日 10:20 AM bystander Exp $
  */
 public class SofaRegsitryClient {
 

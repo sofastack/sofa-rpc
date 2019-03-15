@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.alipay.sofa.rpc.registry.sofa.SofaRegistryHelper.PROTOCOL_TYPE_OVERRIDE;
 
 /**
- * 保留了DSR的订阅列表，一个订阅的dataId，对应一个DsrSubscribeCallback，对应多个Consumer订阅的ProviderListener。
+ * 保留了订阅列表，一个订阅的dataId，对应一个DsrSubscribeCallback，对应多个Consumer订阅的ProviderListener。
  * <p>
  * Created by zhanggeng on 2017/7/6.
  *
