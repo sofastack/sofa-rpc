@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.registry.client.api.Configurator;
-import com.alipay.sofa.registry.client.api.RegistryClient;
 import com.alipay.sofa.registry.client.api.Subscriber;
 import com.alipay.sofa.registry.client.api.model.RegistryType;
 import com.alipay.sofa.registry.client.api.registration.ConfiguratorRegistration;
@@ -66,8 +65,6 @@ public class SofaRegistry extends Registry {
      */
     protected final Map<String, Configurator> configurators = new ConcurrentHashMap<String, Configurator>();
 
-    protected RegistryClient                  registryClient;
-
     /**
      * 注册中心配置
      *
@@ -79,8 +76,6 @@ public class SofaRegistry extends Registry {
 
     @Override
     public void init() {
-        //TODO 这里加一下 碧远
-        registryClient = SofaRegsitryClient.getRegistryClient("", registryConfig);
     }
 
     @Override
@@ -143,7 +138,7 @@ public class SofaRegistry extends Registry {
         addAttributes(dsrRegistration, group);
 
         // 去注册
-        registryClient.register(dsrRegistration, serviceData);
+        SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(dsrRegistration, serviceData);
     }
 
     @Override
@@ -189,7 +184,8 @@ public class SofaRegistry extends Registry {
      */
     protected void doUnRegister(String appName, String serviceName, String group) {
 
-        registryClient.unregister(serviceName, group, RegistryType.PUBLISHER);
+        SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName, group,
+            RegistryType.PUBLISHER);
     }
 
     @Override
@@ -251,9 +247,10 @@ public class SofaRegistry extends Registry {
             // 去配置中心订阅
 
             // 去注册
-            listSubscriber = registryClient.register(subscriberRegistration);
+            listSubscriber = SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(
+                subscriberRegistration);
 
-            attrSubscriber = registryClient.register(configRegistration);
+            attrSubscriber = SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(configRegistration);
 
             // 放入缓存
             subscribers.put(serviceName, listSubscriber);
@@ -273,12 +270,14 @@ public class SofaRegistry extends Registry {
             callback.remove(serviceName, config);
             if (callback.getListenerNum() == 0) {
                 // 已经没人订阅这个data Key了
-                registryClient.unregister(serviceName, dsrSubscriber.getGroup(),
+                SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
+                    dsrSubscriber.getGroup(),
                     RegistryType.SUBSCRIBER);
                 subscribers.remove(serviceName);
 
                 // 已经没人订阅这个config Key了
-                registryClient.unregister(serviceName, dsrSubscriber.getGroup(),
+                SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
+                    dsrSubscriber.getGroup(),
                     RegistryType.CONFIGURATOR);
                 configurators.remove(serviceName);
             }
