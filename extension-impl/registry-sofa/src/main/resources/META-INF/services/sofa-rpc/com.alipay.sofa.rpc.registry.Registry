@@ -1,1 +1,1 @@
-dsr=com.alipay.sofa.rpc.registry.dsr.DsrRegistry
+sofa=com.alipay.sofa.rpc.registry.sofa.SofaRegistry

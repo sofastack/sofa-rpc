@@ -38,9 +38,9 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-@Extension(value = "registry", order = -17000, override = true)
+@Extension(value = "sofa", order = -17000, override = true)
 @AutoActive(consumerSide = true)
-public class DsrRegistryRouter extends Router {
+public class SofaRegistryRouter extends Router {
 
     /**
      * 路由路径：注册中心

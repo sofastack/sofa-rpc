@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
@@ -39,63 +39,63 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-public class DsrRegistryHelperTest {
+public class SofaRegistryHelperTest {
 
     @Test
     public void getValue() throws Exception {
 
-        DsrRegistryHelper.getValue(null);
-        DsrRegistryHelper.getValue(null, null);
+        SofaRegistryHelper.getValue(null);
+        SofaRegistryHelper.getValue(null, null);
 
         Map<String, String> map = new HashMap<String, String>();
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "xx"), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "xx"), null);
 
         map.put("11", "aa");
         map.put("22", "bb");
         map.put("33", "cc");
 
-        Assert.assertEquals(DsrRegistryHelper.getValue(map), null);
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "xx"), null);
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "yy", "zz"), null);
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "zz", "11"), "aa");
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "11", "22"), "aa");
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "22", "33"), "bb");
+        Assert.assertEquals(SofaRegistryHelper.getValue(map), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "xx"), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "yy", "zz"), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "zz", "11"), "aa");
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "11", "22"), "aa");
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "22", "33"), "bb");
     }
 
     @Test
     public void removeKeys() throws Exception {
 
-        DsrRegistryHelper.removeOldKeys(null);
-        DsrRegistryHelper.removeOldKeys(null, null);
+        SofaRegistryHelper.removeOldKeys(null);
+        SofaRegistryHelper.removeOldKeys(null, null);
 
         Map<String, String> map = new HashMap<String, String>();
-        DsrRegistryHelper.removeOldKeys(map, null);
+        SofaRegistryHelper.removeOldKeys(map, null);
 
         map.put("11", "aa");
         map.put("22", "bb");
         map.put("33", "cc");
 
-        DsrRegistryHelper.removeOldKeys(map);
+        SofaRegistryHelper.removeOldKeys(map);
         Assert.assertEquals(map.size(), 3);
-        DsrRegistryHelper.removeOldKeys(map, "xx");
+        SofaRegistryHelper.removeOldKeys(map, "xx");
         Assert.assertEquals(map.size(), 3);
-        DsrRegistryHelper.removeOldKeys(map, "xx", "yy");
+        SofaRegistryHelper.removeOldKeys(map, "xx", "yy");
         Assert.assertEquals(map.size(), 3);
-        DsrRegistryHelper.removeOldKeys(map, "11");
+        SofaRegistryHelper.removeOldKeys(map, "11");
         Assert.assertEquals(map.size(), 2);
-        DsrRegistryHelper.removeOldKeys(map, "22", "33");
+        SofaRegistryHelper.removeOldKeys(map, "22", "33");
         Assert.assertEquals(map.size(), 0);
 
         map.put("11", "aa");
         map.put("22", "bb");
         map.put("33", "cc");
 
-        Assert.assertEquals(DsrRegistryHelper.getValue(map), null);
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "xx"), null);
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "yy", "zz"), null);
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "zz", "11"), "aa");
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "11", "22"), "aa");
-        Assert.assertEquals(DsrRegistryHelper.getValue(map, "22", "33"), "bb");
+        Assert.assertEquals(SofaRegistryHelper.getValue(map), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "xx"), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "yy", "zz"), null);
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "zz", "11"), "aa");
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "11", "22"), "aa");
+        Assert.assertEquals(SofaRegistryHelper.getValue(map, "22", "33"), "bb");
     }
 
     @Test
@@ -127,25 +127,25 @@ public class DsrRegistryHelperTest {
         MethodConfig methodConfig2 = new MethodConfig().setName("xx").setTimeout(2222);
         providerConfig.setMethods(Arrays.asList(methodConfig, methodConfig2));
 
-        String s1 = DsrRegistryHelper.convertProviderToUrls(providerConfig, serverConfig);
+        String s1 = SofaRegistryHelper.convertProviderToUrls(providerConfig, serverConfig);
         Assert.assertNotNull(s1);
-        ProviderInfo providerInfo = DsrRegistryHelper.parseProviderInfo(s1);
+        ProviderInfo providerInfo = SofaRegistryHelper.parseProviderInfo(s1);
         Assert.assertEquals(SystemInfo.getLocalHost(), providerInfo.getHost());
         Assert.assertEquals(serverConfig.getPort(), providerInfo.getPort());
         Assert.assertEquals(providerConfig.getAppName(), providerInfo.getAttr(ProviderInfoAttrs.ATTR_APP_NAME));
         Assert.assertEquals(providerConfig.getTimeout(), providerInfo.getDynamicAttr(ProviderInfoAttrs.ATTR_TIMEOUT));
 
-        String s2 = DsrRegistryHelper.convertProviderToUrls(providerConfig, serverConfig2);
+        String s2 = SofaRegistryHelper.convertProviderToUrls(providerConfig, serverConfig2);
         Assert.assertNotNull(s2);
-        ProviderInfo providerInfo2 = DsrRegistryHelper.parseProviderInfo(s2);
+        ProviderInfo providerInfo2 = SofaRegistryHelper.parseProviderInfo(s2);
         Assert.assertEquals(SystemInfo.getLocalHost(), providerInfo.getHost());
         Assert.assertEquals(serverConfig2.getPort(), providerInfo2.getPort());
         Assert.assertEquals(providerConfig.getAppName(), providerInfo2.getAttr(ProviderInfoAttrs.ATTR_APP_NAME));
         Assert.assertEquals(providerConfig.getTimeout(), providerInfo2.getDynamicAttr(ProviderInfoAttrs.ATTR_TIMEOUT));
 
-        String s3 = DsrRegistryHelper.convertProviderToUrls(providerConfig, serverConfig3);
+        String s3 = SofaRegistryHelper.convertProviderToUrls(providerConfig, serverConfig3);
         Assert.assertNotNull(s3);
-        ProviderInfo providerInfo3 = DsrRegistryHelper.parseProviderInfo(s3);
+        ProviderInfo providerInfo3 = SofaRegistryHelper.parseProviderInfo(s3);
         Assert.assertEquals(serverConfig3.getHost(), providerInfo3.getHost());
         Assert.assertEquals(serverConfig3.getPort(), providerInfo3.getPort());
         Assert.assertEquals(providerConfig.getAppName(), providerInfo3.getAttr(ProviderInfoAttrs.ATTR_APP_NAME));
@@ -163,7 +163,7 @@ public class DsrRegistryHelperTest {
         // [xxxx]=[clientTimeout#2000@retries#2]
         // [xxxx]=[_AUTORECONNECT#false@_TIMEOUT#2000]
         String url = "10.244.22.1:8080?zone=GZ00A&self_app_name=icardcenter&app_name=icardcenter&_TIMEOUT=3000";
-        ProviderInfo provider = DsrRegistryHelper.parseProviderInfo(url);
+        ProviderInfo provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(defaultProtocol.equals(provider.getProtocolType()));
         Assert.assertTrue("10.244.22.1".equals(provider.getHost()));
@@ -173,7 +173,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue((Integer) provider.getDynamicAttr(ProviderInfoAttrs.ATTR_TIMEOUT) == 3000);
 
         url = "11.166.0.239:12200?_TIMEOUT=3000&p=1&_SERIALIZETYPE=hessian2&app_name=iptcore&zone=GZ00B&_IDLETIMEOUT=27&_MAXREADIDLETIME=30&v=4.0";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_BOLT.equals(provider.getProtocolType()));
         Assert.assertTrue(RpcConstants.SERIALIZE_HESSIAN2.equals(provider.getSerializationType()));
@@ -187,7 +187,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue("1".equals(provider.getAttr("p")));
 
         url = "10.209.80.104:12200?zone=GZ00A&self_app_name=icif&_SERIALIZETYPE=java&app_name=icif&_TIMEOUT=3000";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(defaultProtocol.equals(provider.getProtocolType()));
         Assert.assertTrue(RpcConstants.SERIALIZE_JAVA.equals(provider.getSerializationType()));
@@ -200,7 +200,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue(provider.getAttr("p") == null);
 
         url = "10.209.76.82:12200?_TIMEOUT=3000&p=13&_SERIALIZETYPE=11&app_name=ipayprocess&zone=GZ00A&_IDLETIMEOUT=27&_MAXREADIDLETIME=30&v=4.0&[xx]=[_AUTORECONNECT#false@_TIMEOUT#2000]";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_TR.equals(provider.getProtocolType()));
         Assert.assertTrue(RpcConstants.SERIALIZE_PROTOBUF.equals(provider.getSerializationType()));
@@ -217,7 +217,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue("false".equals(provider.getAttr(".xx._AUTORECONNECT")));
 
         url = "grpc://10.15.232.229:55555?_CONNECTIONNUM=1&v=4.0&_SERIALIZETYPE=11&app_name=test&p=1&_TIMEOUT=4000";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_GRPC.equals(provider.getProtocolType()));
         Assert.assertTrue(RpcConstants.SERIALIZE_PROTOBUF.equals(provider.getSerializationType()));
@@ -230,7 +230,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue("1".equals(provider.getAttr("p")));
 
         url = "10.15.232.229:12222?_TIMEOUT=3333&p=1&_SERIALIZETYPE=4&_CONNECTIONNUM=1&_WARMUPTIME=6&_WARMUPWEIGHT=5&app_name=test-server&v=4.0&_WEIGHT=2000&[cd]=[]&[echoStr]=[clientTimeout#4444]";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_BOLT.equals(provider.getProtocolType()));
         Assert.assertTrue(RpcConstants.SERIALIZE_HESSIAN2.equals(provider.getSerializationType()));
@@ -258,7 +258,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue((Integer) provider.getDynamicAttr(".echoStr.timeout") == 4444);
 
         url = "10.15.232.229:12222?_TIMEOUT=3333&p=1&_SERIALIZETYPE=4&_CONNECTIONNUM=1&_WARMUPTIME=6&_WARMUPWEIGHT=5&startTime=123456";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
         Assert.assertTrue((Integer) provider.getDynamicAttr(ProviderInfoAttrs.ATTR_TIMEOUT) == 3333);
         Assert.assertTrue((Integer) provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT) == 5);
         Assert.assertTrue(provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME) != null);
@@ -268,7 +268,7 @@ public class DsrRegistryHelperTest {
         Assert.assertTrue(provider.getStatus() == ProviderStatus.AVAILABLE);
 
         url = "bolt://10.244.22.1:8080?zone=GZ00A&appName=icardcenter&timeout=3000&serialization=hessian2";
-        provider = DsrRegistryHelper.parseProviderInfo(url);
+        provider = SofaRegistryHelper.parseProviderInfo(url);
         Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_BOLT.equals(provider.getProtocolType()));
         Assert.assertTrue(RpcConstants.SERIALIZE_HESSIAN2.equals(provider.getSerializationType()));
         Assert.assertTrue("10.244.22.1".equals(provider.getHost()));
@@ -282,26 +282,26 @@ public class DsrRegistryHelperTest {
     public void parseMethodInfo() throws Exception {
         // 不用测试null等情况，
         Map<String, Object> map = new HashMap<String, Object>();
-        DsrRegistryHelper.parseMethodInfo(map, "xx", "[]");
+        SofaRegistryHelper.parseMethodInfo(map, "xx", "[]");
         Assert.assertTrue(map.size() == 0);
 
         map.clear();
-        DsrRegistryHelper.parseMethodInfo(map, "xx", "[xxxx]");
+        SofaRegistryHelper.parseMethodInfo(map, "xx", "[xxxx]");
         Assert.assertTrue(map.size() == 0);
 
         map.clear();
-        DsrRegistryHelper.parseMethodInfo(map, "xx", "[clientTimeout#5555]");
+        SofaRegistryHelper.parseMethodInfo(map, "xx", "[clientTimeout#5555]");
         Assert.assertTrue(map.size() == 1);
         Assert.assertTrue(5555 == (Integer) map.get(".xx.timeout"));
 
         map.clear();
-        DsrRegistryHelper.parseMethodInfo(map, "xx", "[_AUTORECONNECT#false@_TIMEOUT#2000]");
+        SofaRegistryHelper.parseMethodInfo(map, "xx", "[_AUTORECONNECT#false@_TIMEOUT#2000]");
         Assert.assertTrue(map.size() == 2);
         Assert.assertTrue(2000 == (Integer) map.get(".xx.timeout"));
         Assert.assertTrue("false".equals(map.get(".xx._AUTORECONNECT")));
 
         map.clear();
-        DsrRegistryHelper.parseMethodInfo(map, "xx", "[clientTimeout#4444@retries#3]");
+        SofaRegistryHelper.parseMethodInfo(map, "xx", "[clientTimeout#4444@retries#3]");
         Assert.assertTrue(map.size() == 2);
         Assert.assertTrue(4444 == (Integer) map.get(".xx.timeout"));
         Assert.assertTrue("3".equals(map.get(".xx.retries")));

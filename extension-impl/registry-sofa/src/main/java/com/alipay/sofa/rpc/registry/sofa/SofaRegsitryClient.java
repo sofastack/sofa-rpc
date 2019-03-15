@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.registry.client.api.RegistryClient;
 import com.alipay.sofa.registry.client.api.RegistryClientConfig;
@@ -27,7 +27,7 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
  * @author bystander
  * @version $Id: ConfregClient.java, v 0.1 2018年03月13日 10:20 AM bystander Exp $
  */
-public class ConfregClient {
+public class SofaRegsitryClient {
 
     public static final String    LOCAL_DATACENTER = "DefaultDataCenter";
     public static final String    LOCAL_REGION     = "DEFAULT_ZONE";

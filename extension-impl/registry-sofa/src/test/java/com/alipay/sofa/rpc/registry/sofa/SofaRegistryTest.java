@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -42,11 +42,11 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-public class DsrRegistryTest {
+public class SofaRegistryTest {
 
     private static RegistryConfig    registryConfig;
 
-    private static DsrRegistry       registry;
+    private static SofaRegistry      registry;
 
     private static ConsumerConfig<?> consumer1;
     private static ConsumerConfig<?> consumer2;
@@ -59,12 +59,12 @@ public class DsrRegistryTest {
     @Before
     public void setUp() {
         registryConfig = new RegistryConfig()
-            .setProtocol("dsr")
+            .setProtocol("sofa")
             .setSubscribe(true)
             .setRegister(true)
             .setAddress("127.0.0.1:9603");
 
-        registry = (DsrRegistry) RegistryFactory.getRegistry(registryConfig);
+        registry = (SofaRegistry) RegistryFactory.getRegistry(registryConfig);
         registry.init();
         Assert.assertTrue(registry.start());
     }
@@ -126,8 +126,8 @@ public class DsrRegistryTest {
             .setInvokeType("sync")
             .setTimeout(4444);
 
-        String tag0 = DsrRegistryHelper.buildListDataId(provider, serverConfig1.getProtocol());
-        String tag1 = DsrRegistryHelper.buildListDataId(consumer1, consumer1.getProtocol());
+        String tag0 = SofaRegistryHelper.buildListDataId(provider, serverConfig1.getProtocol());
+        String tag1 = SofaRegistryHelper.buildListDataId(consumer1, consumer1.getProtocol());
         Assert.assertEquals(tag1, tag0);
 
         // 订阅
@@ -190,7 +190,8 @@ public class DsrRegistryTest {
         Assert.assertEquals(1, registry.configurators.size());
         // 取消订阅者1
         registry.unSubscribe(consumer1);
-        DsrSubscribeCallback callback = (DsrSubscribeCallback) registry.subscribers.get(tag1).getDataObserver();
+        SofaRegistrySubscribeCallback callback = (SofaRegistrySubscribeCallback) registry.subscribers.get(tag1)
+            .getDataObserver();
         Assert.assertFalse(callback.providerInfoListeners.contains(consumer1));
         Assert.assertEquals(1, registry.subscribers.size());
         Assert.assertEquals(1, registry.configurators.size());

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.registry.client.api.ConfigDataObserver;
 import com.alipay.sofa.registry.client.api.Configurator;
@@ -44,10 +44,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-public class DsrSubscribeCallbackTest {
+public class SofaRegistrySubscribeCallbackTest {
     @Test
     public void mergeProviderInfo() throws Exception {
-        DsrSubscribeCallback callback = new DsrSubscribeCallback();
+        SofaRegistrySubscribeCallback callback = new SofaRegistrySubscribeCallback();
         // null + null
         List<ProviderInfo> result = callback.mergeProviderInfo(null, null);
         Assert.assertTrue(CommonUtils.isEmpty(result));
@@ -135,7 +135,7 @@ public class DsrSubscribeCallbackTest {
             }
         };
 
-        DsrSubscribeCallback callback = new DsrSubscribeCallback();
+        SofaRegistrySubscribeCallback callback = new SofaRegistrySubscribeCallback();
         callback.addProviderInfoListener("xxxxx", new ConsumerConfig(), listener);
         Assert.assertTrue((!callback.flag[0].get()) && (!callback.flag[1].get()));
 
@@ -156,7 +156,7 @@ public class DsrSubscribeCallbackTest {
         //default+localZone
         Assert.assertEquals(ps.get(), 5 + 5);
 
-        callback = new DsrSubscribeCallback();
+        callback = new SofaRegistrySubscribeCallback();
         ps.set(0);
         callback.addProviderInfoListener("yyyyy", new ConsumerConfig(), listener);
         callback.handleData("yyyyy", buildPs(5));

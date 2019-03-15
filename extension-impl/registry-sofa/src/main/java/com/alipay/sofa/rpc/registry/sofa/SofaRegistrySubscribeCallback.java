@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.registry.client.api.ConfigDataObserver;
 import com.alipay.sofa.registry.client.api.SubscriberDataObserver;
@@ -40,7 +40,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.alipay.sofa.rpc.registry.dsr.DsrRegistryHelper.PROTOCOL_TYPE_OVERRIDE;
+import static com.alipay.sofa.rpc.registry.sofa.SofaRegistryHelper.PROTOCOL_TYPE_OVERRIDE;
 
 /**
  * 保留了DSR的订阅列表，一个订阅的dataId，对应一个DsrSubscribeCallback，对应多个Consumer订阅的ProviderListener。
@@ -49,13 +49,13 @@ import static com.alipay.sofa.rpc.registry.dsr.DsrRegistryHelper.PROTOCOL_TYPE_O
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-public class DsrSubscribeCallback implements SubscriberDataObserver, ConfigDataObserver {
+public class SofaRegistrySubscribeCallback implements SubscriberDataObserver, ConfigDataObserver {
 
     /**
      * Logger
      */
     private static final Logger                             LOGGER                = LoggerFactory
-                                                                                      .getLogger(DsrSubscribeCallback.class);
+                                                                                      .getLogger(SofaRegistrySubscribeCallback.class);
 
     public static final String                              CONFIG_SEPARATOR      = "#";
 
@@ -77,7 +77,7 @@ public class DsrSubscribeCallback implements SubscriberDataObserver, ConfigDataO
      */
     private ConfigData                                      lastConfigData;
 
-    public DsrSubscribeCallback() {
+    public SofaRegistrySubscribeCallback() {
     }
 
     /**
@@ -199,10 +199,10 @@ public class DsrSubscribeCallback implements SubscriberDataObserver, ConfigDataO
      */
     List<ProviderInfo> mergeProviderInfo(List<String> userDatas, List<String> configDatas) {
         // 是否自己缓存运算后的结果？？ TODO
-        List<ProviderInfo> providers = DsrRegistryHelper.parseProviderInfos(userDatas);
+        List<ProviderInfo> providers = SofaRegistryHelper.parseProviderInfos(userDatas);
         // 交叉比较
         if (CommonUtils.isNotEmpty(providers) && CommonUtils.isNotEmpty(configDatas)) {
-            List<ProviderInfo> override = DsrRegistryHelper.parseProviderInfos(configDatas);
+            List<ProviderInfo> override = SofaRegistryHelper.parseProviderInfos(configDatas);
             Iterator<ProviderInfo> iterator = providers.iterator();
             while (iterator.hasNext()) {
                 ProviderInfo origin = iterator.next();

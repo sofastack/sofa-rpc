@@ -1,1 +1,1 @@
-registry=com.alipay.sofa.rpc.router.DsrRegistryRouter
+sofa=com.alipay.sofa.rpc.router.SofaRegistryRouter

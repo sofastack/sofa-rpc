@@ -80,5 +80,5 @@ public class DsrConstants {
     // 方法级
     public static final String KEY_TIMEOUT                 = "clientTimeout";
     public static final String KEY_RETRIES                 = "retries";
-    public static final String DSR_GROUP                   = "dsr.group";
+    public static final String DSR_GROUP                   = "sofa.group";
 }

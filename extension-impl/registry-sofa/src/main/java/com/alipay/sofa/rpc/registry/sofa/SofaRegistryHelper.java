@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
@@ -73,9 +73,9 @@ import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_PROTOBUF;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-public class DsrRegistryHelper {
+public class SofaRegistryHelper {
 
-    private static final Logger LOGGER                     = LoggerFactory.getLogger(DsrRegistryHelper.class);
+    private static final Logger LOGGER                     = LoggerFactory.getLogger(SofaRegistryHelper.class);
 
     /**
      * 注册关键字前缀
@@ -475,7 +475,7 @@ public class DsrRegistryHelper {
         providerInfo.getStaticAttrs().putAll(parameters);
         providerInfo.getDynamicAttrs().putAll(methodParameters);
 
-        providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_SOURCE, "dsr");
+        providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_SOURCE, "sofa");
         return providerInfo;
     }
 

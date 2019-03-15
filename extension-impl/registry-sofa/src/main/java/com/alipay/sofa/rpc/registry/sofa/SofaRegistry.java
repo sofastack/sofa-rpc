@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.dsr;
+package com.alipay.sofa.rpc.registry.sofa;
 
 import com.alipay.sofa.registry.client.api.Configurator;
 import com.alipay.sofa.registry.client.api.RegistryClient;
@@ -48,13 +48,13 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-@Extension("dsr")
-public class DsrRegistry extends Registry {
+@Extension("sofa")
+public class SofaRegistry extends Registry {
 
     /**
      * Logger
      */
-    private static final Logger               LOGGER        = LoggerFactory.getLogger(DsrRegistry.class);
+    private static final Logger               LOGGER        = LoggerFactory.getLogger(SofaRegistry.class);
 
     /**
      * 用于缓存所有数据订阅者，避免同一个dataId订阅两次
@@ -73,14 +73,14 @@ public class DsrRegistry extends Registry {
      *
      * @param registryConfig 注册中心配置
      */
-    protected DsrRegistry(RegistryConfig registryConfig) {
+    protected SofaRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
     }
 
     @Override
     public void init() {
         //TODO 这里加一下 碧远
-        registryClient = ConfregClient.getRegistryClient("", registryConfig);
+        registryClient = SofaRegsitryClient.getRegistryClient("", registryConfig);
     }
 
     @Override
@@ -110,13 +110,13 @@ public class DsrRegistry extends Registry {
         List<ServerConfig> serverConfigs = config.getServer();
         if (CommonUtils.isNotEmpty(serverConfigs)) {
             for (ServerConfig server : serverConfigs) {
-                String serviceName = DsrRegistryHelper.buildListDataId(config, server.getProtocol());
-                String serviceData = DsrRegistryHelper.convertProviderToUrls(config, server);
+                String serviceName = SofaRegistryHelper.buildListDataId(config, server.getProtocol());
+                String serviceData = SofaRegistryHelper.convertProviderToUrls(config, server);
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
                 }
                 String groupId = config.getParameter(DsrConstants.DSR_GROUP);
-                groupId = groupId == null ? DsrRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
+                groupId = groupId == null ? SofaRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
                 doRegister(appName, serviceName, serviceData, groupId);
 
                 if (LOGGER.isInfoEnabled(appName)) {
@@ -163,10 +163,10 @@ public class DsrRegistry extends Registry {
         List<ServerConfig> serverConfigs = config.getServer();
         if (CommonUtils.isNotEmpty(serverConfigs)) {
             for (ServerConfig server : serverConfigs) {
-                String serviceName = DsrRegistryHelper.buildListDataId(config, server.getProtocol());
+                String serviceName = SofaRegistryHelper.buildListDataId(config, server.getProtocol());
                 try {
                     String groupId = config.getParameter(DsrConstants.DSR_GROUP);
-                    groupId = groupId == null ? DsrRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
+                    groupId = groupId == null ? SofaRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
                     doUnRegister(appName, serviceName, groupId);
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
@@ -221,32 +221,32 @@ public class DsrRegistry extends Registry {
             return null;
         }
 
-        String serviceName = DsrRegistryHelper.buildListDataId(config, config.getProtocol());
+        String serviceName = SofaRegistryHelper.buildListDataId(config, config.getProtocol());
 
-        DsrSubscribeCallback callback;
+        SofaRegistrySubscribeCallback callback;
 
         Subscriber listSubscriber = subscribers.get(serviceName);
         Configurator attrSubscriber;
         if (listSubscriber != null && providerInfoListener != null) {
             // 已经有人订阅过这个Key，那么地址已经存在了，
-            callback = (DsrSubscribeCallback) listSubscriber.getDataObserver();
+            callback = (SofaRegistrySubscribeCallback) listSubscriber.getDataObserver();
             callback.addProviderInfoListener(serviceName, config, providerInfoListener);
             // 使用旧数据通知下
             callback.handleDataToListener(serviceName, config, providerInfoListener);
         } else {
 
-            callback = new DsrSubscribeCallback();
+            callback = new SofaRegistrySubscribeCallback();
 
             callback.addProviderInfoListener(serviceName, config, providerInfoListener);
 
             // 生成订阅对象，并添加额外属性
             SubscriberRegistration subscriberRegistration = new SubscriberRegistration(serviceName, callback);
             String groupId = config.getParameter(DsrConstants.DSR_GROUP);
-            groupId = groupId == null ? DsrRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
+            groupId = groupId == null ? SofaRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
             addAttributes(subscriberRegistration, groupId);
 
             ConfiguratorRegistration configRegistration = new ConfiguratorRegistration(serviceName, callback);
-            addAttributes(configRegistration, DsrRegistryHelper.SUBSCRIBER_CONFIG_GROUP_ID);
+            addAttributes(configRegistration, SofaRegistryHelper.SUBSCRIBER_CONFIG_GROUP_ID);
 
             // 去配置中心订阅
 
@@ -265,11 +265,11 @@ public class DsrRegistry extends Registry {
 
     @Override
     public void unSubscribe(ConsumerConfig config) {
-        String serviceName = DsrRegistryHelper.buildListDataId(config, config.getProtocol());
+        String serviceName = SofaRegistryHelper.buildListDataId(config, config.getProtocol());
         String appName = config.getAppName();
         Subscriber dsrSubscriber = subscribers.get(serviceName);
         if (dsrSubscriber != null) {
-            DsrSubscribeCallback callback = (DsrSubscribeCallback) dsrSubscriber.getDataObserver();
+            SofaRegistrySubscribeCallback callback = (SofaRegistrySubscribeCallback) dsrSubscriber.getDataObserver();
             callback.remove(serviceName, config);
             if (callback.getListenerNum() == 0) {
                 // 已经没人订阅这个data Key了
