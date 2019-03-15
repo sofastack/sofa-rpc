@@ -335,6 +335,11 @@
                 <artifactId>nacos-client</artifactId>
                 <version>${nacos.version}</version>
             </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>registry-client-all</artifactId>
+                <version>5.2.0</version>
+            </dependency>
 
             <!-- alipay -->
             <dependency>
