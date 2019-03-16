@@ -39,7 +39,7 @@
         <!-- Test libs -->
         <junit.version>4.10</junit.version>
         <!-- alipay libs -->
-        <bolt.version>1.4.6</bolt.version>
+        <bolt.version>1.5.2</bolt.version>
         <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
