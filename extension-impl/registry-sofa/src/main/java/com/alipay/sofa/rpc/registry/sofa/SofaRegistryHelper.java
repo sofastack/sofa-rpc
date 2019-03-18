@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.registry.sofa;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.client.ProviderStatus;
-import com.alipay.sofa.rpc.common.DsrConstants;
+import com.alipay.sofa.rpc.common.SofaRegistryConstants;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
@@ -52,15 +52,15 @@ import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WARMUP_TIME;
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WARMUP_WEIGHT;
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WARM_UP_END_TIME;
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_WEIGHT;
-import static com.alipay.sofa.rpc.common.DsrConstants.APP_NAME;
-import static com.alipay.sofa.rpc.common.DsrConstants.HOST_MACHINE_KEY;
-import static com.alipay.sofa.rpc.common.DsrConstants.KEY_TIMEOUT;
-import static com.alipay.sofa.rpc.common.DsrConstants.RPC_REMOTING_PROTOCOL;
-import static com.alipay.sofa.rpc.common.DsrConstants.RPC_SERVICE_VERSION;
-import static com.alipay.sofa.rpc.common.DsrConstants.SERIALIZE_TYPE_KEY;
-import static com.alipay.sofa.rpc.common.DsrConstants.SOFA4_RPC_SERVICE_VERSION;
-import static com.alipay.sofa.rpc.common.DsrConstants.TIMEOUT;
-import static com.alipay.sofa.rpc.common.DsrConstants.WEIGHT_KEY;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.APP_NAME;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.HOST_MACHINE_KEY;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.KEY_TIMEOUT;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.RPC_REMOTING_PROTOCOL;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.RPC_SERVICE_VERSION;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.SERIALIZE_TYPE_KEY;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.SOFA4_RPC_SERVICE_VERSION;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.TIMEOUT;
+import static com.alipay.sofa.rpc.common.SofaRegistryConstants.WEIGHT_KEY;
 import static com.alipay.sofa.rpc.common.RpcConstants.PROTOCOL_TYPE_BOLT;
 import static com.alipay.sofa.rpc.common.RpcConstants.PROTOCOL_TYPE_TR;
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN;
@@ -338,8 +338,7 @@ public class SofaRegistryHelper {
         // p=1
         String protocolStr = getValue(parameters, RPC_REMOTING_PROTOCOL);
         if (schema == null && protocolStr != null) {
-            // removeOldKeys(parameters, DsrConstants.RPC_REMOTING_PROTOCOL);
-            // 1->bolt 13->tr 
+            // 1->bolt 13->tr
             if ((RemotingConstants.PROTOCOL_BOLT + "").equals(protocolStr)) {
                 protocolStr = PROTOCOL_TYPE_BOLT;
             } else if ((RemotingConstants.PROTOCOL_TR + "").equals(protocolStr)) {
@@ -353,9 +352,9 @@ public class SofaRegistryHelper {
         }
         // TODO SOFAVERSION v=4.0
         // timeout 
-        String timeoutStr = getValue(parameters, ATTR_TIMEOUT, DsrConstants.TIMEOUT);
+        String timeoutStr = getValue(parameters, ATTR_TIMEOUT, SofaRegistryConstants.TIMEOUT);
         if (timeoutStr != null) {
-            removeOldKeys(parameters, ATTR_TIMEOUT, DsrConstants.TIMEOUT);
+            removeOldKeys(parameters, ATTR_TIMEOUT, SofaRegistryConstants.TIMEOUT);
             try {// 加入动态
                 providerInfo.setDynamicAttr(ATTR_TIMEOUT, Integer.parseInt(timeoutStr));
             } catch (Exception e) {
@@ -364,9 +363,9 @@ public class SofaRegistryHelper {
         }
         // serializeType 使用字符传递
         String serializationStr = getValue(parameters, ATTR_SERIALIZATION,
-            DsrConstants.SERIALIZE_TYPE_KEY);
+            SofaRegistryConstants.SERIALIZE_TYPE_KEY);
         if (serializationStr != null) {
-            removeOldKeys(parameters, ATTR_SERIALIZATION, DsrConstants.SERIALIZE_TYPE_KEY);
+            removeOldKeys(parameters, ATTR_SERIALIZATION, SofaRegistryConstants.SERIALIZE_TYPE_KEY);
             // 1 -> hessian   2->java   4->hessian2  11->protobuf
             if ((RemotingConstants.SERIALIZE_CODE_HESSIAN + "").equals(serializationStr)) {
                 serializationStr = SERIALIZE_HESSIAN;
@@ -380,22 +379,22 @@ public class SofaRegistryHelper {
             providerInfo.setSerializationType(serializationStr);
         }
         // appName
-        String appNameStr = getValue(parameters, ATTR_APP_NAME, DsrConstants.APP_NAME,
-            DsrConstants.SELF_APP_NAME);
+        String appNameStr = getValue(parameters, ATTR_APP_NAME, SofaRegistryConstants.APP_NAME,
+            SofaRegistryConstants.SELF_APP_NAME);
         if (appNameStr != null) {
-            removeOldKeys(parameters, DsrConstants.APP_NAME, DsrConstants.SELF_APP_NAME);
+            removeOldKeys(parameters, SofaRegistryConstants.APP_NAME, SofaRegistryConstants.SELF_APP_NAME);
             providerInfo.setStaticAttr(ATTR_APP_NAME, appNameStr);
         }
         // connections
-        String connections = getValue(parameters, ATTR_CONNECTIONS, DsrConstants.CONNECTI_NUM);
+        String connections = getValue(parameters, ATTR_CONNECTIONS, SofaRegistryConstants.CONNECTI_NUM);
         if (connections != null) {
-            removeOldKeys(parameters, DsrConstants.CONNECTI_NUM);
+            removeOldKeys(parameters, SofaRegistryConstants.CONNECTI_NUM);
             providerInfo.setStaticAttr(ATTR_CONNECTIONS, connections);
         }
         // weight
-        String weightStr = getValue(parameters, ATTR_WEIGHT, DsrConstants.WEIGHT_KEY);
+        String weightStr = getValue(parameters, ATTR_WEIGHT, SofaRegistryConstants.WEIGHT_KEY);
         if (weightStr != null) {
-            removeOldKeys(parameters, ATTR_WEIGHT, DsrConstants.WEIGHT_KEY);
+            removeOldKeys(parameters, ATTR_WEIGHT, SofaRegistryConstants.WEIGHT_KEY);
             try {
                 int weight = Integer.parseInt(weightStr);
                 providerInfo.setWeight(weight);
@@ -405,10 +404,10 @@ public class SofaRegistryHelper {
             }
         }
         // warmupTime
-        String warmupTimeStr = getValue(parameters, ATTR_WARMUP_TIME, DsrConstants.WARMUP_TIME_KEY);
+        String warmupTimeStr = getValue(parameters, ATTR_WARMUP_TIME, SofaRegistryConstants.WARMUP_TIME_KEY);
         int warmupTime = 0;
         if (warmupTimeStr != null) {
-            removeOldKeys(parameters, ATTR_WARMUP_TIME, DsrConstants.WARMUP_TIME_KEY);
+            removeOldKeys(parameters, ATTR_WARMUP_TIME, SofaRegistryConstants.WARMUP_TIME_KEY);
             try {
                 warmupTime = Integer.parseInt(warmupTimeStr);
                 providerInfo.setStaticAttr(ATTR_WARMUP_TIME, warmupTimeStr);
@@ -418,10 +417,10 @@ public class SofaRegistryHelper {
         }
         // warmupWeight
         String warmupWeightStr = getValue(parameters, ATTR_WARMUP_WEIGHT,
-            DsrConstants.WARMUP_WEIGHT_KEY);
+            SofaRegistryConstants.WARMUP_WEIGHT_KEY);
         int warmupWeight = 0;
         if (warmupWeightStr != null) {
-            removeOldKeys(parameters, ATTR_WARMUP_WEIGHT, DsrConstants.WARMUP_WEIGHT_KEY);
+            removeOldKeys(parameters, ATTR_WARMUP_WEIGHT, SofaRegistryConstants.WARMUP_WEIGHT_KEY);
             try {
                 warmupWeight = Integer.parseInt(warmupWeightStr);
                 providerInfo.setStaticAttr(ATTR_WARMUP_WEIGHT, warmupWeightStr);
@@ -506,9 +505,10 @@ public class SofaRegistryHelper {
                 }
             }
             // timeout特殊处理
-            String timeout = getValue(tmp, ATTR_TIMEOUT, DsrConstants.KEY_TIMEOUT, DsrConstants.TIMEOUT);
+            String timeout = getValue(tmp, ATTR_TIMEOUT, SofaRegistryConstants.KEY_TIMEOUT,
+                SofaRegistryConstants.TIMEOUT);
             if (timeout != null) {
-                removeOldKeys(tmp, ATTR_TIMEOUT, DsrConstants.KEY_TIMEOUT, DsrConstants.TIMEOUT);
+                removeOldKeys(tmp, ATTR_TIMEOUT, SofaRegistryConstants.KEY_TIMEOUT, SofaRegistryConstants.TIMEOUT);
                 try {
                     methodParameters.put("." + method + "." + ATTR_TIMEOUT,
                         Integer.parseInt(timeout));

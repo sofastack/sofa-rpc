@@ -21,7 +21,7 @@ package com.alipay.sofa.rpc.common;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-public class DsrConstants {
+public class SofaRegistryConstants {
 
     /**
      *
@@ -80,5 +80,5 @@ public class DsrConstants {
     // 方法级
     public static final String KEY_TIMEOUT                 = "clientTimeout";
     public static final String KEY_RETRIES                 = "retries";
-    public static final String DSR_GROUP                   = "sofa.group";
+    public static final String SOFA_GROUP_KEY              = "sofa.group";
 }

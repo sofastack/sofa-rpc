@@ -24,7 +24,7 @@ import com.alipay.sofa.registry.client.api.registration.PublisherRegistration;
 import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.common.DsrConstants;
+import com.alipay.sofa.rpc.common.SofaRegistryConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -110,7 +110,7 @@ public class SofaRegistry extends Registry {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
                 }
-                String groupId = config.getParameter(DsrConstants.DSR_GROUP);
+                String groupId = config.getParameter(SofaRegistryConstants.SOFA_GROUP_KEY);
                 groupId = groupId == null ? SofaRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
                 doRegister(appName, serviceName, serviceData, groupId);
 
@@ -130,15 +130,15 @@ public class SofaRegistry extends Registry {
      * @param group       服务分组
      */
     protected void doRegister(String appName, String serviceName, String serviceData, String group) {
-        PublisherRegistration dsrRegistration;
+        PublisherRegistration publisherRegistration;
         // 生成注册对象，并添加额外属性
-        dsrRegistration = new PublisherRegistration(serviceName);
+        publisherRegistration = new PublisherRegistration(serviceName);
 
-        dsrRegistration.setGroup(group);
-        addAttributes(dsrRegistration, group);
+        publisherRegistration.setGroup(group);
+        addAttributes(publisherRegistration, group);
 
         // 去注册
-        SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(dsrRegistration, serviceData);
+        SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(publisherRegistration, serviceData);
     }
 
     @Override
@@ -160,7 +160,7 @@ public class SofaRegistry extends Registry {
             for (ServerConfig server : serverConfigs) {
                 String serviceName = SofaRegistryHelper.buildListDataId(config, server.getProtocol());
                 try {
-                    String groupId = config.getParameter(DsrConstants.DSR_GROUP);
+                    String groupId = config.getParameter(SofaRegistryConstants.SOFA_GROUP_KEY);
                     groupId = groupId == null ? SofaRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
                     doUnRegister(appName, serviceName, groupId);
                     if (LOGGER.isInfoEnabled(appName)) {
@@ -237,7 +237,7 @@ public class SofaRegistry extends Registry {
 
             // 生成订阅对象，并添加额外属性
             SubscriberRegistration subscriberRegistration = new SubscriberRegistration(serviceName, callback);
-            String groupId = config.getParameter(DsrConstants.DSR_GROUP);
+            String groupId = config.getParameter(SofaRegistryConstants.SOFA_GROUP_KEY);
             groupId = groupId == null ? SofaRegistryHelper.SUBSCRIBER_LIST_GROUP_ID : groupId;
             addAttributes(subscriberRegistration, groupId);
 
@@ -256,7 +256,7 @@ public class SofaRegistry extends Registry {
             subscribers.put(serviceName, listSubscriber);
             configurators.put(serviceName, attrSubscriber);
         }
-        // DSR统一走异步获取地址，所以此处返回null
+        // 统一走异步获取地址，所以此处返回null
         return null;
     }
 
@@ -264,20 +264,20 @@ public class SofaRegistry extends Registry {
     public void unSubscribe(ConsumerConfig config) {
         String serviceName = SofaRegistryHelper.buildListDataId(config, config.getProtocol());
         String appName = config.getAppName();
-        Subscriber dsrSubscriber = subscribers.get(serviceName);
-        if (dsrSubscriber != null) {
-            SofaRegistrySubscribeCallback callback = (SofaRegistrySubscribeCallback) dsrSubscriber.getDataObserver();
+        Subscriber subscriber = subscribers.get(serviceName);
+        if (subscriber != null) {
+            SofaRegistrySubscribeCallback callback = (SofaRegistrySubscribeCallback) subscriber.getDataObserver();
             callback.remove(serviceName, config);
             if (callback.getListenerNum() == 0) {
                 // 已经没人订阅这个data Key了
                 SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
-                    dsrSubscriber.getGroup(),
+                    subscriber.getGroup(),
                     RegistryType.SUBSCRIBER);
                 subscribers.remove(serviceName);
 
                 // 已经没人订阅这个config Key了
                 SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
-                    dsrSubscriber.getGroup(),
+                    subscriber.getGroup(),
                     RegistryType.CONFIGURATOR);
                 configurators.remove(serviceName);
             }
@@ -300,13 +300,13 @@ public class SofaRegistry extends Registry {
     /**
      * 添加额外的属性
      *
-     * @param dsrRegistration 注册或者订阅对象
+     * @param publisherRegistration 注册或者订阅对象
      * @param group           分组
      */
-    private void addAttributes(PublisherRegistration dsrRegistration, String group) {
+    private void addAttributes(PublisherRegistration publisherRegistration, String group) {
         // if group == null; group = "DEFAULT_GROUP"
         if (StringUtils.isNotEmpty(group)) {
-            dsrRegistration.setGroup(group);
+            publisherRegistration.setGroup(group);
         }
 
     }
@@ -314,29 +314,29 @@ public class SofaRegistry extends Registry {
     /**
      * 添加额外的属性
      *
-     * @param dsrRegistration 注册或者订阅对象
+     * @param subscriberRegistration 注册或者订阅对象
      * @param group           分组
      */
-    private void addAttributes(SubscriberRegistration dsrRegistration, String group) {
+    private void addAttributes(SubscriberRegistration subscriberRegistration, String group) {
 
         // if group == null; group = "DEFAULT_GROUP"
         if (StringUtils.isNotEmpty(group)) {
-            dsrRegistration.setGroup(group);
+            subscriberRegistration.setGroup(group);
         }
 
-        dsrRegistration.setScopeEnum(ScopeEnum.global);
+        subscriberRegistration.setScopeEnum(ScopeEnum.global);
     }
 
     /**
      * 添加额外的属性
      *
-     * @param dsrRegistration 注册或者订阅对象
+     * @param configuratorRegistration 注册或者订阅对象
      * @param group           分组
      */
-    private void addAttributes(ConfiguratorRegistration dsrRegistration, String group) {
+    private void addAttributes(ConfiguratorRegistration configuratorRegistration, String group) {
         // if group == null; group = "DEFAULT_GROUP"
         if (StringUtils.isNotEmpty(group)) {
-            dsrRegistration.setGroup(group);
+            configuratorRegistration.setGroup(group);
         }
 
     }
