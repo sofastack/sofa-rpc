@@ -14,39 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.ext;
+package com.alipay.sofa.rpc.registry.mesh;
 
-import com.alipay.sofa.rpc.protocol.Protocol;
-import com.alipay.sofa.rpc.protocol.ProtocolDecoder;
-import com.alipay.sofa.rpc.protocol.ProtocolEncoder;
-import com.alipay.sofa.rpc.protocol.ProtocolInfo;
-import com.alipay.sofa.rpc.protocol.ProtocolNegotiator;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 
 /**
- *
+ * Test extend this will destroy actively.
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension(value = "wp", code = -1)
-public class WrongProtocol implements Protocol {
+public abstract class BaseMeshTest {
 
-    @Override
-    public ProtocolInfo protocolInfo() {
-        return null;
+    protected static final Logger LOGGER = LoggerFactory.getLogger(BaseMeshTest.class);
+
+    @BeforeClass
+    public static void adBeforeClass() {
+        RpcRunningState.setUnitTestMode(true);
     }
 
-    @Override
-    public ProtocolEncoder encoder() {
-        return null;
-    }
-
-    @Override
-    public ProtocolDecoder decoder() {
-        return null;
-    }
-
-    @Override
-    public ProtocolNegotiator negotiator() {
-        return null;
+    @AfterClass
+    public static void adAfterClass() {
+        RpcRuntimeContext.destroy();
+        RpcInternalContext.removeContext();
+        RpcInvokeContext.removeContext();
     }
 }

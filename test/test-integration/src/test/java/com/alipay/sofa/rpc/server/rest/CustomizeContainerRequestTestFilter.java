@@ -14,23 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.hystrix;
+package com.alipay.sofa.rpc.server.rest;
 
-import com.alipay.sofa.rpc.test.HelloService;
+import javax.ws.rs.container.ContainerRequestContext;
+import javax.ws.rs.container.ContainerRequestFilter;
+import java.io.IOException;
 
-import java.util.concurrent.atomic.AtomicInteger;
+/**
+ * @author zhangchengxi
+ * Date 2018/12/2
+ */
+public class CustomizeContainerRequestTestFilter implements ContainerRequestFilter {
 
-public class InvokeFailedHelloService implements HelloService {
+    private static boolean invoked = false;
 
-    private AtomicInteger executeCount = new AtomicInteger(0);
-
-    @Override
-    public String sayHello(String name, int age) {
-        executeCount.incrementAndGet();
-        throw new RuntimeException("invoke failed");
+    public static boolean isInvoked() {
+        return invoked;
     }
 
-    public int getExecuteCount() {
-        return executeCount.get();
+    public static void reset() {
+        invoked = false;
+    }
+
+    @Override
+    public void filter(ContainerRequestContext requestContext) throws IOException {
+        invoked = true;
     }
 }

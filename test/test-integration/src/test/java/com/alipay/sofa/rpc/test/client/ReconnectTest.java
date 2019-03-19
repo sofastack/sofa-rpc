@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.test.client;
 
-import com.alipay.remoting.Connection;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -32,7 +31,6 @@ import com.alipay.sofa.rpc.transport.bolt.BoltClientTransport;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 
@@ -70,19 +68,20 @@ public class ReconnectTest extends ActivelyDestroyTest {
         // Mock server down, and RPC will throw exception(no available provider)
         providerConfig.unExport();
         ServerFactory.destroyAll();
+
         BoltClientTransport clientTransport = (BoltClientTransport) consumerConfig.getConsumerBootstrap().getCluster()
             .getConnectionHolder()
             .getAvailableClientTransport(ProviderHelper.toProviderInfo("bolt://127.0.0.1:22221"));
-        Field field = BoltClientTransport.class.getDeclaredField("connection");
-        field.setAccessible(true);
-        Connection connection = (Connection) field.get(clientTransport);
-        connection.close();
+
+        clientTransport.disconnect();
+
         TestUtils.delayGet(new Callable<Boolean>() {
             @Override
             public Boolean call() throws Exception {
                 return consumerConfig.getConsumerBootstrap().getCluster().getConnectionHolder().isAvailableEmpty();
             }
         }, true, 100, 30);
+
         try {
             helloService.sayHello("xxx", 11);
             Assert.fail();
