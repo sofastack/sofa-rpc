@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -54,7 +55,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Bolt server processor of bolt server. 
+ * Bolt server processor of bolt server.
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -357,5 +358,20 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
     public boolean timeoutDiscard() {
         // 业务线程自己判断超时请求
         return false;
+    }
+
+    @Override
+    public boolean processInIOThread() {
+        final Map<String, String> parameters = boltServer.serverConfig.getParameters();
+        if (CommonUtils.isNotEmpty(parameters)) {
+            String processInIOThread = parameters.get(RpcConstants.PROCESS_IN_IOTHREAD);
+            if (StringUtils.isNotEmpty(processInIOThread)) {
+                return Boolean.parseBoolean(processInIOThread);
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 }
