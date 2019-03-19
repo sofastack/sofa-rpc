@@ -51,8 +51,8 @@
 
     <properties>
         <!-- Build args -->
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <sofa.rpc.version>${project.version}</sofa.rpc.version>
         <slf4j.version>1.7.21</slf4j.version>
