@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.registry.sofa;
 
+import com.alipay.sofa.registry.server.test.TestRegistryMain;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -26,8 +27,10 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -56,8 +59,21 @@ public class SofaRegistryTest {
 
     private static ProviderConfig<?> provider;
 
+    private static TestRegistryMain  registryMain;
+
+    @BeforeClass
+    public static void beforeClass() {
+        registryMain = new TestRegistryMain();
+        try {
+            registryMain.startRegistry();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     @Before
     public void setUp() {
+
         registryConfig = new RegistryConfig()
             .setProtocol("sofa")
             .setSubscribe(true)
@@ -88,6 +104,15 @@ public class SofaRegistryTest {
         }
         if (provider != null) {
             provider.unExport();
+        }
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        try {
+            registryMain.stopRegistry();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
