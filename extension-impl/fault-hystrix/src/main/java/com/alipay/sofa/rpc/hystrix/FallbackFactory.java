@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.core.response.SofaResponse;
-
 /**
  * Construct a instance by exception when the hystrix execute failed
  * @param <T>
@@ -26,5 +24,5 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  */
 public interface FallbackFactory<T> {
 
-    T create(SofaResponse response, Throwable t);
+    T create(FallbackContext context);
 }
