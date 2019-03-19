@@ -39,6 +39,7 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -53,7 +54,7 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
  * <p>Simple Nacos registry. Features: <br/>
  * 1. register publisher as instance to nacos server.
  * 2. subscribe instances change event
- * 
+ *
  * <pre>
  *     Structure of nacos storage:
  *     --sofa-rpc (namespace)
@@ -65,9 +66,9 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
  *        |--com.alipay.sofa.rpc.example.EchoService (next serviceName)
  *        |......
  * </pre>
- * 
+ *
  * </p>
- * 
+ *
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
  */
 @Extension("nacos")
@@ -90,6 +91,8 @@ public class NacosRegistry extends Registry {
     private ConcurrentMap<ProviderConfig, List<Instance>> providerInstances = new ConcurrentHashMap<ProviderConfig, List<Instance>>();
 
     private ConcurrentMap<ConsumerConfig, EventListener>  consumerListeners = new ConcurrentHashMap<ConsumerConfig, EventListener>();
+
+    private Properties                                    nacosConfig       = new Properties();
 
     /**
      * Instantiates a new Nacos registry.
@@ -115,7 +118,11 @@ public class NacosRegistry extends Registry {
         String address; // IP地址
         if (idx > 0) {
             address = addressInput.substring(0, idx);
-            namespace = addressInput.substring(idx);
+            namespace = addressInput.substring(idx + 1);
+            //for host:port/ this scene
+            if (StringUtils.isBlank(namespace)) {
+                namespace = DEFAULT_NAMESPACE;
+            }
         } else {
             address = addressInput;
             namespace = DEFAULT_NAMESPACE;
@@ -123,7 +130,6 @@ public class NacosRegistry extends Registry {
 
         defaultCluster = Collections.singletonList(NacosRegistryHelper.DEFAULT_CLUSTER);
 
-        Properties nacosConfig = new Properties();
         nacosConfig.put(PropertyKeyConst.SERVER_ADDR, address);
         nacosConfig.put(PropertyKeyConst.NAMESPACE, namespace);
 
@@ -278,7 +284,7 @@ public class NacosRegistry extends Registry {
                 List<Instance> allInstances = namingService.getAllInstances(serviceName, defaultCluster);
 
                 List<ProviderInfo> providerInfos = NacosRegistryHelper.convertInstancesToProviders(allInstances);
-                List<ProviderInfo> matchProviders = NacosRegistryHelper.matchProviderInfos(config, providerInfos);
+                List<ProviderInfo> matchProviders = RegistryUtils.matchProviderInfos(config, providerInfos);
                 return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(
@@ -327,5 +333,9 @@ public class NacosRegistry extends Registry {
         }
         namingService = null;
         providerObserver = null;
+    }
+
+    public Properties getNacosConfig() {
+        return nacosConfig;
     }
 }

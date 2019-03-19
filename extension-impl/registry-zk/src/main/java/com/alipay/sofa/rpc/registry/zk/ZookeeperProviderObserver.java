@@ -18,10 +18,8 @@ package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -30,7 +28,6 @@ import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 import org.apache.curator.framework.recipes.cache.ChildData;
 
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -116,7 +113,7 @@ public class ZookeeperProviderObserver {
 
     /**
      * Add provider
-     * 
+     *
      * @param config       ConsumerConfig
      * @param providerPath Provider path of zookeeper
      * @param data         Event data
@@ -140,7 +137,7 @@ public class ZookeeperProviderObserver {
         if (CommonUtils.isNotEmpty(providerInfoListeners)) {
             List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(providerPath,
                 currentData);
-            List<ProviderInfo> providerInfosForProtocol = filterByProtocol(config, providerInfos);
+            List<ProviderInfo> providerInfosForProtocol = RegistryUtils.matchProviderInfos(config, providerInfos);
             for (ProviderInfoListener listener : providerInfoListeners) {
                 if (add) {
                     listener.addProvider(new ProviderGroup(providerInfosForProtocol));
@@ -149,18 +146,5 @@ public class ZookeeperProviderObserver {
                 }
             }
         }
-    }
-
-    private List<ProviderInfo> filterByProtocol(ConsumerConfig consumerConfig, List<ProviderInfo> providerInfos) {
-        String protocol = consumerConfig.getProtocol();
-        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol) &&
-                StringUtils.equals(consumerConfig.getUniqueId(),
-                    providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
-                result.add(providerInfo);
-            }
-        }
-        return result;
     }
 }

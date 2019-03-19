@@ -24,11 +24,11 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -45,6 +45,8 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
 
     @BeforeClass
     public static void startServer() throws Exception {
+
+        RpcRunningState.setUnitTestMode(true);
 
         // 发布一个服务，每个请求要执行2秒
         serverConfig1 = new ServerConfig()
@@ -73,12 +75,6 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
             .setRepeatedExportLimit(-1)
             .setRegister(false);
         providerConfig2.export();
-    }
-
-    @AfterClass
-    public static void stopServer() {
-        serverConfig1.destroy();
-        serverConfig2.destroy();
     }
 
     @Test

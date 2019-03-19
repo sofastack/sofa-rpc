@@ -41,7 +41,7 @@ import com.alipay.sofa.rpc.registry.consul.internal.ConsulManager;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulEphemeralNode;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulService;
 import com.alipay.sofa.rpc.registry.consul.model.ConsulServiceResp;
-import com.alipay.sofa.rpc.registry.consul.model.NotifyConsumerListner;
+import com.alipay.sofa.rpc.registry.consul.model.NotifyConsumerListener;
 import com.alipay.sofa.rpc.registry.consul.model.NotifyListener;
 import com.alipay.sofa.rpc.registry.consul.model.ThrallRoleType;
 import com.google.common.cache.Cache;
@@ -152,11 +152,11 @@ public class ConsulRegistry extends Registry {
     private ConsulService buildConsulHealthService(ConsulURL url) {
         return ConsulService.newService()//
             .withAddress(url.getHost())//
-            .withPort(Integer.valueOf(url.getPort()).toString())//
+            .withPort(Integer.toString(url.getPort()))//
             .withName(ConsulURLUtils.toServiceName(url.getGroup()))//
             .withTag(ConsulURLUtils.healthServicePath(url, ThrallRoleType.PROVIDER))//
             .withId(url.getHost() + ":" + url.getPort() + "-" + url.getPath() + "-" + url.getVersion())//
-            .withCheckInterval(Integer.valueOf(ConsulConstants.TTL).toString()).build();
+            .withCheckInterval(Integer.toString(ConsulConstants.TTL)).build();
     }
 
     private ConsulEphemeralNode buildEphemralNode(ConsulURL url, ThrallRoleType roleType) {
@@ -327,16 +327,14 @@ public class ConsulRegistry extends Registry {
                     Collection<List<ConsulURL>> consulURLList = entry.getValue().values();
 
                     List<ProviderInfo> matchProviders = new ArrayList<ProviderInfo>();
-                    Iterator<List<ConsulURL>> consulListIt = consulURLList.iterator();
-                    while (consulListIt.hasNext()) {
-                        List<ConsulURL> next = consulListIt.next();
+                    for (List<ConsulURL> next : consulURLList) {
                         matchConsulUrls.addAll(next);
                         matchProviders.addAll(ConsulRegistryHelper.convertUrl2ProviderInfos(next));
                     }
                     result.addAll(ConsulRegistryHelper.matchProviderInfos(config, matchProviders));
                 }
 
-                NotifyConsumerListner listener = new NotifyConsumerListner(consulURL, matchConsulUrls);
+                NotifyConsumerListener listener = new NotifyConsumerListener(consulURL, matchConsulUrls);
 
                 consumerUrls.put(config, url);
 
@@ -450,7 +448,7 @@ public class ConsulRegistry extends Registry {
 
     private Map<String, List<ConsulURL>> lookupServiceUpdate(String group) {
         Long lastConsulIndexId =
-                lookupGroupServices.get(group) == null ? 0L : lookupGroupServices.get(group);
+                lookupGroupServices.get(group) == null ? Long.valueOf(0L) : lookupGroupServices.get(group);
         String serviceName = ConsulURLUtils.toServiceName(group);
         ConsulServiceResp consulResp = consulManager.lookupHealthService(serviceName, lastConsulIndexId);
         if (consulResp != null) {
