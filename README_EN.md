@@ -25,9 +25,9 @@ SOFARPC is a high-performance, high-extensibility, production-level Java RPC fra
 
 ## Requirements
 
-Build-time requirement: JDK 7 or above and Maven 3.2.5 or above.
+Build-time requirement: JDK 8 or above and Maven 3.2.5 or above.
 
-Runtime requirement: JDK 6 or above.
+Runtime requirement: JDK 8 or above.
 
 
 ## Documents
