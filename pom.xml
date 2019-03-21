@@ -5,7 +5,7 @@
    
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-parent</artifactId>
-    <version>5.5.2-SNAPSHOT</version>
+    <version>5.6.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>[SOFA] - RPC Framework</name>
     <url>http://www.antfin.com</url>
@@ -50,8 +50,8 @@
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <module.jacoco.skip>true</module.jacoco.skip>
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <skipTests>false</skipTests>
     </properties>
