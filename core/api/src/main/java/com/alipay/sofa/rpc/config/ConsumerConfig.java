@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.listener.ConsumerStateListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
@@ -231,6 +232,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * 服务列表的listener
      */
     private transient volatile ProviderInfoListener providerInfoListener;
+
+    /**
+     * 配置的用来反向通信的serer.实际上并不会生效，与ProvderConfig保持一致即可
+     */
+    protected List<ServerConfig>                    server;
 
     /**
      * Build key.
@@ -911,6 +917,40 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public String getMethodInvokeType(String methodName) {
         return (String) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_INVOKE_TYPE,
             getInvokeType());
+    }
+
+    /**
+     * Gets server.
+     *
+     * @return the server
+     */
+    public List<ServerConfig> getServer() {
+        return server;
+    }
+
+    /**
+     * Sets server.
+     *
+     * @param server the server
+     * @return the server
+     */
+    public ConsumerConfig<T> setServer(List<ServerConfig> server) {
+        this.server = server;
+        return this;
+    }
+
+    /**
+     * add server.
+     *
+     * @param server ServerConfig
+     * @return the ProviderConfig
+     */
+    public ConsumerConfig<T> setServer(ServerConfig server) {
+        if (this.server == null) {
+            this.server = new ArrayList<ServerConfig>();
+        }
+        this.server.add(server);
+        return this;
     }
 
     /**

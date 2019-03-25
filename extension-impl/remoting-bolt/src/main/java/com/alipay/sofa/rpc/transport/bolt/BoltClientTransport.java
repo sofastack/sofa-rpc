@@ -36,6 +36,8 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -55,11 +57,16 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.message.bolt.BoltFutureInvokeCallback;
 import com.alipay.sofa.rpc.message.bolt.BoltInvokerCallback;
 import com.alipay.sofa.rpc.message.bolt.BoltResponseFuture;
+import com.alipay.sofa.rpc.server.Server;
+import com.alipay.sofa.rpc.server.ServerFactory;
+import com.alipay.sofa.rpc.server.bolt.BoltServer;
+import com.alipay.sofa.rpc.server.bolt.BoltServerProcessor;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -92,9 +99,14 @@ public class BoltClientTransport extends ClientTransport {
                                                                        : new AloneBoltClientConnectionManager(
                                                                            true);
 
+    /**
+     * BoltServerProcessor
+     */
+    protected static BoltServerProcessor         boltServerProcessor;
+
     static {
-        RPC_CLIENT.init();
         SofaRpcSerializationRegister.registerCustomSerializer();
+        RPC_CLIENT.init();
     }
 
     /**
@@ -115,6 +127,17 @@ public class BoltClientTransport extends ClientTransport {
     protected BoltClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
         url = convertProviderToUrl(transportConfig, transportConfig.getProviderInfo());
+
+        final List<ServerConfig> servers = transportConfig.getConsumerConfig().getServer();
+
+        //only support one
+        if (CommonUtils.isNotEmpty(servers)) {
+            final Server server = ServerFactory.getServer(servers.get(0));
+            if (server instanceof BoltServer) {
+                boltServerProcessor = new BoltServerProcessor((BoltServer) server);
+                RPC_CLIENT.registerUserProcessor(boltServerProcessor);
+            }
+        }
     }
 
     /**
@@ -272,7 +295,8 @@ public class BoltClientTransport extends ClientTransport {
      */
     protected SofaResponse doInvokeSync(SofaRequest request, InvokeContext invokeContext, int timeoutMillis)
         throws RemotingException, InterruptedException {
-        return (SofaResponse) RPC_CLIENT.invokeSync(url, request, invokeContext, timeoutMillis);
+        RPC_CLIENT.invokeSync(url, request, invokeContext, timeoutMillis);
+        return null;
     }
 
     @Override
