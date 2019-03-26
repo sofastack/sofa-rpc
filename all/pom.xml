@@ -65,7 +65,7 @@
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
-        <sofaregistry.version>5.2.0</sofaregistry.version>
+        <sofa.registry.version>5.2.0-SNAPSHOT</sofa.registry.version>
     </properties>
 
     <dependencies>
