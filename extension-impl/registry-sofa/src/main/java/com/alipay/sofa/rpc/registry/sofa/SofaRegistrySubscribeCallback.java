@@ -86,6 +86,7 @@ public class SofaRegistrySubscribeCallback implements SubscriberDataObserver, Co
      * 1.拿到服务列表<br/>
      * 2.拿到服务参数<br/>
      * 3 或者 null ：都拿到过
+     * 本次只使用provider
      */
     AtomicBoolean[] flag = new AtomicBoolean[] { new AtomicBoolean(), new AtomicBoolean() };
 
@@ -110,12 +111,12 @@ public class SofaRegistrySubscribeCallback implements SubscriberDataObserver, Co
     }
 
     /**
-     * 标记为空或者标记等于三，代表服务列表和服务参数都拿到过
+     * 标记为空或者标记等于三，代表服务列表和服务参数都拿到过，本次只要provider有，就继续走
      *
      * @return 是否拿到过服务列表和服务参数
      */
     private boolean canNotify() {
-        return flag == null || (flag[0].get() && flag[1].get());
+        return flag == null || (flag[0].get());
     }
 
     /**
@@ -170,13 +171,14 @@ public class SofaRegistrySubscribeCallback implements SubscriberDataObserver, Co
         ComposeUserData result = new ComposeUserData();
 
         Map<String, List<ProviderInfo>> zoneData = new HashMap<String, List<ProviderInfo>>();
-        if (userData == null || configData == null) {
+        if (userData == null) {
             return result;
         } else {
             result.setLocalZone(userData.getLocalZone());
 
             final Map<String, List<String>> listZoneData = userData.getZoneData();
-            final String[] configDatas = StringUtils.split(configData.getData(), CONFIG_SEPARATOR);
+            final String[] configDatas = StringUtils.split(
+                configData == null ? StringUtils.EMPTY : configData.getData(), CONFIG_SEPARATOR);
             final List<String> attrData = Arrays.asList(configDatas);
             for (String key : listZoneData.keySet()) {
                 final List<ProviderInfo> providerInfos = mergeProviderInfo(listZoneData.get(key), attrData);
