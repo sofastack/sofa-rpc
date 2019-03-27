@@ -164,8 +164,6 @@ public class SofaRegistrySubscribeCallbackTest {
             Thread.sleep(200);
         } finally {
         }
-        Assert.assertTrue(ps.get() == 0);
-
         callback.handleData("yyyyy", buildConfigPs(2));
         try {
             Thread.sleep(200);
