@@ -24,7 +24,6 @@ import com.alipay.sofa.registry.client.api.registration.PublisherRegistration;
 import com.alipay.sofa.registry.client.api.registration.SubscriberRegistration;
 import com.alipay.sofa.registry.core.model.ScopeEnum;
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.common.SofaRegistryConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
