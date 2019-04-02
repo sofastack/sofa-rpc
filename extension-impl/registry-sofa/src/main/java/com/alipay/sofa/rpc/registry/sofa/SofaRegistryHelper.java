@@ -390,6 +390,11 @@ public class SofaRegistryHelper {
             removeOldKeys(parameters, SofaRegistryConstants.CONNECTI_NUM);
             providerInfo.setStaticAttr(ATTR_CONNECTIONS, connections);
         }
+
+        //rpc version
+        String rpcVersion = getValue(parameters, ATTR_RPC_VERSION);
+        providerInfo.setRpcVersion(CommonUtils.parseInt(rpcVersion, providerInfo.getRpcVersion()));
+
         // weight
         String weightStr = getValue(parameters, ATTR_WEIGHT, WEIGHT_KEY);
         if (weightStr != null) {
