@@ -13,7 +13,7 @@
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-registry-sofa</artifactId>
     <properties>
-        <sofa.registry.version>5.2.0-SNAPSHOT</sofa.registry.version>
+        <sofa.registry.version>5.2.0</sofa.registry.version>
         <argLine>-Dnetwork_interface_denylist=docker0</argLine>
     </properties>
     <dependencies>
