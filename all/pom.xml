@@ -56,7 +56,7 @@
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <sofa.rpc.version>${project.version}</sofa.rpc.version>
         <slf4j.version>1.7.21</slf4j.version>
-        <sofa.common.tools.version>1.0.12</sofa.common.tools.version>
+        <sofa.common.tools.version>1.0.18</sofa.common.tools.version>
         <javassist.version>3.20.0-GA</javassist.version>
         <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.6</hessian.version>
