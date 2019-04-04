@@ -291,7 +291,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         return new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setRef(helloService)
-            .setServer(serverConfig);
+            .setServer(serverConfig)
+            .setRepeatedExportLimit(-1);
     }
 
     private ConsumerConfig<HelloService> defaultClient() {
@@ -299,6 +300,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             .setInterfaceId(HelloService.class.getName())
             .setDirectUrl("bolt://127.0.0.1:22222")
             .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
-            .setParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED, String.valueOf(true));
+            .setParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED, String.valueOf(true))
+            .setRepeatedReferLimit(-1);
     }
 }
