@@ -22,7 +22,7 @@
         <curator.version>2.9.1</curator.version>
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo.version>2.4.10</dubbo.version>
-        <nacos.version>0.6.0</nacos.version>
+        <nacos.version>0.9.0</nacos.version>
         <!-- serialization -->
         <hessian.version>3.3.6</hessian.version>
         <thrift.version>0.9.2</thrift.version>
