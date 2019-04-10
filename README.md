@@ -48,7 +48,6 @@ Runtime requirement: JDK 8 or above.
 
   <img src="https://gw.alipayobjects.com/mdn/rms_aefe75/afts/img/A*3UUmQrZkwz0AAAAAAAAAAABjARQnAQ"  height="300" width="300">
 
-
 ## License
 
 SOFARPC is licensed under the [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE), and SOFARPC uses some third-party components, you can view their open source license here [NOTICE](https://github.com/alipay/sofa-rpc/wiki/NOTICE).

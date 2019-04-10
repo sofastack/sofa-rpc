@@ -46,7 +46,6 @@ SOFARPC 是一个高可扩展性、高性能、生产级的 Java RPC 框架。�
 
   <img src="https://gw.alipayobjects.com/mdn/rms_aefe75/afts/img/A*3UUmQrZkwz0AAAAAAAAAAABjARQnAQ"  height="300" width="300">
 
-
 ## 致谢
 
 SOFARPC 最早源于阿里内部的 HSF，非常感谢毕玄创造了 HSF，使 SOFARPC 的发展有了良好的基础，也非常感谢寒泉子，独明，世范在 SOFARPC 发展过程中作出的贡献，😄。
