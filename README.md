@@ -32,15 +32,15 @@ Runtime requirement: JDK 8 or above.
 
 ## Documents
 
-- [Getting Started](http://www.sofastack.tech/sofa-rpc/docs/Getting-Started-With-SOFA-Boot)
-- [User Guide](http://www.sofastack.tech/sofa-rpc/docs/Programming)
-- [Developer Guide](http://www.sofastack.tech/sofa-rpc/docs/How-To-Build)
-- [Release Notes](http://www.sofastack.tech/sofa-rpc/docs/ReleaseNotes)
-- [Road Map](http://www.sofastack.tech/sofa-rpc/docs/RoadMap)
+- [Getting Started](http://www.sofastack.tech/sofa-rpc/docs/Getting-Started-With-SOFA-Boot?lang=en)
+- [User Guide](http://www.sofastack.tech/sofa-rpc/docs/Programming?lang=en)
+- [Developer Guide](http://www.sofastack.tech/sofa-rpc/docs/How-To-Build?lang=en)
+- [Release Notes](http://www.sofastack.tech/sofa-rpc/docs/ReleaseNotes?lang=en)
+- [Road Map](http://www.sofastack.tech/sofa-rpc/docs/RoadMap?lang=en)
 
 ## Contribution 
 
-[How to Contributing](http://www.sofastack.tech/sofa-rpc/docs/Contributing)
+[How to Contributing](http://www.sofastack.tech/sofa-rpc/docs/Contributing?lang=en)
 
 ## Contact Us
 
@@ -50,4 +50,4 @@ Runtime requirement: JDK 8 or above.
 
 ## License
 
-SOFARPC is licensed under the [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE), and SOFARPC uses some third-party components, you can view their open source license here [NOTICE](https://github.com/alipay/sofa-rpc/wiki/NOTICE).
+SOFARPC is licensed under the [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE), and SOFARPC uses some third-party components, you can view their open source license here [NOTICE](https://www.sofastack.tech/sofa-rpc/docs/NOTICE?lang=en).
