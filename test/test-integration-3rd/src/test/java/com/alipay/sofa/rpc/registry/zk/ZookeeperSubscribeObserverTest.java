@@ -40,7 +40,7 @@ public class ZookeeperSubscribeObserverTest extends BaseZkTest {
 
     @Test
     public void testAll() throws Exception {
-        RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
+        RegistryConfig registryConfig = new RegistryConfig().setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181");
         ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
             .getRegistry(registryConfig);

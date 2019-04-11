@@ -77,7 +77,7 @@ public class RestServer implements Server {
         httpServer = buildServer();
     }
 
-    private SofaNettyJaxrsServer buildServer() {
+    protected SofaNettyJaxrsServer buildServer() {
         // 生成Server对象
         SofaNettyJaxrsServer httpServer = new SofaNettyJaxrsServer(serverConfig);
 
@@ -99,7 +99,7 @@ public class RestServer implements Server {
         return httpServer;
     }
 
-    private void registerProvider(ResteasyProviderFactory providerFactory) {
+    protected void registerProvider(ResteasyProviderFactory providerFactory) {
         // 注册内置
         Set<Class> internalProviderClasses = JAXRSProviderManager.getInternalProviderClasses();
         if (CommonUtils.isNotEmpty(internalProviderClasses)) {
@@ -109,16 +109,18 @@ public class RestServer implements Server {
         }
 
         // 注册cors filter
-        final CorsFilter corsFilter = new CorsFilter();
         Map<String, String> parameters = serverConfig.getParameters();
         if (CommonUtils.isNotEmpty(parameters)) {
             String crossDomainStr = parameters.get(RpcConstants.ALLOWED_ORIGINS);
-            String[] domains = StringUtils.splitWithCommaOrSemicolon(crossDomainStr);
-            for (String allowDomain : domains) {
-                corsFilter.getAllowedOrigins().add(allowDomain);
+            if (StringUtils.isNotBlank(crossDomainStr)) {
+                final CorsFilter corsFilter = new CorsFilter();
+                String[] domains = StringUtils.splitWithCommaOrSemicolon(crossDomainStr);
+                for (String allowDomain : domains) {
+                    corsFilter.getAllowedOrigins().add(allowDomain);
+                }
+                JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
             }
         }
-        JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
 
         // 注册自定义
         Set<Object> customProviderInstances = JAXRSProviderManager.getCustomProviderInstances();
@@ -204,14 +206,16 @@ public class RestServer implements Server {
             LOGGER.info("Register jaxrs service to base url http://" + serverConfig.getHost() + ":"
                 + serverConfig.getPort() + serverConfig.getContextPath());
         }
+        Object obj = null;
         try {
-            Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
+            obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), instance);
             httpServer.getDeployment().getRegistry()
                 .addResourceFactory(new SofaResourceFactory(providerConfig, obj), serverConfig.getContextPath());
 
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Register jaxrs service error", e);
+            throw new SofaRpcRuntimeException("Register jaxrs service error", e);
         }
     }
 
