@@ -28,8 +28,6 @@ import com.alipay.remoting.rpc.protocol.RpcResponseCommand;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.SofaConfigs;
-import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -51,9 +49,6 @@ import java.util.Map;
  * @author <a href=mailto:hongwei.yhw@antfin.com>HongWei Yi</a>
  */
 public class SofaRpcSerialization extends DefaultCustomSerializer {
-
-    private final boolean         meshSwitch = SofaConfigs.getBooleanValue(
-                                                 SofaOptions.CONFIG_RPC_MESH_SWITCH, false);
 
     protected SimpleMapSerializer mapSerializer;
 
@@ -99,14 +94,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             if (StringUtils.isNotEmpty(service)) {
                 Map<String, String> header = new HashMap<String, String>(16);
                 header.put(RemotingConstants.HEAD_SERVICE, service);
-                // 新序列化协议全部采用扁平化头部
-                byte serializer = requestCommand.getSerializer();
-                if (serializer != RemotingConstants.SERIALIZE_CODE_HESSIAN
-                    && serializer != RemotingConstants.SERIALIZE_CODE_JAVA) {
-                    putRequestMetadataToHeader(requestObject, header);
-                } else if (meshSwitch) {
-                    putRequestMetadataToHeader(requestObject, header);
-                }
+                putRequestMetadataToHeader(requestObject, header);
                 requestCommand.setHeader(mapSerializer.encode(header));
             }
             return true;
