@@ -345,8 +345,9 @@ public class RpcSofaTracer extends Tracer {
                 throwableShow = new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, response.getErrorMsg());
             } else {
                 Object ret = response.getAppResponse();
-                if (ret instanceof Throwable) {
-                    throwableShow = (Throwable) ret;
+                //for server throw exception ,but this class can not be found in current
+                if (ret instanceof Throwable ||
+                    "true".equals(response.getResponseProp(RemotingConstants.HEAD_RESPONSE_ERROR))) {
                     errorSourceApp = clientSpan.getTagsWithStr().get(RpcSpanTags.REMOTE_APP);
                     // 业务异常
                     resultCode = TracerResultCode.RPC_RESULT_BIZ_FAILED;
