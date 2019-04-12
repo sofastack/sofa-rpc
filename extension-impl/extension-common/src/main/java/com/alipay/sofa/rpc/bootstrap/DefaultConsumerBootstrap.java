@@ -163,7 +163,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 if (StringUtils.isNotBlank(dynamicAlias)) {
                     final DynamicManager dynamicManager = DynamicManagerFactory.getDynamicManager(
                         consumerConfig.getAppName(), dynamicAlias);
-                    dynamicManager.initServiceConfigutration(consumerConfig.getInterfaceId());
+                    dynamicManager.initServiceConfigutration("consumer", consumerConfig.getInterfaceId());
                 }
             } catch (Exception e) {
                 if (cluster != null) {

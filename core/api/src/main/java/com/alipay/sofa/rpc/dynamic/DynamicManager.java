@@ -28,7 +28,7 @@ import java.util.Properties;
 public abstract class DynamicManager {
 
     /**
-     * appname
+     * appname appname
      */
     private String appName;
 
@@ -42,18 +42,19 @@ public abstract class DynamicManager {
 
     /**
      * init service ,which service is servicename:1.0.method.xx=1000
+     * @param type 类型,consumers,providers
      * @param service
      * @return
      */
-    public abstract Properties initServiceConfigutration(String service);
+    public abstract Properties initServiceConfigutration(String type, String service);
 
     /**
      * fetch the value of the specify key
+     * @param type 类型,consumers,providers
      * @param service
-     * @param layers
-     * @param key
+     * @param key you need specify
      * @return
      */
-    public abstract String fetchKey(String service, String layers, String key);
+    public abstract String fetchKey(String type, String service, String key);
 
 }

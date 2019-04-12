@@ -32,11 +32,9 @@ public class DynamicFacotryTest {
 
         final String service = "com.alipay.sofa.rpc.demo.HelloService:1.0";
 
-        dynamicManager.initServiceConfigutration(service);
+        dynamicManager.initServiceConfigutration("consumer", service);
 
-        String layers = "methodName";
-
-        String fetchValue = dynamicManager.fetchKey(service, layers, "timeout");
+        String fetchValue = dynamicManager.fetchKey("consumer", service, "methodName.timeout");
 
         Assert.assertEquals("1000", fetchValue);
     }
