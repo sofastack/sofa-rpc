@@ -594,7 +594,7 @@ public abstract class AbstractCluster extends Cluster {
         final String dynamicAlias = consumerConfig.getParameter("dynamicAlias");
         if (StringUtils.isNotBlank(dynamicAlias)) {
             String dynamicTimeout = DynamicManagerFactory.getDynamicManager(consumerConfig.getAppName(), dynamicAlias)
-                .fetchKey("consumer", request.getInterfaceName(), request.getMethodName() + "." + "timeout");
+                .fetchKey(request.getInterfaceName(), request.getMethodName() + "." + "timeout");
             if (StringUtils.isNotBlank(dynamicTimeout)) {
                 return Integer.parseInt(dynamicTimeout);
             }
