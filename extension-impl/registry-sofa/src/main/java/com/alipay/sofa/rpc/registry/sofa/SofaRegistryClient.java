@@ -25,9 +25,9 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 
 /**
  * @author bystander
- * @version $Id: SofaRegsitryClient.java, v 0.1 2018年03月13日 10:20 AM bystander Exp $
+ * @version $Id: SofaRegistryClient.java, v 0.1 2018年03月13日 10:20 AM bystander Exp $
  */
-public class SofaRegsitryClient {
+public class SofaRegistryClient {
 
     public static final String    LOCAL_DATACENTER = "DefaultDataCenter";
     public static final String    LOCAL_REGION     = "DEFAULT_ZONE";
