@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.Map;
@@ -40,13 +41,20 @@ public class SimpleDynamicManager extends DynamicManager {
         final Properties value = new Properties();
         value.setProperty("timeout", "1000");
         contents.put(service, value);
+        contents.put(service + "." + "methodName", value);
         return value;
     }
 
     @Override
-    public String fetchKey(String service, String key) {
+    public String fetchKey(String service, String layers, String key) {
+
+        String lookup = service;
+        if (StringUtils.isNotBlank(layers)) {
+            lookup = lookup + "." + layers;
+        }
+
         if ("timeout".equals(key)) {
-            return (String) contents.get(service).get(key);
+            return (String) contents.get(lookup).get(key);
         }
         return null;
     }

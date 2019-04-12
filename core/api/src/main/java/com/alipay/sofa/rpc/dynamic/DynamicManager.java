@@ -41,7 +41,7 @@ public abstract class DynamicManager {
     }
 
     /**
-     * init service ,which service is servicename:1.0
+     * init service ,which service is servicename:1.0.method.xx=1000
      * @param service
      * @return
      */
@@ -50,9 +50,10 @@ public abstract class DynamicManager {
     /**
      * fetch the value of the specify key
      * @param service
+     * @param layers
      * @param key
      * @return
      */
-    public abstract String fetchKey(String service, String key);
+    public abstract String fetchKey(String service, String layers, String key);
 
 }
