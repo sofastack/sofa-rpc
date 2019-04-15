@@ -47,12 +47,10 @@ public abstract class DynamicManager {
      */
     public abstract Properties initServiceConfigutration(String service);
 
-    /**
-     * fetch the value of the specify key
-     * @param service
-     * @param key you need specify
-     * @return
-     */
-    public abstract String fetchKey(String service, String key);
+    public abstract String getAppValue(String key);
+
+    public abstract String getServiceValue(String service, String key);
+
+    public abstract String getMethodValue(String service, String method, String key);
 
 }
