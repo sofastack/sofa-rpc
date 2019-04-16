@@ -14,28 +14,47 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.dynamic;
+package com.alipay.sofa.rpc.auth;
 
-import org.junit.Assert;
-import org.junit.Test;
+import java.util.List;
 
 /**
- * @author bystander
- * @version : DynamicFacotryTest.java, v 0.1 2019年04月12日 12:08 bystander Exp $
+ *
+ * @author lepdou
+ * @version $Id: AuthRule.java, v 0.1 2019年04月11日 下午7:53 lepdou Exp $
  */
-public class DynamicFacotryTest {
+public class AuthRule {
 
-    @Test
-    public void test() {
-        DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager("testApp", "simple");
-        Assert.assertNotNull(dynamicManager);
+    private String             name;
+    private int                enabled;
 
-        final String service = "com.alipay.sofa.rpc.demo.HelloService:1.0";
+    private List<AuthRuleItem> ruleItems;
 
-        dynamicManager.initServiceConfiguration(service);
+    public boolean enable() {
+        return enabled > 0;
+    }
 
-        String fetchValue = dynamicManager.fetchKey(service, "methodName.timeout");
+    public String getName() {
+        return name;
+    }
 
-        Assert.assertEquals("1000", fetchValue);
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(int enabled) {
+        this.enabled = enabled;
+    }
+
+    public List<AuthRuleItem> getRuleItems() {
+        return ruleItems;
+    }
+
+    public void setRuleItems(List<AuthRuleItem> ruleItems) {
+        this.ruleItems = ruleItems;
     }
 }

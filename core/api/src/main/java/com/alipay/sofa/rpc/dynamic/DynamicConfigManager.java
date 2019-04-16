@@ -16,41 +16,33 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.ext.Extensible;
-
-import java.util.Properties;
 
 /**
  * @author bystander
  * @version : DynamicManager.java, v 0.1 2019年04月12日 11:35 bystander Exp $
  */
 @Extensible(singleton = true)
-public abstract class DynamicManager {
+public abstract class DynamicConfigManager {
 
-    /**
-     * appname appname
-     */
     private String appName;
 
-    /**
-     * init by appName
-     * @param appName
-     */
-    protected DynamicManager(String appName) {
+    protected DynamicConfigManager(String appName) {
         this.appName = appName;
     }
 
-    /**
-     * init service ,which service is servicename:1.0.method.xx=1000
-     * @param service
-     * @return
-     */
-    public abstract Properties initServiceConfigutration(String service);
+    public abstract void initServiceConfiguration(String service);
 
-    public abstract String getAppValue(String key);
+    public abstract String getAppProperty(String key);
 
-    public abstract String getServiceValue(String service, String key);
+    public abstract String getProviderServiceProperty(String service, String key);
 
-    public abstract String getMethodValue(String service, String method, String key);
+    public abstract String getConsumerServiceProperty(String service, String key);
 
+    public abstract String getProviderMethodProperty(String service, String method, String key);
+
+    public abstract String getConsumerMethodProperty(String service, String method, String key);
+
+    public abstract AuthRuleGroup getServiceAuthRule(String service);
 }

@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.Map;
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * @version : SimpleDynamicManager.java, v 0.1 2019年04月12日 11:52 bystander Exp $
  */
 @Extension("simple")
-public class SimpleDynamicManager extends DynamicManager {
+public class SimpleDynamicManager extends DynamicConfigManager {
 
     private Map<String, Properties> contents = new ConcurrentHashMap<String, Properties>();
 
@@ -36,17 +37,42 @@ public class SimpleDynamicManager extends DynamicManager {
     }
 
     @Override
-    public Properties initServiceConfigutration(String type, String service) {
+    public void initServiceConfiguration(String service) {
         final Properties value = new Properties();
         value.setProperty("timeout", "5000");
         value.setProperty("methodName" + "." + "timeout", "1000");
 
         contents.put(service, value);
-        return value;
     }
 
     @Override
-    public String fetchKey(String type, String service, String key) {
-        return (String) contents.get(service).get(key);
+    public String getAppProperty(String key) {
+        return null;
     }
+
+    @Override
+    public String getProviderServiceProperty(String service, String key) {
+        return null;
+    }
+
+    @Override
+    public String getConsumerServiceProperty(String service, String key) {
+        return null;
+    }
+
+    @Override
+    public String getProviderMethodProperty(String service, String method, String key) {
+        return null;
+    }
+
+    @Override
+    public String getConsumerMethodProperty(String service, String method, String key) {
+        return null;
+    }
+
+    @Override
+    public AuthRuleGroup getServiceAuthRule(String service) {
+        return new AuthRuleGroup();
+    }
+
 }
