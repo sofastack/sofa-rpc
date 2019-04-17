@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.ext.Extensible;
 
 /**
+ *
  * @author bystander
  * @version : DynamicManager.java, v 0.1 2019年04月12日 11:35 bystander Exp $
  */
@@ -32,17 +33,57 @@ public abstract class DynamicConfigManager {
         this.appName = appName;
     }
 
+    /**
+     * Init service's governance related configuration.
+     * Such as auth rules、lb rules
+     *
+     * @param service target service
+     */
     public abstract void initServiceConfiguration(String service);
 
-    public abstract String getAppProperty(String key);
-
+    /**
+     * Get provider service related property.
+     *
+     * @param service target service
+     * @param key property key
+     * @return property value
+     */
     public abstract String getProviderServiceProperty(String service, String key);
 
+    /**
+     * Get consumer service related property.
+     *
+     * @param service target service
+     * @param key property key
+     * @return property value
+     */
     public abstract String getConsumerServiceProperty(String service, String key);
 
+    /**
+     * Get provider method related property.
+     *
+     * @param service target service
+     * @param method target method
+     * @param key property key
+     * @return property value
+     */
     public abstract String getProviderMethodProperty(String service, String method, String key);
 
+    /**
+     * Get consumer method related property.
+     *
+     * @param service target service
+     * @param method target method
+     * @param key property key
+     * @return property value
+     */
     public abstract String getConsumerMethodProperty(String service, String method, String key);
 
+    /**
+     * Get service's auth rules.
+     *
+     * @param service target service
+     * @return auth rules
+     */
     public abstract AuthRuleGroup getServiceAuthRule(String service);
 }
