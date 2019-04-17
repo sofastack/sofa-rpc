@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.ext.Extension;
@@ -159,7 +160,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                     proxyInvoker);
 
                 //动态配置
-                final String dynamicAlias = consumerConfig.getParameter("dynamicAlias");
+                final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
                 if (StringUtils.isNotBlank(dynamicAlias)) {
                     final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
                         consumerConfig.getAppName(), dynamicAlias);
