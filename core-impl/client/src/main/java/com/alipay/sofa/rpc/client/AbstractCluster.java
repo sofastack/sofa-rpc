@@ -32,7 +32,8 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.dynamic.DynamicManagerFactory;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderInfoAddEvent;
 import com.alipay.sofa.rpc.event.ProviderInfoRemoveEvent;
@@ -588,13 +589,20 @@ public abstract class AbstractCluster extends Cluster {
      * @return 调用超时
      */
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
-
-        //动态配置优先 FIXME
-
+        // 动态配置优先
         final String dynamicAlias = consumerConfig.getParameter("dynamicAlias");
         if (StringUtils.isNotBlank(dynamicAlias)) {
-            String dynamicTimeout = DynamicManagerFactory.getDynamicManager(consumerConfig.getAppName(), dynamicAlias)
-                .getMethodValue(request.getInterfaceName(), request.getMethodName(), "timeout");
+            String dynamicTimeout = null;
+            DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
+                consumerConfig.getAppName(),
+                dynamicAlias);
+
+            if (dynamicConfigManager != null) {
+                dynamicTimeout = dynamicConfigManager.getConsumerMethodProperty(request.getInterfaceName(),
+                    request.getMethodName(),
+                    "timeout");
+            }
+
             if (StringUtils.isNotBlank(dynamicTimeout)) {
                 return Integer.parseInt(dynamicTimeout);
             }
