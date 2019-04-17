@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.event.EventBus;
@@ -590,7 +591,7 @@ public abstract class AbstractCluster extends Cluster {
      */
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
         // 动态配置优先
-        final String dynamicAlias = consumerConfig.getParameter("dynamicAlias");
+        final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
         if (StringUtils.isNotBlank(dynamicAlias)) {
             String dynamicTimeout = null;
             DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
