@@ -32,8 +32,8 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-import com.alipay.sofa.rpc.dynamic.DynamicManager;
-import com.alipay.sofa.rpc.dynamic.DynamicManagerFactory;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
@@ -161,9 +161,9 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 //动态配置
                 final String dynamicAlias = consumerConfig.getParameter("dynamicAlias");
                 if (StringUtils.isNotBlank(dynamicAlias)) {
-                    final DynamicManager dynamicManager = DynamicManagerFactory.getDynamicManager(
+                    final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
                         consumerConfig.getAppName(), dynamicAlias);
-                    dynamicManager.initServiceConfigutration(consumerConfig.getInterfaceId());
+                    dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId());
                 }
             } catch (Exception e) {
                 if (cluster != null) {

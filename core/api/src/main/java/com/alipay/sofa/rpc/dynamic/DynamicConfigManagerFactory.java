@@ -30,18 +30,18 @@ import java.util.concurrent.ConcurrentMap;
  * @author bystander
  * @version : DynamicManagerFactory.java, v 0.1 2019年04月12日 11:36 bystander Exp $
  */
-public class DynamicManagerFactory {
+public class DynamicConfigManagerFactory {
 
     /**
      * 保存全部的配置和注册中心实例
      */
-    private final static ConcurrentMap<String, DynamicManager> ALL_DYNAMICS = new ConcurrentHashMap<String, DynamicManager>();
+    private final static ConcurrentMap<String, DynamicConfigManager> ALL_DYNAMICS = new ConcurrentHashMap<String, DynamicConfigManager>();
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                LOGGER       = LoggerFactory
-                                                                                .getLogger(DynamicManagerFactory.class);
+    private final static Logger                                      LOGGER       = LoggerFactory
+                                                                                      .getLogger(DynamicConfigManagerFactory.class);
 
     /**
      * 得到动态配置管理
@@ -49,7 +49,7 @@ public class DynamicManagerFactory {
      * @param alias 别名
      * @return DynamicManager 实现
      */
-    public static synchronized DynamicManager getDynamicManager(String appName, String alias) {
+    public static synchronized DynamicConfigManager getDynamicManager(String appName, String alias) {
         if (ALL_DYNAMICS.size() > 3) { // 超过3次 是不是配错了？
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Size of registry is greater than 3, Please check it!");
@@ -57,9 +57,10 @@ public class DynamicManagerFactory {
         }
         try {
             // 注意：RegistryConfig重写了equals方法，如果多个RegistryConfig属性一样，则认为是一个对象
-            DynamicManager registry = ALL_DYNAMICS.get(alias);
+            DynamicConfigManager registry = ALL_DYNAMICS.get(alias);
             if (registry == null) {
-                ExtensionClass<DynamicManager> ext = ExtensionLoaderFactory.getExtensionLoader(DynamicManager.class)
+                ExtensionClass<DynamicConfigManager> ext = ExtensionLoaderFactory.getExtensionLoader(
+                    DynamicConfigManager.class)
                     .getExtensionClass(alias);
                 if (ext == null) {
                     throw ExceptionUtils.buildRuntime("dynamic", alias,
