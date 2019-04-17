@@ -34,7 +34,7 @@ public class DynamicFacotryTest {
 
         dynamicManager.initServiceConfiguration(service);
 
-        String fetchValue = dynamicManager.fetchKey(service, "methodName.timeout");
+        String fetchValue = dynamicManager.getConsumerMethodProperty(service, "methodName", "timeout");
 
         Assert.assertEquals("1000", fetchValue);
     }

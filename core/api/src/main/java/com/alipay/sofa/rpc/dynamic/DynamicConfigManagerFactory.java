@@ -52,7 +52,7 @@ public class DynamicConfigManagerFactory {
     public static synchronized DynamicConfigManager getDynamicManager(String appName, String alias) {
         if (ALL_DYNAMICS.size() > 3) { // 超过3次 是不是配错了？
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Size of registry is greater than 3, Please check it!");
+                LOGGER.warn("Size of dynamic manager is greater than 3, Please check it!");
             }
         }
         try {

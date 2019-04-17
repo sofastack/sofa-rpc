@@ -46,11 +46,6 @@ public class SimpleDynamicManager extends DynamicConfigManager {
     }
 
     @Override
-    public String getAppProperty(String key) {
-        return null;
-    }
-
-    @Override
     public String getProviderServiceProperty(String service, String key) {
         return null;
     }
@@ -67,7 +62,7 @@ public class SimpleDynamicManager extends DynamicConfigManager {
 
     @Override
     public String getConsumerMethodProperty(String service, String method, String key) {
-        return null;
+        return contents.get(service).getProperty(method + "." + key);
     }
 
     @Override
