@@ -125,7 +125,7 @@ public class DynamicConfigKeyHelper {
      * Consumer method property key format : sofa.consumer.service.{serviceName}.{methodName}.{configKey}
      */
     public static String buildConsumerMethodProKey(String serviceName, String methodName, String proKey) {
-        return SERVICE_CONSUMER_PROPERTY_KEY_PREFIX + KEY_SEPARATOR + serviceName + KEY_SEPARATOR + methodName +
+        return METHOD_CONSUMER_PROPERTY_KEY_PREFIX + KEY_SEPARATOR + serviceName + KEY_SEPARATOR + methodName +
             KEY_SEPARATOR + proKey;
     }
 
@@ -133,7 +133,7 @@ public class DynamicConfigKeyHelper {
      * Provider method property key format : sofa.consumer.service.{serviceName}.{methodName}.{configKey}
      */
     public static String buildProviderMethodProKey(String serviceName, String methodName, String proKey) {
-        return SERVICE_PROVIDER_PROPERTY_KEY_PREFIX + KEY_SEPARATOR + serviceName + KEY_SEPARATOR + methodName +
+        return METHOD_PROVIDER_PROPERTY_KEY_PREFIX + KEY_SEPARATOR + serviceName + KEY_SEPARATOR + methodName +
             KEY_SEPARATOR + proKey;
     }
 
@@ -145,5 +145,9 @@ public class DynamicConfigKeyHelper {
     public static boolean isMethodProKey(String key) {
         return !StringUtils.isBlank(key) && (key.startsWith(METHOD_CONSUMER_PROPERTY_KEY_PREFIX) ||
             key.startsWith(METHOD_PROVIDER_PROPERTY_KEY_PREFIX));
+    }
+
+    public static boolean isSofaProKey(String key) {
+        return isServiceProKey(key) || isMethodProKey(key);
     }
 }
