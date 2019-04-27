@@ -283,9 +283,9 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
         channelPipeline.addLast(new HttpObjectAggregator(maxRequestSize));
         channelPipeline.addLast(new HttpResponseEncoder());
         channelPipeline.addLast(httpChannelHandlers.toArray(new ChannelHandler[httpChannelHandlers.size()]));
-        channelPipeline.addLast(new RestEasyHttpRequestDecoder(dispatcher.getDispatcher(), root, protocol));
+        channelPipeline.addLast(new SofaRestEasyHttpRequestDecoder(dispatcher.getDispatcher(), root, protocol)); // CHANGE: Use sofa class
         channelPipeline.addLast(new RestEasyHttpResponseEncoder());
-        channelPipeline.addLast(eventExecutor, new SofaRestRequestHandler(dispatcher)); // CHANGE: 用sofa的处理类
+        channelPipeline.addLast(eventExecutor, new SofaRestRequestHandler(dispatcher)); // CHANGE: Use sofa class
     }
 
     @Override
