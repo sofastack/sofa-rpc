@@ -136,6 +136,9 @@
                         <!-- 这里需要根据自己的需要指定要跑的单元测试 -->
                         <include>**/*Test.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/SofaRegistryTest.java</exclude>
+                    </excludes>
                     <!-- 如无特殊需求，将forkMode设置为once -->
                     <forkMode>once</forkMode>
                 </configuration>
