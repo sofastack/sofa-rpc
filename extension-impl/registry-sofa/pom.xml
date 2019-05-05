@@ -91,6 +91,15 @@
                 <exculdeTests>**/SofaRegistryTest.java</exculdeTests>
             </properties>
         </profile>
+        <profile>
+            <id>jdk18</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <exculdeTests></exculdeTests>
+            </properties>
+        </profile>
     </profiles>
 
     <build>
