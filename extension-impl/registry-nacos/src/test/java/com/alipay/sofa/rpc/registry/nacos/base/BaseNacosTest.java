@@ -55,7 +55,7 @@ public abstract class BaseNacosTest {
 
     @Before
     public void setup() {
-        nacosProcess = NacosStarterBuilder.nacosStarter().withNacosVersion("0.9.0").build().start();
+        nacosProcess = NacosStarterBuilder.nacosStarter().withNacosVersion("1.0.0").build().start();
     }
 
     @After
