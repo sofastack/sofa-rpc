@@ -17,8 +17,7 @@
 package com.alipay.sofa.rpc.registry.zk.demo;
 
 /**
- * @author bystander
- * @version : ZkTestServiceImpl.java, v 0.1 2019年03月23日 14:05 bystander Exp $
+ * @author leizhiyuan
  */
 public class ZkTestServiceImpl implements ZkTestService {
     @Override

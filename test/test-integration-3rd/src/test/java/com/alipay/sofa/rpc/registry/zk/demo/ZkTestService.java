@@ -17,8 +17,7 @@
 package com.alipay.sofa.rpc.registry.zk.demo;
 
 /**
- * @author bystander
- * @version : ZkTestService.java, v 0.1 2019年03月23日 14:04 bystander Exp $
+ * @author leizhiyuan
  */
 public interface ZkTestService {
 

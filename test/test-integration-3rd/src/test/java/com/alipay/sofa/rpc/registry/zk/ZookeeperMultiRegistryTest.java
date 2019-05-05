@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
+import java.util.List;
+
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -32,10 +34,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import java.util.List;
-
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author leizhiyuan
  */
 public class ZookeeperMultiRegistryTest extends BaseMultiZkTest {
 
