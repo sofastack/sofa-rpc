@@ -81,6 +81,27 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>jdk17</id>
+            <activation>
+                <jdk>1.7</jdk>
+            </activation>
+            <properties>
+                <exculdeTests>**/SofaRegistryTest.java</exculdeTests>
+            </properties>
+        </profile>
+        <profile>
+            <id>jdk18</id>
+            <activation>
+                <jdk>1.8</jdk>
+            </activation>
+            <properties>
+                <exculdeTests>**/NotExistTest.java</exculdeTests>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
@@ -136,6 +157,9 @@
                         <!-- 这里需要根据自己的需要指定要跑的单元测试 -->
                         <include>**/*Test.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>${exculdeTests}</exclude>
+                    </excludes>
                     <!-- 如无特殊需求，将forkMode设置为once -->
                     <forkMode>once</forkMode>
                 </configuration>
