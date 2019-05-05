@@ -193,6 +193,9 @@ public class RpcSofaTracer extends Tracer {
             Map<String, String> oldTracerContext = new HashMap<String, String>();
             oldTracerContext.put(TracerCompatibleConstants.TRACE_ID_KEY, sofaTracerSpanContext.getTraceId());
             oldTracerContext.put(TracerCompatibleConstants.RPC_ID_KEY, sofaTracerSpanContext.getSpanId());
+            // 将采样标记解析并传递
+            oldTracerContext.put(TracerCompatibleConstants.SAMPLING_MARK,
+                String.valueOf(sofaTracerSpanContext.isSampled()));
             //业务
             oldTracerContext.put(TracerCompatibleConstants.PEN_ATTRS_KEY,
                 sofaTracerSpanContext.getBizSerializedBaggage());
@@ -445,13 +448,11 @@ public class RpcSofaTracer extends Tracer {
                 String callerZone = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_ZONE_KEY);
                 String callerIdc = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_IDC_KEY);
                 String callerIp = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_IP_KEY);
-
                 SofaTracerSpanContext spanContext = new SofaTracerSpanContext(traceId, rpcId);
+                //解析采样标记
+                spanContext.setSampled(parseSampled(contextMap, spanContext));
                 spanContext.deserializeBizBaggage(bizBaggage);
                 spanContext.deserializeSysBaggage(sysBaggage);
-                //兼容老调用新采样情况
-                spanContext.setSampled("true".equalsIgnoreCase(spanContext.getSysBaggage().get(
-                    TracerCompatibleConstants.SAMPLING_MARK)));
                 //tags
                 tags.put(RpcSpanTags.REMOTE_APP, callerApp);
                 tags.put(RpcSpanTags.REMOTE_ZONE, callerZone);
@@ -464,6 +465,19 @@ public class RpcSofaTracer extends Tracer {
         } else {
             return null;
         }
+    }
+
+    private boolean parseSampled(Map<String, String> contextMap, SofaTracerSpanContext spanContext) {
+        // 新版本中tracer标记不在 baggage 中,兼容老版本
+        String oldSampledMark = spanContext.getSysBaggage().get(
+            TracerCompatibleConstants.SAMPLING_MARK);
+        // 默认不会设置采样标记，即默认采样
+        if (StringUtils.isBlank(oldSampledMark) || "true".equals(oldSampledMark)) {
+            return true;
+        }
+        // 除显示获取 tracer 上下文中的采样标记之外，默认全部采样
+        String sampledStr = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.SAMPLING_MARK);
+        return StringUtils.isNotBlank(sampledStr) ? Boolean.valueOf(sampledStr) : true;
     }
 
     @Override
