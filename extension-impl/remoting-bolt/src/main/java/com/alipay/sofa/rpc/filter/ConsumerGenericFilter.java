@@ -43,6 +43,10 @@ public class ConsumerGenericFilter extends Filter {
      */
     private static final String METHOD_GENERIC_INVOKE = "$genericInvoke";
 
+    private final static String REVISE_KEY            = "generic.revise";
+
+    private final static String REVISE_VALUE          = "true";
+
     /**
      * 是否自动加载
      *
@@ -58,6 +62,12 @@ public class ConsumerGenericFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         try {
+
+            final String revised = (String) request.getRequestProp(REVISE_KEY);
+            //if has revised, invoke directly
+            if (REVISE_VALUE.equals(revised)) {
+                return invoker.invoke(request);
+            }
             String type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
             request.addRequestProp(RemotingConstants.HEAD_GENERIC_TYPE, type);
 
@@ -83,7 +93,7 @@ public class ConsumerGenericFilter extends Filter {
             String invokeType = consumerConfig.getMethodInvokeType(methodName);
             request.setInvokeType(invokeType);
             request.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE, invokeType);
-
+            request.addRequestProp(REVISE_KEY, REVISE_VALUE);
             return invoker.invoke(request);
         } catch (SofaRpcException e) {
             throw e;
