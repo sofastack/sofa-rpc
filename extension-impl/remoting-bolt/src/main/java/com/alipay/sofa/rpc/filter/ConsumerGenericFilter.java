@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.filter;
 
 import com.alipay.sofa.rpc.api.GenericContext;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -66,7 +65,7 @@ public class ConsumerGenericFilter extends Filter {
 
             final String revised = (String) request.getRequestProp(REVISE_KEY);
             //if has revised, invoke directly
-            if (StringUtils.isNotBlank(revised) && REVISE_VALUE.equals(revised)) {
+            if (REVISE_VALUE.equals(revised)) {
                 return invoker.invoke(request);
             }
             String type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
