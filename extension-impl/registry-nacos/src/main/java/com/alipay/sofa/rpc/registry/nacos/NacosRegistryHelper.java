@@ -55,9 +55,9 @@ class NacosRegistryHelper {
      * @param protocol protocol for config
      * @return unique service name
      */
-    static String buildServiceName(AbstractInterfaceConfig config, String protocol){
-        if(RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol)
-                || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)){
+    static String buildServiceName(AbstractInterfaceConfig config, String protocol) {
+        if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol)
+            || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
             return ConfigUniqueNameGenerator.getServiceName(config) + ":DEFAULT";
         } else {
             return ConfigUniqueNameGenerator.getServiceName(config) + ":" + protocol;

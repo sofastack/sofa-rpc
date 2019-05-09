@@ -170,19 +170,19 @@ public class NacosRegistry extends Registry {
                         String serviceName = instance.getServiceName();
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName,
-                                    LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
+                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
                         }
                         namingService.registerInstance(serviceName, instance);
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName,
-                                    LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
+                                LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
                         }
                     }
                     providerInstances.put(config, instances);
                 }
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to register provider to nacosRegistry! service: "
-                        + config.buildKey(), e);
+                    + config.buildKey(), e);
             }
         }
     }
@@ -209,7 +209,7 @@ public class NacosRegistry extends Registry {
                             instance.getClusterName());
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                                    serviceName, instances.size()));
+                                serviceName, instances.size()));
                         }
                     }
                 }
@@ -218,7 +218,7 @@ public class NacosRegistry extends Registry {
                 if (!RpcRunningState.isShuttingDown()) {
                     throw new SofaRpcRuntimeException(
                         "Failed to unregister provider to nacos registry! service: "
-                                + config.buildKey(), e);
+                            + config.buildKey(), e);
                 }
             }
         }
