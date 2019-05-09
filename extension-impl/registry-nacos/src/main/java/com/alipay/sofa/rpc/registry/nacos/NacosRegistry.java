@@ -166,25 +166,23 @@ public class NacosRegistry extends Registry {
             try {
                 List<Instance> instances = NacosRegistryHelper.convertProviderToInstances(config);
                 if (CommonUtils.isNotEmpty(instances)) {
-                    String serviceName = config.getInterfaceId();
-
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
-                    }
-
                     for (Instance instance : instances) {
+                        String serviceName = instance.getServiceName();
+                        if (LOGGER.isInfoEnabled(appName)) {
+                            LOGGER.infoWithApp(appName,
+                                    LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
+                        }
                         namingService.registerInstance(serviceName, instance);
+                        if (LOGGER.isInfoEnabled(appName)) {
+                            LOGGER.infoWithApp(appName,
+                                    LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
+                        }
                     }
                     providerInstances.put(config, instances);
-
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
-                    }
                 }
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to register provider to nacosRegistry!", e);
+                throw new SofaRpcRuntimeException("Failed to register provider to nacosRegistry! service: "
+                        + config.buildKey(), e);
             }
         }
     }
@@ -202,24 +200,25 @@ public class NacosRegistry extends Registry {
 
         // unregister publisher
         if (config.isRegister()) {
-            String serviceName = config.getInterfaceId();
             try {
                 List<Instance> instances = providerInstances.remove(config);
                 if (CommonUtils.isNotEmpty(instances)) {
                     for (Instance instance : instances) {
+                        String serviceName = instance.getServiceName();
                         namingService.deregisterInstance(serviceName, instance.getIp(), instance.getPort(),
                             instance.getClusterName());
-                    }
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                            serviceName, instances.size()));
+                        if (LOGGER.isInfoEnabled(appName)) {
+                            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
+                                    serviceName, instances.size()));
+                        }
                     }
                 }
 
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
                     throw new SofaRpcRuntimeException(
-                        "Failed to unregister provider to nacos registry! service: " + serviceName, e);
+                        "Failed to unregister provider to nacos registry! service: "
+                                + config.buildKey(), e);
                 }
             }
         }
@@ -250,7 +249,7 @@ public class NacosRegistry extends Registry {
         }
 
         if (config.isSubscribe()) {
-            String serviceName = config.getInterfaceId();
+            String serviceName = NacosRegistryHelper.buildServiceName(config, config.getProtocol());
 
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_SUB, serviceName));
@@ -299,7 +298,7 @@ public class NacosRegistry extends Registry {
     @Override
     public void unSubscribe(ConsumerConfig config) {
         if (config.isSubscribe()) {
-            String serviceName = config.getInterfaceId();
+            String serviceName = NacosRegistryHelper.buildServiceName(config, config.getProtocol());
             try {
                 EventListener eventListener = consumerListeners.remove(config);
                 if (null != eventListener) {
