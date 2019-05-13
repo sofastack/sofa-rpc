@@ -58,15 +58,20 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
  * <pre>
  *     Structure of nacos storage:
  *     --sofa-rpc (namespace)
- *        |--com.alipay.sofa.rpc.example.HelloService (serviceName)
+ *        |--com.alipay.sofa.rpc.example.HelloService (serviceName):v1.1 (uniqueId):DEFAULT (protocol)
  *        |   |--default-cluster (cluster)
  *        |   |   |--instances
  *        |   |   |   |--{"ip": "192.168.1.100", "port": 22000, "metaData": {"protocol": "bolt", "timeout": "1000", ...}}
  *        |   |   |   |--{"ip": "192.168.1.110", "port": 22000, "metaData": {"protocol": "bolt", "timeout": "1000", ...}}
- *        |--com.alipay.sofa.rpc.example.EchoService (next serviceName)
+ *        |--com.alipay.sofa.rpc.example.EchoService (next serviceName):grpc (protocol)
  *        |......
  * </pre>
  *
+ *  Remark:
+ *  Here we register service name with not only serviceName, but also with 'uniqueId' and 'protocol',
+ *  because in Nacos, all service instances(with same service name) are only identified by ip and port,
+ *  if there are two service with same service name but different uniqueId, there will be only one instance remained in instance list,
+ *  and the consumer can't find the other instance from Nacos
  * </p>
  *
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
