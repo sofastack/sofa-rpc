@@ -16,16 +16,16 @@
  */
 package com.alipay.sofa.rpc.codec.protostuff;
 
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+
 /**
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author leizhiyuan
  */
 public class ProtostuffHelper {
     /**

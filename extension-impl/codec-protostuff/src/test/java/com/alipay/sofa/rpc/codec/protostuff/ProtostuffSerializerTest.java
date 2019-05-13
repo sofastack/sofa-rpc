@@ -16,6 +16,10 @@
  */
 package com.alipay.sofa.rpc.codec.protostuff;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -28,12 +32,8 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
+ * @author leizhiyuan
  */
 public class ProtostuffSerializerTest {
 

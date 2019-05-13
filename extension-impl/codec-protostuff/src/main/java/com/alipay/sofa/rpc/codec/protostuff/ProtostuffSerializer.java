@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.protostuff;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -33,27 +36,9 @@ import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- * Protobuf serializer.
- * <p>
- * Encode: : Support MessageLite, String, SofaRequest and SofaResponse.
- * <p>
- * Decode by class mode : Support MessageLite and String.
- * <p>
- * Decode by object template : Support SofaRequest and SofaResponse.
- * <ul>
- * <li>encodeRequest: No need extra context</li>
- * <li>encodeResponse: No need extra context</li>
- * <li>decodeRequest: Need extra context which contains: HEAD_TARGET_SERVICE, HEAD_METHOD_NAME, HEAD_TARGET_APP,
- * RPC_TRACE_NAME, etc. </li>
- * <li>decodeResponse: Need extra context which contains: HEAD_RESPONSE_ERROR, HEAD_TARGET_SERVICE,
- * HEAD_METHOD_NAME </li>
- * </ul>
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * protostuff serializer.
+ * @author leizhiyuan
  */
 @Extension(value = "protostuff", code = 12)
 public class ProtostuffSerializer extends AbstractSerializer {

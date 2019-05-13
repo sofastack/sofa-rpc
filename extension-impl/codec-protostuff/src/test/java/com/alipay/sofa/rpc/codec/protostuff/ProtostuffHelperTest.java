@@ -20,7 +20,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
+ * @author leizhiyuan
  */
 public class ProtostuffHelperTest {
 

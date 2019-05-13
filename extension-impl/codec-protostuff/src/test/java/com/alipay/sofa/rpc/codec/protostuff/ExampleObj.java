@@ -19,8 +19,7 @@ package com.alipay.sofa.rpc.codec.protostuff;
 import java.io.Serializable;
 
 /**
- * @author bystander
- * @version $Id: ExampleObj.java, v 0.1 2019年03月02日 17:43 bystander Exp $
+ * @author leizhiyuan
  */
 public class ExampleObj implements Serializable {
 
