@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.filter;
 
+import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import org.junit.Assert;
@@ -33,14 +34,17 @@ public class BeanIdMatchFilterTest {
         Assert.assertEquals("AAA,!BBB", testCustomizeFilter.getIdRule());
 
         AbstractInterfaceConfig configA = new ProviderConfig();
+        configA.setInterfaceId(Serializer.class.getName());
         configA.setId("AAA");
         FilterInvoker filterInvokerA = new FilterInvoker(null, null, configA);
 
         AbstractInterfaceConfig configB = new ProviderConfig();
+        configB.setInterfaceId(Serializer.class.getName());
         configB.setId("BBB");
         FilterInvoker filterInvokerB = new FilterInvoker(null, null, configB);
 
         AbstractInterfaceConfig configC = new ProviderConfig();
+        configC.setInterfaceId(Serializer.class.getName());
         configC.setId("CCC");
         FilterInvoker filterInvokerC = new FilterInvoker(null, null, configC);
 
@@ -59,6 +63,7 @@ public class BeanIdMatchFilterTest {
         testCustomizeFilter.setIdRule("AAA,BBB");
 
         AbstractInterfaceConfig configA = new ProviderConfig();
+        configA.setInterfaceId(Serializer.class.getName());
         configA.setId("AAA");
         FilterInvoker filterInvokerA = new FilterInvoker(null, null, configA);
         Assert.assertEquals(true, testCustomizeFilter.needToLoad(filterInvokerA));
