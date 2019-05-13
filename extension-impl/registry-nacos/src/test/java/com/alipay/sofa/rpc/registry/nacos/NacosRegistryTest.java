@@ -26,9 +26,9 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.nacos.base.BaseNacosTest;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -47,17 +47,17 @@ public class NacosRegistryTest extends BaseNacosTest {
 
     private static RegistryConfig registryConfig;
 
-    private static NacosRegistry  registry;
+    private NacosRegistry         registry;
 
     /**
      * Sets up.
      */
-    @BeforeClass
-    public static void setUp() {
+    @Before
+    public void setUp() {
         registryConfig = new RegistryConfig()
             .setProtocol("nacos")
             .setSubscribe(true)
-            .setAddress("127.0.0.1:8848")
+            .setAddress("127.0.0.1:" + nacosProcess.getServerPort())
             .setRegister(true);
 
         registry = (NacosRegistry) RegistryFactory.getRegistry(registryConfig);
@@ -68,8 +68,8 @@ public class NacosRegistryTest extends BaseNacosTest {
     /**
      * Tear down.
      */
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         registry.destroy();
         registry = null;
     }
