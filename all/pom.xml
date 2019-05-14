@@ -6,10 +6,10 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.5.3</version>
+    <version>5.5.4-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
-    <url>http://github.com/alipay/sofa-rpc</url>
+    <url>http://github.com/sofastack/sofa-rpc</url>
     <description>A high-performance, high-extensibility, production-level Java RPC framework.</description>
 
     <inceptionYear>2008</inceptionYear>
@@ -44,9 +44,9 @@
     </developers>
 
     <scm>
-        <connection>scm:git:git://github.com/alipay/sofa-rpc.git</connection>
-        <developerConnection>scm:git:ssh://github.com/alipay/sofa-rpc.git</developerConnection>
-        <url>http://github.com/alipay/sofa-rpc/tree/master</url>
+        <connection>scm:git:git://github.com/sofastack/sofa-rpc.git</connection>
+        <developerConnection>scm:git:ssh://github.com/sofastack/sofa-rpc.git</developerConnection>
+        <url>http://github.com/sofastack/sofa-rpc/tree/master</url>
     </scm>
 
     <properties>
