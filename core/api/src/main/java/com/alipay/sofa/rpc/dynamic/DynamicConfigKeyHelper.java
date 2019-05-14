@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 /**
  *
  * @author lepdou
- * @version $Id: DynamicConfigKeyUtils.java, v 0.1 2019年04月16日 下午12:01 lepdou Exp $
+ * @version $Id: DynamicConfigKeyHelper.java, v 0.1 2019年04月16日 下午12:01 lepdou Exp $
  */
 public class DynamicConfigKeyHelper {
 
