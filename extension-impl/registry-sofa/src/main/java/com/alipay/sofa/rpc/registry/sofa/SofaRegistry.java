@@ -137,7 +137,7 @@ public class SofaRegistry extends Registry {
         addAttributes(publisherRegistration, group);
 
         // 去注册
-        SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(publisherRegistration, serviceData);
+        SofaRegistryClient.getRegistryClient(appName, registryConfig).register(publisherRegistration, serviceData);
     }
 
     @Override
@@ -183,7 +183,7 @@ public class SofaRegistry extends Registry {
      */
     protected void doUnRegister(String appName, String serviceName, String group) {
 
-        SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName, group,
+        SofaRegistryClient.getRegistryClient(appName, registryConfig).unregister(serviceName, group,
             RegistryType.PUBLISHER);
     }
 
@@ -246,10 +246,10 @@ public class SofaRegistry extends Registry {
             // 去配置中心订阅
 
             // 去注册
-            listSubscriber = SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(
+            listSubscriber = SofaRegistryClient.getRegistryClient(appName, registryConfig).register(
                 subscriberRegistration);
 
-            attrSubscriber = SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(configRegistration);
+            attrSubscriber = SofaRegistryClient.getRegistryClient(appName, registryConfig).register(configRegistration);
 
             // 放入缓存
             subscribers.put(serviceName, listSubscriber);
@@ -269,13 +269,13 @@ public class SofaRegistry extends Registry {
             callback.remove(serviceName, config);
             if (callback.getListenerNum() == 0) {
                 // 已经没人订阅这个data Key了
-                SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
+                SofaRegistryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
                     subscriber.getGroup(),
                     RegistryType.SUBSCRIBER);
                 subscribers.remove(serviceName);
 
                 // 已经没人订阅这个config Key了
-                SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
+                SofaRegistryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
                     subscriber.getGroup(),
                     RegistryType.CONFIGURATOR);
                 configurators.remove(serviceName);
