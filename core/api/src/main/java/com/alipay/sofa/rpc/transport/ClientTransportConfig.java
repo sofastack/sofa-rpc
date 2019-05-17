@@ -16,11 +16,11 @@
  */
 package com.alipay.sofa.rpc.transport;
 
+import java.util.List;
+
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ChannelListener;
-
-import java.util.List;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
@@ -295,5 +295,45 @@ public class ClientTransportConfig {
             ", useEpoll=" + useEpoll +
             ", channelListeners=" + channelListeners +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) { return true; }
+        if (!(o instanceof ClientTransportConfig)) { return false; }
+
+        ClientTransportConfig that = (ClientTransportConfig)o;
+
+        if (getConnectTimeout() != that.getConnectTimeout()) { return false; }
+        if (getDisconnectTimeout() != that.getDisconnectTimeout()) { return false; }
+        if (getInvokeTimeout() != that.getInvokeTimeout()) { return false; }
+        if (getConnectionNum() != that.getConnectionNum()) { return false; }
+        if (getPayload() != that.getPayload()) { return false; }
+        if (isUseEpoll() != that.isUseEpoll()) { return false; }
+        if (getConsumerConfig() != null ? !getConsumerConfig().equals(that.getConsumerConfig())
+            : that.getConsumerConfig() != null) { return false; }
+        if (getProviderInfo() != null ? !getProviderInfo().equals(that.getProviderInfo())
+            : that.getProviderInfo() != null) { return false; }
+        if (getContainer() != null ? !getContainer().equals(that.getContainer()) : that.getContainer() != null) {
+            return false;
+        }
+        return getChannelListeners() != null ? getChannelListeners().equals(that.getChannelListeners())
+            : that.getChannelListeners() == null;
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = getConsumerConfig() != null ? getConsumerConfig().hashCode() : 0;
+        result = 31 * result + (getProviderInfo() != null ? getProviderInfo().hashCode() : 0);
+        result = 31 * result + (getContainer() != null ? getContainer().hashCode() : 0);
+        result = 31 * result + getConnectTimeout();
+        result = 31 * result + getDisconnectTimeout();
+        result = 31 * result + getInvokeTimeout();
+        result = 31 * result + getConnectionNum();
+        result = 31 * result + getPayload();
+        result = 31 * result + (isUseEpoll() ? 1 : 0);
+        result = 31 * result + (getChannelListeners() != null ? getChannelListeners().hashCode() : 0);
+        return result;
     }
 }
