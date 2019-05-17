@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/alipay/sofa-rpc.svg?branch=master)](https://travis-ci.org/alipay/sofa-rpc)
 [![Coverage Status](https://codecov.io/gh/alipay/sofa-rpc/branch/master/graph/badge.svg)](https://codecov.io/gh/alipay/sofa-rpc)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
-[![Maven](https://img.shields.io/github/release/alipay/sofa-rpc.svg)](https://github.com/alipay/sofa-rpc/releases)
+[![Maven](https://img.shields.io/github/release/alipay/sofa-rpc.svg)](https://github.com/sofastack/sofa-rpc/releases)
 
 ## Overview
 
@@ -23,7 +23,7 @@ SOFARPC is a high-performance, high-extensibility, production-level Java RPC fra
 
 ## Related Projects
 
-- [sofa-rpc-boot-project](https://github.com/alipay/sofa-rpc-boot-projects) SOFABoot projects for SOFARPC, include starter and samples.
+- [sofa-rpc-boot-project](https://github.com/sofastack/sofa-rpc-boot-projects) SOFABoot projects for SOFARPC, include starter and samples.
 
 ## Requirements
 
@@ -52,4 +52,4 @@ Runtime requirement: JDK 8 or above.
 
 ## License
 
-SOFARPC is licensed under the [Apache License 2.0](https://github.com/alipay/sofa-rpc/blob/master/LICENSE), and SOFARPC uses some third-party components, you can view their open source license here [NOTICE](https://www.sofastack.tech/sofa-rpc/docs/NOTICE?lang=en).
+SOFARPC is licensed under the [Apache License 2.0](https://github.com/sofastack/sofa-rpc/blob/master/LICENSE), and SOFARPC uses some third-party components, you can view their open source license here [NOTICE](https://www.sofastack.tech/sofa-rpc/docs/NOTICE?lang=en).
