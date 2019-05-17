@@ -299,21 +299,41 @@ public class ClientTransportConfig {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) { return true; }
-        if (!(o instanceof ClientTransportConfig)) { return false; }
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ClientTransportConfig)) {
+            return false;
+        }
 
-        ClientTransportConfig that = (ClientTransportConfig)o;
+        ClientTransportConfig that = (ClientTransportConfig) o;
 
-        if (getConnectTimeout() != that.getConnectTimeout()) { return false; }
-        if (getDisconnectTimeout() != that.getDisconnectTimeout()) { return false; }
-        if (getInvokeTimeout() != that.getInvokeTimeout()) { return false; }
-        if (getConnectionNum() != that.getConnectionNum()) { return false; }
-        if (getPayload() != that.getPayload()) { return false; }
-        if (isUseEpoll() != that.isUseEpoll()) { return false; }
+        if (getConnectTimeout() != that.getConnectTimeout()) {
+            return false;
+        }
+        if (getDisconnectTimeout() != that.getDisconnectTimeout()) {
+            return false;
+        }
+        if (getInvokeTimeout() != that.getInvokeTimeout()) {
+            return false;
+        }
+        if (getConnectionNum() != that.getConnectionNum()) {
+            return false;
+        }
+        if (getPayload() != that.getPayload()) {
+            return false;
+        }
+        if (isUseEpoll() != that.isUseEpoll()) {
+            return false;
+        }
         if (getConsumerConfig() != null ? !getConsumerConfig().equals(that.getConsumerConfig())
-            : that.getConsumerConfig() != null) { return false; }
+            : that.getConsumerConfig() != null) {
+            return false;
+        }
         if (getProviderInfo() != null ? !getProviderInfo().equals(that.getProviderInfo())
-            : that.getProviderInfo() != null) { return false; }
+            : that.getProviderInfo() != null) {
+            return false;
+        }
         if (getContainer() != null ? !getContainer().equals(that.getContainer()) : that.getContainer() != null) {
             return false;
         }
