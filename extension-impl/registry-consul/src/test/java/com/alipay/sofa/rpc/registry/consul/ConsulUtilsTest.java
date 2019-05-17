@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.registry.consul;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 /**
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
