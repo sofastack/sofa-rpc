@@ -62,8 +62,8 @@ public class LocalPreferenceLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             for (int i = 0; i < size; i++) {
                 Assert.assertTrue(cnt.get(9000 + i) == 0);
@@ -98,8 +98,8 @@ public class LocalPreferenceLoadBalancerTest extends BaseLoadBalancerTest {
                 cnt.put(port, cnt.get(port) + 1);
             }
             long end = System.currentTimeMillis();
-            System.out.println("elapsed" + (end - start) + "ms");
-            System.out.println("avg " + (end - start) * 1000 * 1000 / total + "ns");
+            LOGGER.info("elapsed" + (end - start) + "ms");
+            LOGGER.info("avg " + (end - start) * 1000 * 1000 / total + "ns");
 
             for (int i = 0; i < size; i++) {
                 Assert.assertTrue(cnt.get(9000 + i) == 0);
@@ -112,7 +112,6 @@ public class LocalPreferenceLoadBalancerTest extends BaseLoadBalancerTest {
             int per = total / count;
             Assert.assertTrue(cnt.get(22000) == 0);
             for (int i = 1; i < localps; i++) {
-                //System.out.println(cnt.get(9000 + i));
                 Assert.assertTrue(per * i * 0.9 < cnt.get(22000 + i)
                     && per * i * 1.1 > cnt.get(22000 + i)); // 随机偏差不会太大，应该不超过10%
             }

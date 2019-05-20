@@ -31,7 +31,13 @@ public class RpcConstants {
     /**
      * zookeeper注册中心
      */
-    public static final String  REGISTRY_PROTOCOL_ZK               = "zooKeeper";
+    public static final String  REGISTRY_PROTOCOL_ZK               = "zookeeper";
+
+    /**
+     * mesh注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_MESH             = "mesh";
+
     /**
      * xml文件注册中心
      */
@@ -184,6 +190,13 @@ public class RpcConstants {
      */
     public static final String  PROTOCOL_TYPE_H2                   = "h2";
 
+    /**
+     * rest allow origins key
+     *
+     * @since 5.5.0
+     */
+    public static final String  ALLOWED_ORIGINS                    = "allowedOrigins";
+
     /*--------Config配置值相关结束---------*/
 
     /*--------上下文KEY相关开始---------*/
@@ -275,6 +288,14 @@ public class RpcConstants {
      * @since 5.4.0
      */
     public static final String  INTERNAL_KEY_CLIENT_SEND_TIME      = INTERNAL_KEY_PREFIX + "client_send_time";
+
+    /**
+     * 内部使用的key：_server_receive_time 服务端接收时间戳，long
+     *
+     * @since 5.4.8
+     */
+    public static final String  INTERNAL_KEY_SERVER_RECEIVE_TIME   = INTERNAL_KEY_PREFIX + "server_receive_time";
+
     /**
      * 内部使用的key：_router_record 路由记录，string
      */
@@ -408,6 +429,35 @@ public class RpcConstants {
      */
     public static final String  CONFIG_KEY_LOADBALANCER            = "loadBalancer";
 
+    /**
+     * 配置key:delay
+     */
+    public static final String  CONFIG_KEY_DELAY                   = "delay";
+
+    /**
+     * 配置key:id
+     */
+    public static final String  CONFIG_KEY_ID                      = "id";
+
+    /**
+     * 配置key:accepts
+     */
+    public static final String  CONFIG_KEY_ACCEPTS                 = "accepts";
+
+    /**
+     * 配置key:pid
+     */
+    public static final String  CONFIG_KEY_PID                     = "pid";
+
+    /**
+     * 配置key:language
+     */
+    public static final String  CONFIG_KEY_LANGUAGE                = "language";
+
+    /**
+     * 配置key:protocol
+     */
+    public static final String  CONFIG_KEY_PROTOCOL                = "protocol";
     /*--------配置项相关结束---------*/
 
     /*--------客户端相关开始---------*/

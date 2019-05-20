@@ -26,6 +26,9 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.ConsumerSubEvent;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
@@ -34,8 +37,10 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
 import org.apache.curator.RetryPolicy;
+import org.apache.curator.framework.AuthInfo;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.api.ACLProvider;
 import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.framework.recipes.cache.PathChildrenCache;
 import org.apache.curator.framework.recipes.cache.PathChildrenCacheEvent;
@@ -45,8 +50,11 @@ import org.apache.curator.framework.state.ConnectionStateListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
 import org.apache.zookeeper.CreateMode;
 import org.apache.zookeeper.KeeperException;
+import org.apache.zookeeper.ZooDefs;
+import org.apache.zookeeper.data.ACL;
 
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -209,14 +217,22 @@ public class ZookeeperRegistry extends Registry {
                 address, rootPath, preferLocalFile, ephemeralNode);
         }
         RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
-        zkClient = CuratorFrameworkFactory.builder()
+        CuratorFrameworkFactory.Builder zkClientuilder = CuratorFrameworkFactory.builder()
             .connectString(address)
             .sessionTimeoutMs(registryConfig.getConnectTimeout() * 3)
             .connectionTimeoutMs(registryConfig.getConnectTimeout())
             .canBeReadOnly(false)
             .retryPolicy(retryPolicy)
-            .defaultData(null)
-            .build();
+            .defaultData(null);
+
+        //是否需要添加zk的认证信息
+        List<AuthInfo> authInfos = buildAuthInfo();
+        if (CommonUtils.isNotEmpty(authInfos)) {
+            zkClientuilder = zkClientuilder.aclProvider(getDefaultAclProvider())
+                .authorization(authInfos);
+        }
+
+        zkClient = zkClientuilder.build();
 
         zkClient.getConnectionStateListenable().addListener(new ConnectionStateListener() {
             @Override
@@ -376,6 +392,11 @@ public class ZookeeperRegistry extends Registry {
             }
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Failed to register provider to zookeeperRegistry!", e);
+        }
+
+        if (EventBus.isEnable(ProviderPubEvent.class)) {
+            ProviderPubEvent event = new ProviderPubEvent(config);
+            EventBus.post(event);
         }
     }
 
@@ -540,6 +561,8 @@ public class ZookeeperRegistry extends Registry {
         subscribeConsumerUrls(config);
 
         if (config.isSubscribe()) {
+
+            List<ProviderInfo> matchProviders;
             // 订阅配置
             if (!INTERFACE_CONFIG_CACHE.containsKey(buildConfigPath(rootPath, config))) {
                 //订阅接口级配置
@@ -597,11 +620,18 @@ public class ZookeeperRegistry extends Registry {
                 }
                 List<ProviderInfo> providerInfos = ZookeeperRegistryHelper.convertUrlsToProviders(
                     providerPath, pathChildrenCache.getCurrentData());
-                List<ProviderInfo> matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
-                return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
+                matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("Failed to subscribe provider from zookeeperRegistry!", e);
             }
+
+            if (EventBus.isEnable(ConsumerSubEvent.class)) {
+                ConsumerSubEvent event = new ConsumerSubEvent(config);
+                EventBus.post(event);
+            }
+
+            return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
+
         }
         return null;
     }
@@ -729,5 +759,45 @@ public class ZookeeperRegistry extends Registry {
                 LOGGER.error("Close PathChildrenCache error!", e);
             }
         }
+    }
+
+    /**
+     * 获取默认的AclProvider
+     * @return
+     */
+    private ACLProvider getDefaultAclProvider() {
+        return new ACLProvider() {
+            @Override
+            public List<ACL> getDefaultAcl() {
+                return ZooDefs.Ids.CREATOR_ALL_ACL;
+            }
+
+            @Override
+            public List<ACL> getAclForPath(String path) {
+                return ZooDefs.Ids.CREATOR_ALL_ACL;
+            }
+        };
+    }
+
+    /**
+     * 创建认证信息
+     * @return
+     */
+    private List<AuthInfo> buildAuthInfo() {
+        List<AuthInfo> info = new ArrayList<AuthInfo>();
+
+        String scheme = registryConfig.getParameter("scheme");
+
+        //如果存在多个认证信息，则在参数形式为为addAuth=user1:paasswd1,user2:passwd2
+        String addAuth = registryConfig.getParameter("addAuth");
+
+        if (StringUtils.isNotEmpty(addAuth)) {
+            String[] addAuths = addAuth.split(",");
+            for (String singleAuthInfo : addAuths) {
+                info.add(new AuthInfo(scheme, singleAuthInfo.getBytes()));
+            }
+        }
+
+        return info;
     }
 }

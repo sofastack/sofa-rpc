@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.proxy.javassist;
 
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.AbstractTestClass;
 import com.alipay.sofa.rpc.proxy.TestInterface;
 import com.alipay.sofa.rpc.proxy.TestInvoker;
@@ -32,6 +34,9 @@ import java.util.HashMap;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class JavassistProxyTest {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(JavassistProxyTest.class);
+
     @Test
     public void getProxy() throws Exception {
         JavassistProxy proxy = new JavassistProxy();
@@ -39,7 +44,7 @@ public class JavassistProxyTest {
         try {
             testClass = proxy.getProxy(AbstractTestClass.class, new TestInvoker());
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            LOGGER.info(e.getMessage());
         }
         Assert.assertNull(testClass);
 

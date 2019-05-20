@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -24,6 +23,7 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.Registry;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import com.alipay.sofa.rpc.transport.bolt.BoltClientTransport;
@@ -44,7 +44,7 @@ public class ZookeeperServerRestartTest extends BaseZkTest {
 
     @Test
     public void testAll() throws Exception {
-        final RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
+        final RegistryConfig registryConfig = new RegistryConfig().setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181").setConnectTimeout(100);
         final ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
             .getRegistry(registryConfig);

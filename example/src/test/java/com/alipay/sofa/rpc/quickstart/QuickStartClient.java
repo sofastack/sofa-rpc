@@ -17,11 +17,15 @@
 package com.alipay.sofa.rpc.quickstart;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  * Quick Start client
  */
 public class QuickStartClient {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(QuickStartClient.class);
 
     public static void main(String[] args) {
 
@@ -35,7 +39,7 @@ public class QuickStartClient {
 
         while (true) {
             try {
-                System.out.println(helloService.sayHello("world"));
+                LOGGER.info(helloService.sayHello("world"));
             } catch (Exception e) {
                 e.printStackTrace();
             }

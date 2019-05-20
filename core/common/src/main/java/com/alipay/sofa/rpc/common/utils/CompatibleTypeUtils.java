@@ -58,8 +58,8 @@ public class CompatibleTypeUtils {
             String string = (String) value;
             if (char.class.equals(type) || Character.class.equals(type)) {
                 if (string.length() != 1) {
-                    throw new IllegalArgumentException(String.format("CAN NOT convert String(%s) to char!" +
-                        " when convert String to char, the String MUST only 1 char.", string));
+                    throw new IllegalArgumentException(String.format("can not convert String(%s) to char!" +
+                        " when convert String to char, the String must only 1 char.", string));
                 }
                 return string.charAt(0);
             } else if (type.isEnum()) {
@@ -91,7 +91,7 @@ public class CompatibleTypeUtils {
                         return new java.sql.Date(DateUtils.strToLong(string));
                     } else if (type == java.sql.Timestamp.class) {
                         return new java.sql.Timestamp(DateUtils.strToLong(string));
-                    } else if (type == java.sql.Time.class) {
+                    } else {
                         return new java.sql.Time(DateUtils.strToLong(string));
                     }
                 } catch (ParseException e) {

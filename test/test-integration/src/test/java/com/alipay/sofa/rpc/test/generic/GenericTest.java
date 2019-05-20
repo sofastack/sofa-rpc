@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.test.generic;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.alipay.hessian.generic.model.GenericArray;
 import com.alipay.hessian.generic.model.GenericCollection;
 import com.alipay.hessian.generic.model.GenericMap;
@@ -38,9 +41,6 @@ import com.alipay.sofa.rpc.test.generic.bean.MyMap;
 import com.alipay.sofa.rpc.test.generic.bean.People;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -69,6 +69,9 @@ public class GenericTest extends ActivelyDestroyTest {
         MethodConfig config3 = new MethodConfig().setName("helloOneway")
             .setInvokeType("oneway");
         methodConfigs.add(config3);
+        MethodConfig config4 = new MethodConfig().setName("helloTimeout")
+            .setInvokeType("sync");
+        methodConfigs.add(config4);
 
         // C服务的服务端
         ProviderConfig<TestInterface> CProvider = new ProviderConfig<TestInterface>()
@@ -83,7 +86,8 @@ public class GenericTest extends ActivelyDestroyTest {
             .setGeneric(true)
             .setMethods(methodConfigs)
             .setDirectUrl("bolt://127.0.0.1:22222")
-            .setTimeout(3000);
+            .setTimeout(3000)
+            .setRetries(2);
         GenericService proxy = BConsumer.refer();
 
         GenericObject genericObject = new GenericObject(
@@ -203,13 +207,13 @@ public class GenericTest extends ActivelyDestroyTest {
         Assert.assertFalse(isSuccess);
 
         // 3. 指定超时,结果序列化为People 类
-        People peopleResult = proxy.$genericInvoke("hello",
+        People peopleResult = proxy.$genericInvoke("helloTimeout",
             new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
             new Object[] { genericObject }, People.class, genericContext);
         assertEquals(peopleResult, people);
 
         // 4. 指定超时,结果序列化为GenericObject
-        GenericObject result = (GenericObject) proxy.$genericInvoke("hello",
+        GenericObject result = (GenericObject) proxy.$genericInvoke("helloTimeout",
             new String[] { "com.alipay.sofa.rpc.test.generic.bean.People" },
             new Object[] { genericObject }, genericContext);
         isCorrect(result);

@@ -120,7 +120,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 是否启动epoll
   "server.epoll": false,
   // 是否hold住端口，true的话随主线程退出而退出，false的话则要主动退出
-  "server.daemon": true,
+  "server.daemon": false,
   // 端口是否自适应，如果端口被占用，自动+1
   "server.adaptive.port": false,
   // 服务端是否自动启动
@@ -190,7 +190,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认consumer断开时等待结果的超时时间
   "consumer.disconnect.timeout": 10000,
   // 默认consumer调用provider超时时间
-  "consumer.invoke.timeout": 5000,
+  "consumer.invoke.timeout": 3000,
   // 心跳发送间隔
   "consumer.heartbeat.period": 30000,
   // 重建连接间隔

@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.zookeeper.start;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -52,7 +53,7 @@ public class ZookeeperBoltServerMain {
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()

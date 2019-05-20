@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.common.json;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,6 +32,8 @@ import java.util.Map;
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class JSONSerializerTest {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(JSONSerializerTest.class);
 
     @Test
     public void testSerialize() {
@@ -115,7 +119,7 @@ public class JSONSerializerTest {
             "        \"c\":1, /*2   // asdsad \n \r / das */\n" +
             "        \"d\":9999999999" +
             "}";
-        System.out.println(s);
+        LOGGER.info(s);
         Map json = (Map) JSONSerializer.deserialize(s);
         Assert.assertNotNull(json);
         Assert.assertEquals(json.get("a"), null);

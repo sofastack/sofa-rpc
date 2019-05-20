@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.common.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -28,6 +30,9 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class CodecUtilsTest {
+
+    private final Logger LOGGER = LoggerFactory.getLogger(CodecUtilsTest.class);
+
     @Test
     public void intToBytes() {
         int i = 1000;
@@ -236,9 +241,9 @@ public class CodecUtilsTest {
         Assert.assertTrue(header.size() == 15);
 
         for (Map.Entry<String, String> entry : header.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue());
+            LOGGER.info(entry.getKey() + " : " + entry.getValue());
         }
-        System.out.println("");
+        LOGGER.info("");
 
         Map<String, Object> newRequestProps = new HashMap<String, Object>();
 
@@ -257,7 +262,7 @@ public class CodecUtilsTest {
         newRequestProps.put(rpcRespBaggage, newContext);
 
         for (Map.Entry<String, Object> entry : newRequestProps.entrySet()) {
-            System.out.println(entry.getKey() + " : " + entry.getValue());
+            LOGGER.info(entry.getKey() + " : " + entry.getValue());
         }
 
         newRequestProps.putAll(header);

@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerEndHandleEvent;
 import com.alipay.sofa.rpc.event.rest.RestServerReceiveEvent;
 import com.alipay.sofa.rpc.event.rest.RestServerSendEvent;
+import com.alipay.sofa.rpc.lookout.RestLookoutAdapter;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -111,11 +112,12 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                     if (EventBus.isEnable(RestServerSendEvent.class)) {
                         EventBus.post(new RestServerSendEvent(request, response, exception));
                     }
+
+                    RestLookoutAdapter.sendRestServerSendEvent(new RestServerSendEvent(request, response, exception));
                 }
 
                 if (!request.getAsyncContext().isSuspended()) {
                     response.finish();
-                    ctx.flush();
                 }
             } finally {
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {

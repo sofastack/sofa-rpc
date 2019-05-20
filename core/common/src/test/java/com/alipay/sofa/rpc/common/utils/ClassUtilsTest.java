@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.common.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,6 +32,8 @@ import java.util.List;
  *
  */
 public class ClassUtilsTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(CodecUtilsTest.class);
 
     @Test
     public void forName1() throws Exception {
@@ -195,17 +199,17 @@ public class ClassUtilsTest {
 
     private static class TestMemberClass2 {
         private TestMemberClass2() {
-            System.out.println("init TestMemberClass2 ");
+            LOGGER.info("init TestMemberClass2 ");
         }
     }
 
     private static class TestMemberClass3 {
         private TestMemberClass3(String s) {
-            System.out.println("init TestMemberClass3 ");
+            LOGGER.info("init TestMemberClass3 ");
         }
 
         private TestMemberClass3(String s, int i) {
-            System.out.println("init TestMemberClass3 with 2 arg");
+            LOGGER.info("init TestMemberClass3 with 2 arg");
         }
     }
 
@@ -215,17 +219,17 @@ public class ClassUtilsTest {
 
     private class TestMemberClass5 {
         private TestMemberClass5() {
-            System.out.println("init TestMemberClass5 ");
+            LOGGER.info("init TestMemberClass5 ");
         }
     }
 
     private class TestMemberClass6 {
         private TestMemberClass6(int s) {
-            System.out.println("init TestMemberClass6 ");
+            LOGGER.info("init TestMemberClass6 ");
         }
 
         private TestMemberClass6(String s, int i) {
-            System.out.println("init TestMemberClass6 with 2 arg");
+            LOGGER.info("init TestMemberClass6 with 2 arg");
         }
     }
 

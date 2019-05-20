@@ -21,7 +21,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * 测试 https://github.com/alipay/sofa-rpc/issues/367
+ * 测试 https://github.com/sofastack/sofa-rpc/issues/367
  */
 public class TestRejectionOrder {
 
