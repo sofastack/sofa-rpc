@@ -14,27 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.ext;
-
-import com.alipay.sofa.rpc.client.LoadBalancer;
-import org.junit.Assert;
-import org.junit.Test;
+package com.alipay.sofa.rpc.dynamic;
 
 /**
- * 测试 https://github.com/sofastack/sofa-rpc/issues/367
+ * @author bystander
+ * @version : DynamicConfigKeys.java, v 0.1 2019年04月17日 21:51 bystander Exp $
  */
-public class TestRejectionOrder {
-
-    @Test
-    public void testRejection() {
-        boolean error = true;
-        ExtensionLoader<LoadBalancer> loader = new ExtensionLoader<LoadBalancer>(LoadBalancer.class, false, null);
-        loader.loadFromFile("META-INF/ext5/");
-        try {
-            loader.getExtension("lb3");
-        } catch (Exception e) {
-            error = false;
-        }
-        Assert.assertTrue(error);
-    }
+public class DynamicConfigKeys {
+    public static final String DYNAMIC_ALIAS = "dynamicAlias";
 }

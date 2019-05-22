@@ -51,7 +51,7 @@ public class HelpTelnetHandler implements TelnetHandler {
             result.append("The supported command include:").append(LINE);
             for (Map.Entry<String, TelnetHandler> entry : TelnetHandlerFactory.getAllHandlers().entrySet()) {
                 result.append(entry.getKey()).append(" ");
-                //result.append(entry.getKey() + "\t : " + entry.getValue().getDescription() + "\r\n");
+                //result.append(entry.fetchKey() + "\t : " + entry.getValue().getDescription() + "\r\n");
             }
             result.append(LINE);
         }

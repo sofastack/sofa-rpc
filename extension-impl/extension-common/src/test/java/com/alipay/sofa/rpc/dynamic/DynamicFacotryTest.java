@@ -14,27 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.ext;
+package com.alipay.sofa.rpc.dynamic;
 
-import com.alipay.sofa.rpc.client.LoadBalancer;
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * 测试 https://github.com/sofastack/sofa-rpc/issues/367
+ * @author bystander
+ * @version : DynamicFacotryTest.java, v 0.1 2019年04月12日 12:08 bystander Exp $
  */
-public class TestRejectionOrder {
+public class DynamicFacotryTest {
 
     @Test
-    public void testRejection() {
-        boolean error = true;
-        ExtensionLoader<LoadBalancer> loader = new ExtensionLoader<LoadBalancer>(LoadBalancer.class, false, null);
-        loader.loadFromFile("META-INF/ext5/");
-        try {
-            loader.getExtension("lb3");
-        } catch (Exception e) {
-            error = false;
-        }
-        Assert.assertTrue(error);
+    public void test() {
+        DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager("testApp", "simple");
+        Assert.assertNotNull(dynamicManager);
+
+        final String service = "com.alipay.sofa.rpc.demo.HelloService:1.0";
+
+        dynamicManager.initServiceConfiguration(service);
+
+        String fetchValue = dynamicManager.getConsumerMethodProperty(service, "methodName", "timeout");
+
+        Assert.assertEquals("1000", fetchValue);
     }
 }
