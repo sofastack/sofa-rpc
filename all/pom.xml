@@ -60,7 +60,7 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.6</hessian.version>
-        <resteasy.version>3.0.12.Final</resteasy.version>
+        <resteasy.version>3.6.3.Final</resteasy.version>
         <bolt.version>1.5.2</bolt.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
@@ -159,6 +159,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-protobuf</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-protostuff</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
         <dependency>
@@ -309,7 +314,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
             <version>${resteasy.version}</version>
         </dependency>
         <dependency>
@@ -402,6 +407,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-rest</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-protostuff</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-jackson</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
