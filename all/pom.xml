@@ -60,7 +60,7 @@
         <javassist.version>3.20.0-GA</javassist.version>
         <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.6</hessian.version>
-        <resteasy.version>3.0.12.Final</resteasy.version>
+        <resteasy.version>3.6.3.Final</resteasy.version>
         <bolt.version>1.5.2</bolt.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
@@ -299,7 +299,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
             <version>${resteasy.version}</version>
         </dependency>
         <dependency>
