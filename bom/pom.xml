@@ -32,6 +32,8 @@
         <jackson.version>2.9.8</jackson.version>
         <jackson.annotation.version>2.9.0</jackson.annotation.version>
         <msgpack.version>0.6.11</msgpack.version>
+        <protostuff.version>1.5.9</protostuff.version>
+
         <!--common-->
         <httpcomponents.version>4.4.9</httpcomponents.version>
         <httpcomponents.httpmime.version>4.5.5</httpcomponents.httpmime.version>
@@ -266,6 +268,16 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>hessian</artifactId>
                 <version>${hessian.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-core</artifactId>
+                <version>${protostuff.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.protostuff</groupId>
+                <artifactId>protostuff-runtime</artifactId>
+                <version>${protostuff.version}</version>
             </dependency>
 
             <!-- zk client -->
