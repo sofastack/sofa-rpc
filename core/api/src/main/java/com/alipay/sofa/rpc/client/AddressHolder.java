@@ -73,4 +73,10 @@ public abstract class AddressHolder implements ProviderInfoListener {
      * @return 全部服务列表
      */
     public abstract int getAllProviderSize();
+
+    /**
+     * @param providerInfo
+     * @return
+     */
+    public abstract String fetchGroupName(ProviderInfo providerInfo);
 }
