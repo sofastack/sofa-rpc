@@ -158,6 +158,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-protostuff</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-jackson</artifactId>
             <version>${sofa.rpc.version}</version>
         </dependency>
@@ -391,6 +396,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-rest</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-protostuff</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-jackson</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
