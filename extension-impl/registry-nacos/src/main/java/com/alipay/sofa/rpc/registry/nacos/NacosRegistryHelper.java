@@ -24,6 +24,8 @@ import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
@@ -42,6 +44,27 @@ class NacosRegistryHelper {
     static final String DEFAULT_CLUSTER = "default-cluster";
 
     /**
+     * build service name for config， format: interface[:uniqueId]:protocol
+     * 1. here we didn't use protocol like other registry with symbol '@' but ':'
+     * because the limit of Nacos Service Name can only have these characters: '0-9a-zA-Z.:_-',
+     * and ':' won't corrupt with uniqueId because it'll always at the end of the service name.
+     * 2. here we didn't use ConfigUniqueNameGenerator.getUniqueName()
+     * because I think this method is only for old version compatible,
+     * and here we needn't version here anymore.
+     * @param config   producer config or consumer config
+     * @param protocol protocol for config
+     * @return unique service name
+     */
+    static String buildServiceName(AbstractInterfaceConfig config, String protocol) {
+        if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol)
+            || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
+            return ConfigUniqueNameGenerator.getServiceName(config) + ":DEFAULT";
+        } else {
+            return ConfigUniqueNameGenerator.getServiceName(config) + ":" + protocol;
+        }
+    }
+
+    /**
      * Convert provider to instances list.
      *
      * @param providerConfig the provider config 
@@ -53,9 +76,10 @@ class NacosRegistryHelper {
         if (servers != null && !servers.isEmpty()) {
             List<Instance> instances = new ArrayList<Instance>();
             for (ServerConfig server : servers) {
+                String serviceName = buildServiceName(providerConfig, server.getProtocol());
                 Instance instance = new Instance();
                 instance.setClusterName(DEFAULT_CLUSTER);
-                instance.setServiceName(providerConfig.getInterfaceId());
+                instance.setServiceName(serviceName);
 
                 // set host port
                 String host = server.getVirtualHost();

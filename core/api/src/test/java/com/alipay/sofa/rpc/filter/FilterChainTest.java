@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.filter;
 
+import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -38,6 +39,7 @@ public class FilterChainTest {
 
         ProviderConfig providerConfig = new ProviderConfig();
         providerConfig.setFilter(Arrays.asList("testChainFilter0", "-testChainFilter8"));
+        providerConfig.setInterfaceId(Serializer.class.getName());
 
         ConsumerConfig consumerConfig = new ConsumerConfig();
         ArrayList<Filter> list = new ArrayList<Filter>();
@@ -48,6 +50,7 @@ public class FilterChainTest {
         list.add(new TestChainFilter4());
         list.add(new ExcludeFilter("-testChainFilter5"));
         consumerConfig.setFilterRef(list);
+        consumerConfig.setInterfaceId(Serializer.class.getName());
 
         // mock provider chain (0,6,7）
         FilterChain providerChain = FilterChain.buildProviderChain(providerConfig,
