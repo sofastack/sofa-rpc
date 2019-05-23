@@ -43,7 +43,6 @@ import java.util.regex.Pattern;
 /**
  * A builder class for creating etcd client
  *
- * @author Fuwenming
  * @created 2018/6/7
  **/
 public class ClientBuilder {

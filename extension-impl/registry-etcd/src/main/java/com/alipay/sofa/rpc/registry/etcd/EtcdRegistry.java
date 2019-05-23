@@ -41,7 +41,6 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * etcd registry
  *
- * @author Fuwenming
  * @created 2018/7/8
  */
 @Extension("etcd")

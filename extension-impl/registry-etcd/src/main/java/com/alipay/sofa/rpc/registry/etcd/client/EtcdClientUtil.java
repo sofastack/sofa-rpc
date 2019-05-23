@@ -22,12 +22,11 @@ import com.google.protobuf.ByteString;
 import java.util.Arrays;
 
 /**
- * @author Fuwenming
  * @created 2018/6/6
  **/
-public class Utils {
+public class EtcdClientUtil {
 
-    private Utils() {
+    private EtcdClientUtil() {
     }
 
     /**

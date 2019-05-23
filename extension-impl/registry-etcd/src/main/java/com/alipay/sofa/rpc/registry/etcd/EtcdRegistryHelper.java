@@ -46,8 +46,8 @@ public class EtcdRegistryHelper extends RegistryUtils {
             instance.getUuid();
     }
 
-    public static String buildKeyPrefix(String serviceName, String protocol, String unqiueId) {
-        return serviceName + ":" + protocol + ":" + unqiueId;
+    public static String buildKeyPrefix(String serviceName, String protocol, String uniqueId) {
+        return serviceName + ":" + protocol + ":" + uniqueId;
     }
 
     static List<ServiceInstance> convertProviderToInstances(ProviderConfig config) {

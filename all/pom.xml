@@ -409,6 +409,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-nacos</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-mesh</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-sofa</include>
+                                    <include>com.alipay.sofa:sofa-rpc-registry-etcd</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>

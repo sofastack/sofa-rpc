@@ -57,7 +57,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
 /**
- * @author Fuwenming
  * @created 2018/6/5
  **/
 public class EtcdClient implements Closeable {
@@ -123,7 +122,7 @@ public class EtcdClient implements Closeable {
         checkArgument(!StringUtil.isNullOrEmpty(key), "key cannot be null or empty");
         ByteString keyByte = ByteString.copyFromUtf8(key);
         RangeRequest request = RangeRequest.newBuilder().setKey(keyByte)
-            .setRangeEnd(Utils.plusOne(keyByte)).build();
+            .setRangeEnd(EtcdClientUtil.plusOne(keyByte)).build();
         return kvBlockingStub.range(request).getKvsList();
     }
 
@@ -298,7 +297,7 @@ public class EtcdClient implements Closeable {
         });
         ByteString keyByte = ByteString.copyFromUtf8(key);
         WatchCreateRequest createRequest = WatchCreateRequest.newBuilder().setKey(keyByte)
-            .setRangeEnd(Utils.plusOne(keyByte)).build();
+            .setRangeEnd(EtcdClientUtil.plusOne(keyByte)).build();
         request.onNext(WatchRequest.newBuilder().setCreateRequest(createRequest).build());
     }
 
