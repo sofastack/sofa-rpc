@@ -14,27 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.ext;
-
-import com.alipay.sofa.rpc.client.LoadBalancer;
-import org.junit.Assert;
-import org.junit.Test;
+package com.alipay.sofa.rpc.codec.protostuff;
 
 /**
- * 测试 https://github.com/sofastack/sofa-rpc/issues/367
+ * @author leizhiyuan
  */
-public class TestRejectionOrder {
+public interface ProtostuffService {
 
-    @Test
-    public void testRejection() {
-        boolean error = true;
-        ExtensionLoader<LoadBalancer> loader = new ExtensionLoader<LoadBalancer>(LoadBalancer.class, false, null);
-        loader.loadFromFile("META-INF/ext5/");
-        try {
-            loader.getExtension("lb3");
-        } catch (Exception e) {
-            error = false;
-        }
-        Assert.assertTrue(error);
-    }
+    public ExampleObj echoStr(ExampleObj req);
 }
