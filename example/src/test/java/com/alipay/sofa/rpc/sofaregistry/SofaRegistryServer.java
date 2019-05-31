@@ -42,8 +42,8 @@ public class SofaRegistryServer {
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()
-                .setProtocol(RpcConstants.REGISTRY_PROTOCOL_SOFA)
-                .setAddress("127.0.0.1:9603");
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_SOFA)
+            .setAddress("127.0.0.1:9603");
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -51,10 +51,10 @@ public class SofaRegistryServer {
             .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-                .setRegistry(registryConfig)
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl())
-                .setServer(serverConfig);
+            .setRegistry(registryConfig)
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl())
+            .setServer(serverConfig);
 
         providerConfig.export();
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);

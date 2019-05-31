@@ -40,14 +40,14 @@ public class SofaRegistryClient {
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()
-                .setProtocol(RpcConstants.REGISTRY_PROTOCOL_SOFA)
-                .setAddress("127.0.0.1:9603");
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_SOFA)
+            .setAddress("127.0.0.1:9603");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRegistry(registryConfig)
-                .setProtocol("bolt")
-                .setConnectTimeout(10 * 1000);
+            .setInterfaceId(HelloService.class.getName())
+            .setRegistry(registryConfig)
+            .setProtocol("bolt")
+            .setConnectTimeout(10 * 1000);
 
         HelloService helloService = consumerConfig.refer();
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
