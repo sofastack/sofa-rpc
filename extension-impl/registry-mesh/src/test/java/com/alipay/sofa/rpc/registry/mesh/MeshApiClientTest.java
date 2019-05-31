@@ -82,7 +82,6 @@ public class MeshApiClientTest extends BaseMeshTest {
     @Test
     public void testPublish() {
         PublishServiceRequest request = new PublishServiceRequest();
-
         request.setServiceName("aa");
         ProviderMetaInfo providerMetaInfo = new ProviderMetaInfo();
         providerMetaInfo.setAppName("testApp");
@@ -91,17 +90,14 @@ public class MeshApiClientTest extends BaseMeshTest {
         providerMetaInfo.setVersion("4.0");
         request.setProviderMetaInfo(providerMetaInfo);
         boolean result = meshApiClient.publishService(request);
-
         Assert.assertTrue(result);
     }
 
     @Test
     public void testUnPublish() {
         UnPublishServiceRequest request = new UnPublishServiceRequest();
-
         request.setServiceName("aa");
         int result = meshApiClient.unPublishService(request);
-
         Assert.assertEquals(1, result);
     }
 
@@ -109,20 +105,15 @@ public class MeshApiClientTest extends BaseMeshTest {
     public void testSubscribe() {
 
         //11.166.22.163:12200?_TIMEOUT=3000&p=1&_SERIALIZETYPE=protobuf&_WARMUPTIME=0&_WARMUPWEIGHT=10&app_name=bar1&zone=GZ00A&_MAXREADIDLETIME=30&_IDLETIMEOUT=27&v=4.0&_WEIGHT=100&startTime=1524565802559
-
         SubscribeServiceRequest request = new SubscribeServiceRequest();
-
         request.setServiceName("com.alipay.rpc.common.service.facade.pb.SampleServicePb:1.0");
-
         SubscribeServiceResult result = meshApiClient.subscribeService(request);
-
         Assert.assertTrue(result.isSuccess());
     }
 
     @Test
     public void testUnSubscribe() {
         UnSubscribeServiceRequest request = new UnSubscribeServiceRequest();
-
         request.setServiceName("com.alipay.rpc.common.service.facade.pb.SampleServicePb:1.0@DEFAULT");
         boolean result = meshApiClient.unSubscribeService(request);
         Assert.assertTrue(result);
