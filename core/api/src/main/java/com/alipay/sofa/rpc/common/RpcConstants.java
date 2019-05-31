@@ -197,6 +197,13 @@ public class RpcConstants {
      */
     public static final String  ALLOWED_ORIGINS                    = "allowedOrigins";
 
+    /**
+     * bolt server process in io thread
+     *
+     * @since 5.5.6
+     */
+    public static final String  PROCESS_IN_IOTHREAD                = "processInIOThread";
+
     /*--------Config配置值相关结束---------*/
 
     /*--------上下文KEY相关开始---------*/
