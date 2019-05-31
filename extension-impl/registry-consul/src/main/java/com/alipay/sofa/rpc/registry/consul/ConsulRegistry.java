@@ -119,7 +119,9 @@ public class ConsulRegistry extends Registry {
         }
 
         String[] hostAndPort = StringUtils.split(registryConfig.getAddress(), ":");
-        consulClient = new ConsulClient(hostAndPort[0], Integer.parseInt(hostAndPort[1]));
+        String host = hostAndPort[0];
+        int port = hostAndPort.length > 1 ? Integer.parseInt(hostAndPort[1]) : ConsulConstants.DEFAULT_CONSUL_PORT;
+        consulClient = new ConsulClient(host, port);
 
         Integer coreSize = properties.getHeartbeatCoreSize();
         if (coreSize == null) {

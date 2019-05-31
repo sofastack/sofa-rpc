@@ -51,6 +51,8 @@ public class ConsulConstants {
 
     public static final String                                   HEALTH_CHECK_METHOD_KEY       = "healthCheck.method";
 
+    public static final int                                      DEFAULT_CONSUL_PORT           = 8500;
+
     public static final int                                      DEFAULT_HEARTBEAT_INTERVAL    = 300;
 
     public static final Integer                                  DEFAULT_HEARTBEAT_CORE_SIZE   = null;
@@ -72,5 +74,4 @@ public class ConsulConstants {
     public static final String                                   DEFAULT_HEALTH_CHECK_PATH     = "/health";
 
     public static final String                                   DEFAULT_HEALTH_CHECK_METHOD   = "GET";
-
 }
