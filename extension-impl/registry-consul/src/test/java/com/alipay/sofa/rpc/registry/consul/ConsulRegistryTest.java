@@ -91,12 +91,12 @@ public class ConsulRegistryTest {
         ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
         Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
-        Assert.assertEquals(3, healthServices.getValue().size());
+        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 1, TimeUnit.SECONDS);
 
         registry.unRegister(providerConfig);
 
-        healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
-        Assert.assertEquals(0, healthServices.getValue().size());
+        Response<List<HealthService>> healthServicesAfterUnRegister = consulClient.getHealthServices(INTERFACE_ID, request);
+        assertUntil(() -> Assert.assertEquals(0, healthServicesAfterUnRegister.getValue().size()), 10, TimeUnit.SECONDS);
     }
 
     @Test
@@ -108,12 +108,12 @@ public class ConsulRegistryTest {
         ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
         Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
-        Assert.assertEquals(3, healthServices.getValue().size());
+        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 1, TimeUnit.SECONDS);
 
         registry.unRegister(providerConfig);
 
-        healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
-        Assert.assertEquals(0, healthServices.getValue().size());
+        Response<List<HealthService>> healthServicesAfterUnRegister = consulClient.getHealthServices(INTERFACE_ID, request);
+        assertUntil(() -> Assert.assertEquals(0, healthServicesAfterUnRegister.getValue().size()), 10, TimeUnit.SECONDS);
     }
 
     @Test
@@ -124,15 +124,21 @@ public class ConsulRegistryTest {
         ConsumerConfig<?> consumerConfig = consumerConfig("consul-test-1");
         List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
 
-        Assert.assertEquals(1, providerGroups.size());
-        Assert.assertEquals(3, providerGroups.get(0).size());
+        assertUntil(() -> {
+            Assert.assertEquals(1, providerGroups.size());
+            Assert.assertEquals(3, providerGroups.get(0).size());
+        }, 1, TimeUnit.SECONDS);
 
         ConsumerConfig<?> consumerConfigWithAnotherUniqueId = consumerConfig("consul-test-2");
-        providerGroups = registry.subscribe(consumerConfigWithAnotherUniqueId);
-        Assert.assertEquals(1, providerGroups.size());
-        Assert.assertEquals(0, providerGroups.get(0).size());
+        List<ProviderGroup> providerGroupsWithAnotherUniqueId = registry.subscribe(consumerConfigWithAnotherUniqueId);
+
+        assertUntil(() -> {
+            Assert.assertEquals(1, providerGroupsWithAnotherUniqueId.size());
+            Assert.assertEquals(0, providerGroupsWithAnotherUniqueId.get(0).size());
+        }, 10, TimeUnit.SECONDS);
 
         registry.unSubscribe(consumerConfig);
+        registry.unSubscribe(consumerConfigWithAnotherUniqueId);
     }
 
     @Test
@@ -146,8 +152,10 @@ public class ConsulRegistryTest {
 
         List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
 
-        Assert.assertEquals(1, providerGroups.size());
-        Assert.assertEquals(1, providerGroups.get(0).size());
+        assertUntil(() -> {
+            Assert.assertEquals(1, providerGroups.size());
+            Assert.assertEquals(1, providerGroups.get(0).size());
+        }, 10, TimeUnit.SECONDS);
 
         CountDownLatch latch = new CountDownLatch(1);
         listener.setCountDownLatch(latch);
@@ -207,6 +215,25 @@ public class ConsulRegistryTest {
                                 .setPort(port)
                 ).forEach(provider::setServer);
         return provider;
+    }
+
+    private void assertUntil(Runnable f, long time, TimeUnit unit) {
+        long until = System.currentTimeMillis() + unit.toMillis(time);
+        while (true) {
+            try {
+                f.run();
+                return;
+            } catch (AssertionError e) {
+                if (until < System.currentTimeMillis()) {
+                    throw e;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
