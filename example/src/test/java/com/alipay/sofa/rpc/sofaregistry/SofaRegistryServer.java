@@ -19,14 +19,27 @@ package com.alipay.sofa.rpc.sofaregistry;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  * Quick Start Server
  */
 public class SofaRegistryServer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SofaRegistryServer.class);
+
     public static void main(String[] args) {
         // 1. 注册中心配置
+        /**
+         * 运行时项目引入依赖
+         <dependency>
+             <groupId>com.alipay.sofa</groupId>
+             <artifactId>registry-client-all</artifactId>
+             <version>5.2.0</version>
+         </dependency>
+         */
         RegistryConfig registryConfig = new RegistryConfig()
                 .setProtocol("sofa") // 设置协议
                 .setAddress("127.0.0.1:9603"); // 设置注册中心地址
@@ -45,5 +58,7 @@ public class SofaRegistryServer {
                 .setServer(serverConfig); // 指定服务端
 
         providerConfig.export(); // 发布服务
+
+        LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
     }
 }

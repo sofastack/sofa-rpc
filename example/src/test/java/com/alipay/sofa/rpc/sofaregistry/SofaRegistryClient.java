@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.sofaregistry;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -30,6 +31,14 @@ public class SofaRegistryClient {
 
     public static void main(String[] args) {
         // 1. 注册中心配置
+        /**
+         * 运行时项目引入依赖
+         <dependency>
+             <groupId>com.alipay.sofa</groupId>
+             <artifactId>registry-client-all</artifactId>
+             <version>5.2.0</version>
+         </dependency>
+         */
         RegistryConfig registryConfig = new RegistryConfig()
                 .setProtocol("sofa") // 设置协议
                 .setAddress("127.0.0.1:9603"); // 设置注册中心地址
@@ -44,7 +53,23 @@ public class SofaRegistryClient {
         // 3. 构造服务引用
         HelloService helloService = consumerConfig.refer();
 
+        LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
+
         // 4. 进行服务调用
-        System.out.println(helloService.sayHello("world"));
+        try {
+            while (true) {
+                try {
+                    System.out.println(helloService.sayHello("world"));
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+                try {
+                    Thread.sleep(2000);
+                } catch (Exception e) {
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("", e);
+        }
     }
 }
