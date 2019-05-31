@@ -39,6 +39,11 @@ public class RpcConstants {
     public static final String  REGISTRY_PROTOCOL_MESH             = "mesh";
 
     /**
+     * sofa 注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_SOFA             = "sofa";
+
+    /**
      * xml文件注册中心
      */
     public static final String  REGISTRY_PROTOCOL_LOCAL            = "local";

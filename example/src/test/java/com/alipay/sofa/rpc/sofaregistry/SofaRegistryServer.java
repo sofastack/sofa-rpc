@@ -16,22 +16,23 @@
  */
 package com.alipay.sofa.rpc.sofaregistry;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.quickstart.HelloService;
+import com.alipay.sofa.rpc.quickstart.HelloServiceImpl;
 
 /**
- * Quick Start Server
+ * use sofa-registry server demo
  */
 public class SofaRegistryServer {
-
     private static final Logger LOGGER = LoggerFactory.getLogger(SofaRegistryServer.class);
 
     public static void main(String[] args) {
-        // 1. 注册中心配置
         /**
          * 运行时项目引入依赖
          <dependency>
@@ -41,24 +42,21 @@ public class SofaRegistryServer {
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()
-                .setProtocol("sofa") // 设置协议
-                .setAddress("127.0.0.1:9603"); // 设置注册中心地址
+                .setProtocol(RpcConstants.REGISTRY_PROTOCOL_SOFA)
+                .setAddress("127.0.0.1:9603");
 
-        // 2. 通信服务配置
         ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("bolt") // 设置一个协议，默认bolt
-            .setPort(12200) // 设置一个端口，默认12200
-            .setDaemon(false); // 非守护线程
+            .setProtocol("bolt")
+            .setPort(12200)
+            .setDaemon(false);
 
-        // 3. provider 综合配置
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
                 .setRegistry(registryConfig)
-                .setInterfaceId(HelloService.class.getName()) // 指定接口
-                .setRef(new HelloServiceImpl()) // 指定实现
-                .setServer(serverConfig); // 指定服务端
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl())
+                .setServer(serverConfig);
 
-        providerConfig.export(); // 发布服务
-
+        providerConfig.export();
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
     }
 }

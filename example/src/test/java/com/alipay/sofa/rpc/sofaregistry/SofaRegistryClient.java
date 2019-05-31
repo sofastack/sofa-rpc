@@ -16,21 +16,21 @@
  */
 package com.alipay.sofa.rpc.sofaregistry;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.quickstart.HelloService;
 
 /**
- * Quick Start client
+ * use sofa-registry client demo
  */
 public class SofaRegistryClient {
-
     private final static Logger LOGGER = LoggerFactory.getLogger(SofaRegistryClient.class);
 
     public static void main(String[] args) {
-        // 1. 注册中心配置
         /**
          * 运行时项目引入依赖
          <dependency>
@@ -40,22 +40,18 @@ public class SofaRegistryClient {
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()
-                .setProtocol("sofa") // 设置协议
-                .setAddress("127.0.0.1:9603"); // 设置注册中心地址
+                .setProtocol(RpcConstants.REGISTRY_PROTOCOL_SOFA)
+                .setAddress("127.0.0.1:9603");
 
-        // 2. consumer 综合配置
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName()) // 指定接口
+                .setInterfaceId(HelloService.class.getName())
                 .setRegistry(registryConfig)
-                .setProtocol("bolt") // 指定协议
+                .setProtocol("bolt")
                 .setConnectTimeout(10 * 1000);
 
-        // 3. 构造服务引用
         HelloService helloService = consumerConfig.refer();
-
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
 
-        // 4. 进行服务调用
         try {
             while (true) {
                 try {
