@@ -91,7 +91,7 @@ public class ConsulRegistryTest {
         ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
         Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
-        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 1, TimeUnit.SECONDS);
+        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 10, TimeUnit.SECONDS);
 
         registry.unRegister(providerConfig);
 
@@ -108,7 +108,7 @@ public class ConsulRegistryTest {
         ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
         Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
-        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 1, TimeUnit.SECONDS);
+        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 10, TimeUnit.SECONDS);
 
         registry.unRegister(providerConfig);
 
@@ -127,7 +127,7 @@ public class ConsulRegistryTest {
         assertUntil(() -> {
             Assert.assertEquals(1, providerGroups.size());
             Assert.assertEquals(3, providerGroups.get(0).size());
-        }, 1, TimeUnit.SECONDS);
+        }, 10, TimeUnit.SECONDS);
 
         ConsumerConfig<?> consumerConfigWithAnotherUniqueId = consumerConfig("consul-test-2");
         List<ProviderGroup> providerGroupsWithAnotherUniqueId = registry.subscribe(consumerConfigWithAnotherUniqueId);
