@@ -174,8 +174,10 @@ public class ConsulRegistryTest {
         boolean ok = latch.await(10, TimeUnit.SECONDS);
         Assert.assertTrue(ok);
 
-        Map<String, ProviderInfo> providers = listener.getData();
-        Assert.assertEquals(3, providers.size());
+        assertUntil(() -> {
+            Map<String, ProviderInfo> providers = listener.getData();
+            Assert.assertEquals(3, providers.size());
+        }, 10, TimeUnit.SECONDS);
 
         latch = new CountDownLatch(1);
         listener.setCountDownLatch(latch);
@@ -185,8 +187,10 @@ public class ConsulRegistryTest {
         ok = latch.await(10, TimeUnit.SECONDS);
         Assert.assertTrue(ok);
 
-        providers = listener.getData();
-        Assert.assertEquals(1, providers.size());
+        assertUntil(() -> {
+            Map<String, ProviderInfo> providers = listener.getData();
+            Assert.assertEquals(1, providers.size());
+        }, 10, TimeUnit.SECONDS);
     }
 
     private ConsumerConfig<?> consumerConfig(String uniqueId) {
