@@ -90,13 +90,17 @@ public class ConsulRegistryTest {
 
         ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
-        Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
-        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 10, TimeUnit.SECONDS);
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
+            Assert.assertEquals(3, healthServices.getValue().size());
+        }, 10, TimeUnit.SECONDS);
 
         registry.unRegister(providerConfig);
 
-        Response<List<HealthService>> healthServicesAfterUnRegister = consulClient.getHealthServices(INTERFACE_ID, request);
-        assertUntil(() -> Assert.assertEquals(0, healthServicesAfterUnRegister.getValue().size()), 10, TimeUnit.SECONDS);
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
+            Assert.assertEquals(0, healthServices.getValue().size());
+        }, 10, TimeUnit.SECONDS);
     }
 
     @Test
@@ -107,13 +111,18 @@ public class ConsulRegistryTest {
 
         ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
-        Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
-        assertUntil(() -> Assert.assertEquals(3, healthServices.getValue().size()), 10, TimeUnit.SECONDS);
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
+            Assert.assertEquals(3, healthServices.getValue().size());
+        }, 10, TimeUnit.SECONDS);
 
         registry.unRegister(providerConfig);
 
         Response<List<HealthService>> healthServicesAfterUnRegister = consulClient.getHealthServices(INTERFACE_ID, request);
-        assertUntil(() -> Assert.assertEquals(0, healthServicesAfterUnRegister.getValue().size()), 10, TimeUnit.SECONDS);
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
+            Assert.assertEquals(0, healthServicesAfterUnRegister.getValue().size());
+        }, 10, TimeUnit.SECONDS);
     }
 
     @Test
@@ -122,19 +131,19 @@ public class ConsulRegistryTest {
         registry.register(providerConfig);
 
         ConsumerConfig<?> consumerConfig = consumerConfig("consul-test-1");
-        List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
 
         assertUntil(() -> {
+            List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
             Assert.assertEquals(1, providerGroups.size());
             Assert.assertEquals(3, providerGroups.get(0).size());
         }, 10, TimeUnit.SECONDS);
 
         ConsumerConfig<?> consumerConfigWithAnotherUniqueId = consumerConfig("consul-test-2");
-        List<ProviderGroup> providerGroupsWithAnotherUniqueId = registry.subscribe(consumerConfigWithAnotherUniqueId);
 
         assertUntil(() -> {
-            Assert.assertEquals(1, providerGroupsWithAnotherUniqueId.size());
-            Assert.assertEquals(0, providerGroupsWithAnotherUniqueId.get(0).size());
+            List<ProviderGroup> providerGroups = registry.subscribe(consumerConfigWithAnotherUniqueId);
+            Assert.assertEquals(1, providerGroups.size());
+            Assert.assertEquals(0, providerGroups.get(0).size());
         }, 10, TimeUnit.SECONDS);
 
         registry.unSubscribe(consumerConfig);
@@ -150,9 +159,8 @@ public class ConsulRegistryTest {
         MockProviderInfoListener listener = new MockProviderInfoListener();
         consumerConfig.setProviderInfoListener(listener);
 
-        List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
-
         assertUntil(() -> {
+            List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
             Assert.assertEquals(1, providerGroups.size());
             Assert.assertEquals(1, providerGroups.get(0).size());
         }, 10, TimeUnit.SECONDS);
