@@ -68,8 +68,11 @@ public class ReusableClientTransportHolder implements ClientTransportHolder {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Multiple threads init ClientTransport with same key:" + key);
                 }
-                transport.destroy(); //如果同时有人插入，则使用第一个
-                transport = oldTransport;
+                //only is not equals ,we can close
+                if (oldTransport != transport) {
+                    transport.destroy(); //如果同时有人插入，则使用第一个
+                    transport = oldTransport;
+                }
             }
         }
         AtomicInteger counter = transportRefCounter.get(transport);

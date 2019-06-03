@@ -136,7 +136,7 @@ public class BoltClientTransport extends ClientTransport {
     public void connect() {
         if (connection != null) {
             if (!connection.isFine()) {
-                connection.close();
+                RPC_CLIENT.closeStandaloneConnection(connection);
                 connection = null;
             }
         }
@@ -166,7 +166,7 @@ public class BoltClientTransport extends ClientTransport {
                 }
             }
             connection = null;
-            RPC_CLIENT.closeConnection(url);
+            RPC_CLIENT.closeStandaloneConnection(connection);
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("", e);
         }
