@@ -238,6 +238,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
             <version>${bolt.version}</version>
             <exclusions>
@@ -404,6 +409,8 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-dynamic-apollo</include>
+
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>

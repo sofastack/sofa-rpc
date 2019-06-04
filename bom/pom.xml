@@ -24,6 +24,7 @@
         <dubbo.version>2.4.10</dubbo.version>
         <nacos.version>0.6.0</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
+        <apollo.version>1.4.0</apollo.version>
         <!-- serialization -->
         <hessian.version>3.3.6</hessian.version>
         <thrift.version>0.9.2</thrift.version>
@@ -340,6 +341,11 @@
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>registry-client-all</artifactId>
                 <version>${sofa.registry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.ctrip.framework.apollo</groupId>
+                <artifactId>apollo-client</artifactId>
+                <version>${apollo.version}</version>
             </dependency>
 
             <!-- alipay -->
