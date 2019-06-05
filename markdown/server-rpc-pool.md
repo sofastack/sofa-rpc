@@ -38,7 +38,7 @@
  * 名称：Bolt-conn-event-executor
  * daemon线程 
  
-### SEV-BOLT-BIZ- Thread Pool
+### SOFA-SEV-BOLT-BIZ- Thread Pool
  * BoltServer执行init时创建
  * 用于接收netty的请求。根据请求处理业务
  * 配置 rpc config

@@ -13,6 +13,9 @@
    - ServerConfig初始化完成
  * 
    
+### 启动
+ * 先启动netty socket
+ * 再注册到注册中心
  
 ### RpcRuntimeContext
  * 全局的运行时上下文

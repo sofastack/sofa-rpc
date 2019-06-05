@@ -95,6 +95,9 @@
  * 由ClientAsyncReceiveEvent事件触发 
  * 此时线程是client-CB线程
  * 切换请求时的SofaTracerSpan，绑定到当前Thread
+ 
+ * 再执行SofaTracerSpan clientSpan = sofaTraceContext.pop();
+   + 删除当前线程SofaTracerSpan
  * 记录CLIENT_RECV_EVENT_VALUE事件
  * 设置tag
    - REQ_SERIALIZE_TIME
@@ -126,3 +129,16 @@
  * 检查状态
    + 此时一个请求跟踪已经可以结束了。
    + 如果当前Thread还有多由一个SofaTracerSpan则打印错误日志提醒
+   
+   
+### 异步调用时slf4j MDC功能
+ * 调用者线程在执行startRpc时生成TracerId, SpanId
+   + 并将TracerId, SpanId绑定到MDC
+ * 当响应线程处理响应时，在clientReceived删除了SofaTracerSpan
+   + 并将MDC中的TracerId, SpanId删除
+   + 其实响应线程的MDC是没有绑定TracerId, SpanId, 而是调用者线程绑定的
+   所以删除也不存在
+ * 所以调用者在接收到响应结果后。再打印MDC不一定是准确的
+   + 因为是startRpc时绑定的。
+   + 如果这个线程执行了多个请求，则此时的MDC是最后一个请求的MDC
+   + 所以不建议在接收到响应结果后，打印TracerId, SpanId, 因为不准确
