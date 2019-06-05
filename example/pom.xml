@@ -18,6 +18,11 @@
             <artifactId>sofa-rpc-all</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>1.5.16</version>
+        </dependency>
 
         <!-- dependencies for rest begin -->
         <dependency>

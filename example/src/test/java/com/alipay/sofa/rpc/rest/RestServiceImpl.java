@@ -17,17 +17,23 @@
 package com.alipay.sofa.rpc.rest;
 
 import com.alipay.sofa.rpc.api.context.RpcContextManager;
+import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
+import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import io.swagger.models.Swagger;
+import io.swagger.util.Json;
+import org.jboss.resteasy.spi.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.core.Response;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RestServiceImpl implements RestService {
@@ -80,20 +86,31 @@ public class RestServiceImpl implements RestService {
     }
 
     @Override
-    public List<ExampleObj> objects(List<ExampleObj> codes) {
-        for (ExampleObj code : codes) {
-            code.setName(code.getName() + " server");
+    public String api() {
+        Swagger swagger = new Swagger();
+
+        swagger.setBasePath("/rest/");
+        final List<ProviderBootstrap> providerConfigs = RpcRuntimeContext.getProviderConfigs();
+
+        Map<Class<?>, Object> interfaceMapRef = new HashMap<>();
+        final ProviderConfig providerConfig = providerConfigs.get(0).getProviderConfig();
+
+        interfaceMapRef.put(providerConfig.getProxyClass(), providerConfig.getRef());
+
+        Reader.read(swagger, interfaceMapRef, "");
+        String result = null;
+        try {
+            result = Json.mapper().writeValueAsString(swagger);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
         }
-        return codes;
+
+        return result;
+
     }
 
     @Override
-    public String get(String code) {
-        return "server" + code;
-    }
-
-    @Override
-    public String post(String code, String body) {
-        return "server " + code + body;
+    public String invoke(String interfaceName, String methodName, HttpRequest request) {
+        return "a";
     }
 }
