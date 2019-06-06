@@ -165,8 +165,8 @@ public class BoltClientTransport extends ClientTransport {
                         NetUtils.channelToString(localAddress(), remoteAddress()));
                 }
             }
-            connection = null;
             RPC_CLIENT.closeStandaloneConnection(connection);
+            connection = null;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("", e);
         }
