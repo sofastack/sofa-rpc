@@ -51,12 +51,31 @@ public class SimpleMapSerializer {
         UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(64);
         try {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                writeString(out, entry.getKey());
-                writeString(out, entry.getValue());
+                String key = entry.getKey();
+                String value = entry.getValue();
+                writeSupportEmpty(key, out);
+                writeSupportEmpty(value, out);
             }
             return out.toByteArray();
         } catch (IOException ex) {
             throw new SerializationException(ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * 支持empty字符串的序列化
+     *
+     * @param data 输入数据
+     * @param out 输入流
+     * @throws IOException 写入异常
+     */
+    public void writeSupportEmpty(String data, OutputStream out) throws IOException {
+        if (StringUtils.isEmpty(data)) {
+            writeInt(out, 0);
+        } else {
+            byte[] bs = data.getBytes("UTF-8");
+            writeInt(out, bs.length);
+            out.write(bs);
         }
     }
 
@@ -77,11 +96,21 @@ public class SimpleMapSerializer {
 
         UnsafeByteArrayInputStream in = new UnsafeByteArrayInputStream(bytes);
         try {
-            while (in.available() > 0) {
-                String key = readString(in);
-                String value = readString(in);
-                map.put(key, value);
+            while (true) {
+                int length = readInt(in);
+                if (length == -1) {
+                    break;
+                }
+
+                byte[] key = new byte[length];
+                in.read(key);
+                length = readInt(in);
+                byte[] value = new byte[length];
+                in.read(value);
+
+                map.put(new String(key, "UTF-8"), new String(value, "UTF-8"));
             }
+
             return map;
         } catch (IOException ex) {
             throw new DeserializationException(ex.getMessage(), ex);
