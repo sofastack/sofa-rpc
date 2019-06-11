@@ -11,14 +11,22 @@
    抛出异常
    + 调用结束
 
-#### Zookeeper未启动
+#### Zookeeper未启动（zk集群不可用时同样）
  * client启动时连接
    + 默认会重连3次。3次重连还连接不上，则抛出异常。client启动失败
    + 返回重连超时时间：RcpConfigs: registry.connect.timeout=20000（默认）
    
 #### client运行时，Zookeeper挂了
  * client会一直发起重连请求
- * 在未重连上时，调用者发都Rpc请求，则抛出异常
+   + 此时client与server未建立连接
+   + 在未重连上时，调用者发都Rpc请求，则抛出异常
+ 
+ * 如果zk是集群模式
+   + 集群可用是client运行正常
+   + 集群不可用是会一直重连
+   
+ * 如果client-server在zk可用时就创建了连接
+ 则在没有zk服务时。client与server还可以正常通信
  
  * 重启zookeeper。client连接成功
  
