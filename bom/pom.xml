@@ -31,8 +31,7 @@
         <hessian.version>3.3.6</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.5.1</protobuf.version>
-        <jackson.version>2.9.8</jackson.version>
-        <jackson.annotation.version>2.9.0</jackson.annotation.version>
+        <jackson.version>2.9.9</jackson.version>
         <msgpack.version>0.6.11</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
 
@@ -254,7 +253,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.annotation.version}</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
