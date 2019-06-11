@@ -352,3 +352,140 @@ nacos is starting
 
 2019-06-11 15:16:22,508 INFO FrameworkServlet 'dispatcherServlet': initialization completed in 30 ms
 
+/Users/qilong.zql/.jenv/versions/1.8/bin/java  -Xms512m -Xmx512m -Xmn256m -Dnacos.standalone=true -Xloggc:/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/logs/nacos_gc.log -verbose:gc -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCTimeStamps -XX:+UseGCLogFileRotation -XX:NumberOfGCLogFiles=10 -XX:GCLogFileSize=100M -Dnacos.home=/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos -jar /Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/target/nacos-server.jar  --spring.config.location=classpath:/,classpath:/config/,file:./,file:./config/,file:/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/conf/ --logging.config=/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/conf/nacos-logback.xml
+nacos is starting
+                                                        
+         ,--.                                           
+       ,--.'|                                           
+   ,--,:  : |                                           Nacos 0.6.0
+,`--.'`|  ' :                       ,---.               Running in stand alone mode
+|   :  :  | |                      '   ,'\   .--.--.    Port: 8848
+:   |   \ | :  ,--.--.     ,---.  /   /   | /  /    '   Pid: 73795
+|   : '  '; | /       \   /     \.   ; ,. :|  :  /`./   Console: http://10.15.250.1:8848/nacos/index.html
+'   ' ;.    ;.--.  .-. | /    / ''   | |: :|  :  ;_
+|   | | \   | \__\/: . ..    ' / '   | .; : \  \    `.      https://nacos.io
+'   : |  ; .' ," .--.; |'   ; :__|   :    |  `----.   \
+|   | '`--'  /  /  ,.  |'   | '.'|\   \  /  /  /`--'  / 
+'   : |     ;  :   .'   \   :    : `----'  '--'.     /  
+;   |.'     |  ,     .-./\   \  /            `--'---'   
+'---'        `--`---'     `----'                        
+
+2019-06-11 15:25:31,203 INFO Refreshing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@445b84c0: startup date [Tue Jun 11 15:25:31 CST 2019]; root of context hierarchy
+
+2019-06-11 15:25:32,619 INFO Tomcat initialized with port(s): 8848 (http)
+
+2019-06-11 15:25:32,756 INFO Root WebApplicationContext: initialization completed in 1553 ms
+
+2019-06-11 15:25:33,046 INFO Mapping filter: 'characterEncodingFilter' to: [/*]
+
+2019-06-11 15:25:33,047 INFO Mapping filter: 'hiddenHttpMethodFilter' to: [/*]
+
+2019-06-11 15:25:33,047 INFO Mapping filter: 'httpPutFormContentFilter' to: [/*]
+
+2019-06-11 15:25:33,047 INFO Mapping filter: 'requestContextFilter' to: [/*]
+
+2019-06-11 15:25:33,047 INFO Mapping filter: 'authFilter' to urls: [/api/*, /raft/*]
+
+2019-06-11 15:25:33,047 INFO Mapping filter: 'distroFilter' to urls: [/*]
+
+2019-06-11 15:25:33,047 INFO Mapping filter: 'webFilter' to urls: [/*]
+
+2019-06-11 15:25:33,047 INFO Servlet dispatcherServlet mapped to [/]
+
+2019-06-11 15:25:33,353 WARN Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'consoleHealth' defined in URL [jar:file:/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/target/nacos-server.jar!/BOOT-INF/classes!/com/alibaba/nacos/console/controller/HealthController.class]: Unsatisfied dependency expressed through constructor parameter 0; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'persistService': Invocation of init method failed; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'localDataSourceService': Invocation of init method failed; nested exception is java.lang.RuntimeException: load schema.sql error.org.apache.commons.dbcp.SQLNestedException: Cannot create PoolableConnectionFactory (Failed to start database '/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/data/derby-data' with class loader org.springframework.boot.loader.LaunchedURLClassLoader@7a07c5b4, see the next exception for details.)
+
+2019-06-11 15:25:33,363 INFO Nacos Log files: /Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/logs/
+
+2019-06-11 15:25:33,364 INFO Nacos Conf files: /Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/conf/
+
+2019-06-11 15:25:33,364 INFO Nacos Data files: /Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/data/
+
+2019-06-11 15:25:33,364 ERROR Nacos failed to start, please see /Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/logs/nacos.log for more details.
+
+2019-06-11 15:25:33,370 INFO 
+
+Error starting ApplicationContext. To display the conditions report re-run your application with 'debug' enabled.
+
+2019-06-11 15:25:33,372 ERROR Application run failed
+
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'consoleHealth' defined in URL [jar:file:/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/target/nacos-server.jar!/BOOT-INF/classes!/com/alibaba/nacos/console/controller/HealthController.class]: Unsatisfied dependency expressed through constructor parameter 0; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'persistService': Invocation of init method failed; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'localDataSourceService': Invocation of init method failed; nested exception is java.lang.RuntimeException: load schema.sql error.org.apache.commons.dbcp.SQLNestedException: Cannot create PoolableConnectionFactory (Failed to start database '/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/data/derby-data' with class loader org.springframework.boot.loader.LaunchedURLClassLoader@7a07c5b4, see the next exception for details.)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:732)
+	at org.springframework.beans.factory.support.ConstructorResolver.autowireConstructor(ConstructorResolver.java:197)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.autowireConstructor(AbstractAutowireCapableBeanFactory.java:1267)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1124)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:535)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:495)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:317)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:222)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:315)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.preInstantiateSingletons(DefaultListableBeanFactory.java:759)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:869)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:550)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:140)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:780)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:412)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:333)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1277)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1265)
+	at com.alibaba.nacos.Nacos.main(Nacos.java:31)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.boot.loader.MainMethodRunner.run(MainMethodRunner.java:48)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:87)
+	at org.springframework.boot.loader.Launcher.launch(Launcher.java:50)
+	at org.springframework.boot.loader.JarLauncher.main(JarLauncher.java:51)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'persistService': Invocation of init method failed; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'localDataSourceService': Invocation of init method failed; nested exception is java.lang.RuntimeException: load schema.sql error.org.apache.commons.dbcp.SQLNestedException: Cannot create PoolableConnectionFactory (Failed to start database '/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/data/derby-data' with class loader org.springframework.boot.loader.LaunchedURLClassLoader@7a07c5b4, see the next exception for details.)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:139)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:416)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1691)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:573)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:495)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:317)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:222)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:315)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:251)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1135)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1062)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:818)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:724)
+	... 27 common frames omitted
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'localDataSourceService': Invocation of init method failed; nested exception is java.lang.RuntimeException: load schema.sql error.org.apache.commons.dbcp.SQLNestedException: Cannot create PoolableConnectionFactory (Failed to start database '/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/data/derby-data' with class loader org.springframework.boot.loader.LaunchedURLClassLoader@7a07c5b4, see the next exception for details.)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:139)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.applyBeanPostProcessorsBeforeInitialization(AbstractAutowireCapableBeanFactory.java:416)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1691)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:573)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:495)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:317)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:222)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:315)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1089)
+	at com.alibaba.nacos.config.server.service.DynamicDataSource.getDataSource(DynamicDataSource.java:45)
+	at com.alibaba.nacos.config.server.service.PersistService.init(PersistService.java:95)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleElement.invoke(InitDestroyAnnotationBeanPostProcessor.java:366)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:309)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:136)
+	... 40 common frames omitted
+Caused by: java.lang.RuntimeException: load schema.sql error.org.apache.commons.dbcp.SQLNestedException: Cannot create PoolableConnectionFactory (Failed to start database '/Users/qilong.zql/Workdir/opensource/sofa-rpc/extension-impl/registry-nacos/nacos/data/derby-data' with class loader org.springframework.boot.loader.LaunchedURLClassLoader@7a07c5b4, see the next exception for details.)
+	at com.alibaba.nacos.config.server.service.LocalDataSourceServiceImpl.reload(LocalDataSourceServiceImpl.java:105)
+	at com.alibaba.nacos.config.server.service.LocalDataSourceServiceImpl.init(LocalDataSourceServiceImpl.java:89)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:498)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleElement.invoke(InitDestroyAnnotationBeanPostProcessor.java:366)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor$LifecycleMetadata.invokeInitMethods(InitDestroyAnnotationBeanPostProcessor.java:309)
+	at org.springframework.beans.factory.annotation.InitDestroyAnnotationBeanPostProcessor.postProcessBeforeInitialization(InitDestroyAnnotationBeanPostProcessor.java:136)
+	... 58 common frames omitted
+2019-06-11 15:25:45,584 INFO Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@445b84c0: startup date [Tue Jun 11 15:16:12 CST 2019]; root of context hierarchy
+
+2019-06-11 15:25:45,585 INFO Unregistering JMX-exposed beans on shutdown
+

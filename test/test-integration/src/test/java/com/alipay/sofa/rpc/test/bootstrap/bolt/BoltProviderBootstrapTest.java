@@ -172,20 +172,20 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
     }
 
     @Test
-    public void testProviderClassLoader() throws Throwable{
+    public void testProviderClassLoader() throws Throwable {
         // 发布一个服务
         ServerConfig serverConfig = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22223)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22223)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig0 = new ProviderConfig<HelloService>()
-                .setId("p-0")
-                .setUniqueId("p-0")
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl(2000))
-                .setServer(serverConfig)
-                .setRegister(false);
+            .setId("p-0")
+            .setUniqueId("p-0")
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(2000))
+            .setServer(serverConfig)
+            .setRegister(false);
         providerConfig0.export();
 
         // incompatible with JDK 9+
@@ -195,13 +195,13 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
         Class helloServiceImpl = tempClassLoader.loadClass(HelloServiceImpl.class.getCanonicalName());
 
         ProviderConfig<Object> providerConfig1 = new ProviderConfig<Object>()
-                .setId("p-1")
-                .setUniqueId("p-1")
-                .setInterfaceId(HelloService.class.getName())
-                .setProxyClass(helloService)
-                .setRef(helloServiceImpl.getConstructor(int.class).newInstance(2000))
-                .setServer(serverConfig)
-                .setRegister(false);
+            .setId("p-1")
+            .setUniqueId("p-1")
+            .setInterfaceId(HelloService.class.getName())
+            .setProxyClass(helloService)
+            .setRef(helloServiceImpl.getConstructor(int.class).newInstance(2000))
+            .setServer(serverConfig)
+            .setRegister(false);
         providerConfig1.export();
 
         ClassLoader cl0 = ReflectCache.getServiceClassLoader(ConfigUniqueNameGenerator.getUniqueName(providerConfig0));
