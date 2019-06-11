@@ -120,6 +120,10 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                     response.finish();
                 }
             } finally {
+                /**
+                 * issue: https://github.com/sofastack/sofa-rpc/issues/592
+                 */
+                request.releaseContentBuffer();
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
                     EventBus.post(new ServerEndHandleEvent());
                 }
