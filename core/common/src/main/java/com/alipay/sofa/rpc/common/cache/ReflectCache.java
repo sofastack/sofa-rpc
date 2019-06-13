@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -81,6 +83,15 @@ public final class ReflectCache {
     }
 
     /**
+     * 发注册服务的 ClassLoader
+     * @param serviceUniqueName
+     * @return
+     */
+    public static ClassLoader unRegisterServiceClassLoader(String serviceUniqueName) {
+        return SERVICE_CLASSLOADER_MAP.remove(serviceUniqueName);
+    }
+
+    /**
      * 得到服务的自定义ClassLoader
      *
      * @param serviceUniqueName 服务唯一名称
@@ -100,13 +111,13 @@ public final class ReflectCache {
      * String-->Class 缓存
      */
     @VisibleForTesting
-    static final ConcurrentMap<String, Class> CLASS_CACHE    = new ConcurrentHashMap<String, Class>();
+    static final ConcurrentMap<String, WeakHashMap<ClassLoader, Class>> CLASS_CACHE    = new ConcurrentHashMap<String, WeakHashMap<ClassLoader, Class>>();
 
     /**
      * Class-->String 缓存
      */
     @VisibleForTesting
-    static final ConcurrentMap<Class, String> TYPE_STR_CACHE = new ConcurrentHashMap<Class, String>();
+    static final ConcurrentMap<Class, String>                           TYPE_STR_CACHE = new ConcurrentHashMap<Class, String>();
 
     /**
      * 放入Class缓存
@@ -115,7 +126,8 @@ public final class ReflectCache {
      * @param clazz   类
      */
     public static void putClassCache(String typeStr, Class clazz) {
-        CLASS_CACHE.put(typeStr, clazz);
+        CLASS_CACHE.putIfAbsent(typeStr, new WeakHashMap<ClassLoader, Class>());
+        CLASS_CACHE.get(typeStr).put(clazz.getClassLoader(), clazz);
     }
 
     /**
@@ -125,7 +137,13 @@ public final class ReflectCache {
      * @return 类
      */
     public static Class getClassCache(String typeStr) {
-        return CLASS_CACHE.get(typeStr);
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            return null;
+        } else {
+            Map<ClassLoader, Class> temp = CLASS_CACHE.get(typeStr);
+            return temp == null ? null : temp.get(classLoader);
+        }
     }
 
     /**
