@@ -631,6 +631,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             aliveConnections.clear();
             retryConnections.clear();
             uninitializedConnections.clear();
+            lastAddresses.clear();
             return all;
         } finally {
             providerLock.unlock();
