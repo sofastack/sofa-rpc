@@ -52,6 +52,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @created 2018/6/5
@@ -73,6 +74,7 @@ public class EtcdClient implements Closeable {
     private StreamObserver<LeaseKeepAliveRequest>  leaseKeepAliveRequestObserver;
     private final ScheduledExecutorService         scheduledExecutorService;
     private ScheduledFuture<?>                     keepAliveTaskFuture;
+    private volatile AtomicInteger retryKeepalive = new AtomicInteger(3);
 
     EtcdClient(ManagedChannel channel) {
         this.channel = channel;
@@ -82,7 +84,7 @@ public class EtcdClient implements Closeable {
         this.watchStub = WatchGrpc.newStub(this.channel);
         this.scheduledExecutorService = MoreExecutors.listeningDecorator(
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(),
-                new DefaultThreadFactory("KeepAliveTaskThread", true)));
+                new DefaultThreadFactory("EtcdRegisterKeepAliveTaskThread", true)));
     }
 
     public static ClientBuilder builder() {
@@ -155,6 +157,7 @@ public class EtcdClient implements Closeable {
 
                     @Override
                     public void onError(Throwable t) {
+                        LOGGER.error("keep alive for lease id:{} error", leaseId, t);
                         processOnError();
                     }
 
@@ -168,8 +171,6 @@ public class EtcdClient implements Closeable {
             new Runnable() {
                 @Override
                 public void run() {
-                    System.out.println("send keep alive request:" + System.currentTimeMillis());
-                    // send keep alive req to the leases whose next keep alive is before now.
                     leaseKeepAliveRequestObserver.onNext(LeaseKeepAliveRequest.newBuilder().setID(leaseId).build());
                 }
             },
@@ -184,7 +185,9 @@ public class EtcdClient implements Closeable {
         this.keepAliveTaskFuture.cancel(true);
         this.leaseKeepAliveRequestObserver.onCompleted();
         this.leaseKeepAliveResponseObserver.onCompleted();
-        this.startKeepAliveTask();
+        if(retryKeepalive.getAndDecrement() <=0){
+            this.startKeepAliveTask();
+        }
     }
 
     private void processKeepAliveResponse(LeaseKeepAliveResponse value) {
@@ -275,18 +278,27 @@ public class EtcdClient implements Closeable {
         if (channel != null) {
             this.channel.shutdown();
         }
-        if (!keepAliveTaskStarted) {
-            return;
-        }
+
         try {
             leaseKeepAliveRequestObserver.onCompleted();
-            leaseKeepAliveResponseObserver.onCompleted();
-            if (leaseId != 0L) {
-                revokeLease(leaseId);
-            }
         } catch (Exception e) {
             //do nothing
         }
+
+        try{
+            leaseKeepAliveResponseObserver.onCompleted();
+        }catch (Exception e){
+            //do nothing
+        }
+
+        if (leaseId != 0L) {
+            try {
+                revokeLease(leaseId);
+            } catch (Exception e) {
+                LOGGER.error("lease id:{} may not be revoked", e);
+            }
+        }
+
         keepAliveTaskFuture.cancel(true);
     }
 }

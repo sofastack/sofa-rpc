@@ -199,7 +199,6 @@ public class EtcdRegistry extends Registry {
                 List<ProviderGroup> providerGroups = Collections.singletonList(new ProviderGroup()
                     .addAll(matchProviders));
                 consumers.put(config, providerGroups);
-                //register listener
                 providerObserver.addProviderListener(config, config.getProviderInfoListener());
                 etcdHelper.startWatch(new Watcher(etcdHelper, config, providerObserver));
                 return providerGroups;
