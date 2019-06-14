@@ -32,7 +32,7 @@ public class EtcdClientUtil {
     /**
      * plus one to the source bytes
      * <br/>
-     * e.g., "aa"+1 == "ab", "a"+1 == "b"
+     * e.g., "aa"+1 == "ab", "a&#92;xff"+1 == "b"
      *
      * @param source bytes as source
      * @return source bytes plus one

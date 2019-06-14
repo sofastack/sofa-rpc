@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.etcd.EtcdRegistry;
 import com.alipay.sofa.rpc.registry.etcd.Watcher;
+import com.alipay.sofa.rpc.registry.etcd.grpc.api.DeleteRangeRequest;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.Event;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.KVGrpc;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.KeyValue;
@@ -33,7 +34,6 @@ import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseKeepAliveResponse;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseRevokeRequest;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.LeaseRevokeResponse;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.PutRequest;
-import com.alipay.sofa.rpc.registry.etcd.grpc.api.PutResponse;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.RangeRequest;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchCancelRequest;
 import com.alipay.sofa.rpc.registry.etcd.grpc.api.WatchCreateRequest;
@@ -47,10 +47,7 @@ import io.grpc.stub.StreamObserver;
 import io.netty.util.concurrent.DefaultThreadFactory;
 import io.netty.util.internal.StringUtil;
 import java.io.Closeable;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -64,21 +61,18 @@ public class EtcdClient implements Closeable {
     private final static Logger                    LOGGER               = LoggerFactory
                                                                             .getLogger(EtcdRegistry.class);
 
-    protected static final long                    DEFAULT_TTL          = 10;                                   // default ttl time for the key in seconds
-    private static final Map<String, Long>         KEY_LEASEID_MAPPING  = new ConcurrentHashMap<String, Long>();
-
+    protected static final long                    DEFAULT_TTL          = 10;                              // default ttl time for the key in seconds
+    private volatile long                          leaseId;
     private ManagedChannel                         channel;
     private final KVGrpc.KVBlockingStub            kvBlockingStub;
     private final LeaseGrpc.LeaseBlockingStub      leaseBlockingStub;
     private final LeaseGrpc.LeaseStub              leaseStub;
     private final WatchGrpc.WatchStub              watchStub;
-    private final Map<Long, KeepAliveTask>         keepAliveTaskMap;
     private volatile boolean                       keepAliveTaskStarted = false;
     private StreamObserver<LeaseKeepAliveResponse> leaseKeepAliveResponseObserver;
     private StreamObserver<LeaseKeepAliveRequest>  leaseKeepAliveRequestObserver;
     private final ScheduledExecutorService         scheduledExecutorService;
     private ScheduledFuture<?>                     keepAliveTaskFuture;
-    private ScheduledFuture<?>                     removeExpiredTaskFuture;
 
     EtcdClient(ManagedChannel channel) {
         this.channel = channel;
@@ -86,7 +80,6 @@ public class EtcdClient implements Closeable {
         this.leaseBlockingStub = LeaseGrpc.newBlockingStub(this.channel);
         this.leaseStub = LeaseGrpc.newStub(this.channel);
         this.watchStub = WatchGrpc.newStub(this.channel);
-        this.keepAliveTaskMap = new ConcurrentHashMap<Long, KeepAliveTask>();
         this.scheduledExecutorService = MoreExecutors.listeningDecorator(
             Executors.newScheduledThreadPool(Runtime.getRuntime().availableProcessors(),
                 new DefaultThreadFactory("KeepAliveTaskThread", true)));
@@ -97,20 +90,18 @@ public class EtcdClient implements Closeable {
     }
 
     /**
-     * grant a lease and bind to the key
-     *
-     * @return lease id
+     * reuse a lease and bind to the key
      */
-    public Long putWithLease(final String key, final String value) {
-        LeaseGrantRequest leaseGrantRequest = LeaseGrantRequest.newBuilder().setTTL(DEFAULT_TTL).build();
-        LeaseGrantResponse leaseGrantResponse = leaseBlockingStub.leaseGrant(leaseGrantRequest);
-        long leaseId = leaseGrantResponse.getID();
+    public void putWithLease(final String key, final String value) {
+        if (leaseId == 0L) {
+            LeaseGrantRequest leaseGrantRequest = LeaseGrantRequest.newBuilder().setTTL(DEFAULT_TTL).build();
+            LeaseGrantResponse leaseGrantResponse = leaseBlockingStub.leaseGrant(leaseGrantRequest);
+            leaseId = leaseGrantResponse.getID();
+        }
         PutRequest putRequest = PutRequest.newBuilder().setKey(ByteString.copyFromUtf8(key))
             .setLease(leaseId)
             .setValue(ByteString.copyFromUtf8(value)).build();
-        PutResponse putResponse = kvBlockingStub.put(putRequest);
-        KEY_LEASEID_MAPPING.put(key, leaseId);
-        return leaseId;
+        kvBlockingStub.put(putRequest);
     }
 
     /**
@@ -127,71 +118,34 @@ public class EtcdClient implements Closeable {
     }
 
     public boolean revokeLease(final Long leaseId) {
-        LeaseRevokeRequest revokeRequest = LeaseRevokeRequest.newBuilder().setID(leaseId).build();
-        LeaseRevokeResponse revokeResponse = leaseBlockingStub.leaseRevoke(revokeRequest);
-        return revokeResponse != null;
+        try {
+            LeaseRevokeRequest revokeRequest = LeaseRevokeRequest.newBuilder().setID(leaseId).build();
+            LeaseRevokeResponse revokeResponse = leaseBlockingStub.leaseRevoke(revokeRequest);
+            return revokeResponse != null;
+        } catch (Exception e) {
+            LOGGER.error("cannot revoke lease id:{}", leaseId, e);
+        }
+        return false;
     }
 
-    public void revokeLease(final String key) {
-        if (!KEY_LEASEID_MAPPING.containsKey(key)) {
+    public void keepAlive() {
+        if (leaseId == 0L) {
             return;
         }
-        long leaseId = KEY_LEASEID_MAPPING.get(key);
-        if (revokeLease(leaseId)) {
-            KEY_LEASEID_MAPPING.remove(key);
-        }
-    }
-
-    public void keepAlive(final Long id) {
-        KeepAliveTask keepAliveTask = this.keepAliveTaskMap.containsKey(id) ? keepAliveTaskMap.get(id)
-            : new KeepAliveTask();
-        keepAliveTask.addObserver(new StreamObserver<LeaseKeepAliveResponse>() {
-            @Override
-            public void onNext(LeaseKeepAliveResponse value) {
-                //do nothing
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                LOGGER.debug("error happened when keep alive with lease id:" + id, t);
-            }
-
-            @Override
-            public void onCompleted() {
-                //do nothing
-            }
-        });
-
-        this.keepAliveTaskMap.put(id, keepAliveTask);
 
         if (!this.keepAliveTaskStarted) {
             this.keepAliveTaskStarted = true;
             this.startKeepAliveTask();
-            this.removeExpiredKeepAliveTask();
         }
     }
 
-    private void removeExpiredKeepAliveTask() {
-        this.removeExpiredTaskFuture = scheduledExecutorService.scheduleAtFixedRate(
-            new Runnable() {
-                @Override
-                public void run() {
-                    long now = System.currentTimeMillis();
-                    Iterator<Map.Entry<Long, KeepAliveTask>> iterator = keepAliveTaskMap.entrySet().iterator();
-                    while (iterator.hasNext()) {
-                        KeepAliveTask tas = iterator.next().getValue();
-                        if (tas.getExpireTime() < now) {
-                            tas.onCompleted();
-                            iterator.remove();
-                        }
-                    }
-                }
-            },
-            0, 1, TimeUnit.SECONDS
-            );
-    }
-
     private void startKeepAliveTask() {
+        //no lease id found, return
+        if (leaseId == 0L) {
+            this.keepAliveTaskStarted = false;
+            return;
+        }
+
         this.leaseKeepAliveResponseObserver =
                 new StreamObserver<LeaseKeepAliveResponse>() {
                     @Override
@@ -206,6 +160,7 @@ public class EtcdClient implements Closeable {
 
                     @Override
                     public void onCompleted() {
+                        LOGGER.debug("lease keep alive task is completed");
                     }
                 };
         this.leaseKeepAliveRequestObserver = this.leaseStub.leaseKeepAlive(this.leaseKeepAliveResponseObserver);
@@ -213,21 +168,18 @@ public class EtcdClient implements Closeable {
             new Runnable() {
                 @Override
                 public void run() {
+                    System.out.println("send keep alive request:" + System.currentTimeMillis());
                     // send keep alive req to the leases whose next keep alive is before now.
-                    for (Map.Entry<Long, KeepAliveTask> entry : keepAliveTaskMap.entrySet()) {
-                        long nextKeepAlive = entry.getValue().getNextKeepAliveTime();
-                        if (nextKeepAlive < System.currentTimeMillis()) {
-                            Long leaseId = entry.getKey();
-                            leaseKeepAliveRequestObserver.onNext(LeaseKeepAliveRequest.newBuilder().setID(leaseId)
-                                .build());
-                        }
-                    }
+                    leaseKeepAliveRequestObserver.onNext(LeaseKeepAliveRequest.newBuilder().setID(leaseId).build());
                 }
             },
-            0, 1, TimeUnit.SECONDS
+            0, DEFAULT_TTL / 3, TimeUnit.SECONDS
             );
     }
 
+    /**
+     * restart keep alive task
+     */
     private void processOnError() {
         this.keepAliveTaskFuture.cancel(true);
         this.leaseKeepAliveRequestObserver.onCompleted();
@@ -236,28 +188,18 @@ public class EtcdClient implements Closeable {
     }
 
     private void processKeepAliveResponse(LeaseKeepAliveResponse value) {
-        final long leaseID = value.getID();
         final long ttl = value.getTTL();
-        KeepAliveTask task = this.keepAliveTaskMap.get(leaseID);
-
-        if (task == null) {
-            // return if the task has been removed.
-            return;
-        }
-
-        if (ttl > 0) {
-            //update task information when lease is not expired
-            task.setNextKeepAliveTime(System.currentTimeMillis() + (ttl * 1000) / 4);
-            task.setExpireTime(System.currentTimeMillis() + ttl * 1000);
-            task.onNext(value);
-        } else {
-            //remove if expired
-            this.removeKeepAlive(leaseID);
+        if (ttl <= 0) {
+            //reset global lease id
+            leaseId = 0L;
         }
     }
 
-    private synchronized void removeKeepAlive(long leaseId) {
-        this.keepAliveTaskMap.remove(leaseId);
+    /**
+     * delete one key
+     */
+    public void deleteKey(String key) {
+        kvBlockingStub.deleteRange(DeleteRangeRequest.newBuilder().setKey(ByteString.copyFromUtf8(key)).build());
     }
 
     public void startWatch(String key, final Watcher watcher) {
@@ -339,11 +281,12 @@ public class EtcdClient implements Closeable {
         try {
             leaseKeepAliveRequestObserver.onCompleted();
             leaseKeepAliveResponseObserver.onCompleted();
+            if (leaseId != 0L) {
+                revokeLease(leaseId);
+            }
         } catch (Exception e) {
             //do nothing
         }
         keepAliveTaskFuture.cancel(true);
-        removeExpiredTaskFuture.cancel(true);
-        keepAliveTaskMap.clear();
     }
 }

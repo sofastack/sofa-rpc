@@ -33,6 +33,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
 import com.alipay.sofa.rpc.registry.etcd.client.ClientBuilder;
 import com.alipay.sofa.rpc.registry.etcd.client.EtcdClient;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
@@ -194,7 +195,7 @@ public class EtcdRegistry extends Registry {
                 List<ServiceInstance> allInstances = etcdHelper.getInstances(serviceName, config.getProtocol(),
                     config.getUniqueId());
                 List<ProviderInfo> providerInfos = EtcdRegistryHelper.convertInstancesToProviders(allInstances);
-                List<ProviderInfo> matchProviders = EtcdRegistryHelper.matchProviderInfos(config, providerInfos);
+                List<ProviderInfo> matchProviders = RegistryUtils.matchProviderInfos(config, providerInfos);
                 List<ProviderGroup> providerGroups = Collections.singletonList(new ProviderGroup()
                     .addAll(matchProviders));
                 consumers.put(config, providerGroups);

@@ -98,7 +98,7 @@ public class EtcdRegistryTest {
             .setSubscribe(true)
             .setSerialization("java")
             .setInvokeType("sync")
-            .setTimeout(4444);
+            .setTimeout(5000);
 
         // 订阅
         CountDownLatch latch = new CountDownLatch(1);

@@ -34,7 +34,7 @@ public class EtcdHelper {
                                                             .create();
     private final Map<ConsumerConfig, Watcher> watchers = new ConcurrentHashMap<ConsumerConfig, Watcher>();
 
-    public EtcdHelper(EtcdClient client) {
+    EtcdHelper(EtcdClient client) {
         if (client == null) {
             throw new SofaRpcRuntimeException("etcd client should be initialized");
         }
@@ -42,15 +42,15 @@ public class EtcdHelper {
     }
 
     void register(ServiceInstance instance) {
-        long leaseId = client.putWithLease(EtcdRegistryHelper.buildUniqueKey(instance), instance.toJson());
-        client.keepAlive(leaseId);
+        client.putWithLease(EtcdRegistryHelper.buildUniqueKey(instance), instance.toJson());
+        client.keepAlive();
     }
 
-    public void deregister(ServiceInstance instance) {
-        client.revokeLease(EtcdRegistryHelper.buildUniqueKey(instance));
+    void deregister(ServiceInstance instance) {
+        client.deleteKey(EtcdRegistryHelper.buildUniqueKey(instance));
     }
 
-    public List<ServiceInstance> getInstances(String serviceName, String protocol, String uniqueId) {
+    List<ServiceInstance> getInstances(String serviceName, String protocol, String uniqueId) {
         String keyPrefix = EtcdRegistryHelper.buildKeyPrefix(serviceName, protocol, uniqueId);
         List<KeyValue> keyValues = client.getWithPrefix(keyPrefix);
         List<ServiceInstance> serviceInstances = new ArrayList<ServiceInstance>(keyValues.size());
@@ -60,7 +60,7 @@ public class EtcdHelper {
         return serviceInstances;
     }
 
-    public void unsubscribe(ConsumerConfig consumerConfig) {
+    void unsubscribe(ConsumerConfig consumerConfig) {
         Watcher watcher = watchers.get(consumerConfig);
         if (watcher != null && watcher.getWatchId() != null) {
             client.cancelWatch(watcher);
@@ -68,7 +68,7 @@ public class EtcdHelper {
         }
     }
 
-    public void startWatch(Watcher watcher) {
+    void startWatch(Watcher watcher) {
         watchers.put(watcher.getConfig(), watcher);
         client.startWatch(watcher.getKeyPrefix(), watcher);
     }

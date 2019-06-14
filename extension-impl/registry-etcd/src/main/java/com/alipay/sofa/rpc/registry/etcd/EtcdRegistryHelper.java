@@ -82,18 +82,6 @@ public class EtcdRegistryHelper extends RegistryUtils {
         return Collections.emptyList();
     }
 
-    public static List<ProviderInfo> matchProviderInfos(ConsumerConfig config, List<ProviderInfo> providerInfos) {
-        String protocol = config.getProtocol();
-        List<ProviderInfo> result = new ArrayList<ProviderInfo>();
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getProtocolType().equalsIgnoreCase(protocol) &&
-                StringUtils.equals(config.getUniqueId(), providerInfo.getAttr(ProviderInfoAttrs.ATTR_UNIQUEID))) {
-                result.add(providerInfo);
-            }
-        }
-        return result;
-    }
-
     public static List<ProviderInfo> convertInstancesToProviders(List<ServiceInstance> allInstances) {
         List<ProviderInfo> providerInfos = new ArrayList<ProviderInfo>();
         if (CommonUtils.isEmpty(allInstances)) {
