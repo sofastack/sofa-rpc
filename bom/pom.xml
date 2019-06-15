@@ -20,7 +20,7 @@
         <jaxrs.api.version>1.0.2.Final</jaxrs.api.version>
         <cxf.version>3.0.14</cxf.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
-        <curator.version>2.9.1</curator.version>
+        <curator.version>4.0.1</curator.version>
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo.version>2.4.10</dubbo.version>
         <nacos.version>1.0.0</nacos.version>
@@ -290,6 +290,12 @@
                 <artifactId>curator-test</artifactId>
                 <version>${curator.version}</version>
                 <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>zookeeper</artifactId>
+                        <groupId>org.apache.zookeeper</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
             <!--dubbo-->
@@ -316,7 +322,13 @@
             <dependency>
                 <groupId>com.101tec</groupId>
                 <artifactId>zkclient</artifactId>
-                <version>0.10</version>
+                <version>0.11</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>zookeeper</artifactId>
+                        <groupId>org.apache.zookeeper</groupId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.cxf</groupId>
