@@ -161,4 +161,36 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
 
         consumerConfig.unRefer();
     }
+
+    @Test
+    public void getAvailableClientTransport4() throws Exception {
+        ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22223,bolt://127.0.0.1:22224")
+            .setConnectionHolder("all")
+            .setRegister(false)
+            .setLazy(true)
+            .setTimeout(3000);
+        HelloService helloService = consumerConfig.refer();
+        ClientProxyInvoker invoker = (ClientProxyInvoker) ProxyFactory.getInvoker(helloService,
+            consumerConfig.getProxy());
+        Cluster cluster = invoker.getCluster();
+        Assert.assertTrue(cluster.getConnectionHolder() instanceof AllConnectConnectionHolder);
+        AllConnectConnectionHolder holder = (AllConnectConnectionHolder) cluster.getConnectionHolder();
+
+        ProviderGroup providerGroups = new ProviderGroup();
+        providerGroups.add(ProviderHelper.toProviderInfo("bolt://127.0.0.1:22223"));
+        providerGroups.add(ProviderHelper.toProviderInfo("bolt://127.0.0.1:22224"));
+        holder.updateProviders(providerGroups);
+        Set<ProviderInfo> last = holder.currentProviderList();
+        Assert.assertEquals(2, last.size());
+
+        ProviderGroup providerGroups2 = new ProviderGroup();
+        holder.updateProviders(providerGroups2);
+        Set<ProviderInfo> current = holder.currentProviderList();
+
+        Assert.assertEquals(0, current.size());
+
+        consumerConfig.unRefer();
+    }
 }
