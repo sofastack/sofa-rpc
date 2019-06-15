@@ -69,7 +69,7 @@ public abstract class AbstractLoadBalancer extends LoadBalancer {
      * @param providerInfos 全部服务端连接
      * @return 服务端连接 provider
      */
-    public abstract ProviderInfo doSelect(SofaRequest invocation, List<ProviderInfo> providerInfos);
+    protected abstract ProviderInfo doSelect(SofaRequest invocation, List<ProviderInfo> providerInfos);
 
     /**
      * Gets weight.
