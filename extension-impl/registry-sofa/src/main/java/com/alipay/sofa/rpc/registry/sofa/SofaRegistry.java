@@ -129,13 +129,9 @@ public class SofaRegistry extends Registry {
      * @param group       服务分组
      */
     protected void doRegister(String appName, String serviceName, String serviceData, String group) {
-        PublisherRegistration publisherRegistration;
         // 生成注册对象，并添加额外属性
-        publisherRegistration = new PublisherRegistration(serviceName);
-
+        PublisherRegistration publisherRegistration = new PublisherRegistration(serviceName);
         publisherRegistration.setGroup(group);
-        addAttributes(publisherRegistration, group);
-
         // 去注册
         SofaRegistryClient.getRegistryClient(appName, registryConfig).register(publisherRegistration, serviceData);
     }
@@ -294,20 +290,6 @@ public class SofaRegistry extends Registry {
                 LOGGER.errorWithApp(appName, "Error when batch unSubscribe", e);
             }
         }
-    }
-
-    /**
-     * 添加额外的属性
-     *
-     * @param publisherRegistration 注册或者订阅对象
-     * @param group           分组
-     */
-    private void addAttributes(PublisherRegistration publisherRegistration, String group) {
-        // if group == null; group = "DEFAULT_GROUP"
-        if (StringUtils.isNotEmpty(group)) {
-            publisherRegistration.setGroup(group);
-        }
-
     }
 
     /**
