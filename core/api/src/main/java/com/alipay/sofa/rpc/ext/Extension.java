@@ -48,7 +48,7 @@ public @interface Extension {
     byte code() default -1;
 
     /**
-     * 优先级排序，默认不需要，大的优先级高
+     * 优先级排序，默认不需要
      *
      * @return 排序
      */
