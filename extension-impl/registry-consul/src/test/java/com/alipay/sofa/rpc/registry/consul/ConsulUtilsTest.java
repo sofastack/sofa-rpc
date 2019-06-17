@@ -14,22 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.registry.consul.model;
+package com.alipay.sofa.rpc.registry.consul;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
- * @author bystander
- * @version $Id: ThrallRoleTypeTest.java, v 0.1 2018年12月10日 20:24 bystander Exp $
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class ThrallRoleTypeTest {
+public class ConsulUtilsTest {
 
     @Test
-    public void testConvert() {
-        ThrallRoleType type = ThrallRoleType.forNumber(ThrallRoleType.CONSUMER.getNumber());
-        Assert.assertEquals(type, ThrallRoleType.CONSUMER);
-        type = ThrallRoleType.forNumber(ThrallRoleType.PROVIDER.getNumber());
-        Assert.assertEquals(type, ThrallRoleType.PROVIDER);
+    public void testMetaKey() {
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("tags"));
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("TAGS"));
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("TAGS1"));
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("TAGS-1"));
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("consul-tags"));
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("consul_tags"));
+        Assert.assertTrue(ConsulUtils.isValidMetaKey("consul_-_tags"));
+
+        Assert.assertFalse(ConsulUtils.isValidMetaKey("consul.tags"));
+        Assert.assertFalse(ConsulUtils.isValidMetaKey("consul:tags"));
     }
 }
