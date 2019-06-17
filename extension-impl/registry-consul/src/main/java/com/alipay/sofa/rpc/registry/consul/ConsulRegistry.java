@@ -52,8 +52,8 @@ import java.util.stream.Collectors;
 import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildServiceId;
 import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildServiceIds;
 import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildServiceName;
-import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildUniqueName;
-import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.getServerHost;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildUniqueName;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
 /**
  * <p>
@@ -123,12 +123,9 @@ public class ConsulRegistry extends Registry {
         int port = hostAndPort.length > 1 ? Integer.parseInt(hostAndPort[1]) : ConsulConstants.DEFAULT_CONSUL_PORT;
         consulClient = new ConsulClient(host, port);
 
-        Integer coreSize = properties.getHeartbeatCoreSize();
-        if (coreSize == null) {
-            heartbeatExecutor = Executors.newSingleThreadScheduledExecutor();
-        } else {
-            heartbeatExecutor = Executors.newScheduledThreadPool(coreSize);
-        }
+        int coreSize = properties.getHeartbeatCoreSize();
+
+        heartbeatExecutor = Executors.newScheduledThreadPool(coreSize);
     }
 
     @Override

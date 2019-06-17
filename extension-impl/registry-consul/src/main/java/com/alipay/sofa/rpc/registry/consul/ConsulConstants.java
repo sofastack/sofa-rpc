@@ -53,9 +53,9 @@ public class ConsulConstants {
 
     public static final int                                      DEFAULT_CONSUL_PORT           = 8500;
 
-    public static final int                                      DEFAULT_HEARTBEAT_INTERVAL    = 300;
+    public static final int                                      DEFAULT_HEARTBEAT_INTERVAL    = 3000;
 
-    public static final Integer                                  DEFAULT_HEARTBEAT_CORE_SIZE   = null;
+    public static final int                                      DEFAULT_HEARTBEAT_CORE_SIZE   = 1;
 
     public static final int                                      DEFAULT_LOOKUP_INTERVAL       = 1000;
 
@@ -63,7 +63,7 @@ public class ConsulConstants {
 
     public static final ConsulRegistryProperties.HealthCheckType DEFAULT_HEALTH_CHECK_TYPE     = ConsulRegistryProperties.HealthCheckType.TTL;
 
-    public static final String                                   DEFAULT_HEALTH_CHECK_TTL      = "1s";
+    public static final String                                   DEFAULT_HEALTH_CHECK_TTL      = "10s";
 
     public static final String                                   DEFAULT_HEALTH_CHECK_TIMEOUT  = "1s";
 

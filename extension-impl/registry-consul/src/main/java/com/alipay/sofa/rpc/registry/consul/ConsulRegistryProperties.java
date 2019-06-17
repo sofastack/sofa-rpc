@@ -65,7 +65,7 @@ public class ConsulRegistryProperties {
         return getInt(HEARTBEAT_INTERVAL_KEY, DEFAULT_HEARTBEAT_INTERVAL);
     }
 
-    public Integer getHeartbeatCoreSize() {
+    public int getHeartbeatCoreSize() {
         return getInt(HEARTBEAT_CORE_SIZE_KEY, DEFAULT_HEARTBEAT_CORE_SIZE);
     }
 
@@ -113,7 +113,7 @@ public class ConsulRegistryProperties {
         return getString(HEALTH_CHECK_METHOD_KEY, DEFAULT_HEALTH_CHECK_METHOD);
     }
 
-    private Integer getInt(String key, Integer defaultValue) {
+    private int getInt(String key, int defaultValue) {
         return get(key, Integer::parseInt, defaultValue);
     }
 

@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.registry.consul;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -31,14 +29,14 @@ import com.ecwid.consul.v1.health.HealthServicesRequest;
 import com.ecwid.consul.v1.health.model.HealthService;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertInstanceToUrl;
 
 /**
  * Observe the providers from consul and notify the consumers
@@ -105,7 +103,8 @@ public class HealthServiceInformer {
 
     public List<ProviderInfo> currentProviders() {
         return currentData.getValue().stream()
-                .map(service -> ProviderHelper.toProviderInfo(convertInstanceToUrl(service.getService())))
+                .map(HealthService::getService)
+                .map(service -> ProviderHelper.toProviderInfo(convertInstanceToUrl(service.getAddress(), service.getPort(), service.getMeta())))
                 .collect(Collectors.toList());
     }
 
@@ -125,26 +124,4 @@ public class HealthServiceInformer {
         this.watchExecutor.shutdown();
     }
 
-    // TODO  common
-    public static String convertInstanceToUrl(HealthService.Service service) {
-        Map<String, String> metaData = service.getMeta();
-        if (metaData == null) {
-            metaData = new HashMap<>();
-        }
-        String uri = "";
-        String protocol = metaData.get(RpcConstants.CONFIG_KEY_PROTOCOL);
-        if (StringUtils.isNotEmpty(protocol)) {
-            uri = protocol + "://";
-        }
-        uri += service.getAddress() + ":" + service.getPort();
-
-        StringBuilder sb = new StringBuilder();
-        for (Map.Entry<String, String> entry : metaData.entrySet()) {
-            sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
-        }
-        if (sb.length() > 0) {
-            uri += sb.replace(0, 1, "?").toString();
-        }
-        return uri;
-    }
 }

@@ -16,12 +16,8 @@
  */
 package com.alipay.sofa.rpc.registry.consul;
 
-import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
-import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
@@ -29,6 +25,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildUniqueName;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
 /**
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
@@ -67,26 +66,5 @@ public class ConsulUtils {
     public static String buildServiceId(ProviderConfig config, ServerConfig server) {
         return String.join("-", buildUniqueName(config, server.getProtocol()), getServerHost(server),
             String.valueOf(server.getPort()));
-    }
-
-    // TODO  common
-    public static String getServerHost(ServerConfig server) {
-        String host = server.getVirtualHost();
-        if (host == null) {
-            host = server.getHost();
-            if (NetUtils.isLocalHost(host) || NetUtils.isAnyHost(host)) {
-                host = SystemInfo.getLocalHost();
-            }
-        }
-        return host;
-    }
-
-    // TODO  common
-    public static String buildUniqueName(AbstractInterfaceConfig config, String protocol) {
-        if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol) || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
-            return ConfigUniqueNameGenerator.getUniqueName(config) + "@DEFAULT";
-        } else {
-            return ConfigUniqueNameGenerator.getUniqueName(config) + "@" + protocol;
-        }
     }
 }
