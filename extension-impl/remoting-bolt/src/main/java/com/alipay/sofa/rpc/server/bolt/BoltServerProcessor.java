@@ -356,8 +356,17 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
     @Override
     public boolean timeoutDiscard() {
-        // 业务线程自己判断超时请求
-        return false;
+        final Map<String, String> parameters = boltServer.serverConfig.getParameters();
+        if (CommonUtils.isNotEmpty(parameters)) {
+            String timeoutDiscard = parameters.get(RpcConstants.TIMEOUT_DISCARD_IN_SERVER);
+            if (StringUtils.isNotEmpty(timeoutDiscard)) {
+                return Boolean.parseBoolean(timeoutDiscard);
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     @Override
