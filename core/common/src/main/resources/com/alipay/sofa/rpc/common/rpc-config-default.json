@@ -204,7 +204,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 本地缓存的Callback最大实例数
   "callback.max.size": 1000,
   // 弹性连接的连接数，按照服务者数量的百分比进行计算
-  "consumer.connect.elastic.precent": 0,
+  "consumer.connect.elastic.percent": 0,
   // 弹性连接的连接数
   "consumer.connect.elastic.size": 5,
   /*-------------Consumer相关配置结束-------------*/
