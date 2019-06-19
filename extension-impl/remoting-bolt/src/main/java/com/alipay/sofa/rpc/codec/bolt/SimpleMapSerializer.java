@@ -177,8 +177,8 @@ public class SimpleMapSerializer {
      */
     public int readInt(InputStream in) throws IOException {
         return ((byte) in.read() & 0xff) << 24
-                | ((byte) in.read() & 0xff) << 16
-                | ((byte) in.read() & 0xff) << 8
-                | (byte) in.read() & 0xff;
+            | ((byte) in.read() & 0xff) << 16
+            | ((byte) in.read() & 0xff) << 8
+            | (byte) in.read() & 0xff;
     }
 }
