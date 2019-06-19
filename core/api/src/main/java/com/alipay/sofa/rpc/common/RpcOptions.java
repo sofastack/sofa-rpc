@@ -362,7 +362,7 @@ public class RpcOptions {
      *
      * @since 5.5.0
      */
-    public static final String CONSUMER_CONNECT_ELASTIC_PRECENT         = "consumer.connect.elastic.precent";
+    public static final String CONSUMER_CONNECT_ELASTIC_PERCENT         = "consumer.connect.elastic.percent";
     /**
      * 初始化连接时建立连接的个数
      *
