@@ -55,10 +55,8 @@ public class SimpleMapSerializer {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                if (StringUtils.isNotEmpty(key) && StringUtils.isNotEmpty(value)) {
-                    writeIgnoreEmpty(key, out);
-                    writeIgnoreEmpty(value, out);
-                }
+                writeSupportEmpty(key, out);
+                writeSupportEmpty(value, out);
             }
             return out.toByteArray();
         } catch (IOException ex) {
@@ -67,16 +65,20 @@ public class SimpleMapSerializer {
     }
 
     /**
-     * 忽略empty字符串的序列化
+     * 支持empty字符串的序列化
      *
      * @param data 输入数据
      * @param out 输入流
      * @throws IOException 写入异常
      */
-    public void writeIgnoreEmpty(String data, OutputStream out) throws IOException {
-        byte[] bs = data.getBytes(RpcConstants.DEFAULT_CHARSET);
-        writeInt(out, bs.length);
-        out.write(bs);
+    public void writeSupportEmpty(String data, OutputStream out) throws IOException {
+        if (StringUtils.isEmpty(data)) {
+            writeInt(out, 0);
+        } else {
+            byte[] bs = data.getBytes(RpcConstants.DEFAULT_CHARSET);
+            writeInt(out, bs.length);
+            out.write(bs);
+        }
     }
 
     /**
