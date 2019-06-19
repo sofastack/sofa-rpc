@@ -31,10 +31,10 @@ public class TestChainFilter8 extends Filter {
 
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        request.getMethodArgs()[0] = request.getMethodArgs()[0] + "_q8";
+        // request.getMethodArgs()[0] = request.getMethodArgs()[0] + "_q8";
         SofaResponse response = invoker.invoke(request);
         if (!request.isAsync()) {
-            response.setAppResponse(response.getAppResponse() + "_s8");
+            // response.setAppResponse(response.getAppResponse() + "_s8");
         }
         return response;
     }

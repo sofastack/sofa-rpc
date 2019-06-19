@@ -58,4 +58,9 @@ public class JDKProxy implements Proxy {
         }
         return null;
     }
+
+    @Override
+    public <T> T getProxyForClass(Class<T> clazz, Invoker proxyInvoker) {
+        throw new UnsupportedOperationException("Not supported");
+    }
 }

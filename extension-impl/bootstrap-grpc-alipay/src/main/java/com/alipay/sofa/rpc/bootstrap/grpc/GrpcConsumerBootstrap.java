@@ -71,15 +71,15 @@ public class GrpcConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     protected GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
         super(consumerConfig);
-        try {
-            URL url = new URL(consumerConfig.getDirectUrl());
-            host = url.getHost();
-            port = url.getPort();
-        } catch (Exception e) {
-            //TODO: handle exception
-            LOGGER.error("illegal direct url: {}", consumerConfig.getDirectUrl());
-        }
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        // try {
+        //     URL url = new URL(consumerConfig.getDirectUrl());
+        //     host = url.getHost();
+        //     port = url.getPort();
+        // } catch (Exception e) {
+        //     //TODO: handle exception
+        //     LOGGER.error("illegal direct url: {}", consumerConfig.getDirectUrl());
+        // }
+        // channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
     }
 
     /**
@@ -131,8 +131,13 @@ public class GrpcConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         if (proxyIns == null) {
             return;
         }
-
-        // Set to null is sufficient, since GPRC stub doesn't need to be closed.
+        try {
+            channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            LOGGER.warn("GRPC channel shut down interrupted.");
+            e.printStackTrace();
+        }
         proxyIns = null;
     }
 

@@ -33,6 +33,7 @@
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>
+        <module>remoting-grpc</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
     </modules>
