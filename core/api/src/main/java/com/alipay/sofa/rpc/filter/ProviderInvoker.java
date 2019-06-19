@@ -50,14 +50,15 @@ public class ProviderInvoker<T> extends FilterInvoker {
      */
     private final ProviderConfig<T> providerConfig;
 
-    static private final Field      causeField;
+    private static Field            causeField;
 
     static {
         try {
             causeField = Throwable.class.getDeclaredField("cause");
             causeField.setAccessible(true);
         } catch (Exception e) {
-            throw new IllegalArgumentException(e);
+            causeField = null;
+            LOGGER.warnWithApp(null, "error  fetch causeField in ProviderInvoker", e);
         }
     }
 
@@ -125,6 +126,10 @@ public class ProviderInvoker<T> extends FilterInvoker {
      * 截断Cause，以免客户端因为无法找到cause类而出现反序列化失败.
      */
     public void cutCause(Throwable bizException) {
+        if (causeField == null) {
+            return;
+        }
+
         Throwable rootCause = bizException;
         while (null != rootCause.getCause()) {
             rootCause = rootCause.getCause();
