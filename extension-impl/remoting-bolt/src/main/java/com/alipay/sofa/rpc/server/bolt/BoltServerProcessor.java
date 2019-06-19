@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -357,30 +356,20 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
     @Override
     public boolean timeoutDiscard() {
         final Map<String, String> parameters = boltServer.serverConfig.getParameters();
-        if (CommonUtils.isNotEmpty(parameters)) {
-            String timeoutDiscard = parameters.get(RpcConstants.TIMEOUT_DISCARD_IN_SERVER);
-            if (StringUtils.isNotEmpty(timeoutDiscard)) {
-                return Boolean.parseBoolean(timeoutDiscard);
-            } else {
-                return false;
-            }
-        } else {
+        if (CommonUtils.isEmpty(parameters)) {
             return false;
         }
+        String timeoutDiscard = parameters.get(RpcConstants.TIMEOUT_DISCARD_IN_SERVER);
+        return Boolean.parseBoolean(parameters.get(timeoutDiscard));
     }
 
     @Override
     public boolean processInIOThread() {
         final Map<String, String> parameters = boltServer.serverConfig.getParameters();
-        if (CommonUtils.isNotEmpty(parameters)) {
-            String processInIOThread = parameters.get(RpcConstants.PROCESS_IN_IOTHREAD);
-            if (StringUtils.isNotEmpty(processInIOThread)) {
-                return Boolean.parseBoolean(processInIOThread);
-            } else {
-                return false;
-            }
-        } else {
+        if (CommonUtils.isEmpty(parameters)) {
             return false;
         }
+        String processInIOThread = parameters.get(RpcConstants.PROCESS_IN_IOTHREAD);
+        return Boolean.parseBoolean(parameters.get(processInIOThread));
     }
 }
