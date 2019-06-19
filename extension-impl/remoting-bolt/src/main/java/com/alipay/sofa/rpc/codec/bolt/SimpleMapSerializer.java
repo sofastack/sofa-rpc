@@ -99,8 +99,8 @@ public class SimpleMapSerializer {
             while (in.available() > 0) {
                 int length = readInt(in);
                 byte[] key = new byte[length];
-
                 in.read(key);
+
                 length = readInt(in);
                 byte[] value = new byte[length];
                 in.read(value);
