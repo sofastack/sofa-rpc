@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.registry.zk;
 
 import com.alipay.sofa.rpc.base.Destroyable;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.zk.base.BaseZkTest;
@@ -37,7 +38,7 @@ public class ZookeeperRegistryDestroyTest extends BaseZkTest {
     @BeforeClass
     public static void setUp() {
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setSubscribe(true)
             .setAddress("127.0.0.1:2181")
             .setRegister(true);

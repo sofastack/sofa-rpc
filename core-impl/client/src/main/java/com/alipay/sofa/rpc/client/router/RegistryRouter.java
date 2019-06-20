@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.client.AddressHolder;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.Router;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -65,6 +66,12 @@ public class RegistryRouter extends Router {
 
     @Override
     public List<ProviderInfo> route(SofaRequest request, List<ProviderInfo> providerInfos) {
+
+        //has  address. FIXME
+        if (CommonUtils.isNotEmpty(providerInfos)) {
+            return providerInfos;
+        }
+
         AddressHolder addressHolder = consumerBootstrap.getCluster().getAddressHolder();
         if (addressHolder != null) {
             List<ProviderInfo> current = addressHolder.getProviderInfos(RpcConstants.ADDRESS_DEFAULT_GROUP);

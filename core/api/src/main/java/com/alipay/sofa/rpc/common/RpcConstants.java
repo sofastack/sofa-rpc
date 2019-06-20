@@ -31,7 +31,18 @@ public class RpcConstants {
     /**
      * zookeeper注册中心
      */
-    public static final String  REGISTRY_PROTOCOL_ZK               = "zooKeeper";
+    public static final String  REGISTRY_PROTOCOL_ZK               = "zookeeper";
+
+    /**
+     * mesh注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_MESH             = "mesh";
+
+    /**
+     * sofa 注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_SOFA             = "sofa";
+
     /**
      * xml文件注册中心
      */
@@ -183,6 +194,27 @@ public class RpcConstants {
      * @since 5.4.0
      */
     public static final String  PROTOCOL_TYPE_H2                   = "h2";
+
+    /**
+     * rest allow origins key
+     *
+     * @since 5.5.0
+     */
+    public static final String  ALLOWED_ORIGINS                    = "allowedOrigins";
+
+    /**
+     * bolt server process in io thread
+     *
+     * @since 5.5.6
+     */
+    public static final String  PROCESS_IN_IOTHREAD                = "processInIOThread";
+
+    /**
+     * bolt server process timeout discard in process
+     *
+     * @since 5.6.0
+     */
+    public static final String  TIMEOUT_DISCARD_IN_SERVER          = "timeoutDiscard";
 
     /*--------Config配置值相关结束---------*/
 

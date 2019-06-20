@@ -111,6 +111,51 @@ public class LocalRegistryTest {
     }
 
     @Test
+    public void testLoadFile() {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200);
+
+        ProviderConfig<?> provider = new ProviderConfig();
+        provider.setInterfaceId("com.alipay.xxx.TestService")
+            .setUniqueId("unique123Id")
+            .setRegister(true)
+            .setRegistry(registryConfig)
+            .setServer(serverConfig);
+
+        registry.register(provider);
+        registry.destroy();
+
+        // registry 关闭，但是 provider 信息保存到本地
+        Assert.assertTrue(new File(file).exists());
+
+        // 创建一个新的 localRegistry，会立即加载到缓存
+        RegistryConfig newRegistryConfig = new RegistryConfig()
+            .setProtocol("local")
+            //.setParameter("registry.local.scan.period", "1000")
+            .setSubscribe(true)
+            .setFile(file)
+            .setRegister(true);
+
+        LocalRegistry newRegistry = (LocalRegistry) RegistryFactory.getRegistry(newRegistryConfig);
+
+        newRegistry.init();
+        Assert.assertFalse(newRegistry.memoryCache.isEmpty());
+
+        // consumer 订阅时应该能立刻读到数据
+        ConsumerConfig<?> consumer = new ConsumerConfig();
+        consumer.setInterfaceId("com.alipay.xxx.TestService")
+            .setUniqueId("unique123Id")
+            .setRegistry(registryConfig)
+            .setSubscribe(true);
+
+        List<ProviderGroup> subscribe = newRegistry.subscribe(consumer);
+        Assert.assertFalse(subscribe.isEmpty());
+        Assert.assertFalse(subscribe.get(0).getProviderInfos().isEmpty());
+    }
+
+    @Test
     public void testAll() throws Exception {
         // test for notifyConsumer
         notifyConsumerTest();

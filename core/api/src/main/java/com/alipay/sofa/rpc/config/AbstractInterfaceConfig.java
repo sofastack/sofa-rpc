@@ -223,6 +223,17 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected abstract String buildKey();
 
     /**
+     * Sets proxyClass
+     *
+     * @param proxyClass the proxyClass
+     * @return this config
+     */
+    public S setProxyClass(Class proxyClass) {
+        this.proxyClass = proxyClass;
+        return castThis();
+    }
+
+    /**
      * Gets application.
      *
      * @return the application

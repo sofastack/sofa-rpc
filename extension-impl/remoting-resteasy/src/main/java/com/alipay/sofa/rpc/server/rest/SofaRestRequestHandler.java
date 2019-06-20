@@ -23,13 +23,15 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerEndHandleEvent;
 import com.alipay.sofa.rpc.event.rest.RestServerReceiveEvent;
 import com.alipay.sofa.rpc.event.rest.RestServerSendEvent;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.lookout.RestLookoutAdapter;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.handler.codec.http.DefaultHttpResponse;
 import io.netty.handler.codec.http.HttpResponse;
-import org.jboss.resteasy.logging.Logger;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpResponse;
 import org.jboss.resteasy.plugins.server.netty.RequestDispatcher;
@@ -51,7 +53,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  */
 public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
     protected final RequestDispatcher dispatcher;
-    private final static Logger       logger = Logger.getLogger(SofaRestRequestHandler.class);
+    private final static Logger       logger = LoggerFactory.getLogger(SofaRestRequestHandler.class);
 
     public SofaRestRequestHandler(RequestDispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -111,12 +113,18 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                     if (EventBus.isEnable(RestServerSendEvent.class)) {
                         EventBus.post(new RestServerSendEvent(request, response, exception));
                     }
+
+                    RestLookoutAdapter.sendRestServerSendEvent(new RestServerSendEvent(request, response, exception));
                 }
 
                 if (!request.getAsyncContext().isSuspended()) {
                     response.finish();
                 }
             } finally {
+                /**
+                 * issue: https://github.com/sofastack/sofa-rpc/issues/592
+                 */
+                request.releaseContentBuffer();
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
                     EventBus.post(new ServerEndHandleEvent());
                 }
