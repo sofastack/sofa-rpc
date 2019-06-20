@@ -75,6 +75,7 @@ public class NacosRegistryHelperTest {
             Integer.parseInt(instance.getMetadata().get(RpcConstants.CONFIG_KEY_TIMEOUT)));
         assertEquals(provider.getSerialization(), instance.getMetadata().get(RpcConstants.CONFIG_KEY_SERIALIZATION));
         assertEquals(provider.getAppName(), instance.getMetadata().get(RpcConstants.CONFIG_KEY_APP_NAME));
+        assertEquals("com.alipay.xxx.TestService:nacos-test:DEFAULT", instance.getServiceName());
     }
 
     @Test
@@ -104,5 +105,35 @@ public class NacosRegistryHelperTest {
         providerInfos = NacosRegistryHelper.convertInstancesToProviders(Lists.newArrayList(instance));
         providerInfo = providerInfos.get(0);
         assertEquals(RpcConstants.PROTOCOL_TYPE_REST, providerInfo.getProtocolType());
+    }
+
+    @Test
+    public void buildServiceName() {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200);
+
+        ProviderConfig<?> provider = new ProviderConfig();
+        provider.setInterfaceId("com.alipay.xxx.TestService")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setUniqueId("nacos-test")
+            .setProxy("javassist")
+            .setRegister(true)
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setWeight(222)
+            .setTimeout(3000);
+        String serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_BOLT);
+        assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:DEFAULT");
+
+        serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_TR);
+        assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:DEFAULT");
+
+        serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_GRPC);
+        assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:" + RpcConstants.PROTOCOL_TYPE_GRPC);
+
+        serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_REST);
+        assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:" + RpcConstants.PROTOCOL_TYPE_REST);
     }
 }

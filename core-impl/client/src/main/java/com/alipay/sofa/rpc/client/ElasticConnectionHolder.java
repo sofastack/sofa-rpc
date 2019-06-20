@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONCUMER_CONNECT_ELASTIC_SIZE;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PRECENT;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PERCENT;
 
 /**
  * 弹性长连接，可按百分比配置以及按个数配置
@@ -56,7 +56,7 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
     /**
      * 弹性连接，初始化连接百分比数
      */
-    protected int               elasticConnectPercent = getIntValue(CONSUMER_CONNECT_ELASTIC_PRECENT);
+    protected int               elasticConnectPercent = getIntValue(CONSUMER_CONNECT_ELASTIC_PERCENT);
 
     /**
      * 弹性连接，初始化连接数

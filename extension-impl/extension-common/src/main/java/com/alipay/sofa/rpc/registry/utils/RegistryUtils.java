@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -257,6 +258,46 @@ public class RegistryUtils {
             orginMap.put(key, listeners);
         } else {
             listeners.add(needAdd);
+        }
+    }
+
+    public static String convertInstanceToUrl(String host, int port, Map<String, String> metaData) {
+        if (metaData == null) {
+            metaData = new HashMap<String, String>();
+        }
+        String uri = "";
+        String protocol = metaData.get(RpcConstants.CONFIG_KEY_PROTOCOL);
+        if (StringUtils.isNotEmpty(protocol)) {
+            uri = protocol + "://";
+        }
+        uri += host + ":" + port;
+
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<String, String> entry : metaData.entrySet()) {
+            sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+        }
+        if (sb.length() > 0) {
+            uri += sb.replace(0, 1, "?").toString();
+        }
+        return uri;
+    }
+
+    public static String getServerHost(ServerConfig server) {
+        String host = server.getVirtualHost();
+        if (host == null) {
+            host = server.getHost();
+            if (NetUtils.isLocalHost(host) || NetUtils.isAnyHost(host)) {
+                host = SystemInfo.getLocalHost();
+            }
+        }
+        return host;
+    }
+
+    public static String buildUniqueName(AbstractInterfaceConfig config, String protocol) {
+        if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol) || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
+            return ConfigUniqueNameGenerator.getUniqueName(config) + "@DEFAULT";
+        } else {
+            return ConfigUniqueNameGenerator.getUniqueName(config) + "@" + protocol;
         }
     }
 }

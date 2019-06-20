@@ -266,8 +266,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 include = inList(providerConfig.getInclude(), providerConfig.getExclude(), methodName); // 检查是否在黑白名单中
                 methodsLimit.putIfAbsent(methodName, include);
             }
-            providerConfig.setMethodsLimit(methodsLimit);
         }
+        providerConfig.setMethodsLimit(methodsLimit);
     }
 
     @Override
