@@ -45,14 +45,4 @@ public interface Proxy {
      */
     Invoker getInvoker(Object proxyObject);
 
-    /**
-     * 根据类生成代理对象
-     * 
-     * @param clazz
-     * @param proxyInvoker
-     * @param <T>
-     * @return
-     */
-    <T> T getProxyForClass(Class<T> clazz, final Invoker proxyInvoker);
-
 }

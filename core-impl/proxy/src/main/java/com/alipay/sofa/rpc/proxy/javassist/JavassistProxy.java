@@ -290,44 +290,4 @@ public class JavassistProxy implements Proxy {
         }
     }
 
-    public <T> T getProxyForClass(final Class<T> clazz, final Invoker proxyInvoker) {
-        Class<ProxyObject> proxyClass = PROXY_CLASS_MAP.get(clazz);
-        ProxyFactory proxyFactory = new ProxyFactory();
-        if (proxyClass == null) {
-            try {
-                CtClass cc = ClassPool.getDefault().get("io.grpc.examples.helloworld.GreeterGrpc$GreeterBlockingStub");
-                proxyFactory.setSuperclass(clazz);
-                proxyClass = proxyFactory.createClass();
-                PROXY_CLASS_MAP.put(clazz, proxyClass);
-            } catch (Throwable e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
-        ProxyObject proxyObject = null;
-        try {
-            proxyObject = proxyClass.newInstance();
-            proxyObject.setHandler(new MethodHandler() {
-                @Override
-                public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args) throws Throwable {
-                    SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(thisMethod.getDeclaringClass(),
-                        thisMethod, thisMethod.getParameterTypes(), args);
-
-                    SofaResponse sofaResponse = proxyInvoker.invoke(sofaRequest);
-                    if (sofaResponse.isError()) {
-                        throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, sofaResponse.getErrorMsg());
-                    }
-                    Object appResponse = sofaResponse.getAppResponse();
-                    if (appResponse instanceof Throwable) {
-                        throw (Throwable) appResponse;
-                    }
-                    return sofaResponse.getAppResponse();
-                }
-            });
-        } catch (Exception e) {
-            throw new SofaRpcRuntimeException("", e);
-        }
-
-        return (T) proxyObject;
-    }
 }

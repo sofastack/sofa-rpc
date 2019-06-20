@@ -47,17 +47,17 @@ import java.util.concurrent.TimeUnit;
 @Extension("grpc")
 public class GrpcClientTransport extends ClientTransport {
 
-    private ProviderInfo providerInfo;
+    private ProviderInfo                  providerInfo;
 
     private Map<String, MethodDescriptor> methodDescriptors;
 
-    private ManagedChannel channel;
+    private ManagedChannel                channel;
 
-    private InetSocketAddress localAddress;
+    private InetSocketAddress             localAddress;
 
-    private InetSocketAddress remoteAddress;
+    private InetSocketAddress             remoteAddress;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
+    private final static Logger           LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
 
     /**
      * The constructor
@@ -71,7 +71,7 @@ public class GrpcClientTransport extends ClientTransport {
         // GrpcClientTransportUtil.getMethodDescriptors(transportConfig.getConsumerConfig()
         // .getInterfaceId());
         methodDescriptors = GrpcClientTransportUtil
-                .getMethodDescriptors(transportConfig.getConsumerConfig().getInterfaceName());
+            .getMethodDescriptors(transportConfig.getConsumerConfig().getInterfaceName());
         connect();
         remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
         localAddress = InetSocketAddress.createUnresolved(SystemInfo.getLocalHost(), 0);// 端口不准
@@ -84,7 +84,7 @@ public class GrpcClientTransport extends ClientTransport {
         }
         ProviderInfo providerInfo = transportConfig.getProviderInfo();
         channel = ManagedChannelBuilder.forAddress(providerInfo.getHost(), providerInfo.getPort()).usePlaintext()
-                .build();
+            .build();
     }
 
     @Override

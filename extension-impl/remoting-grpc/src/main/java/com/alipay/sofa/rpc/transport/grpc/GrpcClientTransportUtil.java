@@ -75,7 +75,7 @@ public class GrpcClientTransportUtil {
             name = fullMethodName.substring(fullMethodName.lastIndexOf(FULL_METHOD_NAME_SEPARATOR) + 1);
             ret.append(String.valueOf((name.charAt(0))).toLowerCase());
             if (fullMethodName.length() > 1) {
-                ret.append(name.substring(1));   
+                ret.append(name.substring(1));
             }
         }
         return ret.toString();

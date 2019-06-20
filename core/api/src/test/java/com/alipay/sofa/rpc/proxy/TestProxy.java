@@ -36,8 +36,4 @@ public class TestProxy implements Proxy {
         return null;
     }
 
-    @Override
-    public <T> T getProxyForClass(Class<T> clazz, Invoker proxyInvoker) {
-        return null;
-    }
 }

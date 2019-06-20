@@ -83,7 +83,6 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 
-
 /**
  * Consumer bootstrap for grpc 
  *
@@ -112,11 +111,12 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
      */
     protected final static ConcurrentMap<String, AtomicInteger> REFERRED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
 
-    private ManagedChannel channel;
+    private ManagedChannel                                      channel;
 
-    String host;
-    int port;
-    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcConsumerBootstrap.class);
+    String                                                      host;
+    int                                                         port;
+    private final static Logger                                 LOGGER        = LoggerFactory
+                                                                                  .getLogger(GrpcConsumerBootstrap.class);
 
     /**
      * 构造函数

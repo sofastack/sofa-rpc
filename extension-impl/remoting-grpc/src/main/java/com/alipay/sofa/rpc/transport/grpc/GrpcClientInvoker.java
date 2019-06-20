@@ -55,17 +55,17 @@ public class GrpcClientInvoker {
     private final Object           request;
     private final StreamObserver   responseObserver;
     private final Class            requestClass;
-    
+
     private final Method           method;
     private final String[]         methodArgSigs;
     private final Object[]         methodArgs;
-    
+
     private final String           serviceName;
     private final String           interfaceName;
-    
+
     private final Integer          timeout;
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientInvoker.class);
+    private final static Logger    LOGGER = LoggerFactory.getLogger(GrpcClientInvoker.class);
 
     /**
      * The constructor
@@ -102,7 +102,7 @@ public class GrpcClientInvoker {
     public Object makeRequestFromString(String in) {
         int end = in.lastIndexOf('}');
         int begine = in.indexOf('{');
-        String trimmed = in.substring(begine, end+1);
+        String trimmed = in.substring(begine, end + 1);
         JSONObject jObject = JSONObject.parseObject(trimmed);
         return new Object();
     }
@@ -146,7 +146,7 @@ public class GrpcClientInvoker {
         io.grpc.stub.AbstractStub stub = null;
         try {
             Method newBlockingStubMethod = Class.forName(serviceName)
-                    .getDeclaredMethod("newBlockingStub", Channel.class);
+                .getDeclaredMethod("newBlockingStub", Channel.class);
             newBlockingStubMethod.setAccessible(true);
             stub = (io.grpc.stub.AbstractStub) newBlockingStubMethod.invoke(null, channel);
 
@@ -172,7 +172,7 @@ public class GrpcClientInvoker {
         Object r = null;
         try {
             Method requestMethod = Class.forName(interfaceName)
-                    .getDeclaredMethod(method.getName(), Class.forName(methodArgSigs[0]));
+                .getDeclaredMethod(method.getName(), Class.forName(methodArgSigs[0]));
             requestMethod.setAccessible(true);
             r = requestMethod.invoke(getBlockingStub(), methodArgs[0]);
 
@@ -191,8 +191,7 @@ public class GrpcClientInvoker {
         } catch (IllegalArgumentException e) {
             LOGGER.error("IllegalArgumentException");
         }
-        return r; 
+        return r;
     }
-
 
 }
