@@ -44,15 +44,15 @@ public class SimpleMapSerializerTest {
         map.put("a", "");
         map.put("b", null);
         bs = simpleMapSerializer.encode(map);
-        Assert.assertEquals(37, bs.length);
+        Assert.assertEquals(10, bs.length);
 
         Map<String, String> map1 = simpleMapSerializer.decode(bs);
         Assert.assertNotNull(map1);
-        Assert.assertEquals(4, map1.size());
+        Assert.assertEquals(1, map1.size());
         Assert.assertEquals("2", map1.get("1"));
-        Assert.assertEquals("x", map1.get(""));
-        Assert.assertEquals("", map1.get("a"));
-        Assert.assertEquals("", map1.get("b"));
+        Assert.assertEquals(null, map1.get(""));
+        Assert.assertEquals(null, map1.get("a"));
+        Assert.assertEquals(null, map1.get("b"));
 
         map1 = simpleMapSerializer.decode(null);
         Assert.assertNotNull(map1);
