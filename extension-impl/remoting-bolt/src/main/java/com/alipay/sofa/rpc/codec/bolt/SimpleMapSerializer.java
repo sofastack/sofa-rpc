@@ -55,8 +55,13 @@ public class SimpleMapSerializer {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 String key = entry.getKey();
                 String value = entry.getValue();
-                writeSupportEmpty(key, out);
-                writeSupportEmpty(value, out);
+                /**
+                 * 排除不写null作为key
+                 */
+                if(key != null){
+                    writeSupportEmpty(key, out);
+                    writeSupportEmpty(value, out);
+                }
             }
             return out.toByteArray();
         } catch (IOException ex) {
