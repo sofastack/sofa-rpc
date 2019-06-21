@@ -46,8 +46,8 @@ import java.util.Map;
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
 
 /**
- * 客户端：startRpc ——> filter --> beforeSend --> 存入tracer信息 --> clientReceived
- * 服务端：serverReceived --> filter --> serverSend
+ * 客户端：startRpc ——&gt; filter --&gt; beforeSend --&gt; 存入tracer信息 --&gt; clientReceived
+ * 服务端：serverReceived --&gt; filter --&gt; serverSend
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */

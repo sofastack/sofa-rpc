@@ -470,6 +470,8 @@
                             <author>false</author>
                             <keywords>true</keywords>
                             <quiet>true</quiet>
+                            <failOnError>false</failOnError>
+                            <additionalparam>-Xdoclint:none</additionalparam>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.alipay.sofa:sofa-rpc-*</dependencySourceInclude>
