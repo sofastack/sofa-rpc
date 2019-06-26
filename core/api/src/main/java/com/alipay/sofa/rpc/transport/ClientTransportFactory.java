@@ -115,7 +115,7 @@ public class ClientTransportFactory {
     }
 
     @VisibleForTesting
-    static ClientTransportHolder getClientTransportHolder() {
+    public static ClientTransportHolder getClientTransportHolder() {
         return CLIENT_TRANSPORT_HOLDER;
     }
 

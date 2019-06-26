@@ -77,6 +77,15 @@ public class NotReusableClientTransportHolder implements ClientTransportHolder {
         return allTransports.size();
     }
 
+    /**
+     * only for unit test.
+     * @param config
+     * @return true contains transport config.
+     */
+    public boolean containsTransport(ClientTransportConfig config) {
+        return allTransports.containsKey(config);
+    }
+
     @Override
     public void destroy() {
         for (Map.Entry<ClientTransportConfig, ClientTransport> entrySet : allTransports.entrySet()) {

@@ -33,6 +33,10 @@ import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import com.alipay.sofa.rpc.transport.ClientTransport;
+import com.alipay.sofa.rpc.transport.ClientTransportFactory;
+import com.alipay.sofa.rpc.transport.ClientTransportHolder;
+import com.alipay.sofa.rpc.transport.NotReusableClientTransportHolder;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,8 +48,10 @@ import org.junit.Test;
  */
 public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
 
-    private static ServerConfig serverConfig1;
-    private static ServerConfig serverConfig2;
+    private static ServerConfig                 serverConfig1;
+    private static ServerConfig                 serverConfig2;
+    private static ServerConfig                 serverConfig3;
+    private static ProviderConfig<HelloService> providerConfig3;
 
     @BeforeClass
     public static void startServer() throws Exception {
@@ -79,6 +85,21 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
             .setRepeatedExportLimit(-1)
             .setRegister(false);
         providerConfig2.export();
+
+        // 再发布一个服务，不等待
+        serverConfig3 = new ServerConfig()
+                .setStopTimeout(0)
+                .setPort(60000)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+                .setManageConnection(true)
+                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+        providerConfig3 = new ProviderConfig<HelloService>()
+                .setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl())
+                .setServer(serverConfig3)
+                .setRepeatedExportLimit(-1)
+                .setRegister(false);
+        providerConfig3.export();
     }
 
     @Test
@@ -192,5 +213,48 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
         Assert.assertEquals(0, current.size());
 
         consumerConfig.unRefer();
+    }
+
+    @Test
+    public void transportConfigShouldBeReleased() {
+        ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
+                .setInterfaceId(HelloService.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:60000")
+                .setConnectionHolder("all")
+                .setRegister(false)
+                .setLazy(true)
+                .setTimeout(3000);
+        HelloService helloService = consumerConfig.refer();
+        ClientProxyInvoker invoker = (ClientProxyInvoker) ProxyFactory.getInvoker(helloService,
+                consumerConfig.getProxy());
+        Cluster cluster = invoker.getCluster();
+        Assert.assertTrue(cluster.getConnectionHolder() instanceof AllConnectConnectionHolder);
+        AllConnectConnectionHolder holder = (AllConnectConnectionHolder) cluster.getConnectionHolder();
+
+        ProviderGroup providerGroups = new ProviderGroup();
+        ProviderInfo providerInfo = ProviderHelper.toProviderInfo("bolt://127.0.0.1:60000");
+        providerGroups.add(providerInfo);
+        holder.updateProviders(providerGroups);
+
+        ClientTransport transport = cluster.getConnectionHolder().getAvailableClientTransport(providerInfo);
+
+        Assert.assertNotNull(helloService.sayHello("yiji", 18));
+        providerConfig3.unExport();
+
+        for (int i = 0; i < 3; i++) {
+            try {
+                helloService.sayHello("yiji", 18);
+            } catch (Exception ignored) {}
+        }
+
+        ClientTransport newTransport = cluster.getConnectionHolder().getAvailableClientTransport(providerInfo);
+        Assert.assertNotSame(newTransport, transport);
+
+        // for alipay
+        // ClientTransportHolder transportHolder = ClientTransportFactory.getClientTransportHolder();
+        // if (transportHolder instanceof NotReusableClientTransportHolder) {
+        //    NotReusableClientTransportHolder notReusableTransportHolder = (NotReusableClientTransportHolder)transportHolder;
+        //    Assert.assertTrue(!notReusableTransportHolder.containsTransport(transport.getConfig()));
+        // }
     }
 }

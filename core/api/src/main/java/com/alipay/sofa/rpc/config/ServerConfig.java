@@ -53,6 +53,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_STOP_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_TELNET;
 import static com.alipay.sofa.rpc.common.RpcOptions.SEVER_ADAPTIVE_PORT;
 import static com.alipay.sofa.rpc.common.RpcOptions.SEVER_AUTO_START;
+import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_MANAGE_CONNECTION;
 import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_PAYLOAD_MAX;
 import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_SERVER_KEEPALIVE;
 
@@ -209,6 +210,11 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      * 是否维持长连接
      */
     protected boolean                         keepAlive        = getBooleanValue(TRANSPORT_SERVER_KEEPALIVE);
+
+    /**
+     * 是否开启连接管理
+     */
+    protected boolean                         manageConnection = getBooleanValue(SERVER_MANAGE_CONNECTION);
 
     /*------------- 参数配置项结束-----------------*/
     /**
@@ -844,6 +850,15 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      */
     public ServerConfig setKeepAlive(boolean keepAlive) {
         this.keepAlive = keepAlive;
+        return this;
+    }
+
+    public boolean isManageConnection() {
+        return manageConnection;
+    }
+
+    public ServerConfig setManageConnection(boolean manageConnection) {
+        this.manageConnection = manageConnection;
         return this;
     }
 

@@ -233,6 +233,11 @@ public class RpcOptions {
     public static final String SERVER_STOP_TIMEOUT                      = "server.stop.timeout";
 
     /**
+     * 开启tcp连接管理，比如server关闭时否会关闭client channel.
+     */
+    public static final String SERVER_MANAGE_CONNECTION                 = "server.manage.connection";
+
+    /**
      * 默认服务是否注册
      */
     public static final String SERVICE_REGISTER                         = "service.register";

@@ -127,6 +127,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "server.auto.start": true,
   // 服务端关闭超时时间
   "server.stop.timeout": 20000,
+  // 服务端是否开启tcp连接管理
+  "server.manage.connection": false,
   /*-------------Server相关配置结束-------------*/
 
 

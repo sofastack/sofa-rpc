@@ -136,7 +136,7 @@ public class BoltServer implements Server {
 
     protected RemotingServer initRemotingServer() {
         // 绑定到端口
-        RemotingServer remotingServer = new RpcServer(serverConfig.getPort());
+        RemotingServer remotingServer = new RpcServer(serverConfig.getPort(), serverConfig.isManageConnection());
         remotingServer.registerUserProcessor(boltServerProcessor);
         return remotingServer;
     }
