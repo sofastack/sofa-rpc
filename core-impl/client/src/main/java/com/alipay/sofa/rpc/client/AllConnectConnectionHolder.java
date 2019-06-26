@@ -138,16 +138,16 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      * @param transport    the transport
      */
     protected void addRetry(ProviderInfo providerInfo, ClientTransport transport) {
-        ClientTransport releaseTransport = retryConnections.put(providerInfo, transport);
-        releaseTransport(releaseTransport);
+        ClientTransport prev = retryConnections.put(providerInfo, transport);
+        releaseTransport(prev, transport);
     }
 
-    private void releaseTransport(ClientTransport transport) {
-        if (transport != null) {
+    private void releaseTransport(ClientTransport prev, ClientTransport transport) {
+        if (prev != null && transport != prev ) {
             /**
              * 修复transport相关资源泄露
              */
-            ClientTransportFactory.releaseTransport(transport, transport.getConfig()
+            ClientTransportFactory.releaseTransport(prev, prev.getConfig()
                 .getDisconnectTimeout());
         }
     }
