@@ -251,11 +251,12 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
         ClientTransport newTransport = cluster.getConnectionHolder().getAvailableClientTransport(providerInfo);
         Assert.assertNotSame(newTransport, transport);
 
-        // for alipay
-        // ClientTransportHolder transportHolder = ClientTransportFactory.getClientTransportHolder();
-        // if (transportHolder instanceof NotReusableClientTransportHolder) {
-        //    NotReusableClientTransportHolder notReusableTransportHolder = (NotReusableClientTransportHolder)transportHolder;
-        //    Assert.assertTrue(!notReusableTransportHolder.containsTransport(transport.getConfig()));
-        // }
+
+         ClientTransportHolder transportHolder = ClientTransportFactory.getClientTransportHolder();
+         if (transportHolder instanceof NotReusableClientTransportHolder) {
+            NotReusableClientTransportHolder notReusableTransportHolder = (NotReusableClientTransportHolder)transportHolder;
+            // never be override
+            Assert.assertTrue(notReusableTransportHolder.containsTransport(transport.getConfig()));
+         }
     }
 }
