@@ -143,7 +143,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     }
 
     private void releaseTransport(ClientTransport prev, ClientTransport transport) {
-        if (prev != null && transport != prev ) {
+        if (prev != null && transport != prev) {
             /**
              * 修复transport相关资源泄露
              */
