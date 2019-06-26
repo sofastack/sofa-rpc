@@ -88,17 +88,17 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
 
         // 再发布一个服务，不等待
         serverConfig3 = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(60000)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setManageConnection(true)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(60000)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setManageConnection(true)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         providerConfig3 = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl())
-                .setServer(serverConfig3)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl())
+            .setServer(serverConfig3)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig3.export();
     }
 
@@ -218,15 +218,15 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
     @Test
     public void transportConfigShouldBeReleased() {
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:60000")
-                .setConnectionHolder("all")
-                .setRegister(false)
-                .setLazy(true)
-                .setTimeout(3000);
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:60000")
+            .setConnectionHolder("all")
+            .setRegister(false)
+            .setLazy(true)
+            .setTimeout(3000);
         HelloService helloService = consumerConfig.refer();
         ClientProxyInvoker invoker = (ClientProxyInvoker) ProxyFactory.getInvoker(helloService,
-                consumerConfig.getProxy());
+            consumerConfig.getProxy());
         Cluster cluster = invoker.getCluster();
         Assert.assertTrue(cluster.getConnectionHolder() instanceof AllConnectConnectionHolder);
         AllConnectConnectionHolder holder = (AllConnectConnectionHolder) cluster.getConnectionHolder();
@@ -244,7 +244,8 @@ public class AllConnectConnectionHolderTest extends ActivelyDestroyTest {
         for (int i = 0; i < 3; i++) {
             try {
                 helloService.sayHello("yiji", 18);
-            } catch (Exception ignored) {}
+            } catch (Exception ignored) {
+            }
         }
 
         ClientTransport newTransport = cluster.getConnectionHolder().getAvailableClientTransport(providerInfo);
