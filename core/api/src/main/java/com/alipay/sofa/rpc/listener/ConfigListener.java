@@ -28,6 +28,8 @@ public interface ConfigListener {
     /**
      * 配置发生变化，例如
      *
+     * 纯粹测试ci触发，当前pr不会合并
+     *
      * @param newValue 新配置
      */
     void configChanged(Map newValue);
