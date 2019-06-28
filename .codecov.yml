@@ -1,6 +1,6 @@
 coverage:
   status:
-    # pull-requests only
-    patch:
+    project:
       default:
         threshold: 0.1%
+    patch: off
