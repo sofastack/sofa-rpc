@@ -269,7 +269,7 @@
             <id>ci-install</id>
             <properties>
                 <skipTests>true</skipTests>
-                <maven.javadoc.skip>false</maven.javadoc.skip>
+                <maven.javadoc.skip>true</maven.javadoc.skip>
                 <module.jacoco.skip>true</module.jacoco.skip>
             </properties>
         </profile>
