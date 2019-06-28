@@ -19,7 +19,7 @@ before_install:
     && mvn -version
 
 install:
-  - mvn clean install -Pci-install -B -e
+  - mvn clean install -Pci-install -B -U -e
   - sh ./tools/check_format.sh
 
 script:
