@@ -45,4 +45,14 @@ public class ServerFactoryTest {
 
         ServerFactory.destroyAll();
     }
+
+    @Test
+    public void destroyServer() {
+        ServerConfig serverConfig = new ServerConfig().setProtocol("test").setPort(1234);
+        Server server = ServerFactory.getServer(serverConfig);
+        Assert.assertNotNull(server);
+        Assert.assertEquals(1, ServerFactory.getServers().size());
+        serverConfig.destroy();
+        Assert.assertEquals(0, ServerFactory.getServers().size());
+    }
 }
