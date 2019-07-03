@@ -49,7 +49,7 @@ public class ServerFactoryTest {
     @Test
     public void destroyServer() {
         ServerConfig serverConfig = new ServerConfig().setProtocol("test").setPort(1234);
-        Server server = ServerFactory.getServer(serverConfig);
+        Server server = serverConfig.buildIfAbsent();
         Assert.assertNotNull(server);
         Assert.assertEquals(1, ServerFactory.getServers().size());
         serverConfig.destroy();
