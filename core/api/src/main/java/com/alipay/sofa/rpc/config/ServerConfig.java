@@ -242,7 +242,9 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      * 关闭服务
      */
     public synchronized void destroy() {
-        ServerFactory.destroyServer(this);
+        if (server != null) {
+            server.destroy();
+        }
     }
 
     /**
