@@ -149,4 +149,16 @@ public final class ServerFactory {
         }
         SERVER_MAP.clear();
     }
+
+    public static void destroyServer(ServerConfig serverConfig) {
+        try {
+            Server server = serverConfig.getServer();
+            if (server != null) {
+                SERVER_MAP.remove(Integer.toString(serverConfig.getPort()));
+                server.destroy();
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error when destroy server with key:" + serverConfig.getPort(), e);
+        }
+    }
 }
