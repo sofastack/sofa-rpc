@@ -54,5 +54,6 @@ public class ServerFactoryTest {
         Assert.assertEquals(1, ServerFactory.getServers().size());
         serverConfig.destroy();
         Assert.assertEquals(0, ServerFactory.getServers().size());
+        Assert.assertNull(serverConfig.getServer());
     }
 }
