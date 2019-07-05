@@ -154,6 +154,7 @@ public final class ServerFactory {
         try {
             Server server = serverConfig.getServer();
             if (server != null) {
+                serverConfig.setServer(null);
                 SERVER_MAP.remove(Integer.toString(serverConfig.getPort()));
                 server.destroy();
             }
