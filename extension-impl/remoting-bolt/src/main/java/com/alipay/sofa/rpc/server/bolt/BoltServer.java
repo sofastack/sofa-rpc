@@ -190,7 +190,7 @@ public class BoltServer implements Server {
         // 取消缓存Invoker对象
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.remove(key);
-        ReflectCache.unRegisterServiceClassLoader(key);
+        cleanReflectCache(providerConfig);
         // 如果最后一个需要关闭，则关闭
         if (closeIfNoEntry && invokerMap.isEmpty()) {
             stop();
@@ -255,5 +255,17 @@ public class BoltServer implements Server {
      */
     public Invoker findInvoker(String serviceName) {
         return invokerMap.get(serviceName);
+    }
+
+    /**
+     * Clean Reflect Cache
+     * @param providerConfig
+     */
+    public void cleanReflectCache(ProviderConfig providerConfig) {
+        String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
+        ReflectCache.unRegisterServiceClassLoader(key);
+        ReflectCache.invalidateMethodCache(key);
+        ReflectCache.invalidateMethodSigsCache(key);
+        ReflectCache.invalidateOverloadMethodCache(key);
     }
 }

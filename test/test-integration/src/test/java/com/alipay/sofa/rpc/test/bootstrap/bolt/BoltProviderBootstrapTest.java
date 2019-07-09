@@ -33,6 +33,7 @@ import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.Collections;
@@ -183,7 +184,7 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
             .setId("p-0")
             .setUniqueId("p-0")
             .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(2000))
+            .setRef(new HelloServiceImpl())
             .setServer(serverConfig)
             .setRegister(false);
         providerConfig0.export();
@@ -204,6 +205,16 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
             .setRegister(false);
         providerConfig1.export();
 
+        // refer a service
+        ConsumerConfig<HelloService> consumerConfig0 = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setUniqueId("p-0")
+            .setProxy("jdk")
+            .setDirectUrl("bolt://127.0.0.1:22223")
+            .setTimeout(500);
+        HelloService proxy = consumerConfig0.refer();
+        proxy.sayHello("11", 11);
+
         ClassLoader cl0 = ReflectCache.getServiceClassLoader(ConfigUniqueNameGenerator.getUniqueName(providerConfig0));
         ClassLoader cl1 = ReflectCache.getServiceClassLoader(ConfigUniqueNameGenerator.getUniqueName(providerConfig1));
 
@@ -216,6 +227,18 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
         cl1 = ReflectCache.getServiceClassLoader(ConfigUniqueNameGenerator.getUniqueName(providerConfig1));
         Assert.assertEquals(ClassLoaderUtils.getCurrentClassLoader(), cl0);
         Assert.assertEquals(ClassLoaderUtils.getCurrentClassLoader(), cl1);
+
+        Method methodCache = ReflectCache.getMethodCache(ConfigUniqueNameGenerator.getUniqueName(providerConfig0),
+            "sayHello");
+        Assert.assertNull(methodCache);
+
+        methodCache = ReflectCache.getOverloadMethodCache(ConfigUniqueNameGenerator.getUniqueName(providerConfig0),
+            "sayHello", new String[] { "java.lang.Stringint" });
+        Assert.assertNull(methodCache);
+
+        String[] sig = ReflectCache.getMethodSigsCache(ConfigUniqueNameGenerator.getUniqueName(providerConfig0),
+            "sayHello");
+        Assert.assertNull(sig);
     }
 }
 
