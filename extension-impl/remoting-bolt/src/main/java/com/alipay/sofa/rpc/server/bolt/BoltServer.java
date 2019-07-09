@@ -258,7 +258,7 @@ public class BoltServer implements Server {
     }
 
     /**
-     * Clean Rel
+     * Clean Reflect Cache
      * @param providerConfig
      */
     public void cleanReflectCache(ProviderConfig providerConfig) {
