@@ -806,6 +806,14 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     }
 
     /**
+     * Set server
+     * @param server
+     */
+    public void setServer(Server server) {
+        this.server = server;
+    }
+
+    /**
      * Sets bound host.
      *
      * @param boundHost the bound host
