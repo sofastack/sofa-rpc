@@ -41,23 +41,21 @@ import java.util.concurrent.TimeUnit;
 /**
  * GRPC client transport
  *
- * @author LiangEn.LiWei
+ * @author LiangEn.LiWei; Luan Yanqiang
  * @date 2018.11.09 12:10 PM
  */
 @Extension("grpc")
 public class GrpcClientTransport extends ClientTransport {
 
-    private ProviderInfo                  providerInfo;
+    private ProviderInfo        providerInfo;
 
-    private Map<String, MethodDescriptor> methodDescriptors;
+    private ManagedChannel      channel;
 
-    private ManagedChannel                channel;
+    private InetSocketAddress   localAddress;
 
-    private InetSocketAddress             localAddress;
+    private InetSocketAddress   remoteAddress;
 
-    private InetSocketAddress             remoteAddress;
-
-    private final static Logger           LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
 
     /**
      * The constructor
@@ -67,11 +65,6 @@ public class GrpcClientTransport extends ClientTransport {
     public GrpcClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
         providerInfo = transportConfig.getProviderInfo();
-        // methodDescriptors =
-        // GrpcClientTransportUtil.getMethodDescriptors(transportConfig.getConsumerConfig()
-        // .getInterfaceId());
-        methodDescriptors = GrpcClientTransportUtil
-            .getMethodDescriptors(transportConfig.getConsumerConfig().getInterfaceName());
         connect();
         remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
         localAddress = InetSocketAddress.createUnresolved(SystemInfo.getLocalHost(), 0);// 端口不准
@@ -140,9 +133,8 @@ public class GrpcClientTransport extends ClientTransport {
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
         String methodName = request.getMethodName();
-        MethodDescriptor methodDescriptor = methodDescriptors.get(methodName);
         try {
-            SofaResponse r = new GrpcClientInvoker(request, methodDescriptor, channel).invoke();
+            SofaResponse r = new GrpcClientInvoker(request, channel).invoke();
             return r;
             // return new SofaResponse();
         } catch (Exception e) {

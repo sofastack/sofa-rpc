@@ -86,37 +86,38 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 /**
  * Consumer bootstrap for grpc 
  *
- * @author <a href=mailto:luanyanqiang@dibgroup.cn>Luan Yanqiang</a>
+ * @author <a href=mailto:luanyanqiang@dibgroup.cn>Yanqiang Oliver Luan (neokidd)</a>
  */
 @Extension("grpc")
 public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
     /**
-     * 代理实现类
+     * proxy of grpc client's XXXBlockingStub
      */
-    protected transient volatile T                              proxyIns;
+    ProxyObject                 proxyObject;
 
     /**
-    * 调用类
-    */
-    // protected transient volatile Cluster                        cluster;
+     * Set by ConsumerConfig.setInterfaceID(), or interface attribution in XML service definition.
+     * 
+     * PLEASE NOTE: For GRPC transport, interfaceID won't refer to a real interface, it should be
+     * FULL QUALIFIED name of the concrete CLASS, which is generated from .proto file.  
+     * e.g. GreeterGrpc.class.getName()
+     */
+    private final String        interfaceID;
 
     /**
-     * 计数器
+     * Name of the service in .proto file.
+     * e.g. Greeter 
      */
-    // protected transient volatile CountDownLatch                 respondRegistries;
+    private final String        serviceName;
 
     /**
-     * 发布的调用者配置（含计数器）
+     * full qualified name of the blockingStub.
+     * e.g. GreeterBlockingStub
      */
-    protected final static ConcurrentMap<String, AtomicInteger> REFERRED_KEYS = new ConcurrentHashMap<String, AtomicInteger>();
+    private final String        blockingStubName;
 
-    private ManagedChannel                                      channel;
-
-    String                                                      host;
-    int                                                         port;
-    private final static Logger                                 LOGGER        = LoggerFactory
-                                                                                  .getLogger(GrpcConsumerBootstrap.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcConsumerBootstrap.class);
 
     /**
      * 构造函数
@@ -125,25 +126,11 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
      */
     protected GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
         super(consumerConfig);
-        // try {
-        //     URL url = new URL(consumerConfig.getDirectUrl());
-        //     host = url.getHost();
-        //     port = url.getPort();
-        //     // if ("".equals(host)) {
-        //     host = "127.0.0.1";
-        //     // }
-        //     // if (port == 0) {
-        //     port = 50052;
-        //     // }
-        // } catch (Exception e) {
-        //     //TODO: handle exception
-        //     LOGGER.error("illegal direct url: {}", consumerConfig.getDirectUrl());
-        //     host = "127.0.0.1";
-        //     port = 50052;
-        // }
-        // host = "127.0.0.1";
-        // port = 50052;
-        // channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        this.interfaceID = consumerConfig.getInterfaceId();
+        String[] segments = this.interfaceID.split("\\.");
+        String lastSegment = segments[segments.length - 1];
+        this.serviceName = lastSegment.substring(0, lastSegment.length() - 4);
+        this.blockingStubName = this.interfaceID + "$" + this.serviceName + "BlockingStub";
     }
 
     /**
@@ -154,11 +141,9 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
      */
     @Override
     public synchronized T refer() {
-        if (proxyIns != null) {
-            return proxyIns;
+        if (this.proxyObject != null) {
+            return (T) this.proxyObject;
         }
-
-        ProxyObject proxyObject = null;
 
         String key = consumerConfig.buildKey();
         String appName = consumerConfig.getAppName();
@@ -203,10 +188,10 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
             cluster.init();
             // 构造Invoker对象（执行链）
             proxyInvoker = buildClientProxyInvoker(this);
-            // 创建代理类
-            // proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
-            // proxyInvoker);
 
+            String host;
+            int port;
+            ManagedChannel channel;
             if (cluster.getAddressHolder().getProviderInfos("").size() != 0) {
                 host = cluster.getAddressHolder().getProviderInfos("").get(0).getHost();
                 port = cluster.getAddressHolder().getProviderInfos("").get(0).getPort();
@@ -216,12 +201,15 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
             }
             channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
 
+            // first, make GRPC client's XXXBlockingStub instance
+            T blockingStubIns = null;
             try {
                 Method newBlockingChannel = Class
-                    .forName("io.grpc.examples.helloworld.GreeterGrpc"/*consumerConfig.getInterfaceName()*/)
+                    .forName(consumerConfig.getInterfaceId())
                     .getDeclaredMethod("newBlockingStub", Channel.class);
                 newBlockingChannel.setAccessible(true);
-                proxyIns = (T) newBlockingChannel.invoke(null, channel);
+                // proxyIns = (T) newBlockingChannel.invoke(null, channel);
+                blockingStubIns = (T) newBlockingChannel.invoke(null, channel);
 
             } catch (ClassNotFoundException e) {
                 LOGGER.error("ClassNotFoundException");
@@ -239,19 +227,16 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
                 LOGGER.error("IllegalArgumentException");
                 throw e;
             } finally {
-
             }
 
-            // 创建代理类
-            // proxyIns = buildProxy();
-
-            Class<ProxyObject> proxyClass = null;
+            // second, make proxy for that stub, using a fake channel.
             ProxyFactory proxyFactory = new ProxyFactory();
-            proxyFactory.setSuperclass(Class.forName("io.grpc.examples.helloworld.GreeterGrpc$GreeterBlockingStub"));
-            proxyClass = proxyFactory.createClass();
+            // proxyFactory.setSuperclass(Class.forName("io.grpc.examples.helloworld.GreeterGrpc$GreeterBlockingStub"));
+            proxyFactory.setSuperclass(Class.forName(blockingStubName));
+            Class<ProxyObject> proxyClass = proxyFactory.createClass();
             try {
-                // proxyObject = proxyClass.newInstance();
                 proxyObject = (ProxyObject) proxyClass.getConstructors()[0].newInstance(channel, proxyIns);
+                // this is a fake channel, so we shutdown to release resources.
                 channel.shutdown();
                 proxyObject.setHandler(new MethodHandler() {
                     @Override
@@ -295,7 +280,7 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
         }
         RpcRuntimeContext.cacheConsumerConfig(this);
 
-        return (T) proxyObject;
+        return (T) this.proxyObject;
     }
 
     /*
@@ -304,89 +289,12 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
          */
     @Override
     public synchronized void unRefer() {
-        if (proxyIns == null) {
+        if (this.proxyObject == null) {
             return;
         }
 
-        // Set to null is sufficient, since GPRC stub doesn't need to be closed.
-        proxyIns = null;
+        // Do not disconnect. GPRC connection should be closed by connection holders.
+        this.proxyObject = null;
     }
-
-    // @Override
-    // public Cluster getCluster() {
-    //     throw new UnsupportedOperationException("Not supported");
-    // }
-
-    // @Override
-    // public List<ProviderGroup> subscribe() {
-    //     throw new UnsupportedOperationException("Not supported");
-    // }
-
-    // @Override
-    // public boolean isSubscribed() {
-    //     return proxyIns != null;
-    // }
-
-    /**
-     * 得到实现代理类
-     *
-     * @return 实现代理类 proxy ins
-     */
-    @Override
-    public T getProxyIns() {
-        return proxyIns;
-    }
-
-    // @Override
-    // protected T buildProxy() throws Exception {
-    //     try {
-    //         ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-    //             .getExtensionClass(consumerConfig.getProxy());
-
-    //         // Proxy proxy = ext.getExtInstance();
-    //         // return (T) proxy.getProxyForClass(ClassUtils.forName(consumerConfig.getInterfaceId()+"$GreeterBlockingStub"), proxyInvoker); 
-    //         // return (T) proxy.getProxy(ClassUtils.forName(consumerConfig.getInterfaceId()+"$GreeterBlockingStub") , proxyInvoker);
-    //         return (T) getProxyForClass1(
-    //             ClassUtils.forName("io.grpc.examples.helloworld.GreeterGrpc$GreeterBlockingStub"), proxyInvoker);
-    //     } catch (SofaRpcRuntimeException e) {
-    //         throw e;
-    //     } catch (Throwable e) {
-    //         throw new SofaRpcRuntimeException(e.getMessage(), e);
-    //     }
-    // }
-
-    // static public ManagedChannel getManagedChannel() {
-    //     String host = "127.0.0.1";
-    //     int port = 50052;
-    //     ManagedChannel channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
-    //     return channel;
-    // }
-
-    // static public io.grpc.stub.AbstractStub getBlockingStub() {
-    //     io.grpc.stub.AbstractStub stub = null;
-    //     try {
-    //         Method newBlockingStubMethod = Class.forName("io.grpc.examples.helloworld.GreeterGrpc")
-    //             .getDeclaredMethod("newBlockingStub", Channel.class);
-    //         newBlockingStubMethod.setAccessible(true);
-    //         stub = (io.grpc.stub.AbstractStub) newBlockingStubMethod.invoke(null, getManagedChannel());
-
-    //     } catch (ClassNotFoundException e) {
-    //         LOGGER.error("ClassNotFoundException");
-
-    //     } catch (IllegalAccessException e) {
-    //         LOGGER.error("IllegalAccessException");
-
-    //     } catch (NoSuchMethodException e) {
-    //         LOGGER.error("NoSuchMethodException");
-
-    //     } catch (InvocationTargetException e) {
-    //         LOGGER.error("InvocationTargetException");
-
-    //     } catch (IllegalArgumentException e) {
-    //         LOGGER.error("IllegalArgumentException");
-    //     }
-    //     return stub;
-
-    // }
 
 }

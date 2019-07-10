@@ -47,7 +47,7 @@ public class GrpcClientApplication {
 
         ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
         consumerConfig.setInterfaceId(GreeterImpl.class.getName())
-            .setInterfaceName("io.grpc.examples.helloworld.GreeterGrpc").setProtocol("grpc")
+            .setProtocol("grpc")
             .setRegistry(registryConfig);
 
         GreeterGrpc.GreeterBlockingStub greeterBlockingStub = consumerConfig.refer();

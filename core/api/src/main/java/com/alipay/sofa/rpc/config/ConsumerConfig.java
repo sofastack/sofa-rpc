@@ -233,11 +233,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     private transient volatile ProviderInfoListener providerInfoListener;
 
     /**
-     * GRPC专用，newBlockingStub()的所属类 
-     */
-    private transient volatile String               interfaceName;
-
-    /**
      * Build key.
      *
      * @return the string
@@ -263,7 +258,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!proxyClass.isInterface()) {
+                if (!"grpc".equals(protocol) && !proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("consumer.interface",
                         interfaceId, "interfaceId must set interface class, not implement class");
                 }
@@ -274,6 +269,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         } catch (RuntimeException t) {
             throw new IllegalStateException(t.getMessage(), t);
         }
+        proxyClass.getDeclaredClasses();
         return proxyClass;
     }
 
@@ -834,26 +830,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     public ConsumerConfig<T> setRepeatedReferLimit(int repeatedReferLimit) {
         this.repeatedReferLimit = repeatedReferLimit;
-        return this;
-    }
-
-    /**
-     * Gets interface name.
-     *
-     * @return the interface name
-     */
-    public String getInterfaceName() {
-        return interfaceName;
-    }
-
-    /**
-     * Sets the interface name.
-     *
-     * @param repeatedReferLimit the max proxy count
-     * @return the max proxy count
-     */
-    public ConsumerConfig<T> setInterfaceName(String interfaceName) {
-        this.interfaceName = interfaceName;
         return this;
     }
 

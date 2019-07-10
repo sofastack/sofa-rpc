@@ -43,29 +43,27 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 /**
  *  Invoker for Grpc
  *
- * @author LiangEn.LiWei
+ * @author LiangEn.LiWei; Luan Yanqiang
  * @date 2018.12.15 7:06 PM
  */
 public class GrpcClientInvoker {
 
-    private final MethodDescriptor methodDescriptor;
+    private final Channel        channel;
 
-    private final Channel          channel;
+    private final Object         request;
+    private final StreamObserver responseObserver;
+    private final Class          requestClass;
 
-    private final Object           request;
-    private final StreamObserver   responseObserver;
-    private final Class            requestClass;
+    private final Method         method;
+    private final String[]       methodArgSigs;
+    private final Object[]       methodArgs;
 
-    private final Method           method;
-    private final String[]         methodArgSigs;
-    private final Object[]         methodArgs;
+    private final String         serviceName;
+    private final String         interfaceName;
 
-    private final String           serviceName;
-    private final String           interfaceName;
+    private final Integer        timeout;
 
-    private final Integer          timeout;
-
-    private final static Logger    LOGGER = LoggerFactory.getLogger(GrpcClientInvoker.class);
+    private final static Logger  LOGGER = LoggerFactory.getLogger(GrpcClientInvoker.class);
 
     /**
      * The constructor
@@ -73,8 +71,7 @@ public class GrpcClientInvoker {
      * @param methodDescriptor The MethodDescriptor
      * @param channel The Channel
      */
-    public GrpcClientInvoker(SofaRequest sofaRequest, MethodDescriptor methodDescriptor, Channel channel) {
-        this.methodDescriptor = methodDescriptor;
+    public GrpcClientInvoker(SofaRequest sofaRequest, Channel channel) {
         this.channel = channel;
         this.method = sofaRequest.getMethod();
         this.methodArgs = sofaRequest.getMethodArgs();
@@ -112,26 +109,6 @@ public class GrpcClientInvoker {
         SofaResponse r = new SofaResponse();
         r.setAppResponse(response);
         return r;
-    }
-
-    /**
-     * Grpc invoke
-     * @return Grpc response streamObserver
-     */
-    public StreamObserver invoke0() {
-
-        MethodType methodType = methodDescriptor.getType();
-        ClientCall clientCall = channel.newCall(methodDescriptor, buildCallOptions());
-
-        if (methodType == MethodType.UNARY) {
-            ClientCalls.asyncUnaryCall(clientCall, request, responseObserver);
-        } else if (methodType == MethodType.SERVER_STREAMING) {
-            ClientCalls.asyncServerStreamingCall(clientCall, request, responseObserver);
-        } else {
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Unsupported Grpc invocation mode");
-        }
-        //stream calls are processed in the future
-        return null;
     }
 
     private CallOptions buildCallOptions() {

@@ -47,44 +47,9 @@ public class GrpcClientRegistryApplication {
         RegistryConfig registryConfig = new RegistryConfig();
         registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
 
-        // ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
-        // ConsumerConfig<GreeterImpl> consumerConfig = new ConsumerConfig<GreeterImpl>();
-        // consumerConfig.setInterfaceId(GreeterImpl.class.getName())
-        //     .setInterfaceName("io.grpc.examples.helloworld.GreeterGrpc").setProtocol("grpc")
-        //     .setRegistry(registryConfig);
-
-        // GreeterGrpc.GreeterBlockingStub greeterBlockingStub = consumerConfig.refer();
-
-        // LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
-
-        // LOGGER.info("Will try to greet " + "world" + " ...");
-        // HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
-        //     .build();
-        // HelloRequest request = HelloRequest.newBuilder().setName("world").build();
-        // HelloReply reply = null;
-        // try {
-        //     for (int i = 0; i < 10000; i++) {
-        //         try {
-        //             HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("" + i)
-        //                 .build();
-        //             request = HelloRequest.newBuilder(request).setName("world_" + i).setDateTime(reqDateTime).build();
-        //             reply = greeterBlockingStub.sayHello(request);
-        //             LOGGER.info("Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
-        //         } catch (StatusRuntimeException e) {
-        //             LOGGER.error("RPC failed: {}", e.getStatus());
-        //         }
-        //         try {
-        //             Thread.sleep(2000);
-        //         } catch (Exception e) {
-        //         }
-        //     }
-        // } catch (Exception e) {
-        //     LOGGER.error("", e);
-        // }
-
         ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
         consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
-            .setInterfaceName("io.grpc.examples.helloworld.GreeterGrpc").setProtocol("grpc")
+            .setProtocol("grpc")
             .setRegistry(registryConfig);
 
         // GreeterGrpc.GreeterBlockingStub s = new         
