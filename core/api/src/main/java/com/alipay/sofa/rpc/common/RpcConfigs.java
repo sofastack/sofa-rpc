@@ -53,7 +53,8 @@ public class RpcConfigs {
     /**
      * 配置变化监听器
      */
-    private final static ConcurrentMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String, List<RpcConfigListener>>();
+    private final static ConcurrentMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String,
+                                                                                             List<RpcConfigListener>>();
 
     static {
         init(); // 加载配置文件
@@ -141,8 +142,8 @@ public class RpcConfigs {
     }
 
     /**
-     * Remove value 
-     * 
+     * Remove value
+     *
      * @param key Key
      */
     @JustForTest
@@ -303,7 +304,12 @@ public class RpcConfigs {
      */
     public static <T> T getOrDefaultValue(String primaryKey, T defaultValue) {
         Object val = CFG.get(primaryKey);
-        return val == null ? defaultValue : (T) CompatibleTypeUtils.convert(val, defaultValue.getClass());
+        if (val == null) {
+            return defaultValue;
+        } else {
+            Class<?> type = defaultValue == null ? null : defaultValue.getClass();
+            return (T) CompatibleTypeUtils.convert(val, type);
+        }
     }
 
     /**
