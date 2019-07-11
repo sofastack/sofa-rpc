@@ -69,11 +69,6 @@
     </properties>
 
     <dependencies>
-        <!-- <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>infra-sofa-boot-starter</artifactId>
-            <version>3.1.0</version>
-        </dependency> -->
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-common</artifactId>
@@ -280,16 +275,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
-        </dependency>
-        <!-- <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-log4j12</artifactId>
-            <version>${slf4j.version}</version>
-        </dependency> -->
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.12</version>
         </dependency>
         <dependency>
             <groupId>org.javassist</groupId>

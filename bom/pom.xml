@@ -38,7 +38,7 @@
         <httpcomponents.httpmime.version>4.5.5</httpcomponents.httpmime.version>
         <commons.fileupload.version>1.3.3</commons.fileupload.version>
         <!-- Log libs -->
-        <slf4j.version>1.7.25</slf4j.version>
+        <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.2.3</logback.version>
         <!-- Test libs -->
         <junit.version>4.10</junit.version>
@@ -48,7 +48,7 @@
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <!-- Build args -->
-        <module.install.skip>false</module.install.skip>
+        <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
     </properties>
 

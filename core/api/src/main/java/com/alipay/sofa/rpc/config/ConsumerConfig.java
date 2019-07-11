@@ -269,7 +269,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         } catch (RuntimeException t) {
             throw new IllegalStateException(t.getMessage(), t);
         }
-        proxyClass.getDeclaredClasses();
         return proxyClass;
     }
 

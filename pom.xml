@@ -46,7 +46,7 @@
 
     <properties>
         <!-- Build args -->
-        <module.install.skip>false</module.install.skip>
+        <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
         <module.jacoco.skip>true</module.jacoco.skip>

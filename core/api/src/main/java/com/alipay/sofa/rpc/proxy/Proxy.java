@@ -44,5 +44,4 @@ public interface Proxy {
      * @return Invoker
      */
     Invoker getInvoker(Object proxyObject);
-
 }

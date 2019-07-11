@@ -30,30 +30,22 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.proxy.Proxy;
-
-import javassist.CannotCompileException;
 import javassist.ClassPool;
 import javassist.CtClass;
 import javassist.CtConstructor;
 import javassist.CtField;
 import javassist.CtMethod;
-import javassist.Modifier;
-import javassist.NotFoundException;
 import javassist.LoaderClassPath;
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
-import javassist.util.proxy.ProxyObject;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-// import java.lang.reflect.Modifier;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-// import com.dib.sofa.rpc.bootstrap.Grpc
 /**
  * Proxy implement base on javassist
  *
@@ -84,7 +76,7 @@ public class JavassistProxy implements Proxy {
         try {
             Class clazz = PROXY_CLASS_MAP.get(interfaceClass);
             if (clazz == null) {
-                // 生成代理类
+                //生成代理类
                 String interfaceName = ClassTypeUtils.getTypeStr(interfaceClass);
                 ClassPool mPool = ClassPool.getDefault();
                 mPool.appendClassPath(new LoaderClassPath(ClassLoaderUtils.getClassLoader(JavassistProxy.class)));
@@ -92,8 +84,7 @@ public class JavassistProxy implements Proxy {
                 if (interfaceClass.isInterface()) {
                     mCtc.addInterface(mPool.get(interfaceName));
                 } else {
-                    // throw new IllegalArgumentException(interfaceClass.getName() + " is not an
-                    // interface");
+                    throw new IllegalArgumentException(interfaceClass.getName() + " is not an interface");
                 }
 
                 // 继承 java.lang.reflect.Proxy
@@ -152,8 +143,9 @@ public class JavassistProxy implements Proxy {
             Class<?>[] mType = m.getParameterTypes();
             Class<?> returnType = m.getReturnType();
 
-            sb.append(Modifier.toString(m.getModifiers()).replace("abstract", "")).append(" ")
-                .append(ClassTypeUtils.getTypeStr(returnType)).append(" ").append(m.getName()).append("( ");
+            sb.append(Modifier.toString(m.getModifiers()).replace("abstract", ""))
+                .append(" ").append(ClassTypeUtils.getTypeStr(returnType)).append(" ").append(m.getName())
+                .append("( ");
             int c = 0;
 
             for (Class<?> mp : mType) {
@@ -184,9 +176,10 @@ public class JavassistProxy implements Proxy {
             }
 
             fieldList.add("private " + Method.class.getCanonicalName() + " method_" + mi + " = "
-                + ReflectUtils.class.getCanonicalName() + ".getMethod(" + interfaceClass.getCanonicalName()
-                + ".class, \"" + m.getName() + "\", "
-                + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");");
+                + ReflectUtils.class.getCanonicalName() + ".getMethod("
+                + interfaceClass.getCanonicalName() + ".class, \"" + m.getName() + "\", "
+                + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");"
+                );
 
             sb.append(SofaRequest.class.getCanonicalName()).append(" request = ")
                 .append(MessageBuilder.class.getCanonicalName())
@@ -195,8 +188,8 @@ public class JavassistProxy implements Proxy {
                 .append("proxyInvoker.invoke(request);");
             sb.append("if(response.isError()){");
             sb.append("  throw new ").append(SofaRpcException.class.getName()).append("(")
-                .append(RpcErrorType.class.getName()).append(".SERVER_UNDECLARED_ERROR,")
-                .append(" response.getErrorMsg());");
+                .append(RpcErrorType.class.getName())
+                .append(".SERVER_UNDECLARED_ERROR,").append(" response.getErrorMsg());");
             sb.append("}");
 
             sb.append("Object ret = response.getAppResponse();");
@@ -218,19 +211,19 @@ public class JavassistProxy implements Proxy {
 
         // toString()
         sb.append("public String toString() {");
-        sb.append(" return proxyInvoker.toString();");
+        sb.append("  return proxyInvoker.toString();");
         sb.append("}");
         resultList.add(sb.toString());
         // hashCode()
         sb.delete(0, sb.length());
         sb.append("public int hashCode() {");
-        sb.append(" return proxyInvoker.hashCode();");
+        sb.append("  return proxyInvoker.hashCode();");
         sb.append("}");
         resultList.add(sb.toString());
         // equals()
         sb.delete(0, sb.length());
         sb.append("public boolean equals(Object obj) {");
-        sb.append(" return this == obj || (getClass().isInstance($1) && proxyInvoker.equals(")
+        sb.append("  return this == obj || (getClass().isInstance($1) && proxyInvoker.equals(")
             .append(JavassistProxy.class.getName()).append(".parseInvoker($1)));");
         sb.append("}");
         resultList.add(sb.toString());
@@ -289,5 +282,4 @@ public class JavassistProxy implements Proxy {
             return null;
         }
     }
-
 }

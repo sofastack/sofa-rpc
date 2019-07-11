@@ -23,7 +23,6 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-import com.alipay.sofa.rpc.protocol.Protocol;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -56,7 +55,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * The constant serialVersionUID.
      */
-    private static final long                                   serialVersionUID    = -305807388177315962L;
+    private static final long                                   serialVersionUID    = -3058073881775315962L;
 
     /*---------- 参数配置项开始 ------------*/
 
@@ -158,7 +157,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!proxyClass.isInterface() && !getServer().get(0).getProtocol().equals("grpc")) {
+                if (!"grpc".equals(getServer().get(0).getProtocol()) && proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("service.interfaceId",
                         interfaceId, "interfaceId must set interface class, not implement class");
                 }
