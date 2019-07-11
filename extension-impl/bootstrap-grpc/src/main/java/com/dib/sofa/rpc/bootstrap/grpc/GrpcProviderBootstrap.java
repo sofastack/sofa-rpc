@@ -58,7 +58,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 /**
  * Provider bootstrap for grpc
  *
- * @author <a href=mailto:luanyanqiang@dibgroup.cn>Luan Yanqiang</a>
+ * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
  */
 @Extension("grpc")
 public class GrpcProviderBootstrap<T> extends ProviderBootstrap<T> {

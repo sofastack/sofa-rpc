@@ -86,7 +86,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 /**
  * Consumer bootstrap for grpc 
  *
- * @author <a href=mailto:luanyanqiang@dibgroup.cn>Yanqiang Oliver Luan (neokidd)</a>
+ * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
  */
 @Extension("grpc")
 public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {

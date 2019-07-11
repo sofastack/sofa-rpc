@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * GRPC client transport
  *
- * @author LiangEn.LiWei; Luan Yanqiang
+ * @author LiangEn.LiWei; Yanqiang Oliver Luan (neokidd)
  * @date 2018.11.09 12:10 PM
  */
 @Extension("grpc")

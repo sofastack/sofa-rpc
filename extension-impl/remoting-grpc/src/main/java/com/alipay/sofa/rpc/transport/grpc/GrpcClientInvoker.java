@@ -41,9 +41,9 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
- *  Invoker for Grpc
+ * Invoker for Grpc
  *
- * @author LiangEn.LiWei; Luan Yanqiang
+ * @author LiangEn.LiWei; Yanqiang Oliver Luan (neokidd)
  * @date 2018.12.15 7:06 PM
  */
 public class GrpcClientInvoker {
