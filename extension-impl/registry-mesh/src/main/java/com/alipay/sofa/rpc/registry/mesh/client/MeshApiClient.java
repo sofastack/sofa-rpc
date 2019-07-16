@@ -52,12 +52,14 @@ public class MeshApiClient {
     /**
      * 连接超时
      */
-    private static int          connectTimeout = 1000;
+    private static int          connectTimeout = Integer.parseInt(System.getProperty(
+                                                   "mesh_http_connect_timeout", "3000"));      ;
 
     /**
      * 读取超时
      */
-    private static int          readTimeout    = 1000;
+    private static int          readTimeout    = Integer.parseInt(System.getProperty(
+                                                   "mesh_http_read_timeout", "15000"));
 
     private static String       errorMessage   = "ERROR";
 

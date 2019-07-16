@@ -60,7 +60,7 @@ public class MeshRegistry extends Registry {
 
     private static final String VERSION = "4.0";
 
-    private MeshApiClient       client;
+    protected MeshApiClient     client;
 
     /**
      * 注册中心配置
@@ -72,10 +72,10 @@ public class MeshRegistry extends Registry {
     }
 
     //init only once
-    private boolean inited;
+    protected boolean inited;
 
     //has registed app info
-    private boolean registedApp;
+    protected boolean registedApp;
 
     @Override
     public void init() {
@@ -280,7 +280,7 @@ public class MeshRegistry extends Registry {
 
         final List<String> datas = subscribeServiceResult.getDatas();
 
-        if (datas == null) {
+        if (CommonUtils.isEmpty(datas)) {
             targetURL = targetURL + ":" + MeshConstants.TCP_PORT;
         } else {
             for (String data : subscribeServiceResult.getDatas()) {
