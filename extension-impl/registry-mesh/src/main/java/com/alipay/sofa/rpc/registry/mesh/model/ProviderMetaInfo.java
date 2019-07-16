@@ -16,18 +16,22 @@
  */
 package com.alipay.sofa.rpc.registry.mesh.model;
 
+import java.util.Map;
+
 /**
  * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public class ProviderMetaInfo {
 
-    private String protocol;
+    private String              protocol;
 
-    private String version;
+    private String              version;
 
-    private String serializeType;
+    private String              serializeType;
 
-    private String appName;
+    private String              appName;
+
+    private Map<String, String> properties;
 
     public String getProtocol() {
         return protocol;
@@ -61,13 +65,22 @@ public class ProviderMetaInfo {
         this.appName = appName;
     }
 
+    public Map<String, String> getProperties() {
+        return properties;
+    }
+
+    public void setProperties(Map<String, String> properties) {
+        this.properties = properties;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("ProviderMetaInfo{");
+        final StringBuffer sb = new StringBuffer("ProviderMetaInfo{");
         sb.append("protocol='").append(protocol).append('\'');
         sb.append(", version='").append(version).append('\'');
         sb.append(", serializeType='").append(serializeType).append('\'');
         sb.append(", appName='").append(appName).append('\'');
+        sb.append(", properties=").append(properties);
         sb.append('}');
         return sb.toString();
     }

@@ -150,6 +150,7 @@ public class MeshRegistry extends Registry {
         providerMetaInfo.setSerializeType(providerInfo.getSerializationType());
         providerMetaInfo.setAppName(appName);
         providerMetaInfo.setVersion(VERSION);
+        providerMetaInfo.setProperties(providerInfo.getStaticAttrs());
         publishServiceRequest.setProviderMetaInfo(providerMetaInfo);
 
         client.publishService(publishServiceRequest);
