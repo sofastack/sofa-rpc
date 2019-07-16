@@ -157,9 +157,15 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!"grpc".equals(getServer().get(0).getProtocol()) && proxyClass.isInterface()) {
-                    throw ExceptionUtils.buildRuntime("service.interfaceId",
-                        interfaceId, "interfaceId must set interface class, not implement class");
+                if (!proxyClass.isInterface()) {
+                    if ((getServer() != null) && getServer().size() != 0) {
+                        for (int i = 0; i < getServer().size(); i++) {
+                            if (!"grpc".equals(getServer().get(i).getProtocol())) {
+                                throw ExceptionUtils.buildRuntime("service.interfaceId",
+                                    interfaceId, "interfaceId must set interface class, not implement class");
+                            }
+                        }
+                    }
                 }
             } else {
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
