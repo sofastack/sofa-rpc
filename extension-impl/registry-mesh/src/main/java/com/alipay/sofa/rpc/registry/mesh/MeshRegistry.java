@@ -113,7 +113,7 @@ public class MeshRegistry extends Registry {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
                 }
-                doRegister(appName, serviceName, providerInfo);
+                doRegister(appName, serviceName, providerInfo, server.getProtocol());
 
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
@@ -134,7 +134,7 @@ public class MeshRegistry extends Registry {
      * @param serviceName  服务关键字
      * @param providerInfo 服务提供者数据
      */
-    protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo) {
+    protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo, String protocol) {
 
         registerAppInfoOnce(appName);
 
@@ -144,6 +144,7 @@ public class MeshRegistry extends Registry {
 
         PublishServiceRequest publishServiceRequest = new PublishServiceRequest();
         publishServiceRequest.setServiceName(serviceName);
+        publishServiceRequest.setProtocolType(protocol);
         ProviderMetaInfo providerMetaInfo = new ProviderMetaInfo();
         providerMetaInfo.setProtocol(providerInfo.getProtocolType());
         providerMetaInfo.setSerializeType(providerInfo.getSerializationType());

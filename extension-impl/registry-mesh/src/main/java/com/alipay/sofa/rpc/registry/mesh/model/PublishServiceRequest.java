@@ -26,6 +26,9 @@ public class PublishServiceRequest {
     //timeout/appName/serialize/p
     private ProviderMetaInfo providerMetaInfo;
 
+    //这个值是类似DEFAULT/XFIRE这种
+    private String           protocolType;
+
     public String getServiceName() {
         return serviceName;
     }
@@ -42,11 +45,20 @@ public class PublishServiceRequest {
         this.providerMetaInfo = providerMetaInfo;
     }
 
+    public String getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(String protocolType) {
+        this.protocolType = protocolType;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PublishServiceRequest{");
+        final StringBuffer sb = new StringBuffer("PublishServiceRequest{");
         sb.append("serviceName='").append(serviceName).append('\'');
         sb.append(", providerMetaInfo=").append(providerMetaInfo);
+        sb.append(", protocolType='").append(protocolType).append('\'');
         sb.append('}');
         return sb.toString();
     }
