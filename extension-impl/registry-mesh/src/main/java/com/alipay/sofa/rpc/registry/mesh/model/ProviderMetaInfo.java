@@ -19,7 +19,8 @@ package com.alipay.sofa.rpc.registry.mesh.model;
 import java.util.Map;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: ProviderMetaInfo.java, v 0.1 2018年04月03日 11:18 AM bystander Exp $
  */
 public class ProviderMetaInfo {
 

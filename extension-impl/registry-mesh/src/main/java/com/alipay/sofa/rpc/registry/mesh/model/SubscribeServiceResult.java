@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class SubscribeServiceResult {
 
