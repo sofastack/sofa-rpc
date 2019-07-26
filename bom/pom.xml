@@ -30,6 +30,7 @@
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.1.0</protobuf.version>
         <jackson.version>2.9.9</jackson.version>
+        <jackson.databind.version>2.9.9.1</jackson.databind.version>
         <msgpack.version>0.6.11</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
 
@@ -246,7 +247,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson.databind.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
