@@ -48,7 +48,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
     /**
      * Future生成时间
      */
-    protected final long                         genTime            = RpcRuntimeContext.now();
+    protected final long                         genTime            = RpcRuntimeContext.getCurrentTime();
     /**
      * Future已发送时间
      */
@@ -296,7 +296,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
      * 设置已发送时间
      */
     public void setSentTime() {
-        this.sentTime = RpcRuntimeContext.now();
+        this.sentTime = RpcRuntimeContext.getCurrentTime();
     }
 
     /**
@@ -304,7 +304,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
      */
     protected void setDoneTime() {
         if (doneTime == 0L) {
-            doneTime = RpcRuntimeContext.now();
+            doneTime = RpcRuntimeContext.getCurrentTime();
         }
     }
 

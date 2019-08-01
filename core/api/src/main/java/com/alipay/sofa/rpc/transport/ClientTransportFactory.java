@@ -60,13 +60,13 @@ public class ClientTransportFactory {
             if (disconnectTimeout > 0) { // 需要等待结束时间
                 int count = clientTransport.currentRequests();
                 if (count > 0) { // 有正在调用的请求
-                    long start = RpcRuntimeContext.now();
+                    long start = RpcRuntimeContext.getCurrentTime();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("There are {} outstanding call in transport, wait {}ms to end",
                             count, disconnectTimeout);
                     }
                     while (clientTransport.currentRequests() > 0
-                        && RpcRuntimeContext.now() - start < disconnectTimeout) { // 等待返回结果
+                        && RpcRuntimeContext.getCurrentTime() - start < disconnectTimeout) { // 等待返回结果
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException ignore) {

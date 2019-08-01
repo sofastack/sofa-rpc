@@ -255,7 +255,7 @@ public class MockTestRegistry extends Registry {
                 sb.append(getKeyPairs(key, value));
             }
         }
-        sb.append(getKeyPairs(ATTR_START_TIME, RpcRuntimeContext.now()));
+        sb.append(getKeyPairs(ATTR_START_TIME, RpcRuntimeContext.getCurrentTime()));
         return sb.toString();
     }
 

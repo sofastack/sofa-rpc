@@ -89,7 +89,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
         }*/
 
         SofaResponse sofaResponse = new SofaResponse();
-        long startTime = RpcRuntimeContext.now();
+        long startTime = RpcRuntimeContext.getCurrentTime();
         try {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
@@ -112,7 +112,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
             sofaResponse.setAppResponse(e.getCause());
         } finally {
             if (RpcInternalContext.isAttachmentEnable()) {
-                long endTime = RpcRuntimeContext.now();
+                long endTime = RpcRuntimeContext.getCurrentTime();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);
             }

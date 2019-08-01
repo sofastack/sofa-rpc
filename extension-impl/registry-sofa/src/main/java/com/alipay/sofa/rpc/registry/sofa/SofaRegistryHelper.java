@@ -248,7 +248,7 @@ public class SofaRegistryHelper {
      * @param sb 属性
      */
     private static void addCommonAttrs(StringBuilder sb) {
-        sb.append(getKeyPairs(ATTR_START_TIME, RpcRuntimeContext.now()));
+        sb.append(getKeyPairs(ATTR_START_TIME, RpcRuntimeContext.getCurrentTime()));
         //sb.append(getKeyPairs("pid", RpcRuntimeContext.PID));
         //sb.append(getKeyPairs("language", "java"));
         //sb.append(getKeyPairs("appPath", RpcRuntimeContext.get(RpcRuntimeContext.KEY_APPAPTH)));

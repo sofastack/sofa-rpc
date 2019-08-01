@@ -71,7 +71,7 @@ public class RpcRuntimeContext {
     /**
      * 当前应用启动时间（用这个类加载时间为准）
      */
-    public static final long                                  START_TIME                = now();
+    public static final long                                  START_TIME                = getCurrentTime();
 
     /**
      * 发布的服务配置
@@ -198,7 +198,7 @@ public class RpcRuntimeContext {
      *
      * @return 当前时间
      */
-    public static long now() {
+    public static long getCurrentTime() {
         return System.currentTimeMillis();
     }
 

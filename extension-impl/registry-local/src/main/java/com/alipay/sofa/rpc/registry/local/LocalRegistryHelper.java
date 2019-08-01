@@ -138,7 +138,7 @@ public class LocalRegistryHelper {
             }
             // 锁住超过10秒，删掉
             if (lockFile.exists()) {
-                if ((RpcRuntimeContext.now() - lockFile.lastModified()) > 10000) {
+                if ((RpcRuntimeContext.getCurrentTime() - lockFile.lastModified()) > 10000) {
                     boolean ret = lockFile.delete();
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("Other process is locking over 60s, force release : {}", ret);
@@ -195,7 +195,7 @@ public class LocalRegistryHelper {
                     }
                 }
                 LOGGER.info("Write backup file to {}", regFile.getAbsolutePath());
-                regFile.setLastModified(RpcRuntimeContext.now());
+                regFile.setLastModified(RpcRuntimeContext.getCurrentTime());
             }
         } catch (Exception e) {
             LOGGER.error("Backup registry file error !", e);

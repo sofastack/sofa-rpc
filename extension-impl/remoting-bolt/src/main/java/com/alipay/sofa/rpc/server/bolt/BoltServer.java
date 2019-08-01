@@ -207,13 +207,13 @@ public class BoltServer implements Server {
             AtomicInteger count = boltServerProcessor.processingCount;
             // 有正在执行的请求 或者 队列里有请求
             if (count.get() > 0 || bizThreadPool.getQueue().size() > 0) {
-                long start = RpcRuntimeContext.now();
+                long start = RpcRuntimeContext.getCurrentTime();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("There are {} call in processing and {} call in queue, wait {} ms to end",
                         count, bizThreadPool.getQueue().size(), stopTimeout);
                 }
                 while ((count.get() > 0 || bizThreadPool.getQueue().size() > 0)
-                    && RpcRuntimeContext.now() - start < stopTimeout) { // 等待返回结果
+                    && RpcRuntimeContext.getCurrentTime() - start < stopTimeout) { // 等待返回结果
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ignore) {

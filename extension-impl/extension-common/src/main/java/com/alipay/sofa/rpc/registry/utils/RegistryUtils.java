@@ -103,7 +103,7 @@ public class RegistryUtils {
         metaData.put(RpcConstants.CONFIG_KEY_DYNAMIC, String.valueOf(providerConfig.isDynamic()));
         metaData.put(ProviderInfoAttrs.ATTR_WEIGHT, String.valueOf(providerConfig.getWeight()));
         metaData.put(RpcConstants.CONFIG_KEY_ACCEPTS, String.valueOf(server.getAccepts()));
-        metaData.put(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(RpcRuntimeContext.now()));
+        metaData.put(ProviderInfoAttrs.ATTR_START_TIME, String.valueOf(RpcRuntimeContext.getCurrentTime()));
         metaData.put(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName());
         metaData.put(RpcConstants.CONFIG_KEY_SERIALIZATION, providerConfig.getSerialization());
         metaData.put(RpcConstants.CONFIG_KEY_PROTOCOL, server.getProtocol());
@@ -139,7 +139,7 @@ public class RegistryUtils {
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
             .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
                 consumerConfig.getSerialization()))
-            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
+            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.getCurrentTime()))
             .append(convertMap2Pair(consumerConfig.getParameters()));
         addCommonAttrs(sb);
         return sb.toString();

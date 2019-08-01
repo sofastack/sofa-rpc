@@ -37,7 +37,7 @@ public abstract class AbstractIdConfig<S extends AbstractIdConfig> implements Se
     private final static AtomicInteger ID_GENERATOR     = new AtomicInteger(0);
 
     static {
-        RpcRuntimeContext.now();
+        RpcRuntimeContext.getCurrentTime();
     }
 
     /**

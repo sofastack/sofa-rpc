@@ -42,7 +42,7 @@ public class AbstractInvokeCallbackTest {
         elapse = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE);
         Assert.assertNull(elapse);
 
-        context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now() - 1000);
+        context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.getCurrentTime() - 1000);
         invokerCallback.recordClientElapseTime();
         elapse = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE);
         Assert.assertNotNull(elapse);

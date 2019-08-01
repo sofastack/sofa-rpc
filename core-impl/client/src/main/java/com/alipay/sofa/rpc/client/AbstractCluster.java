@@ -512,25 +512,25 @@ public abstract class AbstractCluster extends Cluster {
             SofaResponse response = null;
             // 同步调用
             if (RpcConstants.INVOKER_TYPE_SYNC.equals(invokeType)) {
-                long start = RpcRuntimeContext.now();
+                long start = RpcRuntimeContext.getCurrentTime();
                 try {
                     response = transport.syncSend(request, timeout);
                 } finally {
                     if (RpcInternalContext.isAttachmentEnable()) {
-                        long elapsed = RpcRuntimeContext.now() - start;
+                        long elapsed = RpcRuntimeContext.getCurrentTime() - start;
                         context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE, elapsed);
                     }
                 }
             }
             // 单向调用
             else if (RpcConstants.INVOKER_TYPE_ONEWAY.equals(invokeType)) {
-                long start = RpcRuntimeContext.now();
+                long start = RpcRuntimeContext.getCurrentTime();
                 try {
                     transport.oneWaySend(request, timeout);
                     response = buildEmptyResponse(request);
                 } finally {
                     if (RpcInternalContext.isAttachmentEnable()) {
-                        long elapsed = RpcRuntimeContext.now() - start;
+                        long elapsed = RpcRuntimeContext.getCurrentTime() - start;
                         context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE, elapsed);
                     }
                 }
@@ -547,7 +547,7 @@ public abstract class AbstractCluster extends Cluster {
                     }
                 }
                 // 记录发送开始时间
-                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.getCurrentTime());
                 // 开始调用
                 transport.asyncSend(request, timeout);
                 response = buildEmptyResponse(request);
@@ -555,7 +555,7 @@ public abstract class AbstractCluster extends Cluster {
             // Future调用
             else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
                 // 记录发送开始时间
-                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.getCurrentTime());
                 // 开始调用
                 ResponseFuture future = transport.asyncSend(request, timeout);
                 // 放入线程上下文
@@ -668,12 +668,12 @@ public abstract class AbstractCluster extends Cluster {
             int count = countOfInvoke.get();
             final int timeout = consumerConfig.getDisconnectTimeout(); // 等待结果超时时间
             if (count > 0) { // 有正在调用的请求
-                long start = RpcRuntimeContext.now();
+                long start = RpcRuntimeContext.getCurrentTime();
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("There are {} outstanding call in client, will close transports util return",
                         count);
                 }
-                while (countOfInvoke.get() > 0 && RpcRuntimeContext.now() - start < timeout) { // 等待返回结果
+                while (countOfInvoke.get() > 0 && RpcRuntimeContext.getCurrentTime() - start < timeout) { // 等待返回结果
                     try {
                         Thread.sleep(10);
                     } catch (InterruptedException ignore) {

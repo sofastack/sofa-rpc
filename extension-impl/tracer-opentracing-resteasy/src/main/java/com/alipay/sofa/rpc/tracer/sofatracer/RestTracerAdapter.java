@@ -133,7 +133,7 @@ public class RestTracerAdapter {
             if (serverSpan != null) {
                 RpcInternalContext context = RpcInternalContext.getContext();
 
-                context.setAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME, RpcRuntimeContext.now());
+                context.setAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME, RpcRuntimeContext.getCurrentTime());
 
                 SofaResourceMethodInvoker resourceMethodInvoker = (SofaResourceMethodInvoker)
                         ((PostMatchContainerRequestContext) requestContext)

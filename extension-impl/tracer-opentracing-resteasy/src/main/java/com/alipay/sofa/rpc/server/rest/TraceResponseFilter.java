@@ -45,7 +45,7 @@ public class TraceResponseFilter implements ContainerResponseFilter {
             context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, responseContext.getLength());
             Long startTime = (Long) context.removeAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME);
             if (startTime != null) {
-                context.setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE, RpcRuntimeContext.now() - startTime);
+                context.setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE, RpcRuntimeContext.getCurrentTime() - startTime);
             }
         }
     }
