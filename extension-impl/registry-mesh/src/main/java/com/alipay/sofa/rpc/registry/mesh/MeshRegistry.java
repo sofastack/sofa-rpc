@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.registry.mesh;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -28,6 +29,7 @@ import com.alipay.sofa.rpc.event.ConsumerSubEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -44,6 +46,9 @@ import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * mesh registry
@@ -56,11 +61,29 @@ public class MeshRegistry extends Registry {
     /**
      * Logger
      */
-    private static final Logger LOGGER  = LoggerFactory.getLogger(MeshRegistry.class);
+    private static final Logger       LOGGER                        = LoggerFactory.getLogger(MeshRegistry.class);
 
-    private static final String VERSION = "4.0";
+    private static final String       VERSION                       = "4.0";
 
-    private MeshApiClient       client;
+    protected MeshApiClient           client;
+
+    //init only once
+    protected boolean                 inited;
+
+    //has registed app info
+    protected boolean                 registedApp;
+
+    private static ThreadPoolExecutor asyncCreateConnectionExecutor = initThreadPoolExecutor();
+
+    private static ThreadPoolExecutor initThreadPoolExecutor() {
+        final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(20, 20, 60,
+            TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(5000), new NamedThreadFactory(
+                "Mesh-Async-Registry", true));
+
+        //使用
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        return threadPoolExecutor;
+    }
 
     /**
      * 注册中心配置
@@ -70,12 +93,6 @@ public class MeshRegistry extends Registry {
     protected MeshRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
     }
-
-    //init only once
-    private boolean inited;
-
-    //has registed app info
-    private boolean registedApp;
 
     @Override
     public void init() {
@@ -113,7 +130,7 @@ public class MeshRegistry extends Registry {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, serviceName));
                 }
-                doRegister(appName, serviceName, providerInfo);
+                doRegister(appName, serviceName, providerInfo, server.getProtocol());
 
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, serviceName));
@@ -134,24 +151,41 @@ public class MeshRegistry extends Registry {
      * @param serviceName  服务关键字
      * @param providerInfo 服务提供者数据
      */
-    protected void doRegister(String appName, String serviceName, ProviderInfo providerInfo) {
+    protected void doRegister(final String appName, final String serviceName, final ProviderInfo providerInfo,
+                              final String protocol) {
 
-        registerAppInfoOnce(appName);
+        asyncCreateConnectionExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                registerAppInfoOnce(appName);
 
-        if (LOGGER.isInfoEnabled(appName)) {
-            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, serviceName));
-        }
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, serviceName));
+                }
 
+                PublishServiceRequest publishServiceRequest = buildPublishServiceRequest(serviceName, protocol,
+                    providerInfo, appName);
+
+                client.publishService(publishServiceRequest);
+            }
+        });
+
+    }
+
+    protected PublishServiceRequest buildPublishServiceRequest(String serviceName, String protocol,
+                                                               ProviderInfo providerInfo,
+                                                               String appName) {
         PublishServiceRequest publishServiceRequest = new PublishServiceRequest();
         publishServiceRequest.setServiceName(serviceName);
+        publishServiceRequest.setProtocolType(protocol);
         ProviderMetaInfo providerMetaInfo = new ProviderMetaInfo();
         providerMetaInfo.setProtocol(providerInfo.getProtocolType());
         providerMetaInfo.setSerializeType(providerInfo.getSerializationType());
         providerMetaInfo.setAppName(appName);
         providerMetaInfo.setVersion(VERSION);
+        providerMetaInfo.setProperties(providerInfo.getStaticAttrs());
         publishServiceRequest.setProviderMetaInfo(providerMetaInfo);
-
-        client.publishService(publishServiceRequest);
+        return publishServiceRequest;
     }
 
     @Override
@@ -212,41 +246,59 @@ public class MeshRegistry extends Registry {
     }
 
     @Override
-    public List<ProviderGroup> subscribe(ConsumerConfig config) {
-        final String appName = config.getAppName();
+    public List<ProviderGroup> subscribe(final ConsumerConfig config) {
 
-        registerAppInfoOnce(appName);
+        asyncCreateConnectionExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                final String appName = config.getAppName();
 
-        String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
+                registerAppInfoOnce(appName);
+
+                SubscribeServiceRequest subscribeRequest = buildSubscribeServiceRequest(config);
+                SubscribeServiceResult subscribeServiceResult = client.subscribeService(subscribeRequest);
+
+                if (subscribeServiceResult == null || !subscribeServiceResult.isSuccess()) {
+                    throw new RuntimeException("regist consumer occors error," + subscribeRequest);
+
+                }
+
+                List<ProviderGroup> providerGroups = new ArrayList<ProviderGroup>();
+
+                ProviderGroup providerGroup = new ProviderGroup();
+
+                List<ProviderInfo> providerInfos = new ArrayList<ProviderInfo>();
+
+                String url = fillProtocolAndVersion(subscribeServiceResult, client.getHost(), "", config.getProtocol());
+
+                ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
+                providerInfos.add(providerInfo);
+                providerGroup.setProviderInfos(providerInfos);
+
+                providerGroups.add(providerGroup);
+
+                if (EventBus.isEnable(ConsumerSubEvent.class)) {
+                    ConsumerSubEvent event = new ConsumerSubEvent(config);
+                    EventBus.post(event);
+                }
+
+                final ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
+                if (providerInfoListener != null) {
+                    providerInfoListener.updateAllProviders(providerGroups);
+                }
+            }
+        });
+
+        //async
+        return null;
+
+    }
+
+    protected SubscribeServiceRequest buildSubscribeServiceRequest(ConsumerConfig consumerConfig) {
+        String key = MeshRegistryHelper.buildMeshKey(consumerConfig, consumerConfig.getProtocol());
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
         subscribeRequest.setServiceName(key);
-        SubscribeServiceResult subscribeServiceResult = client.subscribeService(subscribeRequest);
-
-        if (subscribeServiceResult == null || !subscribeServiceResult.isSuccess()) {
-            throw new RuntimeException("regist consumer occors error," + subscribeRequest);
-
-        }
-
-        List<ProviderGroup> providerGroups = new ArrayList<ProviderGroup>();
-
-        ProviderGroup providerGroup = new ProviderGroup();
-
-        List<ProviderInfo> providerInfos = new ArrayList<ProviderInfo>();
-
-        String url = fillProtocolAndVersion(subscribeServiceResult, client.getHost(), "");
-
-        ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
-        providerInfos.add(providerInfo);
-        providerGroup.setProviderInfos(providerInfos);
-
-        providerGroups.add(providerGroup);
-
-        if (EventBus.isEnable(ConsumerSubEvent.class)) {
-            ConsumerSubEvent event = new ConsumerSubEvent(config);
-            EventBus.post(event);
-        }
-
-        return providerGroups;
+        return subscribeRequest;
     }
 
     protected void registerAppInfoOnce(String appName) {
@@ -276,17 +328,24 @@ public class MeshRegistry extends Registry {
     }
 
     protected String fillProtocolAndVersion(SubscribeServiceResult subscribeServiceResult, String targetURL,
-                                            String serviceName) {
+                                            String serviceName, String protocol) {
+
+        String meshPort = judgeMeshPort(protocol);
 
         final List<String> datas = subscribeServiceResult.getDatas();
 
-        if (datas == null) {
-            targetURL = targetURL + ":" + MeshConstants.TCP_PORT;
+        if (CommonUtils.isEmpty(datas)) {
+            targetURL = targetURL + ":" + meshPort;
         } else {
             for (String data : subscribeServiceResult.getDatas()) {
-                String param = data.substring(data.indexOf("?"));
-                targetURL = targetURL + ":" + MeshConstants.TCP_PORT;
-                targetURL = targetURL + param;
+                final int indexOfParam = data.indexOf("?");
+                if (indexOfParam != -1) {
+                    String param = data.substring(indexOfParam + 1);
+                    targetURL = targetURL + ":" + meshPort;
+                    targetURL = targetURL + "?" + param;
+                } else {
+                    targetURL = targetURL + ":" + meshPort;
+                }
                 break;
             }
         }
@@ -295,11 +354,15 @@ public class MeshRegistry extends Registry {
 
     @Override
     public void unSubscribe(ConsumerConfig config) {
-        String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
-        UnSubscribeServiceRequest unsubscribeRequest = new UnSubscribeServiceRequest();
-
-        unsubscribeRequest.setServiceName(key);
+        UnSubscribeServiceRequest unsubscribeRequest = buildUnSubscribeServiceRequest(config);
         client.unSubscribeService(unsubscribeRequest);
+    }
+
+    protected UnSubscribeServiceRequest buildUnSubscribeServiceRequest(ConsumerConfig config) {
+        UnSubscribeServiceRequest unsubscribeRequest = new UnSubscribeServiceRequest();
+        String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
+        unsubscribeRequest.setServiceName(key);
+        return unsubscribeRequest;
     }
 
     @Override
@@ -313,6 +376,10 @@ public class MeshRegistry extends Registry {
                 LOGGER.errorWithApp(appName, "Error when batch unSubscribe", e);
             }
         }
+    }
+
+    protected String judgeMeshPort(String protocol) {
+        return String.valueOf(MeshConstants.TCP_PORT);
     }
 
     @Override

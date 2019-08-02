@@ -17,11 +17,24 @@
 package com.alipay.sofa.rpc.registry.mesh.model;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class SubscribeServiceRequest {
 
-    private String serviceName;
+    private String  serviceName;
+
+    //这个值是类似DEFAULT/XFIRE这种，也有可能是tr
+    private String  protocolType;
+
+    //this should be xxx-pool.alipay.com or  xxx.alipay.com,can be null
+    private String  targetAppAddress;
+
+    private boolean vipEnforce;
+
+    private boolean vipOnly;
+
+    private boolean localCloudFirst;
 
     public String getServiceName() {
         return serviceName;
@@ -29,5 +42,58 @@ public class SubscribeServiceRequest {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    public String getTargetAppAddress() {
+        return targetAppAddress;
+    }
+
+    public void setTargetAppAddress(String targetAppAddress) {
+        this.targetAppAddress = targetAppAddress;
+    }
+
+    public String getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(String protocolType) {
+        this.protocolType = protocolType;
+    }
+
+    public boolean isVipEnforce() {
+        return vipEnforce;
+    }
+
+    public void setVipEnforce(boolean vipEnforce) {
+        this.vipEnforce = vipEnforce;
+    }
+
+    public boolean isVipOnly() {
+        return vipOnly;
+    }
+
+    public void setVipOnly(boolean vipOnly) {
+        this.vipOnly = vipOnly;
+    }
+
+    public boolean isLocalCloudFirst() {
+        return localCloudFirst;
+    }
+
+    public void setLocalCloudFirst(boolean localCloudFirst) {
+        this.localCloudFirst = localCloudFirst;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("SubscribeServiceRequest{");
+        sb.append("serviceName='").append(serviceName).append('\'');
+        sb.append(", protocolType='").append(protocolType).append('\'');
+        sb.append(", targetAppAddress='").append(targetAppAddress).append('\'');
+        sb.append(", vipEnforce=").append(vipEnforce);
+        sb.append(", vipOnly=").append(vipOnly);
+        sb.append(", localCloudFirst=").append(localCloudFirst);
+        sb.append('}');
+        return sb.toString();
     }
 }

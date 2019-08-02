@@ -17,11 +17,18 @@
 package com.alipay.sofa.rpc.registry.mesh.model;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class UnSubscribeServiceRequest {
 
     private String serviceName;
+
+    //this should be xxx-pool.alipay.com or  xxx.alipay.com can be null
+    private String targetAppAddress;
+
+    //这个值是类似DEFAULT/XFIRE这种，也有可能是tr
+    private String protocolType;
 
     public String getServiceName() {
         return serviceName;
@@ -29,5 +36,31 @@ public class UnSubscribeServiceRequest {
 
     public void setServiceName(String serviceName) {
         this.serviceName = serviceName;
+    }
+
+    public String getTargetAppAddress() {
+        return targetAppAddress;
+    }
+
+    public void setTargetAppAddress(String targetAppAddress) {
+        this.targetAppAddress = targetAppAddress;
+    }
+
+    public String getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(String protocolType) {
+        this.protocolType = protocolType;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("UnSubscribeServiceRequest{");
+        sb.append("serviceName='").append(serviceName).append('\'');
+        sb.append(", targetAppAddress='").append(targetAppAddress).append('\'');
+        sb.append(", protocolType='").append(protocolType).append('\'');
+        sb.append('}');
+        return sb.toString();
     }
 }
