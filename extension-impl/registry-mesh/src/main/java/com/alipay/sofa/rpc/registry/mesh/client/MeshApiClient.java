@@ -20,17 +20,7 @@ import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.registry.mesh.model.ApplicationInfoRequest;
-import com.alipay.sofa.rpc.registry.mesh.model.ApplicationInfoResult;
-import com.alipay.sofa.rpc.registry.mesh.model.MeshEndpoint;
-import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceRequest;
-import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceResult;
-import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceRequest;
-import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceResult;
-import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceRequest;
-import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceResult;
-import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceRequest;
-import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceResult;
+import com.alipay.sofa.rpc.registry.mesh.model.*;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -41,7 +31,8 @@ import java.net.URI;
 import java.net.URL;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: MeshApiClient.java, v 0.1 2018年03月27日 2:24 PM bystander Exp $
  */
 public class MeshApiClient {
 
@@ -52,12 +43,14 @@ public class MeshApiClient {
     /**
      * 连接超时
      */
-    private static int          connectTimeout = 1000;
+    private static int          connectTimeout = Integer.parseInt(System.getProperty(
+                                                   "mesh_http_connect_timeout", "3000"));      ;
 
     /**
      * 读取超时
      */
-    private static int          readTimeout    = 1000;
+    private static int          readTimeout    = Integer.parseInt(System.getProperty(
+                                                   "mesh_http_read_timeout", "15000"));
 
     private static String       errorMessage   = "ERROR";
 
@@ -93,7 +86,8 @@ public class MeshApiClient {
         String result = httpPost(MeshEndpoint.CONFIGS, json);
 
         if (!StringUtils.equals(result, errorMessage)) {
-            final ApplicationInfoResult parse = JSON.parseObject(result, ApplicationInfoResult.class);
+            final ApplicationInfoResult parse = JSON.parseObject(result,
+                ApplicationInfoResult.class);
             if (parse.isSuccess()) {
                 return true;
             }
@@ -110,7 +104,8 @@ public class MeshApiClient {
         String result = httpPost(MeshEndpoint.UN_PUBLISH, json);
 
         if (!StringUtils.equals(result, errorMessage)) {
-            final UnPublishServiceResult parse = JSON.parseObject(result, UnPublishServiceResult.class);
+            final UnPublishServiceResult parse = JSON.parseObject(result,
+                UnPublishServiceResult.class);
             if (parse.isSuccess()) {
                 return 1;
             }
@@ -128,8 +123,7 @@ public class MeshApiClient {
 
         SubscribeServiceResult subscribeServiceResult;
         if (!StringUtils.equals(result, errorMessage)) {
-            subscribeServiceResult = JSON.parseObject(result,
-                SubscribeServiceResult.class);
+            subscribeServiceResult = JSON.parseObject(result, SubscribeServiceResult.class);
             return subscribeServiceResult;
         } else {
             subscribeServiceResult = new SubscribeServiceResult();
@@ -168,7 +162,7 @@ public class MeshApiClient {
             con.setRequestProperty("Content-Type", "text/plain");
             return con;
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.errorWithApp(null, "uri:" + url, e);
             return null;
         }
 
@@ -206,7 +200,13 @@ public class MeshApiClient {
         return result;
     }
 
-    private String httpGet(String path) {
+    /**
+     * for get method
+     *
+     * @param path
+     * @return
+     */
+    public String httpGet(String path) {
         HttpURLConnection con = null;
         String result = null;
         try {
