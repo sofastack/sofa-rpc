@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -411,7 +412,9 @@ public class ProviderInfo implements Serializable {
      */
     public ProviderInfo setStaticAttrs(Map<String, String> staticAttrs) {
         this.staticAttrs.clear();
-        this.staticAttrs.putAll(staticAttrs);
+        if (CommonUtils.isNotEmpty(staticAttrs)) {
+            this.staticAttrs.putAll(staticAttrs);
+        }
         return this;
     }
 
