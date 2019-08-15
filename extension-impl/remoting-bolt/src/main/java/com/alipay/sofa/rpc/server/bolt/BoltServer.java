@@ -112,7 +112,7 @@ public class BoltServer implements Server {
             // 生成Server对象
             remotingServer = initRemotingServer();
             try {
-                if (remotingServer.start(serverConfig.getBoundHost())) {
+                if (remotingServer.start()) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
                             serverConfig.getPort());
@@ -136,7 +136,7 @@ public class BoltServer implements Server {
 
     protected RemotingServer initRemotingServer() {
         // 绑定到端口
-        RemotingServer remotingServer = new RpcServer(serverConfig.getPort());
+        RemotingServer remotingServer = new RpcServer(serverConfig.getBoundHost(), serverConfig.getPort());
         remotingServer.registerUserProcessor(boltServerProcessor);
         return remotingServer;
     }
