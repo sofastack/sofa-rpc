@@ -61,19 +61,19 @@ public class MeshRegistry extends Registry {
     /**
      * Logger
      */
-    private static final Logger       LOGGER                        = LoggerFactory.getLogger(MeshRegistry.class);
+    private static final Logger         LOGGER                        = LoggerFactory.getLogger(MeshRegistry.class);
 
-    private static final String       VERSION                       = "4.0";
+    private static final String         VERSION                       = "4.0";
 
-    protected MeshApiClient           client;
+    protected MeshApiClient             client;
 
     //init only once
-    protected boolean                 inited;
+    protected boolean                   inited;
 
     //has registed app info
-    protected boolean                 registedApp;
+    protected boolean                   registedApp;
 
-    private static ThreadPoolExecutor asyncCreateConnectionExecutor = initThreadPoolExecutor();
+    protected static ThreadPoolExecutor asyncCreateConnectionExecutor = initThreadPoolExecutor();
 
     private static ThreadPoolExecutor initThreadPoolExecutor() {
         final ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(20, 20, 60,
