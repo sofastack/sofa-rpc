@@ -114,7 +114,7 @@ public class MeshRegistryTest extends BaseMeshTest {
     }
 
     @Test
-    public void testOnlyPublish() throws InterruptedException {
+    public void testOnlyPublish() {
 
         Field registedAppField = null;
         try {
@@ -153,7 +153,6 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setTimeout(3000);
 
         registry.register(provider);
-        Thread.sleep(3000);
 
         try {
             registedAppValue = (Boolean) registedAppField.get(registry);
@@ -209,8 +208,7 @@ public class MeshRegistryTest extends BaseMeshTest {
         MeshRegistryTest.MockProviderInfoListener providerInfoListener = new MeshRegistryTest.MockProviderInfoListener();
         consumer.setProviderInfoListener(providerInfoListener);
         List<ProviderGroup> groups = registry.subscribe(consumer);
-        Assert.assertNull(groups);
-        Thread.sleep(3000);
+        providerInfoListener.updateAllProviders(groups);
         Map<String, ProviderGroup> ps = providerInfoListener.getData();
         Assert.assertTrue(ps.size() == 1);
 
@@ -247,8 +245,8 @@ public class MeshRegistryTest extends BaseMeshTest {
         providerInfoListener2.setCountDownLatch(latch2);
         consumer2.setProviderInfoListener(providerInfoListener2);
         List<ProviderGroup> groups2 = registry.subscribe(consumer2);
-        Assert.assertNull(groups);
-        Thread.sleep(3000);
+        providerInfoListener2.updateAllProviders(groups2);
+
         Map<String, ProviderGroup> ps2 = providerInfoListener2.getData();
         Assert.assertTrue(ps2.size() == 1);
 
