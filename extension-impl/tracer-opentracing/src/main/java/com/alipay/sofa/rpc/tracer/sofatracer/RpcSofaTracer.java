@@ -213,28 +213,6 @@ public class RpcSofaTracer extends Tracer {
                 getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_IP));
             request.addRequestProp(RemotingConstants.RPC_TRACE_NAME, oldTracerContext);
         }
-
-        // 异步callback同步
-        if (request.isAsync()) {
-            //异步,这个时候除了缓存spanContext clientBeforeSendRequest() rpc 已经调用
-            //还需要这个时候需要还原回父 span
-            //弹出;不弹出的话当前线程就会一直是client了
-            clientSpan = sofaTraceContext.pop();
-            if (clientSpan != null) {
-                // Record client send event
-                clientSpan.log(LogData.CLIENT_SEND_EVENT_VALUE);
-            }
-            //将当前 span 缓存在 request 中,注意:这个只是缓存不需要序列化到服务端
-            rpcInternalContext.setAttachment(RpcConstants.INTERNAL_KEY_TRACER_SPAN, clientSpan);
-            if (clientSpan != null && clientSpan.getParentSofaTracerSpan() != null) {
-                //restore parent
-                sofaTraceContext.push(clientSpan.getParentSofaTracerSpan());
-            }
-        } else {
-            // Record client send event
-            clientSpan.log(LogData.CLIENT_SEND_EVENT_VALUE);
-        }
-
     }
 
     private String getEmptyStringIfNull(Map map, String key) {
@@ -569,7 +547,38 @@ public class RpcSofaTracer extends Tracer {
 
     @Override
     public void clientAsyncAfterSend(SofaRequest request) {
-        //do nothing
+
+        //客户端的启动
+        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+        //获取并不弹出
+        SofaTracerSpan clientSpan = sofaTraceContext.getCurrentSpan();
+        if (clientSpan == null) {
+            SelfLog.warn("ClientSpan is null.Before call interface=" + request.getInterfaceName() + ",method=" +
+                request.getMethodName());
+            return;
+        }
+        RpcInternalContext rpcInternalContext = RpcInternalContext.getContext();
+
+        // 异步callback同步
+        if (request.isAsync()) {
+            //异步,这个时候除了缓存spanContext clientBeforeSendRequest() rpc 已经调用
+            //还需要这个时候需要还原回父 span
+            //弹出;不弹出的话当前线程就会一直是client了
+            clientSpan = sofaTraceContext.pop();
+            if (clientSpan != null) {
+                // Record client send event
+                clientSpan.log(LogData.CLIENT_SEND_EVENT_VALUE);
+            }
+            //将当前 span 缓存在 request 中,注意:这个只是缓存不需要序列化到服务端
+            rpcInternalContext.setAttachment(RpcConstants.INTERNAL_KEY_TRACER_SPAN, clientSpan);
+            if (clientSpan != null && clientSpan.getParentSofaTracerSpan() != null) {
+                //restore parent
+                sofaTraceContext.push(clientSpan.getParentSofaTracerSpan());
+            }
+        } else {
+            // Record client send event
+            clientSpan.log(LogData.CLIENT_SEND_EVENT_VALUE);
+        }
     }
 
     @Override
