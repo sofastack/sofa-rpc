@@ -61,7 +61,7 @@
         <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.6</hessian.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
-        <bolt.version>1.5.2</bolt.version>
+        <bolt.version>1.5.6</bolt.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
