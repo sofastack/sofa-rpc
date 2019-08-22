@@ -37,6 +37,7 @@ import org.jboss.resteasy.plugins.server.netty.RequestDispatcher;
 import org.jboss.resteasy.spi.Failure;
 
 import javax.ws.rs.core.HttpHeaders;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 
 import static io.netty.handler.codec.http.HttpResponseStatus.CONTINUE;
@@ -120,6 +121,10 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                     response.finish();
                 }
             } finally {
+                InputStream input = request.getInputStream();
+                if (input != null) {
+                    input.close();
+                }
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
                     EventBus.post(new ServerEndHandleEvent());
                 }

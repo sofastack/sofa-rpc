@@ -26,6 +26,7 @@ import java.util.List;
 public class AuthRule {
 
     private String             name;
+    private String             mode;
     private int                enabled;
 
     private List<AuthRuleItem> ruleItems;
@@ -40,6 +41,14 @@ public class AuthRule {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getMode() {
+        return mode;
+    }
+
+    public void setMode(String mode) {
+        this.mode = mode;
     }
 
     public int getEnabled() {
