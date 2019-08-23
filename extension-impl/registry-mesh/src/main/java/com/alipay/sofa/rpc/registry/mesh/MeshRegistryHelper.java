@@ -64,4 +64,5 @@ public class MeshRegistryHelper {
     public static String buildMeshKey(AbstractInterfaceConfig config, String protocol) {
         return ConfigUniqueNameGenerator.getUniqueName(config);
     }
+
 }

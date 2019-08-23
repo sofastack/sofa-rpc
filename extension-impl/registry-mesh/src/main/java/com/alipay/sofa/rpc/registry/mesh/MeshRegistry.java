@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.registry.mesh;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -273,7 +272,7 @@ public class MeshRegistry extends Registry {
 
                 String url = fillProtocolAndVersion(subscribeServiceResult, client.getHost(), "", config.getProtocol());
 
-                ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
+                ProviderInfo providerInfo = SofaRegistryHelper.parseProviderInfo(url);
                 providerInfos.add(providerInfo);
                 providerGroup.setProviderInfos(providerInfos);
 
