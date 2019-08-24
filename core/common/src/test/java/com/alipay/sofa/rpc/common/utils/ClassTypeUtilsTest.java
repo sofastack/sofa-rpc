@@ -16,10 +16,13 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Array;
+import java.net.URL;
+import java.net.URLClassLoader;
 
 /**
  *
@@ -108,6 +111,26 @@ public class ClassTypeUtilsTest {
     }
 
     @Test
+    public void testGetClassAccordingToTCL() {
+        // incompatible with JDK 9+
+        URLClassLoader current = (URLClassLoader) this.getClass().getClassLoader();
+        TempClassLoader t0 = new TempClassLoader(current.getURLs(), null);
+        TempClassLoader t1 = new TempClassLoader(current.getURLs(), null);
+
+        ClassLoader old = Thread.currentThread().getContextClassLoader();
+        Thread.currentThread().setContextClassLoader(t0);
+        Class c0 = ClassTypeUtils.getClass(ClassTypeUtils.class.getCanonicalName());
+        Thread.currentThread().setContextClassLoader(t1);
+        Class c1 = ClassTypeUtils.getClass(ClassTypeUtils.class.getCanonicalName());
+
+        Thread.currentThread().setContextClassLoader(t0);
+        Assert.assertEquals(c0, ReflectCache.getClassCache(ClassTypeUtils.class.getCanonicalName()));
+        Thread.currentThread().setContextClassLoader(t1);
+        Assert.assertEquals(c1, ReflectCache.getClassCache(ClassTypeUtils.class.getCanonicalName()));
+        Thread.currentThread().setContextClassLoader(old);
+    }
+
+    @Test
     public void testGetTypeStr() {
 
         Assert.assertEquals(ClassTypeUtils.getTypeStr(String.class), "java.lang.String");
@@ -166,4 +189,11 @@ public class ClassTypeUtilsTest {
 
 class StaticClass {
 
+}
+
+class TempClassLoader extends URLClassLoader {
+
+    public TempClassLoader(URL[] urls, ClassLoader parent) {
+        super(urls, parent);
+    }
 }

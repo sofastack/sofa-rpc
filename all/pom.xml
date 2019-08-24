@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.6.0-SNAPSHOT</version>
+    <version>5.6.1-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/sofastack/sofa-rpc</url>
@@ -61,7 +61,7 @@
         <netty.version>4.1.25.Final</netty.version>
         <hessian.version>3.3.6</hessian.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
-        <bolt.version>1.5.2</bolt.version>
+        <bolt.version>1.5.6</bolt.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
@@ -470,6 +470,8 @@
                             <author>false</author>
                             <keywords>true</keywords>
                             <quiet>true</quiet>
+                            <failOnError>false</failOnError>
+                            <additionalparam>-Xdoclint:none</additionalparam>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.alipay.sofa:sofa-rpc-*</dependencySourceInclude>
