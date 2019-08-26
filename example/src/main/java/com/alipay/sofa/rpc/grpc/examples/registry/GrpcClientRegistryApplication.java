@@ -18,13 +18,12 @@ package com.alipay.sofa.rpc.grpc.registry;
 
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import io.grpc.examples.helloworld.GreeterGrpc;
+import com.alipay.sofa.rpc.grpc.registry.GreeterImpl;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
-import com.alipay.sofa.rpc.grpc.registry.GreeterImpl;
-
 import io.grpc.StatusRuntimeException;
+import io.grpc.examples.helloworld.GreeterGrpc;
 import io.grpc.examples.helloworld.GreeterGrpc;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
