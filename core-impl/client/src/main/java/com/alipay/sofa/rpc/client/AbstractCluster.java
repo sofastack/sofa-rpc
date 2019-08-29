@@ -32,6 +32,9 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderInfoAddEvent;
 import com.alipay.sofa.rpc.event.ProviderInfoRemoveEvent;
@@ -357,6 +360,10 @@ public abstract class AbstractCluster extends Cluster {
         }
         // 原始服务列表数据 --> 路由结果
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
+
+        //保存一下原始地址,为了打印
+        List<ProviderInfo> orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
+
         if (CommonUtils.isEmpty(providerInfos)) {
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         }
@@ -395,7 +402,8 @@ public abstract class AbstractCluster extends Cluster {
                 providerInfos.remove(providerInfo);
             } while (!providerInfos.isEmpty());
         }
-        throw noAvailableProviderException(message.getTargetServiceUniqueName());
+        throw unavailableProviderException(message.getTargetServiceUniqueName(),
+            convertProviders2Urls(orginalProviderInfos));
     }
 
     /**
@@ -597,6 +605,24 @@ public abstract class AbstractCluster extends Cluster {
      */
     // TODO: 2018/6/22 by zmyer
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
+        // 动态配置优先
+        final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
+        if (StringUtils.isNotBlank(dynamicAlias)) {
+            String dynamicTimeout = null;
+            DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
+                consumerConfig.getAppName(),
+                dynamicAlias);
+
+            if (dynamicConfigManager != null) {
+                dynamicTimeout = dynamicConfigManager.getConsumerMethodProperty(request.getInterfaceName(),
+                    request.getMethodName(),
+                    "timeout");
+            }
+
+            if (StringUtils.isNotBlank(dynamicTimeout)) {
+                return Integer.parseInt(dynamicTimeout);
+            }
+        }
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
         if (timeout == null) {
@@ -779,6 +805,18 @@ public abstract class AbstractCluster extends Cluster {
             }
         }
         return providerInfos;
+    }
+
+    private String convertProviders2Urls(List<ProviderInfo> providerInfos) {
+
+        StringBuilder sb = new StringBuilder();
+        if (CommonUtils.isNotEmpty(providerInfos)) {
+            for (ProviderInfo providerInfo : providerInfos) {
+                sb.append(providerInfo).append(",");
+            }
+        }
+
+        return sb.toString();
     }
 
     /**

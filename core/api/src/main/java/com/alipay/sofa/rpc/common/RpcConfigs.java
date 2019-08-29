@@ -17,10 +17,12 @@
 package com.alipay.sofa.rpc.common;
 
 import com.alipay.sofa.rpc.base.Sortable;
+import com.alipay.sofa.rpc.common.annotation.JustForTest;
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.CompatibleTypeUtils;
 import com.alipay.sofa.rpc.common.utils.FileUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
@@ -52,7 +54,8 @@ public class RpcConfigs {
     /**
      * 配置变化监听器
      */
-    private final static ConcurrentMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String, List<RpcConfigListener>>();
+    private final static ConcurrentMap<String, List<RpcConfigListener>> CFG_LISTENER = new ConcurrentHashMap<String,
+                                                                                             List<RpcConfigListener>>();
 
     static {
         init(); // 加载配置文件
@@ -140,6 +143,25 @@ public class RpcConfigs {
     }
 
     /**
+     * Remove value
+     *
+     * @param key Key
+     */
+    @JustForTest
+    synchronized static void removeValue(String key) {
+        Object oldValue = CFG.get(key);
+        if (oldValue != null) {
+            CFG.remove(key);
+            List<RpcConfigListener> rpcConfigListeners = CFG_LISTENER.get(key);
+            if (CommonUtils.isNotEmpty(rpcConfigListeners)) {
+                for (RpcConfigListener rpcConfigListener : rpcConfigListeners) {
+                    rpcConfigListener.onChange(oldValue, null);
+                }
+            }
+        }
+    }
+
+    /**
      * Gets boolean value.
      *
      * @param primaryKey the primary key
@@ -183,7 +205,7 @@ public class RpcConfigs {
         if (val == null) {
             throw new SofaRpcRuntimeException("Not found key: " + primaryKey);
         } else {
-            return Integer.valueOf(val.toString());
+            return Integer.parseInt(val.toString());
         }
     }
 
@@ -202,7 +224,7 @@ public class RpcConfigs {
                 throw new SofaRpcRuntimeException("Not found key: " + primaryKey + "/" + secondaryKey);
             }
         }
-        return Integer.valueOf(val.toString());
+        return Integer.parseInt(val.toString());
     }
 
     /**
@@ -283,7 +305,12 @@ public class RpcConfigs {
      */
     public static <T> T getOrDefaultValue(String primaryKey, T defaultValue) {
         Object val = CFG.get(primaryKey);
-        return val == null ? defaultValue : (T) val;
+        if (val == null) {
+            return defaultValue;
+        } else {
+            Class<?> type = defaultValue == null ? null : defaultValue.getClass();
+            return (T) CompatibleTypeUtils.convert(val, type);
+        }
     }
 
     /**

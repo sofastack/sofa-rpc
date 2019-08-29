@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.codec.bolt;
 import com.alipay.remoting.exception.DeserializationException;
 import com.alipay.remoting.exception.SerializationException;
 import com.alipay.sofa.rpc.codec.common.StringSerializer;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayInputStream;
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -26,6 +27,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,12 +54,36 @@ public class SimpleMapSerializer {
         UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(64);
         try {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                writeString(out, entry.getKey());
-                writeString(out, entry.getValue());
+                String key = entry.getKey();
+                String value = entry.getValue();
+                /**
+                 * 排除不写null作为key
+                 */
+                if (key != null) {
+                    writeSupportEmpty(key, out);
+                    writeSupportEmpty(value, out);
+                }
             }
             return out.toByteArray();
         } catch (IOException ex) {
             throw new SerializationException(ex.getMessage(), ex);
+        }
+    }
+
+    /**
+     * 支持empty字符串的序列化
+     *
+     * @param data 输入数据
+     * @param out 输入流
+     * @throws IOException 写入异常
+     */
+    public void writeSupportEmpty(String data, OutputStream out) throws IOException {
+        if (StringUtils.isEmpty(data)) {
+            writeInt(out, 0);
+        } else {
+            byte[] bs = data.getBytes(RpcConstants.DEFAULT_CHARSET);
+            writeInt(out, bs.length);
+            out.write(bs);
         }
     }
 
@@ -79,10 +105,18 @@ public class SimpleMapSerializer {
         UnsafeByteArrayInputStream in = new UnsafeByteArrayInputStream(bytes);
         try {
             while (in.available() > 0) {
-                String key = readString(in);
-                String value = readString(in);
-                map.put(key, value);
+                int length = readInt(in);
+                byte[] key = new byte[length];
+                in.read(key);
+
+                length = readInt(in);
+                byte[] value = new byte[length];
+                in.read(value);
+
+                Charset charset = RpcConstants.DEFAULT_CHARSET;
+                map.put(new String(key, charset), new String(value, charset));
             }
+
             return map;
         } catch (IOException ex) {
             throw new DeserializationException(ex.getMessage(), ex);

@@ -27,6 +27,8 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -43,11 +45,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class LocalRegistryTest {
+
+    private final static Logger   LOGGER   = LoggerFactory.getLogger(LocalRegistryTest.class);
 
     private static String         filePath = System.getProperty("user.home") + File.separator
                                                + "localFileTest"
@@ -99,12 +101,58 @@ public class LocalRegistryTest {
             registry = null;
         } finally {
             // 清理数据
-            System.out.println(FileUtils.cleanDirectory(new File(filePath)));
+            final boolean cleanDirectory = FileUtils.cleanDirectory(new File(filePath));
+            LOGGER.info("clean result:" + cleanDirectory);
         }
     }
 
     public static void main(String[] args) {
         FileUtils.cleanDirectory(new File(filePath));
+    }
+
+    @Test
+    public void testLoadFile() {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200);
+
+        ProviderConfig<?> provider = new ProviderConfig();
+        provider.setInterfaceId("com.alipay.xxx.TestService")
+            .setUniqueId("unique123Id")
+            .setRegister(true)
+            .setRegistry(registryConfig)
+            .setServer(serverConfig);
+
+        registry.register(provider);
+        registry.destroy();
+
+        // registry 关闭，但是 provider 信息保存到本地
+        Assert.assertTrue(new File(file).exists());
+
+        // 创建一个新的 localRegistry，会立即加载到缓存
+        RegistryConfig newRegistryConfig = new RegistryConfig()
+            .setProtocol("local")
+            //.setParameter("registry.local.scan.period", "1000")
+            .setSubscribe(true)
+            .setFile(file)
+            .setRegister(true);
+
+        LocalRegistry newRegistry = (LocalRegistry) RegistryFactory.getRegistry(newRegistryConfig);
+
+        newRegistry.init();
+        Assert.assertFalse(newRegistry.memoryCache.isEmpty());
+
+        // consumer 订阅时应该能立刻读到数据
+        ConsumerConfig<?> consumer = new ConsumerConfig();
+        consumer.setInterfaceId("com.alipay.xxx.TestService")
+            .setUniqueId("unique123Id")
+            .setRegistry(registryConfig)
+            .setSubscribe(true);
+
+        List<ProviderGroup> subscribe = newRegistry.subscribe(consumer);
+        Assert.assertFalse(subscribe.isEmpty());
+        Assert.assertFalse(subscribe.get(0).getProviderInfos().isEmpty());
     }
 
     @Test

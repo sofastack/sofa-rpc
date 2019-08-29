@@ -116,7 +116,7 @@ public class BoltServer implements Server {
             // 生成Server对象
             remotingServer = initRemotingServer();
             try {
-                if (remotingServer.start(serverConfig.getBoundHost())) {
+                if (remotingServer.start()) {
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
                                 serverConfig.getPort());
@@ -141,7 +141,7 @@ public class BoltServer implements Server {
     // TODO: 2018/6/22 by zmyer
     protected RemotingServer initRemotingServer() {
         // 绑定到端口
-        RemotingServer remotingServer = new RpcServer(serverConfig.getPort());
+        RemotingServer remotingServer = new RpcServer(serverConfig.getBoundHost(), serverConfig.getPort());
         remotingServer.registerUserProcessor(boltServerProcessor);
         return remotingServer;
     }
@@ -185,6 +185,7 @@ public class BoltServer implements Server {
         // 缓存Invoker对象
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.put(key, instance);
+        ReflectCache.registerServiceClassLoader(key, providerConfig.getProxyClass().getClassLoader());
         // 缓存接口的方法
         for (Method m : providerConfig.getProxyClass().getMethods()) {
             ReflectCache.putOverloadMethodCache(key, m);
@@ -197,6 +198,7 @@ public class BoltServer implements Server {
         // 取消缓存Invoker对象
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.remove(key);
+        cleanReflectCache(providerConfig);
         // 如果最后一个需要关闭，则关闭
         if (closeIfNoEntry && invokerMap.isEmpty()) {
             stop();
@@ -262,5 +264,17 @@ public class BoltServer implements Server {
     // TODO: 2018/6/22 by zmyer
     public Invoker findInvoker(String serviceName) {
         return invokerMap.get(serviceName);
+    }
+
+    /**
+     * Clean Reflect Cache
+     * @param providerConfig
+     */
+    public void cleanReflectCache(ProviderConfig providerConfig) {
+        String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
+        ReflectCache.unRegisterServiceClassLoader(key);
+        ReflectCache.invalidateMethodCache(key);
+        ReflectCache.invalidateMethodSigsCache(key);
+        ReflectCache.invalidateOverloadMethodCache(key);
     }
 }

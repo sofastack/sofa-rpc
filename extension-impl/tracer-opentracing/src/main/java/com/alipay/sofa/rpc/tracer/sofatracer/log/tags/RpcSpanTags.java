@@ -25,6 +25,14 @@ public class RpcSpanTags {
 
     //************** String 类型
 
+    public static final String TRACERID                     = "tracerId";
+
+    public static final String SPANID                       = "spanId";
+
+    public static final String BAGGAGE                      = "baggage";
+
+    public static final String TIMESTAMP                    = "timestamp";
+
     public static final String LOCAL_APP                    = "local.app";
 
     public static final String SERVICE                      = "service";

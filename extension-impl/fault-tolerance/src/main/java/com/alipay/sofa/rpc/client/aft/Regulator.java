@@ -16,12 +16,14 @@
  */
 package com.alipay.sofa.rpc.client.aft;
 
+import com.alipay.sofa.rpc.ext.Extensible;
+
 /**
  * Regulator of adaptive fault tolerance
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-// TODO: 2018/12/29 by zmyer
+@Extensible(singleton = false)
 public interface Regulator {
 
     /**

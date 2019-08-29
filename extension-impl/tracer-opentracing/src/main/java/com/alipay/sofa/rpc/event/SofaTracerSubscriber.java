@@ -37,11 +37,11 @@ public class SofaTracerSubscriber extends Subscriber {
         } else if (eventClass == ClientBeforeSendEvent.class) {
             ClientBeforeSendEvent event = (ClientBeforeSendEvent) originEvent;
             Tracers.clientBeforeSend(event.getRequest());
+        } else if (eventClass == ClientAfterSendEvent.class) {
+            // 异步发送完毕
+            ClientAfterSendEvent event = (ClientAfterSendEvent) originEvent;
+            Tracers.clientAsyncAfterSend(event.getRequest());
         }
-
-        // else if (eventClass == ClientAfterSendEvent.class) {
-        //    // 异步发送完毕
-        // }
 
         // else if (eventClass == ClientSyncReceiveEvent.class) {
         //     // 同步返回结果

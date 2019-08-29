@@ -30,9 +30,13 @@ import com.alipay.sofa.rpc.client.aft.MeasureStrategy;
 import com.alipay.sofa.rpc.client.aft.RecoverStrategy;
 import com.alipay.sofa.rpc.client.aft.RegulationStrategy;
 import com.alipay.sofa.rpc.client.aft.Regulator;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
+import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -51,79 +55,83 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-// TODO: 2018/12/29 by zmyer
+@Extension("timeWindow")
 public class TimeWindowRegulator implements Regulator {
 
-    /**
-     * Logger for this class
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(TimeWindowRegulator.class);
+    /** Logger for this class */
+    private static final Logger                      LOGGER             = LoggerFactory
+                                                                            .getLogger(TimeWindowRegulator.class);
 
-    /**
-     * Counter for measure schedule and calculate time window
-     */
-    private final AtomicInteger measureCounter = new AtomicInteger();
+    /** Counter for measure schedule and calculate time window */
+    private final AtomicInteger                      measureCounter     = new AtomicInteger();
 
     /**
      * 度量线程池
      */
-    private final ScheduledService measureScheduler = new ScheduledService("AFT-MEASURE",
-            ScheduledService.MODE_FIXEDRATE,
-            new MeasureRunnable(), 1, 1,
-            TimeUnit.SECONDS);
+    private final ScheduledService                   measureScheduler   = new ScheduledService("AFT-MEASURE",
+                                                                            ScheduledService.MODE_FIXEDRATE,
+                                                                            new MeasureRunnable(), 1, 1,
+                                                                            TimeUnit.SECONDS);
     /**
      * Is measure scheduler started
      */
-    private final AtomicBoolean measureStarted = new AtomicBoolean();
+    private final AtomicBoolean                      measureStarted     = new AtomicBoolean();
 
     /**
      * 计算线程池
      */
-    private final ExecutorService regulationExecutor = ThreadPoolUtils.newFixedThreadPool(2,
-            new LinkedBlockingQueue<Runnable>(16),
-            new NamedThreadFactory(
-                    "AFT-REGULATION"));
+    private final ExecutorService                    regulationExecutor = ThreadPoolUtils.newFixedThreadPool(2,
+                                                                            new LinkedBlockingQueue<Runnable>(16),
+                                                                            new NamedThreadFactory(
+                                                                                "AFT-REGULATION"));
 
     /**
      * 度量模型
      */
-    private final CopyOnWriteArrayList<MeasureModel> measureModels = new CopyOnWriteArrayList<MeasureModel>();
+    private final CopyOnWriteArrayList<MeasureModel> measureModels      = new CopyOnWriteArrayList<MeasureModel>();
 
     /**
      * 度量策略（创建计算模型, 对计算模型里的数据进行度量，选出正常和异常节点）
      */
-    private MeasureStrategy measureStrategy;
+    private MeasureStrategy                          measureStrategy;
 
     /**
-     * 计算策略（根据度量结果，判断是否需要执行降级或者恢复）
+     * 计算策略（根据度量结果，判断是否需要执行降级或者恢复） 
      */
-    private RegulationStrategy regulationStrategy;
+    private RegulationStrategy                       regulationStrategy;
 
     /**
-     * 降级策略: 调整权重
+     * 降级策略: 例如调整权重 
      */
-    private DegradeStrategy weightDegradeStrategy;
+    private DegradeStrategy                          degradeStrategy;
+
     /**
-     * 降级策略: 只打印日志
+     * 恢复策略：例如调整权重 
      */
-    private DegradeStrategy logDegradeStrategy;
-    /**
-     * 恢复策略：调整权重
-     */
-    private RecoverStrategy recoverStrategy;
+    private RecoverStrategy                          recoverStrategy;
 
     /**
      * Listener for invocation stat change.
      */
-    private final InvocationStatListener listener = new TimeWindowRegulatorListener();
+    private final InvocationStatListener             listener           = new TimeWindowRegulatorListener();
 
     @Override
     public void init() {
-        measureStrategy = new ServiceHorizontalMeasureStrategy();
-        regulationStrategy = new ServiceHorizontalRegulationStrategy();
-        weightDegradeStrategy = new WeightDegradeStrategy();
-        logDegradeStrategy = new LogPrintDegradeStrategy();
-        recoverStrategy = new WeightRecoverStrategy();
+        String measureStrategyAlias = RpcConfigs
+            .getOrDefaultValue(RpcOptions.AFT_MEASURE_STRATEGY, "serviceHorizontal");
+        String regulationStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_REGULATION_STRATEGY,
+            "serviceHorizontal");
+        String degradeStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_DEGRADE_STRATEGY, "weight");
+        String recoverStrategyAlias = RpcConfigs.getOrDefaultValue(RpcOptions.AFT_RECOVER_STRATEGY, "weight");
+
+        measureStrategy = ExtensionLoaderFactory.getExtensionLoader(MeasureStrategy.class).getExtension(
+            measureStrategyAlias);
+        regulationStrategy = ExtensionLoaderFactory.getExtensionLoader(RegulationStrategy.class).getExtension(
+            regulationStrategyAlias);
+        degradeStrategy = ExtensionLoaderFactory.getExtensionLoader(DegradeStrategy.class).getExtension(
+            degradeStrategyAlias);
+        recoverStrategy = ExtensionLoaderFactory.getExtensionLoader(RecoverStrategy.class).getExtension(
+            recoverStrategyAlias);
 
         InvocationStatFactory.addListener(listener);
     }
@@ -155,8 +163,7 @@ public class TimeWindowRegulator implements Regulator {
         // release strategy
         measureStrategy = null;
         regulationStrategy = null;
-        weightDegradeStrategy = null;
-        logDegradeStrategy = null;
+        degradeStrategy = null;
         recoverStrategy = null;
     }
 
@@ -210,7 +217,7 @@ public class TimeWindowRegulator implements Regulator {
                     doRegulate(measureResultDetail);
                 } catch (Exception e) {
                     LOGGER.errorWithApp(measureResult.getMeasureModel().getAppName(),
-                            "Error when doRegulate: " + e.getMessage(), e);
+                        "Error when doRegulate: " + e.getMessage(), e);
                 }
             }
         }
@@ -226,16 +233,17 @@ public class TimeWindowRegulator implements Regulator {
 
             boolean isDegradeEffective = regulationStrategy.isDegradeEffective(measureResultDetail);
             if (isDegradeEffective) {
+                measureResultDetail.setLogOnly(false);
                 if (measureState.equals(MeasureState.ABNORMAL)) {
                     boolean isReachMaxDegradeIpCount = regulationStrategy.isReachMaxDegradeIpCount(measureResultDetail);
                     if (!isReachMaxDegradeIpCount) {
-                        weightDegradeStrategy.degrade(measureResultDetail);
+                        degradeStrategy.degrade(measureResultDetail);
                     } else {
                         String appName = measureResult.getMeasureModel().getAppName();
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGULATION_ABNORMAL_NOT_DEGRADE,
-                                    "Reach degrade number limit.", statDimension.getService(), statDimension.getIp(),
-                                    statDimension.getAppName()));
+                                "Reach degrade number limit.", statDimension.getService(), statDimension.getIp(),
+                                statDimension.getAppName()));
                         }
                     }
                 } else if (measureState.equals(MeasureState.HEALTH)) {
@@ -247,13 +255,14 @@ public class TimeWindowRegulator implements Regulator {
                     //没有被降级过，因此不需要被恢复。
                 }
             } else {
+                measureResultDetail.setLogOnly(true);
                 if (measureState.equals(MeasureState.ABNORMAL)) {
-                    logDegradeStrategy.degrade(measureResultDetail);
+                    degradeStrategy.degrade(measureResultDetail);
                     String appName = measureResult.getMeasureModel().getAppName();
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGULATION_ABNORMAL_NOT_DEGRADE,
-                                "Degrade switch is off", statDimension.getService(),
-                                statDimension.getIp(), statDimension.getAppName()));
+                            "Degrade switch is off", statDimension.getService(),
+                            statDimension.getIp(), statDimension.getAppName()));
                     }
                 }
             }

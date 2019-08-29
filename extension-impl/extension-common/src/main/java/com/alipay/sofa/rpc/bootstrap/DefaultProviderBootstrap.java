@@ -271,8 +271,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 include = inList(providerConfig.getInclude(), providerConfig.getExclude(), methodName); // 检查是否在黑白名单中
                 methodsLimit.putIfAbsent(methodName, include);
             }
-            providerConfig.setMethodsLimit(methodsLimit);
         }
+        providerConfig.setMethodsLimit(methodsLimit);
     }
 
     // TODO: 2018/7/6 by zmyer
@@ -451,7 +451,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * 接口可以按方法发布
+     * 接口可以按方法发布,不在黑名单里且在白名单里,*算在白名单
      *
      * @param includeMethods 包含的方法列表
      * @param excludeMethods 不包含的方法列表
@@ -461,20 +461,35 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     // TODO: 2018/6/22 by zmyer
     protected boolean inList(String includeMethods, String excludeMethods, String methodName) {
         //判断是否在白名单中
-        if (includeMethods != null && !StringUtils.ALL.equals(includeMethods)) {
-            includeMethods = includeMethods + ",";
-            boolean inWhite = includeMethods.contains(methodName + ",");
-            if (!inWhite) {
+        if (!StringUtils.ALL.equals(includeMethods)) {
+            if (!inMethodConfigs(includeMethods, methodName)) {
                 return false;
             }
         }
         //判断是否在黑白单中
-        if (StringUtils.isBlank(excludeMethods)) {
-            return true;
-        } else {
-            excludeMethods = excludeMethods + ",";
-            boolean inBlack = excludeMethods.contains(methodName + ",");
-            return !inBlack;
+        if (inMethodConfigs(excludeMethods, methodName)) {
+            return false;
         }
+        //默认还是要发布
+        return true;
+
+    }
+
+    /**
+     * 否则存在method configs 字符串中
+     *
+     * @param methodConfigs
+     * @param methodName
+     * @return
+     */
+    private boolean inMethodConfigs(String methodConfigs, String methodName) {
+        String[] excludeMethodCollections = StringUtils.splitWithCommaOrSemicolon(methodConfigs);
+        for (String excludeMethodName : excludeMethodCollections) {
+            boolean exist = StringUtils.equals(excludeMethodName, methodName);
+            if (exist) {
+                return true;
+            }
+        }
+        return false;
     }
 }

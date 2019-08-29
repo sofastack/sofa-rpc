@@ -16,15 +16,20 @@
  */
 package com.alipay.sofa.rpc.test;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 /**
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class EchoServiceImpl implements EchoService {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(EchoServiceImpl.class);
+
     @Override
     public String echoStr(String arg) {
-        System.out.println(arg);
+        LOGGER.info(arg);
         return arg;
     }
 }

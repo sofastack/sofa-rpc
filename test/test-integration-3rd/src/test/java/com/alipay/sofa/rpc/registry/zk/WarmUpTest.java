@@ -16,13 +16,13 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,7 +36,7 @@ public class WarmUpTest extends BaseZkTest {
     public void testWarmUp() throws InterruptedException {
 
         RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
@@ -78,7 +78,7 @@ public class WarmUpTest extends BaseZkTest {
         }
 
         long elapsed = System.currentTimeMillis() - startTime;
-        System.out.println("elapsed " + elapsed + "ms");
+        LOGGER.info("elapsed " + elapsed + "ms");
 
         long sleepTime = 2100 - elapsed;
         if (sleepTime >= 0) {

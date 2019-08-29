@@ -20,14 +20,11 @@ import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.AbstractLoadBalancer;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.HashUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.ext.Extension;
 
-import java.io.UnsupportedEncodingException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -36,7 +33,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author 景竹 2018/8/13 since 5.5.0
  */
-// TODO: 2018/12/27 by zmyer
 @Extension("weightConsistentHash")
 public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
@@ -64,8 +60,8 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
         Selector selector = selectorCache.get(key);
         // 原来没有
         if (selector == null ||
-                // 或者服务列表已经变化
-                selector.getHashCode() != hashcode) {
+            // 或者服务列表已经变化
+            selector.getHashCode() != hashcode) {
             selector = new Selector(interfaceId, method, providerInfos, hashcode);
             selectorCache.put(key, selector);
         }
@@ -80,17 +76,17 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
         /**
          * The Hashcode.
          */
-        private final int hashcode;
+        private final int                         hashcode;
 
         /**
          * The Interface id.
          */
-        private final String interfaceId;
+        private final String                      interfaceId;
 
         /**
          * The Method name.
          */
-        private final String method;
+        private final String                      method;
 
         /**
          * 虚拟节点
@@ -121,14 +117,14 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
             this.method = method;
             this.hashcode = hashcode;
             // 创建虚拟节点环 （provider创建虚拟节点数 =  真实节点权重 * 32）
-            this.virtualNodes = new TreeMap<>();
+            this.virtualNodes = new TreeMap<Long, ProviderInfo>();
             // 设置越大越慢，精度越高
             int num = 32;
             for (ProviderInfo providerInfo : actualNodes) {
                 for (int i = 0; i < num * providerInfo.getWeight() / 4; i++) {
-                    byte[] digest = messageDigest(providerInfo.getHost() + providerInfo.getPort() + i);
+                    byte[] digest = HashUtils.messageDigest(providerInfo.getHost() + providerInfo.getPort() + i);
                     for (int h = 0; h < 4; h++) {
-                        long m = hash(digest, h);
+                        long m = HashUtils.hash(digest, h);
                         virtualNodes.put(m, providerInfo);
                     }
                 }
@@ -143,8 +139,8 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
          */
         public ProviderInfo select(SofaRequest request) {
             String key = buildKeyOfHash(request.getMethodArgs());
-            byte[] digest = messageDigest(key);
-            return selectForKey(hash(digest, 0));
+            byte[] digest = HashUtils.messageDigest(key);
+            return selectForKey(HashUtils.hash(digest, 0));
         }
 
         /**
@@ -173,40 +169,6 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
                 entry = virtualNodes.firstEntry();
             }
             return entry.getValue();
-        }
-
-        /**
-         * 换算法？ MD5  SHA-1 MurMurHash???
-         *
-         * @param value the value
-         * @return the byte []
-         */
-        private byte[] messageDigest(String value) {
-            MessageDigest md5;
-            try {
-                md5 = MessageDigest.getInstance("MD5");
-                md5.update(value.getBytes("UTF-8"));
-                return md5.digest();
-            } catch (NoSuchAlgorithmException e) {
-                throw new SofaRpcRuntimeException("No such algorithm named md5", e);
-            } catch (UnsupportedEncodingException e) {
-                throw new SofaRpcRuntimeException("Unsupported encoding of" + value, e);
-            }
-        }
-
-        /**
-         * Hash long.
-         *
-         * @param digest the digest
-         * @param index  the number
-         * @return the long
-         */
-        private long hash(byte[] digest, int index) {
-            long f = ((long) (digest[3 + index * 4] & 0xFF) << 24)
-                    | ((long) (digest[2 + index * 4] & 0xFF) << 16)
-                    | ((long) (digest[1 + index * 4] & 0xFF) << 8)
-                    | (digest[index * 4] & 0xFF);
-            return f & 0xFFFFFFFFL;
         }
 
         /**

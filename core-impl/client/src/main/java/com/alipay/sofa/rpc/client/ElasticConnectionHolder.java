@@ -26,11 +26,17 @@ import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import com.alipay.sofa.rpc.transport.ClientTransportFactory;
 
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONCUMER_CONNECT_ELASTIC_SIZE;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PRECENT;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PERCENT;
 
 /**
  * 弹性长连接，可按百分比配置以及按个数配置
@@ -38,24 +44,24 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_ELASTIC_PRE
  * @author <a href=mailto:liangyuanpengem@163.com>LiangYuanPeng</a>
  * @since 5.5.0
  */
-// TODO: 2018/12/28 by zmyer
+
 @Extension("elastic")
 public class ElasticConnectionHolder extends AllConnectConnectionHolder {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ElasticConnectionHolder.class);
+    private final static Logger LOGGER                = LoggerFactory.getLogger(ElasticConnectionHolder.class);
 
     /**
      * 弹性连接，初始化连接百分比数
      */
-    protected int elasticConnectPercent = getIntValue(CONSUMER_CONNECT_ELASTIC_PRECENT);
+    protected int               elasticConnectPercent = getIntValue(CONSUMER_CONNECT_ELASTIC_PERCENT);
 
     /**
      * 弹性连接，初始化连接数
      */
-    protected int elasticConnectSize = getIntValue(CONCUMER_CONNECT_ELASTIC_SIZE);
+    protected int               elasticConnectSize    = getIntValue(CONCUMER_CONNECT_ELASTIC_SIZE);
 
     /**
      * 构造函数
@@ -67,7 +73,6 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
         this.consumerConfig = consumerBootstrap.getConsumerConfig();
     }
 
-    // TODO: 2018/12/28 by zmyer
     @Override
     protected void addNode(List<ProviderInfo> providerInfoList) {
         final String interfaceId = consumerConfig.getInterfaceId();
@@ -94,13 +99,12 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
 
             int connectTimeout = consumerConfig.getConnectTimeout();
 
-            NamedThreadFactory namedThreadFactory =
-                    new NamedThreadFactory("CLI-CONN-" + interfaceId, true);
+            NamedThreadFactory namedThreadFactory = new NamedThreadFactory("CLI-CONN-" + interfaceId, true);
 
             ThreadPoolExecutor initPool = new ThreadPoolExecutor(threads, threads,
-                    0L, TimeUnit.MILLISECONDS,
-                    new LinkedBlockingQueue<Runnable>(minSynConnectSize),
-                    namedThreadFactory);
+                0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>(minSynConnectSize),
+                namedThreadFactory);
 
             // 第一次同步建立连接的连接数
             int synInitConnectProviderSize = 0;
@@ -114,7 +118,9 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
 
             try {
                 int totalTimeout = ((synInitConnectProviderSize % threads == 0) ? (synInitConnectProviderSize / threads)
-                        : ((synInitConnectProviderSize / threads) + 1)) * connectTimeout + 500;
+                    : ((synInitConnectProviderSize /
+                    threads) + 1)) *
+                    connectTimeout + 500;
                 latch.await(totalTimeout, TimeUnit.MILLISECONDS); // 一直等到子线程都结束
             } catch (InterruptedException e) {
                 LOGGER.errorWithApp(appName, "Exception when add provider", e);
@@ -123,17 +129,17 @@ public class ElasticConnectionHolder extends AllConnectConnectionHolder {
             }
 
             final List<ProviderInfo> asynConnectProviderInfoList = providerInfoList.subList(synInitConnectProviderSize,
-                    providerInfoList.size());
+                providerInfoList.size());
 
             if (!asynConnectProviderInfoList.isEmpty()) {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, "asynConnectProviderInfoListSize:{}",
-                            asynConnectProviderInfoList.size());
+                        asynConnectProviderInfoList.size());
                 }
                 final ExecutorService executorService = new ThreadPoolExecutor(5, 5,
-                        0L, TimeUnit.MILLISECONDS,
-                        new LinkedBlockingQueue<Runnable>(asynConnectProviderInfoList.size()),
-                        namedThreadFactory);
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(asynConnectProviderInfoList.size()),
+                    namedThreadFactory);
 
                 FutureTask<String> futureTask;
 
