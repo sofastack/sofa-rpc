@@ -52,7 +52,7 @@ public class CommonUtils {
      * @return 不为空，且为true
      */
     public static boolean isTrue(String b) {
-        return b != null && StringUtils.TRUE.equalsIgnoreCase(b);
+        return b != null && "true".equalsIgnoreCase(b);
     }
 
     /**
@@ -82,7 +82,7 @@ public class CommonUtils {
      * @return 不为空，且为true
      */
     public static boolean isFalse(String b) {
-        return b != null && StringUtils.FALSE.equalsIgnoreCase(b);
+        return b != null && "false".equalsIgnoreCase(b);
     }
 
     /**
@@ -177,25 +177,6 @@ public class CommonUtils {
     }
 
     /**
-     * String Long turn number.
-     *
-     * @param num         The number of strings.
-     * @param defaultLong The default value
-     * @return long
-     */
-    public static long parseLong(String num, long defaultLong) {
-        if (num == null) {
-            return defaultLong;
-        } else {
-            try {
-                return Long.parseLong(num);
-            } catch (Exception e) {
-                return defaultLong;
-            }
-        }
-    }
-
-    /**
      * 字符串转布尔
      *
      * @param bool       数字
@@ -248,7 +229,9 @@ public class CommonUtils {
             List<T> ltmp = new ArrayList<T>(left);
             List<T> rtmp = new ArrayList<T>(right);
             for (T t : ltmp) {
-                rtmp.remove(t);
+                if (rtmp.contains(t)) {
+                    rtmp.remove(t);
+                }
             }
             return rtmp.isEmpty();
         }

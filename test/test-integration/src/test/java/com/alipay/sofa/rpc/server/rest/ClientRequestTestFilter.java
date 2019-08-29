@@ -16,9 +16,6 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
-
 import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
 import javax.ws.rs.client.ClientRequestFilter;
@@ -32,26 +29,25 @@ import java.io.IOException;
 @Provider
 @Priority(150)
 public class ClientRequestTestFilter implements ClientRequestFilter {
-    private final static Logger LOGGER = LoggerFactory.getLogger(ClientRequestTestFilter.class);
 
-    private static String       name   = "X";
+    private static String name  = "X";
 
     @CustomerAnnotation()
-    private static String       code   = "x";
+    private static String code  = "x";
 
-    private static String       code2  = "x";
+    private static String code2 = "x";
 
     @Override
     public void filter(ClientRequestContext requestContext) throws IOException {
-        LOGGER.info("客户端request filter生效");
+        System.out.println("客户端request filter生效");
         name = "A";
-        LOGGER.info("客户端customerAnnotation  code:" + code);
+        System.out.println("客户端customerAnnotion  code:" + code);
     }
 
     @CustomerAnnotation()
     public void setCode(String code2) {
         this.code2 = code2;
-        LOGGER.info("客户端customerAnnotation  code2:" + this.code2);
+        System.out.println("客户端customerAnnotion  code2:" + this.code2);
 
     }
 

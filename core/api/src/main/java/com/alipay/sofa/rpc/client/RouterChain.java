@@ -54,14 +54,14 @@ public class RouterChain {
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = Collections
-            .synchronizedMap(new ConcurrentHashMap<>());
+    private final static ConcurrentHashMap<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES =
+            new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = Collections
-            .synchronizedMap(new ConcurrentHashMap<>());
+    private final static ConcurrentHashMap<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES =
+            new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 扩展加载器
@@ -80,8 +80,7 @@ public class RouterChain {
                     String alias = extensionClass.getAlias();
                     if (autoActive.providerSide()) {
                         PROVIDER_AUTO_ACTIVES.put(alias, extensionClass);
-                    }
-                    if (autoActive.consumerSide()) {
+                    } else if (autoActive.consumerSide()) {
                         CONSUMER_AUTO_ACTIVES.put(alias, extensionClass);
                     }
                     if (LOGGER.isDebugEnabled()) {

@@ -48,7 +48,7 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
         Thread.sleep(100);

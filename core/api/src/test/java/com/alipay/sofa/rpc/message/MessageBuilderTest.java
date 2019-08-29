@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.message;
 
-import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -34,11 +33,11 @@ public class MessageBuilderTest {
     @Test
     public void buildSofaRequest() throws Exception {
         SofaRequest request = MessageBuilder.buildSofaRequest(Number.class, "intValue",
-            new Class[0], CodecUtils.EMPTY_OBJECT_ARRAY);
+            new Class[0], new Object[0]);
         Assert.assertEquals(request.getInterfaceName(), Number.class.getName());
         Assert.assertEquals(request.getMethodName(), "intValue");
-        Assert.assertArrayEquals(CodecUtils.EMPTY_OBJECT_ARRAY, request.getMethodArgs());
-        Assert.assertArrayEquals(StringUtils.EMPTY_STRING_ARRAY, request.getMethodArgSigs());
+        Assert.assertArrayEquals(request.getMethodArgs(), new Object[0]);
+        Assert.assertArrayEquals(request.getMethodArgSigs(), StringUtils.EMPTY_STRING_ARRAY);
 
         request = MessageBuilder.buildSofaRequest(Comparable.class, "compareTo",
             new Class[] { Object.class }, new Object[] { null });
@@ -52,11 +51,11 @@ public class MessageBuilderTest {
     public void buildSofaRequest1() throws Exception {
         Method method = Number.class.getMethod("intValue");
         SofaRequest request = MessageBuilder.buildSofaRequest(Number.class, method,
-            new Class[0], StringUtils.EMPTY_STRING_ARRAY);
+            new Class[0], new Object[0]);
         Assert.assertEquals(request.getInterfaceName(), Number.class.getName());
         Assert.assertEquals(request.getMethodName(), "intValue");
-        Assert.assertArrayEquals(StringUtils.EMPTY_STRING_ARRAY, request.getMethodArgs());
-        Assert.assertArrayEquals(StringUtils.EMPTY_STRING_ARRAY, request.getMethodArgSigs());
+        Assert.assertArrayEquals(request.getMethodArgs(), new Object[0]);
+        Assert.assertArrayEquals(request.getMethodArgSigs(), StringUtils.EMPTY_STRING_ARRAY);
 
         method = Comparable.class.getMethod("compareTo", Object.class);
         request = MessageBuilder.buildSofaRequest(Comparable.class, method,

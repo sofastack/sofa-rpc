@@ -102,7 +102,7 @@ public class FutureTest extends ActivelyDestroyTest {
             error = true;
         } finally {
             end = System.currentTimeMillis();
-            LOGGER.info("elapsed time " + (end - start) + "ms");
+            System.out.println("elapsed time " + (end - start) + "ms");
             Assert.assertTrue((end - start) < 400);
         }
         Assert.assertTrue(error);
@@ -124,7 +124,7 @@ public class FutureTest extends ActivelyDestroyTest {
             error = true;
         } finally {
             end = System.currentTimeMillis();
-            LOGGER.info("elapsed time " + (end - start) + "ms");
+            System.out.println("elapsed time " + (end - start) + "ms");
             Assert.assertTrue((end - start) < 400);
         }
         Assert.assertTrue(error);

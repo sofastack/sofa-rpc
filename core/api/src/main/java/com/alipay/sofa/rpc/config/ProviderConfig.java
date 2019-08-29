@@ -28,12 +28,13 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROVIDER_BOOTSTRAP;
 import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_CONCURRENTS;
 import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_DELAY;
 import static com.alipay.sofa.rpc.common.RpcOptions.PROVIDER_DYNAMIC;
@@ -103,7 +104,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * 启动器
      */
-    protected String bootstrap;
+    protected String bootstrap = getStringValue(DEFAULT_PROVIDER_BOOTSTRAP);
 
     /**
      * 自定义线程池
@@ -138,7 +139,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
     /**
      * 方法名称：是否可调用
      */
-    protected transient volatile ConcurrentMap<String, Boolean> methodsLimit;
+    protected transient volatile ConcurrentHashMap<String, Boolean> methodsLimit;
 
     /**
      * 服务提供者启动类
@@ -513,7 +514,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      * @param methodsLimit the methodsLimit
      * @return the ProviderConfig
      */
-    public ProviderConfig<T> setMethodsLimit(ConcurrentMap<String, Boolean> methodsLimit) {
+    public ProviderConfig<T> setMethodsLimit(ConcurrentHashMap<String, Boolean> methodsLimit) {
         this.methodsLimit = methodsLimit;
         return this;
     }
@@ -544,13 +545,5 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      */
     public ProviderBootstrap getProviderBootstrap() {
         return providerBootstrap;
-    }
-
-    /**
-     * set provider bootstrap
-     * @param providerBootstrap
-     */
-    public void setProviderBootstrap(ProviderBootstrap providerBootstrap) {
-        this.providerBootstrap = providerBootstrap;
     }
 }

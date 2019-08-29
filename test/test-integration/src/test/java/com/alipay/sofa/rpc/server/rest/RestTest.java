@@ -91,7 +91,7 @@ public class RestTest extends ActivelyDestroyTest {
                 }
             }, "thread" + i);
             thread.start();
-            LOGGER.info("send " + i);
+            System.out.println("send " + i);
             try {
                 Thread.sleep(200);
             } catch (Exception ignore) {
@@ -135,7 +135,5 @@ public class RestTest extends ActivelyDestroyTest {
 
         Assert.assertEquals(helloService.get("zzz"), "serverzzz");
         Assert.assertEquals(helloService.post("zzz", "boddddy"), "server zzzboddddy");
-
-        providerConfig.unExport();
     }
 }

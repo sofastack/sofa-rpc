@@ -18,22 +18,15 @@ package com.alipay.sofa.rpc.common.utils;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.List;
 
 /**
  *
  */
 public class ClassUtilsTest {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(CodecUtilsTest.class);
 
     @Test
     public void forName1() throws Exception {
@@ -162,35 +155,28 @@ public class ClassUtilsTest {
     }
 
     @Test
-    public void getDefaultPrimitiveValue() throws Exception {
-        Assert.assertEquals((short) 0, ClassUtils.getDefaultPrimitiveValue(short.class));
-        Assert.assertEquals(0, ClassUtils.getDefaultPrimitiveValue(int.class));
-        Assert.assertEquals(0l, ClassUtils.getDefaultPrimitiveValue(long.class));
-        Assert.assertEquals(0d, ClassUtils.getDefaultPrimitiveValue(double.class));
-        Assert.assertEquals(0f, ClassUtils.getDefaultPrimitiveValue(float.class));
-        Assert.assertEquals((byte) 0, ClassUtils.getDefaultPrimitiveValue(byte.class));
-        Assert.assertEquals((char) 0, ClassUtils.getDefaultPrimitiveValue(char.class));
-        Assert.assertEquals(false, ClassUtils.getDefaultPrimitiveValue(boolean.class));
+    public void getDefaultArg() throws Exception {
+        Assert.assertEquals((short) 0, ClassUtils.getDefaultArg(short.class));
+        Assert.assertEquals(0, ClassUtils.getDefaultArg(int.class));
+        Assert.assertEquals(0l, ClassUtils.getDefaultArg(long.class));
+        Assert.assertEquals(0d, ClassUtils.getDefaultArg(double.class));
+        Assert.assertEquals(0f, ClassUtils.getDefaultArg(float.class));
+        Assert.assertEquals((byte) 0, ClassUtils.getDefaultArg(byte.class));
+        Assert.assertEquals((char) 0, ClassUtils.getDefaultArg(char.class));
+        Assert.assertEquals(false, ClassUtils.getDefaultArg(boolean.class));
 
-        Assert.assertEquals(null, ClassUtils.getDefaultPrimitiveValue(Void.class));
-        Assert.assertEquals(null, ClassUtils.getDefaultPrimitiveValue(void.class));
-        Assert.assertEquals(null, ClassUtils.getDefaultPrimitiveValue(String.class));
-    }
+        Assert.assertEquals((short) 0, ClassUtils.getDefaultArg(Short.class));
+        Assert.assertEquals(0, ClassUtils.getDefaultArg(Integer.class));
+        Assert.assertEquals(0l, ClassUtils.getDefaultArg(Long.class));
+        Assert.assertEquals(0d, ClassUtils.getDefaultArg(Double.class));
+        Assert.assertEquals(0f, ClassUtils.getDefaultArg(Float.class));
+        Assert.assertEquals((byte) 0, ClassUtils.getDefaultArg(Byte.class));
+        Assert.assertEquals((char) 0, ClassUtils.getDefaultArg(Character.class));
+        Assert.assertEquals(false, ClassUtils.getDefaultArg(Boolean.class));
 
-    @Test
-    public void getDefaultWrapperValue() throws Exception {
-        Assert.assertTrue((short) 0 == ClassUtils.getDefaultWrapperValue(Short.class));
-        Assert.assertTrue(0 == ClassUtils.getDefaultWrapperValue(Integer.class));
-        Assert.assertTrue(0l == ClassUtils.getDefaultWrapperValue(Long.class));
-        Assert.assertTrue(0d == ClassUtils.getDefaultWrapperValue(Double.class));
-        Assert.assertTrue(0f == ClassUtils.getDefaultWrapperValue(Float.class));
-        Assert.assertTrue((byte) 0 == ClassUtils.getDefaultWrapperValue(Byte.class));
-        Assert.assertTrue((char) 0 == ClassUtils.getDefaultWrapperValue(Character.class));
-        Assert.assertTrue(false == ClassUtils.getDefaultWrapperValue(Boolean.class));
-
-        Assert.assertEquals(null, ClassUtils.getDefaultWrapperValue(Void.class));
-        Assert.assertEquals(null, ClassUtils.getDefaultWrapperValue(void.class));
-        Assert.assertEquals(null, ClassUtils.getDefaultWrapperValue(String.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultArg(Void.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultArg(void.class));
+        Assert.assertEquals(null, ClassUtils.getDefaultArg(String.class));
     }
 
     private static class TestMemberClass1 {
@@ -199,17 +185,17 @@ public class ClassUtilsTest {
 
     private static class TestMemberClass2 {
         private TestMemberClass2() {
-            LOGGER.info("init TestMemberClass2 ");
+            System.out.println("init TestMemberClass2 ");
         }
     }
 
     private static class TestMemberClass3 {
         private TestMemberClass3(String s) {
-            LOGGER.info("init TestMemberClass3 ");
+            System.out.println("init TestMemberClass3 ");
         }
 
         private TestMemberClass3(String s, int i) {
-            LOGGER.info("init TestMemberClass3 with 2 arg");
+            System.out.println("init TestMemberClass3 with 2 arg");
         }
     }
 
@@ -219,62 +205,18 @@ public class ClassUtilsTest {
 
     private class TestMemberClass5 {
         private TestMemberClass5() {
-            LOGGER.info("init TestMemberClass5 ");
+            System.out.println("init TestMemberClass5 ");
         }
     }
 
     private class TestMemberClass6 {
         private TestMemberClass6(int s) {
-            LOGGER.info("init TestMemberClass6 ");
+            System.out.println("init TestMemberClass6 ");
         }
 
         private TestMemberClass6(String s, int i) {
-            LOGGER.info("init TestMemberClass6 with 2 arg");
+            System.out.println("init TestMemberClass6 with 2 arg");
         }
     }
 
-    @Test
-    public void testIsAssignableFrom() throws MalformedURLException, ClassNotFoundException {
-        // single class loader
-        testIsAssignableFrom0();
-
-        // over different class loader
-        String codebase = ReflectUtils.getCodeBase(ClassUtilsTest.class);
-        String url = "file://" + codebase;
-        loader = new URLClassLoader(new URL[] { new URL(url) }, null);
-        try {
-            testIsAssignableFrom0();
-        } finally {
-            loader = null;
-        }
-    }
-
-    private void testIsAssignableFrom0() throws ClassNotFoundException {
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk0.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk1.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk2.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk3.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk4.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk5.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk6.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk7.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk8.class)));
-        Assert.assertTrue(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignOk9.class)));
-
-        Assert.assertFalse(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignNotOk.class)));
-        Assert.assertFalse(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignNotOk0.class)));
-        Assert.assertFalse(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignNotOk1.class)));
-        Assert.assertFalse(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignNotOk2.class)));
-        Assert.assertFalse(ClassUtils.isAssignableFrom(TestAssignOk.class, getClass(TestAssignNotOk3.class)));
-    }
-
-    private static ClassLoader loader;
-
-    private static Class getClass(Class clazz) throws ClassNotFoundException {
-        if (loader != null) {
-            return loader.loadClass(clazz.getCanonicalName());
-        }
-        return clazz;
-    }
 }

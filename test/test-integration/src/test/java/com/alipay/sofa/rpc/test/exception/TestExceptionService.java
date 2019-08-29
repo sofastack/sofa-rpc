@@ -32,6 +32,4 @@ public interface TestExceptionService {
     public String throwSofaException() throws SofaRpcException;
 
     public String throwDeclaredException() throws TestException;
-
-    public void throwDeclaredExceptionWithoutReturn() throws TestException;
 }

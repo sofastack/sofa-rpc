@@ -69,7 +69,7 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
             // and still be able to call ResteasyProviderFactory.getInstance()
             if (!(providerFactory instanceof ThreadLocalResteasyProviderFactory)) {
                 if (ResteasyProviderFactory.peekInstance() == null ||
-                    !(ResteasyProviderFactory.peekInstance() instanceof ThreadLocalResteasyProviderFactory)) {
+                        !(ResteasyProviderFactory.peekInstance() instanceof ThreadLocalResteasyProviderFactory)) {
 
                     threadLocalProviderFactory = new ThreadLocalResteasyProviderFactory(providerFactory);
                     ResteasyProviderFactory.setInstance(threadLocalProviderFactory);
@@ -177,7 +177,7 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
                 // com/sun/ts/tests/jaxrs/spec/provider/standardhaspriority/JAXRSClient.java#readWriteMapProviderTest_from_standalone                                               Failed. Test case throws exception: [JAXRSCommonClient] null failed!  Check output for cause of failure.
                 // com/sun/ts/tests/jaxrs/spec/provider/standardwithjaxrsclient/JAXRSClient.java#mapElementProviderTest_from_standalone                                             Failed. Test case throws exception: returned MultivaluedMap is null
                 providerFactory.registerProviderInstance(new ServerFormUrlEncodedProvider(useContainerFormParams),
-                    null, null, true);
+                        null, null, true);
             } else {
                 providerFactory.setRegisterBuiltins(false);
             }
@@ -192,7 +192,7 @@ public class SofaResteasyDeployment extends ResteasyDeployment {
 
             if (paramMapping != null) {
                 providerFactory.getContainerRequestFilterRegistry().registerSingleton(
-                    new AcceptParameterHttpPreprocessor(paramMapping));
+                        new AcceptParameterHttpPreprocessor(paramMapping));
             }
 
             AcceptHeaderByFileSuffixFilter suffixNegotiationFilter = null;

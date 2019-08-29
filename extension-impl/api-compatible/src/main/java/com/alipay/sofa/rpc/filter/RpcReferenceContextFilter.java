@@ -82,7 +82,7 @@ public class RpcReferenceContextFilter extends Filter {
         // 调用后
         InetSocketAddress local = context.getLocalAddress();
         if (local != null) {
-            referenceCtx.setClientIP(NetUtils.toIpString(local));
+            referenceCtx.setClinetIP(NetUtils.toIpString(local));
             referenceCtx.setClientPort(local.getPort());
         }
         Long ct = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME);

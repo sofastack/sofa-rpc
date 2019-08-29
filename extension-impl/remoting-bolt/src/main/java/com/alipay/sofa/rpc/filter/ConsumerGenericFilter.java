@@ -30,7 +30,6 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-// TODO: 2018/12/28 by zmyer
 @Extension(value = "consumerGeneric", order = -18000)
 @AutoActive(consumerSide = true)
 public class ConsumerGenericFilter extends Filter {
@@ -38,15 +37,11 @@ public class ConsumerGenericFilter extends Filter {
     /**
      * 方法名 $invoke
      */
-    private static final String METHOD_INVOKE = "$invoke";
+    private static final String METHOD_INVOKE         = "$invoke";
     /**
      * 方法名 $genericInvoke
      */
     private static final String METHOD_GENERIC_INVOKE = "$genericInvoke";
-
-    private final static String REVISE_KEY            = "generic.revise";
-
-    private final static String REVISE_VALUE          = "true";
 
     /**
      * 是否自动加载
@@ -60,27 +55,12 @@ public class ConsumerGenericFilter extends Filter {
         return consumerConfig.isGeneric();
     }
 
-    // TODO: 2018/12/28 by zmyer
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         try {
+            int type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
+            request.setSerializeFactoryType(type);
 
-            final String revised = (String) request.getRequestProp(REVISE_KEY);
-            //if has revised, invoke directly
-            if (REVISE_VALUE.equals(revised)) {
-                return invoker.invoke(request);
-            }
-            String type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
-            request.addRequestProp(RemotingConstants.HEAD_GENERIC_TYPE, type);
-
-            // 修正超时时间
-            Long clientTimeout = getClientTimeoutFromGenericContext(request.getMethodName(),
-                request.getMethodArgs());
-            if (clientTimeout != null) {
-                request.setTimeout(clientTimeout.intValue());
-            }
-
-            // 修正请求对象
             Object[] genericArgs = request.getMethodArgs();
             String methodName = (String) genericArgs[0];
             String[] argTypes = (String[]) genericArgs[1];
@@ -95,7 +75,7 @@ public class ConsumerGenericFilter extends Filter {
             String invokeType = consumerConfig.getMethodInvokeType(methodName);
             request.setInvokeType(invokeType);
             request.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE, invokeType);
-            request.addRequestProp(REVISE_KEY, REVISE_VALUE);
+
             return invoker.invoke(request);
         } catch (SofaRpcException e) {
             throw e;
@@ -104,8 +84,7 @@ public class ConsumerGenericFilter extends Filter {
         }
     }
 
-    // TODO: 2018/12/28 by zmyer
-    private String getSerializeFactoryType(String method, Object[] args) throws SofaRpcException {
+    private int getSerializeFactoryType(String method, Object[] args) throws SofaRpcException {
         if (METHOD_INVOKE.equals(method)) {
             // 方法名为 $invoke
             return RemotingConstants.SERIALIZE_FACTORY_NORMAL;
@@ -128,16 +107,5 @@ public class ConsumerGenericFilter extends Filter {
             }
         }
         throw new SofaRpcException(RpcErrorType.CLIENT_FILTER, "Unsupported method of generic service");
-    }
-
-    private Long getClientTimeoutFromGenericContext(String method, Object[] args) throws SofaRpcException {
-        if (METHOD_GENERIC_INVOKE.equals(method)) {
-            if (args.length == 4 && args[3] instanceof GenericContext) {
-                return ((GenericContext) args[3]).getClientTimeout();
-            } else if (args.length == 5 && args[4] instanceof GenericContext) {
-                return ((GenericContext) args[4]).getClientTimeout();
-            }
-        }
-        return null;
     }
 }

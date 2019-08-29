@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of Registry
@@ -41,12 +40,14 @@ public class RegistryFactory {
     /**
      * 保存全部的配置和注册中心实例
      */
-    private final static ConcurrentMap<RegistryConfig, Registry> ALL_REGISTRIES = new ConcurrentHashMap<RegistryConfig, Registry>();
+    private final static ConcurrentHashMap<RegistryConfig, Registry> ALL_REGISTRIES =
+            new ConcurrentHashMap<RegistryConfig, Registry>();
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(RegistryFactory.class);
 
     /**
      * 得到注册中心对象
@@ -71,7 +72,7 @@ public class RegistryFactory {
                     throw ExceptionUtils.buildRuntime("registry.protocol", registryConfig.getProtocol(),
                             "Unsupported protocol of registry config !");
                 }
-                registry = ext.getExtInstance(new Class[]{RegistryConfig.class}, new Object[]{registryConfig});
+                registry = ext.getExtInstance(new Class[]{ RegistryConfig.class }, new Object[]{ registryConfig });
                 ALL_REGISTRIES.put(registryConfig, registry);
             }
             return registry;
@@ -88,7 +89,7 @@ public class RegistryFactory {
      * @return 注册中心配置
      */
     public static List<RegistryConfig> getRegistryConfigs() {
-        return new ArrayList<>(ALL_REGISTRIES.keySet());
+        return new ArrayList<RegistryConfig>(ALL_REGISTRIES.keySet());
     }
 
     /**
@@ -97,7 +98,7 @@ public class RegistryFactory {
      * @return 注册中心
      */
     public static List<Registry> getRegistries() {
-        return new ArrayList<>(ALL_REGISTRIES.values());
+        return new ArrayList<Registry>(ALL_REGISTRIES.values());
     }
 
     /**

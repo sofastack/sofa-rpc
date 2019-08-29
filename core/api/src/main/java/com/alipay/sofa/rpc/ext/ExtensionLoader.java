@@ -37,7 +37,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * <p>一个可扩展接口类，对应一个加载器</p>
@@ -49,7 +48,8 @@ public class ExtensionLoader<T> {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ExtensionLoader.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(ExtensionLoader.class);
 
     /**
      * 当前加载的接口类名
@@ -69,12 +69,12 @@ public class ExtensionLoader<T> {
     /**
      * 全部的加载的实现类 {"alias":ExtensionClass}
      */
-    protected final ConcurrentMap<String, ExtensionClass<T>> all;
+    protected final ConcurrentHashMap<String, ExtensionClass<T>> all;
 
     /**
      * 如果是单例，那么factory不为空
      */
-    protected final ConcurrentMap<String, T> factory;
+    protected final ConcurrentHashMap<String, T> factory;
 
     /**
      * 加载监听器
@@ -199,7 +199,7 @@ public class ExtensionLoader<T> {
         }
     }
 
-    protected void readLine(URL url, String line) {
+    protected void readLine(URL url, String line) throws Throwable {
         String[] aliasAndClassName = parseAliasAndClassName(line);
         if (aliasAndClassName == null || aliasAndClassName.length != 2) {
             return;
@@ -214,9 +214,6 @@ public class ExtensionLoader<T> {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Extension {} of extensible {} is disabled, cause by: {}",
                         className, interfaceName, ExceptionUtils.toShortString(e, 2));
-            }
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("Extension " + className + " of extensible " + interfaceName + " is disabled.", e);
             }
             return;
         }
@@ -310,10 +307,6 @@ public class ExtensionLoader<T> {
                     String[] rejection = extensionClass.getRejection();
                     if (CommonUtils.isNotEmpty(rejection)) {
                         for (String rej : rejection) {
-                            existed = all.get(rej);
-                            if (existed == null || extensionClass.getOrder() < existed.getOrder()) {
-                                continue;
-                            }
                             ExtensionClass removed = all.remove(rej);
                             if (removed != null) {
                                 if (LOGGER.isInfoEnabled()) {
@@ -357,16 +350,9 @@ public class ExtensionLoader<T> {
     }
 
     private void loadSuccess(String alias, ExtensionClass<T> extensionClass) {
+        all.put(alias, extensionClass);
         if (listener != null) {
-            try {
-                listener.onLoad(extensionClass); // 加载完毕，通知监听器
-                all.put(alias, extensionClass);
-            } catch (Exception e) {
-                LOGGER.error("Error when load extension of extensible " + interfaceClass + " with alias: "
-                        + alias + ".", e);
-            }
-        } else {
-            all.put(alias, extensionClass);
+            listener.onLoad(extensionClass); // 加载完毕，通知监听器
         }
     }
 
@@ -384,7 +370,7 @@ public class ExtensionLoader<T> {
         }
 
         String alias = null;
-        String className;
+        String className = null;
         int i = line.indexOf('=');
         if (i > 0) {
             alias = line.substring(0, i).trim(); // 以代码里的为准
@@ -395,7 +381,7 @@ public class ExtensionLoader<T> {
         if (className.length() == 0) {
             return null;
         }
-        return new String[]{alias, className};
+        return new String[]{ alias, className };
     }
 
     /**
@@ -403,7 +389,7 @@ public class ExtensionLoader<T> {
      *
      * @return 扩展类对象
      */
-    public ConcurrentMap<String, ExtensionClass<T>> getAllExtensions() {
+    public ConcurrentHashMap<String, ExtensionClass<T>> getAllExtensions() {
         return all;
     }
 

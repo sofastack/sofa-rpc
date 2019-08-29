@@ -33,15 +33,15 @@ public interface Module {
      *
      * @return 是否
      */
-    boolean needLoad();
+    public boolean needLoad();
 
     /**
      * 安装模板
      */
-    void install();
+    public void install();
 
     /**
      * 卸载模块
      */
-    void uninstall();
+    public void uninstall();
 }

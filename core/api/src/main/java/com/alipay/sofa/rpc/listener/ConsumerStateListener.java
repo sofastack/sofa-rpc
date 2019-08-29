@@ -30,12 +30,12 @@ public interface ConsumerStateListener<T> {
      *
      * @param proxy 接口实现代理类
      */
-    void onAvailable(T proxy);
+    public void onAvailable(T proxy);
 
     /**
      * 状态变成不可用（无可用长连接）的时候
      *
      * @param proxy 接口实现代理类
      */
-    void onUnavailable(T proxy);
+    public void onUnavailable(T proxy);
 }

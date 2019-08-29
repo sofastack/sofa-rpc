@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
 import java.util.regex.Pattern;
@@ -27,37 +26,36 @@ import java.util.regex.Pattern;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-// TODO: 2018/12/29 by zmyer
 public class ConfigValueHelper {
     /**
      * 可用的字符串为：英文大小写，数字，横杆-，下划线_，点.
      * !@#$*,;:有特殊含义
      */
-    protected final static Pattern NORMAL = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.]+$");
+    protected final static Pattern NORMAL                 = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.]+$");
 
     /**
      * 可用的字符串为：英文大小写，数字，横杆-，下划线_，点. 逗号,
      * !@#$*;:有特殊含义
      */
-    protected final static Pattern NORMAL_COMMA = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.,]+$");
+    protected final static Pattern NORMAL_COMMA           = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.,]+$");
 
     /**
      * 可用的字符串为：英文大小写，数字，横杆-，下划线_，点. 冒号:
      * !@#$*,;有特殊含义
      */
-    protected final static Pattern NORMAL_COLON = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.:]+$");
+    protected final static Pattern NORMAL_COLON           = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.:]+$");
 
     /**
      * 可用的字符串为：英文大小写，数字，横杆-，下划线_，点. 分号;
      * !@#$*,;有特殊含义
      */
-    protected final static Pattern NORMAL_SEMICOLON = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.;]+$");
+    protected final static Pattern NORMAL_SEMICOLON       = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.;]+$");
 
     /**
      * 可用的字符串为：英文大小写，数字，横杆-，下划线_，点. 逗号, 冒号:
      * !@#$*,;有特殊含义
      */
-    protected final static Pattern NORMAL_COMMA_COLON = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.,:]+$");
+    protected final static Pattern NORMAL_COMMA_COLON     = Pattern.compile("^[a-zA-Z0-9\\-\\_\\.,:]+$");
 
     /**
      * 可用的字符串为：英文大小写，数字，横杆-，下划线_，点. 分号; 冒号:
@@ -72,10 +70,8 @@ public class ConfigValueHelper {
      * @return 是否为空或"false"或"null"
      */
     protected static boolean assertFalse(String string) {
-        return string == null
-                || StringUtils.EMPTY.equals(string)
-                || StringUtils.FALSE.equalsIgnoreCase(string)
-                || StringUtils.NULL.equals(string);
+        return string == null || "".equals(string)
+            || "false".equalsIgnoreCase(string) || "null".equals(string);
     }
 
     /**
@@ -129,7 +125,7 @@ public class ConfigValueHelper {
      * @throws SofaRpcRuntimeException 非法异常
      */
     protected static void checkNormalWithCommaColon(String configKey, String configValue)
-            throws SofaRpcRuntimeException {
+        throws SofaRpcRuntimeException {
         checkPattern(configKey, configValue, NORMAL_COMMA_COLON, "only allow a-zA-Z0-9 '-' '_' '.' ':' ','");
     }
 
@@ -143,7 +139,7 @@ public class ConfigValueHelper {
      * @throws SofaRpcRuntimeException
      */
     protected static void checkPattern(String configKey, String configValue, Pattern pattern, String message)
-            throws SofaRpcRuntimeException {
+        throws SofaRpcRuntimeException {
         if (configValue != null && !match(pattern, configValue)) {
             throw ExceptionUtils.buildRuntime(configKey, configValue, message);
         }

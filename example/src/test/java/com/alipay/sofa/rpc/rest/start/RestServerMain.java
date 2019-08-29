@@ -51,6 +51,8 @@ public class RestServerMain {
          */
 
         ServerConfig serverConfig = new ServerConfig()
+            //        .setHost("0.0.0.0")
+            //        .setPort(22222)
             .setProtocol("rest")
             .setPort(8888)
             .setDaemon(false);

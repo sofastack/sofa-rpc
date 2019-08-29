@@ -46,7 +46,7 @@ public class ServerTransportConfig {
     private boolean keepAlive = getBooleanValue(RpcOptions.TRANSPORT_SERVER_KEEPALIVE);
     private boolean tcpNoDelay = getBooleanValue(RpcOptions.TRANSPORT_SERVER_TCPNODELAY);
     private int bizMaxThreads = getIntValue(RpcOptions.SERVER_POOL_MAX);
-    //default business pool set to 200
+            //default business pool set to 200
     private String bizPoolType = getStringValue(RpcOptions.SERVER_POOL_TYPE);
 
     private boolean useEpoll = getBooleanValue(RpcOptions.TRANSPORT_USE_EPOLL);

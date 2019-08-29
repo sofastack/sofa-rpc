@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.bolt;
 
-import java.util.HashMap;
-import java.util.Map;
-
+import com.alipay.hessian.ClassNameResolver;
+import com.alipay.hessian.NameBlackListFilter;
+import com.alipay.hessian.generic.model.GenericObject;
 import com.alipay.remoting.DefaultCustomSerializer;
 import com.alipay.remoting.InvokeContext;
 import com.alipay.remoting.exception.DeserializationException;
@@ -28,19 +28,38 @@ import com.alipay.remoting.rpc.ResponseCommand;
 import com.alipay.remoting.rpc.protocol.RpcProtocol;
 import com.alipay.remoting.rpc.protocol.RpcRequestCommand;
 import com.alipay.remoting.rpc.protocol.RpcResponseCommand;
-import com.alipay.sofa.rpc.codec.Serializer;
+import com.alipay.sofa.rpc.codec.anthessian.BlackListFileLoader;
+import com.alipay.sofa.rpc.codec.anthessian.GenericMultipleClassLoaderSofaSerializerFactory;
+import com.alipay.sofa.rpc.codec.anthessian.GenericSingleClassLoaderSofaSerializerFactory;
+import com.alipay.sofa.rpc.codec.anthessian.MultipleClassLoaderSofaSerializerFactory;
+import com.alipay.sofa.rpc.codec.anthessian.SingleClassLoaderSofaSerializerFactory;
+import com.alipay.sofa.rpc.codec.antpb.ProtobufSerializer;
+import com.alipay.sofa.rpc.common.ReflectCache;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.common.utils.CodecUtils;
+import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.SofaConfigs;
+import com.alipay.sofa.rpc.common.SofaOptions;
+import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.transport.AbstractByteBuf;
-import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import com.alipay.sofa.rpc.log.LogCodes;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.SerializerFactory;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Sofa RPC BOLT 协议的对象序列化/反序列化自定义类
@@ -51,6 +70,9 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 // TODO: 2018/6/22 by zmyer
 public class SofaRpcSerialization extends DefaultCustomSerializer {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SofaRpcSerialization.class);
+    protected SerializerFactory serializerFactory;
+    protected SerializerFactory genericSerializerFactory;
     protected SimpleMapSerializer mapSerializer;
 
     public SofaRpcSerialization() {
@@ -62,11 +84,25 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     protected void init() {
         mapSerializer = new SimpleMapSerializer();
+        if (RpcConfigs.getBooleanValue(RpcOptions.MULTIPLE_CLASSLOADER_ENABLE)) {
+            serializerFactory = new MultipleClassLoaderSofaSerializerFactory();
+            genericSerializerFactory = new GenericMultipleClassLoaderSofaSerializerFactory();
+        } else {
+            serializerFactory = new SingleClassLoaderSofaSerializerFactory();
+            genericSerializerFactory = new GenericSingleClassLoaderSofaSerializerFactory();
+        }
+        if (RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) &&
+                SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
+            ClassNameResolver resolver = new ClassNameResolver();
+            resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
+            serializerFactory.setClassNameResolver(resolver);
+            genericSerializerFactory.setClassNameResolver(resolver);
+        }
     }
 
     @Override
     public <Response extends ResponseCommand> boolean serializeHeader(Response response)
-        throws SerializationException {
+            throws SerializationException {
         if (response instanceof RpcResponseCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -74,7 +110,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             if (responseObject instanceof SofaResponse) {
                 SofaResponse sofaResponse = (SofaResponse) responseObject;
                 if (sofaResponse.isError() || sofaResponse.getAppResponse() instanceof Throwable) {
-                    sofaResponse.addResponseProp(RemotingConstants.HEAD_RESPONSE_ERROR, StringUtils.TRUE);
+                    sofaResponse.addResponseProp(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
                 }
                 response.setHeader(mapSerializer.encode(sofaResponse.getResponseProps()));
             }
@@ -85,7 +121,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean serializeHeader(Request request, InvokeContext invokeContext)
-        throws SerializationException {
+            throws SerializationException {
         if (request instanceof RpcRequestCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -95,7 +131,12 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             if (StringUtils.isNotEmpty(service)) {
                 Map<String, String> header = new HashMap<String, String>(16);
                 header.put(RemotingConstants.HEAD_SERVICE, service);
-                putRequestMetadataToHeader(requestObject, header);
+                // 新序列化协议全部采用扁平化头部
+                byte serializer = requestCommand.getSerializer();
+                if (serializer != RemotingConstants.SERIALIZE_CODE_HESSIAN
+                        && serializer != RemotingConstants.SERIALIZE_CODE_JAVA) {
+                    putRequestMetadataToHeader(requestObject, header);
+                }
                 requestCommand.setHeader(mapSerializer.encode(header));
             }
             return true;
@@ -115,7 +156,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 Map<String, Object> requestProps = sofaRequest.getRequestProps();
                 if (requestProps != null) {
                     // <String, Object> 转扁平化 <String, String>
-                    CodecUtils.flatCopyTo("", requestProps, header);
+                    ContextMapConverter.flatCopyTo("", requestProps, header);
                 }
             }
         }
@@ -138,7 +179,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean deserializeHeader(Request request)
-        throws DeserializationException {
+            throws DeserializationException {
         if (request instanceof RpcRequestCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -159,7 +200,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean deserializeHeader(Response response, InvokeContext invokeContext)
-        throws DeserializationException {
+            throws DeserializationException {
         if (response instanceof RpcResponseCommand) {
             RpcInternalContext.getContext().getStopWatch().tick();
 
@@ -173,29 +214,63 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean serializeContent(Request request, InvokeContext invokeContext)
-        throws SerializationException {
+            throws SerializationException {
         if (request instanceof RpcRequestCommand) {
             RpcRequestCommand requestCommand = (RpcRequestCommand) request;
             Object requestObject = requestCommand.getRequestObject();
-            byte serializerCode = requestCommand.getSerializer();
-            try {
-                Map<String, String> header = (Map<String, String>) requestCommand.getRequestHeader();
-                if (header == null) {
-                    header = new HashMap<String, String>();
-                }
-                putKV(header, RemotingConstants.HEAD_GENERIC_TYPE,
-                    (String) invokeContext.get(RemotingConstants.HEAD_GENERIC_TYPE));
+            if (requestObject instanceof SofaRequest) {
+                byte serializer = requestCommand.getSerializer();
+                if (serializer == RemotingConstants.SERIALIZE_CODE_HESSIAN) {
+                    try {
+                        SofaRequest sofaRequest = (SofaRequest) requestObject;
+                        ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+                        Hessian2Output output = new Hessian2Output(byteArray);
 
-                Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory
-                    .getSerializer(serializerCode);
-                AbstractByteBuf byteBuf = rpcSerializer.encode(requestObject, header);
-                request.setContent(byteBuf.array());
-                return true;
-            } catch (Exception ex) {
-                throw new SerializationException(ex.getMessage(), ex);
-            } finally {
-                recordSerializeRequest(requestCommand, invokeContext);
+                        // 根据SerializeType信息决定序列化器
+                        boolean genericSerialize = genericSerializeRequest(invokeContext);
+                        if (genericSerialize) {
+                            output.setSerializerFactory(genericSerializerFactory);
+                        } else {
+                            output.setSerializerFactory(serializerFactory);
+                        }
+
+                        output.writeObject(sofaRequest);
+                        final Object[] args = sofaRequest.getMethodArgs();
+                        if (args != null) {
+                            for (Object arg : args) {
+                                output.writeObject(arg);
+                            }
+                        }
+                        output.close();
+                        request.setContent(byteArray.toByteArray());
+                        byteArray.close();
+
+                        return true;
+                    } catch (IOException ex) {
+                        throw new SerializationException(ex.getMessage(), ex);
+                    } finally {
+                        recordSerializeRequest(requestCommand, invokeContext);
+                    }
+                } else if (serializer == RemotingConstants.SERIALIZE_CODE_PROTOBUF) {
+                    // protobuf序列化
+                    try {
+                        SofaRequest sofaRequest = (SofaRequest) requestObject;
+                        Object[] args = sofaRequest.getMethodArgs();
+                        if (args.length > 1) {
+                            throw new SerializationException("Protobuf only support one parameter!");
+                        }
+                        request.setContent(ProtobufSerializer.getInstance().encode(args[0]));
+                        return true;
+                    } catch (SerializationException e) {
+                        throw e;
+                    } catch (Exception e) {
+                        throw new SerializationException(e.getMessage(), e);
+                    } finally {
+                        recordSerializeRequest(requestCommand, invokeContext);
+                    }
+                }
             }
+            return true;
         }
         return false;
     }
@@ -205,7 +280,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      *
      * @param requestCommand 请求对象
      */
-    protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext) {
+    private void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext) {
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -219,9 +294,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
         int cost = context.getStopWatch().tick().read();
         int requestSize = RpcProtocol.getRequestHeaderLength()
-            + requestCommand.getClazzLength()
-            + requestCommand.getContentLength()
-            + requestCommand.getHeaderLength();
+                + requestCommand.getClazzLength()
+                + requestCommand.getContentLength()
+                + requestCommand.getHeaderLength();
         // 记录请求序列化大小和请求序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME, cost);
@@ -229,7 +304,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Request extends RequestCommand> boolean deserializeContent(Request request)
-        throws DeserializationException {
+            throws DeserializationException {
         if (request instanceof RpcRequestCommand) {
             RpcRequestCommand requestCommand = (RpcRequestCommand) request;
             Object header = requestCommand.getRequestHeader();
@@ -237,33 +312,99 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 throw new DeserializationException("Head of request is null or is not map");
             }
             Map<String, String> headerMap = (Map<String, String>) header;
-            byte[] content = requestCommand.getContent();
-            if (content == null || content.length == 0) {
-                throw new DeserializationException("Content of request is null");
-            }
-            try {
-                String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
-                ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-
-                ClassLoader serviceClassLoader = ReflectCache.getServiceClassLoader(service);
-                try {
-                    Thread.currentThread().setContextClassLoader(serviceClassLoader);
-
-                    Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory
-                        .getSerializer(requestCommand.getSerializer());
-                    Object sofaRequest = ClassUtils.forName(requestCommand.getRequestClass()).newInstance();
-                    rpcSerializer.decode(new ByteArrayWrapperByteBuf(requestCommand.getContent()),
-                        sofaRequest, headerMap);
-                    requestCommand.setRequestObject(sofaRequest);
-                } finally {
-                    Thread.currentThread().setContextClassLoader(oldClassLoader);
+            byte serializer = requestCommand.getSerializer();
+            if (serializer == RemotingConstants.SERIALIZE_CODE_HESSIAN) {
+                byte[] content = requestCommand.getContent();
+                if (content == null || content.length == 0) {
+                    throw new DeserializationException("Content of request is null");
                 }
+                try {
+                    ByteArrayInputStream input = new ByteArrayInputStream(requestCommand.getContent());
+                    Hessian2Input hessianInput = new Hessian2Input(input);
+                    hessianInput.setSerializerFactory(serializerFactory);
+                    String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
+                    ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
 
-                return true;
-            } catch (Exception ex) {
-                throw new DeserializationException(ex.getMessage(), ex);
-            } finally {
-                recordDeserializeRequest(requestCommand);
+                    ClassLoader serviceClassLoader = ReflectCache.getServiceClassLoader(service);
+                    try {
+                        Thread.currentThread().setContextClassLoader(serviceClassLoader);
+                        Object object = hessianInput.readObject();
+                        if (object instanceof SofaRequest) {
+                            final SofaRequest sofaRequest = (SofaRequest) object;
+                            String[] sig = sofaRequest.getMethodArgSigs();
+                            Class<?>[] classSig = new Class[sig.length];
+                            generateArgTypes(sig, classSig, serviceClassLoader);
+
+                            final Object[] args = new Object[sig.length];
+                            for (int i = 0; i < sofaRequest.getMethodArgSigs().length; ++i) {
+                                args[i] = hessianInput.readObject(classSig[i]);
+                            }
+                            sofaRequest.setMethodArgs(args);
+                        }
+                        requestCommand.setRequestObject(object);
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(oldClassLoader);
+                    }
+
+                    input.close();
+                    hessianInput.close();
+                    return true;
+                } catch (IOException ex) {
+                    throw new DeserializationException(ex.getMessage(), ex);
+                } finally {
+                    recordDeserializeRequest(requestCommand);
+                }
+            } else if (serializer == RemotingConstants.SERIALIZE_CODE_PROTOBUF) {
+                // protobuf序列化
+                try {
+                    String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
+                    ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
+
+                    try {
+                        ClassLoader serviceClassLoader = ReflectCache.getServiceClassLoader(service);
+                        Thread.currentThread().setContextClassLoader(serviceClassLoader);
+
+                        final SofaRequest sofaRequest = new SofaRequest();
+                        // 解析request信息
+                        sofaRequest.setMethodName(headerMap.remove(RemotingConstants.HEAD_METHOD_NAME));
+                        sofaRequest.setTargetAppName(headerMap.remove(RemotingConstants.HEAD_TARGET_APP));
+                        sofaRequest.setTargetServiceUniqueName(headerMap.remove(RemotingConstants.HEAD_TARGET_SERVICE));
+
+                        // 解析trace信息
+                        Map<String, String> traceMap = new HashMap<String, String>(16);
+                        ContextMapConverter.treeCopyTo(RemotingConstants.RPC_TRACE_NAME + ".", headerMap,
+                                traceMap, true);
+                        sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
+                        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                            sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
+                        }
+
+                        // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
+                        Class requestClass = ProtobufSerializer.getReqClass(service,
+                                sofaRequest.getMethodName(), serviceClassLoader);
+                        byte[] content = requestCommand.getContent();
+                        if (content == null || content.length == 0) {
+                            Constructor constructor = requestClass.getDeclaredConstructor();
+                            constructor.setAccessible(true);
+                            sofaRequest.setMethodArgs(new Object[]{ constructor.newInstance() });
+                        } else {
+                            Object pbReq = ProtobufSerializer.getInstance().decode(content, requestClass);
+                            sofaRequest.setMethodArgs(new Object[]{ pbReq });
+                        }
+                        sofaRequest.setMethodArgSigs(new String[]{ requestClass.getName() });
+
+                        requestCommand.setRequestObject(sofaRequest);
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(oldClassLoader);
+                    }
+                    return true;
+                } catch (DeserializationException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new DeserializationException(e.getMessage(), e);
+                } finally {
+                    recordDeserializeRequest(requestCommand);
+                }
             }
         }
         return false;
@@ -281,9 +422,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         RpcInternalContext context = RpcInternalContext.getContext();
         int cost = context.getStopWatch().tick().read();
         int requestSize = RpcProtocol.getRequestHeaderLength()
-            + requestCommand.getClazzLength()
-            + requestCommand.getContentLength()
-            + requestCommand.getHeaderLength();
+                + requestCommand.getClazzLength()
+                + requestCommand.getContentLength()
+                + requestCommand.getHeaderLength();
         // 记录请求反序列化大小和请求反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME, cost);
@@ -291,19 +432,54 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean serializeContent(Response response)
-        throws SerializationException {
+            throws SerializationException {
         if (response instanceof RpcResponseCommand) {
             RpcResponseCommand responseCommand = (RpcResponseCommand) response;
-            byte serializerCode = response.getSerializer();
-            try {
-                Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory.getSerializer(serializerCode);
-                AbstractByteBuf byteBuf = rpcSerializer.encode(responseCommand.getResponseObject(), null);
-                responseCommand.setContent(byteBuf.array());
-                return true;
-            } catch (Exception ex) {
-                throw new SerializationException(ex.getMessage(), ex);
-            } finally {
-                recordSerializeResponse(responseCommand);
+            byte serializer = response.getSerializer();
+            if (serializer == RemotingConstants.SERIALIZE_CODE_HESSIAN) {
+                try {
+                    ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+                    Hessian2Output output = new Hessian2Output(byteArray);
+                    output.setSerializerFactory(serializerFactory);
+                    output.writeObject(responseCommand.getResponseObject());
+                    output.close();
+                    response.setContent(byteArray.toByteArray());
+                    byteArray.close();
+
+                    return true;
+                } catch (IOException ex) {
+                    throw new SerializationException(ex.getMessage(), ex);
+                } finally {
+                    recordSerializeResponse(responseCommand);
+                }
+            } else if (serializer == RemotingConstants.SERIALIZE_CODE_PROTOBUF) {
+                try {
+                    if (responseCommand.getResponseObject() instanceof SofaResponse) {
+                        SofaResponse sofaResponse = (SofaResponse) responseCommand.getResponseObject();
+                        if (sofaResponse.isError()) {
+                            // 框架异常：错误则body序列化的是错误字符串
+                            byte[] content = ProtobufSerializer.getInstance().encode(sofaResponse.getErrorMsg());
+                            response.setContent(content);
+                        } else {
+                            // 正确返回则解析序列化的protobuf返回对象
+                            Object appResponse = sofaResponse.getAppResponse();
+                            if (appResponse instanceof Throwable) {
+                                // 业务异常序列化的是错误字符串
+                                response.setContent(ProtobufSerializer.getInstance()
+                                        .encode(((Throwable) appResponse).getMessage()));
+                            } else {
+                                response.setContent(ProtobufSerializer.getInstance().encode(appResponse));
+                            }
+                        }
+                    }
+                    return true;
+                } catch (SerializationException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new SerializationException(e.getMessage(), e);
+                } finally {
+                    recordSerializeResponse(responseCommand);
+                }
             }
         }
         return false;
@@ -321,9 +497,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         RpcInternalContext context = RpcInternalContext.getContext();
         int cost = context.getStopWatch().tick().read();
         int respSize = RpcProtocol.getResponseHeaderLength()
-            + responseCommand.getClazzLength()
-            + responseCommand.getContentLength()
-            + responseCommand.getHeaderLength();
+                + responseCommand.getClazzLength()
+                + responseCommand.getContentLength()
+                + responseCommand.getHeaderLength();
         // 记录响应序列化大小和请求序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME, cost);
@@ -331,47 +507,97 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
     @Override
     public <Response extends ResponseCommand> boolean deserializeContent(Response response, InvokeContext invokeContext)
-        throws DeserializationException {
+            throws DeserializationException {
         if (response instanceof RpcResponseCommand) {
             RpcResponseCommand responseCommand = (RpcResponseCommand) response;
             byte serializer = response.getSerializer();
-            byte[] content = responseCommand.getContent();
-            if (content == null || content.length == 0) {
-                return false;
-            }
-            try {
-                Object sofaResponse = ClassUtils.forName(responseCommand.getResponseClass()).newInstance();
-
-                Map<String, String> header = (Map<String, String>) responseCommand.getResponseHeader();
-                if (header == null) {
-                    header = new HashMap<String, String>();
+            if (serializer == RemotingConstants.SERIALIZE_CODE_HESSIAN) {
+                byte[] content = responseCommand.getContent();
+                if (content == null || content.length == 0) {
+                    return false;
                 }
-                putKV(header, RemotingConstants.HEAD_TARGET_SERVICE,
-                    (String) invokeContext.get(RemotingConstants.HEAD_TARGET_SERVICE));
-                putKV(header, RemotingConstants.HEAD_METHOD_NAME,
-                    (String) invokeContext.get(RemotingConstants.HEAD_METHOD_NAME));
-                putKV(header, RemotingConstants.HEAD_GENERIC_TYPE,
-                    (String) invokeContext.get(RemotingConstants.HEAD_GENERIC_TYPE));
+                try {
+                    ByteArrayInputStream input = new ByteArrayInputStream(
+                            responseCommand.getContent());
+                    Hessian2Input hessianInput = new Hessian2Input(input);
 
-                Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory.getSerializer(serializer);
-                rpcSerializer.decode(new ByteArrayWrapperByteBuf(responseCommand.getContent()), sofaResponse, header);
+                    // 根据SerializeType信息决定序列化器
+                    Object object;
+                    boolean genericSerialize = genericSerializeResponse(invokeContext);
+                    if (genericSerialize) {
+                        hessianInput.setSerializerFactory(genericSerializerFactory);
+                        GenericObject genericObject = (GenericObject) hessianInput.readObject();
+                        SofaResponse sofaResponse = new SofaResponse();
+                        sofaResponse.setErrorMsg((String) genericObject.getField("errorMsg"));
+                        sofaResponse.setAppResponse(genericObject.getField("appResponse"));
+                        object = sofaResponse;
+                    } else {
+                        hessianInput.setSerializerFactory(serializerFactory);
+                        object = hessianInput.readObject();
+                    }
+                    responseCommand.setResponseObject(object);
 
-                responseCommand.setResponseObject(sofaResponse);
-                return true;
-            } catch (Exception ex) {
-                throw new DeserializationException(ex.getMessage(), ex);
-            } finally {
-                recordDeserializeResponse(responseCommand, invokeContext);
+                    input.close();
+                    hessianInput.close();
+                    return true;
+                } catch (IOException ex) {
+                    throw new DeserializationException(ex.getMessage(), ex);
+                } finally {
+                    recordDeserializeResponse(responseCommand, invokeContext);
+                }
+            } else if (serializer == RemotingConstants.SERIALIZE_CODE_PROTOBUF) {
+                try {
+                    String service = invokeContext.get(RemotingConstants.HEAD_TARGET_SERVICE);
+                    String methodName = invokeContext.get(RemotingConstants.HEAD_METHOD_NAME);
+
+                    SofaResponse sofaResponse = new SofaResponse();
+
+                    boolean isError = false;
+                    Map<String, String> header = (Map<String, String>) responseCommand.getResponseHeader();
+                    if (header != null) {
+                        if ("true".equals(header.get(RemotingConstants.HEAD_RESPONSE_ERROR))) {
+                            header.remove(RemotingConstants.HEAD_RESPONSE_ERROR);
+                            isError = true;
+                        }
+                        if (!header.isEmpty()) {
+                            sofaResponse.setResponseProps(header);
+                        }
+                    }
+                    if (isError) {
+                        String errorMessage = (String) ProtobufSerializer.getInstance().decode(
+                                responseCommand.getContent(), String.class);
+                        sofaResponse.setErrorMsg(errorMessage);
+                        responseCommand.setResponseObject(sofaResponse);
+                    } else {
+                        // 根据接口+方法名找到参数类型
+                        Class responseClass = ProtobufSerializer.getResClass(service, methodName,
+                                Thread.currentThread().getContextClassLoader());
+                        byte[] content = responseCommand.getContent();
+                        if (content == null || content.length == 0) {
+                            Constructor constructor = responseClass.getDeclaredConstructor();
+                            constructor.setAccessible(true);
+                            sofaResponse.setAppResponse(constructor.newInstance());
+                        } else {
+                            Object pbRes = ProtobufSerializer.getInstance().decode(content, responseClass);
+                            sofaResponse.setAppResponse(pbRes);
+                        }
+                        responseCommand.setResponseObject(sofaResponse);
+                    }
+
+                    return true;
+                } catch (DeserializationException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new DeserializationException(e.getMessage(), e);
+                } finally {
+                    recordDeserializeResponse(responseCommand, invokeContext);
+                }
+
             }
+            return false;
         }
 
         return false;
-    }
-
-    protected void putKV(Map<String, String> map, String key, String value) {
-        if (map != null && key != null && value != null) {
-            map.put(key, value);
-        }
     }
 
     /**
@@ -393,11 +619,94 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
         int cost = context.getStopWatch().tick().read();
         int respSize = RpcProtocol.getResponseHeaderLength()
-            + responseCommand.getClazzLength()
-            + responseCommand.getContentLength()
-            + responseCommand.getHeaderLength();
+                + responseCommand.getClazzLength()
+                + responseCommand.getContentLength()
+                + responseCommand.getHeaderLength();
         // 记录响应反序列化大小和响应反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME, cost);
+    }
+
+    protected void generateArgTypes(final String[] sig, final Class[] classSig,
+            ClassLoader appClassLoader) throws IOException {
+        for (int x = 0; x < sig.length; x++) {
+            String name = ClassTypeUtils.canonicalNameToJvmName(sig[x]);
+            Class<?> signature = getPrimitiveType(name);
+            if (signature != null) {
+                classSig[x] = signature;
+            } else {
+                try {
+                    signature = getJdkType(name);
+                } catch (ClassNotFoundException e1) {
+                    signature = null;
+                }
+                if (signature != null) {
+                    classSig[x] = signature;
+                } else {
+                    try {
+                        classSig[x] = Class.forName(name, true, appClassLoader);
+                    } catch (ClassNotFoundException e) {
+                        LOGGER.error(LogCodes.getLog(LogCodes.ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND, name), e);
+                        throw new IOException(LogCodes.getLog(LogCodes.ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND, name));
+                    }
+                }
+                if (classSig[x] == null) {
+                    throw new IOException(LogCodes.getLog(LogCodes.ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND, sig[x]));
+                }
+
+            }
+        }
+    }
+
+    private Class<?> getPrimitiveType(String name) {
+        if (null != name) {
+            if ("byte".equals(name)) {
+                return Byte.TYPE;
+            }
+            if ("short".equals(name)) {
+                return Short.TYPE;
+            }
+            if ("int".equals(name)) {
+                return Integer.TYPE;
+            }
+            if ("long".equals(name)) {
+                return Long.TYPE;
+            }
+            if ("char".equals(name)) {
+                return Character.TYPE;
+            }
+            if ("float".equals(name)) {
+                return Float.TYPE;
+            }
+            if ("double".equals(name)) {
+                return Double.TYPE;
+            }
+            if ("boolean".equals(name)) {
+                return Boolean.TYPE;
+            }
+            if ("void".equals(name)) {
+                return Void.TYPE;
+            }
+        }
+        return null;
+    }
+
+    private Class<?> getJdkType(String name) throws ClassNotFoundException {
+        if (name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("sun.")) {
+            return Class.forName(name);
+        }
+        return null;
+    }
+
+    private boolean genericSerializeResponse(InvokeContext invokeContext) {
+        Integer serializeType = invokeContext == null ? null :
+                (Integer) invokeContext.get(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE);
+        return serializeType != null && serializeType == RemotingConstants.SERIALIZE_FACTORY_GENERIC;
+    }
+
+    protected boolean genericSerializeRequest(InvokeContext invokeContext) {
+        Integer serializeType = invokeContext == null ? null :
+                (Integer) invokeContext.get(RemotingConstants.INVOKE_CTX_SERIALIZE_FACTORY_TYPE);
+        return serializeType != null && serializeType != RemotingConstants.SERIALIZE_FACTORY_NORMAL;
     }
 }

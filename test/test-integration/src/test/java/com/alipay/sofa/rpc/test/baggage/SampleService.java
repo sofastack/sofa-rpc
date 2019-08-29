@@ -16,15 +16,10 @@
  */
 package com.alipay.sofa.rpc.test.baggage;
 
-import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
-import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
-
 /**
  * @author hongwei.yhw
  * @since 2014-Sep-12
  */
 public interface SampleService {
     String hello();
-
-    EchoResponse echoObj(EchoRequest req);
 }

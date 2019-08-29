@@ -29,9 +29,9 @@ import java.util.Map;
  */
 public class RpcLoggerFactory {
 
-    public static final String  RPC_LOG_SPACE = "com.alipay.sofa.rpc";
+    public static final String RPC_LOG_SPACE = "com.alipay.sofa.rpc";
 
-    private static final String APPNAME       = "appname";
+    private static final String APPNAME = "appname";
 
     /**
      * 获取日志对象

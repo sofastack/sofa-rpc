@@ -52,9 +52,8 @@ if [ -f $version_java_file ]; then
     echo " WARN: You need to modify \"core/api/src/main/java/com/alipay/sofa/rpc/common/Version.java\" "
     echo "=================="
 
-    version_str=$(echo $1 | \sed -e "s/[^0-9\.]//g")
-    echo "VERSION is ${version_str}"
-    sed "s/\(VERSION[ ]*=[ ]*\"\).*$/\1${version_str}\";/g" $version_java_file
+    echo "VERSION is $1"
+    sed -i ""  "s/\(VERSION[ ]*=[ ]*\"\).*$/\1$1\";/g" $version_java_file
     
     # number and dot -> padding bugfix version -> padding minor version -> padding major version -> only leave number
     rpc_version=$(echo $1 | \sed -e "s/[^0-9\.]//g" \
@@ -63,10 +62,9 @@ if [ -f $version_java_file ]; then
         -e "s/^\([0-9]\)\./\1\./g" \
         -e "s/[^0-9]//g")
     echo "RPC_VERSION is ${rpc_version}"
-    sed "s/\(RPC_VERSION[ ]*=[ ]*\).*$/\1${rpc_version};/g" $version_java_file
+    sed -i ""  "s/\(RPC_VERSION[ ]*=[ ]*\).*$/\1${rpc_version};/g" $version_java_file
     
     date_format=$(date  +"%Y%m%d%H%M%S")
-    build_version=${version_str}_${date_format}
-    echo "BUILD_VERSION is ${build_version}"
-    sed "s/\(BUILD_VERSION[ ]*=[ ]*\"\).*$/\1${build_version}\";/g" $version_java_file
+    echo "BUILD_VERSION is $1_${date_format}"
+    sed -i ""  "s/\(BUILD_VERSION[ ]*=[ ]*\"\).*$/\1$1_${date_format}\";/g" $version_java_file
 fi

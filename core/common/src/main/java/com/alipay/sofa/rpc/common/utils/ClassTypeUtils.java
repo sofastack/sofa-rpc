@@ -16,7 +16,8 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>类型转换工具类</p>
@@ -36,6 +37,16 @@ import com.alipay.sofa.rpc.common.cache.ReflectCache;
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class ClassTypeUtils {
+
+    /**
+     * String-->Class 缓存，指定大小
+     */
+    private final static Map<String, Class> CLASS_MAP = new ConcurrentHashMap<String, Class>();
+
+    /**
+     * String-->Class 缓存，指定大小
+     */
+    private final static Map<Class, String> TYPE_STR_MAP = new ConcurrentHashMap<Class, String>();
 
     /**
      * Class[]转String[]
@@ -62,7 +73,7 @@ public class ClassTypeUtils {
      * @return Class[]
      */
     public static Class getClass(String typeStr) {
-        Class clazz = ReflectCache.getClassCache(typeStr);
+        Class clazz = CLASS_MAP.get(typeStr);
         if (clazz == null) {
             if ("void".equals(typeStr)) {
                 clazz = void.class;
@@ -86,7 +97,7 @@ public class ClassTypeUtils {
                 String jvmName = canonicalNameToJvmName(typeStr);
                 clazz = ClassUtils.forName(jvmName);
             }
-            ReflectCache.putClassCache(typeStr, clazz);
+            CLASS_MAP.put(typeStr, clazz);
         }
         return clazz;
     }
@@ -171,7 +182,7 @@ public class ClassTypeUtils {
      * @see #getClass(String)
      */
     public static String getTypeStr(Class clazz) {
-        String typeStr = ReflectCache.getTypeStrCache(clazz);
+        String typeStr = TYPE_STR_MAP.get(clazz);
         if (typeStr == null) {
             if (clazz.isArray()) {
                 String name = clazz.getName(); // 原始名字：[Ljava.lang.String;
@@ -179,7 +190,7 @@ public class ClassTypeUtils {
             } else {
                 typeStr = clazz.getName();
             }
-            ReflectCache.putTypeStrCache(clazz, typeStr);
+            TYPE_STR_MAP.put(clazz, typeStr);
         }
         return typeStr;
     }

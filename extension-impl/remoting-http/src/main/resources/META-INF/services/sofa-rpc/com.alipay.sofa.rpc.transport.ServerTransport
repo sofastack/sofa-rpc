@@ -1,2 +1,0 @@
-http=com.alipay.sofa.rpc.transport.http.Http1ServerTransport
-h2c=com.alipay.sofa.rpc.transport.http.Http2ClearTextServerTransport

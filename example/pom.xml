@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-parent</artifactId>
-        <version>5.6.1-SNAPSHOT</version>
+        <version>5.3.1</version>
     </parent>
 
     <artifactId>sofa-rpc-example</artifactId>
@@ -21,8 +21,8 @@
 
         <!-- dependencies for rest begin -->
         <dependency>
-            <groupId>org.jboss.spec.javax.ws.rs</groupId>
-            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>jaxrs-api</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -61,7 +61,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson2-provider</artifactId>
+            <artifactId>resteasy-jackson-provider</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -77,25 +77,17 @@
         </dependency>
         <!-- dependencies for rest end -->
 
-        <!-- dependencies for dubbo -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>dubbo</artifactId>
         </dependency>
 
-        <!-- dependencies for zookeeper -->
         <dependency>
             <groupId>org.apache.curator</groupId>
             <artifactId>curator-recipes</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- dependencies for protobuf -->
-        <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
-        </dependency>
-
+        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

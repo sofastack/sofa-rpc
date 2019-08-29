@@ -44,7 +44,7 @@ public class RecoverStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
@@ -66,7 +66,7 @@ public class RecoverStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
 
@@ -82,7 +82,7 @@ public class RecoverStrategyTest extends FaultBaseServiceTest {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
-                LOGGER.info("超时");
+                System.out.println("超时");
             }
         }
 

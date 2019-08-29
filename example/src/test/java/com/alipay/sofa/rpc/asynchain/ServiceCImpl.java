@@ -16,18 +16,13 @@
  */
 package com.alipay.sofa.rpc.asynchain;
 
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
-
 /**
  *
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ServiceCImpl implements ServiceC {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(ServiceCImpl.class);
-    int                         time   = 0;
+    int time = 0;
 
     public ServiceCImpl(int i) {
         time = i;
@@ -35,7 +30,7 @@ public class ServiceCImpl implements ServiceC {
 
     @Override
     public String getStr(String str) {
-        LOGGER.info("c get req from b :" + str);
+        System.out.println("c get req from b :" + str);
         try {
             Thread.sleep(time);
         } catch (Exception e) {

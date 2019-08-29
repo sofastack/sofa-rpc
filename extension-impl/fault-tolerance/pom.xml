@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-extension-impl</artifactId>
-        <version>5.6.1-SNAPSHOT</version>
+        <version>5.3.1</version>
     </parent>
 
     <artifactId>sofa-rpc-fault-tolerance</artifactId>
@@ -28,12 +28,6 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-bolt</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-codec-sofa-hessian</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>

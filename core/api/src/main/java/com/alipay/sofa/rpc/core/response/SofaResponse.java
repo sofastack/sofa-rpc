@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.core.response;
 
-import com.alipay.sofa.rpc.transport.AbstractByteBuf;
-
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +28,7 @@ import java.util.Map;
 // TODO: 2018/6/22 by zmyer
 public final class SofaResponse implements Serializable {
 
-    private static final long serialVersionUID = -4364536436151723421L;
+    static private final long serialVersionUID = -4364536436151723421L;
 
     /**
      * 框架异常
@@ -51,18 +49,6 @@ public final class SofaResponse implements Serializable {
      * extensional properties
      */
     private Map<String, String> responseProps;
-
-    //====================== 下面是非传递属性 ===============
-
-    /**
-     * 序列化类型
-     */
-    private transient byte serializeType;
-
-    /**
-     * 数据
-     */
-    private transient AbstractByteBuf data;
 
     /**
      * Gets app response.
@@ -131,7 +117,7 @@ public final class SofaResponse implements Serializable {
      */
     public void addResponseProp(String key, String value) {
         if (responseProps == null) {
-            responseProps = new HashMap<String, String>(16);
+            responseProps = new HashMap<String, String>();
         }
         if (key != null && value != null) {
             responseProps.put(key, value);
@@ -165,46 +151,6 @@ public final class SofaResponse implements Serializable {
      */
     public void setResponseProps(Map<String, String> responseProps) {
         this.responseProps = responseProps;
-    }
-
-    /**
-     * Gets serialize type.
-     *
-     * @return the serialize type
-     */
-    public byte getSerializeType() {
-        return serializeType;
-    }
-
-    /**
-     * Sets serialize type.
-     *
-     * @param serializeType the serialize type
-     * @return the serialize type
-     */
-    public SofaResponse setSerializeType(byte serializeType) {
-        this.serializeType = serializeType;
-        return this;
-    }
-
-    /**
-     * Gets data.
-     *
-     * @return the data
-     */
-    public AbstractByteBuf getData() {
-        return data;
-    }
-
-    /**
-     * Sets data.
-     *
-     * @param data the data
-     * @return the data
-     */
-    public SofaResponse setData(AbstractByteBuf data) {
-        this.data = data;
-        return this;
     }
 
     @Override

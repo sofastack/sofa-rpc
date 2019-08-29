@@ -25,14 +25,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class CommonUtilsTest {
 
     @Test
-    public void parseBoolean() {
+    public void parseBoolean() throws Exception {
         Assert.assertTrue(CommonUtils.parseBoolean(null, true));
         Assert.assertTrue(CommonUtils.parseBoolean("true", true));
         Assert.assertFalse(CommonUtils.parseBoolean("falSE", true));
@@ -45,12 +44,12 @@ public class CommonUtilsTest {
     }
 
     @Test
-    public void parseInts() {
+    public void parseInts() throws Exception {
         Assert.assertArrayEquals(new int[] { 1, 2, 3 }, CommonUtils.parseInts("1,2,3", ","));
     }
 
     @Test
-    public void join() {
+    public void join() throws Exception {
         Assert.assertEquals(CommonUtils.join(null, ","), "");
         Assert.assertEquals(CommonUtils.join(new ArrayList(), ","), "");
         List<String> s = new ArrayList<String>();
@@ -62,7 +61,7 @@ public class CommonUtilsTest {
 
     @Test
     public void testPutToConcurrentMap() throws Exception {
-        final ConcurrentMap<String, AtomicInteger> hashMap = new ConcurrentHashMap<String, AtomicInteger>();
+        final ConcurrentHashMap<String, AtomicInteger> hashMap = new ConcurrentHashMap<String, AtomicInteger>();
         final CountDownLatch latch = new CountDownLatch(3);
         for (int i = 0; i < 3; i++) {
             Thread thread = new Thread(new Runnable() {
@@ -137,7 +136,7 @@ public class CommonUtilsTest {
     }
 
     @Test
-    public void testIsTrue() {
+    public void testIsTrue() throws Exception {
         Assert.assertTrue(CommonUtils.isTrue("true"));
         Assert.assertTrue(CommonUtils.isTrue("True"));
         Assert.assertFalse(CommonUtils.isTrue("111"));
@@ -150,7 +149,7 @@ public class CommonUtilsTest {
     }
 
     @Test
-    public void testIsFalse() {
+    public void testIsFalse() throws Exception {
         Assert.assertTrue(CommonUtils.isFalse("false"));
         Assert.assertTrue(CommonUtils.isFalse("False"));
         Assert.assertFalse(CommonUtils.isFalse("null"));
@@ -163,12 +162,6 @@ public class CommonUtilsTest {
     }
 
     @Test
-    public void testParseNum() {
-        Assert.assertTrue(CommonUtils.parseNum(null, 123) == 123);
-        Assert.assertTrue(CommonUtils.parseNum(1234, 123) == 1234);
-    }
-
-    @Test
     public void testParseInt() {
         Assert.assertEquals(CommonUtils.parseInt("", 123), 123);
         Assert.assertEquals(CommonUtils.parseInt("xxx", 123), 123);
@@ -177,15 +170,7 @@ public class CommonUtilsTest {
     }
 
     @Test
-    public void testParseLong() {
-        Assert.assertEquals(CommonUtils.parseLong("", 123L), 123L);
-        Assert.assertEquals(CommonUtils.parseLong("xxx", 123L), 123L);
-        Assert.assertEquals(CommonUtils.parseLong(null, 123L), 123L);
-        Assert.assertEquals(CommonUtils.parseLong("12345", 123L), 12345L);
-    }
-
-    @Test
-    public void testListEquals() {
+    public void testListEquals() throws Exception {
         List left = new ArrayList();
         List right = new ArrayList();
         Assert.assertTrue(CommonUtils.listEquals(null, null));

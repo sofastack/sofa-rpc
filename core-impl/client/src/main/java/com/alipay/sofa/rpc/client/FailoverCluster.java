@@ -70,21 +70,20 @@ public class FailoverCluster extends AbstractCluster {
                     if (throwable != null) {
                         if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                             LOGGER.warnWithApp(consumerConfig.getAppName(),
-                                LogCodes.getLog(LogCodes.WARN_SUCCESS_BY_RETRY,
-                                    throwable.getClass() + ":" + throwable.getMessage(),
-                                    invokedProviderInfos));
+                                    LogCodes.getLog(LogCodes.WARN_SUCCESS_BY_RETRY,
+                                            throwable.getClass() + ":" + throwable.getMessage(),
+                                            invokedProviderInfos));
                         }
                     }
                     return response;
                 } else {
                     throwable = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                        "Failed to call " + request.getInterfaceName() + "." + methodName
-                            + " on remote server " + providerInfo + ", return null");
-                    time++;
+                            "Failed to call " + request.getInterfaceName() + "." + methodName
+                                    + " on remote server " + providerInfo + ", return null");
                 }
             } catch (SofaRpcException e) { // 服务端异常+ 超时异常 才发起rpc异常重试
                 if (e.getErrorType() == RpcErrorType.SERVER_BUSY
-                    || e.getErrorType() == RpcErrorType.CLIENT_TIMEOUT) {
+                        || e.getErrorType() == RpcErrorType.CLIENT_TIMEOUT) {
                     throwable = e;
                     time++;
                 } else {
@@ -92,13 +91,13 @@ public class FailoverCluster extends AbstractCluster {
                 }
             } catch (Exception e) { // 其它异常不重试
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
-                        + " on remote server: " + providerInfo + ", cause by unknown exception: "
-                        + e.getClass().getName() + ", message is: " + e.getMessage(), e);
+                        "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
+                                + " on remote server: " + providerInfo + ", cause by unknown exception: "
+                                + e.getClass().getName() + ", message is: " + e.getMessage(), e);
             } finally {
                 if (RpcInternalContext.isAttachmentEnable()) {
                     RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_INVOKE_TIMES,
-                        time + 1); // 重试次数
+                            time + 1); // 重试次数
                 }
             }
             invokedProviderInfos.add(providerInfo);

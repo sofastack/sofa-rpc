@@ -42,7 +42,7 @@ public class DirectUrlRouter extends Router {
     /**
      * 请求路径：直连
      */
-    public static final String  RPC_DIRECT_URL_ROUTER = "DIRECT";
+    public static final String RPC_DIRECT_URL_ROUTER = "DIRECT";
 
     /**
      * 服务消费者配置

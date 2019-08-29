@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-test</artifactId>
-        <version>5.6.1-SNAPSHOT</version>
+        <version>5.3.1</version>
     </parent>
 
     <artifactId>sofa-rpc-test-integration-3rd</artifactId>
@@ -58,12 +58,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.curator</groupId>
-            <artifactId>curator-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-
     </dependencies>
     <build>
         <testSourceDirectory>src/test/java</testSourceDirectory>
@@ -105,7 +99,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <skipTests>${skipTests}</skipTests>
+                    <skipTests>${dependency.test.skip}</skipTests>
                     <includes>
                         <!-- 这里需要根据自己的需要指定要跑的单元测试 -->
                         <include>**/*Test.java</include>

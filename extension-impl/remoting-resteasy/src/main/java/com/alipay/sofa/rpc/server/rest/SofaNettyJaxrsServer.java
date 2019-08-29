@@ -19,15 +19,12 @@ package com.alipay.sofa.rpc.server.rest;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.ServerConfig;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollEventLoopGroup;
-import io.netty.channel.epoll.EpollServerSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -63,36 +60,26 @@ import static org.jboss.resteasy.plugins.server.netty.RestEasyHttpRequestDecoder
 // TODO: 2018/6/22 by zmyer
 public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
-    private final ServerConfig         serverConfig;
-    protected ServerBootstrap          bootstrap           = null;
-    protected String                   hostname            = null;
-    protected int                      port                = 8080;
-    protected ResteasyDeployment       deployment          = new SofaResteasyDeployment(); // CHANGE: 使用sofa的类
-    protected String                   root                = "";
-    protected SecurityDomain           domain;
-    private EventLoopGroup             eventLoopGroup;
-    private EventLoopGroup             eventExecutor;
-    private int                        ioWorkerCount       = SystemInfo.getCpuCores() * 2; // CHANGE:cpu计算修改
-    private int                        executorThreadCount = 16;
-    private SSLContext                 sslContext;
-    private int                        maxRequestSize      = 1024 * 1024 * 10;
-    private int                        backlog             = 128;
-    private List<ChannelHandler>       channelHandlers     = Collections.emptyList();
-    private Map<ChannelOption, Object> channelOptions      = Collections.emptyMap();
+    protected ServerBootstrap bootstrap = new ServerBootstrap();
+    protected String hostname = null;
+    protected int port = 8080;
+    protected ResteasyDeployment deployment = new SofaResteasyDeployment(); // CHANGE: 使用sofa的类
+    protected String root = "";
+    protected SecurityDomain domain;
+    private EventLoopGroup eventLoopGroup;
+    private EventLoopGroup eventExecutor;
+    private int ioWorkerCount = SystemInfo.getCpuCores() * 2; // CHANGE:cpu计算修改
+    private int executorThreadCount = 16;
+    private SSLContext sslContext;
+    private int maxRequestSize = 1024 * 1024 * 10;
+    private int backlog = 128;
+    private List<ChannelHandler> channelHandlers = Collections.emptyList();
+    private Map<ChannelOption, Object> channelOptions = Collections.emptyMap();
     private Map<ChannelOption, Object> childChannelOptions = Collections.emptyMap();
-    private List<ChannelHandler>       httpChannelHandlers = Collections.emptyList();
-
-    /**
-     * Build SofaNettyJaxrsServer
-     *
-     * @param serverConfig ServerConfig
-     */
-    public SofaNettyJaxrsServer(ServerConfig serverConfig) {
-        if (serverConfig == null) {
-            throw new IllegalArgumentException("server config is null");
-        }
-        this.serverConfig = serverConfig;
-    }
+    private List<ChannelHandler> httpChannelHandlers = Collections.emptyList();
+    protected boolean keepAlive = false;                       // CHANGE:是否长连接
+    protected boolean telnet = true;                        // CHANGE:是否允许telnet
+    protected boolean daemon = true;                        // CHANGE:是否守护线程
 
     public void setSSLContext(SSLContext sslContext) {
         this.sslContext = sslContext;
@@ -101,7 +88,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     /**
      * Specify the worker count to use. For more information about this please see the javadocs of {@link EventLoopGroup}
      *
-     * @param ioWorkerCount ioWorkerCount
+     * @param ioWorkerCount
      */
     public void setIoWorkerCount(int ioWorkerCount) {
         this.ioWorkerCount = ioWorkerCount;
@@ -112,7 +99,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * If you want to disable the use of the {@link EventExecutor} specify a value <= 0.  This should only be done if you are 100% sure that you don't have any blocking
      * code in there.
      *
-     * @param executorThreadCount executorThreadCount
+     * @param executorThreadCount
      */
     public void setExecutorThreadCount(int executorThreadCount) {
         this.executorThreadCount = executorThreadCount;
@@ -154,7 +141,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @param channelHandlers the additional {@link io.netty.channel.ChannelHandler}s.
      */
     public void setChannelHandlers(final List<ChannelHandler> channelHandlers) {
-        this.channelHandlers = channelHandlers == null ? Collections.<ChannelHandler> emptyList() : channelHandlers;
+        this.channelHandlers = channelHandlers == null ? Collections.<ChannelHandler>emptyList() : channelHandlers;
     }
 
     /**
@@ -164,8 +151,8 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @param httpChannelHandlers the additional {@link io.netty.channel.ChannelHandler}s.
      */
     public void setHttpChannelHandlers(final List<ChannelHandler> httpChannelHandlers) {
-        this.httpChannelHandlers = httpChannelHandlers == null ? Collections.<ChannelHandler> emptyList()
-            : httpChannelHandlers;
+        this.httpChannelHandlers = httpChannelHandlers == null ? Collections.<ChannelHandler>emptyList()
+                : httpChannelHandlers;
     }
 
     /**
@@ -175,7 +162,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @see io.netty.bootstrap.ServerBootstrap#option(io.netty.channel.ChannelOption, Object)
      */
     public void setChannelOptions(final Map<ChannelOption, Object> channelOptions) {
-        this.channelOptions = channelOptions == null ? Collections.<ChannelOption, Object> emptyMap() : channelOptions;
+        this.channelOptions = channelOptions == null ? Collections.<ChannelOption, Object>emptyMap() : channelOptions;
     }
 
     /**
@@ -185,8 +172,8 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
      * @see io.netty.bootstrap.ServerBootstrap#childOption(io.netty.channel.ChannelOption, Object)
      */
     public void setChildChannelOptions(final Map<ChannelOption, Object> channelOptions) {
-        this.childChannelOptions = channelOptions == null ? Collections.<ChannelOption, Object> emptyMap()
-            : channelOptions;
+        this.childChannelOptions = channelOptions == null ? Collections.<ChannelOption, Object>emptyMap()
+                : channelOptions;
     }
 
     @Override
@@ -215,28 +202,22 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
     // TODO: 2018/6/22 by zmyer
     protected RequestDispatcher createRequestDispatcher() {
         return new RequestDispatcher((SynchronousDispatcher) deployment.getDispatcher(),
-            deployment.getProviderFactory(), domain);
+                deployment.getProviderFactory(), domain);
     }
 
     // TODO: 2018/6/22 by zmyer
     @Override
     public void start() {
         // CHANGE: 增加线程名字
-        boolean daemon = serverConfig.isDaemon();
-        boolean isEpoll = serverConfig.isEpoll();
-        NamedThreadFactory ioFactory = new NamedThreadFactory("SEV-REST-IO-" + port, daemon);
-        NamedThreadFactory bizFactory = new NamedThreadFactory("SEV-REST-BIZ-" + port, daemon);
-        eventLoopGroup = isEpoll ? new EpollEventLoopGroup(ioWorkerCount, ioFactory)
-            : new NioEventLoopGroup(ioWorkerCount, ioFactory);
-        eventExecutor = isEpoll ? new EpollEventLoopGroup(executorThreadCount, bizFactory)
-            : new NioEventLoopGroup(executorThreadCount, bizFactory);
+        eventLoopGroup = new NioEventLoopGroup(ioWorkerCount, new NamedThreadFactory("SOFA-REST-IO-" + port, daemon));
+        eventExecutor = new NioEventLoopGroup(executorThreadCount, new NamedThreadFactory("SOFA-REST-BIZ-" + port,
+                daemon));
         // Configure the server.
-        bootstrap = new ServerBootstrap()
-            .group(eventLoopGroup)
-            .channel(isEpoll ? EpollServerSocketChannel.class : NioServerSocketChannel.class)
-            .childHandler(createChannelInitializer())
-            .option(ChannelOption.SO_BACKLOG, backlog)
-            .childOption(ChannelOption.SO_KEEPALIVE, serverConfig.isKeepAlive()); // CHANGE: setKeepAlive
+        bootstrap.group(eventLoopGroup)
+                .channel(NioServerSocketChannel.class)
+                .childHandler(createChannelInitializer())
+                .option(ChannelOption.SO_BACKLOG, backlog)
+                .childOption(ChannelOption.SO_KEEPALIVE, keepAlive); // CHANGE:
 
         for (Map.Entry<ChannelOption, Object> entry : channelOptions.entrySet()) {
             bootstrap.option(entry.getKey(), entry.getValue());
@@ -281,7 +262,7 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
 
     // TODO: 2018/6/22 by zmyer
     private void setupHandlers(SocketChannel ch, RequestDispatcher dispatcher,
-                               RestEasyHttpRequestDecoder.Protocol protocol) {
+            RestEasyHttpRequestDecoder.Protocol protocol) {
         ChannelPipeline channelPipeline = ch.pipeline();
         channelPipeline.addLast(channelHandlers.toArray(new ChannelHandler[channelHandlers.size()]));
         channelPipeline.addLast(new HttpRequestDecoder());
@@ -300,6 +281,17 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
             eventExecutor.shutdownGracefully().sync();
         } catch (Exception ignore) { // NOPMD
         }
-        bootstrap = null;
+    }
+
+    public void setKeepAlive(boolean keepAlive) {
+        this.keepAlive = keepAlive;
+    }
+
+    public void setTelnet(boolean telnet) {
+        this.telnet = telnet;
+    }
+
+    public void setDaemon(boolean daemon) {
+        this.daemon = daemon;
     }
 }

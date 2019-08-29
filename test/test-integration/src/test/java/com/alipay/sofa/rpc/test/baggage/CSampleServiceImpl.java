@@ -17,10 +17,6 @@
 package com.alipay.sofa.rpc.test.baggage;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
-import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
 
 /**
  *
@@ -29,14 +25,12 @@ import com.alipay.sofa.rpc.server.bolt.pb.EchoResponse;
  */
 public class CSampleServiceImpl implements SampleService {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(CSampleServiceImpl.class);
-
-    private String              reqBaggage;
+    private String reqBaggage;
 
     @Override
     public String hello() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        LOGGER.info("----c-----:" + context);
+        System.out.println("----c-----:" + context);
         reqBaggage = context.getRequestBaggage("reqBaggageC");
         if (reqBaggage != null) {
             context.putResponseBaggage("respBaggageC", "c2aaa");
@@ -44,19 +38,6 @@ public class CSampleServiceImpl implements SampleService {
             context.putResponseBaggage("respBaggageC_force", "c2aaaff");
         }
         return "hello world c";
-    }
-
-    @Override
-    public EchoResponse echoObj(EchoRequest req) {
-        RpcInvokeContext context = RpcInvokeContext.getContext();
-        LOGGER.info("----c-----:" + context);
-        reqBaggage = context.getRequestBaggage("reqBaggageC");
-        if (reqBaggage != null) {
-            context.putResponseBaggage("respBaggageC", "c2aaa");
-        } else {
-            context.putResponseBaggage("respBaggageC_force", "c2aaaff");
-        }
-        return EchoResponse.newBuilder().setCode(200).setMessage("hello world c").build();
     }
 
     public String getReqBaggage() {

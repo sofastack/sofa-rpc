@@ -26,7 +26,7 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * ConnectionHolder SPI
@@ -65,7 +65,7 @@ public abstract class ConnectionHolder implements Initializable, Destroyable, Pr
      * @return the alive connections
      */
     @Deprecated
-    public abstract ConcurrentMap<ProviderInfo, ClientTransport> getAvailableConnections();
+    public abstract ConcurrentHashMap<ProviderInfo, ClientTransport> getAvailableConnections();
 
     /**
      * 存活的全部provider

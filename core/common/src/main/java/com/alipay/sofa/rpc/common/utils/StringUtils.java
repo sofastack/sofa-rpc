@@ -54,27 +54,6 @@ public class StringUtils {
     public static final String DEFAULT = "default";
 
     /**
-     * The string {@code "true"}.
-     *
-     * @since 5.4.0
-     */
-    public static final String TRUE = "true";
-
-    /**
-     * The string {@code "false"}.
-     *
-     * @since 5.4.0
-     */
-    public static final String FALSE = "false";
-
-    /**
-     * The string {@code "null"}.
-     *
-     * @since 5.4.0
-     */
-    public static final String NULL = "null";
-
-    /**
      * 空数组
      */
     public static final String[] EMPTY_STRING_ARRAY = new String[0];
@@ -263,17 +242,6 @@ public class StringUtils {
     /**
      * 对象转string
      *
-     * @param o          对象
-     * @param defaultVal 默认值
-     * @return 不为null执行toString方法
-     */
-    public static String toString(Object o, String defaultVal) {
-        return o == null ? defaultVal : o.toString();
-    }
-
-    /**
-     * 对象转string
-     *
      * @param o 对象
      * @return 不为null执行toString方法
      */
@@ -282,25 +250,14 @@ public class StringUtils {
     }
 
     /**
-     * 对象数组转string
+     * 对象转string
      *
-     * @param args 对象
+     * @param o          对象
+     * @param defaultVal 默认值
      * @return 不为null执行toString方法
-     * @since 5.4.0
      */
-    public static String objectsToString(Object[] args) {
-        if (args == null) {
-            return null;
-        } else if (args.length == 0) {
-            return "[]";
-        } else {
-            StringBuilder sb = new StringBuilder().append("[");
-            for (Object arg : args) {
-                sb.append(arg.toString()).append(",");
-            }
-            sb.setCharAt(sb.length() - 1, ']');
-            return sb.toString();
-        }
+    public static String toString(Object o, String defaultVal) {
+        return o == null ? defaultVal : o.toString();
     }
 
     /**
@@ -324,7 +281,7 @@ public class StringUtils {
      */
     public static String[] split(String src, String separator) {
         if (isEmpty(separator)) {
-            return new String[]{src};
+            return new String[]{ src };
         }
         if (isEmpty(src)) {
             return StringUtils.EMPTY_STRING_ARRAY;
@@ -416,46 +373,5 @@ public class StringUtils {
             return EMPTY;
         }
         return str.substring(pos + separator.length());
-    }
-
-    /**
-     * <p>Gets the substring before the first occurrence of a separator.
-     * The separator is not returned.</p>
-     *
-     * <p>A <code>null</code> string input will return <code>null</code>.
-     * An empty ("") string input will return the empty string.
-     * A <code>null</code> separator will return the input string.</p>
-     *
-     * <p>If nothing is found, the string input is returned.</p>
-     *
-     * <pre>
-     * StringUtils.substringBefore(null, *)      = null
-     * StringUtils.substringBefore("", *)        = ""
-     * StringUtils.substringBefore("abc", "a")   = ""
-     * StringUtils.substringBefore("abcba", "b") = "a"
-     * StringUtils.substringBefore("abc", "c")   = "ab"
-     * StringUtils.substringBefore("abc", "d")   = "abc"
-     * StringUtils.substringBefore("abc", "")    = ""
-     * StringUtils.substringBefore("abc", null)  = "abc"
-     * </pre>
-     *
-     * @param str  the String to get a substring from, may be null
-     * @param separator  the String to search for, may be null
-     * @return the substring before the first occurrence of the separator,
-     *  <code>null</code> if null String input
-     * @since 2.0
-     */
-    public static String substringBefore(String str, String separator) {
-        if (isEmpty(str) || separator == null) {
-            return str;
-        }
-        if (separator.length() == 0) {
-            return EMPTY;
-        }
-        int pos = str.indexOf(separator);
-        if (pos == -1) {
-            return str;
-        }
-        return str.substring(0, pos);
     }
 }

@@ -16,19 +16,13 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  *
  *
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class TestClass2 {
-
-    private final Logger LOGGER = LoggerFactory.getLogger(CodecUtilsTest.class);
-
     private TestClass2() {
-        LOGGER.info("init TestClass2 ");
+        System.out.println("init TestClass2 ");
     }
 }

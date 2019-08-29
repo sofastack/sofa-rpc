@@ -101,13 +101,9 @@ public abstract class Registry implements Initializable, Destroyable {
 
     @Override
     public void destroy(DestroyHook hook) {
-        if (hook != null) {
-            hook.preDestroy();
-        }
+        hook.preDestroy();
         destroy();
-        if (hook != null) {
-            hook.postDestroy();
-        }
+        hook.postDestroy();
     }
 
 }

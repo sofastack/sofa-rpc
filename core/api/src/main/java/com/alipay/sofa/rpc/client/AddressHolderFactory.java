@@ -46,7 +46,7 @@ public class AddressHolderFactory {
                 throw ExceptionUtils.buildRuntime("consumer.addressHolder", connectionHolder,
                         "Unsupported addressHolder of client!");
             }
-            return ext.getExtInstance(new Class[]{ConsumerBootstrap.class}, new Object[]{consumerBootstrap});
+            return ext.getExtInstance(new Class[]{ ConsumerBootstrap.class }, new Object[]{ consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {

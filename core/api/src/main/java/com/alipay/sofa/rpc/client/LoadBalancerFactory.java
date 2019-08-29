@@ -41,12 +41,12 @@ public class LoadBalancerFactory {
         try {
             String loadBalancer = consumerBootstrap.getConsumerConfig().getLoadBalancer();
             ExtensionClass<LoadBalancer> ext = ExtensionLoaderFactory
-                .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
+                    .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.loadBalancer",
-                    loadBalancer, "Unsupported loadBalancer of client!");
+                        loadBalancer, "Unsupported loadBalancer of client!");
             }
-            return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
+            return ext.getExtInstance(new Class[]{ ConsumerBootstrap.class }, new Object[]{ consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {

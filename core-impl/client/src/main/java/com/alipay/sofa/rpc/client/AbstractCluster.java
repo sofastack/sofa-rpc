@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -32,9 +31,6 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
-import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
-import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderInfoAddEvent;
 import com.alipay.sofa.rpc.event.ProviderInfoRemoveEvent;
@@ -49,7 +45,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -133,7 +128,8 @@ public abstract class AbstractCluster extends Cluster {
         // 连接管理器
         connectionHolder = ConnectionHolderFactory.getConnectionHolder(consumerBootstrap);
         // 构造Filter链,最底层是调用过滤器
-        this.filterChain = FilterChain.buildConsumerChain(this.consumerConfig, new ConsumerInvoker(consumerBootstrap));
+        this.filterChain = FilterChain.buildConsumerChain(this.consumerConfig,
+                new ConsumerInvoker(consumerBootstrap));
 
         if (consumerConfig.isLazy()) { // 延迟连接
             if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
@@ -207,7 +203,7 @@ public abstract class AbstractCluster extends Cluster {
         ProviderGroup oldProviderGroup = addressHolder.getProviderGroup(providerGroup.getName());
         if (ProviderHelper.isEmpty(providerGroup)) {
             addressHolder.updateProviders(providerGroup);
-            if (!ProviderHelper.isEmpty(oldProviderGroup)) {
+            if (CommonUtils.isNotEmpty(oldProviderGroup.getProviderInfos())) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
                             "providers has been closed, or this consumer has been add to blacklist");
@@ -277,6 +273,9 @@ public abstract class AbstractCluster extends Cluster {
                             "Unmatched protocol between consumer [{}] and provider [{}].",
                             consumerConfig.getProtocol(), providerInfo.getProtocolType());
                 }
+            }
+            if (StringUtils.isEmpty(providerInfo.getSerializationType())) {
+                providerInfo.setSerializationType(consumerConfig.getSerialization());
             }
         }
     }
@@ -360,10 +359,6 @@ public abstract class AbstractCluster extends Cluster {
         }
         // 原始服务列表数据 --> 路由结果
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
-
-        //保存一下原始地址,为了打印
-        List<ProviderInfo> orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
-
         if (CommonUtils.isEmpty(providerInfos)) {
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         }
@@ -402,8 +397,7 @@ public abstract class AbstractCluster extends Cluster {
                 providerInfos.remove(providerInfo);
             } while (!providerInfos.isEmpty());
         }
-        throw unavailableProviderException(message.getTargetServiceUniqueName(),
-            convertProviders2Urls(orginalProviderInfos));
+        throw noAvailableProviderException(message.getTargetServiceUniqueName());
     }
 
     /**
@@ -414,7 +408,7 @@ public abstract class AbstractCluster extends Cluster {
      */
     // TODO: 2018/7/6 by zmyer
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
-        ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
+        ProviderInfo tp = ProviderInfo.valueOf(targetIP);
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getHost().equals(tp.getHost())
                     && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
@@ -488,8 +482,7 @@ public abstract class AbstractCluster extends Cluster {
      */
     // TODO: 2018/7/6 by zmyer
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
-        RpcInternalContext context = RpcInternalContext.getContext();
-        context.setProviderInfo(providerInfo);
+        RpcInternalContext.getContext().setProviderInfo(providerInfo);
         return filterChain.invoke(request);
     }
 
@@ -514,7 +507,7 @@ public abstract class AbstractCluster extends Cluster {
      */
     // TODO: 2018/6/22 by zmyer
     protected SofaResponse doSendMsg(ProviderInfo providerInfo, ClientTransport transport,
-                                     SofaRequest request) throws SofaRpcException {
+            SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
         // 添加调用的服务端远程地址
         RpcInternalContext.getContext().setRemoteAddress(providerInfo.getHost(), providerInfo.getPort());
@@ -541,7 +534,7 @@ public abstract class AbstractCluster extends Cluster {
                 long start = RpcRuntimeContext.now();
                 try {
                     transport.oneWaySend(request, timeout);
-                    response = buildEmptyResponse(request);
+                    response = new SofaResponse();
                 } finally {
                     if (RpcInternalContext.isAttachmentEnable()) {
                         long elapsed = RpcRuntimeContext.now() - start;
@@ -560,21 +553,16 @@ public abstract class AbstractCluster extends Cluster {
                         request.setSofaResponseCallback(methodResponseCallback);
                     }
                 }
-                // 记录发送开始时间
-                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
-                // 开始调用
                 transport.asyncSend(request, timeout);
-                response = buildEmptyResponse(request);
+                response = new SofaResponse();
             }
             // Future调用
             else if (RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
-                // 记录发送开始时间
-                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME, RpcRuntimeContext.now());
                 // 开始调用
                 ResponseFuture future = transport.asyncSend(request, timeout);
                 // 放入线程上下文
                 RpcInternalContext.getContext().setFuture(future);
-                response = buildEmptyResponse(request);
+                response = new SofaResponse();
             } else {
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Unknown invoke type:" + invokeType);
             }
@@ -584,15 +572,6 @@ public abstract class AbstractCluster extends Cluster {
         } catch (Throwable e) { // 客户端其它异常
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
         }
-    }
-
-    private SofaResponse buildEmptyResponse(SofaRequest request) {
-        SofaResponse response = new SofaResponse();
-        Method method = request.getMethod();
-        if (method != null) {
-            response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
-        }
-        return response;
     }
 
     /**
@@ -605,30 +584,12 @@ public abstract class AbstractCluster extends Cluster {
      */
     // TODO: 2018/6/22 by zmyer
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
-        // 动态配置优先
-        final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
-        if (StringUtils.isNotBlank(dynamicAlias)) {
-            String dynamicTimeout = null;
-            DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
-                consumerConfig.getAppName(),
-                dynamicAlias);
-
-            if (dynamicConfigManager != null) {
-                dynamicTimeout = dynamicConfigManager.getConsumerMethodProperty(request.getInterfaceName(),
-                    request.getMethodName(),
-                    "timeout");
-            }
-
-            if (StringUtils.isNotBlank(dynamicTimeout)) {
-                return Integer.parseInt(dynamicTimeout);
-            }
-        }
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
         if (timeout == null) {
             // 取客户端配置（先方法级别再接口级别）
             timeout = consumerConfig.getMethodTimeout(request.getMethodName());
-            if (timeout < 0) {
+            if (timeout == null || timeout < 0) {
                 // 再取服务端配置
                 timeout = (Integer) providerInfo.getDynamicAttr(ATTR_TIMEOUT);
                 if (timeout == null) {
@@ -805,18 +766,6 @@ public abstract class AbstractCluster extends Cluster {
             }
         }
         return providerInfos;
-    }
-
-    private String convertProviders2Urls(List<ProviderInfo> providerInfos) {
-
-        StringBuilder sb = new StringBuilder();
-        if (CommonUtils.isNotEmpty(providerInfos)) {
-            for (ProviderInfo providerInfo : providerInfos) {
-                sb.append(providerInfo).append(",");
-            }
-        }
-
-        return sb.toString();
     }
 
     /**

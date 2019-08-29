@@ -16,11 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec;
 
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.transport.AbstractByteBuf;
-
-import java.util.Map;
 
 /**
  *
@@ -28,20 +24,19 @@ import java.util.Map;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension(value = "test", code = 117)
-public class TestSerializer extends AbstractSerializer {
+public class TestSerializer implements Serializer {
+    @Override
+    public byte[] encode(Object object) {
+        return new byte[0];
+    }
 
     @Override
-    public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
+    public Object decode(byte[] data, Class clazz) {
         return null;
     }
 
     @Override
-    public Object decode(AbstractByteBuf data, Class clazz, Map<String, String> context) throws SofaRpcException {
+    public Object decode(byte[] data, Object template) {
         return null;
-    }
-
-    @Override
-    public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
-
     }
 }

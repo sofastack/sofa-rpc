@@ -24,7 +24,7 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class WeightRoundRobinLoadBalancerV2Test extends BaseLoadBalancerTest {
+public class WeightRoundRobinLoadBalancerV2Test {
 
     /**
      * 上次选择的服务器
@@ -131,7 +131,7 @@ public class WeightRoundRobinLoadBalancerV2Test extends BaseLoadBalancerTest {
 
         for (int i = 0; i < 15; i++) {
             Server server = weightRoundRobin.getServer();
-            LOGGER.info("server " + server.getIp() + " weight=" + server.getWeight());
+            System.out.println("server " + server.getIp() + " weight=" + server.getWeight());
         }
     }
 

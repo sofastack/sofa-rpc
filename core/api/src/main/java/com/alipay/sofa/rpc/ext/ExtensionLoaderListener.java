@@ -29,5 +29,5 @@ public interface ExtensionLoaderListener<T> {
      *
      * @param extensionClass 扩展点类对象
      */
-    void onLoad(ExtensionClass<T> extensionClass);
+    public void onLoad(ExtensionClass<T> extensionClass);
 }

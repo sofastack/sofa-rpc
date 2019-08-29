@@ -43,7 +43,8 @@ public class BoltServerMain {
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setPort(22000)
+            //        .setHost("0.0.0.0")
+            //        .setPort(22222)
             .setDaemon(false);
 
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()

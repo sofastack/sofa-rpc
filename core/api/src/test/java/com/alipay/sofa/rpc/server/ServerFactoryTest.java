@@ -27,7 +27,7 @@ import org.junit.Test;
  */
 public class ServerFactoryTest {
     @Test
-    public void getServer() {
+    public void getServer() throws Exception {
         ServerConfig serverConfig = new ServerConfig().setProtocol("test").setPort(1234);
         Server server = ServerFactory.getServer(serverConfig);
         Assert.assertNotNull(server);
@@ -40,20 +40,14 @@ public class ServerFactoryTest {
             error = true;
         }
         Assert.assertTrue(error);
-
-        Assert.assertTrue(ServerFactory.getServers().size() > 0);
-
-        ServerFactory.destroyAll();
     }
 
     @Test
-    public void destroyServer() {
-        ServerConfig serverConfig = new ServerConfig().setProtocol("test").setPort(1234);
-        Server server = serverConfig.buildIfAbsent();
-        Assert.assertNotNull(server);
-        Assert.assertEquals(1, ServerFactory.getServers().size());
-        serverConfig.destroy();
-        Assert.assertEquals(0, ServerFactory.getServers().size());
-        Assert.assertNull(serverConfig.getServer());
+    public void getServers() throws Exception {
     }
+
+    @Test
+    public void destroyAll() throws Exception {
+    }
+
 }

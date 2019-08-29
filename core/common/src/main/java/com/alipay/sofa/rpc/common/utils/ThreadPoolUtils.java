@@ -69,7 +69,7 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newFixedThreadPool(int corePoolSize,
-                                                        BlockingQueue<Runnable> queue) {
+            BlockingQueue<Runnable> queue) {
         return new ThreadPoolExecutor(corePoolSize,
                 corePoolSize,
                 0,
@@ -86,8 +86,8 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newFixedThreadPool(int corePoolSize,
-                                                        BlockingQueue<Runnable> queue,
-                                                        ThreadFactory threadFactory) {
+            BlockingQueue<Runnable> queue,
+            ThreadFactory threadFactory) {
         return new ThreadPoolExecutor(corePoolSize,
                 corePoolSize,
                 0,
@@ -106,9 +106,9 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newFixedThreadPool(int corePoolSize,
-                                                        BlockingQueue<Runnable> queue,
-                                                        ThreadFactory threadFactory,
-                                                        RejectedExecutionHandler handler) {
+            BlockingQueue<Runnable> queue,
+            ThreadFactory threadFactory,
+            RejectedExecutionHandler handler) {
         return new ThreadPoolExecutor(corePoolSize,
                 corePoolSize,
                 0,
@@ -126,7 +126,7 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newCachedThreadPool(int corePoolSize,
-                                                         int maximumPoolSize) {
+            int maximumPoolSize) {
         return new ThreadPoolExecutor(corePoolSize,
                 maximumPoolSize,
                 DateUtils.MILLISECONDS_PER_MINUTE,
@@ -143,8 +143,8 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newCachedThreadPool(int corePoolSize,
-                                                         int maximumPoolSize,
-                                                         BlockingQueue<Runnable> queue) {
+            int maximumPoolSize,
+            BlockingQueue<Runnable> queue) {
         return new ThreadPoolExecutor(corePoolSize,
                 maximumPoolSize,
                 DateUtils.MILLISECONDS_PER_MINUTE,
@@ -162,9 +162,9 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newCachedThreadPool(int corePoolSize,
-                                                         int maximumPoolSize,
-                                                         BlockingQueue<Runnable> queue,
-                                                         ThreadFactory threadFactory) {
+            int maximumPoolSize,
+            BlockingQueue<Runnable> queue,
+            ThreadFactory threadFactory) {
         return new ThreadPoolExecutor(corePoolSize,
                 maximumPoolSize,
                 DateUtils.MILLISECONDS_PER_MINUTE,
@@ -184,10 +184,10 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newCachedThreadPool(int corePoolSize,
-                                                         int maximumPoolSize,
-                                                         BlockingQueue<Runnable> queue,
-                                                         ThreadFactory threadFactory,
-                                                         RejectedExecutionHandler handler) {
+            int maximumPoolSize,
+            BlockingQueue<Runnable> queue,
+            ThreadFactory threadFactory,
+            RejectedExecutionHandler handler) {
         return new ThreadPoolExecutor(corePoolSize,
                 maximumPoolSize,
                 DateUtils.MILLISECONDS_PER_MINUTE,
@@ -209,11 +209,11 @@ public class ThreadPoolUtils {
      * @return the thread pool executor
      */
     public static ThreadPoolExecutor newCachedThreadPool(int corePoolSize,
-                                                         int maximumPoolSize,
-                                                         int keepAliveTime,
-                                                         BlockingQueue<Runnable> queue,
-                                                         ThreadFactory threadFactory,
-                                                         RejectedExecutionHandler handler) {
+            int maximumPoolSize,
+            int keepAliveTime,
+            BlockingQueue<Runnable> queue,
+            ThreadFactory threadFactory,
+            RejectedExecutionHandler handler) {
         return new ThreadPoolExecutor(corePoolSize,
                 maximumPoolSize,
                 keepAliveTime,

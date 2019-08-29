@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Factory of module
@@ -35,18 +34,17 @@ import java.util.concurrent.ConcurrentMap;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.2.0
  */
-// TODO: 2018/12/28 by zmyer
 public class ModuleFactory {
 
     /**
      * logger for this class
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(ModuleFactory.class);
+    private static final Logger                    LOGGER            = LoggerFactory.getLogger(ModuleFactory.class);
 
     /**
      * 已加载的模块
      */
-    static final ConcurrentMap<String, Module> INSTALLED_MODULES = new ConcurrentHashMap<String, Module>();
+    static final ConcurrentHashMap<String, Module> INSTALLED_MODULES = new ConcurrentHashMap<String, Module>();
 
     /**
      * parse module load config
@@ -59,12 +57,12 @@ public class ModuleFactory {
         String[] activatedModules = StringUtils.splitWithCommaOrSemicolon(moduleLoadList);
         boolean match = false;
         for (String activatedModule : activatedModules) {
-            if (StringUtils.ALL.equals(activatedModule)) {
+            if ("*".equals(activatedModule)) {
                 match = true;
             } else if (activatedModule.equals(moduleName)) {
                 match = true;
             } else if (match && (activatedModule.equals("!" + moduleName)
-                    || activatedModule.equals("-" + moduleName))) {
+                || activatedModule.equals("-" + moduleName))) {
                 match = false;
                 break;
             }
@@ -75,7 +73,6 @@ public class ModuleFactory {
     /**
      * 加载全部模块
      */
-    // TODO: 2018/12/28 by zmyer
     public static void installModules() {
         ExtensionLoader<Module> loader = ExtensionLoaderFactory.getExtensionLoader(Module.class);
         String moduleLoadList = RpcConfigs.getStringValue(RpcOptions.MODULE_LOAD_LIST);

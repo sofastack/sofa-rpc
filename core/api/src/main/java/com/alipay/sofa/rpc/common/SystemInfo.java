@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.common;
 
-import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 
@@ -28,7 +27,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 public class SystemInfo {
 
     /**
-     * 缓存了本机地址
+     * 缓存了本机地址 
      */
     private static String  LOCALHOST;
     /**
@@ -49,32 +48,17 @@ public class SystemInfo {
     private static boolean IS_MAC;
 
     static {
-        boolean[] os = parseOSName();
-        IS_WINDOWS = os[0];
-        IS_LINUX = os[1];
-        IS_MAC = os[2];
+        String osName = System.getProperty("os.name").toLowerCase();
+        if (osName.contains("windows")) {
+            IS_WINDOWS = true;
+        } else if (osName.contains("linux")) {
+            IS_LINUX = true;
+        } else if (osName.contains("mac")) {
+            IS_MAC = true;
+        }
 
         LOCALHOST = NetUtils.getLocalIpv4();
         HOSTMACHINE = parseHostMachine();
-    }
-
-    /**
-     * 解析物理机地址
-     *
-     * @return 物理机地址
-     */
-    @VisibleForTesting
-    static boolean[] parseOSName() {
-        boolean[] result = new boolean[] { false, false, false };
-        String osName = System.getProperty("os.name").toLowerCase();
-        if (osName.contains("windows")) {
-            result[0] = true;
-        } else if (osName.contains("linux")) {
-            result[1] = true;
-        } else if (osName.contains("mac")) {
-            result[2] = true;
-        }
-        return result;
     }
 
     /**
@@ -132,7 +116,6 @@ public class SystemInfo {
      *
      * @return 物理机地址
      */
-    @VisibleForTesting
     static String parseHostMachine() {
         String hostMachine = System.getProperty("host_machine");
         return StringUtils.isNotEmpty(hostMachine) ? hostMachine : null;

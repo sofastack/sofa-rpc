@@ -21,7 +21,6 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -32,11 +31,11 @@ import java.util.concurrent.locks.ReentrantLock;
 @ThreadSafe
 public class TwoWayMap<K, V> implements Map<K, V> {
 
-    private ConcurrentMap<K, V> kvMap = new ConcurrentHashMap<K, V>();
+    private ConcurrentHashMap<K, V> kvMap = new ConcurrentHashMap<K, V>();
 
-    private ConcurrentMap<V, K> vkMap = new ConcurrentHashMap<V, K>();
+    private ConcurrentHashMap<V, K> vkMap = new ConcurrentHashMap<V, K>();
 
-    private ReentrantLock       lock  = new ReentrantLock();
+    private ReentrantLock           lock  = new ReentrantLock();
 
     @Override
     public int size() {

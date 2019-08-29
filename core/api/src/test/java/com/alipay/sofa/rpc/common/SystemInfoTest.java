@@ -16,9 +16,7 @@
  */
 package com.alipay.sofa.rpc.common;
 
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -27,33 +25,8 @@ import org.junit.Test;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class SystemInfoTest {
-
-    @BeforeClass
-    public static void beforeClass() {
-        SystemInfo systemInfo = new SystemInfo();
-    }
-
     @Test
-    public void parseOSName() {
-        String old = System.getProperty("os.name");
-        try {
-            System.setProperty("os.name", "windows7");
-            Assert.assertTrue(SystemInfo.parseOSName()[0]);
-            System.setProperty("os.name", "linux123");
-            Assert.assertTrue(SystemInfo.parseOSName()[1]);
-            System.setProperty("os.name", "mac osx123");
-            Assert.assertTrue(SystemInfo.parseOSName()[2]);
-        } finally {
-            if (old == null) {
-                System.clearProperty("os.name");
-            } else {
-                System.setProperty("os.name", old);
-            }
-        }
-    }
-
-    @Test
-    public void parseHostMachine() {
+    public void parseHostMachine() throws Exception {
         String old = System.getProperty("host_machine");
         try {
             System.setProperty("host_machine", "xxx");
@@ -65,11 +38,10 @@ public class SystemInfoTest {
                 System.setProperty("host_machine", old);
             }
         }
-        Assert.assertTrue(StringUtils.isEmpty(SystemInfo.getHostMachine()));
     }
 
     @Test
-    public void isWindows() {
+    public void isWindows() throws Exception {
         String osName = System.getProperty("os.name").toLowerCase();
         Assert.assertEquals(osName.contains("windows"), SystemInfo.isWindows());
         Assert.assertEquals(osName.contains("linux"), SystemInfo.isLinux());
@@ -77,17 +49,17 @@ public class SystemInfoTest {
     }
 
     @Test
-    public void getCpuCores() {
+    public void getCpuCores() throws Exception {
         Assert.assertTrue(SystemInfo.getCpuCores() > 0);
     }
 
     @Test
-    public void getLocalHost() {
+    public void getLocalHost() throws Exception {
         Assert.assertNotNull(SystemInfo.getLocalHost());
     }
 
     @Test
-    public void setLocalHost() {
+    public void setLocalHost() throws Exception {
         String old = SystemInfo.getLocalHost();
         try {
             SystemInfo.setLocalHost("xxx");
@@ -95,5 +67,6 @@ public class SystemInfoTest {
         } finally {
             SystemInfo.setLocalHost(old);
         }
+
     }
 }

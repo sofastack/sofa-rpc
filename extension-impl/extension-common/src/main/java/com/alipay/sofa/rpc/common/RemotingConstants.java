@@ -31,7 +31,7 @@ public class RemotingConstants {
      * 协议：tr，老协议
      * // com.taobao.remoting.TRConstants#PROCOCOL_VERSION;
      */
-    public static final byte PROTOCOL_TR = 13;
+    public static final byte PROTOCOL_TR = 13;                        //
     /**
      * 协议：bolt
      * // RpcProtocol.PROTOCOL_CODE;
@@ -84,17 +84,17 @@ public class RemotingConstants {
     /**
      * 普通序列化：序列化反序列化均使用SofaSerializerFactory
      */
-    public static final String SERIALIZE_FACTORY_NORMAL = "0";
+    public static final byte SERIALIZE_FACTORY_NORMAL = 0;
 
     /**
      * 混合序列化：序列化使用SofaGenericSerializerFactory, 反序列化使用SofaSerializerFactory
      */
-    public static final String SERIALIZE_FACTORY_MIX = "1";
+    public static final byte SERIALIZE_FACTORY_MIX = 1;
 
     /**
      * 泛型序列化：序列化反序列化均使用SofaGenericSerializerFactory
      */
-    public static final String SERIALIZE_FACTORY_GENERIC = "2";
+    public static final byte SERIALIZE_FACTORY_GENERIC = 2;
 
     //========= tracer 相关 ===========
     /**
@@ -117,19 +117,13 @@ public class RemotingConstants {
      */
     public static final String HTTP_HEADER_RPC_ID_KEY = "SOFA-RpcId";
 
-    /**
-     * TraceId 放在透传上下文中的 key
-     */
+    /** TraceId 放在透传上下文中的 key */
     public static final String TRACE_ID_KEY = "sofaTraceId";
 
-    /**
-     * RpcId 放在透传上下文中的 key
-     */
+    /** RpcId 放在透传上下文中的 key */
     public static final String RPC_ID_KEY = "sofaRpcId";
 
-    /**
-     * penetrateAttributes 放在透传上下文中的 key
-     */
+    /** penetrateAttributes 放在透传上下文中的 key */
     public static final String PEN_ATTRS_KEY = "sofaPenAttrs";
 
     // ============ 序列化相关 ===========
@@ -149,13 +143,6 @@ public class RemotingConstants {
      * 客户端应用
      */
     public static final String HEAD_PROTOCOL = "protocol";
-
-    /**
-     * 忽略浏览器的图标请求
-     */
-    public static final String IGNORE_WEB_BROWSER = "/favicon.ico";
-
-    // ========== 头相关 ============
     /**
      * 对方方法名
      *
@@ -201,16 +188,6 @@ public class RemotingConstants {
      * @since 5.1.0
      */
     public static final String HEAD_RESPONSE_ERROR = "sofa_head_response_error";
-    /**
-     * 是否泛化调用
-     *
-     * @since 5.4.0
-     */
-    public static final String HEAD_GENERIC_TYPE = "sofa_head_generic_type";
-    /**
-     * @since 5.4.0
-     */
-    public static final String HEAD_SERIALIZE_TYPE = "sofa_head_serialize_type";
 
     /**
      * RPC透传请求链路数据
@@ -233,6 +210,13 @@ public class RemotingConstants {
      * @since 5.1.0
      */
     public static final String INVOKE_CTX_RPC_CTX = "rpc.ctx";
+
+    /**
+     * bolt RpcInvokeContext的Key
+     *
+     * @since 5.1.0
+     */
+    public static final String INVOKE_CTX_SERIALIZE_FACTORY_TYPE = "SerializeFactoryType";
 
     /**
      * bolt RpcInvokeContext的Key

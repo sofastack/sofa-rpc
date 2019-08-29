@@ -59,10 +59,10 @@ public abstract class Filter {
 
     /**
      * Do filtering after asynchronous respond, only supported in CONSUMER SIDE. <p>
-     * <p>
+     *
      * Because when do async invoke, the code after invoke has been executed after invoker return dummy empty response.
      * We need execute filter code after get true response from server.<p>
-     * <p>
+     *
      * NOTICE: The thread run {@link #onAsyncResponse} is different with the thread run {@link #invoke}
      *
      * @param config    ConsumerConfig, READ ONLY PLEASE.
@@ -75,6 +75,6 @@ public abstract class Filter {
      */
     // TODO: 2018/6/22 by zmyer
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable exception)
-        throws SofaRpcException {
+            throws SofaRpcException {
     }
 }

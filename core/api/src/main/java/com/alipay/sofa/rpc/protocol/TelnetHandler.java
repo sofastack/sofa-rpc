@@ -33,21 +33,21 @@ public interface TelnetHandler {
     /**
      * The constant LINE.
      */
-    String LINE = "\r\n";
+    public String LINE = "\r\n";
 
     /**
      * Gets command.
      *
      * @return the command
      */
-    String getCommand();
+    public String getCommand();
 
     /**
      * Gets description.
      *
      * @return the description
      */
-    String getDescription();
+    public String getDescription();
 
     /**
      * Do telnet and return string result.
@@ -56,5 +56,5 @@ public interface TelnetHandler {
      * @param message the message
      * @return the string
      */
-    String telnet(AbstractChannel channel, String message);
+    public String telnet(AbstractChannel channel, String message);
 }

@@ -57,7 +57,7 @@ public abstract class ProviderBootstrap<T> {
     public abstract void export();
 
     /**
-     * 取消发布一个服务
+     * 反引用一个服务
      */
     public abstract void unExport();
 }

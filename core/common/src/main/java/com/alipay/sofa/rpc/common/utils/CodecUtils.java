@@ -16,9 +16,6 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
-import java.util.Iterator;
-import java.util.Map;
-
 /**
  * Codec工具类
  *
@@ -222,44 +219,6 @@ public final class CodecUtils {
     }
 
     /**
-     * byte[] to hex string, such as [0,1] --> "0001"
-     * 
-     * @param bytes data
-     * @return hex string 
-     */
-    public static String byte2hex(byte[] bytes) {
-        StringBuilder hs = new StringBuilder();
-        String stmp;
-        for (int n = 0; bytes != null && n < bytes.length; n++) {
-            stmp = Integer.toHexString(bytes[n] & 0XFF);
-            if (stmp.length() == 1) {
-                hs.append('0');
-            }
-            hs.append(stmp);
-        }
-        return hs.toString().toUpperCase();
-    }
-
-    /**
-     * hex string to byte[], such as "0001" -> [0,1]
-     *
-     * @param str hex string
-     * @return byte[]
-     */
-    public static byte[] hex2byte(String str) {
-        byte[] bytes = str.getBytes();
-        if ((bytes.length % 2) != 0) {
-            throw new IllegalArgumentException();
-        }
-        byte[] b2 = new byte[bytes.length / 2];
-        for (int n = 0; n < bytes.length; n += 2) {
-            String item = new String(bytes, n, 2);
-            b2[n / 2] = (byte) Integer.parseInt(item, 16);
-        }
-        return b2;
-    }
-
-    /**
      * 一个byte可以存8个boolean，可以按位获取
      *
      * @param modifiers 描述符
@@ -289,47 +248,5 @@ public final class CodecUtils {
             return (byte) (modifiers + (1 << i));
         }
         return modifiers;
-    }
-
-    /**
-     * 扁平化复制
-     * @param prefix 前缀
-     * @param sourceMap 原始map
-     * @param dstMap 目标map
-     */
-    public static void flatCopyTo(String prefix, Map<String, Object> sourceMap,
-                                  Map<String, String> dstMap) {
-        for (Map.Entry<String, Object> entry : sourceMap.entrySet()) {
-            String key = prefix + entry.getKey();
-            Object value = entry.getValue();
-            if (value instanceof String) {
-                dstMap.put(key, (String) value);
-            } else if (value instanceof Number) {
-                dstMap.put(key, value.toString());
-            } else if (value instanceof Map) {
-                flatCopyTo(key + ".", (Map<String, Object>) value, dstMap);
-            }
-        }
-    }
-
-    /**
-     * 树状恢复
-     * @param prefix 前缀
-     * @param sourceMap  原始map
-     * @param dstMap 目标map
-     * @param remove 命中遍历后是否删除
-     */
-    public static void treeCopyTo(String prefix, Map<String, String> sourceMap,
-                                  Map<String, String> dstMap, boolean remove) {
-        Iterator<Map.Entry<String, String>> it = sourceMap.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, String> entry = it.next();
-            if (entry.getKey().startsWith(prefix)) {
-                dstMap.put(entry.getKey().substring(prefix.length()), entry.getValue());
-                if (remove) {
-                    it.remove();
-                }
-            }
-        }
     }
 }

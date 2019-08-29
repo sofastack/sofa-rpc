@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 
 import java.util.List;
 
@@ -35,6 +36,10 @@ public class ExcludeRouter extends Router {
 
     public ExcludeRouter(String excludeName) {
         this.excludeName = excludeName;
+    }
+
+    public SofaResponse invoke(SofaRequest request) {
+        throw new UnsupportedOperationException();
     }
 
     public String getExcludeName() {

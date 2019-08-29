@@ -19,8 +19,6 @@ package com.alipay.sofa.rpc.asynchain.start;
 import com.alipay.sofa.rpc.asynchain.ServiceB;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  *
@@ -28,9 +26,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class ClientA {
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(ClientA.class);
-
     public static void main(String[] args) {
         // A 服务
         ConsumerConfig<ServiceB> consumerConfig = new ConsumerConfig<ServiceB>()
@@ -45,7 +40,7 @@ public class ClientA {
         while (true) {
             try {
                 int ret0 = serviceB.getInt(999);
-                LOGGER.info("ret0:" + ret0);
+                System.out.println("ret0:" + ret0);
             } catch (Exception e) {
                 e.printStackTrace();
             }

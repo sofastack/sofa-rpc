@@ -144,7 +144,8 @@ public class NetUtils {
      * IPv4地址
      */
     public static final Pattern IPV4_PATTERN = Pattern
-            .compile("^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
+            .compile(
+                    "^(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)(\\.(25[0-5]|2[0-4]\\d|[0-1]?\\d?\\d)){3}$");
 
     /**
      * 是否本地地址 127.x.x.x 或者 localhost
@@ -388,9 +389,9 @@ public class NetUtils {
                 if (defaultPort == null && s1[1] != null && s1[1].length() > 0) {
                     defaultPort = s1[1];
                 }
-                ips.add(new String[]{s1[0], s1[1]}); // 得到ip和端口
+                ips.add(new String[]{ s1[0], s1[1] }); // 得到ip和端口
             } else {
-                ips.add(new String[]{s1[0], defaultPort});
+                ips.add(new String[]{ s1[0], defaultPort });
             }
         }
 

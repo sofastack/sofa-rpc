@@ -18,32 +18,27 @@ package com.alipay.sofa.rpc.server.bolt;
 
 import com.alipay.remoting.RemotingServer;
 import com.alipay.remoting.rpc.RpcServer;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
+import com.alipay.sofa.rpc.common.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-import com.alipay.sofa.rpc.event.EventBus;
-import com.alipay.sofa.rpc.event.ServerStartedEvent;
-import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
-import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Bolt server
+ * Bolt server 
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -69,9 +64,9 @@ public class BoltServer implements Server {
     protected ServerConfig serverConfig;
 
     /**
-     * BoltServerProcessor
+     *
      */
-    protected BoltServerProcessor boltServerProcessor;
+    BoltServerProcessor boltServerProcessor;
     /**
      * 业务线程池
      */
@@ -95,7 +90,7 @@ public class BoltServer implements Server {
     protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
         ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
         threadPool.setThreadFactory(new NamedThreadFactory(
-                "SEV-BOLT-BIZ-" + serverConfig.getPort(), serverConfig.isDaemon()));
+                "SofaBizProcessor-" + serverConfig.getPort(), serverConfig.isDaemon()));
         threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
         if (serverConfig.isPreStartCore()) { // 初始化核心线程池
             threadPool.prestartAllCoreThreads();
@@ -116,20 +111,10 @@ public class BoltServer implements Server {
             // 生成Server对象
             remotingServer = initRemotingServer();
             try {
-                if (remotingServer.start()) {
-                    if (LOGGER.isInfoEnabled()) {
-                        LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
-                                serverConfig.getPort());
-                    }
-                } else {
+                if (!remotingServer.start(serverConfig.getBoundHost())) {
                     throw new SofaRpcRuntimeException("Failed to start bolt server, see more detail from bolt log.");
                 }
                 started = true;
-
-                if (EventBus.isEnable(ServerStartedEvent.class)) {
-                    EventBus.post(new ServerStartedEvent(serverConfig, bizThreadPool));
-                }
-
             } catch (SofaRpcRuntimeException e) {
                 throw e;
             } catch (Exception e) {
@@ -141,7 +126,7 @@ public class BoltServer implements Server {
     // TODO: 2018/6/22 by zmyer
     protected RemotingServer initRemotingServer() {
         // 绑定到端口
-        RemotingServer remotingServer = new RpcServer(serverConfig.getBoundHost(), serverConfig.getPort());
+        RemotingServer remotingServer = new RpcServer(serverConfig.getPort());
         remotingServer.registerUserProcessor(boltServerProcessor);
         return remotingServer;
     }
@@ -158,25 +143,17 @@ public class BoltServer implements Server {
 
     // TODO: 2018/7/9 by zmyer
     @Override
-    public void stop() {
+    public synchronized void stop() {
         if (!started) {
             return;
         }
-        synchronized (this) {
-            if (!started) {
-                return;
-            }
-            // 关闭端口，不关闭线程池
-            try {
-                remotingServer.stop();
-            } catch (IllegalStateException ignore) { // NOPMD
-            }
-            if (EventBus.isEnable(ServerStoppedEvent.class)) {
-                EventBus.post(new ServerStoppedEvent(serverConfig));
-            }
-            remotingServer = null;
-            started = false;
+        // 关闭端口，不关闭线程池
+        try {
+            remotingServer.stop();
+        } catch (IllegalStateException ignore) { // NOPMD
         }
+        remotingServer = null;
+        started = false;
     }
 
     // TODO: 2018/7/6 by zmyer
@@ -185,11 +162,8 @@ public class BoltServer implements Server {
         // 缓存Invoker对象
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.put(key, instance);
-        ReflectCache.registerServiceClassLoader(key, providerConfig.getProxyClass().getClassLoader());
         // 缓存接口的方法
-        for (Method m : providerConfig.getProxyClass().getMethods()) {
-            ReflectCache.putOverloadMethodCache(key, m);
-        }
+        ReflectCache.putServiceMethodCache(key, providerConfig.getProxyClass());
     }
 
     // TODO: 2018/7/9 by zmyer
@@ -198,9 +172,10 @@ public class BoltServer implements Server {
         // 取消缓存Invoker对象
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         invokerMap.remove(key);
-        cleanReflectCache(providerConfig);
+        // 取消缓存接口方法
+        ReflectCache.invalidateServiceMethodCache(key);
         // 如果最后一个需要关闭，则关闭
-        if (closeIfNoEntry && invokerMap.isEmpty()) {
+        if (closeIfNoEntry && invokerMap.size() == 0) {
             stop();
         }
     }
@@ -237,13 +212,9 @@ public class BoltServer implements Server {
 
     @Override
     public void destroy(DestroyHook hook) {
-        if (hook != null) {
-            hook.preDestroy();
-        }
+        hook.preDestroy();
         destroy();
-        if (hook != null) {
-            hook.postDestroy();
-        }
+        hook.postDestroy();
     }
 
     /**
@@ -264,17 +235,5 @@ public class BoltServer implements Server {
     // TODO: 2018/6/22 by zmyer
     public Invoker findInvoker(String serviceName) {
         return invokerMap.get(serviceName);
-    }
-
-    /**
-     * Clean Reflect Cache
-     * @param providerConfig
-     */
-    public void cleanReflectCache(ProviderConfig providerConfig) {
-        String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-        ReflectCache.unRegisterServiceClassLoader(key);
-        ReflectCache.invalidateMethodCache(key);
-        ReflectCache.invalidateMethodSigsCache(key);
-        ReflectCache.invalidateOverloadMethodCache(key);
     }
 }

@@ -16,9 +16,7 @@
  */
 package com.alipay.sofa.rpc.bootstrap.rest;
 
-import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
-import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
@@ -37,10 +35,4 @@ public class RestConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
     protected RestConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
         super(consumerConfig);
     }
-
-    @Override
-    protected ClientProxyInvoker buildClientProxyInvoker(ConsumerBootstrap bootstrap) {
-        return new RestClientProxyInvoker(bootstrap);
-    }
-
 }

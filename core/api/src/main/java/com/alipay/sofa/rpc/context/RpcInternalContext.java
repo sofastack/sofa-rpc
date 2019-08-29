@@ -27,8 +27,8 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import java.net.InetSocketAddress;
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于ThreadLocal的内部使用的上下文传递。一般存在于：客户端请求线程、服务端业务线程池、客户端异步线程<br>
@@ -42,7 +42,8 @@ public class RpcInternalContext implements Cloneable {
      * 是否允许携带上下文附件，关闭后只能传递"."开头的key，"_" 开头的Key将不被保持和传递。<br>
      * 在性能测试等场景可能关闭此传递功能。
      */
-    private static final boolean ATTACHMENT_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.CONTEXT_ATTACHMENT_ENABLE);
+    private static final boolean ATTACHMENT_ENABLE = RpcConfigs
+            .getBooleanValue(RpcOptions.CONTEXT_ATTACHMENT_ENABLE);
 
     /**
      * The constant LOCAL.
@@ -52,7 +53,8 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The constant DEQUE_LOCAL.
      */
-    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL = new ThreadLocal<Deque<RpcInternalContext>>();
+    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL =
+            new ThreadLocal<Deque<RpcInternalContext>>();
 
     /**
      * 设置上下文
@@ -167,7 +169,7 @@ public class RpcInternalContext implements Cloneable {
      *
      * @see #ATTACHMENT_ENABLE
      */
-    private Map<String, Object> attachments = new ConcurrentHashMap<String, Object>();
+    private Map<String, Object> attachments = new HashMap<String, Object>();
 
     /**
      * The Stopwatch
@@ -330,7 +332,7 @@ public class RpcInternalContext implements Cloneable {
      * @return attachment attachment
      */
     public Object getAttachment(String key) {
-        return key == null ? null : attachments.get(key);
+        return attachments.get(key);
     }
 
     /**
@@ -367,10 +369,11 @@ public class RpcInternalContext implements Cloneable {
      * remove attachment.
      *
      * @param key the key
-     * @return Old value
+     * @return context rpc context
      */
-    public Object removeAttachment(String key) {
-        return attachments.remove(key);
+    public RpcInternalContext removeAttachment(String key) {
+        attachments.remove(key);
+        return this;
     }
 
     /**
@@ -422,9 +425,9 @@ public class RpcInternalContext implements Cloneable {
      * Clear context for next user
      */
     public void clear() {
-        this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(null)
+        this.setRemoteAddress(null).setLocalAddress(null).setFuture(null).setProviderSide(false)
                 .setProviderInfo(null);
-        this.attachments = new ConcurrentHashMap<String, Object>();
+        this.attachments = new HashMap<String, Object>();
         this.stopWatch.reset();
     }
 
@@ -450,7 +453,7 @@ public class RpcInternalContext implements Cloneable {
 
     @Override
     public String toString() {
-        return super.toString() + "{" +
+        return "RpcInternalContext{" +
                 "future=" + future +
                 ", localAddress=" + localAddress +
                 ", remoteAddress=" + remoteAddress +

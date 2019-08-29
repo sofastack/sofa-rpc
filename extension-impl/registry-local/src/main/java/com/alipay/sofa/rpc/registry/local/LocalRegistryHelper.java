@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.registry.local;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -35,20 +34,17 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
-import javax.xml.bind.DatatypeConverter;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Util method of local registry.
@@ -64,16 +60,16 @@ public class LocalRegistryHelper {
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalRegistryHelper.class);
 
     /**
-     * Check file's digest.
+     * Check file's lastmodified.
      *
      * @param address    the address
-     * @param lastDigest the update digest
+     * @param updateDate the update date
      * @return true被修改，false未被修改
      */
-    public static boolean checkModified(String address, String lastDigest) {
+    public static boolean checkModified(String address, long updateDate) {
         // 检查文件是否被修改了
-        String newDigest = calMD5Checksum(address);
-        return !StringUtils.equals(newDigest, lastDigest);
+        File xmlFile = new File(address);
+        return xmlFile.lastModified() > updateDate;
     }
 
     /**
@@ -85,11 +81,11 @@ public class LocalRegistryHelper {
      */
     public static ProviderInfo convertProviderToProviderInfo(ProviderConfig config, ServerConfig server) {
         ProviderInfo providerInfo = new ProviderInfo()
-            .setPort(server.getPort())
-            .setWeight(config.getWeight())
-            .setSerializationType(config.getSerialization())
-            .setProtocolType(server.getProtocol())
-            .setPath(server.getContextPath());
+                .setPort(server.getPort())
+                .setWeight(config.getWeight())
+                .setSerializationType(config.getSerialization())
+                .setProtocolType(server.getProtocol())
+                .setPath(server.getContextPath());
         String host = server.getHost();
         if (NetUtils.isLocalHost(host) || NetUtils.isAnyHost(host)) {
             host = SystemInfo.getLocalHost();
@@ -98,9 +94,7 @@ public class LocalRegistryHelper {
         return providerInfo;
     }
 
-    static Map<String, ProviderGroup> loadBackupFileToCache(String address) {
-
-        Map<String, ProviderGroup> memoryCache = new ConcurrentHashMap<String, ProviderGroup>();
+    static long loadBackupFileToCache(String address, Map<String, ProviderGroup> memoryCache) {
         // 从文件夹下读取指定文件
         File regFile = new File(address);
         if (!regFile.exists()) {
@@ -122,7 +116,7 @@ public class LocalRegistryHelper {
                 throw new SofaRpcRuntimeException("Error when read backup file: " + regFile.getAbsolutePath(), e);
             }
         }
-        return memoryCache;
+        return RpcRuntimeContext.now();
     }
 
     // TODO: 2018/7/9 by zmyer
@@ -207,7 +201,7 @@ public class LocalRegistryHelper {
                 if (!deleted) {
                     if (LOGGER.isWarnEnabled()) {
                         LOGGER.warn("Lock file create by this thread, but failed to delete it," +
-                            " may be the elapsed time of this backup is too long");
+                                " may be the elapsed time of this backup is too long");
                     }
                 }
             }
@@ -226,7 +220,7 @@ public class LocalRegistryHelper {
                 if (CommonUtils.isNotEmpty(ps)) {
                     sb.append(entry.getKey()).append(SEPARATORSTR);
                     for (ProviderInfo providerInfo : ps) {
-                        sb.append(ProviderHelper.toUrl(providerInfo)).append(SEPARATORSTR);
+                        sb.append(providerInfo.toUrl()).append(SEPARATORSTR);
                     }
                     sb.append(FileUtils.LINE_SEPARATOR);
                 }
@@ -249,7 +243,7 @@ public class LocalRegistryHelper {
                 for (int i = 1; i < fields.length; i++) {
                     String pstr = fields[i];
                     if (StringUtils.isNotEmpty(pstr)) {
-                        ProviderInfo providerInfo = ProviderHelper.toProviderInfo(pstr);
+                        ProviderInfo providerInfo = ProviderInfo.valueOf(pstr);
                         providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_SOURCE, "local");
                         values.add(providerInfo);
                     }
@@ -261,7 +255,7 @@ public class LocalRegistryHelper {
     }
 
     /**
-     * 服务注册中心的Key
+     * 配置中心的Key
      *
      * @param config   配置
      * @param protocol 协议
@@ -269,44 +263,10 @@ public class LocalRegistryHelper {
      */
     static String buildListDataId(AbstractInterfaceConfig config, String protocol) {
         if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol)
-            || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
+                || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
             return ConfigUniqueNameGenerator.getUniqueName(config) + "@DEFAULT";
         } else {
             return ConfigUniqueNameGenerator.getUniqueName(config) + "@" + protocol;
         }
-    }
-
-    private static byte[] createChecksum(String filename) {
-        MessageDigest complete = null;
-        try {
-            complete = MessageDigest.getInstance("MD5");
-        } catch (Exception e) {
-            //ignore
-        }
-        String content = null;
-        try {
-            final File file = new File(filename);
-            content = FileUtils.file2String(file);
-        } catch (IOException e) {
-            //ignore
-        }
-
-        if (content == null) {
-            content = "";
-        }
-        byte[] digest = new byte[0];
-
-        if (complete != null) {
-            digest = complete.digest(content.getBytes());
-        }
-
-        return digest;
-    }
-
-    public static String calMD5Checksum(String filename) {
-        byte[] b;
-        b = createChecksum(filename);
-        String digestInHex = DatatypeConverter.printHexBinary(b).toUpperCase();
-        return digestInHex;
     }
 }

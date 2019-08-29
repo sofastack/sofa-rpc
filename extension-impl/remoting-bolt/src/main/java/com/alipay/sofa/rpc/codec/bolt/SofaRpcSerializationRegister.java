@@ -34,11 +34,11 @@ public class SofaRpcSerializationRegister {
         // 注册序列化器到bolt
         if (CustomSerializerManager.getCustomSerializer(SofaRequest.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaRequest.class.getName(),
-                RPC_SERIALIZATION);
+                    RPC_SERIALIZATION);
         }
         if (CustomSerializerManager.getCustomSerializer(SofaResponse.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaResponse.class.getName(),
-                RPC_SERIALIZATION);
+                    RPC_SERIALIZATION);
         }
     }
 }

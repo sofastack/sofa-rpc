@@ -20,24 +20,21 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * Simply event bus for internal event transport.
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/6/22 by zmyer
 public class EventBus {
 
-    private static final Logger  LOGGER           = LoggerFactory.getLogger(EventBus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
 
     /**
      * 是否允许携带上下文附件，关闭后只能传递"."开头的key，"_" 开头的Key将不被保持和传递。<br>
@@ -67,8 +64,8 @@ public class EventBus {
     /**
      * 某中事件的订阅者
      */
-
-    private final static ConcurrentMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>> SUBSCRIBER_MAP = new ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>>();
+    private final static ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>> SUBSCRIBER_MAP =
+            new ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>>();
 
     /**
      * 注册一个订阅者
@@ -122,27 +119,13 @@ public class EventBus {
                 if (subscriber.isSync()) {
                     handleEvent(subscriber, event);
                 } else { // 异步
-                    final RpcInternalContext context = RpcInternalContext.peekContext();
-                    final ThreadPoolExecutor asyncThreadPool = AsyncRuntime.getAsyncThreadPool();
-                    try {
-                        asyncThreadPool.execute(
+                    AsyncRuntime.getAsyncThreadPool().execute(
                             new Runnable() {
                                 @Override
                                 public void run() {
-                                    try {
-                                        RpcInternalContext.setContext(context);
-                                        handleEvent(subscriber, event);
-                                    } finally {
-                                        RpcInternalContext.removeContext();
-                                    }
+                                    handleEvent(subscriber, event);
                                 }
                             });
-                    } catch (RejectedExecutionException e) {
-                        LOGGER
-                            .warn("This queue is full when post event to async execute, queue size is " +
-                                asyncThreadPool.getQueue().size() +
-                                ", please optimize this async thread pool of eventbus.");
-                    }
                 }
             }
         }

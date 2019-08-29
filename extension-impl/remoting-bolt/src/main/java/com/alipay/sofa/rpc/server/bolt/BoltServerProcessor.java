@@ -22,11 +22,10 @@ import com.alipay.remoting.InvokeContext;
 import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
 import com.alipay.remoting.rpc.protocol.UserProcessor;
 import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
+import com.alipay.sofa.rpc.common.ReflectCache;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -54,7 +53,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Bolt server processor of bolt server.
+ * Bolt server processor of bolt server. 
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -106,9 +105,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             // 默认全局appName
             appName = (String) RpcRuntimeContext.get(RpcRuntimeContext.KEY_APPNAME);
         }
-
-        // 是否链路异步化中
-        boolean isAsyncChain = false;
         try { // 这个 try-finally 为了保证Context一定被清理
             processingCount.incrementAndGet(); // 统计值加1
 
@@ -160,7 +156,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                     // 查找方法
                     String methodName = request.getMethodName();
-                    Method serviceMethod = ReflectCache.getOverloadMethodCache(serviceName, methodName,
+                    Method serviceMethod = ReflectCache.getServiceMethod(serviceName, methodName,
                             request.getMethodArgSigs());
                     if (serviceMethod == null) {
                         throwable = cannotFoundServiceMethod(appName, methodName, serviceName);
@@ -188,10 +184,11 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             // Response不为空，代表需要返回给客户端
             if (response != null) {
                 RpcInvokeContext invokeContext = RpcInvokeContext.peekContext();
-                isAsyncChain = CommonUtils.isTrue(invokeContext != null ?
-                        (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null);
+                Boolean isAsyncChain = invokeContext != null ?
+                        (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null;
+
                 // 如果是服务端异步代理模式，特殊处理，因为该模式是在业务代码自主异步返回的
-                if (!isAsyncChain) {
+                if (isAsyncChain == null || !isAsyncChain) {
                     // 其它正常请求
                     try { // 这个try-catch 保证一定要记录tracer
                         asyncCtx.sendResponse(response);
@@ -209,10 +206,8 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             }
         } finally {
             processingCount.decrementAndGet();
-            if (!isAsyncChain) {
-                if (EventBus.isEnable(ServerEndHandleEvent.class)) {
-                    EventBus.post(new ServerEndHandleEvent());
-                }
+            if (EventBus.isEnable(ServerEndHandleEvent.class)) {
+                EventBus.post(new ServerEndHandleEvent());
             }
             RpcInvokeContext.removeContext();
             RpcInternalContext.removeAllContext();
@@ -235,7 +230,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
     // TODO: 2018/6/22 by zmyer
     private void putToContextIfNotNull(InvokeContext invokeContext, String oldKey,
-                                       RpcInternalContext context, String key) {
+            RpcInternalContext context, String key) {
         Object value = invokeContext.get(oldKey);
         if (value != null) {
             context.setAttachment(key, value);
@@ -266,7 +261,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      */
     private SofaRpcException cannotFoundServiceMethod(String appName, String serviceName, String methodName) {
         String errorMsg = LogCodes.getLog(
-                LogCodes.ERROR_PROVIDER_SERVICE_METHOD_CANNOT_FOUND, serviceName, methodName);
+                LogCodes.ERROR_PROVIDER_SERVICE_METHOD_CANNOT_FOUND, methodName, serviceName);
         LOGGER.errorWithApp(appName, errorMsg);
         return new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, errorMsg);
     }
@@ -351,7 +346,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     }
                 } catch (Exception e) {
                     if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn(LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
+                        LOGGER.warnWithApp(null, LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
                     }
                 }
             }
@@ -361,21 +356,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
     @Override
     public boolean timeoutDiscard() {
-        final Map<String, String> parameters = boltServer.serverConfig.getParameters();
-        if (CommonUtils.isEmpty(parameters)) {
-            return false;
-        }
-        String timeoutDiscard = parameters.get(RpcConstants.TIMEOUT_DISCARD_IN_SERVER);
-        return Boolean.parseBoolean(parameters.get(timeoutDiscard));
-    }
-
-    @Override
-    public boolean processInIOThread() {
-        final Map<String, String> parameters = boltServer.serverConfig.getParameters();
-        if (CommonUtils.isEmpty(parameters)) {
-            return false;
-        }
-        String processInIOThread = parameters.get(RpcConstants.PROCESS_IN_IOTHREAD);
-        return Boolean.parseBoolean(parameters.get(processInIOThread));
+        // 业务线程自己判断超时请求
+        return false;
     }
 }

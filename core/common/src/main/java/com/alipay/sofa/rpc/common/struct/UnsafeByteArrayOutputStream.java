@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
@@ -24,15 +23,16 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 /**
- * 去掉了synchronized关键字，和修改了数组增长策略（ByteArrayOutputStream默认是翻倍）无需关闭
+ * <p>主要是去掉了synchronized关键字，和修改了数组增长策略（ByteArrayOutputSteam默认是翻倍）</p>
+ * no need close
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-@NotThreadSafe
+// TODO: 2018/6/22 by zmyer
 public class UnsafeByteArrayOutputStream extends OutputStream {
     protected byte[] mBuffer;
 
-    protected int    mCount;
+    protected int mCount;
 
     public UnsafeByteArrayOutputStream() {
         this(32);

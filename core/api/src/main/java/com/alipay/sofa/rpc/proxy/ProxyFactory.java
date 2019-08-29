@@ -38,9 +38,10 @@ public final class ProxyFactory {
      * @param proxyInvoker 代码执行的Invoker
      * @param <T>          类型
      * @return 代理类实例
+     * @throws Exception
      */
     // TODO: 2018/7/6 by zmyer
-    public static <T> T buildProxy(String proxyType, Class<T> clazz, Invoker proxyInvoker) {
+    public static <T> T buildProxy(String proxyType, Class<T> clazz, Invoker proxyInvoker) throws Exception {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
                     .getExtensionClass(proxyType);
