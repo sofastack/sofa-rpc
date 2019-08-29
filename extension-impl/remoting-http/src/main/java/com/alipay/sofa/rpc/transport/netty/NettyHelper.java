@@ -47,27 +47,27 @@ import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_USE_EPOLL;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
+// TODO: 2018/12/29 by zmyer
 public class NettyHelper {
 
     /**
      * Logger for NettyHelper
      **/
-    private static final Logger                                 LOGGER           = LoggerFactory
-                                                                                     .getLogger(NettyHelper.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyHelper.class);
 
     /**
      * 服务端Boss线程池（一种协议一个）
      */
-    private static ConcurrentMap<String, EventLoopGroup>        serverBossGroups = new ConcurrentHashMap<String, EventLoopGroup>();
+    private static ConcurrentMap<String, EventLoopGroup> serverBossGroups = new ConcurrentHashMap<String, EventLoopGroup>();
     /**
      * 服务端IO线程池（一种协议一个）
      */
-    private static ConcurrentMap<String, EventLoopGroup>        serverIoGroups   = new ConcurrentHashMap<String, EventLoopGroup>();
+    private static ConcurrentMap<String, EventLoopGroup> serverIoGroups = new ConcurrentHashMap<String, EventLoopGroup>();
 
     /**
      * 由于线程池是公用的，需要计数器，在最后一个人关闭时才能销毁
      */
-    private static ConcurrentMap<EventLoopGroup, AtomicInteger> refCounter       = new ConcurrentHashMap<EventLoopGroup, AtomicInteger>();
+    private static ConcurrentMap<EventLoopGroup, AtomicInteger> refCounter = new ConcurrentHashMap<EventLoopGroup, AtomicInteger>();
 
     /**
      * 得到服务端Boss线程池
@@ -87,8 +87,8 @@ public class NettyHelper {
                     NamedThreadFactory threadName =
                             new NamedThreadFactory("SEV-BOSS-" + config.getPort(), config.isDaemon());
                     bossGroup = config.isUseEpoll() ?
-                        new EpollEventLoopGroup(bossThreads, threadName) :
-                        new NioEventLoopGroup(bossThreads, threadName);
+                            new EpollEventLoopGroup(bossThreads, threadName) :
+                            new NioEventLoopGroup(bossThreads, threadName);
                     serverBossGroups.put(type, bossGroup);
                     refCounter.putIfAbsent(bossGroup, new AtomicInteger(0));
                 }
@@ -128,8 +128,8 @@ public class NettyHelper {
                     NamedThreadFactory threadName =
                             new NamedThreadFactory("SEV-IO-" + config.getPort(), config.isDaemon());
                     ioGroup = config.isUseEpoll() ?
-                        new EpollEventLoopGroup(ioThreads, threadName) :
-                        new NioEventLoopGroup(ioThreads, threadName);
+                            new EpollEventLoopGroup(ioThreads, threadName) :
+                            new NioEventLoopGroup(ioThreads, threadName);
                     serverIoGroups.put(type, ioGroup);
                     refCounter.putIfAbsent(ioGroup, new AtomicInteger(0));
                 }
@@ -185,12 +185,12 @@ public class NettyHelper {
         if (clientIOEventLoopGroup == null) {
             int clientIoThreads = getIntValue(TRANSPORT_CLIENT_IO_THREADS);
             int threads = clientIoThreads > 0 ?
-                clientIoThreads : // 用户配置
-                Math.max(4, SystemInfo.getCpuCores() + 1); // 默认cpu+1,至少4个
+                    clientIoThreads : // 用户配置
+                    Math.max(4, SystemInfo.getCpuCores() + 1); // 默认cpu+1,至少4个
             NamedThreadFactory threadName = new NamedThreadFactory("CLI-IO", true);
             boolean useEpoll = getBooleanValue(TRANSPORT_USE_EPOLL);
             clientIOEventLoopGroup = useEpoll ? new EpollEventLoopGroup(threads, threadName)
-                : new NioEventLoopGroup(threads, threadName);
+                    : new NioEventLoopGroup(threads, threadName);
             refCounter.putIfAbsent(clientIOEventLoopGroup, new AtomicInteger(0));
             // SelectStrategyFactory 未设置
         }
@@ -231,13 +231,13 @@ public class NettyHelper {
     public static EventLoopGroup getServerBizEventLoopGroup(ServerTransportConfig config, Executor executor) {
         int bizThreads = config.getBizMaxThreads();
         return config.isUseEpoll() ?
-            new EpollEventLoopGroup(config.getBizMaxThreads(), executor) :
-            new NioEventLoopGroup(bizThreads, executor);
+                new EpollEventLoopGroup(config.getBizMaxThreads(), executor) :
+                new NioEventLoopGroup(bizThreads, executor);
     }
 
     private static AdaptiveRecvByteBufAllocator recvByteBufAllocator = AdaptiveRecvByteBufAllocator.DEFAULT;
 
-    private static ByteBufAllocator             byteBufAllocator     = ByteBufAllocator.DEFAULT;
+    private static ByteBufAllocator byteBufAllocator = ByteBufAllocator.DEFAULT;
 
     public static ByteBufAllocator getByteBufAllocator() {
         return byteBufAllocator;

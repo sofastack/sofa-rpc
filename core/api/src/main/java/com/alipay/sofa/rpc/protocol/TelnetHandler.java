@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.transport.AbstractChannel;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extensible(singleton = false)
 @Unstable
 public interface TelnetHandler {

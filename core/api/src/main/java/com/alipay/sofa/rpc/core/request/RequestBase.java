@@ -29,17 +29,17 @@ import java.io.Serializable;
 // TODO: 2018/6/22 by zmyer
 public abstract class RequestBase implements Serializable {
 
-    private static final long  serialVersionUID = -7323141575870688636L;
+    private static final long serialVersionUID = -7323141575870688636L;
 
     /**
      * Method name
      */
-    private String             methodName;
+    private String methodName;
 
     /**
      * Argument type strings of method
      */
-    private String[]           methodArgSigs;
+    private String[] methodArgSigs;
 
     /**
      * Argument values of method
@@ -49,7 +49,7 @@ public abstract class RequestBase implements Serializable {
     /**
      * Target service unique name, contains interfaceName, uniqueId and etc.
      */
-    private String             targetServiceUniqueName;
+    private String targetServiceUniqueName;
 
     /**
      * Gets method name.

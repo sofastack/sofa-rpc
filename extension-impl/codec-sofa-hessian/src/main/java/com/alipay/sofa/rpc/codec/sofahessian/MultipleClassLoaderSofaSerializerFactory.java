@@ -30,7 +30,8 @@ import java.util.concurrent.ConcurrentMap;
 // TODO: 2018/6/22 by zmyer
 public class MultipleClassLoaderSofaSerializerFactory extends SingleClassLoaderSofaSerializerFactory {
 
-    private final ConcurrentMap<String, ConcurrentMap<ClassLoader, Deserializer>> cachedTypeDeserializerMap = new ConcurrentHashMap<String, ConcurrentMap<ClassLoader, Deserializer>>();
+    private final ConcurrentMap<String, ConcurrentMap<ClassLoader, Deserializer>> cachedTypeDeserializerMap =
+            new ConcurrentHashMap<String, ConcurrentMap<ClassLoader, Deserializer>>();
 
     @Override
     protected Deserializer getDeserializerFromCachedType(String type) {
@@ -46,7 +47,7 @@ public class MultipleClassLoaderSofaSerializerFactory extends SingleClassLoaderS
     protected void putDeserializerToCachedType(String type, Deserializer deserializer) {
 
         ConcurrentMap<ClassLoader, Deserializer> concurrentMap = cachedTypeDeserializerMap
-            .get(type);
+                .get(type);
 
         if (concurrentMap == null) {
             ConcurrentMap<ClassLoader, Deserializer> newMap = new ConcurrentHashMap<ClassLoader, Deserializer>();

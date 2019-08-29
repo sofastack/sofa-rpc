@@ -46,12 +46,12 @@ public abstract class BoltSendableResponseCallback<T> implements SendableRespons
     /**
      *
      */
-    protected SofaRequest  request;
+    protected SofaRequest request;
 
     /**
      * 是否已发送
      */
-    private boolean        sent;
+    private boolean sent;
 
     public BoltSendableResponseCallback() {
         init();
@@ -130,7 +130,7 @@ public abstract class BoltSendableResponseCallback<T> implements SendableRespons
     /**
      * 发送响应数据
      *
-     * @param response 响应
+     * @param response      响应
      * @param sofaException SofaRpcException
      */
     protected void sendSofaResponse(SofaResponse response, SofaRpcException sofaException) {

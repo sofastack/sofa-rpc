@@ -38,13 +38,14 @@ import java.util.Map;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 @Extension("dubbo")
 public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
 
     /**
      * Dubbo的配置
      */
-    private ReferenceConfig<T>     referenceConfig;
+    private ReferenceConfig<T> referenceConfig;
 
     /**
      * 代理实现类
@@ -108,12 +109,12 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
             for (RegistryConfig registryConfig : registryConfigs) {
                 // 生成并丢到缓存里
                 com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
-                    .get(registryConfig);
+                        .get(registryConfig);
                 if (dubboRegistryConfig == null) {
                     dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
                     copyRegistryFields(registryConfig, dubboRegistryConfig);
                     com.alibaba.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
-                        registryConfig, dubboRegistryConfig);
+                            registryConfig, dubboRegistryConfig);
                     if (old != null) {
                         dubboRegistryConfig = old;
                     }
@@ -157,7 +158,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 referenceConfig.setSent(false);
             }
             if (RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)
-                || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
+                    || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
                 referenceConfig.setAsync(true);
             }
         }
@@ -182,7 +183,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                         dubboMethodConfig.setReturn(false);
                     }
                     if (RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)
-                        || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
+                            || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)) {
                         dubboMethodConfig.setAsync(true);
                     }
                 }

@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.base.Destroyable;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 public interface ClientTransportHolder extends Destroyable {
 
     /**
@@ -36,7 +37,7 @@ public interface ClientTransportHolder extends Destroyable {
     /**
      * 销毁长连接
      *
-     * @param clientTransport   ClientTransport
+     * @param clientTransport ClientTransport
      * @return need close client transport
      */
     boolean removeClientTransport(ClientTransport clientTransport);

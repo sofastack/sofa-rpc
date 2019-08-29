@@ -19,9 +19,9 @@ package com.alipay.sofa.rpc.event;
 import com.alipay.sofa.rpc.tracer.Tracers;
 
 /**
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class SofaTracerSubscriber extends Subscriber {
 
     @Override
@@ -34,9 +34,7 @@ public class SofaTracerSubscriber extends Subscriber {
         if (eventClass == ClientStartInvokeEvent.class) {
             ClientStartInvokeEvent event = (ClientStartInvokeEvent) originEvent;
             Tracers.startRpc(event.getRequest());
-        }
-
-        else if (eventClass == ClientBeforeSendEvent.class) {
+        } else if (eventClass == ClientBeforeSendEvent.class) {
             ClientBeforeSendEvent event = (ClientBeforeSendEvent) originEvent;
             Tracers.clientBeforeSend(event.getRequest());
         }
@@ -55,9 +53,7 @@ public class SofaTracerSubscriber extends Subscriber {
             Tracers.clientAsyncReceivedPrepare();
             // 记录收到返回
             Tracers.clientReceived(event.getRequest(), event.getResponse(), event.getThrowable());
-        }
-
-        else if (eventClass == ClientEndInvokeEvent.class) {
+        } else if (eventClass == ClientEndInvokeEvent.class) {
             ClientEndInvokeEvent event = (ClientEndInvokeEvent) originEvent;
             if (!event.getRequest().isAsync()) {
                 // 因为同步调用重试行为，需要放到最后才能算 received
@@ -65,21 +61,15 @@ public class SofaTracerSubscriber extends Subscriber {
             }
             // 检查下状态
             Tracers.checkState();
-        }
-
-        else if (eventClass == ServerReceiveEvent.class) {
+        } else if (eventClass == ServerReceiveEvent.class) {
             ServerReceiveEvent event = (ServerReceiveEvent) originEvent;
             // 接到请求
             Tracers.serverReceived(event.getRequest());
-        }
-
-        else if (eventClass == ServerSendEvent.class) {
+        } else if (eventClass == ServerSendEvent.class) {
             // 发送响应
             ServerSendEvent event = (ServerSendEvent) originEvent;
             Tracers.serverSend(event.getRequest(), event.getResponse(), event.getThrowable());
-        }
-
-        else if (eventClass == ServerEndHandleEvent.class) {
+        } else if (eventClass == ServerEndHandleEvent.class) {
             // 检查下状态
             Tracers.checkState();
         }

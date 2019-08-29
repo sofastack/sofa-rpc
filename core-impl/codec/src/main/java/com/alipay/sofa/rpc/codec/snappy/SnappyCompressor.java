@@ -23,6 +23,7 @@ import static com.alipay.sofa.rpc.codec.snappy.SnappyRpcCompressor.COPY_1_BYTE_O
 import static com.alipay.sofa.rpc.codec.snappy.SnappyRpcCompressor.COPY_2_BYTE_OFFSET;
 import static com.alipay.sofa.rpc.codec.snappy.SnappyRpcCompressor.LITERAL;
 
+// TODO: 2018/12/29 by zmyer
 final class SnappyCompressor {
     private static final boolean NATIVE_LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
 
@@ -34,13 +35,13 @@ final class SnappyCompressor {
     // helpful in implementing blocked decompression.  However the
     // decompression code should not rely on this guarantee since older
     // compression code may not obey it.
-    private static final int     BLOCK_LOG            = 15;
-    private static final int     BLOCK_SIZE           = 1 << BLOCK_LOG;
+    private static final int BLOCK_LOG = 15;
+    private static final int BLOCK_SIZE = 1 << BLOCK_LOG;
 
-    private static final int     INPUT_MARGIN_BYTES   = 15;
+    private static final int INPUT_MARGIN_BYTES = 15;
 
-    private static final int     MAX_HASH_TABLE_BITS  = 14;
-    private static final int     MAX_HASH_TABLE_SIZE  = 1 << MAX_HASH_TABLE_BITS;
+    private static final int MAX_HASH_TABLE_BITS = 14;
+    private static final int MAX_HASH_TABLE_SIZE = 1 << MAX_HASH_TABLE_BITS;
 
     public static int maxCompressedLength(int sourceLength) {
         // Compressed data can be defined as:
@@ -67,11 +68,11 @@ final class SnappyCompressor {
     }
 
     public static int compress(
-                               final byte[] uncompressed,
-                               final int uncompressedOffset,
-                               final int uncompressedLength,
-                               final byte[] compressed,
-                               final int compressedOffset) {
+            final byte[] uncompressed,
+            final int uncompressedOffset,
+            final int uncompressedLength,
+            final byte[] compressed,
+            final int compressedOffset) {
         // First write the uncompressed size to the output as a variable length int
         int compressedIndex = writeUncompressedLength(compressed, compressedOffset, uncompressedLength);
 
@@ -84,12 +85,12 @@ final class SnappyCompressor {
             Arrays.fill(table, (short) 0);
 
             compressedIndex = compressFragment(
-                uncompressed,
-                uncompressedOffset + read,
-                Math.min(uncompressedLength - read, BLOCK_SIZE),
-                compressed,
-                compressedIndex,
-                table);
+                    uncompressed,
+                    uncompressedOffset + read,
+                    Math.min(uncompressedLength - read, BLOCK_SIZE),
+                    compressed,
+                    compressedIndex,
+                    table);
         }
 
         recycler.releaseEncodingHash(table);
@@ -98,12 +99,12 @@ final class SnappyCompressor {
     }
 
     private static int compressFragment(
-                                        final byte[] input,
-                                        final int inputOffset,
-                                        final int inputSize,
-                                        final byte[] output,
-                                        int outputIndex,
-                                        final short[] table) {
+            final byte[] input,
+            final int inputOffset,
+            final int inputSize,
+            final byte[] output,
+            int outputIndex,
+            final short[] table) {
         int ipIndex = inputOffset;
         assert inputSize <= BLOCK_SIZE;
         final int ipEndIndex = inputOffset + inputSize;
@@ -173,7 +174,7 @@ final class SnappyCompressor {
                 // by proceeding to the next iteration of the main loop.  We also can exit
                 // this loop via goto if we get close to exhausting the input.
                 int[] indexes = emitCopies(input, inputOffset, inputSize, ipIndex, output, outputIndex, table, shift,
-                    candidateIndex);
+                        candidateIndex);
                 ipIndex = indexes[0];
                 outputIndex = indexes[1];
                 nextEmitIndex = ipIndex;
@@ -211,7 +212,7 @@ final class SnappyCompressor {
                 break;
             }
         }
-        return new int[] { ipIndex, candidateIndex, skip };
+        return new int[]{ipIndex, candidateIndex, skip};
     }
 
     private static int bytesBetweenHashLookups(int skip) {
@@ -219,15 +220,15 @@ final class SnappyCompressor {
     }
 
     private static int[] emitCopies(
-                                    byte[] input,
-                                    final int inputOffset,
-                                    final int inputSize,
-                                    int ipIndex,
-                                    byte[] output,
-                                    int outputIndex,
-                                    short[] table,
-                                    int shift,
-                                    int candidateIndex) {
+            byte[] input,
+            final int inputOffset,
+            final int inputSize,
+            int ipIndex,
+            byte[] output,
+            int outputIndex,
+            short[] table,
+            int shift,
+            int candidateIndex) {
         // Step 3: Call EmitCopy, and then see if another EmitCopy could
         // be our next move.  Repeat until we find no match for the
         // input immediately after what was consumed by the last EmitCopy call.
@@ -250,7 +251,7 @@ final class SnappyCompressor {
 
             // are we done?
             if (ipIndex >= inputOffset + inputSize - INPUT_MARGIN_BYTES) {
-                return new int[] { ipIndex, outputIndex };
+                return new int[]{ipIndex, outputIndex};
             }
 
             // We could immediately start working at ip now, but to improve
@@ -276,16 +277,16 @@ final class SnappyCompressor {
             table[curHash] = (short) (ipIndex - inputOffset);
 
         } while (inputBytes == SnappyInternalUtils.loadInt(input, candidateIndex));
-        return new int[] { ipIndex, outputIndex };
+        return new int[]{ipIndex, outputIndex};
     }
 
     private static int emitLiteral(
-                                   byte[] output,
-                                   int outputIndex,
-                                   byte[] literal,
-                                   final int literalIndex,
-                                   final int length,
-                                   final boolean allowFastPath) {
+            byte[] output,
+            int outputIndex,
+            byte[] literal,
+            final int literalIndex,
+            final int length,
+            final boolean allowFastPath) {
         SnappyInternalUtils.checkPositionIndexes(literalIndex, literalIndex + length, literal.length);
 
         int n = length - 1; // Zero-length literals are disallowed
@@ -337,10 +338,10 @@ final class SnappyCompressor {
     }
 
     private static int emitCopyLessThan64(
-                                          byte[] output,
-                                          int outputIndex,
-                                          int offset,
-                                          int length) {
+            byte[] output,
+            int outputIndex,
+            int offset,
+            int length) {
         assert offset >= 0;
         assert length <= 64;
         assert length >= 4;
@@ -360,10 +361,10 @@ final class SnappyCompressor {
     }
 
     private static int emitCopy(
-                                byte[] output,
-                                int outputIndex,
-                                int offset,
-                                int length) {
+            byte[] output,
+            int outputIndex,
+            int offset,
+            int length) {
         // Emit 64 byte copies but make sure to keep at least four bytes reserved
         while (length >= 68) {
             outputIndex = emitCopyLessThan64(output, outputIndex, offset, 64);
@@ -382,25 +383,25 @@ final class SnappyCompressor {
     }
 
     private static int findMatchLength(
-                                       byte[] s1,
-                                       int s1Index,
-                                       byte[] s2,
-                                       final int s2Index,
-                                       int s2Limit) {
+            byte[] s1,
+            int s1Index,
+            byte[] s2,
+            final int s2Index,
+            int s2Limit) {
         assert (s2Limit >= s2Index);
 
         if (SnappyInternalUtils.HAS_UNSAFE) {
             int matched = 0;
 
             while (s2Index + matched <= s2Limit - 4 &&
-                SnappyInternalUtils.loadInt(s2, s2Index + matched) == SnappyInternalUtils
-                    .loadInt(s1, s1Index + matched)) {
+                    SnappyInternalUtils.loadInt(s2, s2Index + matched) == SnappyInternalUtils
+                            .loadInt(s1, s1Index + matched)) {
                 matched += 4;
             }
 
             if (NATIVE_LITTLE_ENDIAN && s2Index + matched <= s2Limit - 4) {
                 int x = SnappyInternalUtils.loadInt(s2, s2Index + matched) ^
-                    SnappyInternalUtils.loadInt(s1, s1Index + matched);
+                        SnappyInternalUtils.loadInt(s1, s1Index + matched);
                 int matchingBits = Integer.numberOfTrailingZeros(x);
                 matched += matchingBits >> 3;
             } else {

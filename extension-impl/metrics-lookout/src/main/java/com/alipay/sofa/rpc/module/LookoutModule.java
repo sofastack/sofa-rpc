@@ -24,9 +24,9 @@ import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension("lookout")
 public class LookoutModule implements Module {
 

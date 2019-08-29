@@ -82,30 +82,30 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 是否已启动(已建立连接)
      */
-    protected volatile boolean initialized   = false;
+    protected volatile boolean initialized = false;
 
     /**
      * 是否已经销毁（已经销毁不能再继续使用）
      */
-    protected volatile boolean destroyed     = false;
+    protected volatile boolean destroyed = false;
 
     /**
      * 当前Client正在发送的调用数量
      */
-    protected AtomicInteger    countOfInvoke = new AtomicInteger(0);
+    protected AtomicInteger countOfInvoke = new AtomicInteger(0);
 
     /**
      * 路由列表
      */
-    protected RouterChain      routerChain;
+    protected RouterChain routerChain;
     /**
      * 负载均衡接口
      */
-    protected LoadBalancer     loadBalancer;
+    protected LoadBalancer loadBalancer;
     /**
      * 地址保持器
      */
-    protected AddressHolder    addressHolder;
+    protected AddressHolder addressHolder;
     /**
      * 连接管理器
      */
@@ -113,7 +113,7 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 过滤器链
      */
-    protected FilterChain      filterChain;
+    protected FilterChain filterChain;
 
     // TODO: 2018/6/22 by zmyer
     @Override
@@ -130,8 +130,7 @@ public abstract class AbstractCluster extends Cluster {
         // 连接管理器
         connectionHolder = ConnectionHolderFactory.getConnectionHolder(consumerBootstrap);
         // 构造Filter链,最底层是调用过滤器
-        this.filterChain = FilterChain.buildConsumerChain(this.consumerConfig,
-            new ConsumerInvoker(consumerBootstrap));
+        this.filterChain = FilterChain.buildConsumerChain(this.consumerConfig, new ConsumerInvoker(consumerBootstrap));
 
         if (consumerConfig.isLazy()) { // 延迟连接
             if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
@@ -160,8 +159,8 @@ public abstract class AbstractCluster extends Cluster {
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
             throw new SofaRpcRuntimeException("The consumer is depend on alive provider " +
-                "and there is no alive provider, you can ignore it " +
-                "by ConsumerConfig.setCheck(boolean) (default is false)");
+                    "and there is no alive provider, you can ignore it " +
+                    "by ConsumerConfig.setCheck(boolean) (default is false)");
         }
     }
 
@@ -208,7 +207,7 @@ public abstract class AbstractCluster extends Cluster {
             if (!ProviderHelper.isEmpty(oldProviderGroup)) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
-                        "providers has been closed, or this consumer has been add to blacklist");
+                            "providers has been closed, or this consumer has been add to blacklist");
                     closeTransports();
                 }
             }
@@ -218,7 +217,7 @@ public abstract class AbstractCluster extends Cluster {
         }
         if (EventBus.isEnable(ProviderInfoUpdateEvent.class)) {
             ProviderInfoUpdateEvent event = new ProviderInfoUpdateEvent(consumerConfig, oldProviderGroup,
-                providerGroup);
+                    providerGroup);
             EventBus.post(event);
         }
     }
@@ -240,7 +239,7 @@ public abstract class AbstractCluster extends Cluster {
             if (CommonUtils.isNotEmpty(currentProviderList)) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
-                        "providers has been closed, or this consumer has been add to blacklist");
+                            "providers has been closed, or this consumer has been add to blacklist");
                     closeTransports();
                 }
             }
@@ -250,7 +249,7 @@ public abstract class AbstractCluster extends Cluster {
         }
         if (EventBus.isEnable(ProviderInfoUpdateAllEvent.class)) {
             ProviderInfoUpdateAllEvent event = new ProviderInfoUpdateAllEvent(consumerConfig, oldProviderGroups,
-                providerGroups);
+                    providerGroups);
             EventBus.post(event);
         }
     }
@@ -272,8 +271,8 @@ public abstract class AbstractCluster extends Cluster {
             if (!StringUtils.equals(providerInfo.getProtocolType(), consumerConfig.getProtocol())) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(),
-                        "Unmatched protocol between consumer [{}] and provider [{}].",
-                        consumerConfig.getProtocol(), providerInfo.getProtocolType());
+                            "Unmatched protocol between consumer [{}] and provider [{}].",
+                            consumerConfig.getProtocol(), providerInfo.getProtocolType());
                 }
             }
         }
@@ -344,7 +343,7 @@ public abstract class AbstractCluster extends Cluster {
      */
     // TODO: 2018/7/6 by zmyer
     protected ProviderInfo select(SofaRequest message, List<ProviderInfo> invokedProviderInfos)
-        throws SofaRpcException {
+            throws SofaRpcException {
         // 粘滞连接，当前连接可用
         if (consumerConfig.isSticky()) {
             if (lastProviderInfo != null) {
@@ -362,7 +361,7 @@ public abstract class AbstractCluster extends Cluster {
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         }
         if (CommonUtils.isNotEmpty(invokedProviderInfos) &&
-            providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
+                providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
             providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
         }
 
@@ -410,8 +409,8 @@ public abstract class AbstractCluster extends Cluster {
         ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
         for (ProviderInfo providerInfo : providerInfos) {
             if (providerInfo.getHost().equals(tp.getHost())
-                && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
-                && providerInfo.getPort() == tp.getPort()) {
+                    && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
+                    && providerInfo.getPort() == tp.getPort()) {
                 return providerInfo;
             }
         }
@@ -548,7 +547,7 @@ public abstract class AbstractCluster extends Cluster {
                 SofaResponseCallback sofaResponseCallback = request.getSofaResponseCallback();
                 if (sofaResponseCallback == null) {
                     SofaResponseCallback methodResponseCallback = consumerConfig
-                        .getMethodOnreturn(request.getMethodName());
+                            .getMethodOnreturn(request.getMethodName());
                     if (methodResponseCallback != null) { // 方法的Callback
                         request.setSofaResponseCallback(methodResponseCallback);
                     }
@@ -603,7 +602,7 @@ public abstract class AbstractCluster extends Cluster {
         if (timeout == null) {
             // 取客户端配置（先方法级别再接口级别）
             timeout = consumerConfig.getMethodTimeout(request.getMethodName());
-            if (timeout == null || timeout < 0) {
+            if (timeout < 0) {
                 // 再取服务端配置
                 timeout = (Integer) providerInfo.getDynamicAttr(ATTR_TIMEOUT);
                 if (timeout == null) {
@@ -664,7 +663,7 @@ public abstract class AbstractCluster extends Cluster {
                 long start = RpcRuntimeContext.now();
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("There are {} outstanding call in client, will close transports util return",
-                        count);
+                            count);
                 }
                 while (countOfInvoke.get() > 0 && RpcRuntimeContext.now() - start < timeout) { // 等待返回结果
                     try {

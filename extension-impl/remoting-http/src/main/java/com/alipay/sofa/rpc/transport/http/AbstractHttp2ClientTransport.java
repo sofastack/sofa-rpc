@@ -83,6 +83,7 @@ import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
+// TODO: 2018/12/29 by zmyer
 public abstract class AbstractHttp2ClientTransport extends ClientTransport {
 
     /**
@@ -103,24 +104,24 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
     /**
      * 服务端提供者信息
      */
-    protected final ProviderInfo        providerInfo;
+    protected final ProviderInfo providerInfo;
     /**
      * Start from 3 (because 1 is setting stream)
      */
-    private final static int            START_STREAM_ID = 3;
+    private final static int START_STREAM_ID = 3;
     /**
      * StreamId, start from 3 (because 1 is setting stream)
      */
-    protected final AtomicInteger       streamId        = new AtomicInteger();
+    protected final AtomicInteger streamId = new AtomicInteger();
     /**
      * 正在发送的调用数量
      */
-    protected volatile AtomicInteger    currentRequests = new AtomicInteger(0);
+    protected volatile AtomicInteger currentRequests = new AtomicInteger(0);
 
     /**
      * Channel
      */
-    protected NettyChannel              channel;
+    protected NettyChannel channel;
 
     /**
      * Response channel handler
@@ -130,8 +131,8 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
     /**
      * 超时处理器
      */
-    private static final Timer          TIMEOUT_TIMER   = new HashedWheelTimer(new NamedThreadFactory("HTTP-TIMER"),
-                                                            10, TimeUnit.MILLISECONDS);
+    private static final Timer TIMEOUT_TIMER = new HashedWheelTimer(new NamedThreadFactory("HTTP-TIMER"),
+            10, TimeUnit.MILLISECONDS);
 
     @Override
     public void connect() {
@@ -228,15 +229,15 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
         SofaResponseCallback listener = request.getSofaResponseCallback();
         if (listener != null) {
             AbstractHttpClientHandler callback = new CallbackInvokeClientHandler(transportConfig.getConsumerConfig(),
-                transportConfig.getProviderInfo(), listener, request, rpcContext,
-                ClassLoaderUtils.getCurrentClassLoader());
+                    transportConfig.getProviderInfo(), listener, request, rpcContext,
+                    ClassLoaderUtils.getCurrentClassLoader());
             doSend(request, callback, timeoutMillis);
             return null;
         } else {
             HttpResponseFuture future = new HttpResponseFuture(request, timeoutMillis);
             AbstractHttpClientHandler callback = new FutureInvokeClientHandler(transportConfig.getConsumerConfig(),
-                transportConfig.getProviderInfo(), future, request, rpcContext,
-                ClassLoaderUtils.getCurrentClassLoader());
+                    transportConfig.getProviderInfo(), future, request, rpcContext,
+                    ClassLoaderUtils.getCurrentClassLoader());
             doSend(request, callback, timeoutMillis);
             future.setSentTime();
             return future;
@@ -272,11 +273,11 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
      * @throws TimeoutException     超时异常
      */
     protected SofaResponse doInvokeSync(SofaRequest request, int timeout) throws InterruptedException,
-        ExecutionException, TimeoutException {
+            ExecutionException, TimeoutException {
         HttpResponseFuture future = new HttpResponseFuture(request, timeout);
         AbstractHttpClientHandler callback = new SyncInvokeClientHandler(transportConfig.getConsumerConfig(),
-            transportConfig.getProviderInfo(), future, request, RpcInternalContext.getContext(),
-            ClassLoaderUtils.getCurrentClassLoader());
+                transportConfig.getProviderInfo(), future, request, RpcInternalContext.getContext(),
+                ClassLoaderUtils.getCurrentClassLoader());
         future.setSentTime();
         doSend(request, callback, timeout);
         future.setSentTime();
@@ -305,7 +306,7 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
                     @Override
                     public void run(Timeout timeout) throws Exception {
                         Map.Entry<ChannelFuture, AbstractHttpClientHandler> entry = responseChannelHandler
-                            .removePromise(requestId);
+                                .removePromise(requestId);
                         if (entry != null) {
                             ClientHandler handler = entry.getValue();
                             Exception e = timeoutException(request, timeoutMills, null);
@@ -332,14 +333,14 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
 
         // Create a simple POST request with a body.
         FullHttpRequest httpRequest = new DefaultFullHttpRequest(HTTP_1_1, POST, url,
-            wrappedBuffer(request.getData().array()));
+                wrappedBuffer(request.getData().array()));
         HttpHeaders headers = httpRequest.headers();
         addToHeader(headers, HttpHeaderNames.HOST, hostName);
         addToHeader(headers, HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), scheme.name());
         addToHeader(headers, HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.GZIP);
         addToHeader(headers, HttpHeaderNames.ACCEPT_ENCODING, HttpHeaderValues.DEFLATE);
         addToHeader(headers, RemotingConstants.HEAD_SERIALIZE_TYPE,
-            SerializerFactory.getAliasByCode(request.getSerializeType()));
+                SerializerFactory.getAliasByCode(request.getSerializeType()));
         addToHeader(headers, RemotingConstants.HEAD_TARGET_APP, request.getTargetAppName());
         Map<String, Object> requestProps = request.getRequestProps();
         if (requestProps != null) {
@@ -420,8 +421,8 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
 
     protected SofaTimeOutException timeoutException(SofaRequest request, int timeout, Throwable e) {
         return new SofaTimeOutException(LogCodes.getLog(LogCodes.ERROR_INVOKE_TIMEOUT,
-            providerInfo.getProtocolType(), request.getTargetServiceUniqueName(), request.getMethodName(),
-            providerInfo.toString(), StringUtils.objectsToString(request.getMethodArgs()), timeout), e);
+                providerInfo.getProtocolType(), request.getTargetServiceUniqueName(), request.getMethodName(),
+                providerInfo.toString(), StringUtils.objectsToString(request.getMethodArgs()), timeout), e);
     }
 
     /**

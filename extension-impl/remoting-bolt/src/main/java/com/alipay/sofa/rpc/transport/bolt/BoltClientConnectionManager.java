@@ -37,25 +37,25 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 class BoltClientConnectionManager {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                            LOGGER               = LoggerFactory
-                                                                                    .getLogger(BoltClientConnectionManager.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(BoltClientConnectionManager.class);
 
     /**
      * 长连接复用时，共享长连接的连接池，一个服务端ip和端口同一协议只建立一个长连接，不管多少接口，共用长连接
      */
     @VisibleForTesting
-    final ConcurrentMap<ClientTransportConfig, Connection> urlConnectionMap     = new ConcurrentHashMap<ClientTransportConfig, Connection>();
+    final ConcurrentMap<ClientTransportConfig, Connection> urlConnectionMap = new ConcurrentHashMap<ClientTransportConfig, Connection>();
 
     /**
      * 长连接复用时，共享长连接的计数器
      */
     @VisibleForTesting
-    final ConcurrentMap<Connection, AtomicInteger>         connectionRefCounter = new ConcurrentHashMap<Connection, AtomicInteger>();
+    final ConcurrentMap<Connection, AtomicInteger> connectionRefCounter = new ConcurrentHashMap<Connection, AtomicInteger>();
 
     @VisibleForTesting
     protected BoltClientConnectionManager(boolean addHook) {
@@ -100,6 +100,7 @@ class BoltClientConnectionManager {
      * @param url             传输层地址
      * @return 长连接
      */
+    // TODO: 2018/12/28 by zmyer
     public Connection getConnection(RpcClient rpcClient, ClientTransportConfig transportConfig, Url url) {
         if (rpcClient == null || transportConfig == null || url == null) {
             return null;
@@ -142,8 +143,8 @@ class BoltClientConnectionManager {
                 int currentCount = counter.incrementAndGet();
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Bolt client transport {} of {}, current ref count is: {}", url.toString(),
-                        NetUtils.channelToString(connection.getLocalAddress(), connection.getRemoteAddress()),
-                        currentCount);
+                            NetUtils.channelToString(connection.getLocalAddress(), connection.getRemoteAddress()),
+                            currentCount);
                 }
             }
         }
@@ -176,8 +177,8 @@ class BoltClientConnectionManager {
             int currentCount = integer.decrementAndGet();
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Client transport {} of {} , current ref count is: {}", url.toString(),
-                    NetUtils.channelToString(connection.getLocalAddress(), connection.getRemoteAddress()),
-                    currentCount);
+                        NetUtils.channelToString(connection.getLocalAddress(), connection.getRemoteAddress()),
+                        currentCount);
             }
             if (currentCount <= 0) {
                 // 此长连接无任何引用，可以销毁

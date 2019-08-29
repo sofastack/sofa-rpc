@@ -53,25 +53,25 @@ public class FilterChain implements Invoker {
     /**
      * 日志
      */
-    private static final Logger                              LOGGER                = LoggerFactory
-                                                                                       .getLogger(FilterChain.class);
+    private static final Logger LOGGER = LoggerFactory
+            .getLogger(FilterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Filter>> PROVIDER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new LinkedHashMap<String, ExtensionClass<Filter>>());
+            .synchronizedMap(new LinkedHashMap<>());
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Filter>> CONSUMER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new LinkedHashMap<String, ExtensionClass<Filter>>());
+            .synchronizedMap(new LinkedHashMap<>());
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Filter>             EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Filter> EXTENSION_LOADER = buildLoader();
 
     private static ExtensionLoader<Filter> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
@@ -90,7 +90,7 @@ public class FilterChain implements Invoker {
                     }
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Extension of interface " + Filter.class
-                            + ", " + implClass + "(" + alias + ") will auto active");
+                                + ", " + implClass + "(" + alias + ") will auto active");
                     }
                 }
             }
@@ -105,7 +105,7 @@ public class FilterChain implements Invoker {
     /**
      * 过滤器列表，从底至上排序
      */
-    private List<Filter>  loadedFilters;
+    private List<Filter> loadedFilters;
 
     /**
      * 构造执行链
@@ -181,7 +181,7 @@ public class FilterChain implements Invoker {
          */
         // 用户通过自己new实例的方式注入的filter，优先级高
         List<Filter> customFilters = config.getFilterRef() == null ?
-            new ArrayList<Filter>() : new CopyOnWriteArrayList<Filter>(config.getFilterRef());
+                new ArrayList<Filter>() : new CopyOnWriteArrayList<Filter>(config.getFilterRef());
         // 先解析是否有特殊处理
         HashSet<String> excludes = parseExcludeFilter(customFilters);
 
@@ -238,8 +238,8 @@ public class FilterChain implements Invoker {
                     String excludeName = excludeFilter.getExcludeName();
                     if (StringUtils.isNotEmpty(excludeName)) {
                         String excludeFilterName = startsWithExcludePrefix(excludeName) ?
-                            excludeName.substring(1)
-                            : excludeName;
+                                excludeName.substring(1)
+                                : excludeName;
                         if (StringUtils.isNotEmpty(excludeFilterName)) {
                             excludeKeys.add(excludeFilterName);
                         }
@@ -279,14 +279,14 @@ public class FilterChain implements Invoker {
      */
     // TODO: 2018/6/22 by zmyer
     public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
-        throws SofaRpcException {
+            throws SofaRpcException {
         try {
             for (Filter loadedFilter : loadedFilters) {
                 loadedFilter.onAsyncResponse(config, request, response, throwable);
             }
         } catch (SofaRpcException e) {
             LOGGER.errorWithApp(config.getAppName(), "Catch exception when do filtering after asynchronous respond.",
-                e);
+                    e);
         }
     }
 

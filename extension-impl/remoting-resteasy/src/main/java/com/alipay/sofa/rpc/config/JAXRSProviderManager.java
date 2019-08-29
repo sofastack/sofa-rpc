@@ -26,12 +26,13 @@ import java.util.Set;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class JAXRSProviderManager {
 
     /**
      * 内置的jaxrs Provider类
      */
-    private static Set<Class>  internalProviderClasses = Collections.synchronizedSet(new LinkedHashSet<Class>());
+    private static Set<Class> internalProviderClasses = Collections.synchronizedSet(new LinkedHashSet<Class>());
 
     /**
      * 自定义jaxrs Provider实例
@@ -47,6 +48,7 @@ public class JAXRSProviderManager {
 
     /**
      * remove internal jaxrs provider instace
+     *
      * @param provider
      */
     public static void removeInternalProviderClass(Class provider) {
@@ -71,6 +73,7 @@ public class JAXRSProviderManager {
 
     /**
      * remove custom jaxrs provider instace
+     *
      * @param provider
      */
     public static void removeCustomProviderInstance(Object provider) {

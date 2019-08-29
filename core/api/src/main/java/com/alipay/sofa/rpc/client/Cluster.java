@@ -48,7 +48,7 @@ public abstract class Cluster implements Invoker, ProviderInfoListener, Initiali
     /**
      * 配置
      */
-    protected final ConsumerConfig    consumerConfig;
+    protected final ConsumerConfig consumerConfig;
 
     /**
      * 构造函数

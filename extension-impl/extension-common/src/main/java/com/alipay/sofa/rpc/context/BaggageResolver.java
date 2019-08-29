@@ -30,6 +30,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class BaggageResolver {
 
     /**
@@ -65,7 +66,7 @@ public class BaggageResolver {
         }
         // 解析请求 
         Map<String, String> requestBaggage = (Map<String, String>) request
-            .getRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE);
+                .getRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE);
         if (CommonUtils.isNotEmpty(requestBaggage)) {
             if (context == null) {
                 context = RpcInvokeContext.getContext();
@@ -122,7 +123,7 @@ public class BaggageResolver {
                         context = RpcInvokeContext.getContext();
                     }
                     context.putResponseBaggage(entry.getKey().substring(prefix.length()),
-                        entry.getValue());
+                            entry.getValue());
                 }
             }
         }

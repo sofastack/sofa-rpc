@@ -35,41 +35,41 @@ import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
 // TODO: 2018/7/6 by zmyer
 public class ServerTransportConfig {
 
-    private String                host             = getStringValue(RpcOptions.SERVER_HOST);
-    private int                   port             = getIntValue(RpcOptions.SERVER_PORT_START);
+    private String host = getStringValue(RpcOptions.SERVER_HOST);
+    private int port = getIntValue(RpcOptions.SERVER_PORT_START);
 
-    private String                contextPath      = getStringValue(RpcOptions.SERVER_CONTEXT_PATH);
-    private String                container        = getStringValue(RpcOptions.DEFAULT_TRANSPORT);
-    private int                   backlog          = getIntValue(RpcOptions.TRANSPORT_SERVER_BACKLOG);
-    private String                protocolType     = getStringValue(RpcOptions.DEFAULT_PROTOCOL);
-    private boolean               reuseAddr        = getBooleanValue(RpcOptions.TRANSPORT_SERVER_REUSE_ADDR);
-    private boolean               keepAlive        = getBooleanValue(RpcOptions.TRANSPORT_SERVER_KEEPALIVE);
-    private boolean               tcpNoDelay       = getBooleanValue(RpcOptions.TRANSPORT_SERVER_TCPNODELAY);
-    private int                   bizMaxThreads    = getIntValue(RpcOptions.SERVER_POOL_MAX);
+    private String contextPath = getStringValue(RpcOptions.SERVER_CONTEXT_PATH);
+    private String container = getStringValue(RpcOptions.DEFAULT_TRANSPORT);
+    private int backlog = getIntValue(RpcOptions.TRANSPORT_SERVER_BACKLOG);
+    private String protocolType = getStringValue(RpcOptions.DEFAULT_PROTOCOL);
+    private boolean reuseAddr = getBooleanValue(RpcOptions.TRANSPORT_SERVER_REUSE_ADDR);
+    private boolean keepAlive = getBooleanValue(RpcOptions.TRANSPORT_SERVER_KEEPALIVE);
+    private boolean tcpNoDelay = getBooleanValue(RpcOptions.TRANSPORT_SERVER_TCPNODELAY);
+    private int bizMaxThreads = getIntValue(RpcOptions.SERVER_POOL_MAX);
     //default business pool set to 200
-    private String                bizPoolType      = getStringValue(RpcOptions.SERVER_POOL_TYPE);
+    private String bizPoolType = getStringValue(RpcOptions.SERVER_POOL_TYPE);
 
-    private boolean               useEpoll         = getBooleanValue(RpcOptions.TRANSPORT_USE_EPOLL);
-    private String                bizPoolQueueType = getStringValue(RpcOptions.SERVER_POOL_QUEUE_TYPE);      // 队列类型
-    private int                   bizPoolQueues    = getIntValue(RpcOptions.SERVER_POOL_QUEUE);              // 队列大小
+    private boolean useEpoll = getBooleanValue(RpcOptions.TRANSPORT_USE_EPOLL);
+    private String bizPoolQueueType = getStringValue(RpcOptions.SERVER_POOL_QUEUE_TYPE);      // 队列类型
+    private int bizPoolQueues = getIntValue(RpcOptions.SERVER_POOL_QUEUE);              // 队列大小
 
-    private int                   bossThreads      = getIntValue(RpcOptions.TRANSPORT_SERVER_BOSS_THREADS);  // boss线程,一个端口绑定到一个线程
+    private int bossThreads = getIntValue(RpcOptions.TRANSPORT_SERVER_BOSS_THREADS);  // boss线程,一个端口绑定到一个线程
 
-    private int                   ioThreads        = getIntValue(RpcOptions.TRANSPORT_SERVER_IO_THREADS);    // worker线程==IO线程，一个长连接绑定到一个线程
+    private int ioThreads = getIntValue(RpcOptions.TRANSPORT_SERVER_IO_THREADS);    // worker线程==IO线程，一个长连接绑定到一个线程
 
-    private int                   maxConnection    = getIntValue(RpcOptions.SERVER_ACCEPTS);                 // 最大连接数 default set to 100
-    private int                   payload          = getIntValue(RpcOptions.TRANSPORT_PAYLOAD_MAX);          // 最大数据包 default set to 8M
-    private int                   buffer           = getIntValue(RpcOptions.TRANSPORT_BUFFER_SIZE);          // 缓冲器大小
-    private boolean               telnet           = getBooleanValue(RpcOptions.SERVER_TELNET);              // 是否允许telnet
-    private boolean               daemon           = getBooleanValue(RpcOptions.SERVER_DAEMON);              // 是否守护线程，true随主线程退出而退出，false需要主动退出
+    private int maxConnection = getIntValue(RpcOptions.SERVER_ACCEPTS);                 // 最大连接数 default set to 100
+    private int payload = getIntValue(RpcOptions.TRANSPORT_PAYLOAD_MAX);          // 最大数据包 default set to 8M
+    private int buffer = getIntValue(RpcOptions.TRANSPORT_BUFFER_SIZE);          // 缓冲器大小
+    private boolean telnet = getBooleanValue(RpcOptions.SERVER_TELNET);              // 是否允许telnet
+    private boolean daemon = getBooleanValue(RpcOptions.SERVER_DAEMON);              // 是否守护线程，true随主线程退出而退出，false需要主动退出
 
-    private int                   bufferMin        = getIntValue(RpcOptions.TRANSPORT_BUFFER_MIN);
-    private int                   bufferMax        = getIntValue(RpcOptions.TRANSPORT_BUFFER_MAX);
+    private int bufferMin = getIntValue(RpcOptions.TRANSPORT_BUFFER_MIN);
+    private int bufferMax = getIntValue(RpcOptions.TRANSPORT_BUFFER_MAX);
 
-    private Map<String, String>   parameters;                                                                //其他一些参数配置
+    private Map<String, String> parameters;                                                                //其他一些参数配置
 
     private List<ChannelListener> channelListeners;
-    private ServerHandler         serverHandler;
+    private ServerHandler serverHandler;
 
     public String getHost() {
         return host;

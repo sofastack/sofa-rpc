@@ -64,123 +64,124 @@ import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROTOCOL;
  * @param <T> the type parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig<T>> implements Serializable {
 
     /**
      * The constant serialVersionUID.
      */
-    private static final long                       serialVersionUID   = 4244077707655448146L;
+    private static final long serialVersionUID = 4244077707655448146L;
 
     /**
      * 调用的协议
      */
-    protected String                                protocol           = getStringValue(DEFAULT_PROTOCOL);
+    protected String protocol = getStringValue(DEFAULT_PROTOCOL);
 
     /**
      * 直连调用地址
      */
-    protected String                                directUrl;
+    protected String directUrl;
 
     /**
      * 是否泛化调用
      */
-    protected boolean                               generic;
+    protected boolean generic;
 
     /**
      * 是否异步调用
      */
-    protected String                                invokeType         = getStringValue(CONSUMER_INVOKE_TYPE);
+    protected String invokeType = getStringValue(CONSUMER_INVOKE_TYPE);
 
     /**
      * 连接超时时间
      */
-    protected int                                   connectTimeout     = getIntValue(CONSUMER_CONNECT_TIMEOUT);
+    protected int connectTimeout = getIntValue(CONSUMER_CONNECT_TIMEOUT);
 
     /**
      * 关闭超时时间（如果还有请求，会等待请求结束或者超时）
      */
-    protected int                                   disconnectTimeout  = getIntValue(CONSUMER_DISCONNECT_TIMEOUT);
+    protected int disconnectTimeout = getIntValue(CONSUMER_DISCONNECT_TIMEOUT);
 
     /**
      * 集群处理，默认是failover
      */
-    protected String                                cluster            = getStringValue(CONSUMER_CLUSTER);
+    protected String cluster = getStringValue(CONSUMER_CLUSTER);
 
     /**
      * The ConnectionHolder 连接管理器
      */
-    protected String                                connectionHolder   = getStringValue(CONSUMER_CONNECTION_HOLDER);
+    protected String connectionHolder = getStringValue(CONSUMER_CONNECTION_HOLDER);
 
     /**
      * 地址管理器
      */
-    protected String                                addressHolder      = getStringValue(CONSUMER_ADDRESS_HOLDER);
+    protected String addressHolder = getStringValue(CONSUMER_ADDRESS_HOLDER);
 
     /**
      * 负载均衡
      */
-    protected String                                loadBalancer       = getStringValue(CONSUMER_LOAD_BALANCER);
+    protected String loadBalancer = getStringValue(CONSUMER_LOAD_BALANCER);
 
     /**
      * 是否延迟建立长连接（第一次调用时新建，注意此参数可能和check冲突，开启check后lazy自动失效）
      *
      * @see ConsumerConfig#check
      */
-    protected boolean                               lazy               = getBooleanValue(CONSUMER_LAZY);
+    protected boolean lazy = getBooleanValue(CONSUMER_LAZY);
 
     /**
      * 粘滞连接，一个断开才选下一个
      * change transport when current is disconnected
      */
-    protected boolean                               sticky             = getBooleanValue(CONSUMER_STICKY);
+    protected boolean sticky = getBooleanValue(CONSUMER_STICKY);
 
     /**
      * 是否jvm内部调用（provider和consumer配置在同一个jvm内，则走本地jvm内部，不走远程）
      */
-    protected boolean                               inJVM              = getBooleanValue(CONSUMER_INJVM);
+    protected boolean inJVM = getBooleanValue(CONSUMER_INJVM);
 
     /**
      * 是否强依赖（即没有服务节点就启动失败，注意此参数可能和lazy冲突，开启check后lazy自动失效)
      *
      * @see ConsumerConfig#lazy
      */
-    protected boolean                               check              = getBooleanValue(CONSUMER_CHECK);
+    protected boolean check = getBooleanValue(CONSUMER_CHECK);
 
     /**
      * 长连接个数，不是所有的框架都支持一个地址多个长连接
      */
-    protected int                                   connectionNum      = getIntValue(CONSUMER_CONNECTION_NUM);
+    protected int connectionNum = getIntValue(CONSUMER_CONNECTION_NUM);
 
     /**
      * Consumer给Provider发心跳的间隔
      */
-    protected int                                   heartbeatPeriod    = getIntValue(CONSUMER_HEARTBEAT_PERIOD);
+    protected int heartbeatPeriod = getIntValue(CONSUMER_HEARTBEAT_PERIOD);
 
     /**
      * Consumer给Provider重连的间隔
      */
-    protected int                                   reconnectPeriod    = getIntValue(CONSUMER_RECONNECT_PERIOD);
+    protected int reconnectPeriod = getIntValue(CONSUMER_RECONNECT_PERIOD);
 
     /**
      * 路由配置别名
      */
-    protected List<String>                          router;
+    protected List<String> router;
 
     /**
      * 路由规则引用，多个用英文逗号隔开。List<Router>
      */
-    protected transient List<Router>                routerRef;
+    protected transient List<Router> routerRef;
 
     /**
      * 返回值之前的listener,处理结果或者异常
      */
-    protected transient SofaResponseCallback        onReturn;
+    protected transient SofaResponseCallback onReturn;
 
     /**
      * 连接事件监听器实例，连接或者断开时触发
      */
     @Unstable
-    protected transient List<ChannelListener>       onConnect;
+    protected transient List<ChannelListener> onConnect;
 
     /**
      * 客户端状态变化监听器实例，状态可用和不可以时触发
@@ -191,42 +192,42 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 启动器
      */
-    protected String                                bootstrap;
+    protected String bootstrap;
 
     /**
      * 等待地址获取时间(毫秒)，-1表示等到拿到地址位置
      */
-    protected int                                   addressWait        = getIntValue(CONSUMER_ADDRESS_WAIT);
+    protected int addressWait = getIntValue(CONSUMER_ADDRESS_WAIT);
 
     /**
      * 同一个服务（接口协议uniqueId相同）的最大引用次数，防止由于代码bug导致重复引用，每次引用都会生成一个代理类对象，-1表示不检查
      *
      * @since 5.2.0
      */
-    protected int                                   repeatedReferLimit = getIntValue(CONSUMER_REPEATED_REFERENCE_LIMIT);
+    protected int repeatedReferLimit = getIntValue(CONSUMER_REPEATED_REFERENCE_LIMIT);
 
     /*-------- 下面是方法级可覆盖配置 --------*/
     /**
      * 客户端调用超时时间(毫秒)
      */
-    protected int                                   timeout            = getIntValue(CONSUMER_INVOKE_TIMEOUT);
+    protected int timeout = getIntValue(CONSUMER_INVOKE_TIMEOUT);
 
     /**
      * The Retries. 失败后重试次数
      */
-    protected int                                   retries            = getIntValue(CONSUMER_RETRIES);
+    protected int retries = getIntValue(CONSUMER_RETRIES);
 
     /**
      * 接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
      */
-    protected int                                   concurrents        = getIntValue(CONSUMER_CONCURRENTS);
+    protected int concurrents = getIntValue(CONSUMER_CONCURRENTS);
 
     /*---------- 参数配置项结束 ------------*/
 
     /**
      * 服务消费者启动类
      */
-    private transient ConsumerBootstrap<T>          consumerBootstrap;
+    private transient ConsumerBootstrap<T> consumerBootstrap;
 
     /**
      * 服务列表的listener
@@ -261,11 +262,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
                 this.proxyClass = ClassUtils.forName(interfaceId);
                 if (!proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("consumer.interface",
-                        interfaceId, "interfaceId must set interface class, not implement class");
+                            interfaceId, "interfaceId must set interface class, not implement class");
                 }
             } else {
                 throw ExceptionUtils.buildRuntime("consumer.interface",
-                    "null", "interfaceId must be not null");
+                        "null", "interfaceId must be not null");
             }
         } catch (RuntimeException t) {
             throw new IllegalStateException(t.getMessage(), t);
@@ -862,7 +863,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         if (CommonUtils.isNotEmpty(methods)) {
             for (MethodConfig methodConfig : methods.values()) {
                 if (methodConfig.getConcurrents() != null
-                    && methodConfig.getConcurrents() > 0) {
+                        && methodConfig.getConcurrents() > 0) {
                     return true;
                 }
             }
@@ -878,7 +879,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     public int getMethodRetries(String methodName) {
         return (Integer) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_RETRIES,
-            getRetries());
+                getRetries());
     }
 
     /**
@@ -889,7 +890,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     public int getMethodTimeout(String methodName) {
         return (Integer) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_TIMEOUT,
-            getTimeout());
+                getTimeout());
     }
 
     /**
@@ -900,7 +901,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     public SofaResponseCallback getMethodOnreturn(String methodName) {
         return (SofaResponseCallback) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_ONRETURN,
-            getOnReturn());
+                getOnReturn());
     }
 
     /**
@@ -909,9 +910,10 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * @param methodName the method name
      * @return the time out
      */
+    // TODO: 2018/12/28 by zmyer
     public String getMethodInvokeType(String methodName) {
         return (String) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_INVOKE_TYPE,
-            getInvokeType());
+                getInvokeType());
     }
 
     /**

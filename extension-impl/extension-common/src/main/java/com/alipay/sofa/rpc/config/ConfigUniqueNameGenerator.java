@@ -49,8 +49,8 @@ public class ConfigUniqueNameGenerator {
         String version = interfaceConfig.getVersion();
         String uniqueId = interfaceConfig.getUniqueId();
         return interfaceConfig.getInterfaceId()
-            + (StringUtils.isEmpty(version) ? ":1.0" : ":" + version)
-            + (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
+                + (StringUtils.isEmpty(version) ? ":1.0" : ":" + version)
+                + (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
     }
 
     /**

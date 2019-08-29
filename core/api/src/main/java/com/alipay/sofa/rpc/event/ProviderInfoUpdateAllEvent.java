@@ -26,8 +26,9 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 public class ProviderInfoUpdateAllEvent implements Event {
-    private final ConsumerConfig      consumerConfig;
+    private final ConsumerConfig consumerConfig;
     private final List<ProviderGroup> oldProviderGroups;
     private final List<ProviderGroup> newProviderGroups;
 

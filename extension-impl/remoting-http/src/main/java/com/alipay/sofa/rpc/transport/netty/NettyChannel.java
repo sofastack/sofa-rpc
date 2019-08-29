@@ -28,15 +28,15 @@ import io.netty.util.concurrent.FutureListener;
 import java.net.InetSocketAddress;
 
 /**
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
+// TODO: 2018/12/29 by zmyer
 public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel> {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger   LOGGER = LoggerFactory.getLogger(NettyChannel.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(NettyChannel.class);
 
     /**
      * 长连接上下文
@@ -46,7 +46,7 @@ public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel
     /**
      * 通道
      */
-    private Channel               channel;
+    private Channel channel;
 
     public NettyChannel(Channel channel) {
         this.channel = channel;
@@ -86,9 +86,9 @@ public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel
                 if (!future1.isSuccess()) {
                     Throwable throwable = future1.cause();
                     LOGGER.error("Failed to send to "
-                        + NetUtils.channelToString(localAddress(), remoteAddress())
-                        + " for msg : " + obj
-                        + ", Cause by:", throwable);
+                            + NetUtils.channelToString(localAddress(), remoteAddress())
+                            + " for msg : " + obj
+                            + ", Cause by:", throwable);
                 }
             }
         });

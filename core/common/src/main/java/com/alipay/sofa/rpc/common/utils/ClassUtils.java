@@ -247,7 +247,7 @@ public final class ClassUtils {
 
     /**
      * 得到基本类型的默认值
-     * 
+     *
      * @param clazz Class类
      * @return 默认值
      */
@@ -317,7 +317,7 @@ public final class ClassUtils {
      * @param interfaceClass 接口类
      * @param implementClass 实现类
      * @return 是否指定类型的实现类
-     * @see Class#isAssignableFrom(Class) 
+     * @see Class#isAssignableFrom(Class)
      */
     public static boolean isAssignableFrom(Class<?> interfaceClass, Class<?> implementClass) {
         if (interfaceClass.isAssignableFrom(implementClass)) {

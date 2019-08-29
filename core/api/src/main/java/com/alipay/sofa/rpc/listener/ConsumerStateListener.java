@@ -22,6 +22,7 @@ package com.alipay.sofa.rpc.listener;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 public interface ConsumerStateListener<T> {
 
     /**

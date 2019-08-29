@@ -27,9 +27,9 @@ import javax.ws.rs.ext.Provider;
 import java.io.IOException;
 
 /**
- * 
  * @author <a href="mailto:lw111072@alibaba-inc.com">liangen</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Provider
 @Priority(100)
 public class TraceRequestFilter implements ContainerRequestFilter {

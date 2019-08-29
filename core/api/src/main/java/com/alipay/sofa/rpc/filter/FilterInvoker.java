@@ -41,12 +41,12 @@ public class FilterInvoker implements Invoker {
     /**
      * 下一层过滤器
      */
-    protected Filter                  nextFilter;
+    protected Filter nextFilter;
 
     /**
      * 下一层Invoker
      */
-    protected FilterInvoker           invoker;
+    protected FilterInvoker invoker;
 
     /**
      * 过滤器所在的接口，可能是provider或者consumer
@@ -59,7 +59,7 @@ public class FilterInvoker implements Invoker {
      * 例如是否开启validation配置，方法级是否开启配置。<br>
      * 像请求ip端口这种和invocation有关的上下文不在此map中。
      */
-    protected Map<String, Object>     configContext;
+    protected Map<String, Object> configContext;
 
     /**
      * 如果无需下一层过滤器
@@ -95,9 +95,7 @@ public class FilterInvoker implements Invoker {
         if (nextFilter == null && invoker == null) {
             throw new SofaRpcException(RpcErrorType.SERVER_FILTER, "Next filter or invoker is null!");
         }
-        return nextFilter == null ?
-            invoker.invoke(request) :
-            nextFilter.invoke(invoker, request);
+        return nextFilter == null ? invoker.invoke(request) : nextFilter.invoke(invoker, request);
     }
 
     /**

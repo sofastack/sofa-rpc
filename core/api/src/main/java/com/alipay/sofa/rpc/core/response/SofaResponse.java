@@ -30,34 +30,34 @@ import java.util.Map;
 // TODO: 2018/6/22 by zmyer
 public final class SofaResponse implements Serializable {
 
-    private static final long         serialVersionUID = -4364536436151723421L;
+    private static final long serialVersionUID = -4364536436151723421L;
 
     /**
      * 框架异常
      */
-    private boolean                   isError          = false;
+    private boolean isError = false;
 
     /**
      * 框架异常的消息
      */
-    private String                    errorMsg;
+    private String errorMsg;
 
     /**
      * 业务返回或者业务异常
      */
-    private Object                    appResponse;
+    private Object appResponse;
 
     /**
      * extensional properties
      */
-    private Map<String, String>       responseProps;
+    private Map<String, String> responseProps;
 
     //====================== 下面是非传递属性 ===============
 
     /**
      * 序列化类型
      */
-    private transient byte            serializeType;
+    private transient byte serializeType;
 
     /**
      * 数据

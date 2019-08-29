@@ -28,6 +28,7 @@ import java.io.Closeable;
  * @param <S> the response parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Unstable
 public interface Callback<Q, S> extends Closeable {
 

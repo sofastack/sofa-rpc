@@ -60,7 +60,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * Dubbo的配置
      */
-    private ServiceConfig<T>             serviceConfig;
+    private ServiceConfig<T> serviceConfig;
 
     // TODO: 2018/7/9 by zmyer
     @Override
@@ -141,12 +141,12 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
             for (RegistryConfig registryConfig : registryConfigs) {
                 // 生成并丢到缓存里
                 com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
-                    .get(registryConfig);
+                        .get(registryConfig);
                 if (dubboRegistryConfig == null) {
                     dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
                     copyRegistryFields(registryConfig, dubboRegistryConfig);
                     com.alibaba.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
-                        registryConfig, dubboRegistryConfig);
+                            registryConfig, dubboRegistryConfig);
                     if (old != null) {
                         dubboRegistryConfig = old;
                     }
@@ -228,19 +228,19 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
                 for (ServerConfig server : servers) {
                     StringBuilder sb = new StringBuilder(200);
                     sb.append(server.getProtocol()).append("://").append(server.getHost())
-                        .append(":").append(server.getPort()).append(server.getContextPath())
-                        .append(providerConfig.getInterfaceId())
-                        .append("?uniqueId=").append(providerConfig.getUniqueId())
-                        .append(getKeyPairs("version", "1.0"))
-                        .append(getKeyPairs("delay", providerConfig.getDelay()))
-                        .append(getKeyPairs("weight", providerConfig.getWeight()))
-                        .append(getKeyPairs("register", providerConfig.isRegister()))
-                        .append(getKeyPairs("maxThreads", server.getMaxThreads()))
-                        .append(getKeyPairs("ioThreads", server.getIoThreads()))
-                        .append(getKeyPairs("threadPoolType", server.getThreadPoolType()))
-                        .append(getKeyPairs("accepts", server.getAccepts()))
-                        .append(getKeyPairs("dynamic", providerConfig.isDynamic()))
-                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION));
+                            .append(":").append(server.getPort()).append(server.getContextPath())
+                            .append(providerConfig.getInterfaceId())
+                            .append("?uniqueId=").append(providerConfig.getUniqueId())
+                            .append(getKeyPairs("version", "1.0"))
+                            .append(getKeyPairs("delay", providerConfig.getDelay()))
+                            .append(getKeyPairs("weight", providerConfig.getWeight()))
+                            .append(getKeyPairs("register", providerConfig.isRegister()))
+                            .append(getKeyPairs("maxThreads", server.getMaxThreads()))
+                            .append(getKeyPairs("ioThreads", server.getIoThreads()))
+                            .append(getKeyPairs("threadPoolType", server.getThreadPoolType()))
+                            .append(getKeyPairs("accepts", server.getAccepts()))
+                            .append(getKeyPairs("dynamic", providerConfig.isDynamic()))
+                            .append(getKeyPairs(RpcConstants.CONFIG_KEY_RPC_VERSION, Version.RPC_VERSION));
                     urls.add(sb.toString());
                 }
                 return urls;

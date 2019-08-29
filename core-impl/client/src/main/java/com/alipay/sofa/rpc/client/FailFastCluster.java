@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 @Extension("failfast")
 public class FailFastCluster extends AbstractCluster {
 
@@ -40,6 +41,7 @@ public class FailFastCluster extends AbstractCluster {
         super(consumerBootstrap);
     }
 
+    // TODO: 2018/12/28 by zmyer
     @Override
     public SofaResponse doInvoke(SofaRequest request) throws SofaRpcException {
         ProviderInfo providerInfo = select(request);
@@ -49,14 +51,14 @@ public class FailFastCluster extends AbstractCluster {
                 return response;
             } else {
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
-                        + " on remote server " + providerInfo + ", return null");
+                        "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
+                                + " on remote server " + providerInfo + ", return null");
             }
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
-                    + " on remote server: " + providerInfo + ", cause by: "
-                    + e.getClass().getName() + ", message is: " + e.getMessage(), e);
+                    "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
+                            + " on remote server: " + providerInfo + ", cause by: "
+                            + e.getClass().getName() + ", message is: " + e.getMessage(), e);
         }
     }
 }

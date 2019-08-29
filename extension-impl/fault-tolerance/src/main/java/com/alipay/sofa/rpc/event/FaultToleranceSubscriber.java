@@ -32,6 +32,7 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class FaultToleranceSubscriber extends Subscriber {
 
     /**

@@ -38,12 +38,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * 
  * @author <a href="mailto:caojie.cj@antfin.com">CaoJie</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class GenericMultipleClassLoaderSofaSerializerFactory extends MultipleClassLoaderSofaSerializerFactory {
 
-    private static final char                                ARRAY_PREFIX     = '[';
+    private static final char ARRAY_PREFIX = '[';
 
     private static final ConcurrentMap<String, Deserializer> DESERIALIZER_MAP = new ConcurrentHashMap<String, Deserializer>();
 

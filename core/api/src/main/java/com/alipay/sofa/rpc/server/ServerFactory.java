@@ -47,8 +47,7 @@ public final class ServerFactory {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                        LOGGER     = LoggerFactory
-                                                                      .getLogger(ServerFactory.class);
+    private final static Logger                        LOGGER     = LoggerFactory.getLogger(ServerFactory.class);
     /**
      * 全部服务端
      */

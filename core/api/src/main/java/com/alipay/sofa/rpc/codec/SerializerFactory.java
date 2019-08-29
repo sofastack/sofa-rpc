@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public final class SerializerFactory {
 
     /**
@@ -42,23 +43,23 @@ public final class SerializerFactory {
     /**
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外，还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static TwoWayMap<String, Byte>         TYPE_CODE_MAP       = new TwoWayMap<String, Byte>();
+    private final static TwoWayMap<String, Byte> TYPE_CODE_MAP = new TwoWayMap<String, Byte>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Serializer>     EXTENSION_LOADER    = buildLoader();
+    private final static ExtensionLoader<Serializer> EXTENSION_LOADER = buildLoader();
 
     private static ExtensionLoader<Serializer> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Serializer.class,
-            new ExtensionLoaderListener<Serializer>() {
-                @Override
-                public void onLoad(ExtensionClass<Serializer> extensionClass) {
-                    // 除了保留 tag：Serializer外， 需要保留 code：Serializer
-                    TYPE_SERIALIZER_MAP.put(extensionClass.getCode(), extensionClass.getExtInstance());
-                    TYPE_CODE_MAP.put(extensionClass.getAlias(), extensionClass.getCode());
-                }
-            });
+                new ExtensionLoaderListener<Serializer>() {
+                    @Override
+                    public void onLoad(ExtensionClass<Serializer> extensionClass) {
+                        // 除了保留 tag：Serializer外， 需要保留 code：Serializer
+                        TYPE_SERIALIZER_MAP.put(extensionClass.getCode(), extensionClass.getExtInstance());
+                        TYPE_CODE_MAP.put(extensionClass.getAlias(), extensionClass.getCode());
+                    }
+                });
     }
 
     /**

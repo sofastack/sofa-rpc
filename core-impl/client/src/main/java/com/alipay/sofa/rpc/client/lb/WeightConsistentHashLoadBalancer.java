@@ -36,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * @author 景竹 2018/8/13 since 5.5.0
  */
+// TODO: 2018/12/27 by zmyer
 @Extension("weightConsistentHash")
 public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
 
@@ -63,8 +64,8 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
         Selector selector = selectorCache.get(key);
         // 原来没有
         if (selector == null ||
-            // 或者服务列表已经变化
-            selector.getHashCode() != hashcode) {
+                // 或者服务列表已经变化
+                selector.getHashCode() != hashcode) {
             selector = new Selector(interfaceId, method, providerInfos, hashcode);
             selectorCache.put(key, selector);
         }
@@ -79,17 +80,17 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
         /**
          * The Hashcode.
          */
-        private final int                         hashcode;
+        private final int hashcode;
 
         /**
          * The Interface id.
          */
-        private final String                      interfaceId;
+        private final String interfaceId;
 
         /**
          * The Method name.
          */
-        private final String                      method;
+        private final String method;
 
         /**
          * 虚拟节点
@@ -120,7 +121,7 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
             this.method = method;
             this.hashcode = hashcode;
             // 创建虚拟节点环 （provider创建虚拟节点数 =  真实节点权重 * 32）
-            this.virtualNodes = new TreeMap<Long, ProviderInfo>();
+            this.virtualNodes = new TreeMap<>();
             // 设置越大越慢，精度越高
             int num = 32;
             for (ProviderInfo providerInfo : actualNodes) {
@@ -202,9 +203,9 @@ public class WeightConsistentHashLoadBalancer extends AbstractLoadBalancer {
          */
         private long hash(byte[] digest, int index) {
             long f = ((long) (digest[3 + index * 4] & 0xFF) << 24)
-                | ((long) (digest[2 + index * 4] & 0xFF) << 16)
-                | ((long) (digest[1 + index * 4] & 0xFF) << 8)
-                | (digest[index * 4] & 0xFF);
+                    | ((long) (digest[2 + index * 4] & 0xFF) << 16)
+                    | ((long) (digest[1 + index * 4] & 0xFF) << 8)
+                    | (digest[index * 4] & 0xFF);
             return f & 0xFFFFFFFFL;
         }
 

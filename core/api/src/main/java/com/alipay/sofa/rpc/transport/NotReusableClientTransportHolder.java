@@ -29,12 +29,12 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 public class NotReusableClientTransportHolder implements ClientTransportHolder {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                         LOGGER        = LoggerFactory
-                                                                                          .getLogger(NotReusableClientTransportHolder.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(NotReusableClientTransportHolder.class);
 
     /**
      * 长连接不复用的时候，一个ClientTransportConfig对应一个ClientTransport
@@ -47,9 +47,9 @@ public class NotReusableClientTransportHolder implements ClientTransportHolder {
         ClientTransport transport = allTransports.get(config);
         if (transport == null) {
             transport = ExtensionLoaderFactory.getExtensionLoader(ClientTransport.class)
-                .getExtension(config.getContainer(),
-                    new Class[] { ClientTransportConfig.class },
-                    new Object[] { config });
+                    .getExtension(config.getContainer(),
+                            new Class[]{ClientTransportConfig.class},
+                            new Object[]{config});
             ClientTransport old = allTransports.putIfAbsent(config, transport); // 保存唯一长连接
             if (old != null) {
                 if (LOGGER.isWarnEnabled()) {

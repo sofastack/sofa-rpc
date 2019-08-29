@@ -41,12 +41,12 @@ public class AddressHolderFactory {
         try {
             String connectionHolder = consumerBootstrap.getConsumerConfig().getAddressHolder();
             ExtensionClass<AddressHolder> ext = ExtensionLoaderFactory.getExtensionLoader(AddressHolder.class)
-                .getExtensionClass(connectionHolder);
+                    .getExtensionClass(connectionHolder);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.addressHolder", connectionHolder,
-                    "Unsupported addressHolder of client!");
+                        "Unsupported addressHolder of client!");
             }
-            return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
+            return ext.getExtInstance(new Class[]{ConsumerBootstrap.class}, new Object[]{consumerBootstrap});
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {

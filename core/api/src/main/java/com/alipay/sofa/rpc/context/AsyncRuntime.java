@@ -33,12 +33,13 @@ import java.util.concurrent.ThreadPoolExecutor;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 public class AsyncRuntime {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                LOGGER = LoggerFactory.getLogger(AsyncRuntime.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(AsyncRuntime.class);
 
     /**
      * callback业务线程池（callback+async）
@@ -60,10 +61,11 @@ public class AsyncRuntime {
      * @param build 没有时是否构建
      * @return callback用的线程池
      */
+    // TODO: 2018/12/27 by zmyer
     public static ThreadPoolExecutor getAsyncThreadPool(boolean build) {
         if (asyncThreadPool == null && build) {
             synchronized (AsyncRuntime.class) {
-                if (asyncThreadPool == null && build) {
+                if (asyncThreadPool == null) {
                     // 一些系统参数，可以从配置或者注册中心获取。
                     int coresize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_CORE);
                     int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
@@ -82,18 +84,18 @@ public class AsyncRuntime {
                                 i = 1;
                                 if (LOGGER.isWarnEnabled()) {
                                     LOGGER.warn("Task:{} has been reject because of threadPool exhausted!" +
-                                        " pool:{}, active:{}, queue:{}, taskcnt: {}", r,
-                                        executor.getPoolSize(),
-                                        executor.getActiveCount(),
-                                        executor.getQueue().size(),
-                                        executor.getTaskCount());
+                                                    " pool:{}, active:{}, queue:{}, taskcnt: {}", r,
+                                            executor.getPoolSize(),
+                                            executor.getActiveCount(),
+                                            executor.getQueue().size(),
+                                            executor.getTaskCount());
                                 }
                             }
                             throw new RejectedExecutionException("Callback handler thread pool has bean exhausted");
                         }
                     };
                     asyncThreadPool = ThreadPoolUtils.newCachedThreadPool(
-                        coresize, maxsize, keepAliveTime, queue, threadFactory, handler);
+                            coresize, maxsize, keepAliveTime, queue, threadFactory, handler);
                 }
             }
         }

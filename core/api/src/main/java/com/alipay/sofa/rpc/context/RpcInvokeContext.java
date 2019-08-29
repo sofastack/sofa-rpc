@@ -96,46 +96,46 @@ public class RpcInvokeContext {
     /**
      * 用户自定义超时时间，单次调用生效
      */
-    protected Integer                       timeout;
+    protected Integer timeout;
 
     /**
      * 用户自定义对方地址，单次调用生效
      */
-    protected String                        targetURL;
+    protected String targetURL;
 
     /**
      * 用户自定义对方分组
      */
-    protected String                        targetGroup;
+    protected String targetGroup;
 
     /**
      * 用户自定义Callback，单次调用生效
      */
-    protected SofaResponseCallback          responseCallback;
+    protected SofaResponseCallback responseCallback;
 
     /**
      * The Future.
      */
-    protected ResponseFuture<?>             future;
+    protected ResponseFuture<?> future;
 
     /**
      * 自定义属性
      */
-    protected ConcurrentMap<String, Object> map             = new ConcurrentHashMap<String, Object>();
+    protected ConcurrentMap<String, Object> map = new ConcurrentHashMap<String, Object>();
 
     /**
      * 请求上的透传数据
      *
      * @since 5.1.2
      */
-    protected Map<String, String>           requestBaggage  = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
+    protected Map<String, String> requestBaggage = BAGGAGE_ENABLE ? new HashMap<>() : null;
 
     /**
      * 响应上的透传数据
      *
      * @since 5.1.2
      */
-    protected Map<String, String>           responseBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
+    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new HashMap<>() : null;
 
     /**
      * 得到调用级别超时时间
@@ -244,7 +244,7 @@ public class RpcInvokeContext {
 
     /**
      * 设置全部请求透传数据
-     * 
+     *
      * @param requestBaggage 请求透传数据
      */
     public void putAllRequestBaggage(Map<String, String> requestBaggage) {
@@ -302,7 +302,7 @@ public class RpcInvokeContext {
 
     /**
      * 设置全部响应透传数据
-     * 
+     *
      * @param responseBaggage 响应透传数据
      */
     public void putAllResponseBaggage(Map<String, String> responseBaggage) {

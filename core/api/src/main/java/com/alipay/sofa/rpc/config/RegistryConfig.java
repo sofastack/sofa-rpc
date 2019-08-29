@@ -44,67 +44,67 @@ public class RegistryConfig extends AbstractIdConfig implements Serializable {
     /**
      * The constant serialVersionUID.
      */
-    private static final long     serialVersionUID = -2921019924557602234L;
+    private static final long serialVersionUID = -2921019924557602234L;
 
     /**
      * 协议
      */
-    private String                protocol         = getStringValue(DEFAULT_REGISTRY);
+    private String protocol = getStringValue(DEFAULT_REGISTRY);
 
     /**
      * 指定注册中心的地址, 和index必须填一个，address优先
      */
-    private String                address;
+    private String address;
 
     /**
      * 指定注册中心寻址服务的地址, 和address必须填一个
      */
-    private String                index            = getStringValue(REGISTRY_INDEX_ADDRESS);
+    private String index = getStringValue(REGISTRY_INDEX_ADDRESS);
 
     /**
      * 是否注册，如果是false只订阅不注册
      */
-    private boolean               register         = getBooleanValue(SERVICE_REGISTER);
+    private boolean register = getBooleanValue(SERVICE_REGISTER);
 
     /**
      * 是否订阅服务
      */
-    private boolean               subscribe        = getBooleanValue(SERVICE_SUBSCRIBE);
+    private boolean subscribe = getBooleanValue(SERVICE_SUBSCRIBE);
 
     /**
      * 调用注册中心超时时间
      */
-    private int                   timeout          = getIntValue(REGISTRY_INVOKE_TIMEOUT);
+    private int timeout = getIntValue(REGISTRY_INVOKE_TIMEOUT);
 
     /**
      * 连接注册中心超时时间
      */
-    private int                   connectTimeout   = getIntValue(REGISTRY_CONNECT_TIMEOUT);
+    private int connectTimeout = getIntValue(REGISTRY_CONNECT_TIMEOUT);
 
     /**
      * 保存到本地文件的位置，默认$HOME下
      */
-    private String                file;
+    private String file;
 
     /**
      * 是否批量操作
      */
-    private boolean               batch            = getBooleanValue(REGISTRY_BATCH);
+    private boolean batch = getBooleanValue(REGISTRY_BATCH);
 
     /**
      * 定时批量检查时的条目数
      */
-    private int                   batchSize        = getIntValue(REGISTRY_BATCH_SIZE);
+    private int batchSize = getIntValue(REGISTRY_BATCH_SIZE);
 
     /**
      * Consumer给Provider发心跳的间隔
      */
-    protected int                 heartbeatPeriod  = getIntValue(REGISTRY_HEARTBEAT_PERIOD);
+    protected int heartbeatPeriod = getIntValue(REGISTRY_HEARTBEAT_PERIOD);
 
     /**
      * Consumer给Provider重连的间隔
      */
-    protected int                 reconnectPeriod  = getIntValue(REGISTRY_RECONNECT_PERIOD);
+    protected int reconnectPeriod = getIntValue(REGISTRY_RECONNECT_PERIOD);
 
     /**
      * The Parameters. 自定义参数
@@ -402,20 +402,20 @@ public class RegistryConfig extends AbstractIdConfig implements Serializable {
     @Override
     public String toString() {
         return "RegistryConfig{" +
-            "protocol='" + protocol + '\'' +
-            ", address='" + address + '\'' +
-            ", index='" + index + '\'' +
-            ", register=" + register +
-            ", subscribe=" + subscribe +
-            ", timeout=" + timeout +
-            ", connectTimeout=" + connectTimeout +
-            ", file='" + file + '\'' +
-            ", batch=" + batch +
-            ", batchSize=" + batchSize +
-            ", heartbeatPeriod=" + heartbeatPeriod +
-            ", reconnectPeriod=" + reconnectPeriod +
-            ", parameters=" + parameters +
-            '}';
+                "protocol='" + protocol + '\'' +
+                ", address='" + address + '\'' +
+                ", index='" + index + '\'' +
+                ", register=" + register +
+                ", subscribe=" + subscribe +
+                ", timeout=" + timeout +
+                ", connectTimeout=" + connectTimeout +
+                ", file='" + file + '\'' +
+                ", batch=" + batch +
+                ", batchSize=" + batchSize +
+                ", heartbeatPeriod=" + heartbeatPeriod +
+                ", reconnectPeriod=" + reconnectPeriod +
+                ", parameters=" + parameters +
+                '}';
     }
 
     @Override

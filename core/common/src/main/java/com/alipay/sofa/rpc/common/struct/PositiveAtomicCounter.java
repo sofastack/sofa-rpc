@@ -23,8 +23,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 public class PositiveAtomicCounter {
-    private static final int    MASK = 0x7FFFFFFF;
+    private static final int MASK = 0x7FFFFFFF;
     private final AtomicInteger atom;
 
     public PositiveAtomicCounter() {

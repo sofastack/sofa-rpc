@@ -29,6 +29,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class ProviderHelper {
     /**
      * Compare two provider group, return add list and remove list
@@ -88,8 +89,8 @@ public class ProviderHelper {
      *
      * @param oldGroups old provider group list
      * @param newGroups new provider group list
-     * @param add      provider list need add
-     * @param remove   provider list need remove
+     * @param add       provider list need add
+     * @param remove    provider list need remove
      */
     public static void compareGroups(List<ProviderGroup> oldGroups, List<ProviderGroup> newGroups,
                                      List<ProviderInfo> add,
@@ -162,7 +163,7 @@ public class ProviderHelper {
 
     /**
      * Write provider info to url string
-     * 
+     *
      * @param providerInfo Provide info
      * @return the string
      */
@@ -175,7 +176,7 @@ public class ProviderHelper {
         }
         if (providerInfo.getSerializationType() != null) {
             sb.append("&").append(ProviderInfoAttrs.ATTR_SERIALIZATION).append("=")
-                .append(providerInfo.getSerializationType());
+                    .append(providerInfo.getSerializationType());
         }
         for (Map.Entry<String, String> entry : providerInfo.getStaticAttrs().entrySet()) {
             sb.append("&").append(entry.getKey()).append("=").append(entry.getValue());
@@ -190,8 +191,9 @@ public class ProviderHelper {
      * Parse url string to ProviderInfo.
      *
      * @param url the url
-     * @return ProviderInfo 
+     * @return ProviderInfo
      */
+    // TODO: 2018/12/27 by zmyer
     public static ProviderInfo toProviderInfo(String url) {
         ProviderInfo providerInfo = new ProviderInfo();
         providerInfo.setOriginUrl(url);
@@ -243,10 +245,10 @@ public class ProviderHelper {
                             providerInfo.setWeight(weight);
                             providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT, String.valueOf(weight));
                         } else if (ProviderInfoAttrs.ATTR_RPC_VERSION.equals(kvpair[0]) &&
-                            StringUtils.isNotEmpty(kvpair[1])) {
+                                StringUtils.isNotEmpty(kvpair[1])) {
                             providerInfo.setRpcVersion(CommonUtils.parseInt(kvpair[1], providerInfo.getRpcVersion()));
                         } else if (ProviderInfoAttrs.ATTR_SERIALIZATION.equals(kvpair[0]) &&
-                            StringUtils.isNotEmpty(kvpair[1])) {
+                                StringUtils.isNotEmpty(kvpair[1])) {
                             providerInfo.setSerializationType(kvpair[1]);
                         } else {
                             providerInfo.getStaticAttrs().put(kvpair[0], kvpair[1]);

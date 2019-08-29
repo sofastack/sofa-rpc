@@ -79,21 +79,15 @@ public class ProviderInvoker<T> extends FilterInvoker {
             Object result = method.invoke(providerConfig.getRef(), request.getMethodArgs());
 
             sofaResponse.setAppResponse(result);
-        } catch (IllegalArgumentException e) { // 非法参数，可能是实现类和接口类不对应) 
+        } catch (IllegalArgumentException | IllegalAccessException e) { // 非法参数，可能是实现类和接口类不对应)
             sofaResponse.setErrorMsg(e.getMessage());
-        } catch (IllegalAccessException e) { // 如果此 Method 对象强制执行 Java 语言访问控制，并且底层方法是不可访问的
-            sofaResponse.setErrorMsg(e.getMessage());
-            //        } catch (NoSuchMethodException e) { // 如果找不到匹配的方法
-            //            sofaResponse.setErrorMsg(e.getMessage());
-            //        } catch (ClassNotFoundException e) { // 如果指定的类加载器无法定位该类
-            //            sofaResponse.setErrorMsg(e.getMessage());
         } catch (InvocationTargetException e) { // 业务代码抛出异常
             sofaResponse.setAppResponse(e.getCause());
         } finally {
             if (RpcInternalContext.isAttachmentEnable()) {
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
-                    endTime - startTime);
+                        endTime - startTime);
             }
         }
 

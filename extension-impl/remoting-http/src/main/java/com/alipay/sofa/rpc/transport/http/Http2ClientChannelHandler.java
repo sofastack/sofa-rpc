@@ -39,20 +39,20 @@ import java.util.Map.Entry;
 
 /**
  * Process {@link FullHttpResponse} translated from HTTP/2 frames
- * 
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
+// TODO: 2018/12/29 by zmyer
 public class Http2ClientChannelHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
     /**
      * Logger for HttpClientChannelHandler
      **/
-    private static final Logger                                                 LOGGER = LoggerFactory
-                                                                                           .getLogger(Http2ClientChannelHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(Http2ClientChannelHandler.class);
 
     /**
-     * 
+     *
      */
     private final Map<Integer, Entry<ChannelFuture, AbstractHttpClientHandler>> streamIdPromiseMap;
 
@@ -73,7 +73,7 @@ public class Http2ClientChannelHandler extends SimpleChannelInboundHandler<FullH
     public Entry<ChannelFuture, AbstractHttpClientHandler> put(int streamId, ChannelFuture writeFuture,
                                                                AbstractHttpClientHandler promise) {
         return streamIdPromiseMap.put(streamId, new SimpleEntry<ChannelFuture, AbstractHttpClientHandler>(
-            writeFuture, promise));
+                writeFuture, promise));
     }
 
     @Override
@@ -83,7 +83,7 @@ public class Http2ClientChannelHandler extends SimpleChannelInboundHandler<FullH
         if (streamId == null) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("HttpResponseHandler unexpected message received: {}, data is {}", msg.toString(),
-                    NettyHelper.toString(msg.content()));
+                        NettyHelper.toString(msg.content()));
             }
             return;
         }
@@ -92,7 +92,7 @@ public class Http2ClientChannelHandler extends SimpleChannelInboundHandler<FullH
         if (entry == null) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Message received for unknown stream id {}, msg is {}, data is {}", streamId,
-                    msg.toString(), NettyHelper.toString(msg.content()));
+                        msg.toString(), NettyHelper.toString(msg.content()));
             }
         } else {
             final AbstractHttpClientHandler callback = entry.getValue();
@@ -107,8 +107,8 @@ public class Http2ClientChannelHandler extends SimpleChannelInboundHandler<FullH
             LOGGER.info("Channel inactive: {}", channel);
         }
         final Exception e = new SofaRpcException(RpcErrorType.CLIENT_NETWORK, "Channel "
-            + NetUtils.channelToString(channel.localAddress(), channel.remoteAddress())
-            + " has been closed, remove future when channel inactive.");
+                + NetUtils.channelToString(channel.localAddress(), channel.remoteAddress())
+                + " has been closed, remove future when channel inactive.");
         Iterator<Entry<Integer, Entry<ChannelFuture, AbstractHttpClientHandler>>> it =
                 streamIdPromiseMap.entrySet().iterator();
         while (it.hasNext()) {

@@ -18,9 +18,10 @@ package com.alipay.sofa.rpc.context;
 
 /**
  * RPC 框架运行状态
- * 
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public final class RpcRunningState {
 
     /**
@@ -36,7 +37,7 @@ public final class RpcRunningState {
     /**
      * 是否debug模式，开启后，会打印一些额外的调试日志，不过还是受slf4j的日志级别限制
      */
-    static boolean debugMode    = false;
+    static boolean debugMode = false;
 
     /**
      * 是否正在关闭

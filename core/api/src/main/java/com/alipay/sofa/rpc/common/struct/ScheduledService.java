@@ -31,21 +31,22 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 public class ScheduledService {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger               LOGGER          = LoggerFactory.getLogger(ScheduledService.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ScheduledService.class);
 
     /**
      * 固定频率执行，按执行开始时间计算间隔
      */
-    public static final int                   MODE_FIXEDRATE  = 0;
+    public static final int MODE_FIXEDRATE = 0;
     /**
      * 固定间隔执行，执行完成后才计算间隔
      */
-    public static final int                   MODE_FIXEDDELAY = 1;
+    public static final int MODE_FIXEDDELAY = 1;
 
     /**
      * The Scheduled executor service.
@@ -55,43 +56,43 @@ public class ScheduledService {
     /**
      * The Thread name
      */
-    private String                            threadName;
+    private String threadName;
 
     /**
      * The Runnable.
      */
-    private final Runnable                    runnable;
+    private final Runnable runnable;
 
     /**
      * The Initial delay.
      */
-    private final long                        initialDelay;
+    private final long initialDelay;
 
     /**
      * The Period.
      */
-    private final long                        period;
+    private final long period;
 
     /**
      * The Unit.
      */
-    private final TimeUnit                    unit;
+    private final TimeUnit unit;
 
     /**
      * 0:scheduleAtFixedRate
      * 1:scheduleWithFixedDelay
      */
-    private final int                         mode;
+    private final int mode;
 
     /**
      * The Future.
      */
-    private volatile ScheduledFuture          future;
+    private volatile ScheduledFuture future;
 
     /**
      * The Started.
      */
-    private volatile boolean                  started;
+    private volatile boolean started;
 
     /**
      * Instantiates a new Scheduled service.
@@ -130,18 +131,15 @@ public class ScheduledService {
         }
         if (scheduledExecutorService == null) {
             scheduledExecutorService = new ScheduledThreadPoolExecutor(1,
-                new NamedThreadFactory(threadName, true));
+                    new NamedThreadFactory(threadName, true));
         }
         ScheduledFuture future = null;
         switch (mode) {
             case MODE_FIXEDRATE:
-                future = scheduledExecutorService.scheduleAtFixedRate(runnable, initialDelay,
-                    period,
-                    unit);
+                future = scheduledExecutorService.scheduleAtFixedRate(runnable, initialDelay, period, unit);
                 break;
             case MODE_FIXEDDELAY:
-                future = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialDelay, period,
-                    unit);
+                future = scheduledExecutorService.scheduleWithFixedDelay(runnable, initialDelay, period, unit);
                 break;
             default:
                 break;
@@ -201,7 +199,7 @@ public class ScheduledService {
      * 缓存了目前全部的定时任务， 用于重建
      */
     protected final static Map<ScheduledService, Long> SCHEDULED_SERVICE_MAP = new ConcurrentHashMap<ScheduledService,
-                                                                                     Long>();
+            Long>();
 
     /**
      * 重建定时任务，用于特殊情况

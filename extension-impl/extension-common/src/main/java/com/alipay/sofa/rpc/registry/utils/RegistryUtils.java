@@ -62,25 +62,25 @@ public class RegistryUtils {
                     }
                 }
                 sb.append(server.getProtocol()).append("://").append(host).append(":")
-                    .append(server.getPort()).append(server.getContextPath()).append("?version=1.0")
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, providerConfig.getUniqueId()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, providerConfig.getInterfaceId()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
-                    .append(getKeyPairs("delay", providerConfig.getDelay()))
-                    .append(getKeyPairs("id", providerConfig.getId()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
-                    .append(getKeyPairs("accepts", server.getAccepts()))
-                    .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
-                    .append(
-                        getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()))
-                    .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
-                        providerConfig.getSerialization()))
-                    .append(convertMap2Pair(providerConfig.getParameters()));
+                        .append(server.getPort()).append(server.getContextPath()).append("?version=1.0")
+                        .append(
+                                getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, providerConfig.getUniqueId()))
+                        .append(
+                                getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, providerConfig.getInterfaceId()))
+                        .append(
+                                getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, providerConfig.getTimeout()))
+                        .append(getKeyPairs("delay", providerConfig.getDelay()))
+                        .append(getKeyPairs("id", providerConfig.getId()))
+                        .append(
+                                getKeyPairs(RpcConstants.CONFIG_KEY_DYNAMIC, providerConfig.isDynamic()))
+                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_WEIGHT, providerConfig.getWeight()))
+                        .append(getKeyPairs("accepts", server.getAccepts()))
+                        .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
+                        .append(
+                                getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, providerConfig.getAppName()))
+                        .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
+                                providerConfig.getSerialization()))
+                        .append(convertMap2Pair(providerConfig.getParameters()));
                 addCommonAttrs(sb);
                 urls.add(sb.toString());
             }
@@ -99,17 +99,17 @@ public class RegistryUtils {
         StringBuilder sb = new StringBuilder(200);
         String host = SystemInfo.getLocalHost();
         sb.append(consumerConfig.getProtocol()).append("://").append(host).append("?version=1.0")
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, consumerConfig.getUniqueId()))
-            .append(getKeyPairs("pid", RpcRuntimeContext.PID))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
-            .append(getKeyPairs("id", consumerConfig.getId()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, consumerConfig.getInterfaceId()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
-            .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
-                consumerConfig.getSerialization()))
-            .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
-            .append(convertMap2Pair(consumerConfig.getParameters()));
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_UNIQUEID, consumerConfig.getUniqueId()))
+                .append(getKeyPairs("pid", RpcRuntimeContext.PID))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_TIMEOUT, consumerConfig.getTimeout()))
+                .append(getKeyPairs("id", consumerConfig.getId()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_GENERIC, consumerConfig.isGeneric()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_INTERFACE, consumerConfig.getInterfaceId()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_APP_NAME, consumerConfig.getAppName()))
+                .append(getKeyPairs(RpcConstants.CONFIG_KEY_SERIALIZATION,
+                        consumerConfig.getSerialization()))
+                .append(getKeyPairs(ProviderInfoAttrs.ATTR_START_TIME, RpcRuntimeContext.now()))
+                .append(convertMap2Pair(consumerConfig.getParameters()));
         addCommonAttrs(sb);
         return sb.toString();
     }
@@ -185,11 +185,11 @@ public class RegistryUtils {
         String startTimeStr = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_START_TIME);
 
         if (StringUtils.isNotBlank(warmupTimeStr) && StringUtils.isNotBlank(warmupWeightStr)
-            && StringUtils.isNotBlank(startTimeStr)) {
+                && StringUtils.isNotBlank(startTimeStr)) {
 
             long warmupTime = CommonUtils.parseLong(warmupTimeStr, 0);
             int warmupWeight = CommonUtils.parseInt(warmupWeightStr,
-                Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
+                    Integer.parseInt(providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_WEIGHT)));
             long startTime = CommonUtils.parseLong(startTimeStr, 0);
             long warmupEndTime = startTime + warmupTime;
 

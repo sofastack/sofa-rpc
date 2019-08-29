@@ -26,6 +26,7 @@ import java.util.concurrent.Future;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public interface ResponseFuture<V> extends Future<V> {
 
     /**

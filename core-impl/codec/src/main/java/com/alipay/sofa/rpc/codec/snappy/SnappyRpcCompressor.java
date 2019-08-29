@@ -28,6 +28,7 @@ import java.util.Arrays;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension(value = "snappy", code = 2)
 public final class SnappyRpcCompressor implements Compressor {
 
@@ -48,20 +49,20 @@ public final class SnappyRpcCompressor implements Compressor {
     }
 
     public int getUncompressedLength(byte[] compressed, int compressedOffset)
-        throws CorruptionException {
+            throws CorruptionException {
         return SnappyDecompressor.getUncompressedLength(compressed, compressedOffset);
     }
 
     public byte[] uncompress(byte[] compressed, int compressedOffset, int compressedSize)
-        throws CorruptionException {
+            throws CorruptionException {
         return SnappyDecompressor.uncompress(compressed, compressedOffset, compressedSize);
     }
 
     public int uncompress(byte[] compressed, int compressedOffset, int compressedSize, byte[] uncompressed,
                           int uncompressedOffset)
-        throws CorruptionException {
+            throws CorruptionException {
         return SnappyDecompressor.uncompress(compressed, compressedOffset, compressedSize, uncompressed,
-            uncompressedOffset);
+                uncompressedOffset);
     }
 
     public int maxCompressedLength(int sourceLength) {
@@ -69,16 +70,16 @@ public final class SnappyRpcCompressor implements Compressor {
     }
 
     public int compress(
-                        byte[] uncompressed,
-                        int uncompressedOffset,
-                        int uncompressedLength,
-                        byte[] compressed,
-                        int compressedOffset) {
+            byte[] uncompressed,
+            int uncompressedOffset,
+            int uncompressedLength,
+            byte[] compressed,
+            int compressedOffset) {
         return SnappyCompressor.compress(uncompressed,
-            uncompressedOffset,
-            uncompressedLength,
-            compressed,
-            compressedOffset);
+                uncompressedOffset,
+                uncompressedLength,
+                compressed,
+                compressedOffset);
     }
 
     @Override
@@ -89,7 +90,7 @@ public final class SnappyRpcCompressor implements Compressor {
         return trimmedBuffer;
     }
 
-    static final int LITERAL            = 0;
+    static final int LITERAL = 0;
     static final int COPY_1_BYTE_OFFSET = 1; // 3 bit length + 3 bits of offset in opcode
     static final int COPY_2_BYTE_OFFSET = 2;
     static final int COPY_4_BYTE_OFFSET = 3;

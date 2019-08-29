@@ -26,6 +26,7 @@ import java.io.Serializable;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class ParameterConfig implements Serializable {
 
     private static final long serialVersionUID = -8438415130253334898L;
@@ -33,17 +34,17 @@ public class ParameterConfig implements Serializable {
     /**
      * 关键字
      */
-    private String            key;
+    private String key;
 
     /**
      * 值
      */
-    private String            value;
+    private String value;
 
     /**
      * 是否隐藏（是的话，业务代码不能获取到）
      */
-    private boolean           hide             = false;
+    private boolean hide = false;
 
     /**
      * Gets key.
@@ -62,7 +63,7 @@ public class ParameterConfig implements Serializable {
     public void setKey(String key) {
         if (!isValidParamKey(key)) {
             throw ExceptionUtils.buildRuntime("param.key", key, "key can not start with "
-                + RpcConstants.HIDE_KEY_PREFIX + " and " + RpcConstants.INTERNAL_KEY_PREFIX);
+                    + RpcConstants.HIDE_KEY_PREFIX + " and " + RpcConstants.INTERNAL_KEY_PREFIX);
         }
         this.key = key;
     }

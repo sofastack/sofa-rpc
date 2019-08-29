@@ -41,12 +41,12 @@ public class ConnectionHolderFactory {
         try {
             String connectionHolder = consumerBootstrap.getConsumerConfig().getConnectionHolder();
             ExtensionClass<ConnectionHolder> ext = ExtensionLoaderFactory
-                .getExtensionLoader(ConnectionHolder.class).getExtensionClass(connectionHolder);
+                    .getExtensionLoader(ConnectionHolder.class).getExtensionClass(connectionHolder);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.connectionHolder", connectionHolder,
-                    "Unsupported connectionHolder of client!");
+                        "Unsupported connectionHolder of client!");
             }
-            return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
+            return ext.getExtInstance(new Class[]{ConsumerBootstrap.class}, new Object[]{consumerBootstrap});
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {

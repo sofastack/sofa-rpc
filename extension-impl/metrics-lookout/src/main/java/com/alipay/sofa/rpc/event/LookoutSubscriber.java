@@ -33,15 +33,16 @@ import com.alipay.sofa.rpc.metrics.lookout.RpcServerLookoutModel;
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class LookoutSubscriber extends Subscriber {
 
     /**
      * Whether lookout be banned from collecting information.
      */
-    public static boolean    lookoutCollectDisable = RpcConfigs
-                                                       .getBooleanValue(RpcOptions.LOOKOUT_COLLECT_DISABLE);
+    public static boolean lookoutCollectDisable = RpcConfigs
+            .getBooleanValue(RpcOptions.LOOKOUT_COLLECT_DISABLE);
 
-    private final RpcLookout rpcMetrics            = new RpcLookout();
+    private final RpcLookout rpcMetrics = new RpcLookout();
 
     public LookoutSubscriber() {
         super(false);
@@ -61,7 +62,7 @@ public class LookoutSubscriber extends Subscriber {
             ClientEndInvokeEvent clientEndInvokeEvent = (ClientEndInvokeEvent) event;
 
             RpcClientLookoutModel rpcClientMetricsModel = createClientMetricsModel(clientEndInvokeEvent.getRequest(),
-                clientEndInvokeEvent.getResponse());
+                    clientEndInvokeEvent.getResponse());
 
             rpcMetrics.collectClient(rpcClientMetricsModel);
 
@@ -70,7 +71,7 @@ public class LookoutSubscriber extends Subscriber {
             ServerSendEvent serverSendEvent = (ServerSendEvent) event;
 
             RpcServerLookoutModel rpcServerMetricsModel = createServerMetricsModel(serverSendEvent.getRequest(),
-                serverSendEvent.getResponse());
+                    serverSendEvent.getResponse());
 
             rpcMetrics.collectServer(rpcServerMetricsModel);
 
@@ -79,7 +80,7 @@ public class LookoutSubscriber extends Subscriber {
             ServerStartedEvent serverStartedEvent = (ServerStartedEvent) event;
 
             rpcMetrics.collectThreadPool(serverStartedEvent.getServerConfig(),
-                serverStartedEvent.getThreadPoolExecutor());
+                    serverStartedEvent.getThreadPoolExecutor());
 
         } else if (eventClass == ServerStoppedEvent.class) {
             ServerStoppedEvent serverStartedEvent = (ServerStoppedEvent) event;
@@ -90,6 +91,7 @@ public class LookoutSubscriber extends Subscriber {
 
     /**
      * create RpcClientLookoutModel
+     *
      * @param request
      * @param response
      * @return
@@ -110,7 +112,7 @@ public class LookoutSubscriber extends Subscriber {
         Long responseSize = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE));
         Long elapsedTime = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE));
         Boolean success = response != null && !response.isError() && response.getErrorMsg() == null &&
-            (!(response.getAppResponse() instanceof Throwable));
+                (!(response.getAppResponse() instanceof Throwable));
 
         clientMetricsModel.setApp(app);
         clientMetricsModel.setService(service);
@@ -128,6 +130,7 @@ public class LookoutSubscriber extends Subscriber {
 
     /**
      * create RpcServerLookoutModel
+     *
      * @param request
      * @param response
      * @return
@@ -146,7 +149,7 @@ public class LookoutSubscriber extends Subscriber {
         String callerApp = getStringAvoidNull(request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
         Long elapsedTime = getLongAvoidNull(context.getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE));
         boolean success = response != null && !response.isError() && response.getErrorMsg() == null &&
-            (!(response.getAppResponse() instanceof Throwable));
+                (!(response.getAppResponse() instanceof Throwable));
 
         rpcServerMetricsModel.setApp(app);
         rpcServerMetricsModel.setService(service);

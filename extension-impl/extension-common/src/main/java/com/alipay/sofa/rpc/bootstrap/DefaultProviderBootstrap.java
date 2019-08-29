@@ -69,12 +69,12 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 是否已发布
      */
-    protected transient volatile boolean                        exported;
+    protected transient volatile boolean exported;
 
     /**
      * 服务端Invoker对象
      */
-    protected transient Invoker                                 providerProxyInvoker;
+    protected transient Invoker providerProxyInvoker;
 
     /**
      * 发布的服务配置
@@ -84,9 +84,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 延迟加载的线程名工厂
      */
-    private final ThreadFactory                                 factory       = new NamedThreadFactory(
-                                                                                  "DELAY-EXPORT",
-                                                                                  true);
+    private final ThreadFactory factory = new NamedThreadFactory(
+            "DELAY-EXPORT",
+            true);
 
     // TODO: 2018/6/22 by zmyer
     @Override
@@ -145,14 +145,14 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     decrementCounter(hasExportedInCurrent);
                     // 超过最大数量，直接抛出异常
                     throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
-                        + " has been exported more than " + maxProxyCount + " times!"
-                        + " Maybe it's wrong config, please check it."
-                        + " Ignore this if you did that on purpose!");
+                            + " has been exported more than " + maxProxyCount + " times!"
+                            + " Maybe it's wrong config, please check it."
+                            + " Ignore this if you did that on purpose!");
                 } else if (c > 1) {
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, "Duplicate provider config with key {} has been exported!"
-                            + " Maybe it's wrong config, please check it."
-                            + " Ignore this if you did that on purpose!", key);
+                                + " Maybe it's wrong config, please check it."
+                                + " Ignore this if you did that on purpose!", key);
                     }
                 }
             }
@@ -185,7 +185,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     throw e;
                 } catch (Exception e) {
                     LOGGER.errorWithApp(appName, "Catch exception when register processor to server: "
-                        + serverConfig.getId(), e);
+                            + serverConfig.getId(), e);
                 }
             }
 
@@ -209,6 +209,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     /**
      * decrease counter
+     *
      * @param hasExportedInCurrent
      */
     private void decrementCounter(Map<String, Boolean> hasExportedInCurrent) {
@@ -224,7 +225,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     }
 
     /**
-     * for check fields and parameters of consumer config 
+     * for check fields and parameters of consumer config
      */
     // TODO: 2018/6/22 by zmyer
     protected void checkParameters() {
@@ -234,14 +235,15 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         T ref = providerConfig.getRef();
         if (!proxyClass.isInstance(ref)) {
             throw ExceptionUtils.buildRuntime("provider.ref",
-                ref == null ? "null" : ref.getClass().getName(),
-                "This is not an instance of " + providerConfig.getInterfaceId()
-                    + " in provider config with key " + key + " !");
+                    ref == null ? "null" : ref.getClass().getName(),
+                    "This is not an instance of " + providerConfig.getInterfaceId()
+                            + " in provider config with key " + key + " !");
         }
         // server 不能为空
         if (CommonUtils.isEmpty(providerConfig.getServer())) {
-            throw ExceptionUtils.buildRuntime("server", "NULL", "Value of \"server\" is not specified in provider" +
-                " config with key " + key + " !");
+            throw ExceptionUtils.buildRuntime("server", "NULL",
+                    "Value of \"server\" is not specified in provider" +
+                            " config with key " + key + " !");
         }
         checkMethods(proxyClass);
     }
@@ -260,7 +262,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 // 重名的方法
                 if (LOGGER.isWarnEnabled(providerConfig.getAppName())) {
                     LOGGER.warnWithApp(providerConfig.getAppName(), "Method with same name \"" + itfClass.getName()
-                        + "." + methodName + "\" exists ! The usage of overloading method in rpc is deprecated.");
+                            + "." + methodName + "\" exists ! The usage of overloading method in rpc is deprecated.");
                 }
             }
             // 判断服务下方法的黑白名单
@@ -291,7 +293,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 String key = providerConfig.buildKey() + ":" + protocol;
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, "Unexport provider config : {} {}", key, providerConfig.getId() != null
-                        ? "with bean id " + providerConfig.getId() : "");
+                            ? "with bean id " + providerConfig.getId() : "");
                 }
             }
 
@@ -310,8 +312,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                         } catch (Exception e) {
                             if (LOGGER.isWarnEnabled(appName)) {
                                 LOGGER.warnWithApp(appName, "Catch exception when unRegister processor to server: " +
-                                    serverConfig.getId()
-                                    + ", but you can ignore if it's called by JVM shutdown hook", e);
+                                        serverConfig.getId()
+                                        + ", but you can ignore if it's called by JVM shutdown hook", e);
                             }
                         }
                     }
@@ -355,7 +357,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {
                             LOGGER.warnWithApp(appName, "Catch exception when register to registry: "
-                                + registryConfig.getId(), e);
+                                    + registryConfig.getId(), e);
                         }
                     }
                 }
@@ -379,8 +381,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {
                             LOGGER.warnWithApp(appName, "Catch exception when unRegister from registry: " +
-                                registryConfig.getId()
-                                + ", but you can ignore if it's called by JVM shutdown hook", e);
+                                    registryConfig.getId()
+                                    + ", but you can ignore if it's called by JVM shutdown hook", e);
                         }
                     }
                 }
@@ -408,7 +410,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
             // TODO 可能需要处理ServerConfig的配置变化
             try { // 检查是否有变化
-                  // 是否过滤map?
+                // 是否过滤map?
                 for (Map.Entry<String, String> entry : newValues.entrySet()) {
                     String newValue = entry.getValue();
                     String oldValue = providerConfig.queryAttribute(entry.getKey());

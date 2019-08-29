@@ -61,10 +61,13 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension(value = "hessian2", code = 1)
 public class SofaHessianSerializer extends AbstractSerializer {
 
-    /** Logger for SofaHessianSerializer **/
+    /**
+     * Logger for SofaHessianSerializer
+     **/
     private static final Logger LOGGER = LoggerFactory.getLogger(SofaHessianSerializer.class);
     /**
      * Normal Serializer Factory
@@ -93,7 +96,7 @@ public class SofaHessianSerializer extends AbstractSerializer {
         serializerFactory = getSerializerFactory(enableMultipleClassLoader, false);
         genericSerializerFactory = getSerializerFactory(enableMultipleClassLoader, true);
         if (RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) &&
-            SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
+                SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
             ClassNameResolver resolver = new ClassNameResolver();
             resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
             serializerFactory.setClassNameResolver(resolver);
@@ -103,9 +106,9 @@ public class SofaHessianSerializer extends AbstractSerializer {
             genericSerializerFactory.setClassNameResolver(null);
         }
         CustomHessianSerializerManager.addSerializer(SofaRequest.class,
-            new SofaRequestHessianSerializer(serializerFactory, genericSerializerFactory));
+                new SofaRequestHessianSerializer(serializerFactory, genericSerializerFactory));
         CustomHessianSerializerManager.addSerializer(SofaResponse.class,
-            new SofaResponseHessianSerializer(serializerFactory, genericSerializerFactory));
+                new SofaResponseHessianSerializer(serializerFactory, genericSerializerFactory));
     }
 
     /**
@@ -118,10 +121,10 @@ public class SofaHessianSerializer extends AbstractSerializer {
     protected SerializerFactory getSerializerFactory(boolean multipleClassLoader, boolean generic) {
         if (generic) {
             return multipleClassLoader ? new GenericMultipleClassLoaderSofaSerializerFactory() :
-                new GenericSingleClassLoaderSofaSerializerFactory();
+                    new GenericSingleClassLoaderSofaSerializerFactory();
         } else {
             return multipleClassLoader ? new MultipleClassLoaderSofaSerializerFactory() :
-                new SingleClassLoaderSofaSerializerFactory();
+                    new SingleClassLoaderSofaSerializerFactory();
         }
     }
 

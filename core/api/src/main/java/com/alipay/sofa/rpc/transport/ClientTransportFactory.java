@@ -32,12 +32,12 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 public class ClientTransportFactory {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                LOGGER                  = LoggerFactory
-                                                                           .getLogger(ClientTransportFactory.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ClientTransportFactory.class);
 
     /**
      * 不可复用长连接管理器
@@ -50,6 +50,7 @@ public class ClientTransportFactory {
      * @param clientTransport   ClientTransport
      * @param disconnectTimeout disconnect timeout
      */
+    // TODO: 2018/12/28 by zmyer
     public static void releaseTransport(ClientTransport clientTransport, int disconnectTimeout) {
         if (clientTransport == null) {
             return;
@@ -63,10 +64,10 @@ public class ClientTransportFactory {
                     long start = RpcRuntimeContext.now();
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("There are {} outstanding call in transport, wait {}ms to end",
-                            count, disconnectTimeout);
+                                count, disconnectTimeout);
                     }
                     while (clientTransport.currentRequests() > 0
-                        && RpcRuntimeContext.now() - start < disconnectTimeout) { // 等待返回结果
+                            && RpcRuntimeContext.now() - start < disconnectTimeout) { // 等待返回结果
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException ignore) {
@@ -147,13 +148,13 @@ public class ClientTransportFactory {
                 transport = REVERSE_CLIENT_TRANSPORT_MAP.get(key);
                 if (transport == null) {
                     ClientTransportConfig config = new ClientTransportConfig()
-                        .setProviderInfo(new ProviderInfo().setHost(channel.remoteAddress().getHostName())
-                            .setPort(channel.remoteAddress().getPort()))
-                        .setContainer(container);
+                            .setProviderInfo(new ProviderInfo().setHost(channel.remoteAddress().getHostName())
+                                    .setPort(channel.remoteAddress().getPort()))
+                            .setContainer(container);
                     transport = ExtensionLoaderFactory.getExtensionLoader(ClientTransport.class)
-                        .getExtension(config.getContainer(),
-                            new Class[] { ClientTransportConfig.class },
-                            new Object[] { config });
+                            .getExtension(config.getContainer(),
+                                    new Class[]{ClientTransportConfig.class},
+                                    new Object[]{config});
                     transport.setChannel(channel);
                     REVERSE_CLIENT_TRANSPORT_MAP.put(key, transport); // 保存唯一长连接
                 }
@@ -172,7 +173,7 @@ public class ClientTransportFactory {
      */
     public static ClientTransport getReverseClientTransport(String channelKey) {
         return REVERSE_CLIENT_TRANSPORT_MAP != null ?
-            REVERSE_CLIENT_TRANSPORT_MAP.get(channelKey) : null;
+                REVERSE_CLIENT_TRANSPORT_MAP.get(channelKey) : null;
     }
 
     /**

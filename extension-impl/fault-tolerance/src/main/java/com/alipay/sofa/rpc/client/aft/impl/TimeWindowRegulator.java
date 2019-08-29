@@ -51,67 +51,71 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author <a href="mailto:lw111072@antfin.com">liangen</a>
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class TimeWindowRegulator implements Regulator {
 
-    /** Logger for this class */
-    private static final Logger                      LOGGER             = LoggerFactory
-                                                                            .getLogger(TimeWindowRegulator.class);
+    /**
+     * Logger for this class
+     */
+    private static final Logger LOGGER = LoggerFactory.getLogger(TimeWindowRegulator.class);
 
-    /** Counter for measure schedule and calculate time window */
-    private final AtomicInteger                      measureCounter     = new AtomicInteger();
+    /**
+     * Counter for measure schedule and calculate time window
+     */
+    private final AtomicInteger measureCounter = new AtomicInteger();
 
     /**
      * 度量线程池
      */
-    private final ScheduledService                   measureScheduler   = new ScheduledService("AFT-MEASURE",
-                                                                            ScheduledService.MODE_FIXEDRATE,
-                                                                            new MeasureRunnable(), 1, 1,
-                                                                            TimeUnit.SECONDS);
+    private final ScheduledService measureScheduler = new ScheduledService("AFT-MEASURE",
+            ScheduledService.MODE_FIXEDRATE,
+            new MeasureRunnable(), 1, 1,
+            TimeUnit.SECONDS);
     /**
      * Is measure scheduler started
      */
-    private final AtomicBoolean                      measureStarted     = new AtomicBoolean();
+    private final AtomicBoolean measureStarted = new AtomicBoolean();
 
     /**
      * 计算线程池
      */
-    private final ExecutorService                    regulationExecutor = ThreadPoolUtils.newFixedThreadPool(2,
-                                                                            new LinkedBlockingQueue<Runnable>(16),
-                                                                            new NamedThreadFactory(
-                                                                                "AFT-REGULATION"));
+    private final ExecutorService regulationExecutor = ThreadPoolUtils.newFixedThreadPool(2,
+            new LinkedBlockingQueue<Runnable>(16),
+            new NamedThreadFactory(
+                    "AFT-REGULATION"));
 
     /**
      * 度量模型
      */
-    private final CopyOnWriteArrayList<MeasureModel> measureModels      = new CopyOnWriteArrayList<MeasureModel>();
+    private final CopyOnWriteArrayList<MeasureModel> measureModels = new CopyOnWriteArrayList<MeasureModel>();
 
     /**
      * 度量策略（创建计算模型, 对计算模型里的数据进行度量，选出正常和异常节点）
      */
-    private MeasureStrategy                          measureStrategy;
+    private MeasureStrategy measureStrategy;
 
     /**
-     * 计算策略（根据度量结果，判断是否需要执行降级或者恢复） 
+     * 计算策略（根据度量结果，判断是否需要执行降级或者恢复）
      */
-    private RegulationStrategy                       regulationStrategy;
+    private RegulationStrategy regulationStrategy;
 
     /**
-     * 降级策略: 调整权重 
+     * 降级策略: 调整权重
      */
-    private DegradeStrategy                          weightDegradeStrategy;
+    private DegradeStrategy weightDegradeStrategy;
     /**
-     * 降级策略: 只打印日志 
+     * 降级策略: 只打印日志
      */
-    private DegradeStrategy                          logDegradeStrategy;
+    private DegradeStrategy logDegradeStrategy;
     /**
-     * 恢复策略：调整权重 
+     * 恢复策略：调整权重
      */
-    private RecoverStrategy                          recoverStrategy;
+    private RecoverStrategy recoverStrategy;
 
     /**
      * Listener for invocation stat change.
      */
-    private final InvocationStatListener             listener           = new TimeWindowRegulatorListener();
+    private final InvocationStatListener listener = new TimeWindowRegulatorListener();
 
     @Override
     public void init() {
@@ -206,7 +210,7 @@ public class TimeWindowRegulator implements Regulator {
                     doRegulate(measureResultDetail);
                 } catch (Exception e) {
                     LOGGER.errorWithApp(measureResult.getMeasureModel().getAppName(),
-                        "Error when doRegulate: " + e.getMessage(), e);
+                            "Error when doRegulate: " + e.getMessage(), e);
                 }
             }
         }
@@ -230,8 +234,8 @@ public class TimeWindowRegulator implements Regulator {
                         String appName = measureResult.getMeasureModel().getAppName();
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGULATION_ABNORMAL_NOT_DEGRADE,
-                                "Reach degrade number limit.", statDimension.getService(), statDimension.getIp(),
-                                statDimension.getAppName()));
+                                    "Reach degrade number limit.", statDimension.getService(), statDimension.getIp(),
+                                    statDimension.getAppName()));
                         }
                     }
                 } else if (measureState.equals(MeasureState.HEALTH)) {
@@ -248,8 +252,8 @@ public class TimeWindowRegulator implements Regulator {
                     String appName = measureResult.getMeasureModel().getAppName();
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGULATION_ABNORMAL_NOT_DEGRADE,
-                            "Degrade switch is off", statDimension.getService(),
-                            statDimension.getIp(), statDimension.getAppName()));
+                                "Degrade switch is off", statDimension.getService(),
+                                statDimension.getIp(), statDimension.getAppName()));
                     }
                 }
             }

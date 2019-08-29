@@ -50,7 +50,7 @@ public class DubboSingleton {
     /**
      * sofa.SeverConfig --> dubbo.ProtocolConfig
      */
-    final static ConcurrentMap<ServerConfig, ProtocolConfig>                            SERVER_MAP   = new ConcurrentHashMap<ServerConfig, ProtocolConfig>();
+    final static ConcurrentMap<ServerConfig, ProtocolConfig> SERVER_MAP = new ConcurrentHashMap<ServerConfig, ProtocolConfig>();
 
     /**
      * sofa.RegistryConfig --> dubbo.RegistryConfig

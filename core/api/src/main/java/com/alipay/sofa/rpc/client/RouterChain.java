@@ -49,25 +49,24 @@ public class RouterChain {
     /**
      * LOGGER
      */
-    private static final Logger                              LOGGER                = LoggerFactory
-                                                                                       .getLogger(RouterChain.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(RouterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+            .synchronizedMap(new ConcurrentHashMap<>());
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+            .synchronizedMap(new ConcurrentHashMap<>());
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Router>             EXTENSION_LOADER      = buildLoader();
+    private final static ExtensionLoader<Router> EXTENSION_LOADER = buildLoader();
 
     // TODO: 2018/7/6 by zmyer
     private static ExtensionLoader<Router> buildLoader() {
@@ -87,7 +86,7 @@ public class RouterChain {
                     }
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Extension of interface " + Router.class + ", " + implClass + "(" + alias +
-                            ") will auto active");
+                                ") will auto active");
                     }
                 }
             }
@@ -137,7 +136,7 @@ public class RouterChain {
     public static RouterChain buildConsumerChain(ConsumerBootstrap consumerBootstrap) {
         ConsumerConfig<?> consumerConfig = consumerBootstrap.getConsumerConfig();
         List<Router> customRouters = consumerConfig.getRouterRef() == null ? new ArrayList<Router>()
-            : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
+                : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
         // 先解析是否有特殊处理
         HashSet<String> excludes = parseExcludeRouter(customRouters);
 
@@ -193,7 +192,7 @@ public class RouterChain {
                     String excludeName = excludeRouter.getExcludeName();
                     if (StringUtils.isNotEmpty(excludeName)) {
                         String excludeRouterName = startsWithExcludePrefix(excludeName) ? excludeName.substring(1)
-                            : excludeName;
+                                : excludeName;
                         if (StringUtils.isNotEmpty(excludeRouterName)) {
                             excludeKeys.add(excludeRouterName);
                         }

@@ -41,6 +41,7 @@ public abstract class AbstractLoadBalancer extends LoadBalancer {
         super(consumerBootstrap);
     }
 
+    // TODO: 2018/12/28 by zmyer
     @Override
     public ProviderInfo select(SofaRequest request, List<ProviderInfo> providerInfos) throws SofaRpcException {
         if (providerInfos.size() == 0) {

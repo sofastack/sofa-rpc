@@ -46,8 +46,7 @@ public class RegistryFactory {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                  LOGGER         = LoggerFactory
-                                                                                    .getLogger(RegistryFactory.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(RegistryFactory.class);
 
     /**
      * 得到注册中心对象
@@ -67,12 +66,12 @@ public class RegistryFactory {
             Registry registry = ALL_REGISTRIES.get(registryConfig);
             if (registry == null) {
                 ExtensionClass<Registry> ext = ExtensionLoaderFactory.getExtensionLoader(Registry.class)
-                    .getExtensionClass(registryConfig.getProtocol());
+                        .getExtensionClass(registryConfig.getProtocol());
                 if (ext == null) {
                     throw ExceptionUtils.buildRuntime("registry.protocol", registryConfig.getProtocol(),
-                        "Unsupported protocol of registry config !");
+                            "Unsupported protocol of registry config !");
                 }
-                registry = ext.getExtInstance(new Class[] { RegistryConfig.class }, new Object[] { registryConfig });
+                registry = ext.getExtInstance(new Class[]{RegistryConfig.class}, new Object[]{registryConfig});
                 ALL_REGISTRIES.put(registryConfig, registry);
             }
             return registry;
@@ -89,7 +88,7 @@ public class RegistryFactory {
      * @return 注册中心配置
      */
     public static List<RegistryConfig> getRegistryConfigs() {
-        return new ArrayList<RegistryConfig>(ALL_REGISTRIES.keySet());
+        return new ArrayList<>(ALL_REGISTRIES.keySet());
     }
 
     /**
@@ -98,7 +97,7 @@ public class RegistryFactory {
      * @return 注册中心
      */
     public static List<Registry> getRegistries() {
-        return new ArrayList<Registry>(ALL_REGISTRIES.values());
+        return new ArrayList<>(ALL_REGISTRIES.values());
     }
 
     /**
@@ -113,7 +112,7 @@ public class RegistryFactory {
                 ALL_REGISTRIES.remove(config);
             } catch (Exception e) {
                 LOGGER.error("Error when destroy registry :" + config
-                    + ", but you can ignore if it's called by JVM shutdown hook", e);
+                        + ", but you can ignore if it's called by JVM shutdown hook", e);
             }
         }
     }

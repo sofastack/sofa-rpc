@@ -31,10 +31,11 @@ import java.util.concurrent.ConcurrentMap;
 
 /**
  * 按权重的负载均衡轮询算法，按方法级进行轮询，性能较差，不推荐<br>
- *  例如：权重为1、2、3、4三个节点，顺序为 1234234344
+ * 例如：权重为1、2、3、4三个节点，顺序为 1234234344
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 @Extension("weightRoundRobin")
 @Deprecated
 public class WeightRoundRobinLoadBalancer extends AbstractLoadBalancer {
@@ -129,7 +130,7 @@ public class WeightRoundRobinLoadBalancer extends AbstractLoadBalancer {
     private String getServiceKey(SofaRequest request) {
         StringBuilder builder = new StringBuilder();
         builder.append(request.getTargetAppName()).append("#")
-            .append(request.getMethodName());
+                .append(request.getMethodName());
         return builder.toString();
     }
 

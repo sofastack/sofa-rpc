@@ -30,7 +30,7 @@ import java.lang.annotation.Target;
 // TODO: 2018/7/6 by zmyer
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 public @interface AutoActive {
 
     /**

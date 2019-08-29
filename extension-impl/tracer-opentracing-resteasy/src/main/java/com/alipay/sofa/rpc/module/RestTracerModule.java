@@ -34,11 +34,12 @@ import com.alipay.sofa.rpc.transport.rest.TraceClientResponseFilter;
 
 /**
  * 该模块有两个作用：<br>
- *   - 加载sofaTracer <br>
- *   - 订阅事件<br>
- *           
+ * - 加载sofaTracer <br>
+ * - 订阅事件<br>
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension("sofaTracer-resteasy")
 public class RestTracerModule implements Module {
 

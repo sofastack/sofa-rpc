@@ -49,7 +49,7 @@ public class Bootstraps {
             providerConfig.setBootstrap(bootstrap);
         }
         ProviderBootstrap providerBootstrap = ExtensionLoaderFactory.getExtensionLoader(ProviderBootstrap.class)
-            .getExtension(bootstrap, new Class[] { ProviderConfig.class }, new Object[] { providerConfig });
+                .getExtension(bootstrap, new Class[]{ProviderConfig.class}, new Object[]{providerConfig});
         return (ProviderBootstrap<T>) providerBootstrap;
     }
 
@@ -66,9 +66,7 @@ public class Bootstraps {
         ConsumerBootstrap consumerBootstrap;
         if (StringUtils.isNotEmpty(bootstrap)) {
             consumerBootstrap = ExtensionLoaderFactory.getExtensionLoader(ConsumerBootstrap.class)
-                .getExtension(bootstrap,
-                    new Class[] { ConsumerConfig.class },
-                    new Object[] { consumerConfig });
+                    .getExtension(bootstrap, new Class[]{ConsumerConfig.class}, new Object[]{consumerConfig});
         } else {
             // default is same with protocol
             bootstrap = consumerConfig.getProtocol();
@@ -79,11 +77,11 @@ public class Bootstraps {
                 bootstrap = RpcConfigs.getStringValue(RpcOptions.DEFAULT_CONSUMER_BOOTSTRAP);
                 consumerConfig.setBootstrap(bootstrap);
                 consumerBootstrap = ExtensionLoaderFactory.getExtensionLoader(ConsumerBootstrap.class)
-                    .getExtension(bootstrap, new Class[] { ConsumerConfig.class }, new Object[] { consumerConfig });
+                        .getExtension(bootstrap, new Class[]{ConsumerConfig.class}, new Object[]{consumerConfig});
             } else {
                 consumerConfig.setBootstrap(bootstrap);
                 consumerBootstrap = extensionClass.getExtInstance(
-                    new Class[] { ConsumerConfig.class }, new Object[] { consumerConfig });
+                        new Class[]{ConsumerConfig.class}, new Object[]{consumerConfig});
             }
         }
         return (ConsumerBootstrap<T>) consumerBootstrap;

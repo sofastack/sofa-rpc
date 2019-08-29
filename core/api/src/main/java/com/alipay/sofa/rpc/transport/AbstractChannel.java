@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Unstable
 public abstract class AbstractChannel<CONTEXT, CHANNEL> {
 

@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 @Extension("roundRobin")
 public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
 
@@ -59,10 +60,7 @@ public class RoundRobinLoadBalancer extends AbstractLoadBalancer {
     }
 
     private String getServiceKey(SofaRequest request) {
-        StringBuilder builder = new StringBuilder();
-        builder.append(request.getTargetAppName()).append("#")
-            .append(request.getMethodName());
-        return builder.toString();
+        return request.getTargetAppName() + "#" + request.getMethodName();
     }
 
 }

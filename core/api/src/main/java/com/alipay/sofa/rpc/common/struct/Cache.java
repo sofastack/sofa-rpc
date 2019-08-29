@@ -17,9 +17,9 @@
 package com.alipay.sofa.rpc.common.struct;
 
 /**
- *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public interface Cache {
     /**
      * 通过调用参数获得唯一的key，返回null以后将不从cache中load

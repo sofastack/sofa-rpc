@@ -53,7 +53,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
     /**
      * 缓存序列化类型
      */
-    protected Byte   serializeType;
+    protected Byte serializeType;
 
     /**
      * 构造执行链
@@ -103,7 +103,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
                 request.setSofaResponseCallback(responseCallback);
                 invokeCtx.setResponseCallback(null); // 一次性用完
                 invokeCtx.put(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN,
-                    isSendableResponseCallback(responseCallback));
+                        isSendableResponseCallback(responseCallback));
             }
             // 如果用户设置了调用级别超时时间
             Integer timeout = invokeCtx.getTimeout();

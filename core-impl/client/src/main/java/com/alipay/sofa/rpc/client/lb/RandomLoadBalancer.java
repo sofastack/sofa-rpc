@@ -30,6 +30,7 @@ import java.util.Random;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension("random")
 public class RandomLoadBalancer extends AbstractLoadBalancer {
 
@@ -64,10 +65,10 @@ public class RandomLoadBalancer extends AbstractLoadBalancer {
             // 如果权重不相同且权重大于0则按总权重数随机
             int offset = random.nextInt(totalWeight);
             // 并确定随机值落在哪个片断上
-            for (int i = 0; i < size; i++) {
-                offset -= getWeight(providerInfos.get(i));
+            for (ProviderInfo providerInfo1 : providerInfos) {
+                offset -= getWeight(providerInfo1);
                 if (offset < 0) {
-                    providerInfo = providerInfos.get(i);
+                    providerInfo = providerInfo1;
                     break;
                 }
             }

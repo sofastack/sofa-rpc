@@ -51,8 +51,7 @@ public class ProviderProxyInvoker implements Invoker {
     public ProviderProxyInvoker(ProviderConfig providerConfig) {
         this.providerConfig = providerConfig;
         // 最底层是调用过滤器
-        this.filterChain = FilterChain.buildProviderChain(providerConfig,
-            new ProviderInvoker(providerConfig));
+        this.filterChain = FilterChain.buildProviderChain(providerConfig, new ProviderInvoker(providerConfig));
     }
 
     /**

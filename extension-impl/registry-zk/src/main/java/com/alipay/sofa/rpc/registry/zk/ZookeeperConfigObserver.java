@@ -40,8 +40,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                                          LOGGER            = LoggerFactory
-                                                                                               .getLogger(ZookeeperConfigObserver.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperConfigObserver.class);
 
     /**
      * The Config listener map.
@@ -84,8 +83,8 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive update data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
+                        + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                        + ", stat=[" + data.getStat() + "]");
             }
             notifyListeners(config, configPath, data, false);
         }
@@ -107,14 +106,14 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 for (ChildData data : currentData) {
                     LOGGER.infoWithApp(config.getAppName(), "Receive updateAll data: path=["
-                        + data.getPath() + "], data=[" + StringSerializer.decode(data.getData()) + "]"
-                        + ", stat=[" + data.getStat() + "]");
+                            + data.getPath() + "], data=[" + StringSerializer.decode(data.getData()) + "]"
+                            + ", stat=[" + data.getStat() + "]");
                 }
             }
             List<ConfigListener> configListeners = configListenerMap.get(config);
             if (CommonUtils.isNotEmpty(configListeners)) {
                 List<Map<String, String>> attributes = ZookeeperRegistryHelper.convertConfigToAttributes(configPath,
-                    currentData);
+                        currentData);
                 for (ConfigListener listener : configListeners) {
                     for (Map<String, String> attribute : attributes) {
                         listener.configChanged(attribute);
@@ -139,8 +138,8 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive remove data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
+                        + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                        + ", stat=[" + data.getStat() + "]");
             }
             notifyListeners(config, configPath, data, true);
         }
@@ -161,8 +160,8 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         } else {
             if (LOGGER.isInfoEnabled(config.getAppName())) {
                 LOGGER.infoWithApp(config.getAppName(), "Receive add data: path=[" + data.getPath() + "]"
-                    + ", data=[" + StringSerializer.decode(data.getData()) + "]"
-                    + ", stat=[" + data.getStat() + "]");
+                        + ", data=[" + StringSerializer.decode(data.getData()) + "]"
+                        + ", stat=[" + data.getStat() + "]");
             }
             notifyListeners(config, configPath, data, false);
         }
@@ -173,7 +172,7 @@ public class ZookeeperConfigObserver extends AbstractZookeeperObserver {
         if (CommonUtils.isNotEmpty(configListeners)) {
             //转换子节点Data为接口级配置<配置属性名,配置属性值>,例如<timeout,200>
             Map<String, String> attribute = ZookeeperRegistryHelper.convertConfigToAttribute(configPath, data,
-                removeType);
+                    removeType);
             for (ConfigListener listener : configListeners) {
                 listener.configChanged(attribute);
             }

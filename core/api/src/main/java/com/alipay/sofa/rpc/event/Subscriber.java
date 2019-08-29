@@ -22,6 +22,7 @@ package com.alipay.sofa.rpc.event;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @see EventBus
  */
+// TODO: 2018/12/29 by zmyer
 public abstract class Subscriber {
     /**
      * 接到事件是否同步执行

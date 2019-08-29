@@ -29,22 +29,22 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory of TelnetHandler
- * 
+ *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Unstable
 public class TelnetHandlerFactory {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                         LOGGER           = LoggerFactory
-                                                                             .getLogger(TelnetHandlerFactory.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TelnetHandlerFactory.class);
 
     /**
      * 保存支持的全部命令，{命令：解析器}
      */
-    private static Map<String, TelnetHandler>           supportedCmds    = new ConcurrentHashMap<String, TelnetHandler>();
+    private static Map<String, TelnetHandler> supportedCmds = new ConcurrentHashMap<String, TelnetHandler>();
 
     /**
      * 扩展器
@@ -53,17 +53,17 @@ public class TelnetHandlerFactory {
 
     private static ExtensionLoader<TelnetHandler> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(TelnetHandler.class,
-            new ExtensionLoaderListener<TelnetHandler>() {
-                @Override
-                public void onLoad(ExtensionClass<TelnetHandler> extensionClass) {
-                    // 自己维护支持列表，不托管给ExtensionLoaderFactory
-                    TelnetHandler handler = extensionClass.getExtInstance();
-                    supportedCmds.put(handler.getCommand(), handler);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Add telnet handler {}:{}.", handler.getCommand(), handler);
+                new ExtensionLoaderListener<TelnetHandler>() {
+                    @Override
+                    public void onLoad(ExtensionClass<TelnetHandler> extensionClass) {
+                        // 自己维护支持列表，不托管给ExtensionLoaderFactory
+                        TelnetHandler handler = extensionClass.getExtInstance();
+                        supportedCmds.put(handler.getCommand(), handler);
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Add telnet handler {}:{}.", handler.getCommand(), handler);
+                        }
                     }
-                }
-            });
+                });
     }
 
     public static TelnetHandler getHandler(String command) {

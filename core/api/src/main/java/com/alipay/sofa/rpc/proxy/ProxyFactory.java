@@ -38,16 +38,15 @@ public final class ProxyFactory {
      * @param proxyInvoker 代码执行的Invoker
      * @param <T>          类型
      * @return 代理类实例
-     * @throws Exception
      */
     // TODO: 2018/7/6 by zmyer
-    public static <T> T buildProxy(String proxyType, Class<T> clazz, Invoker proxyInvoker) throws Exception {
+    public static <T> T buildProxy(String proxyType, Class<T> clazz, Invoker proxyInvoker) {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-                .getExtensionClass(proxyType);
+                    .getExtensionClass(proxyType);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.proxy", proxyType,
-                    "Unsupported proxy of client!");
+                        "Unsupported proxy of client!");
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getProxy(clazz, proxyInvoker);
@@ -68,10 +67,10 @@ public final class ProxyFactory {
     public static Invoker getInvoker(Object proxyObject, String proxyType) {
         try {
             ExtensionClass<Proxy> ext = ExtensionLoaderFactory.getExtensionLoader(Proxy.class)
-                .getExtensionClass(proxyType);
+                    .getExtensionClass(proxyType);
             if (ext == null) {
                 throw ExceptionUtils.buildRuntime("consumer.proxy", proxyType,
-                    "Unsupported proxy of client!");
+                        "Unsupported proxy of client!");
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getInvoker(proxyObject);

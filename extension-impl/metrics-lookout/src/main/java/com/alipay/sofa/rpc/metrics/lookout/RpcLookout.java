@@ -40,14 +40,15 @@ import java.util.concurrent.TimeUnit;
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class RpcLookout {
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER       = LoggerFactory.getLogger(RpcLookout.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(RpcLookout.class);
 
-    private final RpcLookoutId  rpcLookoutId = new RpcLookoutId();
+    private final RpcLookoutId rpcLookoutId = new RpcLookoutId();
 
     /**
      * Collect the RPC client information.

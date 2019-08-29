@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension("fault-tolerance")
 public class FaultToleranceModule implements Module {
 
@@ -40,7 +41,7 @@ public class FaultToleranceModule implements Module {
     /**
      * Regulator
      */
-    private Regulator                regulator = new TimeWindowRegulator();
+    private Regulator regulator = new TimeWindowRegulator();
 
     @Override
     public boolean needLoad() {

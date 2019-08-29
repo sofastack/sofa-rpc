@@ -31,16 +31,11 @@ public abstract class AbstractZookeeperObserver {
     /**
      * Init or add list.
      *
-     * @param <K>
-     *         the key parameter
-     * @param <V>
-     *         the value parameter
-     * @param orginMap
-     *         the orgin map
-     * @param key
-     *         the key
-     * @param needAdd
-     *         the need add
+     * @param <K>      the key parameter
+     * @param <V>      the value parameter
+     * @param orginMap the orgin map
+     * @param key      the key
+     * @param needAdd  the need add
      */
     protected <K, V> void initOrAddList(Map<K, List<V>> orginMap, K key, V needAdd) {
         List<V> listeners = orginMap.get(key);

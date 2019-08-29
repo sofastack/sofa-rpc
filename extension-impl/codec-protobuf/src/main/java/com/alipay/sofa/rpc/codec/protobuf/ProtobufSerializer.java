@@ -55,19 +55,20 @@ import java.util.Map;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extension(value = "protobuf", code = 11)
 public class ProtobufSerializer extends AbstractSerializer {
 
-    private final ProtobufHelper protobufHelper     = new ProtobufHelper();
+    private final ProtobufHelper protobufHelper = new ProtobufHelper();
 
     /**
      * Encode method name
      */
-    private static final String  METHOD_TOBYTEARRAY = "toByteArray";
+    private static final String METHOD_TOBYTEARRAY = "toByteArray";
     /**
      * Decode method name
      */
-    private static final String  METHOD_PARSEFROM   = "parseFrom";
+    private static final String METHOD_PARSEFROM = "parseFrom";
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
@@ -87,7 +88,7 @@ public class ProtobufSerializer extends AbstractSerializer {
                     protobufHelper.toByteArrayMethodMap.put(clazz, method);
                 } catch (Exception e) {
                     throw buildSerializeError("Cannot found method " + clazz.getName()
-                        + ".toByteArray(), please check the generated code.", e);
+                            + ".toByteArray(), please check the generated code.", e);
                 }
             }
             try {
@@ -99,12 +100,12 @@ public class ProtobufSerializer extends AbstractSerializer {
             return new ByteArrayWrapperByteBuf(StringSerializer.encode((String) object));
         } else {
             throw buildSerializeError("Unsupported class:" + object.getClass().getName()
-                + ", only support protobuf message");
+                    + ", only support protobuf message");
         }
     }
 
     protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
-        throws SofaRpcException {
+            throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
         if (args.length > 1) {
             throw buildSerializeError("Protobuf only support one parameter!");
@@ -113,7 +114,7 @@ public class ProtobufSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
-        throws SofaRpcException {
+            throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
             // 框架异常：错误则body序列化的是错误字符串
@@ -151,13 +152,13 @@ public class ProtobufSerializer extends AbstractSerializer {
                         method = clazz.getMethod(METHOD_PARSEFROM, byte[].class);
                         if (!Modifier.isStatic(method.getModifiers())) {
                             throw buildDeserializeError("Cannot found static method " + clazz.getName()
-                                + ".parseFrom(byte[]), please check the generated code");
+                                    + ".parseFrom(byte[]), please check the generated code");
                         }
                         method.setAccessible(true);
                         protobufHelper.parseFromMethodMap.put(clazz, method);
                     } catch (NoSuchMethodException e) {
                         throw buildDeserializeError("Cannot found method " + clazz.getName()
-                            + ".parseFrom(byte[]), please check the generated code", e);
+                                + ".parseFrom(byte[]), please check the generated code", e);
                     }
                 }
                 try {
@@ -221,10 +222,10 @@ public class ProtobufSerializer extends AbstractSerializer {
 
         // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
         Class requestClass = protobufHelper.getReqClass(targetService,
-            sofaRequest.getMethodName());
+                sofaRequest.getMethodName());
         Object pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(new Object[] { pbReq });
-        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
+        sofaRequest.setMethodArgs(new Object[]{pbReq});
+        sofaRequest.setMethodArgSigs(new String[]{requestClass.getName()});
     }
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,

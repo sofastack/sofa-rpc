@@ -30,6 +30,7 @@ import com.alipay.sofa.rpc.ext.Extension;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/28 by zmyer
 @Extension(value = "consumerGeneric", order = -18000)
 @AutoActive(consumerSide = true)
 public class ConsumerGenericFilter extends Filter {
@@ -37,7 +38,7 @@ public class ConsumerGenericFilter extends Filter {
     /**
      * 方法名 $invoke
      */
-    private static final String METHOD_INVOKE         = "$invoke";
+    private static final String METHOD_INVOKE = "$invoke";
     /**
      * 方法名 $genericInvoke
      */
@@ -55,6 +56,7 @@ public class ConsumerGenericFilter extends Filter {
         return consumerConfig.isGeneric();
     }
 
+    // TODO: 2018/12/28 by zmyer
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         try {
@@ -85,6 +87,7 @@ public class ConsumerGenericFilter extends Filter {
         }
     }
 
+    // TODO: 2018/12/28 by zmyer
     private String getSerializeFactoryType(String method, Object[] args) throws SofaRpcException {
         if (METHOD_INVOKE.equals(method)) {
             // 方法名为 $invoke

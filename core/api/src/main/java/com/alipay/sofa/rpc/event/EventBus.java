@@ -36,7 +36,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 // TODO: 2018/6/22 by zmyer
 public class EventBus {
 
-    private static final Logger  LOGGER           = LoggerFactory.getLogger(EventBus.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(EventBus.class);
 
     /**
      * 是否允许携带上下文附件，关闭后只能传递"."开头的key，"_" 开头的Key将不被保持和传递。<br>
@@ -67,7 +67,8 @@ public class EventBus {
      * 某中事件的订阅者
      */
 
-    private final static ConcurrentMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>> SUBSCRIBER_MAP = new ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>>();
+    private final static ConcurrentMap<Class<? extends Event>,
+            CopyOnWriteArraySet<Subscriber>> SUBSCRIBER_MAP = new ConcurrentHashMap<Class<? extends Event>, CopyOnWriteArraySet<Subscriber>>();
 
     /**
      * 注册一个订阅者
@@ -123,17 +124,17 @@ public class EventBus {
                 } else { // 异步
                     final RpcInternalContext context = RpcInternalContext.peekContext();
                     AsyncRuntime.getAsyncThreadPool().execute(
-                        new Runnable() {
-                            @Override
-                            public void run() {
-                                try {
-                                    RpcInternalContext.setContext(context);
-                                    handleEvent(subscriber, event);
-                                } catch (Exception e) {
-                                    RpcInternalContext.removeContext();
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    try {
+                                        RpcInternalContext.setContext(context);
+                                        handleEvent(subscriber, event);
+                                    } catch (Exception e) {
+                                        RpcInternalContext.removeContext();
+                                    }
                                 }
-                            }
-                        });
+                            });
                 }
             }
         }

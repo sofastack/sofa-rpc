@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public abstract class AbstractSerializer implements Serializer {
 
     protected SofaRpcException buildSerializeError(String message) {

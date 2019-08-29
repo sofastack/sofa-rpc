@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.event;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
 /**
- *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class ServerStoppedEvent implements Event {

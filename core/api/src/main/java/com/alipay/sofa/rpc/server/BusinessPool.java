@@ -25,7 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Business pool 
+ * Business pool
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */

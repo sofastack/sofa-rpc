@@ -46,7 +46,7 @@ public class ClientProxyInvoker implements Invoker {
     /**
      *
      */
-    protected Cluster              cluster;
+    protected Cluster cluster;
 
     /**
      * 构造执行链

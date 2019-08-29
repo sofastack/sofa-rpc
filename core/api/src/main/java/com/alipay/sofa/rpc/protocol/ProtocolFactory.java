@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class ProtocolFactory {
 
     /**
@@ -44,20 +45,19 @@ public class ProtocolFactory {
      * 除了托管给扩展加载器的工厂模式（保留alias：实例）外<br>
      * 还需要额外保留编码和实例的映射：{别名：编码}
      */
-    private final static ConcurrentMap<String, Byte>   TYPE_CODE_MAP     = new ConcurrentHashMap<String, Byte>();
+    private final static ConcurrentMap<String, Byte> TYPE_CODE_MAP = new ConcurrentHashMap<String, Byte>();
 
     /**
      * 扩展加载器
      */
-    private final static ExtensionLoader<Protocol>     EXTENSION_LOADER  = buildLoader();
+    private final static ExtensionLoader<Protocol> EXTENSION_LOADER = buildLoader();
 
     private static ExtensionLoader<Protocol> buildLoader() {
         return ExtensionLoaderFactory.getExtensionLoader(Protocol.class, new ExtensionLoaderListener<Protocol>() {
             @Override
             public void onLoad(ExtensionClass<Protocol> extensionClass) {
                 // 除了保留 alias：Protocol外， 需要保留 code：Protocol
-                Protocol protocol = extensionClass
-                    .getExtInstance();
+                Protocol protocol = extensionClass.getExtInstance();
                 TYPE_PROTOCOL_MAP.put(extensionClass.getCode(), protocol);
                 TYPE_CODE_MAP.put(extensionClass.getAlias(), extensionClass.getCode());
                 if (RpcConfigs.getBooleanValue(RpcOptions.TRANSPORT_SERVER_PROTOCOL_ADAPTIVE)) {

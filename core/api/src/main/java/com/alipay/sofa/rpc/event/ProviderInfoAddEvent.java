@@ -24,10 +24,11 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/27 by zmyer
 public class ProviderInfoAddEvent implements Event {
 
     private final ConsumerConfig consumerConfig;
-    private final ProviderGroup  providerGroup;
+    private final ProviderGroup providerGroup;
 
     public ProviderInfoAddEvent(ConsumerConfig consumerConfig, ProviderGroup providerGroup) {
         this.consumerConfig = consumerConfig;

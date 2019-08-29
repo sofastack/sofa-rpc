@@ -32,7 +32,7 @@ public class ExtensionLoaderFactory {
     /**
      * All extension loader {Class : ExtensionLoader}
      */
-    private static final ConcurrentMap<Class, ExtensionLoader> LOADER_MAP = new ConcurrentHashMap<Class, ExtensionLoader>();
+    private static final ConcurrentMap<Class, ExtensionLoader> LOADER_MAP = new ConcurrentHashMap<>();
 
     /**
      * Get extension loader by extensible class with listener

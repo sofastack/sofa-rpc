@@ -18,26 +18,26 @@ package com.alipay.sofa.rpc.api;
 
 /**
  * GenericContext
- * 
+ *
  * @author <a href="mailto:caojie.cj@antfin.com">CaoJie</a>
  */
 public class GenericContext {
 
     public static final GenericContext EMPTY_GENERIC_CONTEXT = new GenericContext() {
-                                                                 @Override
-                                                                 public void setClientTimeout(long clientTimeout) {
-                                                                     throw new UnsupportedOperationException();
-                                                                 }
+        @Override
+        public void setClientTimeout(long clientTimeout) {
+            throw new UnsupportedOperationException();
+        }
 
-                                                                 @Override
-                                                                 public long getClientTimeout() {
-                                                                     return 0;
-                                                                 }
-                                                             };
+        @Override
+        public long getClientTimeout() {
+            return 0;
+        }
+    };
     /**
      * 超时时间
      */
-    private long                       clientTimeout;
+    private long clientTimeout;
 
     public long getClientTimeout() {
         return clientTimeout;

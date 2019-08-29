@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 @Extensible
 @Unstable
 public interface ProtocolNegotiator {

@@ -45,7 +45,7 @@ public class RegistryRouter extends Router {
      *
      * @since 5.2.0
      */
-    public static final String  RPC_REGISTRY_ROUTER = "REGISTRY";
+    public static final String RPC_REGISTRY_ROUTER = "REGISTRY";
 
     /**
      * 服务消费者配置

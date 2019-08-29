@@ -24,10 +24,11 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+// TODO: 2018/12/29 by zmyer
 public class ClientEndInvokeEvent implements Event {
-    private final SofaRequest  request;
+    private final SofaRequest request;
     private final SofaResponse response;
-    private final Throwable    throwable;
+    private final Throwable throwable;
 
     public ClientEndInvokeEvent(SofaRequest request, SofaResponse response, Throwable throwable) {
         this.request = request;

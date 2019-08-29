@@ -31,7 +31,7 @@ import java.lang.annotation.Target;
 // TODO: 2018/7/9 by zmyer
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ ElementType.TYPE })
+@Target({ElementType.TYPE})
 public @interface Extension {
     /**
      * 扩展点名字
