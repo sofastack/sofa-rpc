@@ -1,1 +1,1 @@
-protostuff=com.alipay.sofa.rpc.codec.protobuf.ProtostuffSerializer
+protostuff=com.alipay.sofa.rpc.codec.protostuff.ProtostuffSerializer
