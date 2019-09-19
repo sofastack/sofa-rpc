@@ -268,6 +268,9 @@ public class RpcSofaTracer extends Tracer {
                 clientSpan.setTag(RpcSpanTags.LOCAL_IP, NetUtils.toIpString(address));
                 clientSpan.setTag(RpcSpanTags.LOCAL_PORT, address.getPort());
             }
+
+            //adjust for generic invoke
+            clientSpan.setTag(RpcSpanTags.METHOD, request.getMethodName());
         }
 
         Throwable throwableShow = exceptionThrow;
