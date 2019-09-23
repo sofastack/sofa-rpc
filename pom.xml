@@ -5,7 +5,7 @@
    
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-parent</artifactId>
-    <version>5.6.2-SNAPSHOT</version>
+    <version>5.6.2</version>
     <packaging>pom</packaging>
     <name>[SOFA] - RPC Framework</name>
     <url>http://www.antfin.com</url>
