@@ -74,7 +74,7 @@ public class ConsumerGenericFilter extends Filter {
             // 修正超时时间
             Long clientTimeout = getClientTimeoutFromGenericContext(request.getMethodName(),
                 request.getMethodArgs());
-            if (clientTimeout != null) {
+            if (clientTimeout != null && clientTimeout != 0) {
                 request.setTimeout(clientTimeout.intValue());
             }
 
