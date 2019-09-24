@@ -132,7 +132,7 @@ public class EventBus {
                                     try {
                                         RpcInternalContext.setContext(context);
                                         handleEvent(subscriber, event);
-                                    } catch (Exception e) {
+                                    } finally {
                                         RpcInternalContext.removeContext();
                                     }
                                 }

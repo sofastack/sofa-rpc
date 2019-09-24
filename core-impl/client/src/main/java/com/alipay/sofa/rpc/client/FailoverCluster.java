@@ -78,6 +78,7 @@ public class FailoverCluster extends AbstractCluster {
                     throwable = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
                         "Failed to call " + request.getInterfaceName() + "." + methodName
                             + " on remote server " + providerInfo + ", return null");
+                    time++;
                 }
             } catch (SofaRpcException e) { // 服务端异常+ 超时异常 才发起rpc异常重试
                 if (e.getErrorType() == RpcErrorType.SERVER_BUSY
