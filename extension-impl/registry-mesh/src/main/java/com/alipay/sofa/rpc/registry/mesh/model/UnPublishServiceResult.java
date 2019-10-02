@@ -17,7 +17,8 @@
 package com.alipay.sofa.rpc.registry.mesh.model;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class UnPublishServiceResult {
 
@@ -39,5 +40,14 @@ public class UnPublishServiceResult {
 
     public void setSuccess(boolean success) {
         this.success = success;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("UnPublishServiceResult{");
+        sb.append("errorMessage='").append(errorMessage).append('\'');
+        sb.append(", success=").append(success);
+        sb.append('}');
+        return sb.toString();
     }
 }

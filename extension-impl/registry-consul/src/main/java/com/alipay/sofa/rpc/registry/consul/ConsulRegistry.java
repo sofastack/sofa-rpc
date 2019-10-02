@@ -18,12 +18,12 @@ package com.alipay.sofa.rpc.registry.consul;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.event.ConsumerSubEvent;
@@ -34,43 +34,59 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
-import com.alipay.sofa.rpc.registry.consul.common.ConsulConstants;
-import com.alipay.sofa.rpc.registry.consul.common.ConsulURL;
-import com.alipay.sofa.rpc.registry.consul.common.ConsulURLUtils;
-import com.alipay.sofa.rpc.registry.consul.internal.ConsulManager;
-import com.alipay.sofa.rpc.registry.consul.model.ConsulEphemeralNode;
-import com.alipay.sofa.rpc.registry.consul.model.ConsulService;
-import com.alipay.sofa.rpc.registry.consul.model.ConsulServiceResp;
-import com.alipay.sofa.rpc.registry.consul.model.NotifyConsumerListener;
-import com.alipay.sofa.rpc.registry.consul.model.NotifyListener;
-import com.alipay.sofa.rpc.registry.consul.model.ThrallRoleType;
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.agent.model.NewService;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.net.URL;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
-import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
+import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildServiceId;
+import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildServiceIds;
+import static com.alipay.sofa.rpc.registry.consul.ConsulUtils.buildServiceName;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildUniqueName;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
 /**
- * CONSUL 注册中心
+ * <p>
+ * Consul Registry. Features:
+ *
+ * <ol>
+ * <li> register publisher as instance to consul agent.</li>
+ * <li> subscribe instances change event.</li>
+ * <li> custom health check, e.g. tcp, http.</li>
+ * </ol>
+ *
+ * The data structure in Consul consists of three parts: service name, service id, tag.
+ *
+ * <ol>
+ * <li> service name is the human-readable name of each service. In sofa-rpc, the default value is interfaceId.</li>
+ * <li> tag can be used to filter a set of instances which can be subscribed, we use interfaceId + version + uniqueId + protocol to identify it.</li>
+ * <li> each instance needs to have a unique service id so it won't be overwritten by other instances, we use tag + host + port to identify it.</li>
+ * </ol>
+ *
+ * Here is an example:
+ * <pre>
+ * {
+ *     Service: "com.alipay.sofa.rpc.registry.consul.TestService",
+ *     Tags: [
+ *       "com.alipay.sofa.rpc.registry.consul.TestService:1.0:default@DEFAULT"
+ *     ],
+ *     ID: "com.alipay.sofa.rpc.registry.consul.TestService:1.0:default@DEFAULT-127.0.0.1-12200"
+ * }
+ * </pre>
+ * </p>
  *
  * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  * @since 5.5.0
  */
 @Extension("consul")
@@ -79,111 +95,45 @@ public class ConsulRegistry extends Registry {
     /**
      * Logger
      */
-    private final static Logger                                               LOGGER                 = LoggerFactory
-                                                                                                         .getLogger(ConsulRegistry.class);
+    private final static Logger                LOGGER                 = LoggerFactory.getLogger(ConsulRegistry.class);
 
-    private ConsulManager                                                     consulManager;
+    private final ConsulRegistryProperties     properties;
 
-    /**
-     * Root path of registry data
-     */
-    private String                                                            rootPath;
+    private Map<String, ScheduledFuture>       heartbeatFutures       = new ConcurrentHashMap<>();
 
-    /**
-     * 保存服务发布者的url
-     */
-    private ConcurrentMap<ProviderConfig, List<String>>                       providerUrls           = new ConcurrentHashMap<ProviderConfig, List<String>>();
+    private Map<String, HealthServiceInformer> healthServiceInformers = new ConcurrentHashMap<>();
 
-    /**
-     * 保存服务消费者的url
-     */
-    private ConcurrentMap<ConsumerConfig, String>                             consumerUrls           = new ConcurrentHashMap<ConsumerConfig, String>();
+    private ConsulClient                       consulClient;
 
-    private Cache<String, Map<String, List<ConsulURL>>>                       serviceCache;
+    private ScheduledExecutorService           heartbeatExecutor;
 
-    private final ConcurrentMap<String, Long>                                 lookupGroupServices    = Maps
-                                                                                                         .newConcurrentMap();
-
-    private final ConcurrentMap<String, Pair<ConsulURL, Set<NotifyListener>>> notifyServiceListeners = Maps
-                                                                                                         .newConcurrentMap();
-
-    private final Set<String>                                                 serviceGroupLookUped   = Sets
-                                                                                                         .newConcurrentHashSet();
-
-    private ExecutorService                                                   notifyExecutor;
-
-    /**
-     * 注册中心配置
-     *
-     * @param registryConfig 注册中心配置
-     */
     protected ConsulRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
-    }
-
-    public String[] validateIp(RegistryConfig registryConfig) {
-        String addressInput = registryConfig.getAddress(); // xxx:2181,yyy:2181/path1/paht2
-
-        if (StringUtils.isEmpty(addressInput)) {
-            throw new SofaRpcRuntimeException("Address of consul registry is empty.");
-        }
-
-        int idx = addressInput.indexOf(CONTEXT_SEP);
-        String address; // IP地址
-        if (idx > 0) {
-            address = addressInput.substring(0, idx);
-            rootPath = addressInput.substring(idx);
-
-        } else {
-            address = addressInput;
-            rootPath = "/";
-        }
-
-        if (!ConsulURLUtils.isValidAddress(address)) {
-            throw new SofaRpcRuntimeException("Address format of consul registry is wrong.");
-        }
-        if (!rootPath.endsWith(CONTEXT_SEP)) {
-            rootPath += CONTEXT_SEP; // 保证以"/"结尾
-        }
-        String[] ipAndHost = StringUtils.split(address, ":");
-        return ipAndHost;
-    }
-
-    private ConsulService buildConsulHealthService(ConsulURL url) {
-        return ConsulService.newService()//
-            .withAddress(url.getHost())//
-            .withPort(Integer.toString(url.getPort()))//
-            .withName(ConsulURLUtils.toServiceName(url.getGroup()))//
-            .withTag(ConsulURLUtils.healthServicePath(url, ThrallRoleType.PROVIDER))//
-            .withId(url.getHost() + ":" + url.getPort() + "-" + url.getPath() + "-" + url.getVersion())//
-            .withCheckInterval(Integer.toString(ConsulConstants.TTL)).build();
-    }
-
-    private ConsulEphemeralNode buildEphemralNode(ConsulURL url, ThrallRoleType roleType) {
-        return ConsulEphemeralNode.newEphemralNode().withUrl(url)//
-            .withEphemralType(roleType)//
-            .withCheckInterval(Integer.toString(ConsulConstants.TTL * 6))//
-            .build();
+        this.properties = new ConsulRegistryProperties(registryConfig.getParameters());
     }
 
     @Override
     public void init() {
-
-        if (consulManager != null) {
+        if (consulClient != null) {
             return;
         }
 
-        String[] address = validateIp(registryConfig);
-        consulManager = new ConsulManager(address[0], Integer.parseInt(address[1]));
-        serviceCache = CacheBuilder.newBuilder().maximumSize(1000).build();
-        notifyExecutor = Executors.newCachedThreadPool(
-            new NamedThreadFactory("NotifyConsumerListener", true));
+        String[] hostAndPort = StringUtils.split(registryConfig.getAddress(), ":");
+        String host = hostAndPort[0];
+        int port = hostAndPort.length > 1 ? Integer.parseInt(hostAndPort[1]) : ConsulConstants.DEFAULT_CONSUL_PORT;
+        consulClient = new ConsulClient(host, port);
+
+        int coreSize = properties.getHeartbeatCoreSize();
+
+        heartbeatExecutor = Executors.newScheduledThreadPool(coreSize);
     }
 
     @Override
     public void destroy() {
-        providerUrls.clear();
-        consumerUrls.clear();
+        if (heartbeatExecutor != null) {
+            heartbeatExecutor.shutdown();
+        }
+        healthServiceInformers.values().forEach(HealthServiceInformer::shutdown);
     }
 
     @Override
@@ -195,7 +145,6 @@ public class ConsulRegistry extends Registry {
 
     @Override
     public boolean start() {
-
         return true;
     }
 
@@ -204,57 +153,48 @@ public class ConsulRegistry extends Registry {
         String appName = config.getAppName();
 
         if (!registryConfig.isRegister()) {
-            //只订阅不注册
+            // 只订阅不注册
             if (LOGGER.isInfoEnabled(appName)) {
                 LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
-        if (config.isRegister()) {
-            //注册服务端节点
-            try {
-                List<String> urls = ConsulRegistryHelper.convertProviderToUrls(config);
-                if (CommonUtils.isNotEmpty(urls)) {
-                    String providerPath = ConsulRegistryHelper.buildProviderPath(rootPath, config);
+        if (!config.isRegister()) {
+            return;
+        }
+        // 注册服务端节点
+        try {
+            List<NewService> services = buildNewServices(config);
+            if (CommonUtils.isNotEmpty(services)) {
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName,
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, config.getInterfaceId()));
+                }
+                for (NewService service : services) {
+                    registerConsulService(service);
                     if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, providerPath));
-                    }
-                    for (String url : urls) {
-                        //                        url = URLEncoder.encode(url, "UTF-8");
-                        String providerUrl = providerPath + CONTEXT_SEP + url;
-
-                        ConsulURL providerConfigUrl = ConsulURL.valueOf(url);
-                        ConsulService service = this.buildConsulHealthService(providerConfigUrl);
-                        consulManager.registerService(service);
-                        ConsulEphemeralNode ephemralNode = this.buildEphemralNode(providerConfigUrl,
-                            ThrallRoleType.PROVIDER);
-                        consulManager.registerEphemralNode(ephemralNode);
-                        if (LOGGER.isInfoEnabled(appName)) {
-                            LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, providerUrl));
-                        }
-                    }
-                    providerUrls.put(config, urls);
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, providerPath));
+                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB, config.getInterfaceId()));
                     }
                 }
-            } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to register provider to consulRegistry!", e);
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName,
+                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, config.getInterfaceId()));
+                }
             }
+        } catch (Exception e) {
+            throw new SofaRpcRuntimeException("Failed to register provider to consulRegistry!", e);
+        }
 
-            if (EventBus.isEnable(ProviderPubEvent.class)) {
-                ProviderPubEvent event = new ProviderPubEvent(config);
-                EventBus.post(event);
-            }
+        if (EventBus.isEnable(ProviderPubEvent.class)) {
+            ProviderPubEvent event = new ProviderPubEvent(config);
+            EventBus.post(event);
         }
     }
 
     @Override
     public void unRegister(ProviderConfig config) {
-
         String appName = config.getAppName();
+
         if (!registryConfig.isRegister()) {
             // 注册中心不注册
             if (LOGGER.isInfoEnabled(appName)) {
@@ -263,43 +203,32 @@ public class ConsulRegistry extends Registry {
             return;
         }
         // 反注册服务端节点
-        if (config.isRegister()) {
-            try {
-                List<String> urls = providerUrls.remove(config);
-
-                if (CommonUtils.isNotEmpty(urls)) {
-                    String providerPath = ConsulRegistryHelper.buildProviderPath(rootPath, config);
-
-                    for (String url : urls) {
-                        ConsulURL providerConfigUrl = ConsulURL.valueOf(url);
-                        ConsulService service = this.buildConsulHealthService(providerConfigUrl);
-                        consulManager.unregisterService(service);
-                    }
-                    if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
-                            providerPath, "1"));
-                    }
-                }
-            } catch (Exception e) {
-                if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unregister provider to consulRegistry!", e);
+        if (!config.isRegister()) {
+            return;
+        }
+        try {
+            List<String> ids = buildServiceIds(config);
+            if (CommonUtils.isNotEmpty(ids)) {
+                ids.forEach(this::deregisterConsulService);
+                if (LOGGER.isInfoEnabled(appName)) {
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
+                            config.getInterfaceId(), ids.size()));
                 }
             }
+        } catch (Exception e) {
+            if (!RpcRunningState.isShuttingDown()) {
+                throw new SofaRpcRuntimeException("Failed to unregister provider to consulRegistry!", e);
+            }
         }
-
     }
 
     @Override
     public void batchUnRegister(List<ProviderConfig> configs) {
-
-        for (ProviderConfig providerConfig : configs) {
-            unRegister(providerConfig);
-        }
+        configs.forEach(this::unRegister);
     }
 
     @Override
     public List<ProviderGroup> subscribe(ConsumerConfig config) {
-
         String appName = config.getAppName();
         if (!registryConfig.isSubscribe()) {
             // 注册中心不订阅
@@ -308,235 +237,151 @@ public class ConsulRegistry extends Registry {
             }
             return null;
         }
-        // 注册Consumer节点
-        if (config.isRegister()) {
-            try {
-
-                String url = ConsulRegistryHelper.convertConsumerToUrl(config);
-                ConsulURL consulURL = ConsulURL.valueOf(url);
-
-                Iterator<Map.Entry<String, Map<String, List<ConsulURL>>>> it = serviceCache.asMap().entrySet()
-                    .iterator();
-
-                Set<ProviderInfo> result = new HashSet<ProviderInfo>();
-
-                List<ConsulURL> matchConsulUrls = new ArrayList<ConsulURL>();
-                // find all providerInfos
-                while (it.hasNext()) {
-                    Map.Entry<String, Map<String, List<ConsulURL>>> entry = it.next();
-                    Collection<List<ConsulURL>> consulURLList = entry.getValue().values();
-
-                    List<ProviderInfo> matchProviders = new ArrayList<ProviderInfo>();
-                    for (List<ConsulURL> next : consulURLList) {
-                        matchConsulUrls.addAll(next);
-                        matchProviders.addAll(ConsulRegistryHelper.convertUrl2ProviderInfos(next));
-                    }
-                    result.addAll(ConsulRegistryHelper.matchProviderInfos(config, matchProviders));
-                }
-
-                NotifyConsumerListener listener = new NotifyConsumerListener(consulURL, matchConsulUrls);
-
-                consumerUrls.put(config, url);
-
-                Pair<ConsulURL, Set<NotifyListener>> listenersPair =
-                        notifyServiceListeners.get(consulURL.getServiceKey());
-
-                if (listenersPair == null) {
-                    Set<NotifyListener> listeners = Sets.newConcurrentHashSet();
-                    listeners.add(listener);
-                    listenersPair =
-                            new ImmutablePair<ConsulURL, Set<NotifyListener>>(consulURL, listeners);
-                } else {
-                    listenersPair.getValue().add(listener);
-                }
-
-                if (notifyServiceListeners.get(consulURL.getServiceKey()) == null) {
-                    notifyServiceListeners.put(consulURL.getServiceKey(), listenersPair);
-                }
-                if (!serviceGroupLookUped.contains(consulURL.getGroup())) {
-                    serviceGroupLookUped.add(consulURL.getGroup());
-                    ServiceLookUper serviceLookUper = new ServiceLookUper(consulURL.getGroup());
-                    serviceLookUper.setDaemon(true);
-                    serviceLookUper.start();
-                    ConsulEphemeralNode ephemralNode = this.buildEphemralNode(consulURL, ThrallRoleType.CONSUMER);
-                    consulManager.registerEphemralNode(ephemralNode);
-                } else {
-                    notifyListener(consulURL, listener);
-                }
-
-                if (EventBus.isEnable(ConsumerSubEvent.class)) {
-                    ConsumerSubEvent event = new ConsumerSubEvent(config);
-                    EventBus.post(event);
-                }
-
-                return Collections.singletonList(new ProviderGroup().addAll(result));
-            } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to register consumer to consulRegistry!", e);
-            }
+        if (!config.isSubscribe()) {
+            return null;
         }
-        return null;
+        try {
+            List<ProviderInfo> providers = lookupHealthService(config);
+
+            if (EventBus.isEnable(ConsumerSubEvent.class)) {
+                ConsumerSubEvent event = new ConsumerSubEvent(config);
+                EventBus.post(event);
+            }
+
+            return Collections.singletonList(new ProviderGroup().addAll(providers));
+        } catch (Exception e) {
+            throw new SofaRpcRuntimeException("Failed to subscribe provider from consulRegistry!", e);
+        }
     }
 
     @Override
     public void unSubscribe(ConsumerConfig config) {
-
         String appName = config.getAppName();
         if (!registryConfig.isSubscribe()) {
             // 注册中心不订阅
             if (LOGGER.isInfoEnabled(appName)) {
-                LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
+                LOGGER.infoWithApp(config.getAppName(), LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
         }
 
-        // 注册Consumer节点
-        if (config.isRegister()) {
-            // 向服务器端发送取消订阅请求
-            String url = ConsulRegistryHelper.convertConsumerToUrl(config);
-            ConsulURL consulURL = ConsulURL.valueOf(url);
-            consumerUrls.remove(config);
-            notifyServiceListeners.remove(consulURL.getServiceKey());
-
+        if (!config.isSubscribe()) {
+            return;
         }
-
+        String uniqueName = buildUniqueName(config, config.getProtocol());
+        HealthServiceInformer informer = healthServiceInformers.get(uniqueName);
+        if (informer == null) {
+            return;
+        }
+        informer.removeListener(config.getProviderInfoListener());
+        if (informer.getListenerSize() == 0) {
+            healthServiceInformers.remove(uniqueName);
+            informer.shutdown();
+        }
     }
 
     @Override
     public void batchUnSubscribe(List<ConsumerConfig> configs) {
+        configs.forEach(this::unSubscribe);
+    }
 
-        for (ConsumerConfig consumerConfig : configs) {
-            unSubscribe(consumerConfig);
+    private List<ProviderInfo> lookupHealthService(ConsumerConfig config) {
+        String uniqueName = buildUniqueName(config, config.getProtocol());
+        String serviceName = buildServiceName(config);
+        String informerKey = String.join("-", serviceName, uniqueName);
+        HealthServiceInformer informer = healthServiceInformers.get(informerKey);
+        if (informer == null) {
+            informer = new HealthServiceInformer(serviceName, uniqueName, consulClient, properties);
+            informer.init();
+            healthServiceInformers.put(informerKey, informer);
+        }
+        informer.addListener(config.getProviderInfoListener());
+        return informer.currentProviders();
+    }
+
+    private void deregisterConsulService(String id) {
+        consulClient.agentServiceDeregister(id);
+        ScheduledFuture future = heartbeatFutures.remove(id);
+        if (future != null) {
+            future.cancel(true);
         }
     }
 
-    private void notifyListener(ConsulURL url, NotifyListener listener) {
-        Map<String, List<ConsulURL>> groupCacheUrls = serviceCache.getIfPresent(url.getGroup());
-        if (groupCacheUrls != null) {
-            for (Map.Entry<String, List<ConsulURL>> entry : groupCacheUrls.entrySet()) {
-                String cacheServiceKey = entry.getKey();
-                if (url.getServiceKey().equals(cacheServiceKey)) {
-                    List<ConsulURL> newUrls = entry.getValue();
-                    ConsulRegistry.this.notify(url, listener, newUrls);
-                }
+    private void registerConsulService(NewService service) {
+        consulClient.agentServiceRegister(service);
+        if (service.getCheck().getTtl() != null) {
+            ScheduledFuture<?> scheduledFuture =
+                    heartbeatExecutor.scheduleAtFixedRate(
+                            () -> checkPass(service),
+                            0, properties.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
+
+            // multiple heartbeat use the same service id, remove and cancel the old one, or still use it?
+            ScheduledFuture oldFuture = heartbeatFutures.remove(service.getId());
+            if (oldFuture != null) {
+                oldFuture.cancel(true);
             }
+            heartbeatFutures.put(service.getId(), scheduledFuture);
         }
     }
 
-    protected void notify(final ConsulURL url, final NotifyListener listener,
-                          final List<ConsulURL> urls) {
-        if (url == null) {
-            throw new IllegalArgumentException("notify url == null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("notify listener == null");
-        }
+    private void checkPass(NewService service) {
         try {
-
-            notifyExecutor.submit(new Runnable() {
-
-                @Override
-                public void run() {
-                    listener.notify(url, urls);
-                }
-            });
-        } catch (Exception t) {
-            // 将失败的通知请求记录到失败列表，定时重试
-            LOGGER.error(
-                "Failed to notify for subscribe " + url + ", waiting for retry, cause: " + t.getMessage(),
-                t);
-        }
-    }
-
-    private Map<String, List<ConsulURL>> lookupServiceUpdate(String group) {
-        Long lastConsulIndexId =
-                lookupGroupServices.get(group) == null ? Long.valueOf(0L) : lookupGroupServices.get(group);
-        String serviceName = ConsulURLUtils.toServiceName(group);
-        ConsulServiceResp consulResp = consulManager.lookupHealthService(serviceName, lastConsulIndexId);
-        if (consulResp != null) {
-            List<ConsulService> consulServcies = consulResp.getConsulServices();
-            boolean updated = consulServcies != null && !consulServcies.isEmpty()
-                && consulResp.getConsulIndex() > lastConsulIndexId;
-            if (updated) {
-                Map<String, List<ConsulURL>> groupProviderUrls = Maps.newConcurrentMap();
-                for (ConsulService service : consulServcies) {
-                    ConsulURL providerUrl = buildURL(service);
-                    String serviceKey = providerUrl.getServiceKey();
-                    List<ConsulURL> urlList = groupProviderUrls.get(serviceKey);
-                    if (urlList == null) {
-                        urlList = Lists.newArrayList();
-                        groupProviderUrls.put(serviceKey, urlList);
-                    }
-                    urlList.add(providerUrl);
-                }
-                lookupGroupServices.put(group, consulResp.getConsulIndex());
-                return groupProviderUrls;
-            }
-        }
-        return null;
-    }
-
-    private ConsulURL buildURL(ConsulService service) {
-        try {
-            for (String tag : service.getTags()) {
-                if (org.apache.commons.lang3.StringUtils.indexOf(tag, ConsulConstants.PROVIDERS_CATEGORY) != -1) {
-                    String toUrlPath = org.apache.commons.lang3.StringUtils.substringAfter(tag,
-                        ConsulConstants.PROVIDERS_CATEGORY);
-                    ConsulURL consulUrl = ConsulURL.valueOf(ConsulURL.decode(toUrlPath));
-                    return consulUrl;
-                }
-            }
+            consulClient.agentCheckPass("service:" + service.getId(), "TTL check passing by SOFA RPC");
         } catch (Exception e) {
-            LOGGER.error("convert consul service to url fail! service:" + service, e);
+            LOGGER.error("Consul check pass failed.", e);
         }
-        return null;
     }
 
-    private class ServiceLookUper extends Thread {
-
-        private final String group;
-
-        public ServiceLookUper(String group) {
-            this.group = group;
+    private List<NewService> buildNewServices(ProviderConfig<?> config) {
+        List<ServerConfig> servers = config.getServer();
+        if (CommonUtils.isEmpty(servers)) {
+            return Collections.emptyList();
         }
+        return servers.stream().map(server -> {
+            NewService service = new NewService();
+            service.setId(buildServiceId(config, server));
+            service.setName(buildServiceName(config));
 
-        @Override
-        public void run() {
-            while (true) {
-                try {
-                    // 最新拉取的值
-                    Map<String, List<ConsulURL>> groupNewUrls = lookupServiceUpdate(group);
-                    if (groupNewUrls != null && !groupNewUrls.isEmpty()) {
-                        // 缓存中的值
-                        Map<String, List<ConsulURL>> groupCacheUrls = serviceCache.getIfPresent(group);
-                        if (groupCacheUrls == null) {
-                            groupCacheUrls = Maps.newConcurrentMap();
-                            serviceCache.put(group, groupCacheUrls);
-                        }
-                        for (Map.Entry<String, List<ConsulURL>> entry : groupNewUrls.entrySet()) {
-                            List<ConsulURL> oldUrls = groupCacheUrls.get(entry.getKey());
-                            List<ConsulURL> newUrls = entry.getValue();
-                            boolean isSame = CommonUtils.listEquals(newUrls, oldUrls);
-                            if (!isSame) {
-                                groupCacheUrls.put(entry.getKey(), newUrls);
-                                Pair<ConsulURL, Set<NotifyListener>> listenerPair =
-                                        notifyServiceListeners.get(entry.getKey());
-                                if (listenerPair != null) {
-                                    ConsulURL subscribeUrl = listenerPair.getKey();
-                                    Set<NotifyListener> listeners = listenerPair.getValue();
-                                    for (NotifyListener listener : listeners) {
-                                        ConsulRegistry.this.notify(subscribeUrl, listener, newUrls);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    sleep(ConsulConstants.DEFAULT_LOOKUP_INTERVAL);
-                } catch (Throwable e) {
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ignored) {
-                    }
-                }
+            String host = getServerHost(server);
+            int port = server.getPort();
+            service.setAddress(host);
+            service.setPort(port);
+
+            Map<String, String> metaData = RegistryUtils.convertProviderToMap(config, server).entrySet().stream()
+                    .filter(e -> ConsulUtils.isValidMetaKey(e.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+            service.setMeta(metaData);
+            service.setTags(Collections.singletonList(buildUniqueName(config, server.getProtocol())));
+
+            service.setCheck(buildCheck(host, port));
+            return service;
+        }).collect(Collectors.toList());
+    }
+
+    private NewService.Check buildCheck(String serverHost, int serverPort) {
+        NewService.Check check = new NewService.Check();
+        ConsulRegistryProperties.HealthCheckType healthCheckType = properties.getHealthCheckType();
+        if (healthCheckType == ConsulRegistryProperties.HealthCheckType.TTL) {
+            check.setTtl(properties.getHealthCheckTTL());
+        } else if (healthCheckType == ConsulRegistryProperties.HealthCheckType.TCP) {
+            String host = properties.getHealthCheckHost(serverHost);
+            int port = properties.getHealthCheckPort(serverPort);
+            check.setTcp(host + ":" + port);
+            check.setInterval(properties.getHealthCheckInterval());
+            check.setTimeout(properties.getHealthCheckTimeout());
+        } else {
+            String host = properties.getHealthCheckHost(serverHost);
+            int port = properties.getHealthCheckPort(serverPort);
+            String address;
+            try {
+                address = new URL(properties.getHealthCheckProtocol(), host, port, properties.getHealthCheckPath()).toString();
+            } catch (Exception e) {
+                throw new SofaRpcRuntimeException("Invalid health check url!", e);
             }
+            check.setHttp(address);
+            check.setMethod(properties.getHealthCheckMethod());
+            check.setInterval(properties.getHealthCheckInterval());
+            check.setTimeout(properties.getHealthCheckTimeout());
         }
+        return check;
     }
 }

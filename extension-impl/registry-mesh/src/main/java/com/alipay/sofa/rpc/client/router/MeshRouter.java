@@ -73,10 +73,7 @@ public class MeshRouter extends Router {
                 }
             }
         }
-
-        boolean isBolt = consumerConfig.getProtocol().equalsIgnoreCase(RpcConstants.PROTOCOL_TYPE_BOLT);
-
-        return !isDirect && isMesh && isBolt;
+        return !isDirect && isMesh;
     }
 
     @Override

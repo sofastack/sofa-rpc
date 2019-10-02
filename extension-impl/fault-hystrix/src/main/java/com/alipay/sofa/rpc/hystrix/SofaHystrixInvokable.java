@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.hystrix;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 
 /**
- * Basic interface for {@link SofaHystrixCommand} and {@link SofaHystrixObservableCommand}
+ * Basic interface for {@link SofaHystrixCommand} and {@link SofaAsyncHystrixCommand}
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */

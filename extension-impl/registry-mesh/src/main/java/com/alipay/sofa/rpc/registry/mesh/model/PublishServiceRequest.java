@@ -17,14 +17,20 @@
 package com.alipay.sofa.rpc.registry.mesh.model;
 
 /**
- * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
+ * @author bystander
+ * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class PublishServiceRequest {
 
     private String           serviceName;
 
+    //这个值是类似DEFAULT/XFIRE这种，也有可能是tr
+    private String           protocolType;
+
     //timeout/appName/serialize/p
     private ProviderMetaInfo providerMetaInfo;
+
+    private boolean          onlyPublishInCloud;
 
     public String getServiceName() {
         return serviceName;
@@ -42,11 +48,29 @@ public class PublishServiceRequest {
         this.providerMetaInfo = providerMetaInfo;
     }
 
+    public String getProtocolType() {
+        return protocolType;
+    }
+
+    public void setProtocolType(String protocolType) {
+        this.protocolType = protocolType;
+    }
+
+    public boolean isOnlyPublishInCloud() {
+        return onlyPublishInCloud;
+    }
+
+    public void setOnlyPublishInCloud(boolean onlyPublishInCloud) {
+        this.onlyPublishInCloud = onlyPublishInCloud;
+    }
+
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("PublishServiceRequest{");
+        final StringBuffer sb = new StringBuffer("PublishServiceRequest{");
         sb.append("serviceName='").append(serviceName).append('\'');
+        sb.append(", protocolType='").append(protocolType).append('\'');
         sb.append(", providerMetaInfo=").append(providerMetaInfo);
+        sb.append(", onlyPublishInCloud=").append(onlyPublishInCloud);
         sb.append('}');
         return sb.toString();
     }
