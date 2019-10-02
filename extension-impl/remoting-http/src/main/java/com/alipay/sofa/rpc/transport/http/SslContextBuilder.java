@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.transport.http;
 
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-
 import io.netty.handler.codec.http2.Http2SecurityUtil;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
@@ -27,7 +26,6 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.SupportedCipherSuiteFilter;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
 
 /**
  *
@@ -38,34 +36,29 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 public class SslContextBuilder {
 
     public static final boolean SSL = System.getProperty("ssl") != null;
+    public static final String CERTIFICATE_PATH = System.getProperty("certificate_path");
+    public static final String PRIVATE_KEY_PATH = System.getProperty("private_key_path");
 
     public static SslContext build() {
         // Configure SSL.
         SslContext sslCtx;
         try {
             if (SSL) {
-                // TODO need openssl 1.1.0+
                 SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
-                SelfSignedCertificate ssc = new SelfSignedCertificate();
-                sslCtx = io.netty.handler.ssl.SslContextBuilder
-                    .forServer(ssc.certificate(), ssc.privateKey())
+                SelfSignedCer ssc = new SelfSignedCer(CERTIFICATE_PATH, PRIVATE_KEY_PATH);
+                sslCtx = io.netty.handler.ssl.SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
                     .sslProvider(provider)
-                    /*
-                     * NOTE: the cipher filter may not include all ciphers required by the HTTP/2
-                     * specification. Please refer to the HTTP/2 specification for cipher
-                     * requirements.
-                     */
+                    /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
+                     * Please refer to the HTTP/2 specification for cipher requirements. */
                     .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
-                    .applicationProtocolConfig(
-                        new ApplicationProtocolConfig(
-                            ApplicationProtocolConfig.Protocol.ALPN,
-                            // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK
-                            // providers.
-                            ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
-                            // ACCEPT is currently the only mode supported by both OpenSsl and JDK
-                            // providers.
-                            ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
-                            ApplicationProtocolNames.HTTP_2, ApplicationProtocolNames.HTTP_1_1))
+                    .applicationProtocolConfig(new ApplicationProtocolConfig(
+                        ApplicationProtocolConfig.Protocol.ALPN,
+                        // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                        ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                        // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                        ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                        ApplicationProtocolNames.HTTP_2,
+                        ApplicationProtocolNames.HTTP_1_1))
                     .build();
             } else {
                 sslCtx = null;
@@ -82,26 +75,22 @@ public class SslContextBuilder {
         try {
             if (SSL) {
                 SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
-                sslCtx = io.netty.handler.ssl.SslContextBuilder
-                    .forClient()
+                sslCtx = io.netty.handler.ssl.SslContextBuilder.forClient()
                     .sslProvider(provider)
-                    /*
-                     * NOTE: the cipher filter may not include all ciphers required by the HTTP/2
+                    /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2
                      * specification. Please refer to the HTTP/2 specification for cipher
-                     * requirements.
-                     */
+                     * requirements.*/
                     .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
                     .trustManager(InsecureTrustManagerFactory.INSTANCE)
                     .applicationProtocolConfig(
                         new ApplicationProtocolConfig(
                             ApplicationProtocolConfig.Protocol.ALPN,
-                            // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK
-                            // providers.
-                            ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
-                            // ACCEPT is currently the only mode supported by both OpenSsl and JDK
-                            // providers.
-                            ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
-                            ApplicationProtocolNames.HTTP_2, ApplicationProtocolNames.HTTP_1_1))
+                        // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                        ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                        // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                        ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                        ApplicationProtocolNames.HTTP_2,
+                        ApplicationProtocolNames.HTTP_1_1))
                     .build();
             } else {
                 sslCtx = null;
