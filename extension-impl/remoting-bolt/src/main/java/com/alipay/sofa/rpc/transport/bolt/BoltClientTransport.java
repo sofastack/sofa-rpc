@@ -424,7 +424,7 @@ public class BoltClientTransport extends ClientTransport {
     @Override
     public InetSocketAddress localAddress() {
         Connection connection = fetchConnection();
-        return connection == null ? null : connection.getRemoteAddress();
+        return connection == null ? null : connection.getLocalAddress();
     }
 
     protected void checkConnection() throws SofaRpcException {

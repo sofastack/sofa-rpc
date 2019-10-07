@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.event.LookoutSubscriber;
 import com.alipay.sofa.rpc.event.ProviderPubEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
+import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 
 /**
@@ -50,6 +51,7 @@ public class LookoutModule implements Module {
         EventBus.register(ClientEndInvokeEvent.class, subscriber);
         EventBus.register(ServerSendEvent.class, subscriber);
         EventBus.register(ServerStartedEvent.class, subscriber);
+        EventBus.register(ServerStoppedEvent.class, subscriber);
         EventBus.register(ProviderPubEvent.class, subscriber);
         EventBus.register(ConsumerSubEvent.class, subscriber);
 
@@ -61,6 +63,7 @@ public class LookoutModule implements Module {
             EventBus.unRegister(ClientEndInvokeEvent.class, subscriber);
             EventBus.unRegister(ServerSendEvent.class, subscriber);
             EventBus.unRegister(ServerStartedEvent.class, subscriber);
+            EventBus.unRegister(ServerStoppedEvent.class, subscriber);
             EventBus.unRegister(ProviderPubEvent.class, subscriber);
             EventBus.unRegister(ConsumerSubEvent.class, subscriber);
         }

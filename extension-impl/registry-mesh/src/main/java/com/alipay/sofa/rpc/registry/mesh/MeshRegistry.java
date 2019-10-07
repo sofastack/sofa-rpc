@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.registry.mesh;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -248,6 +247,8 @@ public class MeshRegistry extends Registry {
     @Override
     public List<ProviderGroup> subscribe(final ConsumerConfig config) {
 
+        final ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
+
         asyncCreateConnectionExecutor.execute(new Runnable() {
             @Override
             public void run() {
@@ -271,7 +272,7 @@ public class MeshRegistry extends Registry {
 
                 String url = fillProtocolAndVersion(subscribeServiceResult, client.getHost(), "", config.getProtocol());
 
-                ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
+                ProviderInfo providerInfo = SofaRegistryHelper.parseProviderInfo(url);
                 providerInfos.add(providerInfo);
                 providerGroup.setProviderInfos(providerInfos);
 
@@ -282,7 +283,6 @@ public class MeshRegistry extends Registry {
                     EventBus.post(event);
                 }
 
-                final ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
                 if (providerInfoListener != null) {
                     providerInfoListener.updateAllProviders(providerGroups);
                 }
