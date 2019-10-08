@@ -36,7 +36,7 @@
 
   /*-------------Consumer相关配置开始-------------*/
   //默认consumer连provider超时时间
-  "consumer.connect.timeout": 3000,
+  "consumer.connect.timeout": 1000,
   //默认consumer断开时等待结果的超时时间
   "consumer.disconnect.timeout": 5000,
   // 默认consumer调用provider超时时间
