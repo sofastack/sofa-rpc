@@ -186,7 +186,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // 默认长连接数
   "consumer.connection.num": 1,
   // 默认consumer连provider超时时间
-  "consumer.connect.timeout": 5000,
+  "consumer.connect.timeout": 1000,
   // 默认consumer断开时等待结果的超时时间
   "consumer.disconnect.timeout": 10000,
   // 默认consumer调用provider超时时间
