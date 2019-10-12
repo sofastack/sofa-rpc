@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.transport.http;
 
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+
 import io.netty.handler.codec.http2.Http2SecurityUtil;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
@@ -36,8 +37,10 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 public class SslContextBuilder {
 
     public static final boolean SSL = System.getProperty("ssl") != null;
-    public static final String CERTIFICATE_PATH = System.getProperty("certificate_path");
-    public static final String PRIVATE_KEY_PATH = System.getProperty("private_key_path");
+    public static final String ProPerty_CERTIFICATE_PATH = "certificate_path";
+    public static final String ProPerty_PRIVATE_KEY_PATH = "private_key_path";
+    public static final String CERTIFICATE_PATH = System.getProperty(ProPerty_CERTIFICATE_PATH);
+    public static final String PRIVATE_KEY_PATH = System.getProperty(ProPerty_PRIVATE_KEY_PATH);
 
     public static SslContext build() {
         // Configure SSL.

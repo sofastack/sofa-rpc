@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.http2;
 
+import com.alipay.sofa.rpc.common.utils.ReflectUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
@@ -37,6 +38,11 @@ public class Http2WithSSLClientMain {
     private final static Logger LOGGER = LoggerFactory.getLogger(Http2WithSSLClientMain.class);
 
     public static void main(String[] args) {
+        System.setProperty("ssl", "true");
+        System.setProperty("io.netty.handler.ssl.noOpenSsl", "false");
+        String codebase = ReflectUtils.getCodeBase(Http2WithSSLClientMain.class);
+        System.setProperty("certificate_path", codebase + "selfSigned.crt");
+
         ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
 
         ConsumerConfig<ProtoService> consumerConfig = new ConsumerConfig<ProtoService>().setApplication(application)
