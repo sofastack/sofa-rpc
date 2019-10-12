@@ -36,10 +36,10 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 public class SslContextBuilder {
 
     public static final boolean SSL = System.getProperty("ssl") != null;
-    public static final String ProPerty_CERTIFICATE_PATH = "CERTIFICATE_PATH";
-    public static final String ProPerty_PRIVATE_KEY_PATH = "PRIVATE_KEY_PATH";
-    public static final String CERTIFICATE_PATH = System.getProperty(ProPerty_CERTIFICATE_PATH);
-    public static final String PRIVATE_KEY_PATH = System.getProperty(ProPerty_PRIVATE_KEY_PATH);
+    public static final String PROPERTY_CERTIFICATE_PATH = "certificate_path";
+    public static final String PROPERTY_PRIVATE_KEY_PATH = "private_key_path";
+    public static final String CERTIFICATE_PATH = System.getProperty(PROPERTY_CERTIFICATE_PATH);
+    public static final String PRIVATE_KEY_PATH = System.getProperty(PROPERTY_PRIVATE_KEY_PATH);
 
     public static SslContext build() {
         // Configure SSL.
