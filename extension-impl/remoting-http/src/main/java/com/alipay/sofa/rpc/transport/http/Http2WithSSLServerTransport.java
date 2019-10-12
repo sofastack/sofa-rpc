@@ -22,8 +22,8 @@ import com.alipay.sofa.rpc.transport.ServerTransportConfig;
 /**
  * Http2WithSSL Server Transport
  * 
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
- * @since 5.4.0
+ * @author <a href="mailto:466178395@qq.com">LiHao</a>
+ * @since 5.6.2
  */
 @Extension("h2")
 public class Http2WithSSLServerTransport extends AbstractHttp2ServerTransport {

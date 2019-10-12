@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.http2;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.alipay.sofa.rpc.common.utils.ReflectUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -42,6 +43,13 @@ public class Http2WithSSLServerMain {
     private final static Logger LOGGER = LoggerFactory.getLogger(Http2WithSSLServerMain.class);
 
     public static void main(String[] args) {
+
+        System.setProperty("ssl", "true");
+        System.setProperty("io.netty.handler.ssl.noOpenSsl", "false");
+        String codebase = ReflectUtils.getCodeBase(Http2WithSSLServerMain.class);
+        System.setProperty("certificate_path", codebase + "selfSigned.crt");
+        System.setProperty("private_key_path", codebase + "privatekey.key");
+
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
         ServerConfig serverConfig = new ServerConfig().setProtocol("h2").setPort(12300).setDaemon(false);
