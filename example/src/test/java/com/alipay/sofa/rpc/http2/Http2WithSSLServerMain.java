@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.protobuf.ProtoServiceImpl;
 import com.alipay.sofa.rpc.server.http.Http2WithSSLServer;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import com.alipay.sofa.rpc.transport.http.SslContextBuilder;
 
 /**
  *
@@ -47,8 +48,8 @@ public class Http2WithSSLServerMain {
         System.setProperty("ssl", "true");
         System.setProperty("io.netty.handler.ssl.noOpenSsl", "false");
         String codebase = ReflectUtils.getCodeBase(Http2WithSSLServerMain.class);
-        System.setProperty("certificate_path", codebase + "selfSigned.crt");
-        System.setProperty("private_key_path", codebase + "privatekey.key");
+        System.setProperty(SslContextBuilder.PROPERTY_CERTIFICATE_PATH, codebase + "selfSigned.crt");
+        System.setProperty(SslContextBuilder.PROPERTY_PRIVATE_KEY_PATH, codebase + "privatekey.key");
 
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 

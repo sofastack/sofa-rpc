@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.protobuf.EchoRequest;
 import com.alipay.sofa.rpc.protobuf.EchoResponse;
 import com.alipay.sofa.rpc.protobuf.Group;
 import com.alipay.sofa.rpc.protobuf.ProtoService;
+import com.alipay.sofa.rpc.transport.http.SslContextBuilder;
 
 /**
  *
@@ -41,7 +42,7 @@ public class Http2WithSSLClientMain {
         System.setProperty("ssl", "true");
         System.setProperty("io.netty.handler.ssl.noOpenSsl", "false");
         String codebase = ReflectUtils.getCodeBase(Http2WithSSLClientMain.class);
-        System.setProperty("certificate_path", codebase + "selfSigned.crt");
+        System.setProperty(SslContextBuilder.PROPERTY_CERTIFICATE_PATH, codebase + "selfSigned.crt");
 
         ApplicationConfig application = new ApplicationConfig().setAppName("test-client");
 

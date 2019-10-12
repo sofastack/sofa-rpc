@@ -35,11 +35,11 @@ import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 @Unstable
 public class SslContextBuilder {
 
-    public static final boolean SSL = System.getProperty("ssl") != null;
-    public static final String PROPERTY_CERTIFICATE_PATH = "certificate_path";
-    public static final String PROPERTY_PRIVATE_KEY_PATH = "private_key_path";
-    public static final String CERTIFICATE_PATH = System.getProperty(PROPERTY_CERTIFICATE_PATH);
-    public static final String PRIVATE_KEY_PATH = System.getProperty(PROPERTY_PRIVATE_KEY_PATH);
+    public static final boolean SSL                       = System.getProperty("ssl") != null;
+    public static final String  PROPERTY_CERTIFICATE_PATH = "certificate_path";
+    public static final String  PROPERTY_PRIVATE_KEY_PATH = "private_key_path";
+    public static final String  CERTIFICATE_PATH          = System.getProperty(PROPERTY_CERTIFICATE_PATH);
+    public static final String  PRIVATE_KEY_PATH          = System.getProperty(PROPERTY_PRIVATE_KEY_PATH);
 
     public static SslContext build() {
         // Configure SSL.
@@ -87,12 +87,12 @@ public class SslContextBuilder {
                     .applicationProtocolConfig(
                         new ApplicationProtocolConfig(
                             ApplicationProtocolConfig.Protocol.ALPN,
-                        // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
-                        ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
-                        // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
-                        ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
-                        ApplicationProtocolNames.HTTP_2,
-                        ApplicationProtocolNames.HTTP_1_1))
+                            // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                            ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                            // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                            ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                            ApplicationProtocolNames.HTTP_2,
+                            ApplicationProtocolNames.HTTP_1_1))
                     .build();
             } else {
                 sslCtx = null;
