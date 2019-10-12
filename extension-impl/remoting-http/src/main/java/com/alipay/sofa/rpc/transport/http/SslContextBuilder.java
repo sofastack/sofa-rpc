@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.transport.http;
 
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-
 import io.netty.handler.codec.http2.Http2SecurityUtil;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
