@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.codec.msgpack;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
-import com.alipay.sofa.rpc.codec.common.StringSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -30,7 +29,6 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import java.io.IOException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -38,8 +36,8 @@ import java.util.Set;
 import org.msgpack.MessagePack;
 
 /**
- * @author: wengdezhi
- * @create: 2019/10/12 18:04
+ * @author leyou240
+ * @create 2019/10/12 18:04
  */
 @Extension(value = "msgpack", code = 13)
 public class MsgPackSerializer extends AbstractSerializer {
@@ -74,7 +72,8 @@ public class MsgPackSerializer extends AbstractSerializer {
     }
 
     /**
-     *  注册class到messagePack
+     * 注册class到messagePack
+     *
      * @param clazz
      */
     private void registerClass(Class<?> clazz) {
@@ -94,13 +93,12 @@ public class MsgPackSerializer extends AbstractSerializer {
         } else if (data.readableBytes() <= 0) {
             try {
                 result = clazz.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
+            } catch (InstantiationException | IllegalAccessException e) {
+                throw buildDeserializeError(e.getMessage());
             }
             return result;
         } else if (helper.isJavaClass(clazz)) {
+            //jdk原始类型
             try {
                 return messagePack.read(data.array(), clazz);
             } catch (IOException e) {
@@ -201,7 +199,7 @@ public class MsgPackSerializer extends AbstractSerializer {
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,
                                     SofaRequest sofaRequest) {
-        Map<String, String> traceMap = new HashMap<String, String>(8);
+        Map<String, String> traceMap = new HashMap<>(8);
         CodecUtils.treeCopyTo(key + ".", headerMap, traceMap, true);
         if (!traceMap.isEmpty()) {
             sofaRequest.addRequestProp(key, traceMap);
