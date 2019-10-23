@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.codec.msgpack;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -30,7 +31,6 @@ import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.msgpack.MessagePack;
@@ -43,7 +43,7 @@ import org.msgpack.MessagePack;
 public class MsgPackSerializer extends AbstractSerializer {
     private final MessagePack messagePack = new MessagePack();
     private final MsgPackHelper helper = new MsgPackHelper();
-    private final Set<Class<?>> registerSet = new HashSet<>();
+    private final Set<Class<?>> registerSet = new ConcurrentHashSet<>();
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
