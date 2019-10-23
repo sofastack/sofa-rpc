@@ -1,2 +1,3 @@
 http=com.alipay.sofa.rpc.server.http.Http1Server
 h2c=com.alipay.sofa.rpc.server.http.Http2ClearTextServer
+h2=com.alipay.sofa.rpc.server.http.Http2WithSSLServer
