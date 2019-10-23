@@ -12,8 +12,7 @@
     <properties>
         <javassist.version>3.20.0-GA</javassist.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
-
-        <netty.version>4.1.40.Final</netty.version>
+        <netty.version>4.1.42.Final</netty.version>
         <!-- 3rd extends libs -->
         <servlet.version>2.5</servlet.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
