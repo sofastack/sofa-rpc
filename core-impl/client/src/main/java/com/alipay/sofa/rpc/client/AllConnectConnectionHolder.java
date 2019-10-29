@@ -108,7 +108,12 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 客户端变化provider的锁
      */
-    private Lock                                           providerLock             = new ReentrantLock();
+    protected Lock                                         providerLock             = new ReentrantLock();
+
+    /**
+     * class object
+     */
+    protected final Object                                 lock                     = new Object();
 
     /**
      * Gets retry connections.
@@ -533,7 +538,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         transport = uninitializedConnections.get(providerInfo);
         if (transport != null) {
             // 未初始化则初始化
-            synchronized (this) {
+            synchronized (lock) {
                 transport = uninitializedConnections.get(providerInfo);
                 if (transport != null) {
                     initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
