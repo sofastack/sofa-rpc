@@ -253,6 +253,14 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     Object sofaRequest = ClassUtils.forName(requestCommand.getRequestClass()).newInstance();
                     rpcSerializer.decode(new ByteArrayWrapperByteBuf(requestCommand.getContent()),
                         sofaRequest, headerMap);
+
+                    //for service mesh or other scene, we need to add more info from header
+                    if (sofaRequest instanceof SofaRequest) {
+                        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                            ((SofaRequest) sofaRequest).addRequestProp(entry.getKey(), entry.getValue());
+                        }
+                    }
+
                     requestCommand.setRequestObject(sofaRequest);
                 } finally {
                     Thread.currentThread().setContextClassLoader(oldClassLoader);
