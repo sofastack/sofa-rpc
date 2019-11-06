@@ -355,10 +355,12 @@ public abstract class AbstractCluster extends Cluster {
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
 
         //保存一下原始地址,为了打印
-        List<ProviderInfo> orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
+        List<ProviderInfo> orginalProviderInfos;
 
         if (CommonUtils.isEmpty(providerInfos)) {
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
+        } else {
+            orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
         }
         if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
             providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
