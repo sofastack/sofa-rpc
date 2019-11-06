@@ -541,7 +541,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                         providerInfo);
                 }
                 if (transport != null) {
-                    ClientTransportFactory.releaseTransport(transport, consumerConfig.getDisconnectTimeout());
+                    releaseTransport(transport);
                 }
             } catch (Exception e) {
                 LOGGER.errorWithApp(appName, "Remove provider of " + consumerConfig.getInterfaceId() + ": " +
