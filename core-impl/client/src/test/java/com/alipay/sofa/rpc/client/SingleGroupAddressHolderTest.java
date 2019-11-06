@@ -286,36 +286,4 @@ public class SingleGroupAddressHolderTest {
         }
         Assert.assertFalse(error.get());
     }
-
-    @Test
-    public void testReversedRelation() throws Exception {
-        SingleGroupAddressHolder addressHolder = new SingleGroupAddressHolder(null);
-        Assert.assertTrue(ProviderHelper.isEmpty(addressHolder.getProviderGroup(null)));
-        Assert.assertTrue(ProviderHelper.isEmpty(addressHolder.getProviderGroup(StringUtils.EMPTY)));
-        Assert.assertTrue(ProviderHelper.isEmpty(addressHolder.getProviderGroup(ADDRESS_DEFAULT_GROUP)));
-
-        final ProviderInfo providerInfo = ProviderHelper.toProviderInfo("127.0.0.1:12200");
-        ProviderGroup providerGroup = new ProviderGroup("xxx");
-        providerGroup.add(providerInfo);
-        addressHolder.addProvider(providerGroup);
-
-
-        String groupName = addressHolder.fetchGroupName(providerInfo);
-
-        Assert.assertEquals("xxx", groupName);
-
-        addressHolder.removeProvider(providerGroup);
-
-        groupName = addressHolder.fetchGroupName(providerInfo);
-
-        Assert.assertEquals("", groupName);
-
-
-        final ArrayList<ProviderGroup> providerGroups = new ArrayList<>();
-        providerGroups.add(providerGroup);
-        addressHolder.updateAllProviders(providerGroups);
-        groupName = addressHolder.fetchGroupName(providerInfo);
-        Assert.assertEquals("xxx", groupName);
-
-    }
 }
