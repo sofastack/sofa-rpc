@@ -58,11 +58,6 @@ public class TestAddressHolder extends AddressHolder {
     }
 
     @Override
-    public String fetchGroupName(ProviderInfo providerInfo) {
-        return null;
-    }
-
-    @Override
     public void addProvider(ProviderGroup providerGroup) {
 
     }

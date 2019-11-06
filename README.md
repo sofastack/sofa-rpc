@@ -1,6 +1,6 @@
 # SOFARPC
 
-[![Build Status](https://travis-ci.org/sofastack/sofa-rpc.svg?branch=master)](https://travis-ci.org/sofastack/sofa-rpc)
+[![Build Status](https://travis-ci.com/sofastack/sofa-rpc.svg?branch=master)](https://travis-ci.com/sofastack/sofa-rpc)
 [![Coverage Status](https://codecov.io/gh/sofastack/sofa-rpc/branch/master/graph/badge.svg)](https://codecov.io/gh/sofastack/sofa-rpc)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
 [![Maven](https://img.shields.io/github/release/sofastack/sofa-rpc.svg)](https://github.com/sofastack/sofa-rpc/releases)
@@ -48,7 +48,7 @@ Runtime requirement: JDK 8 or above.
 
 - **DingTalk Group**
 
-  <img src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*VEttSbQSXzUAAAAAAAAAAABjARQnAQ"  height="300" width="300">
+  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*QkNdTrDjk_8AAAAAAAAAAABkARQnAQ" height="250" width="250">
 
 ## License
 

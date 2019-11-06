@@ -9,7 +9,7 @@
         <Property name="APP_NAME">${sys:appname}</Property>
     </Properties>
 
-    <appenders>
+    <Appenders>
 
         <RollingFile name="ERROR-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-error.log" append="true"
                      filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-error.log.%d{yyyy-MM-dd}">
@@ -96,37 +96,37 @@
             </Policies>
         </RollingFile>
 
-    </appenders>
+    </Appenders>
 
-    <loggers>
-        <logger name="com.alipay.sofa.rpc.registry" level="${RPC_LOG_LEVEL}" additivity="false">
+    <Loggers>
+        <AsyncLogger name="com.alipay.sofa.rpc.registry" level="${RPC_LOG_LEVEL}" additivity="false">
             <appender-ref ref="RPC-REGISTRY-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
+        </AsyncLogger>
 
-        <logger name="com.alipay.sofa.rpc.codec" level="${RPC_LOG_LEVEL}" additivity="false">
+        <AsyncLogger name="com.alipay.sofa.rpc.codec" level="${RPC_LOG_LEVEL}" additivity="false">
             <appender-ref ref="RPC-CODEC-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
+        </AsyncLogger>
 
-        <logger name="com.alipay.sofa.rpc.client" level="${RPC_LOG_LEVEL}" additivity="false">
+        <AsyncLogger name="com.alipay.sofa.rpc.client" level="${RPC_LOG_LEVEL}" additivity="false">
             <appender-ref ref="RPC-CLIENT-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
+        </AsyncLogger>
 
-        <logger name="com.alipay.sofa.rpc.server" level="${RPC_LOG_LEVEL}" additivity="false">
+        <AsyncLogger name="com.alipay.sofa.rpc.server" level="${RPC_LOG_LEVEL}" additivity="false">
             <appender-ref ref="RPC-SERVER-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
+        </AsyncLogger>
 
-        <logger name="com.alipay.sofa.rpc.transport" level="${RPC_LOG_LEVEL}" additivity="false">
+        <AsyncLogger name="com.alipay.sofa.rpc.transport" level="${RPC_LOG_LEVEL}" additivity="false">
             <appender-ref ref="RPC-TRANSPORT-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
-        </logger>
+        </AsyncLogger>
 
-        <root level="${RPC_LOG_LEVEL}">
+        <AsyncRoot level="${RPC_LOG_LEVEL}">
             <appender-ref ref="ROOT-APPENDER"/>
             <appender-ref ref="ERROR-APPENDER"/>
-        </root>
-    </loggers>
+        </AsyncRoot>
+    </Loggers>
 </configuration>

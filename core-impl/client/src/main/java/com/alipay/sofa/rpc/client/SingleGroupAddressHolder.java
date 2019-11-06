@@ -39,25 +39,20 @@ public class SingleGroupAddressHolder extends AddressHolder {
     /**
      * 配置的直连地址列表
      */
-    protected ProviderGroup                    directUrlGroup;
+    protected ProviderGroup        directUrlGroup;
     /**
      * 注册中心来的地址列表
      */
-    protected ProviderGroup                    registryGroup;
-
-    /**
-     * 存储关系
-     */
-    protected Map<ProviderInfo, ProviderGroup> reversedRelationMap = new ConcurrentHashMap<ProviderInfo, ProviderGroup>();
+    protected ProviderGroup        registryGroup;
 
     /**
      * 地址变化的锁
      */
-    private ReentrantReadWriteLock             lock                = new ReentrantReadWriteLock();
+    private ReentrantReadWriteLock lock  = new ReentrantReadWriteLock();
     // 读锁，允许并发读
-    private Lock                               rLock               = lock.readLock();
+    private Lock                   rLock = lock.readLock();
     // 写锁，写的时候不允许读
-    private Lock                               wLock               = lock.writeLock();
+    private Lock                   wLock = lock.writeLock();
 
     /**
      * 构造函数
@@ -116,22 +111,6 @@ public class SingleGroupAddressHolder extends AddressHolder {
     }
 
     @Override
-    public String fetchGroupName(ProviderInfo providerInfo) {
-        rLock.lock();
-
-        try {
-            final ProviderGroup providerGroup = reversedRelationMap.get(providerInfo);
-            if (providerGroup != null) {
-                return providerGroup.getName();
-            } else {
-                return "";
-            }
-        } finally {
-            rLock.unlock();
-        }
-    }
-
-    @Override
     public void addProvider(ProviderGroup providerGroup) {
         if (ProviderHelper.isEmpty(providerGroup)) {
             return;
@@ -139,7 +118,6 @@ public class SingleGroupAddressHolder extends AddressHolder {
         wLock.lock();
         try {
             getProviderGroup(providerGroup.getName()).addAll(providerGroup.getProviderInfos());
-            addOrUpdateReversedRelation(this.reversedRelationMap, providerGroup);
         } finally {
             wLock.unlock();
         }
@@ -153,7 +131,6 @@ public class SingleGroupAddressHolder extends AddressHolder {
         wLock.lock();
         try {
             getProviderGroup(providerGroup.getName()).removeAll(providerGroup.getProviderInfos());
-            removeReversedRelation(this.reversedRelationMap, providerGroup);
         } finally {
             wLock.unlock();
         }
@@ -165,29 +142,8 @@ public class SingleGroupAddressHolder extends AddressHolder {
         try {
             getProviderGroup(providerGroup.getName())
                 .setProviderInfos(new ArrayList<ProviderInfo>(providerGroup.getProviderInfos()));
-            addOrUpdateReversedRelation(this.reversedRelationMap, providerGroup);
         } finally {
             wLock.unlock();
-        }
-    }
-
-    public void addOrUpdateReversedRelation(Map<ProviderInfo, ProviderGroup> tmpReversedRelationMap,
-                                            ProviderGroup providerGroup) {
-        final List<ProviderInfo> providerInfos = providerGroup.getProviderInfos();
-        if (providerInfos != null) {
-            for (ProviderInfo providerInfo : providerInfos) {
-                tmpReversedRelationMap.put(providerInfo, providerGroup);
-            }
-        }
-    }
-
-    public void removeReversedRelation(Map<ProviderInfo, ProviderGroup> tmpReversedRelationMap,
-                                       ProviderGroup providerGroup) {
-        final List<ProviderInfo> providerInfos = providerGroup.getProviderInfos();
-        if (providerInfos != null) {
-            for (ProviderInfo providerInfo : providerInfos) {
-                reversedRelationMap.remove(providerInfo);
-            }
         }
     }
 
@@ -195,7 +151,6 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public void updateAllProviders(List<ProviderGroup> providerGroups) {
         ConcurrentHashSet<ProviderInfo> tmpDirectUrl = new ConcurrentHashSet<ProviderInfo>();
         ConcurrentHashSet<ProviderInfo> tmpRegistry = new ConcurrentHashSet<ProviderInfo>();
-        Map<ProviderInfo, ProviderGroup> tmpReversedRelationMap = new ConcurrentHashMap<>();
         for (ProviderGroup providerGroup : providerGroups) {
             if (!ProviderHelper.isEmpty(providerGroup)) {
                 if (RpcConstants.ADDRESS_DIRECT_GROUP.equals(providerGroup.getName())) {
@@ -203,14 +158,12 @@ public class SingleGroupAddressHolder extends AddressHolder {
                 } else {
                     tmpRegistry.addAll(providerGroup.getProviderInfos());
                 }
-                addOrUpdateReversedRelation(tmpReversedRelationMap, providerGroup);
             }
         }
         wLock.lock();
         try {
             this.directUrlGroup.setProviderInfos(new ArrayList<ProviderInfo>(tmpDirectUrl));
             this.registryGroup.setProviderInfos(new ArrayList<ProviderInfo>(tmpRegistry));
-            this.reversedRelationMap = tmpReversedRelationMap;
         } finally {
             wLock.unlock();
         }

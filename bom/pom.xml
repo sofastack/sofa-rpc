@@ -6,14 +6,13 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-bom</artifactId>
-    <version>5.6.0</version>
+    <version>5.6.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <properties>
         <javassist.version>3.20.0-GA</javassist.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
-
-        <netty.version>4.1.25.Final</netty.version>
+        <netty.version>4.1.42.Final</netty.version>
         <!-- 3rd extends libs -->
         <servlet.version>2.5</servlet.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
@@ -29,8 +28,8 @@
         <hessian.version>3.3.6</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.5.1</protobuf.version>
-        <jackson.version>2.9.9</jackson.version>
-        <jackson.databind.version>2.9.9.1</jackson.databind.version>
+        <jackson.version>2.9.10</jackson.version>
+        <jackson.databind.version>2.9.10.1</jackson.databind.version>
         <msgpack.version>0.6.11</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
 
@@ -44,7 +43,7 @@
         <!-- Test libs -->
         <junit.version>4.10</junit.version>
         <!-- alipay libs -->
-        <bolt.version>1.5.2</bolt.version>
+        <bolt.version>1.5.6</bolt.version>
         <sofa.common.tools.version>1.0.18</sofa.common.tools.version>
         <tracer.version>2.1.2</tracer.version>
         <lookout.version>1.4.1</lookout.version>
@@ -450,10 +449,46 @@
                 <version>2.3.0</version>
                 <scope>test</scope>
             </dependency>
+            <!-- h2 SSL libs -->
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-tcnative-boringssl-static</artifactId>
+                <version>2.0.25.Final</version>
+                <classifier>${os.detected.classifier}</classifier>
+            </dependency>
+            <dependency>
+                <groupId>org.mortbay.jetty.alpn</groupId>
+                <artifactId>alpn-boot</artifactId>
+                <version>8.1.12.v20180117</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-alpn-openjdk8-server</artifactId>
+                <version>9.4.8.v20171121</version>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-alpn-openjdk8-client</artifactId>
+                <version>9.4.8.v20171121</version>
+            </dependency>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-tcnative-boringssl-static</artifactId>
+                <version>2.0.25.Final</version>
+                <classifier>${os.detected.classifier}</classifier>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
     <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.4.0.Final</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
