@@ -132,7 +132,15 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      */
     protected void addAlive(ProviderInfo providerInfo, ClientTransport transport) {
         if (checkState(providerInfo, transport)) {
-            aliveConnections.put(providerInfo, transport);
+            providerLock.lock();
+            try {
+                ClientTransport prev = aliveConnections.put(providerInfo, transport);
+                if (prev != null && prev != transport) {
+                    releaseTransport(prev);
+                }
+            } finally {
+                providerLock.unlock();
+            }
         }
     }
 
@@ -143,7 +151,15 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      * @param transport    the transport
      */
     protected void addRetry(ProviderInfo providerInfo, ClientTransport transport) {
-        retryConnections.put(providerInfo, transport);
+        providerLock.lock();
+        try {
+            ClientTransport pre = retryConnections.put(providerInfo, transport);
+            if (pre != transport) {
+                releaseTransport(pre);
+            }
+        } finally {
+            providerLock.unlock();
+        }
     }
 
     /**
@@ -155,9 +171,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void aliveToRetry(ProviderInfo providerInfo, ClientTransport transport) {
         providerLock.lock();
         try {
-            if (aliveConnections.remove(providerInfo) != null) {
-                retryConnections.put(providerInfo, transport);
+            ClientTransport removed = aliveConnections.remove(providerInfo);
+            if (removed != null) {
+                ClientTransport prev = retryConnections.put(providerInfo, transport);
+                if (prev != null && prev != transport) {
+                    releaseTransport(prev);
+                }
             }
+
         } finally {
             providerLock.unlock();
         }
@@ -172,9 +193,13 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void retryToAlive(ProviderInfo providerInfo, ClientTransport transport) {
         providerLock.lock();
         try {
-            if (retryConnections.remove(providerInfo) != null) {
+            ClientTransport prev = retryConnections.remove(providerInfo);
+            if (prev != null) {
                 if (checkState(providerInfo, transport)) {
-                    aliveConnections.put(providerInfo, transport);
+                    ClientTransport pre = aliveConnections.put(providerInfo, transport);
+                    if (pre != null && pre != transport) {
+                        releaseTransport(pre);
+                    }
                 }
             }
         } finally {
@@ -208,9 +233,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void aliveToSubHealth(ProviderInfo providerInfo, ClientTransport transport) {
         providerLock.lock();
         try {
-            if (aliveConnections.remove(providerInfo) != null) {
-                subHealthConnections.put(providerInfo, transport);
+            ClientTransport removed = aliveConnections.remove(providerInfo);
+            if (removed != null) {
+                ClientTransport prev = subHealthConnections.put(providerInfo, transport);
+                if (prev != null && prev != transport) {
+                    releaseTransport(prev);
+                }
             }
+
         } finally {
             providerLock.unlock();
         }
@@ -225,11 +255,16 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void subHealthToAlive(ProviderInfo providerInfo, ClientTransport transport) {
         providerLock.lock();
         try {
-            if (subHealthConnections.remove(providerInfo) != null) {
+            ClientTransport prev = subHealthConnections.remove(providerInfo);
+            if (prev != null) {
                 if (checkState(providerInfo, transport)) {
-                    aliveConnections.put(providerInfo, transport);
+                    ClientTransport connection = aliveConnections.put(providerInfo, transport);
+                    if (connection != null && connection != transport) {
+                        releaseTransport(connection);
+                    }
                 }
             }
+
         } finally {
             providerLock.unlock();
         }
@@ -244,9 +279,16 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     protected void subHealthToRetry(ProviderInfo providerInfo, ClientTransport transport) {
         providerLock.lock();
         try {
-            if (subHealthConnections.remove(providerInfo) != null) {
-                retryConnections.put(providerInfo, transport);
+            ClientTransport prev = subHealthConnections.remove(providerInfo);
+            if (prev != null) {
+                if (checkState(providerInfo, transport)) {
+                    ClientTransport connection = retryConnections.put(providerInfo, transport);
+                    if (connection != null && connection != transport) {
+                        releaseTransport(connection);
+                    }
+                }
             }
+
         } finally {
             providerLock.unlock();
         }
@@ -595,8 +637,12 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         providerLock.lock();
         try {
             boolean first = isAvailableEmpty();
-            if (aliveConnections.remove(providerInfo) != null) {
-                retryConnections.put(providerInfo, transport);
+            ClientTransport prev = aliveConnections.remove(providerInfo);
+            if (prev != null) {
+                ClientTransport retried = retryConnections.put(providerInfo, transport);
+                if (retried != null && retried != transport) {
+                    releaseTransport(retried);
+                }
                 if (!first && isAvailableEmpty()) { // 原来不空，变成空
                     notifyStateChangeToUnavailable();
                 }
@@ -897,6 +943,13 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         if (reconThread != null) {
             reconThread.shutdown();
             reconThread = null;
+        }
+    }
+
+    protected void releaseTransport(ClientTransport transport) {
+        if (transport != null) {
+            ClientTransportFactory.releaseTransport(transport, transport.getConfig()
+                .getDisconnectTimeout());
         }
     }
 }
