@@ -151,12 +151,6 @@
     </dependencies>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-            </extension>
-        </extensions>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
