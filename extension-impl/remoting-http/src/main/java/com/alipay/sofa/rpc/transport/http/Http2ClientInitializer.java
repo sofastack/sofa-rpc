@@ -16,8 +16,12 @@
  */
 package com.alipay.sofa.rpc.transport.http;
 
+import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE;
+
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
+
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
@@ -39,9 +43,6 @@ import io.netty.handler.codec.http2.InboundHttp2ToHttpAdapterBuilder;
 import io.netty.handler.ssl.ApplicationProtocolNames;
 import io.netty.handler.ssl.ApplicationProtocolNegotiationHandler;
 import io.netty.handler.ssl.SslContext;
-
-import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_CLIENT_H2C_USE_PRIOR_KNOWLEDGE;
 
 /**
  * Configures the client pipeline to support HTTP/2 frames.
@@ -69,14 +70,10 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     public void initChannel(SocketChannel ch) throws Exception {
         final Http2Connection connection = new DefaultHttp2Connection(false);
         connectionHandler = new HttpToHttp2ConnectionHandlerBuilder()
-            .frameListener(new DelegatingDecompressorFrameListener(
-                connection,
-                new InboundHttp2ToHttpAdapterBuilder(connection)
-                    .maxContentLength(transportConfig.getPayload())
-                    .propagateSettings(true)
-                    .build()))
-            .connection(connection)
-            .build();
+            .frameListener(
+                new DelegatingDecompressorFrameListener(connection, new InboundHttp2ToHttpAdapterBuilder(connection)
+                    .maxContentLength(transportConfig.getPayload()).propagateSettings(true).build()))
+            .connection(connection).build();
         responseHandler = new Http2ClientChannelHandler();
         settingsHandler = new Http2SettingsHandler(ch.newPromise());
         String protocol = transportConfig.getProviderInfo().getProtocolType();
@@ -107,10 +104,11 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
      * Configure the pipeline for TLS NPN negotiation to HTTP/2.
      */
     private void configureSsl(SocketChannel ch) {
-        SslContext sslCtx = SslContextBuilder.build();
+        SslContext sslCtx = SslContextBuilder.buildForClient();
         ChannelPipeline pipeline = ch.pipeline();
         pipeline.addLast(sslCtx.newHandler(ch.alloc()));
-        // We must wait for the handshake to finish and the protocol to be negotiated before configuring
+        // We must wait for the handshake to finish and the protocol to be negotiated
+        // before configuring
         // the HTTP/2 components of the pipeline.
         pipeline.addLast(new ApplicationProtocolNegotiationHandler("") {
             @Override
@@ -135,20 +133,18 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
         Http2ClientUpgradeCodec upgradeCodec = new Http2ClientUpgradeCodec(connectionHandler);
         HttpClientUpgradeHandler upgradeHandler = new HttpClientUpgradeHandler(sourceCodec, upgradeCodec, 65536);
 
-        ch.pipeline().addLast(sourceCodec,
-            upgradeHandler,
-            new UpgradeRequestHandler(),
-            new UserEventLogger());
+        ch.pipeline().addLast(sourceCodec, upgradeHandler, new UpgradeRequestHandler(), new UserEventLogger());
     }
 
     /**
-     * A handler that triggers the cleartext upgrade to HTTP/2 by sending an initial HTTP request.
+     * A handler that triggers the cleartext upgrade to HTTP/2 by sending an initial
+     * HTTP request.
      */
     private final class UpgradeRequestHandler extends ChannelInboundHandlerAdapter {
         @Override
         public void channelActive(ChannelHandlerContext ctx) throws Exception {
-            DefaultFullHttpRequest upgradeRequest =
-                    new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET, "/");
+            DefaultFullHttpRequest upgradeRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.GET,
+                "/");
             ctx.writeAndFlush(upgradeRequest);
 
             ctx.fireChannelActive();
@@ -171,18 +167,18 @@ public class Http2ClientInitializer extends ChannelInitializer<SocketChannel> {
     }
 
     /**
-     * Configure the pipeline for a cleartext useing Prior-Knowledge method to start http2.
+     * Configure the pipeline for a cleartext useing Prior-Knowledge method to start
+     * http2.
      */
     private void configureClearTextWithPriorKnowledge(SocketChannel ch) {
-        ch.pipeline().addLast(connectionHandler,
-            new PrefaceFrameWrittenEventHandler(),
-            new UserEventLogger());
+        ch.pipeline().addLast(connectionHandler, new PrefaceFrameWrittenEventHandler(), new UserEventLogger());
         configureEndOfPipeline(ch.pipeline());
     }
 
     /**
-     * Class that capture Prior-Knowledge method's Preface frame written Events triggered on this channel,
-     * and Flush Channel for send preface frame to remote realy
+     * Class that capture Prior-Knowledge method's Preface frame written Events
+     * triggered on this channel, and Flush Channel for send preface frame to remote
+     * realy
      */
     private static class PrefaceFrameWrittenEventHandler extends ChannelInboundHandlerAdapter {
         @Override
