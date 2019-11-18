@@ -51,7 +51,7 @@ public class TraceClientRequestFilter implements ClientRequestFilter {
 
             }
 
-            RestTracerAdapter.storeTracerInfo(requestContext);
+            RestTracerAdapter.beforeSend(requestContext);
         } catch (Exception e) {
             logger.error("the process of rest tracer client request occur error ", e);
         }
