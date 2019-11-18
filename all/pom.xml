@@ -414,6 +414,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-protostuff</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-jackson</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-msgpack</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-hystrix</include>
