@@ -25,6 +25,7 @@
         <module>codec-jackson</module>
         <module>codec-protostuff</module>
         <module>codec-sofa-hessian</module>
+        <module>codec-msgpack</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
         <module>metrics-lookout</module>

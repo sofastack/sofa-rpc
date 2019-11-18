@@ -30,7 +30,7 @@
         <protobuf.version>3.5.1</protobuf.version>
         <jackson.version>2.9.10</jackson.version>
         <jackson.databind.version>2.9.10.1</jackson.databind.version>
-        <msgpack.version>0.6.11</msgpack.version>
+        <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
 
         <!--common-->
@@ -278,7 +278,11 @@
                 <artifactId>protostuff-runtime</artifactId>
                 <version>${protostuff.version}</version>
             </dependency>
-
+            <dependency>
+                <groupId>org.msgpack</groupId>
+                <artifactId>msgpack</artifactId>
+                <version>${msgpack.version}</version>
+            </dependency>
             <!-- zk client -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -358,7 +362,7 @@
             <dependency>
                 <groupId>com.pszymczyk.consul</groupId>
                 <artifactId>embedded-consul</artifactId>
-                <version>1.1.0</version>
+                <version>2.1.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
