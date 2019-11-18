@@ -258,7 +258,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!proxyClass.isInterface()) {
+                if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(protocol) && !proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("consumer.interface",
                         interfaceId, "interfaceId must set interface class, not implement class");
                 }

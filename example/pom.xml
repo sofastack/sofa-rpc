@@ -10,6 +10,11 @@
         <version>5.6.3-SNAPSHOT</version>
     </parent>
 
+    <properties>
+        <protoc.version>3.5.1-1</protoc.version>
+        <protoc-gen-grpc-java.version>1.17.0</protoc-gen-grpc-java.version>
+    </properties>
+
     <artifactId>sofa-rpc-example</artifactId>
 
     <dependencies>
@@ -17,6 +22,23 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-all</artifactId>
             <version>${project.parent.version}</version>
+        </dependency>
+
+        <!-- grpc  -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.17.0</version>
         </dependency>
 
         <!-- dependencies for rest begin -->
@@ -129,12 +151,6 @@
     </dependencies>
 
     <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-            </extension>
-        </extensions>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
@@ -156,7 +172,35 @@
             </testResource>
         </testResources>
 
+        <!-- grpc  -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.5.0.Final</version>
+            </extension>
+        </extensions>
+
         <plugins>
+            <!-- grpc -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.5.1</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${protoc-gen-grpc-java.version}:exe:${os.detected.classifier}</pluginArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -165,6 +209,19 @@
                     <target>${maven.compiler.target}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.neokidd.maven.plugins</groupId>
+                <artifactId>hack-modifier-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                <execution>
+                    <phase>process-classes</phase>
+                    <goals>
+                    <goal>hack</goal>
+                    </goals>
+                </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

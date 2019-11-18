@@ -27,7 +27,7 @@
         <!-- serialization -->
         <hessian.version>3.3.6</hessian.version>
         <thrift.version>0.9.2</thrift.version>
-        <protobuf.version>3.1.0</protobuf.version>
+        <protobuf.version>3.5.1</protobuf.version>
         <jackson.version>2.9.10</jackson.version>
         <jackson.databind.version>2.9.10.1</jackson.databind.version>
         <msgpack.version>0.6.11</msgpack.version>
@@ -128,7 +128,7 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency>
+            </dependency> 
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
@@ -343,7 +343,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>18.0</version>
+                <version>20.0</version>
             </dependency>
             <dependency>
                 <groupId>com.ecwid.consul</groupId>
