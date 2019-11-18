@@ -1,0 +1,1 @@
+grpc=com.dib.sofa.rpc.bootstrap.grpc.GrpcProviderBootstrap

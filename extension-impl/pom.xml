@@ -18,6 +18,7 @@
         <module>extension-common</module>
         <module>bootstrap-bolt</module>
         <module>bootstrap-dubbo</module>
+        <module>bootstrap-grpc</module>
         <module>bootstrap-http</module>
         <module>bootstrap-rest</module>
         <module>codec-protobuf</module>
@@ -36,6 +37,7 @@
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>
+        <module>remoting-grpc</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
         <module>fault-hystrix</module>
