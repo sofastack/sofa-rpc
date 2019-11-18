@@ -25,7 +25,7 @@
         <nacos.version>1.0.0</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <!-- serialization -->
-        <hessian.version>3.3.6</hessian.version>
+        <hessian.version>3.3.7-SNAPSHOT</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.5.1</protobuf.version>
         <jackson.version>2.9.10</jackson.version>
