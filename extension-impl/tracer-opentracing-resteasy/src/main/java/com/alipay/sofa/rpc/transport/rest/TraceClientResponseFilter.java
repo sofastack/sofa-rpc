@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.transport.rest;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.tracer.sofatracer.RestTracerAdapter;
 
 import javax.annotation.Priority;
 import javax.ws.rs.client.ClientRequestContext;
@@ -41,5 +42,6 @@ public class TraceClientResponseFilter implements ClientResponseFilter {
             RpcInternalContext context = RpcInternalContext.getContext();
             context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, responseContext.getLength());
         }
+        RestTracerAdapter.clientReceived(responseContext);
     }
 }
