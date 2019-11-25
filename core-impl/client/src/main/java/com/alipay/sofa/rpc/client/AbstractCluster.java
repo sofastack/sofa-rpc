@@ -375,10 +375,6 @@ public abstract class AbstractCluster extends Cluster {
         if (StringUtils.isNotBlank(targetIP)) {
             // 如果指定了调用地址
             providerInfo = selectPinpointProvider(targetIP, providerInfos);
-            if (providerInfo == null) {
-                // 指定的不存在
-                throw unavailableProviderException(message.getTargetServiceUniqueName(), targetIP);
-            }
             ClientTransport clientTransport = selectByProvider(message, providerInfo);
             if (clientTransport == null) {
                 // 指定的不存在或已死，抛出异常
@@ -415,7 +411,8 @@ public abstract class AbstractCluster extends Cluster {
                 return providerInfo;
             }
         }
-        return null;
+        // support direct target url
+        return tp;
     }
 
     /**
