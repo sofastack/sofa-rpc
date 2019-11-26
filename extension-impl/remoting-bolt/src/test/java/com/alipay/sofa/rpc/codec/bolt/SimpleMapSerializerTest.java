@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec.bolt;
 
+import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,8 +24,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class SimpleMapSerializerTest {
@@ -44,15 +43,15 @@ public class SimpleMapSerializerTest {
         map.put("a", "");
         map.put("b", null);
         bs = simpleMapSerializer.encode(map);
-        Assert.assertEquals(37, bs.length);
+        Assert.assertEquals(28, bs.length);
 
         Map<String, String> map1 = simpleMapSerializer.decode(bs);
         Assert.assertNotNull(map1);
-        Assert.assertEquals(4, map1.size());
+        Assert.assertEquals(3, map1.size());
         Assert.assertEquals("2", map1.get("1"));
         Assert.assertEquals("x", map1.get(""));
         Assert.assertEquals("", map1.get("a"));
-        Assert.assertEquals("", map1.get("b"));
+        Assert.assertNull(map1.get("b"));
 
         map1 = simpleMapSerializer.decode(null);
         Assert.assertNotNull(map1);
@@ -100,4 +99,40 @@ public class SimpleMapSerializerTest {
         Assert.assertEquals(map, newmap);
     }
 
+    //when read null
+    @Test
+    public void testCompatible() throws Exception {
+        SimpleMapSerializer simpleMapSerializer = new SimpleMapSerializer();
+
+        HashMap<String, String> map = new HashMap<String, String>();
+        map.put("1", "2");
+        map.put("", "x");
+        map.put("b", null);
+        map.put(null, null);
+        byte[] bs = simpleMapSerializer.encode(map);
+        Map<String, String> readMap = simpleMapSerializer.decode(bs);
+        Assert.assertEquals(2, readMap.size());
+
+        UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(64);
+
+        //key is null
+        simpleMapSerializer.writeString(out, null);
+        simpleMapSerializer.writeString(out, "value");
+
+        //value is null
+        simpleMapSerializer.writeString(out, "value");
+        simpleMapSerializer.writeString(out, null);
+
+        //value is null and key is null
+        simpleMapSerializer.writeString(out, null);
+        simpleMapSerializer.writeString(out, null);
+
+        //value is not null and key is not null
+        simpleMapSerializer.writeString(out, "key");
+        simpleMapSerializer.writeString(out, "value");
+
+        readMap = simpleMapSerializer.decode(out.toByteArray());
+        Assert.assertEquals(1, readMap.size());
+        Assert.assertEquals("value", readMap.get("key"));
+    }
 }
