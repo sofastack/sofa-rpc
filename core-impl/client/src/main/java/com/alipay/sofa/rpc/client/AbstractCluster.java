@@ -17,7 +17,9 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -86,17 +88,17 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 是否已启动(已建立连接)
      */
-    protected volatile boolean initialized       = false;
+    protected volatile boolean initialized   = false;
 
     /**
      * 是否已经销毁（已经销毁不能再继续使用）
      */
-    protected volatile boolean destroyed         = false;
+    protected volatile boolean destroyed     = false;
 
     /**
      * 当前Client正在发送的调用数量
      */
-    protected AtomicInteger    countOfInvoke     = new AtomicInteger(0);
+    protected AtomicInteger    countOfInvoke = new AtomicInteger(0);
 
     /**
      * 路由列表
@@ -122,7 +124,7 @@ public abstract class AbstractCluster extends Cluster {
     /***
      * 是否允许通过上下文地址创建连接。
      */
-    protected volatile boolean createConnFromCtx = true;
+    protected volatile boolean createConnFromCtx;
 
     @Override
     public synchronized void init() {
@@ -165,12 +167,7 @@ public abstract class AbstractCluster extends Cluster {
         // 启动成功
         initialized = true;
 
-        String createConnFromCtx = System.getProperty("com.alipay.sofa.direct.conn");
-        if (StringUtils.isEmpty(createConnFromCtx))
-            createConnFromCtx = System.getProperty("ALIPAY_SOFA_DIRECT_CONN");
-
-        if (StringUtils.isNotEmpty(createConnFromCtx))
-            this.createConnFromCtx = Boolean.parseBoolean(createConnFromCtx);
+        this.createConnFromCtx = RpcConfigs.getBooleanValue(RpcOptions.RPC_CREATE_CONN_FROM_CONTEXT_ENABLE);
 
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {

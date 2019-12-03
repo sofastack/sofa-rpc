@@ -530,4 +530,9 @@ public class RpcOptions {
      * Automatic fault tolerance measure strategy
      */
     public static final String AFT_MEASURE_STRATEGY                     = "aft.measure.strategy";
+
+    /**
+     * 是否允许通过RpcInvokeContext.getTargetUrl创建tcp连接，默认允许
+     */
+    public static final String RPC_CREATE_CONN_FROM_CONTEXT_ENABLE      = "rpc.create.conn.from.context.enable";
 }
