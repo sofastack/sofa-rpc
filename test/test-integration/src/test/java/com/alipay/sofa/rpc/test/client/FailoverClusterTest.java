@@ -43,39 +43,39 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
 
         // 只有2个线程 执行
         ServerConfig serverConfig = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22222)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22222)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
 
         // 发布一个服务，每个请求要执行1秒
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl() {
-                    AtomicInteger cnt = new AtomicInteger();
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl() {
+                AtomicInteger cnt = new AtomicInteger();
 
-                    @Override
-                    public String sayHello(String name, int age) {
-                        if (cnt.getAndIncrement() % 3 != 0) {
-                            try {
-                                Thread.sleep(2000);
-                            } catch (Exception ignore) {
-                            }
+                @Override
+                public String sayHello(String name, int age) {
+                    if (cnt.getAndIncrement() % 3 != 0) {
+                        try {
+                            Thread.sleep(2000);
+                        } catch (Exception ignore) {
                         }
-                        LOGGER.info("xxxxxxxxxxxxxxxxx" + age);
-                        return "hello " + name + " from server! age: " + age;
                     }
-                })
-                .setServer(serverConfig)
-                .setRegister(false);
+                    LOGGER.info("xxxxxxxxxxxxxxxxx" + age);
+                    return "hello " + name + " from server! age: " + age;
+                }
+            })
+            .setServer(serverConfig)
+            .setRegister(false);
         providerConfig.export();
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:22222")
-                .setCluster("failover")
-                .setTimeout(1000)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22222")
+            .setCluster("failover")
+            .setTimeout(1000)
+            .setRegister(false);
         final HelloService helloService = consumerConfig.refer();
 
         int count1 = 0;
@@ -89,12 +89,12 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
         Assert.assertEquals(count1, 2);
 
         ConsumerConfig<HelloService> consumerConfig2 = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:22222")
-                .setTimeout(1000)
-                .setCluster("failover")
-                .setRetries(2) // 失败后自动重试2次
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22222")
+            .setTimeout(1000)
+            .setCluster("failover")
+            .setRetries(2) // 失败后自动重试2次
+            .setRegister(false);
         final HelloService helloService2 = consumerConfig2.refer();
         int count2 = 0;
         for (int i = 0; i < 4; i++) {
@@ -116,39 +116,39 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
 
         // 发布一个服务，每个请求要执行2秒
         ServerConfig serverConfig = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22223)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22223)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl(2000))
-                .setServer(serverConfig)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(2000))
+            .setServer(serverConfig)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig.export();
 
         // 再发布一个服务，不等待
         ServerConfig serverConfig2 = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22224)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22224)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl())
-                .setServer(serverConfig2)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl())
+            .setServer(serverConfig2)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig2.export();
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:22223;bolt://127.0.0.1:22224")
-                .setTimeout(1000)
-                .setCluster("failover")
-                .setRetries(1) // 失败后重试一次
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22223;bolt://127.0.0.1:22224")
+            .setTimeout(1000)
+            .setCluster("failover")
+            .setRetries(1) // 失败后重试一次
+            .setRegister(false);
         final HelloService helloService = consumerConfig.refer();
 
         int count2 = 0;
@@ -168,39 +168,39 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
 
         // 发布一个服务，每个请求要执行2秒
         ServerConfig serverConfig = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22225)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22225)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl("55"))
-                .setServer(serverConfig)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("55"))
+            .setServer(serverConfig)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig.export();
 
         // 再发布一个服务，不等待
         ServerConfig serverConfig2 = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22226)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22226)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl("66"))
-                .setServer(serverConfig2)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("66"))
+            .setServer(serverConfig2)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig2.export();
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:22225;bolt://127.0.0.1:22226")
-                .setTimeout(1000)
-                .setCluster("failover")
-                .setLoadBalancer("random")
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22225;bolt://127.0.0.1:22226")
+            .setTimeout(1000)
+            .setCluster("failover")
+            .setLoadBalancer("random")
+            .setRegister(false);
         final HelloService helloService = consumerConfig.refer();
 
         int count2 = 0;
@@ -240,40 +240,40 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
 
         // 发布一个服务，每个请求要执行2秒
         ServerConfig serverConfig = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22227)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22227)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl("77"))
-                .setServer(serverConfig)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("77"))
+            .setServer(serverConfig)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig.export();
 
         // 再发布一个服务，不等待
         ServerConfig serverConfig2 = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22228)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+            .setStopTimeout(0)
+            .setPort(22228)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
         ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl("88"))
-                .setServer(serverConfig2)
-                .setRepeatedExportLimit(-1)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("88"))
+            .setServer(serverConfig2)
+            .setRepeatedExportLimit(-1)
+            .setRegister(false);
         providerConfig2.export();
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-                .setInterfaceId(HelloService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:22227;bolt://127.0.0.1:22228")
-                .setTimeout(1000)
-                .setCluster("failover")
-                .setLoadBalancer("random")
-                .setSticky(true)
-                .setRegister(false);
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22227;bolt://127.0.0.1:22228")
+            .setTimeout(1000)
+            .setCluster("failover")
+            .setLoadBalancer("random")
+            .setSticky(true)
+            .setRegister(false);
         final HelloService helloService = consumerConfig.refer();
 
         int count2 = 0;
@@ -308,31 +308,31 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
     public void testRpcDirectInvokeFromContext() {
 
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol("bolt")
-                .setHost("0.0.0.0")
-                .setPort(13900);
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(13900);
 
         ProviderConfig<HelloService> provider = new ProviderConfig();
         provider.setInterfaceId(HelloService.class.getName())
-                .setRef(new HelloServiceImpl("x-demo-invoke"))
-                .setApplication(new ApplicationConfig().setAppName("x-test-server"))
-                .setProxy("javassist")
-                .setSerialization("hessian2")
-                .setServer(serverConfig)
-                .setTimeout(3000);
+            .setRef(new HelloServiceImpl("x-demo-invoke"))
+            .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+            .setProxy("javassist")
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setTimeout(3000);
 
         provider.export();
 
         ConsumerConfig<HelloService> consumer = new ConsumerConfig();
         consumer.setInterfaceId(HelloService.class.getName())
-                .setApplication(new ApplicationConfig().setAppName("x-test-client"))
-                .setProxy("javassist");
+            .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+            .setProxy("javassist");
 
         // 在refer之前设置target url，用于提前建立tcp连接
 
         HelloService proxy = consumer.refer();
 
-        for (int i = 0 ; i < 3; i++){
+        for (int i = 0; i < 3; i++) {
             RpcInvokeContext.getContext().setTargetURL("127.0.0.1:13900");
             Assert.assertEquals("x-demo-invoke", proxy.sayHello("x-demo-invoke", 1));
         }
