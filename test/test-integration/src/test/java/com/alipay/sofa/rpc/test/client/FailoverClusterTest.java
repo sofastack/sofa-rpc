@@ -17,13 +17,16 @@
 package com.alipay.sofa.rpc.test.client;
 
 import com.alipay.sofa.rpc.client.Cluster;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.core.exception.SofaRouteException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
@@ -328,8 +331,6 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
             .setApplication(new ApplicationConfig().setAppName("x-test-client"))
             .setProxy("javassist");
 
-        // 在refer之前设置target url，用于提前建立tcp连接
-
         HelloService proxy = consumer.refer();
 
         for (int i = 0; i < 3; i++) {
@@ -339,6 +340,49 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
 
         provider.unExport();
         consumer.unRefer();
+    }
+
+    @Test(expected = SofaRouteException.class)
+    public void testRpcDirectInvokeFromContextNotAllowed() {
+
+        boolean prev = RpcConfigs.getBooleanValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT);
+
+        // disable create connection from context
+        RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, false);
+
+        try{
+            ServerConfig serverConfig = new ServerConfig()
+                    .setProtocol("bolt")
+                    .setHost("0.0.0.0")
+                    .setPort(13900);
+
+            ProviderConfig<HelloService> provider = new ProviderConfig();
+            provider.setInterfaceId(HelloService.class.getName())
+                    .setRef(new HelloServiceImpl("x-demo-invoke"))
+                    .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+                    .setProxy("javassist")
+                    .setSerialization("hessian2")
+                    .setServer(serverConfig)
+                    .setTimeout(3000);
+
+            provider.export();
+
+            ConsumerConfig<HelloService> consumer = new ConsumerConfig();
+            consumer.setInterfaceId(HelloService.class.getName())
+                    .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+                    .setProxy("javassist");
+
+            HelloService proxy = consumer.refer();
+
+            RpcInvokeContext.getContext().setTargetURL("127.0.0.1:13900");
+            proxy.sayHello("x-demo-invoke", 1);
+
+            provider.unExport();
+            consumer.unRefer();
+        }
+        finally {
+            RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, prev);
+        }
     }
 
     @After

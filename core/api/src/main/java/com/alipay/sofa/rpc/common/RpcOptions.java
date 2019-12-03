@@ -534,5 +534,5 @@ public class RpcOptions {
     /**
      * 是否允许通过RpcInvokeContext.getTargetUrl创建tcp连接，默认允许
      */
-    public static final String RPC_CREATE_CONN_FROM_CONTEXT_ENABLE      = "rpc.create.conn.from.context.enable";
+    public static final String RPC_CREATE_CONN_WHEN_ABSENT              = "consumer.connect.create.when.absent";
 }

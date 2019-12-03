@@ -55,7 +55,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -124,7 +123,7 @@ public abstract class AbstractCluster extends Cluster {
     /***
      * 是否允许通过上下文地址创建连接。
      */
-    protected volatile boolean createConnFromCtx;
+    protected boolean createConnWhenAbsent;
 
     @Override
     public synchronized void init() {
@@ -167,7 +166,7 @@ public abstract class AbstractCluster extends Cluster {
         // 启动成功
         initialized = true;
 
-        this.createConnFromCtx = RpcConfigs.getBooleanValue(RpcOptions.RPC_CREATE_CONN_FROM_CONTEXT_ENABLE);
+        this.createConnWhenAbsent = RpcConfigs.getBooleanValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT);
 
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
@@ -375,10 +374,8 @@ public abstract class AbstractCluster extends Cluster {
              */
             RpcInternalContext context = RpcInternalContext.peekContext();
             if (context != null) {
-                String targetIP = (String) RpcInternalContext.getContext().getAttachment(
-                    RpcConstants.HIDDEN_KEY_PINPOINT);
-                if (StringUtils.isNotBlank(targetIP) && this.createConnFromCtx/**允许创建直连连接 */
-                ) {
+                String targetIP = (String) RpcInternalContext.getContext().getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+                if (this.createConnWhenAbsent /**允许创建直连连接 */ &&StringUtils.isNotBlank(targetIP)) {
                     // 如果上下文指定provider，直接返回
                     ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
                     // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
