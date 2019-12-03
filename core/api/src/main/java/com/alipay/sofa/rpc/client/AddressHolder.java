@@ -73,4 +73,12 @@ public abstract class AddressHolder implements ProviderInfoListener {
      * @return 全部服务列表
      */
     public abstract int getAllProviderSize();
+
+    /**
+     * 判断分组是否包含指定服务
+     * @param groupName 分组名称
+     * @param providerInfo 分组是否包含指定服务
+     * @return true包含，false不包含
+     */
+    public abstract boolean containsProviderInfo(String groupName, ProviderInfo providerInfo);
 }

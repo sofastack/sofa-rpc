@@ -58,6 +58,11 @@ public class TestAddressHolder extends AddressHolder {
     }
 
     @Override
+    public boolean containsProviderInfo(String groupName, ProviderInfo providerInfo) {
+        return false;
+    }
+
+    @Override
     public void addProvider(ProviderGroup providerGroup) {
 
     }

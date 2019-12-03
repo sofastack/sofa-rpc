@@ -51,7 +51,9 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -84,17 +86,17 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 是否已启动(已建立连接)
      */
-    protected volatile boolean initialized   = false;
+    protected volatile boolean initialized = false;
 
     /**
      * 是否已经销毁（已经销毁不能再继续使用）
      */
-    protected volatile boolean destroyed     = false;
+    protected volatile boolean destroyed = false;
 
     /**
      * 当前Client正在发送的调用数量
      */
-    protected AtomicInteger    countOfInvoke = new AtomicInteger(0);
+    protected AtomicInteger countOfInvoke = new AtomicInteger(0);
 
     /**
      * 路由列表
@@ -132,7 +134,7 @@ public abstract class AbstractCluster extends Cluster {
         connectionHolder = ConnectionHolderFactory.getConnectionHolder(consumerBootstrap);
         // 构造Filter链,最底层是调用过滤器
         this.filterChain = FilterChain.buildConsumerChain(this.consumerConfig,
-            new ConsumerInvoker(consumerBootstrap));
+                new ConsumerInvoker(consumerBootstrap));
 
         if (consumerConfig.isLazy()) { // 延迟连接
             if (LOGGER.isInfoEnabled(consumerConfig.getAppName())) {
@@ -161,8 +163,8 @@ public abstract class AbstractCluster extends Cluster {
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
             throw new SofaRpcRuntimeException("The consumer is depend on alive provider " +
-                "and there is no alive provider, you can ignore it " +
-                "by ConsumerConfig.setCheck(boolean) (default is false)");
+                    "and there is no alive provider, you can ignore it " +
+                    "by ConsumerConfig.setCheck(boolean) (default is false)");
         }
     }
 
@@ -209,7 +211,7 @@ public abstract class AbstractCluster extends Cluster {
             if (!ProviderHelper.isEmpty(oldProviderGroup)) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
-                        "providers has been closed, or this consumer has been add to blacklist");
+                            "providers has been closed, or this consumer has been add to blacklist");
                     closeTransports();
                 }
             }
@@ -239,7 +241,7 @@ public abstract class AbstractCluster extends Cluster {
             if (CommonUtils.isNotEmpty(currentProviderList)) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
-                        "providers has been closed, or this consumer has been add to blacklist");
+                            "providers has been closed, or this consumer has been add to blacklist");
                     closeTransports();
                 }
             }
@@ -249,7 +251,7 @@ public abstract class AbstractCluster extends Cluster {
         }
         if (EventBus.isEnable(ProviderInfoUpdateAllEvent.class)) {
             ProviderInfoUpdateAllEvent event = new ProviderInfoUpdateAllEvent(consumerConfig, oldProviderGroups,
-                providerGroups);
+                    providerGroups);
             EventBus.post(event);
         }
     }
@@ -270,8 +272,8 @@ public abstract class AbstractCluster extends Cluster {
             if (!StringUtils.equals(providerInfo.getProtocolType(), consumerConfig.getProtocol())) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(),
-                        "Unmatched protocol between consumer [{}] and provider [{}].",
-                        consumerConfig.getProtocol(), providerInfo.getProtocolType());
+                            "Unmatched protocol between consumer [{}] and provider [{}].",
+                            consumerConfig.getProtocol(), providerInfo.getProtocolType());
                 }
             }
         }
@@ -339,7 +341,7 @@ public abstract class AbstractCluster extends Cluster {
      * @throws SofaRpcException rpc异常
      */
     protected ProviderInfo select(SofaRequest message, List<ProviderInfo> invokedProviderInfos)
-        throws SofaRpcException {
+            throws SofaRpcException {
         // 粘滞连接，当前连接可用
         if (consumerConfig.isSticky()) {
             if (lastProviderInfo != null) {
@@ -358,6 +360,26 @@ public abstract class AbstractCluster extends Cluster {
         List<ProviderInfo> orginalProviderInfos;
 
         if (CommonUtils.isEmpty(providerInfos)) {
+            /**
+             * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
+             * 1. RpcInvokeContext.getContext
+             */
+            RpcInternalContext context = RpcInternalContext.peekContext();
+            if (context != null) {
+                String targetIP = (String) RpcInternalContext.getContext().getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+                if (StringUtils.isNotBlank(targetIP)) {
+                    // 如果上下文指定provider，直接返回
+                    ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
+                    // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
+                    if(connectionHolder.isAvailableEmpty()
+                            && !addressHolder.containsProviderInfo(RpcConstants.ADDRESS_DIRECT_GROUP, providerInfo)){
+                        addProvider(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, Arrays.asList(providerInfo)));
+                    }
+
+                    return providerInfo;
+                }
+            }
+
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         } else {
             orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
@@ -393,7 +415,7 @@ public abstract class AbstractCluster extends Cluster {
             } while (!providerInfos.isEmpty());
         }
         throw unavailableProviderException(message.getTargetServiceUniqueName(),
-            convertProviders2Urls(orginalProviderInfos));
+                convertProviders2Urls(orginalProviderInfos));
     }
 
     /**
@@ -404,11 +426,14 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
         ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getHost().equals(tp.getHost())
-                && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
-                && providerInfo.getPort() == tp.getPort()) {
-                return providerInfo;
+        // 存在注册中心provider才会遍历
+        if (CommonUtils.isNotEmpty(providerInfos)){
+            for (ProviderInfo providerInfo : providerInfos) {
+                if (providerInfo.getHost().equals(tp.getHost())
+                        && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
+                        && providerInfo.getPort() == tp.getPort()) {
+                    return providerInfo;
+                }
             }
         }
         // support direct target url
@@ -540,7 +565,7 @@ public abstract class AbstractCluster extends Cluster {
                 SofaResponseCallback sofaResponseCallback = request.getSofaResponseCallback();
                 if (sofaResponseCallback == null) {
                     SofaResponseCallback methodResponseCallback = consumerConfig
-                        .getMethodOnreturn(request.getMethodName());
+                            .getMethodOnreturn(request.getMethodName());
                     if (methodResponseCallback != null) { // 方法的Callback
                         request.setSofaResponseCallback(methodResponseCallback);
                     }
@@ -594,13 +619,13 @@ public abstract class AbstractCluster extends Cluster {
         if (StringUtils.isNotBlank(dynamicAlias)) {
             String dynamicTimeout = null;
             DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
-                consumerConfig.getAppName(),
-                dynamicAlias);
+                    consumerConfig.getAppName(),
+                    dynamicAlias);
 
             if (dynamicConfigManager != null) {
                 dynamicTimeout = dynamicConfigManager.getConsumerMethodProperty(request.getInterfaceName(),
-                    request.getMethodName(),
-                    "timeout");
+                        request.getMethodName(),
+                        "timeout");
             }
 
             if (StringUtils.isNotBlank(dynamicTimeout)) {
@@ -648,8 +673,7 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 关闭连接<br>
-     * 注意：关闭有风险，可能有正在调用的请求，建议判断下isAvailable()
+     * 关闭连接<br> 注意：关闭有风险，可能有正在调用的请求，建议判断下isAvailable()
      */
     protected void closeTransports() {
         if (connectionHolder != null) {
@@ -670,7 +694,7 @@ public abstract class AbstractCluster extends Cluster {
                 long start = RpcRuntimeContext.now();
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("There are {} outstanding call in client, will close transports util return",
-                        count);
+                            count);
                 }
                 while (countOfInvoke.get() > 0 && RpcRuntimeContext.now() - start < timeout) { // 等待返回结果
                     try {
@@ -723,9 +747,7 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 通知状态变成不可用,主要是：<br>
-     * 1.注册中心删除，更新节点后变成不可用时<br>
-     * 2.连接断线后（心跳+调用），如果是可用节点为空
+     * 通知状态变成不可用,主要是：<br> 1.注册中心删除，更新节点后变成不可用时<br> 2.连接断线后（心跳+调用），如果是可用节点为空
      */
     public void notifyStateChangeToUnavailable() {
         final List<ConsumerStateListener> onprepear = consumerConfig.getOnAvailable();
@@ -747,10 +769,7 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 通知状态变成可用,主要是：<br>
-     * 1.启动成功变成可用时<br>
-     * 2.注册中心增加，更新节点后变成可用时<br>
-     * 3.重连上从一个可用节点都没有-->有可用节点时
+     * 通知状态变成可用,主要是：<br> 1.启动成功变成可用时<br> 2.注册中心增加，更新节点后变成可用时<br> 3.重连上从一个可用节点都没有-->有可用节点时
      */
     public void notifyStateChangeToAvailable() {
         final List<ConsumerStateListener> onprepear = consumerConfig.getOnAvailable();
