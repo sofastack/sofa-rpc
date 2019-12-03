@@ -372,7 +372,7 @@ public abstract class AbstractCluster extends Cluster {
              * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
              * 1. RpcInvokeContext.getContext
              */
-            RpcInternalContext context = RpcInternalContext.getContext();
+            RpcInternalContext context = RpcInternalContext.peekContext();
             if (context != null) {
                 String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
                 if (this.createConnWhenAbsent/**允许创建直连连接 */
@@ -399,7 +399,7 @@ public abstract class AbstractCluster extends Cluster {
 
         String targetIP = null;
         ProviderInfo providerInfo;
-        RpcInternalContext context = RpcInternalContext.getContext();
+        RpcInternalContext context = RpcInternalContext.peekContext();
         if (context != null) {
             targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
