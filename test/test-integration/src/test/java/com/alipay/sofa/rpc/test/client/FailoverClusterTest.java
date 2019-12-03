@@ -350,27 +350,27 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
         // disable create connection from context
         RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, false);
 
-        try{
+        try {
             ServerConfig serverConfig = new ServerConfig()
-                    .setProtocol("bolt")
-                    .setHost("0.0.0.0")
-                    .setPort(13900);
+                .setProtocol("bolt")
+                .setHost("0.0.0.0")
+                .setPort(13900);
 
             ProviderConfig<HelloService> provider = new ProviderConfig();
             provider.setInterfaceId(HelloService.class.getName())
-                    .setRef(new HelloServiceImpl("x-demo-invoke"))
-                    .setApplication(new ApplicationConfig().setAppName("x-test-server"))
-                    .setProxy("javassist")
-                    .setSerialization("hessian2")
-                    .setServer(serverConfig)
-                    .setTimeout(3000);
+                .setRef(new HelloServiceImpl("x-demo-invoke"))
+                .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+                .setProxy("javassist")
+                .setSerialization("hessian2")
+                .setServer(serverConfig)
+                .setTimeout(3000);
 
             provider.export();
 
             ConsumerConfig<HelloService> consumer = new ConsumerConfig();
             consumer.setInterfaceId(HelloService.class.getName())
-                    .setApplication(new ApplicationConfig().setAppName("x-test-client"))
-                    .setProxy("javassist");
+                .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+                .setProxy("javassist");
 
             HelloService proxy = consumer.refer();
 
@@ -379,8 +379,7 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
 
             provider.unExport();
             consumer.unRefer();
-        }
-        finally {
+        } finally {
             RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, prev);
         }
     }

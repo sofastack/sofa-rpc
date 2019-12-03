@@ -123,7 +123,7 @@ public abstract class AbstractCluster extends Cluster {
     /***
      * 是否允许通过上下文地址创建连接。
      */
-    protected boolean createConnWhenAbsent;
+    protected boolean          createConnWhenAbsent;
 
     @Override
     public synchronized void init() {
@@ -372,10 +372,11 @@ public abstract class AbstractCluster extends Cluster {
              * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
              * 1. RpcInvokeContext.getContext
              */
-            RpcInternalContext context = RpcInternalContext.peekContext();
+            RpcInternalContext context = RpcInternalContext.getContext();
             if (context != null) {
-                String targetIP = (String) RpcInternalContext.getContext().getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
-                if (this.createConnWhenAbsent /**允许创建直连连接 */ &&StringUtils.isNotBlank(targetIP)) {
+                String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+                if (this.createConnWhenAbsent/**允许创建直连连接 */
+                && StringUtils.isNotBlank(targetIP)) {
                     // 如果上下文指定provider，直接返回
                     ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
                     // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
@@ -398,9 +399,9 @@ public abstract class AbstractCluster extends Cluster {
 
         String targetIP = null;
         ProviderInfo providerInfo;
-        RpcInternalContext context = RpcInternalContext.peekContext();
+        RpcInternalContext context = RpcInternalContext.getContext();
         if (context != null) {
-            targetIP = (String) RpcInternalContext.getContext().getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+            targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
         if (StringUtils.isNotBlank(targetIP)) {
             // 如果指定了调用地址
