@@ -386,7 +386,7 @@ public abstract class AbstractCluster extends Cluster {
                     ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
                     // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
                     if (connectionHolder.isAvailableEmpty()
-                        && !addressHolder.containsProviderInfo(RpcConstants.ADDRESS_DIRECT_GROUP, providerInfo)) {
+                        && !containsProviderInfo(RpcConstants.ADDRESS_DIRECT_GROUP, providerInfo)) {
                         addProvider(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, Arrays.asList(providerInfo)));
                     }
 
@@ -857,5 +857,16 @@ public abstract class AbstractCluster extends Cluster {
     @Override
     public RouterChain getRouterChain() {
         return routerChain;
+    }
+
+    /**
+     * 判断分组是否包含指定服务
+     * @param groupName 分组名称
+     * @param providerInfo 分组是否包含指定服务
+     * @return true包含，false不包含
+     */
+    public boolean containsProviderInfo(String groupName, ProviderInfo providerInfo) {
+        ProviderGroup group = addressHolder.getProviderGroup(groupName);
+        return group != null && group.providerInfos.contains(providerInfo);
     }
 }

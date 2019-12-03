@@ -169,13 +169,4 @@ public class SingleGroupAddressHolder extends AddressHolder {
         }
     }
 
-    public boolean containsProviderInfo(String groupName, ProviderInfo providerInfo) {
-        rLock.lock();
-        try {
-            ProviderGroup group = getProviderGroup(groupName);
-            return group != null && group.providerInfos.contains(providerInfo);
-        } finally {
-            rLock.unlock();
-        }
-    }
 }
