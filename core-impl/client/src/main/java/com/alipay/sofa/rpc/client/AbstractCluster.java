@@ -86,17 +86,17 @@ public abstract class AbstractCluster extends Cluster {
     /**
      * 是否已启动(已建立连接)
      */
-    protected volatile boolean initialized   = false;
+    protected volatile boolean initialized       = false;
 
     /**
      * 是否已经销毁（已经销毁不能再继续使用）
      */
-    protected volatile boolean destroyed     = false;
+    protected volatile boolean destroyed         = false;
 
     /**
      * 当前Client正在发送的调用数量
      */
-    protected AtomicInteger    countOfInvoke = new AtomicInteger(0);
+    protected AtomicInteger    countOfInvoke     = new AtomicInteger(0);
 
     /**
      * 路由列表
@@ -118,6 +118,11 @@ public abstract class AbstractCluster extends Cluster {
      * 过滤器链
      */
     protected FilterChain      filterChain;
+
+    /***
+     * 是否允许通过上下文地址创建连接。
+     */
+    protected volatile boolean createConnFromCtx = true;
 
     @Override
     public synchronized void init() {
@@ -159,6 +164,13 @@ public abstract class AbstractCluster extends Cluster {
 
         // 启动成功
         initialized = true;
+
+        String createConnFromCtx = System.getProperty("com.alipay.sofa.direct.conn");
+        if (StringUtils.isEmpty(createConnFromCtx))
+            createConnFromCtx = System.getProperty("ALIPAY_SOFA_DIRECT_CONN");
+
+        if (StringUtils.isNotEmpty(createConnFromCtx))
+            this.createConnFromCtx = Boolean.parseBoolean(createConnFromCtx);
 
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
@@ -368,7 +380,8 @@ public abstract class AbstractCluster extends Cluster {
             if (context != null) {
                 String targetIP = (String) RpcInternalContext.getContext().getAttachment(
                     RpcConstants.HIDDEN_KEY_PINPOINT);
-                if (StringUtils.isNotBlank(targetIP)) {
+                if (StringUtils.isNotBlank(targetIP) && this.createConnFromCtx/**允许创建直连连接 */
+                ) {
                     // 如果上下文指定provider，直接返回
                     ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
                     // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
