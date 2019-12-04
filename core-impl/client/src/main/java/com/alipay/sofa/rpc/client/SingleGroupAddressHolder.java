@@ -82,6 +82,9 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public ProviderGroup getProviderGroup(String groupName) {
         rLock.lock();
         try {
+            if (groupName == null) {
+                return registryGroup;
+            }
             switch (groupName) {
                 case RpcConstants.ADDRESS_DIRECT_GROUP:
                     return directUrlGroup;
