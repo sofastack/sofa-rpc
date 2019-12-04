@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.struct.ListDifference;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
@@ -63,12 +65,17 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(AllConnectConnectionHolder.class);
+    private final static Logger LOGGER             = LoggerFactory.getLogger(AllConnectConnectionHolder.class);
 
     /**
      * 服务消费者配置
      */
     protected ConsumerConfig    consumerConfig;
+
+    /**
+     * switch
+     */
+    protected boolean           connectionValidate = RpcConfigs.getBooleanValue(RpcOptions.CONNNECTION_VALIDATE_SLEEP);
 
     /**
      * 构造函数
@@ -774,23 +781,27 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      */
     protected boolean doubleCheck(String interfaceId, ProviderInfo providerInfo, ClientTransport transport) {
         if (transport.isAvailable()) {
-            try { // 睡一下下 防止被连上又被服务端踢下线
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                // ignore
-            }
-            if (transport.isAvailable()) { // double check
+            if (!connectionValidate) {
                 return true;
-            } else { // 可能在黑名单里，刚连上就断开了
-                if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
-                    LOGGER.warnWithApp(consumerConfig.getAppName(),
-                        "Connection has been closed after connected (in last 100ms)!" +
-                            " Maybe connectionNum of provider has been reached limit," +
-                            " or your host is in the blacklist of provider {}/{}",
-                        interfaceId, transport.getConfig().getProviderInfo());
+            } else {
+                try { // 睡一下下 防止被连上又被服务端踢下线
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    // ignore
                 }
-                providerInfo.setDynamicAttr(ProviderInfoAttrs.ATTR_RC_PERIOD_COEFFICIENT, 5);
-                return false;
+                if (transport.isAvailable()) { // double check
+                    return true;
+                } else { // 可能在黑名单里，刚连上就断开了
+                    if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
+                        LOGGER.warnWithApp(consumerConfig.getAppName(),
+                            "Connection has been closed after connected (in last 100ms)!" +
+                                " Maybe connectionNum of provider has been reached limit," +
+                                " or your host is in the blacklist of provider {}/{}",
+                            interfaceId, transport.getConfig().getProviderInfo());
+                    }
+                    providerInfo.setDynamicAttr(ProviderInfoAttrs.ATTR_RC_PERIOD_COEFFICIENT, 5);
+                    return false;
+                }
             }
         } else {
             return false;
