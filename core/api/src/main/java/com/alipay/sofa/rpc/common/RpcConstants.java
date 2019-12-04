@@ -495,13 +495,6 @@ public class RpcConstants {
      */
     public static final String  ADDRESS_DIRECT_GROUP               = "_DIRECT";
 
-    /**
-     * 默认直连分组（RpcInvokeContext.getContext().getTargetUrl）
-     *
-     * @since 5.6.3
-     */
-    public static final String  ADDRESS_DIRECT_CONTEXT_GROUP       = "_DIRECT_CONTEXT";
-
     /*--------客户端相关结束---------*/
 
     /*--------系统参数相关开始---------*/
