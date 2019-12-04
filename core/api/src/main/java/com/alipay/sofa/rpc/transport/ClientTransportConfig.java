@@ -297,31 +297,4 @@ public class ClientTransportConfig {
             ", channelListeners=" + channelListeners +
             '}';
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ClientTransportConfig that = (ClientTransportConfig) o;
-        return connectTimeout == that.connectTimeout &&
-            disconnectTimeout == that.disconnectTimeout &&
-            invokeTimeout == that.invokeTimeout &&
-            connectionNum == that.connectionNum &&
-            payload == that.payload &&
-            useEpoll == that.useEpoll &&
-            Objects.equals(providerInfo, that.providerInfo) &&
-            Objects.equals(container, that.container) &&
-            Objects.equals(channelListeners, that.channelListeners);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(providerInfo, container, connectTimeout, disconnectTimeout, invokeTimeout, connectionNum,
-            payload,
-            useEpoll, channelListeners);
-    }
 }
