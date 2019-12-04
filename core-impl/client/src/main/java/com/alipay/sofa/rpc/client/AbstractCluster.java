@@ -17,9 +17,7 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -53,7 +51,6 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -120,11 +117,6 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected FilterChain      filterChain;
 
-    /***
-     * 是否允许通过上下文地址创建连接。
-     */
-    protected boolean          createConnWhenAbsent;
-
     @Override
     public synchronized void init() {
         if (initialized) { // 已初始化
@@ -165,8 +157,6 @@ public abstract class AbstractCluster extends Cluster {
 
         // 启动成功
         initialized = true;
-
-        this.createConnWhenAbsent = RpcConfigs.getBooleanValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT);
 
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
@@ -380,11 +370,6 @@ public abstract class AbstractCluster extends Cluster {
                 if (StringUtils.isNotBlank(targetIP)) {
                     // 如果上下文指定provider，直接返回
                     ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
-                    /**
-                     * 直连场景，如果没有可用tcp连接，尝试创建
-                     */
-                    createConnectionWhenAbsent(providerInfo);
-
                     return providerInfo;
                 }
             }
@@ -406,11 +391,6 @@ public abstract class AbstractCluster extends Cluster {
         if (StringUtils.isNotBlank(targetIP)) {
             // 如果指定了调用地址
             providerInfo = selectPinpointProvider(targetIP, providerInfos);
-            /**
-             * 直连场景，如果没有可用tcp连接，尝试创建
-             */
-            createConnectionWhenAbsent(providerInfo);
-
             ClientTransport clientTransport = selectByProvider(message, providerInfo);
             if (clientTransport == null) {
                 // 指定的不存在或已死，抛出异常
@@ -430,18 +410,6 @@ public abstract class AbstractCluster extends Cluster {
         }
         throw unavailableProviderException(message.getTargetServiceUniqueName(),
             convertProviders2Urls(originalProviderInfos));
-    }
-
-    /**
-     * jvm启动参数：consumer.connect.create.when.absent=true 允许为直连创建tcp连接
-     */
-    protected void createConnectionWhenAbsent(ProviderInfo providerInfo) {
-        if (this.createConnWhenAbsent) {
-            // 直连分组没有包含调用的provider，尝试初始化
-            if (!containsProviderInfo(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, providerInfo)) {
-                addProvider(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, Arrays.asList(providerInfo)));
-            }
-        }
     }
 
     /**

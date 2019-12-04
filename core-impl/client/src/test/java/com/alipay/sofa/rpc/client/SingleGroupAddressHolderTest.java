@@ -64,17 +64,17 @@ public class SingleGroupAddressHolderTest {
 
         SingleGroupAddressHolder addressHolder = new SingleGroupAddressHolder(null);
         List<ProviderGroup> ps = addressHolder.getProviderGroups();
-        Assert.assertTrue(ps.size() == 3);
+        Assert.assertTrue(ps.size() == 2);
         Assert.assertTrue(ps.get(0).size() == 0);
         addressHolder.registryGroup.add(ProviderHelper.toProviderInfo("127.0.0.1:12200"));
         addressHolder.registryGroup.add(ProviderHelper.toProviderInfo("127.0.0.1:12201"));
 
         ps = addressHolder.getProviderGroups();
-        Assert.assertTrue(ps.size() == 3);
+        Assert.assertTrue(ps.size() == 2);
         Assert.assertTrue(ps.get(0).size() == 2);
 
         addressHolder.directUrlGroup.add(ProviderHelper.toProviderInfo("127.0.0.1:12200"));
-        Assert.assertTrue(ps.size() == 3);
+        Assert.assertTrue(ps.size() == 2);
         Assert.assertTrue(ps.get(0).size() == 2);
         Assert.assertTrue(ps.get(1).size() == 1);
         Assert.assertTrue(addressHolder.getAllProviderSize() == 3);
@@ -177,7 +177,7 @@ public class SingleGroupAddressHolderTest {
         addressHolder.updateAllProviders(ps0);
 
         current = addressHolder.getProviderGroups();
-        Assert.assertTrue(current.size() == 3);
+        Assert.assertTrue(current.size() == 2);
         Assert.assertTrue(current.get(0).size() == 2);
         Assert.assertTrue(addressHolder.getProviderGroup("xxx").size() == 2);
         Assert.assertTrue(addressHolder.getProviderGroup(ADDRESS_DIRECT_GROUP).size() == 1);
@@ -192,7 +192,7 @@ public class SingleGroupAddressHolderTest {
         addressHolder.updateAllProviders(ps1);
 
         current = addressHolder.getProviderGroups();
-        Assert.assertTrue(current.size() == 3);
+        Assert.assertTrue(current.size() == 2);
         Assert.assertTrue(current.get(0).size() == 4);
         Assert.assertTrue(addressHolder.getProviderGroup("xxx").size() == 4);
         Assert.assertTrue(addressHolder.getAllProviderSize() == 4);
@@ -202,7 +202,7 @@ public class SingleGroupAddressHolderTest {
         addressHolder.updateAllProviders(ps2);
 
         current = addressHolder.getProviderGroups();
-        Assert.assertTrue(current.size() == 3);
+        Assert.assertTrue(current.size() == 2);
         Assert.assertTrue(current.get(0).size() == 0);
         Assert.assertTrue(addressHolder.getProviderGroup("xxx").size() == 0);
         Assert.assertTrue(addressHolder.getAllProviderSize() == 0);
@@ -216,7 +216,7 @@ public class SingleGroupAddressHolderTest {
         addressHolder.updateAllProviders(ps3);
 
         current = addressHolder.getProviderGroups();
-        Assert.assertTrue(current.size() == 3);
+        Assert.assertTrue(current.size() == 2);
         Assert.assertTrue(current.get(0).size() == 3);
         Assert.assertTrue(addressHolder.getProviderGroup("xxx").size() == 3);
         Assert.assertTrue(addressHolder.getAllProviderSize() == 3);
@@ -228,7 +228,7 @@ public class SingleGroupAddressHolderTest {
         addressHolder.updateAllProviders(ps4);
 
         current = addressHolder.getProviderGroups();
-        Assert.assertTrue(current.size() == 3);
+        Assert.assertTrue(current.size() == 2);
         Assert.assertTrue(current.get(0).size() == 2);
         Assert.assertTrue(addressHolder.getProviderGroup("xxx").size() == 2);
         Assert.assertTrue(addressHolder.getAllProviderSize() == 2);

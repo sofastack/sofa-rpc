@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ChannelListener;
 
 import java.util.List;
+import java.util.Objects;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
@@ -295,5 +296,32 @@ public class ClientTransportConfig {
             ", useEpoll=" + useEpoll +
             ", channelListeners=" + channelListeners +
             '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ClientTransportConfig that = (ClientTransportConfig) o;
+        return connectTimeout == that.connectTimeout &&
+            disconnectTimeout == that.disconnectTimeout &&
+            invokeTimeout == that.invokeTimeout &&
+            connectionNum == that.connectionNum &&
+            payload == that.payload &&
+            useEpoll == that.useEpoll &&
+            Objects.equals(providerInfo, that.providerInfo) &&
+            Objects.equals(container, that.container) &&
+            Objects.equals(channelListeners, that.channelListeners);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(providerInfo, container, connectTimeout, disconnectTimeout, invokeTimeout, connectionNum,
+            payload,
+            useEpoll, channelListeners);
     }
 }
