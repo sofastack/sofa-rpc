@@ -437,9 +437,8 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected void createConnectionWhenAbsent(ProviderInfo providerInfo) {
         if (this.createConnWhenAbsent) {
-            // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
-            if (connectionHolder.isAvailableEmpty()
-                && !containsProviderInfo(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, providerInfo)) {
+            // 直连分组没有包含调用的provider，尝试初始化
+            if (!containsProviderInfo(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, providerInfo)) {
                 addProvider(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, Arrays.asList(providerInfo)));
             }
         }
