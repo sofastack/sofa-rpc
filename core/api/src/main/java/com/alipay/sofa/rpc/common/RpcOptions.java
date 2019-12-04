@@ -36,7 +36,7 @@ public class RpcOptions {
     public static final String EXTENSION_LOAD_PATH                      = "extension.load.path";
     /**
      * 需要被加载的模块列表，多个用逗号隔开
-     * 
+     *
      * @since 5.3.0
      */
     public static final String MODULE_LOAD_LIST                         = "module.load.list";
@@ -287,7 +287,7 @@ public class RpcOptions {
      * 默认连接管理器
      */
     public static final String CONSUMER_CONNECTION_HOLDER               = "consumer.connectionHolder";
-    /** 
+    /**
      * 默认地址管理器
      */
     public static final String CONSUMER_ADDRESS_HOLDER                  = "consumer.addressHolder";
@@ -530,4 +530,9 @@ public class RpcOptions {
      * Automatic fault tolerance measure strategy
      */
     public static final String AFT_MEASURE_STRATEGY                     = "aft.measure.strategy";
+
+    /**
+     * use conn validate by server or not, usually we use it as sec or backlist ip
+     */
+    public static final String CONNNECTION_VALIDATE_SLEEP               = "connection.validate.sleep";
 }

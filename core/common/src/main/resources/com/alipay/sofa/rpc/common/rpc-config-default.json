@@ -296,5 +296,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   //是否所有客户端共享一个重连线程
   "consumer.share.reconnect.thread": false,
   //是否禁止开启lookout采集信息
-  "lookout.collect.disable": false
+  "lookout.collect.disable": false,
+  //是否禁止开启lookout采集信息
+  "connection.validate.sleep": false
 }
