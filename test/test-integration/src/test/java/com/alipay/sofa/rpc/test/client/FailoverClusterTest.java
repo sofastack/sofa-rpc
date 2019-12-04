@@ -342,6 +342,43 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
         consumer.unRefer();
     }
 
+    @Test
+    public void testRpcDirectInvokeFromContextWithAvailableProviders() {
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(13900);
+
+        ProviderConfig<HelloService> provider = new ProviderConfig();
+        provider.setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("x-demo-invoke"))
+            .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+            .setProxy("javassist")
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setTimeout(3000);
+
+        provider.export();
+
+        ConsumerConfig<HelloService> consumer = new ConsumerConfig();
+        consumer.setInterfaceId(HelloService.class.getName())
+            .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+            // 模拟有可用服务
+            .setDirectUrl("bolt://127.0.0.1:65534")
+            .setProxy("javassist");
+
+        HelloService proxy = consumer.refer();
+
+        for (int i = 0; i < 3; i++) {
+            RpcInvokeContext.getContext().setTargetURL("127.0.0.1:13900");
+            Assert.assertEquals("x-demo-invoke", proxy.sayHello("x-demo-invoke", 1));
+        }
+
+        provider.unExport();
+        consumer.unRefer();
+    }
+
     @Test(expected = SofaRouteException.class)
     public void testRpcDirectInvokeFromContextNotAllowed() {
 

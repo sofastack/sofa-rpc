@@ -23,8 +23,6 @@ import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -40,6 +38,9 @@ public class SingleGroupAddressHolder extends AddressHolder {
      * 配置的直连地址列表
      */
     protected ProviderGroup        directUrlGroup;
+
+    protected ProviderGroup        directContextUrlGroup;
+
     /**
      * 注册中心来的地址列表
      */
@@ -63,6 +64,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
         super(consumerBootstrap);
         directUrlGroup = new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP);
         registryGroup = new ProviderGroup();
+        directContextUrlGroup = new ProviderGroup(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP);
     }
 
     @Override
@@ -80,8 +82,14 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public ProviderGroup getProviderGroup(String groupName) {
         rLock.lock();
         try {
-            return RpcConstants.ADDRESS_DIRECT_GROUP.equals(groupName) ? directUrlGroup
-                : registryGroup;
+            switch (groupName) {
+                case RpcConstants.ADDRESS_DIRECT_GROUP:
+                    return directUrlGroup;
+                case RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP:
+                    return directContextUrlGroup;
+                default:
+                    return registryGroup;
+            }
         } finally {
             rLock.unlock();
         }
@@ -94,6 +102,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
             List<ProviderGroup> list = new ArrayList<ProviderGroup>();
             list.add(registryGroup);
             list.add(directUrlGroup);
+            list.add(directContextUrlGroup);
             return list;
         } finally {
             rLock.unlock();
@@ -104,7 +113,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
     public int getAllProviderSize() {
         rLock.lock();
         try {
-            return directUrlGroup.size() + registryGroup.size();
+            return directUrlGroup.size() + registryGroup.size() + directContextUrlGroup.size();
         } finally {
             rLock.unlock();
         }
@@ -149,12 +158,15 @@ public class SingleGroupAddressHolder extends AddressHolder {
 
     @Override
     public void updateAllProviders(List<ProviderGroup> providerGroups) {
+        ConcurrentHashSet<ProviderInfo> tmpDirectContextUrl = new ConcurrentHashSet<ProviderInfo>();
         ConcurrentHashSet<ProviderInfo> tmpDirectUrl = new ConcurrentHashSet<ProviderInfo>();
         ConcurrentHashSet<ProviderInfo> tmpRegistry = new ConcurrentHashSet<ProviderInfo>();
         for (ProviderGroup providerGroup : providerGroups) {
             if (!ProviderHelper.isEmpty(providerGroup)) {
                 if (RpcConstants.ADDRESS_DIRECT_GROUP.equals(providerGroup.getName())) {
                     tmpDirectUrl.addAll(providerGroup.getProviderInfos());
+                } else if (RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP.equals(providerGroup.getName())) {
+                    tmpDirectContextUrl.addAll(providerGroup.getProviderInfos());
                 } else {
                     tmpRegistry.addAll(providerGroup.getProviderInfos());
                 }
@@ -162,6 +174,7 @@ public class SingleGroupAddressHolder extends AddressHolder {
         }
         wLock.lock();
         try {
+            this.directContextUrlGroup.setProviderInfos(new ArrayList<ProviderInfo>(tmpDirectContextUrl));
             this.directUrlGroup.setProviderInfos(new ArrayList<ProviderInfo>(tmpDirectUrl));
             this.registryGroup.setProviderInfos(new ArrayList<ProviderInfo>(tmpRegistry));
         } finally {

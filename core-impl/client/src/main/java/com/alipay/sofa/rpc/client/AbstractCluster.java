@@ -365,25 +365,25 @@ public abstract class AbstractCluster extends Cluster {
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
 
         //保存一下原始地址,为了打印
-        List<ProviderInfo> orginalProviderInfos;
+        List<ProviderInfo> originalProviderInfos;
 
         if (CommonUtils.isEmpty(providerInfos)) {
             /**
+             * 如果注册中心没有provider，可能上下文中指定了provider
+             *
              * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
-             * 1. RpcInvokeContext.getContext
+             * 1. RpcInvokeContext.getContext().getTargetUrl()
              */
             RpcInternalContext context = RpcInternalContext.peekContext();
             if (context != null) {
                 String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
-                if (this.createConnWhenAbsent/**允许创建直连连接 */
-                && StringUtils.isNotBlank(targetIP)) {
+                if (StringUtils.isNotBlank(targetIP)) {
                     // 如果上下文指定provider，直接返回
                     ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
-                    // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
-                    if (connectionHolder.isAvailableEmpty()
-                        && !containsProviderInfo(RpcConstants.ADDRESS_DIRECT_GROUP, providerInfo)) {
-                        addProvider(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, Arrays.asList(providerInfo)));
-                    }
+                    /**
+                     * 直连场景，如果没有可用tcp连接，尝试创建
+                     */
+                    createConnectionWhenAbsent(providerInfo);
 
                     return providerInfo;
                 }
@@ -391,7 +391,7 @@ public abstract class AbstractCluster extends Cluster {
 
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         } else {
-            orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
+            originalProviderInfos = new ArrayList<>(providerInfos);
         }
         if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
             providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
@@ -406,6 +406,11 @@ public abstract class AbstractCluster extends Cluster {
         if (StringUtils.isNotBlank(targetIP)) {
             // 如果指定了调用地址
             providerInfo = selectPinpointProvider(targetIP, providerInfos);
+            /**
+             * 直连场景，如果没有可用tcp连接，尝试创建
+             */
+            createConnectionWhenAbsent(providerInfo);
+
             ClientTransport clientTransport = selectByProvider(message, providerInfo);
             if (clientTransport == null) {
                 // 指定的不存在或已死，抛出异常
@@ -424,7 +429,20 @@ public abstract class AbstractCluster extends Cluster {
             } while (!providerInfos.isEmpty());
         }
         throw unavailableProviderException(message.getTargetServiceUniqueName(),
-            convertProviders2Urls(orginalProviderInfos));
+            convertProviders2Urls(originalProviderInfos));
+    }
+
+    /**
+     * jvm启动参数：consumer.connect.create.when.absent=true 允许为直连创建tcp连接
+     */
+    protected void createConnectionWhenAbsent(ProviderInfo providerInfo) {
+        if (this.createConnWhenAbsent) {
+            // 上下文地址直连，如果没有可用连接，并且直连分组没有包含调用的provider，尝试初始化
+            if (connectionHolder.isAvailableEmpty()
+                && !containsProviderInfo(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, providerInfo)) {
+                addProvider(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_CONTEXT_GROUP, Arrays.asList(providerInfo)));
+            }
+        }
     }
 
     /**
