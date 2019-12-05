@@ -532,6 +532,11 @@ public class RpcOptions {
     public static final String AFT_MEASURE_STRATEGY                     = "aft.measure.strategy";
 
     /**
+     * 是否允许通过RpcInvokeContext.getTargetUrl创建tcp连接，默认允许
+     */
+    public static final String RPC_CREATE_CONN_WHEN_ABSENT              = "consumer.connect.create.when.absent";
+
+    /**
      * use conn validate by server or not, usually we use it as sec or backlist ip
      */
     public static final String CONNNECTION_VALIDATE_SLEEP               = "connection.validate.sleep";

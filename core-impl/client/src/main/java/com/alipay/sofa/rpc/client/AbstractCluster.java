@@ -355,12 +355,28 @@ public abstract class AbstractCluster extends Cluster {
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
 
         //保存一下原始地址,为了打印
-        List<ProviderInfo> orginalProviderInfos;
+        List<ProviderInfo> originalProviderInfos;
 
         if (CommonUtils.isEmpty(providerInfos)) {
+            /**
+             * 如果注册中心没有provider，可能上下文中指定了provider
+             *
+             * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
+             * 1. RpcInvokeContext.getContext().getTargetUrl()
+             */
+            RpcInternalContext context = RpcInternalContext.peekContext();
+            if (context != null) {
+                String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+                if (StringUtils.isNotBlank(targetIP)) {
+                    // 如果上下文指定provider，直接返回
+                    ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
+                    return providerInfo;
+                }
+            }
+
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
         } else {
-            orginalProviderInfos = new ArrayList<ProviderInfo>(providerInfos);
+            originalProviderInfos = new ArrayList<>(providerInfos);
         }
         if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
             providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
@@ -370,15 +386,11 @@ public abstract class AbstractCluster extends Cluster {
         ProviderInfo providerInfo;
         RpcInternalContext context = RpcInternalContext.peekContext();
         if (context != null) {
-            targetIP = (String) RpcInternalContext.getContext().getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+            targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
         if (StringUtils.isNotBlank(targetIP)) {
             // 如果指定了调用地址
             providerInfo = selectPinpointProvider(targetIP, providerInfos);
-            if (providerInfo == null) {
-                // 指定的不存在
-                throw unavailableProviderException(message.getTargetServiceUniqueName(), targetIP);
-            }
             ClientTransport clientTransport = selectByProvider(message, providerInfo);
             if (clientTransport == null) {
                 // 指定的不存在或已死，抛出异常
@@ -397,7 +409,7 @@ public abstract class AbstractCluster extends Cluster {
             } while (!providerInfos.isEmpty());
         }
         throw unavailableProviderException(message.getTargetServiceUniqueName(),
-            convertProviders2Urls(orginalProviderInfos));
+            convertProviders2Urls(originalProviderInfos));
     }
 
     /**
@@ -408,14 +420,18 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
         ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getHost().equals(tp.getHost())
-                && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
-                && providerInfo.getPort() == tp.getPort()) {
-                return providerInfo;
+        // 存在注册中心provider才会遍历
+        if (CommonUtils.isNotEmpty(providerInfos)) {
+            for (ProviderInfo providerInfo : providerInfos) {
+                if (providerInfo.getHost().equals(tp.getHost())
+                    && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
+                    && providerInfo.getPort() == tp.getPort()) {
+                    return providerInfo;
+                }
             }
         }
-        return null;
+        // support direct target url
+        return tp;
     }
 
     /**
@@ -651,8 +667,7 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 关闭连接<br>
-     * 注意：关闭有风险，可能有正在调用的请求，建议判断下isAvailable()
+     * 关闭连接<br> 注意：关闭有风险，可能有正在调用的请求，建议判断下isAvailable()
      */
     protected void closeTransports() {
         if (connectionHolder != null) {
@@ -726,9 +741,7 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 通知状态变成不可用,主要是：<br>
-     * 1.注册中心删除，更新节点后变成不可用时<br>
-     * 2.连接断线后（心跳+调用），如果是可用节点为空
+     * 通知状态变成不可用,主要是：<br> 1.注册中心删除，更新节点后变成不可用时<br> 2.连接断线后（心跳+调用），如果是可用节点为空
      */
     public void notifyStateChangeToUnavailable() {
         final List<ConsumerStateListener> onprepear = consumerConfig.getOnAvailable();
@@ -750,10 +763,7 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 通知状态变成可用,主要是：<br>
-     * 1.启动成功变成可用时<br>
-     * 2.注册中心增加，更新节点后变成可用时<br>
-     * 3.重连上从一个可用节点都没有-->有可用节点时
+     * 通知状态变成可用,主要是：<br> 1.启动成功变成可用时<br> 2.注册中心增加，更新节点后变成可用时<br> 3.重连上从一个可用节点都没有-->有可用节点时
      */
     public void notifyStateChangeToAvailable() {
         final List<ConsumerStateListener> onprepear = consumerConfig.getOnAvailable();
@@ -827,5 +837,16 @@ public abstract class AbstractCluster extends Cluster {
     @Override
     public RouterChain getRouterChain() {
         return routerChain;
+    }
+
+    /**
+     * 判断分组是否包含指定服务
+     * @param groupName 分组名称
+     * @param providerInfo 分组是否包含指定服务
+     * @return true包含，false不包含
+     */
+    public boolean containsProviderInfo(String groupName, ProviderInfo providerInfo) {
+        ProviderGroup group = addressHolder.getProviderGroup(groupName);
+        return group != null && group.providerInfos.contains(providerInfo);
     }
 }
