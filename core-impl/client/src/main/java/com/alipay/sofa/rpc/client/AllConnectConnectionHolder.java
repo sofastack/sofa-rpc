@@ -68,7 +68,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER             = LoggerFactory.getLogger(AllConnectConnectionHolder.class);
+    private final static Logger LOGGER               = LoggerFactory.getLogger(AllConnectConnectionHolder.class);
 
     /**
      * 服务消费者配置
@@ -78,7 +78,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * switch
      */
-    protected boolean           connectionValidate = RpcConfigs.getBooleanValue(RpcOptions.CONNNECTION_VALIDATE_SLEEP);
+    protected boolean           connectionValidate   = RpcConfigs
+                                                         .getBooleanValue(RpcOptions.CONNNECTION_VALIDATE_SLEEP);
+
+    /***
+     * 是否允许通过上下文地址创建连接。
+     */
+    protected boolean           createConnWhenAbsent = RpcConfigs
+                                                         .getBooleanValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT);
 
     /**
      * 构造函数
@@ -553,14 +560,14 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             }
         }
 
-        if (consumerConfig.isCreateConnWhenAbsent()) {
+        if (createConnWhenAbsent) {
             RpcInternalContext context = RpcInternalContext.peekContext();
             String targetIP = (context == null) ? null : (String) context
                 .getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
             /**
              * RpcInvokeContext.getContext().setTargetUrl() 设置了地址，初始化tcp连接
              */
-            if (StringUtils.isNotBlank(targetIP) && transport == null) {
+            if (StringUtils.isNotBlank(targetIP)) {
                 ClientTransportConfig transportConfig = providerToClientConfig(providerInfo);
                 transport = ClientTransportFactory.getClientTransport(transportConfig);
                 initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);

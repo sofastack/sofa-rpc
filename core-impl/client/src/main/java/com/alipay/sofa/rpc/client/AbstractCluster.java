@@ -339,7 +339,7 @@ public abstract class AbstractCluster extends Cluster {
      * @throws SofaRpcException rpc异常
      */
     protected ProviderInfo select(SofaRequest message, List<ProviderInfo> invokedProviderInfos)
-        throws SofaRpcException {
+            throws SofaRpcException {
         // 粘滞连接，当前连接可用
         if (consumerConfig.isSticky()) {
             if (lastProviderInfo != null) {
@@ -409,7 +409,7 @@ public abstract class AbstractCluster extends Cluster {
             } while (!providerInfos.isEmpty());
         }
         throw unavailableProviderException(message.getTargetServiceUniqueName(),
-            convertProviders2Urls(originalProviderInfos));
+                convertProviders2Urls(originalProviderInfos));
     }
 
     /**
@@ -667,7 +667,8 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 关闭连接<br> 注意：关闭有风险，可能有正在调用的请求，建议判断下isAvailable()
+     * 关闭连接<br>
+     * 注意：关闭有风险，可能有正在调用的请求，建议判断下isAvailable()
      */
     protected void closeTransports() {
         if (connectionHolder != null) {
@@ -741,7 +742,9 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 通知状态变成不可用,主要是：<br> 1.注册中心删除，更新节点后变成不可用时<br> 2.连接断线后（心跳+调用），如果是可用节点为空
+     * 通知状态变成不可用,主要是：<br>
+     * 1.注册中心删除，更新节点后变成不可用时<br>
+     * 2.连接断线后（心跳+调用），如果是可用节点为空
      */
     public void notifyStateChangeToUnavailable() {
         final List<ConsumerStateListener> onprepear = consumerConfig.getOnAvailable();
@@ -763,7 +766,10 @@ public abstract class AbstractCluster extends Cluster {
     }
 
     /**
-     * 通知状态变成可用,主要是：<br> 1.启动成功变成可用时<br> 2.注册中心增加，更新节点后变成可用时<br> 3.重连上从一个可用节点都没有-->有可用节点时
+     * 通知状态变成可用,主要是：<br>
+     * 1.启动成功变成可用时<br>
+     * 2.注册中心增加，更新节点后变成可用时<br>
+     * 3.重连上从一个可用节点都没有-->有可用节点时
      */
     public void notifyStateChangeToAvailable() {
         final List<ConsumerStateListener> onprepear = consumerConfig.getOnAvailable();
@@ -841,7 +847,8 @@ public abstract class AbstractCluster extends Cluster {
 
     /**
      * 判断分组是否包含指定服务
-     * @param groupName 分组名称
+     *
+     * @param groupName    分组名称
      * @param providerInfo 分组是否包含指定服务
      * @return true包含，false不包含
      */
