@@ -207,6 +207,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "consumer.connect.elastic.percent": 0,
   // 弹性连接的连接数
   "consumer.connect.elastic.size": 5,
+  // 是否允许通过RpcInvokeContext.getTargetUrl创建tcp连接，默认允许
+  "consumer.connect.create.when.absent": true,
   /*-------------Consumer相关配置结束-------------*/
 
 

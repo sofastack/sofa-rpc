@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.struct.ListDifference;
@@ -26,8 +27,10 @@ import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConsumerStateListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -549,7 +552,22 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                 return getAvailableClientTransport(providerInfo);
             }
         }
-        return null;
+
+        if (consumerConfig.isCreateConnWhenAbsent()) {
+            RpcInternalContext context = RpcInternalContext.peekContext();
+            String targetIP = (context == null) ? null : (String) context
+                .getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+            /**
+             * RpcInvokeContext.getContext().setTargetUrl() 设置了地址，初始化tcp连接
+             */
+            if (StringUtils.isNotBlank(targetIP) && transport == null) {
+                ClientTransportConfig transportConfig = providerToClientConfig(providerInfo);
+                transport = ClientTransportFactory.getClientTransport(transportConfig);
+                initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
+            }
+        }
+
+        return transport;
     }
 
     @Override
