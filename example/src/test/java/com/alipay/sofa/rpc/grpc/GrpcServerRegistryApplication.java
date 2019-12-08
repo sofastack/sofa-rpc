@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.grpc.registry;
+package com.alipay.sofa.rpc.grpc;
 
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -22,8 +22,6 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.dib.sofa.rpc.bootstrap.grpc.GrpcProviderBootstrap;
-import com.alipay.sofa.rpc.grpc.*;
 import io.grpc.examples.helloworld.*;
 
 /**
