@@ -46,27 +46,27 @@ public class GrpcServerTest {
         int port = 50052;
 
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol("grpc")
-                .setPort(port);
+            .setProtocol("grpc")
+            .setPort(port);
 
         ProviderConfig<GreeterImpl> providerConfig = new ProviderConfig<GreeterImpl>()
-                .setApplication(applicationConfig)
-                .setBootstrap("grpc")
-                .setInterfaceId(GreeterGrpc.class.getName())
-                .setRef(new GreeterImpl())
-                .setServer(serverConfig);
+            .setApplication(applicationConfig)
+            .setBootstrap("grpc")
+            .setInterfaceId(GreeterGrpc.class.getName())
+            .setRef(new GreeterImpl())
+            .setServer(serverConfig);
 
         providerConfig.export();
 
         ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
         consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
-                .setProtocol("grpc")
-                .setDirectUrl("grpc://127.0.0.1:" + port);
+            .setProtocol("grpc")
+            .setDirectUrl("grpc://127.0.0.1:" + port);
 
         GreeterGrpc.GreeterBlockingStub greeterBlockingStub = consumerConfig.refer();
 
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
-                .build();
+            .build();
         HelloReply reply = null;
         HelloRequest request = HelloRequest.newBuilder().setName("world").setDateTime(dateTime).build();
         reply = greeterBlockingStub.sayHello(request);
