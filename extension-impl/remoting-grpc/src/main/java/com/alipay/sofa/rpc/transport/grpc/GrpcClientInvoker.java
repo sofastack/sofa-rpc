@@ -16,29 +16,19 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.core.exception.RpcErrorType;
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
-import io.grpc.ClientCall;
-import io.grpc.MethodDescriptor;
-import io.grpc.MethodDescriptor.MethodType;
-import io.grpc.stub.ClientCalls;
 import io.grpc.stub.StreamObserver;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
-
-import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONObject;
-
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
  * Invoker for Grpc
@@ -68,7 +58,6 @@ public class GrpcClientInvoker {
     /**
      * The constructor
      * @param sofaRequest The SofaRequest
-     * @param methodDescriptor The MethodDescriptor
      * @param channel The Channel
      */
     public GrpcClientInvoker(SofaRequest sofaRequest, Channel channel) {
@@ -85,23 +74,10 @@ public class GrpcClientInvoker {
         try {
             requestClass.cast(request);
         } catch (ClassCastException e) {
-            //TODO: handle exception
             LOGGER.error("Request type error!");
             throw e;
         }
-
-        // if (request instanceof String ) {
-        //     Object realRequest = makeRequestFromString((String)request);
-        // }
         this.timeout = sofaRequest.getTimeout();
-    }
-
-    public Object makeRequestFromString(String in) {
-        int end = in.lastIndexOf('}');
-        int begine = in.indexOf('{');
-        String trimmed = in.substring(begine, end + 1);
-        JSONObject jObject = JSONObject.parseObject(trimmed);
-        return new Object();
     }
 
     public SofaResponse invoke() {
