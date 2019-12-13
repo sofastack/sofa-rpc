@@ -59,7 +59,7 @@
         <sofa.common.tools.version>1.0.18</sofa.common.tools.version>
         <javassist.version>3.20.0-GA</javassist.version>
         <netty.version>4.1.42.Final</netty.version>
-        <hessian.version>3.3.7-SNAPSHOT</hessian.version>
+        <hessian.version>3.3.7</hessian.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
         <bolt.version>1.5.6</bolt.version>
         <tracer.version>2.1.2</tracer.version>
