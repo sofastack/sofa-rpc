@@ -73,7 +73,7 @@ public class RpcSofaTracer extends Tracer {
      */
     public static final String ERROR_SOURCE    = "rpc";
 
-    private SofaTracer         sofaTracer;
+    protected SofaTracer       sofaTracer;
 
     public RpcSofaTracer() {
         //构造 client 的日志打印实例
@@ -202,20 +202,11 @@ public class RpcSofaTracer extends Tracer {
             //系统
             oldTracerContext.put(TracerCompatibleConstants.PEN_SYS_ATTRS_KEY,
                 sofaTracerSpanContext.getSysSerializedBaggage());
-            Map<String, Object> attachments = rpcInternalContext.getAttachments();
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_APP_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_APP));
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_ZONE_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_ZONE));
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_IDC_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_IDC));
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_IP_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_IP));
             request.addRequestProp(RemotingConstants.RPC_TRACE_NAME, oldTracerContext);
         }
     }
 
-    private String getEmptyStringIfNull(Map map, String key) {
+    protected String getEmptyStringIfNull(Map map, String key) {
         if (map == null || map.size() <= 0) {
             return StringUtils.EMPTY;
         }
@@ -364,7 +355,7 @@ public class RpcSofaTracer extends Tracer {
 
     private void generateClientErrorContext(Map<String, String> context, SofaRequest request, SofaTracerSpan clientSpan) {
         Map<String, String> tagsWithStr = clientSpan.getTagsWithStr();
-        //记录的上下文信息
+        //记录的上下文信息// do not change this key
         context.put("serviceName", tagsWithStr.get(RpcSpanTags.SERVICE));
         context.put("methodName", tagsWithStr.get(RpcSpanTags.METHOD));
         context.put("protocol", tagsWithStr.get(RpcSpanTags.PROTOCOL));
