@@ -7,7 +7,7 @@
     <parent>
         <artifactId>sofa-rpc-extension-impl</artifactId>
         <groupId>com.alipay.sofa</groupId>
-        <version>5.6.3</version>
+        <version>5.6.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>sofa-rpc-bootstrap-dubbo</artifactId>
