@@ -21,7 +21,7 @@
         <jetty.version>7.5.4.v20111024</jetty.version>
         <curator.version>4.0.1</curator.version>
         <opentracing.version>0.22.0</opentracing.version>
-        <dubbo.version>2.8.4</dubbo.version>
+        <dubbo.version>2.6.7</dubbo.version>
         <nacos.version>1.0.0</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <!-- serialization -->
