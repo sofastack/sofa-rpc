@@ -73,7 +73,7 @@ public class RpcSofaTracer extends Tracer {
      */
     public static final String ERROR_SOURCE    = "rpc";
 
-    private SofaTracer         sofaTracer;
+    protected SofaTracer       sofaTracer;
 
     public RpcSofaTracer() {
         //构造 client 的日志打印实例
@@ -206,7 +206,7 @@ public class RpcSofaTracer extends Tracer {
         }
     }
 
-    private String getEmptyStringIfNull(Map map, String key) {
+    protected String getEmptyStringIfNull(Map map, String key) {
         if (map == null || map.size() <= 0) {
             return StringUtils.EMPTY;
         }
