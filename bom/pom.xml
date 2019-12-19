@@ -128,7 +128,7 @@
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-log4j12</artifactId>
                 <version>${slf4j.version}</version>
-            </dependency> 
+            </dependency>
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-classic</artifactId>
@@ -315,6 +315,10 @@
                     <exclusion>
                         <artifactId>spring</artifactId>
                         <groupId>org.springframework</groupId>
+                    </exclusion>
+                    <exclusion>
+                        <artifactId>netty</artifactId>
+                        <groupId>org.jboss.netty</groupId>
                     </exclusion>
                 </exclusions>
             </dependency>
