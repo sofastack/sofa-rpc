@@ -505,4 +505,5 @@ public class RpcConstants {
 
     /* --------系统参数相关结束---------*/
 
+    public static final String  SOFA_REQUEST_HEADER_KEY            = "request_header_key";
 }
