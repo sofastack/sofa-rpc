@@ -6,10 +6,11 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-bom</artifactId>
-    <version>5.6.4-SNAPSHOT</version>
+    <version>${revision}</version>
     <packaging>pom</packaging>
 
     <properties>
+        <revision>5.6.4-SNAPSHOT</revision>
         <javassist.version>3.20.0-GA</javassist.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <netty.version>4.1.42.Final</netty.version>
