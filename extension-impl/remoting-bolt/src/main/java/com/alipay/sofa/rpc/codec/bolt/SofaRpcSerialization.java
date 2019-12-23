@@ -153,7 +153,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             Map<String, String> headerMap = mapSerializer.decode(header);
             requestCommand.setRequestHeader(headerMap);
             RpcInvokeContext.getContext().put(RpcConstants.SOFA_REQUEST_HEADER_KEY,
-                    Collections.unmodifiableMap((new HashMap<>(headerMap))));
+                Collections.unmodifiableMap(headerMap));
 
             return true;
         }
