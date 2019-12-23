@@ -14,16 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.grpc.registry;
+package com.alipay.sofa.rpc.grpc;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.dib.sofa.rpc.bootstrap.grpc.GrpcProviderBootstrap;
-import com.alipay.sofa.rpc.grpc.*;
 import io.grpc.examples.helloworld.*;
 
 /**
@@ -48,12 +47,12 @@ public class GrpcServerRegistryApplication {
             .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("grpc")
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setPort(port);
 
         ProviderConfig<GreeterImpl> providerConfig = new ProviderConfig<GreeterImpl>()
             .setApplication(applicationConfig)
-            .setBootstrap("grpc")
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setInterfaceId(GreeterGrpc.class.getName())
             .setRef(new GreeterImpl())
             .setServer(serverConfig)

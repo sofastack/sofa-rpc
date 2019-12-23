@@ -32,10 +32,8 @@ import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.grpc.MethodDescriptor;
 
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -86,7 +84,6 @@ public class GrpcClientTransport extends ClientTransport {
             try {
                 channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                // TODO Auto-generated catch block
                 LOGGER.warn("GRPC channel shut down interrupted.");
                 e.printStackTrace();
             }
@@ -132,11 +129,9 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
-        String methodName = request.getMethodName();
         try {
             SofaResponse r = new GrpcClientInvoker(request, channel).invoke();
             return r;
-            // return new SofaResponse();
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);
         }
