@@ -67,11 +67,14 @@ public class RegistryUtils {
                         host = SystemInfo.getLocalHost();
                     }
                 }
-
+                Integer port = server.getVirtualPort();
+                if (port == null) {
+                    port = server.getPort();
+                }
                 Map<String, String> metaData = convertProviderToMap(providerConfig, server);
                 //noinspection unchecked
                 sb.append(server.getProtocol()).append("://").append(host).append(":")
-                    .append(server.getPort()).append(server.getContextPath()).append("?version=1.0")
+                    .append(port).append(server.getContextPath()).append("?version=1.0")
                     .append(convertMap2Pair(metaData));
                 urls.add(sb.toString());
             }
@@ -239,16 +242,11 @@ public class RegistryUtils {
     /**
      * Init or add list.
      *
-     * @param <K>
-     *         the key parameter
-     * @param <V>
-     *         the value parameter
-     * @param orginMap
-     *         the orgin map
-     * @param key
-     *         the key
-     * @param needAdd
-     *         the need add
+     * @param <K>      the key parameter
+     * @param <V>      the value parameter
+     * @param orginMap the orgin map
+     * @param key      the key
+     * @param needAdd  the need add
      */
     public static <K, V> void initOrAddList(Map<K, List<V>> orginMap, K key, V needAdd) {
         List<V> listeners = orginMap.get(key);
