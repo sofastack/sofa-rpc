@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.test.grpc;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -46,12 +47,12 @@ public class GrpcServerTest {
         int port = 50052;
 
         ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("grpc")
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setPort(port);
 
         ProviderConfig<GreeterImpl> providerConfig = new ProviderConfig<GreeterImpl>()
             .setApplication(applicationConfig)
-            .setBootstrap("grpc")
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setInterfaceId(GreeterGrpc.class.getName())
             .setRef(new GreeterImpl())
             .setServer(serverConfig);
@@ -60,7 +61,7 @@ public class GrpcServerTest {
 
         ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
         consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
-            .setProtocol("grpc")
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setDirectUrl("grpc://127.0.0.1:" + port);
 
         GreeterGrpc.GreeterBlockingStub greeterBlockingStub = consumerConfig.refer();

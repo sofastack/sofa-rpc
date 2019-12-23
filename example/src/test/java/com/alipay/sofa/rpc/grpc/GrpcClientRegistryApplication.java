@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.grpc;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.log.Logger;
@@ -45,7 +46,7 @@ public class GrpcClientRegistryApplication {
 
         ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
         consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
-            .setProtocol("grpc")
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setRegistry(registryConfig);
 
         // GreeterGrpc.GreeterBlockingStub s = new         
