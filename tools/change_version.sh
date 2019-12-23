@@ -21,7 +21,7 @@ echo "Change version in root pom.xml ===>"
 sed "s/<revision>.*<\/revision>/<revision>$1<\/revision>/" $shellDir/../pom.xml
 
 echo "Change version in sofa-rpc-all ===>"
-sed "s/<revision>.*<\/revision>/<revision>$1<\/revision>/" $shellDir/../all/pom.xml
+sed "/<project /,/<name/ s/<version>[^\$].*<\/version>/<version>$1<\/version>/" $shellDir/../all/pom.xml
 
 echo "Change version in sofa-rpc-bom ===>"
 sed "s/<revision>.*<\/revision>/<revision>$1<\/revision>/" $shellDir/../bom/pom.xml
