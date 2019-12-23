@@ -16,13 +16,13 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
+import com.alibaba.dubbo.config.DubboShutdownHook;
 import com.alibaba.dubbo.config.ProtocolConfig;
 import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -61,13 +61,6 @@ public class DubboSingleton {
      * Destroy all dubbo resources
      */
     public static void destroyAll() {
-        for (Map.Entry<ServerConfig, ProtocolConfig> entry : SERVER_MAP.entrySet()) {
-            entry.getValue().destory();
-        }
-        try {
-            ProtocolConfig.destroyAll();
-        } catch (Exception e) {
-            // NOPMD
-        }
+        DubboShutdownHook.getDubboShutdownHook().destroyAll();
     }
 }
