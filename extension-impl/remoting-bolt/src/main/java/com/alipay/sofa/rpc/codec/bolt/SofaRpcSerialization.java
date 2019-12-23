@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec.bolt;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -152,7 +153,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             Map<String, String> headerMap = mapSerializer.decode(header);
             requestCommand.setRequestHeader(headerMap);
             RpcInvokeContext.getContext().put(RpcConstants.SOFA_REQUEST_HEADER_KEY,
-                new HashMap<>(headerMap));
+                    Collections.unmodifiableMap((new HashMap<>(headerMap))));
 
             return true;
         }
