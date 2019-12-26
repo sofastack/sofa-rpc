@@ -373,6 +373,8 @@ public class RpcSofaTracer extends Tracer {
     @Override
     public void serverReceived(SofaRequest request) {
 
+        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+
         Map<String, String> tags = new HashMap<String, String>();
         //server tags 必须设置
         tags.put(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER);
@@ -387,15 +389,15 @@ public class RpcSofaTracer extends Tracer {
             //新
             spanContext = SofaTracerSpanContext.deserializeFromString(spanStrs);
         }
-        if (spanContext == null) {
-            SelfLog.error("SpanContext created error when server received and root SpanContext created.");
-            spanContext = SofaTracerSpanContext.rootStart(true);
-        }
+        //使用客户端的进行初始化，可能客户端为空，没关系
+        SofaTracerSpan serverSpan = (SofaTracerSpan) this.sofaTracer.buildSpan(request.getInterfaceName())
+            .asChildOf(spanContext)
+            .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+            .start();
 
-        SofaTracerSpan serverSpan = new SofaTracerSpan(this.sofaTracer, System.currentTimeMillis(),
-            request.getInterfaceName()
-            , spanContext, tags);
-        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+        //重新获取
+        spanContext = serverSpan.getSofaTracerSpanContext();
+
         // Record server receive event
         serverSpan.log(LogData.SERVER_RECV_EVENT_VALUE);
         //放到线程上下文
