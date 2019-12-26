@@ -389,7 +389,7 @@ public class RpcSofaTracer extends Tracer {
         }
         if (spanContext == null) {
             SelfLog.error("SpanContext created error when server received and root SpanContext created.");
-            spanContext = SofaTracerSpanContext.rootStart();
+            spanContext = SofaTracerSpanContext.rootStart(true);
         }
 
         SofaTracerSpan serverSpan = new SofaTracerSpan(this.sofaTracer, System.currentTimeMillis(),
