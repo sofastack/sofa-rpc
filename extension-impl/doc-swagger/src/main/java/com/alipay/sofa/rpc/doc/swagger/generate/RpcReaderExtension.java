@@ -14,31 +14,65 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.rest;
+package com.alipay.sofa.rpc.doc.swagger.generate;
 
+import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.doc.swagger.utils.LocalVariableTableParameterNameDiscoverer;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Collections2;
-import io.swagger.annotations.*;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
+import io.swagger.annotations.ResponseHeader;
 import io.swagger.converter.ModelConverters;
-import io.swagger.models.*;
-import io.swagger.models.parameters.*;
+import io.swagger.models.HttpMethod;
+import io.swagger.models.Model;
+import io.swagger.models.Operation;
+import io.swagger.models.Response;
+import io.swagger.models.Scheme;
+import io.swagger.models.Swagger;
+import io.swagger.models.parameters.AbstractSerializableParameter;
+import io.swagger.models.parameters.BodyParameter;
+import io.swagger.models.parameters.FormParameter;
+import io.swagger.models.parameters.Parameter;
+import io.swagger.models.parameters.QueryParameter;
 import io.swagger.models.properties.ArrayProperty;
 import io.swagger.models.properties.MapProperty;
 import io.swagger.models.properties.Property;
+import io.swagger.models.properties.PropertyBuilder;
 import io.swagger.models.properties.RefProperty;
-import io.swagger.util.*;
+import io.swagger.util.BaseReaderUtils;
+import io.swagger.util.ParameterProcessor;
+import io.swagger.util.PathUtils;
+import io.swagger.util.PrimitiveType;
+import io.swagger.util.ReflectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RpcReaderExtension implements ReaderExtension {
+
+    private final LocalVariableTableParameterNameDiscoverer localVariableTableParameterNameDiscoverer = new LocalVariableTableParameterNameDiscoverer();
 
     @Override
     public int getPriority() {
@@ -433,19 +467,23 @@ public class RpcReaderExtension implements ReaderExtension {
     private Parameter readParam(Swagger swagger, Type type, Class<?> cls, ApiParam param) {
         PrimitiveType fromType = PrimitiveType.fromType(type);
         final Parameter para = null == fromType ? new BodyParameter() : new QueryParameter();
-        Parameter parameter = ParameterProcessor.applyAnnotations(swagger, para,
-            type == null ? String.class : type, null == param ? new ArrayList<Annotation>()
+        Parameter parameter = ParameterProcessor.applyAnnotations(swagger, para, type,
+            null == param ? new ArrayList<Annotation>()
                 : Collections.<Annotation> singletonList(param));
         if (parameter instanceof AbstractSerializableParameter) {
             final AbstractSerializableParameter<?> p = (AbstractSerializableParameter<?>) parameter;
             if (p.getType() == null) {
                 p.setType(null == fromType ? "string" : fromType.getCommonName());
             }
-            p.setRequired(p.getRequired() == true ? true : cls.isPrimitive());
+            p.setRequired(p.getRequired() || cls.isPrimitive());
         } else {
             //hack: Get the from data model paramter from BodyParameter
             BodyParameter bp = (BodyParameter) parameter;
-            bp.setIn("formData");
+            bp.setIn("body");
+            Property property = ModelConverters.getInstance().readAsProperty(type);
+            final Map<PropertyBuilder.PropertyId, Object> args = new EnumMap<PropertyBuilder.PropertyId, Object>(
+                PropertyBuilder.PropertyId.class);
+            bp.setSchema(PropertyBuilder.toModel(PropertyBuilder.merge(property, args)));
         }
         return parameter;
     }
@@ -454,15 +492,7 @@ public class RpcReaderExtension implements ReaderExtension {
     public void applyParameters(ReaderContext context, Operation operation, Method method,
                                 Method interfaceMethod) {
         try {
-            //String[] parameterNames = method.;
-            final java.lang.reflect.Parameter[] parameters = method.getParameters();
-
-            String[] parameterNames = new String[parameters.length];
-            int ix = 0;
-            for (java.lang.reflect.Parameter parameter : parameters) {
-                parameterNames[ix] = parameter.getName();
-                ix++;
-            }
+            String[] parameterNames = getMethodParameterNames(method);
             Type[] genericParameterTypes = method.getGenericParameterTypes();
             Class<?>[] parameterTypes = method.getParameterTypes();
             Annotation[][] parameterAnnotations = method.getParameterAnnotations();
@@ -476,6 +506,20 @@ public class RpcReaderExtension implements ReaderExtension {
             e.printStackTrace();
         }
 
+    }
+
+    private String[] getMethodParameterNames(Method method) {
+        String[] parameterNames = localVariableTableParameterNameDiscoverer.getParameterNames(method);
+        if (CommonUtils.isEmpty(parameterNames)) {
+            java.lang.reflect.Parameter[] parameters = method.getParameters();
+            parameterNames = new String[parameters.length];
+            int ix = 0;
+            for (java.lang.reflect.Parameter parameter : parameters) {
+                parameterNames[ix] = parameter.getName();
+                ix++;
+            }
+        }
+        return parameterNames;
     }
 
     @Override

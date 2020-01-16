@@ -14,15 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.rest;
+package com.alipay.sofa.rpc.doc.swagger.generate;
 
+import io.swagger.annotations.ApiKeyAuthDefinition;
+import io.swagger.annotations.BasicAuthDefinition;
 import io.swagger.annotations.Info;
-import io.swagger.annotations.*;
+import io.swagger.annotations.OAuth2Definition;
+import io.swagger.annotations.Scope;
+import io.swagger.annotations.SwaggerDefinition;
 import io.swagger.models.Contact;
 import io.swagger.models.ExternalDocs;
 import io.swagger.models.License;
+import io.swagger.models.Operation;
+import io.swagger.models.Path;
+import io.swagger.models.Response;
+import io.swagger.models.Scheme;
+import io.swagger.models.Swagger;
 import io.swagger.models.Tag;
-import io.swagger.models.*;
 import io.swagger.models.auth.In;
 import io.swagger.models.parameters.Parameter;
 import io.swagger.util.BaseReaderUtils;
@@ -31,8 +39,16 @@ import io.swagger.util.ReflectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 /**
  * The <code>Reader</code> class scans classes for Swagger annotations.
@@ -48,10 +64,8 @@ public class Reader {
     /**
      * Scans a set of classes for Swagger annotations.
      *
-     * @param swagger
-     *            is the Swagger instance
-     * @param classes
-     *            are a set of classes to scan
+     * @param swagger is the Swagger instance
+     * @param classes are a set of classes to scan
      */
     public static void read(Swagger swagger, Set<Class<?>> classes) {
         final Reader reader = new Reader(swagger);

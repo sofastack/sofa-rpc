@@ -66,6 +66,7 @@
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
+        <bolt.swagger.version>1.5.18</bolt.swagger.version>
     </properties>
 
     <dependencies>
@@ -243,6 +244,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-doc-swagger</artifactId>
+            <version>${sofa.rpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
             <version>${bolt.version}</version>
             <exclusions>
@@ -311,6 +317,11 @@
             <groupId>com.alipay.sofa.lookout</groupId>
             <artifactId>lookout-api</artifactId>
             <version>${lookout.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>${bolt.swagger.version}</version>
         </dependency>
     </dependencies>
 
@@ -414,6 +425,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>

@@ -16,16 +16,22 @@
  */
 package com.alipay.sofa.rpc.rest;
 
-import io.swagger.annotations.ApiParam;
-import io.swagger.annotations.ApiResponse;
-import org.jboss.resteasy.spi.HttpRequest;
-
 import javax.annotation.Resource;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.util.List;
 
 /**
+ *
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Resource
@@ -60,18 +66,21 @@ public interface RestService {
     @Path(value = "/object")
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
-    public @ApiResponse(response = ExampleObj.class, message = "response", code = 200)
-    ExampleObj object(@ApiParam(value = "参数", required = true) ExampleObj code);
-
-    @GET
-    @Path(value = "/api")
-    @Produces(MediaType.APPLICATION_JSON)
-    public String api();
+    public ExampleObj object(ExampleObj code);
 
     @POST
-    @Path(value = "/{interfaceName}/{methodName}")
+    @Path(value = "/objects")
     @Produces(MediaType.APPLICATION_JSON)
-    public String invoke(@PathParam("interfaceName") String interfaceName, @PathParam("methodName") String methodName,
-                         HttpRequest request);
+    @Consumes(MediaType.APPLICATION_JSON)
+    public List<ExampleObj> objects(List<ExampleObj> code);
 
+    @GET
+    @Path(value = "/get/{code}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String get(@PathParam("code") String code);
+
+    @POST
+    @Path(value = "/post/{code}")
+    @Produces(MediaType.TEXT_PLAIN)
+    public String post(@PathParam("code") String code, String body);
 }
