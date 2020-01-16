@@ -209,6 +209,13 @@ public class RpcConstants {
      */
     public static final String  PROCESS_IN_IOTHREAD                = "processInIOThread";
 
+    /**
+     * bolt server process timeout discard in process
+     *
+     * @since 5.6.0
+     */
+    public static final String  TIMEOUT_DISCARD_IN_SERVER          = "timeoutDiscard";
+
     /*--------Config配置值相关结束---------*/
 
     /*--------上下文KEY相关开始---------*/
@@ -498,4 +505,5 @@ public class RpcConstants {
 
     /* --------系统参数相关结束---------*/
 
+    public static final String  SOFA_REQUEST_HEADER_KEY            = "request_header_key";
 }

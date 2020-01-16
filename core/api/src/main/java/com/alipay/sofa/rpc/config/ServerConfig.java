@@ -242,9 +242,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      * 关闭服务
      */
     public synchronized void destroy() {
-        if (server != null) {
-            server.destroy();
-        }
+        ServerFactory.destroyServer(this);
     }
 
     /**
@@ -805,6 +803,14 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
      */
     public Server getServer() {
         return server;
+    }
+
+    /**
+     * Set server
+     * @param server
+     */
+    public void setServer(Server server) {
+        this.server = server;
     }
 
     /**

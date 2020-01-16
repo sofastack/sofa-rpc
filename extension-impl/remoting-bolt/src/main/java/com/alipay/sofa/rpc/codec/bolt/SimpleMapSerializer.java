@@ -51,8 +51,15 @@ public class SimpleMapSerializer {
         UnsafeByteArrayOutputStream out = new UnsafeByteArrayOutputStream(64);
         try {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                writeString(out, entry.getKey());
-                writeString(out, entry.getValue());
+                String key = entry.getKey();
+                String value = entry.getValue();
+                /**
+                 * 排除不写null作为key
+                 */
+                if (key != null && value != null) {
+                    writeString(out, key);
+                    writeString(out, value);
+                }
             }
             return out.toByteArray();
         } catch (IOException ex) {
@@ -80,8 +87,11 @@ public class SimpleMapSerializer {
             while (in.available() > 0) {
                 String key = readString(in);
                 String value = readString(in);
-                map.put(key, value);
+                if (key != null && value != null) {
+                    map.put(key, value);
+                }
             }
+
             return map;
         } catch (IOException ex) {
             throw new DeserializationException(ex.getMessage(), ex);
@@ -90,7 +100,7 @@ public class SimpleMapSerializer {
 
     /**
      * 写一个String
-     * 
+     *
      * @param out 输出流
      * @param str 字符串
      * @throws IOException 写入异常
@@ -109,7 +119,7 @@ public class SimpleMapSerializer {
 
     /**
      * 读取一个字符串
-     * 
+     *
      * @param in 输入流程
      * @return 字符串
      * @throws IOException 读取异常
@@ -129,9 +139,9 @@ public class SimpleMapSerializer {
 
     /**
      * OutputStream.write(int) 仅 write 第一个 byte, 而不是整个 int
-     * 
+     *
      * @param out OutputStream
-     * @param i int value
+     * @param i   int value
      * @throws IOException if an I/O error occurs.
      */
     private void writeInt(OutputStream out, int i) throws IOException {
@@ -143,7 +153,7 @@ public class SimpleMapSerializer {
 
     /**
      * InputStream.read 仅 read 一个 byte
-     * 
+     *
      * @param in InputStream
      * @return int value
      * @throws IOException if an I/O error occurs.

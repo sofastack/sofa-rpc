@@ -17,12 +17,16 @@
 package com.alipay.sofa.rpc.test.client;
 
 import com.alipay.sofa.rpc.client.Cluster;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.core.exception.SofaRouteException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
@@ -33,8 +37,6 @@ import org.junit.Test;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class FailoverClusterTest extends ActivelyDestroyTest {
@@ -303,6 +305,120 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
         }
         Assert.assertEquals(count2, 10);
 
+    }
+
+    @Test
+    public void testRpcDirectInvokeFromContext() {
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(13900);
+
+        ProviderConfig<HelloService> provider = new ProviderConfig();
+        provider.setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("x-demo-invoke"))
+            .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+            .setProxy("javassist")
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setTimeout(3000);
+
+        provider.export();
+
+        ConsumerConfig<HelloService> consumer = new ConsumerConfig();
+        consumer.setInterfaceId(HelloService.class.getName())
+            .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+            .setProxy("javassist");
+
+        HelloService proxy = consumer.refer();
+
+        for (int i = 0; i < 3; i++) {
+            RpcInvokeContext.getContext().setTargetURL("127.0.0.1:13900");
+            Assert.assertEquals("x-demo-invoke", proxy.sayHello("x-demo-invoke", 1));
+        }
+
+        provider.unExport();
+        consumer.unRefer();
+    }
+
+    @Test
+    public void testRpcDirectInvokeFromContextWithAvailableProviders() {
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(13900);
+
+        ProviderConfig<HelloService> provider = new ProviderConfig();
+        provider.setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl("x-demo-invoke"))
+            .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+            .setProxy("javassist")
+            .setSerialization("hessian2")
+            .setServer(serverConfig)
+            .setTimeout(3000);
+
+        provider.export();
+
+        ConsumerConfig<HelloService> consumer = new ConsumerConfig();
+        consumer.setInterfaceId(HelloService.class.getName())
+            .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+            // 模拟有可用服务
+            .setDirectUrl("bolt://127.0.0.1:65534")
+            .setProxy("javassist");
+
+        HelloService proxy = consumer.refer();
+
+        for (int i = 0; i < 3; i++) {
+            RpcInvokeContext.getContext().setTargetURL("127.0.0.1:13900");
+            Assert.assertEquals("x-demo-invoke", proxy.sayHello("x-demo-invoke", 1));
+        }
+
+        provider.unExport();
+        consumer.unRefer();
+    }
+
+    @Test(expected = SofaRouteException.class)
+    public void testRpcDirectInvokeFromContextNotAllowed() {
+
+        boolean prev = RpcConfigs.getBooleanValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT);
+
+        // disable create connection from context
+        RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, false);
+
+        try {
+            ServerConfig serverConfig = new ServerConfig()
+                .setProtocol("bolt")
+                .setHost("0.0.0.0")
+                .setPort(13900);
+
+            ProviderConfig<HelloService> provider = new ProviderConfig();
+            provider.setInterfaceId(HelloService.class.getName())
+                .setRef(new HelloServiceImpl("x-demo-invoke"))
+                .setApplication(new ApplicationConfig().setAppName("x-test-server"))
+                .setProxy("javassist")
+                .setSerialization("hessian2")
+                .setServer(serverConfig)
+                .setTimeout(3000);
+
+            provider.export();
+
+            ConsumerConfig<HelloService> consumer = new ConsumerConfig();
+            consumer.setInterfaceId(HelloService.class.getName())
+                .setApplication(new ApplicationConfig().setAppName("x-test-client"))
+                .setProxy("javassist");
+
+            HelloService proxy = consumer.refer();
+
+            RpcInvokeContext.getContext().setTargetURL("127.0.0.1:13900");
+            proxy.sayHello("x-demo-invoke", 1);
+
+            provider.unExport();
+            consumer.unRefer();
+        } finally {
+            RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, prev);
+        }
     }
 
     @After

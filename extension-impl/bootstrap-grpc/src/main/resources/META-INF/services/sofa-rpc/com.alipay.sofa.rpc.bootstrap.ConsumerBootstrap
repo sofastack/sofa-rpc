@@ -1,0 +1,1 @@
+grpc=com.alipay.sofa.rpc.bootstrap.grpc.GrpcConsumerBootstrap

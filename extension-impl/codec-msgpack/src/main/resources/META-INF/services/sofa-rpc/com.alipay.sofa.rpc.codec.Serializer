@@ -1,0 +1,1 @@
+msgpack=com.alipay.sofa.rpc.codec.msgpack.MsgPackSerializer
