@@ -26,6 +26,7 @@
         <nacos.version>1.0.0</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <swagger.version>1.5.18</swagger.version>
+        <asm.version>7.0</asm.version>
         <!-- serialization -->
         <hessian.version>3.3.7</hessian.version>
         <thrift.version>0.9.2</thrift.version>
@@ -390,6 +391,11 @@
                 <groupId>io.swagger</groupId>
                 <artifactId>swagger-core</artifactId>
                 <version>${swagger.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.ow2.asm</groupId>
+                <artifactId>asm</artifactId>
+                <version>${asm.version}</version>
             </dependency>
 
             <!-- alipay -->

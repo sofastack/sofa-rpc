@@ -259,7 +259,7 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-doc-swagger</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
