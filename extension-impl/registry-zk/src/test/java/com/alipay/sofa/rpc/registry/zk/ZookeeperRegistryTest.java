@@ -79,7 +79,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 1000;
+        int timeoutPerSub = 10000;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -131,12 +131,13 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setInvokeType("sync")
             .setTimeout(4444);
         latch = new CountDownLatch(1);
-        providerInfoListener.setCountDownLatch(latch);
-        consumerNoUniqueId.setProviderInfoListener(providerInfoListener);
+        MockProviderInfoListener providerInfoListener3 = new MockProviderInfoListener();
+        providerInfoListener3.setCountDownLatch(latch);
+        consumerNoUniqueId.setProviderInfoListener(providerInfoListener3);
         all = registry.subscribe(consumerNoUniqueId);
-        providerInfoListener.updateAllProviders(all);
-        ps = providerInfoListener.getData();
-        Assert.assertEquals("wrong uniqueId: 0", 0, ps.size());
+        providerInfoListener3.updateAllProviders(all);
+        Map<String, ProviderInfo> ps3 = providerInfoListener3.getData();
+        Assert.assertEquals("wrong uniqueId: 0", 0, ps3.size());
 
         // 反注册
         latch = new CountDownLatch(1);
@@ -330,7 +331,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -341,7 +341,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -353,7 +352,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -367,7 +365,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -396,7 +393,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
                 concurrentHashMap.put(StringUtils.toString(property), StringUtils.toString(newValue.get(property)));
                 if (countDownLatch != null) {
                     countDownLatch.countDown();
-                    countDownLatch = null;
                 }
             }
         }

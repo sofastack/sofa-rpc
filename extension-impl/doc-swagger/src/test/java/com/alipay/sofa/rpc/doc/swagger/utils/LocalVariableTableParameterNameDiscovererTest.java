@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.doc.swagger.utils;
 
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -27,7 +29,10 @@ import java.lang.reflect.Method;
  */
 public class LocalVariableTableParameterNameDiscovererTest {
 
-    private final static LocalVariableTableParameterNameDiscoverer d = new LocalVariableTableParameterNameDiscoverer();
+    private final static Logger                                    LOGGER     = LoggerFactory
+                                                                                  .getLogger(LocalVariableTableParameterNameDiscoverer.class);
+
+    private final static LocalVariableTableParameterNameDiscoverer DISCOVERER = new LocalVariableTableParameterNameDiscoverer();
 
     private static Method                                          CLASS_NO_PARAM_METHOD;
     private static Method                                          CLASS_ONE_PARAM_METHOD;
@@ -39,7 +44,7 @@ public class LocalVariableTableParameterNameDiscovererTest {
             CLASS_ONE_PARAM_METHOD = DemoClass.class.getMethod("oneParam", Object.class);
             CLASS_MULTI_PARAM_METHOD = DemoClass.class.getMethod("multiParam", Object.class, Object.class);
         } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+            LOGGER.error("fail to get method of DemoClass", e);
         }
     }
 
@@ -47,13 +52,13 @@ public class LocalVariableTableParameterNameDiscovererTest {
     public void test() {
         String[] parameterNames;
 
-        parameterNames = d.getParameterNames(CLASS_NO_PARAM_METHOD);
+        parameterNames = DISCOVERER.getParameterNames(CLASS_NO_PARAM_METHOD);
         Assert.assertTrue(CommonUtils.isEmpty(parameterNames));
 
-        parameterNames = d.getParameterNames(CLASS_ONE_PARAM_METHOD);
+        parameterNames = DISCOVERER.getParameterNames(CLASS_ONE_PARAM_METHOD);
         Assert.assertEquals("a", parameterNames[0]);
 
-        parameterNames = d.getParameterNames(CLASS_MULTI_PARAM_METHOD);
+        parameterNames = DISCOVERER.getParameterNames(CLASS_MULTI_PARAM_METHOD);
         Assert.assertEquals("a", parameterNames[0]);
         Assert.assertEquals("b", parameterNames[1]);
     }

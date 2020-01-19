@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.JAXRSProviderManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -32,6 +34,7 @@ import org.jboss.resteasy.spi.PropertyInjector;
 import org.jboss.resteasy.spi.ResteasyDeployment;
 import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -106,9 +109,18 @@ public class RestServer implements Server {
         }
 
         // 注册cors filter
-        final CorsFilter corsFilter = new CorsFilter();
-        corsFilter.getAllowedOrigins().add("*");
-        JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
+        Map<String, String> parameters = serverConfig.getParameters();
+        if (CommonUtils.isNotEmpty(parameters)) {
+            String crossDomainStr = parameters.get(RpcConstants.ALLOWED_ORIGINS);
+            if (StringUtils.isNotBlank(crossDomainStr)) {
+                final CorsFilter corsFilter = new CorsFilter();
+                String[] domains = StringUtils.splitWithCommaOrSemicolon(crossDomainStr);
+                for (String allowDomain : domains) {
+                    corsFilter.getAllowedOrigins().add(allowDomain);
+                }
+                JAXRSProviderManager.registerCustomProviderInstance(corsFilter);
+            }
+        }
 
         // 注册自定义
         Set<Object> customProviderInstances = JAXRSProviderManager.getCustomProviderInstances();
