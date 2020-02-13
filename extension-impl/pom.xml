@@ -42,6 +42,8 @@
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
         <module>fault-hystrix</module>
+        <module>dynamic-apollo</module>
+
     </modules>
 
     <dependencyManagement>

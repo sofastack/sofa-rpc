@@ -26,7 +26,10 @@ import com.ctrip.framework.apollo.ConfigService;
 /**
  * @author bystander
  * @version : ApolloDynamicConfigManager.java, v 0.1 2019年06月04日 20:29 bystander Exp $
+ * apollo.cluster need to config or not
+ * app.id need to config
  */
+
 @Extension(value = "apollo", override = true)
 public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
