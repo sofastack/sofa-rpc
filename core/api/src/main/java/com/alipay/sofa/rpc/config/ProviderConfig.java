@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.bootstrap.Bootstraps;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
@@ -158,8 +159,14 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
                 if (!proxyClass.isInterface()) {
-                    throw ExceptionUtils.buildRuntime("service.interfaceId",
-                        interfaceId, "interfaceId must set interface class, not implement class");
+                    if ((getServer() != null) && getServer().size() != 0) {
+                        for (int i = 0; i < getServer().size(); i++) {
+                            if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(getServer().get(i).getProtocol())) {
+                                throw ExceptionUtils.buildRuntime("service.interfaceId",
+                                    interfaceId, "interfaceId must set interface class, not implement class");
+                            }
+                        }
+                    }
                 }
             } else {
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
@@ -540,5 +547,13 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      */
     public ProviderBootstrap getProviderBootstrap() {
         return providerBootstrap;
+    }
+
+    /**
+     * set provider bootstrap
+     * @param providerBootstrap
+     */
+    public void setProviderBootstrap(ProviderBootstrap providerBootstrap) {
+        this.providerBootstrap = providerBootstrap;
     }
 }

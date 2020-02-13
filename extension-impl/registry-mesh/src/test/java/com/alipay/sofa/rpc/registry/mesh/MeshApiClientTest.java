@@ -75,7 +75,6 @@ public class MeshApiClientTest extends BaseMeshTest {
         UnSubscribeServiceResult unSubscribeServiceResult = new UnSubscribeServiceResult();
         unSubscribeServiceResult.setSuccess(true);
         HttpMockServer.addMockPath(MeshEndpoint.UN_SUBCRIBE, JSON.toJSONString(unSubscribeServiceResult));
-
         HttpMockServer.start();
     }
 
@@ -103,7 +102,6 @@ public class MeshApiClientTest extends BaseMeshTest {
 
     @Test
     public void testSubscribe() {
-
         //11.166.22.163:12200?_TIMEOUT=3000&p=1&_SERIALIZETYPE=protobuf&_WARMUPTIME=0&_WARMUPWEIGHT=10&app_name=bar1&zone=GZ00A&_MAXREADIDLETIME=30&_IDLETIMEOUT=27&v=4.0&_WEIGHT=100&startTime=1524565802559
         SubscribeServiceRequest request = new SubscribeServiceRequest();
         request.setServiceName("com.alipay.rpc.common.service.facade.pb.SampleServicePb:1.0");

@@ -27,7 +27,7 @@ public final class ProviderInfoAttrs {
 
     /*=====字段配置=====*/
     /**
-     * 配置key:rpcVer
+     * 配置key:serialization
      */
     public static final String ATTR_SERIALIZATION         = RpcConstants.CONFIG_KEY_SERIALIZATION;
     /**

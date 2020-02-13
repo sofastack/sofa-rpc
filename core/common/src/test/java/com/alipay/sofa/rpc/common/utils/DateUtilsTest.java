@@ -49,9 +49,9 @@ public class DateUtilsTest {
         long s2 = 1501127835658l; // 2017-07-27 11:57:15:658 +8
         TimeZone timeZone = TimeZone.getDefault();
 
-        Date date0 = new Date(0 - timeZone.getRawOffset());
-        Date date1 = new Date(s1 - timeZone.getRawOffset());
-        Date date2 = new Date(s2 - timeZone.getRawOffset());
+        Date date0 = new Date(0 - timeZone.getOffset(0));
+        Date date1 = new Date(s1 - timeZone.getOffset(s1));
+        Date date2 = new Date(s2 - timeZone.getOffset(s2));
 
         Assert.assertEquals(DateUtils.dateToStr(date0), "1970-01-01 00:00:00");
         Assert.assertEquals(DateUtils.dateToStr(date1), "2017-07-27 03:56:42");
@@ -65,9 +65,9 @@ public class DateUtilsTest {
         long d1 = 1501127802975l; // 2017-07-27 11:56:42:975 +8
         long d2 = 1501127835658l; // 2017-07-27 11:57:15:658 +8
         TimeZone timeZone = TimeZone.getDefault();
-        Date date0 = new Date(d0 - timeZone.getRawOffset());
-        Date date1 = new Date(d1 - timeZone.getRawOffset());
-        Date date2 = new Date(d2 - timeZone.getRawOffset());
+        Date date0 = new Date(d0 - timeZone.getOffset(d0));
+        Date date1 = new Date(d1 - timeZone.getOffset(d1));
+        Date date2 = new Date(d2 - timeZone.getOffset(d2));
 
         Assert.assertEquals(DateUtils.dateToStr(date0, DateUtils.DATE_FORMAT_MILLS_TIME), "1970-01-01 00:00:00.000");
         Assert.assertEquals(DateUtils.dateToStr(date1, DateUtils.DATE_FORMAT_MILLS_TIME), "2017-07-27 03:56:42.975");
@@ -80,9 +80,9 @@ public class DateUtilsTest {
         long d1 = 1501127802000l; // 2017-07-27 11:56:42:975 +8
         long d2 = 1501127835000l; // 2017-07-27 11:57:15:658 +8
         TimeZone timeZone = TimeZone.getDefault();
-        Date date0 = new Date(d0 - timeZone.getRawOffset());
-        Date date1 = new Date(d1 - timeZone.getRawOffset());
-        Date date2 = new Date(d2 - timeZone.getRawOffset());
+        Date date0 = new Date(d0 - timeZone.getOffset(d0));
+        Date date1 = new Date(d1 - timeZone.getOffset(d1));
+        Date date2 = new Date(d2 - timeZone.getOffset(d2));
 
         String s0 = "1970-01-01 00:00:00";
         String s1 = "2017-07-27 03:56:42";
@@ -101,9 +101,9 @@ public class DateUtilsTest {
         long d1 = 1501127802975l; // 2017-07-27 11:56:42:975 +8
         long d2 = 1501127835658l; // 2017-07-27 11:57:15:658 +8
         TimeZone timeZone = TimeZone.getDefault();
-        Date date0 = new Date(d0 - timeZone.getRawOffset());
-        Date date1 = new Date(d1 - timeZone.getRawOffset());
-        Date date2 = new Date(d2 - timeZone.getRawOffset());
+        Date date0 = new Date(d0 - timeZone.getOffset(d0));
+        Date date1 = new Date(d1 - timeZone.getOffset(d1));
+        Date date2 = new Date(d2 - timeZone.getOffset(d2));
 
         String s0 = "1970-01-01 00:00:00.000";
         String s1 = "2017-07-27 03:56:42.975";
@@ -120,9 +120,9 @@ public class DateUtilsTest {
         long d1 = 1501127802975l; // 2017-07-27 11:56:42:975 +8
         long d2 = 1501127835658l; // 2017-07-27 11:57:15:658 +8
         TimeZone timeZone = TimeZone.getDefault();
-        Date date0 = new Date(d0 - timeZone.getRawOffset());
-        Date date1 = new Date(d1 - timeZone.getRawOffset());
-        Date date2 = new Date(d2 - timeZone.getRawOffset());
+        Date date0 = new Date(d0 - timeZone.getOffset(d0));
+        Date date1 = new Date(d1 - timeZone.getOffset(d1));
+        Date date2 = new Date(d2 - timeZone.getOffset(d2));
 
         Assert.assertEquals(DateUtils.dateToMillisStr(date0), "1970-01-01 00:00:00.000");
         Assert.assertEquals(DateUtils.dateToMillisStr(date1), "2017-07-27 03:56:42.975");
@@ -135,9 +135,9 @@ public class DateUtilsTest {
         long d1 = 1501127802975l; // 2017-07-27 11:56:42:975 +8
         long d2 = 1501127835658l; // 2017-07-27 11:57:15:658 +8
         TimeZone timeZone = TimeZone.getDefault();
-        Date date0 = new Date(d0 - timeZone.getRawOffset());
-        Date date1 = new Date(d1 - timeZone.getRawOffset());
-        Date date2 = new Date(d2 - timeZone.getRawOffset());
+        Date date0 = new Date(d0 - timeZone.getOffset(d0));
+        Date date1 = new Date(d1 - timeZone.getOffset(d1));
+        Date date2 = new Date(d2 - timeZone.getOffset(d2));
 
         String s0 = "1970-01-01 00:00:00.000";
         String s1 = "2017-07-27 03:56:42.975";

@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-parent</artifactId>
-        <version>5.5.6</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>sofa-rpc-extension-impl</artifactId>
@@ -18,11 +18,14 @@
         <module>extension-common</module>
         <module>bootstrap-bolt</module>
         <module>bootstrap-dubbo</module>
+        <module>bootstrap-grpc</module>
         <module>bootstrap-http</module>
         <module>bootstrap-rest</module>
         <module>codec-protobuf</module>
         <module>codec-jackson</module>
+        <module>codec-protostuff</module>
         <module>codec-sofa-hessian</module>
+        <module>codec-msgpack</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
         <module>metrics-lookout</module>
@@ -35,10 +38,10 @@
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>
+        <module>remoting-grpc</module>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
         <module>fault-hystrix</module>
-        <module>dynamic-apollo</module>
     </modules>
 
     <dependencyManagement>

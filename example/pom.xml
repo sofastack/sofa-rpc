@@ -7,8 +7,13 @@
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-parent</artifactId>
-        <version>5.5.6</version>
+        <version>${revision}</version>
     </parent>
+
+    <properties>
+        <protoc.version>3.5.1-1</protoc.version>
+        <protoc-gen-grpc-java.version>1.17.0</protoc-gen-grpc-java.version>
+    </properties>
 
     <artifactId>sofa-rpc-example</artifactId>
 
@@ -19,10 +24,27 @@
             <version>${project.parent.version}</version>
         </dependency>
 
+        <!-- grpc  -->
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>1.17.0</version>
+        </dependency>
+
         <!-- dependencies for rest begin -->
         <dependency>
-            <groupId>org.jboss.resteasy</groupId>
-            <artifactId>jaxrs-api</artifactId>
+            <groupId>org.jboss.spec.javax.ws.rs</groupId>
+            <artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -61,7 +83,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -95,7 +117,7 @@
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -105,6 +127,26 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <!-- dependencies for h2 SSL -->
+        <dependency>
+            <groupId>org.mortbay.jetty.alpn</groupId>
+            <artifactId>alpn-boot</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-openjdk8-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-alpn-openjdk8-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-tcnative-boringssl-static</artifactId>
+            <classifier>${os.detected.classifier}</classifier>
         </dependency>
     </dependencies>
 
@@ -130,7 +172,35 @@
             </testResource>
         </testResources>
 
+        <!-- grpc  -->
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.5.0.Final</version>
+            </extension>
+        </extensions>
+
         <plugins>
+            <!-- grpc -->
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.5.1</version>
+                <configuration>
+                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
+                    <pluginId>grpc-java</pluginId>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${protoc-gen-grpc-java.version}:exe:${os.detected.classifier}</pluginArtifact>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>compile-custom</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -139,6 +209,19 @@
                     <target>${maven.compiler.target}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.neokidd.maven.plugins</groupId>
+                <artifactId>hack-modifier-maven-plugin</artifactId>
+                <version>1.0.0</version>
+                <executions>
+                <execution>
+                    <phase>process-classes</phase>
+                    <goals>
+                    <goal>hack</goal>
+                    </goals>
+                </execution>
+                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

@@ -129,15 +129,11 @@ public class SofaRegistry extends Registry {
      * @param group       服务分组
      */
     protected void doRegister(String appName, String serviceName, String serviceData, String group) {
-        PublisherRegistration publisherRegistration;
         // 生成注册对象，并添加额外属性
-        publisherRegistration = new PublisherRegistration(serviceName);
-
+        PublisherRegistration publisherRegistration = new PublisherRegistration(serviceName);
         publisherRegistration.setGroup(group);
-        addAttributes(publisherRegistration, group);
-
         // 去注册
-        SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(publisherRegistration, serviceData);
+        SofaRegistryClient.getRegistryClient(appName, registryConfig).register(publisherRegistration, serviceData);
     }
 
     @Override
@@ -183,7 +179,7 @@ public class SofaRegistry extends Registry {
      */
     protected void doUnRegister(String appName, String serviceName, String group) {
 
-        SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName, group,
+        SofaRegistryClient.getRegistryClient(appName, registryConfig).unregister(serviceName, group,
             RegistryType.PUBLISHER);
     }
 
@@ -246,10 +242,10 @@ public class SofaRegistry extends Registry {
             // 去配置中心订阅
 
             // 去注册
-            listSubscriber = SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(
+            listSubscriber = SofaRegistryClient.getRegistryClient(appName, registryConfig).register(
                 subscriberRegistration);
 
-            attrSubscriber = SofaRegsitryClient.getRegistryClient(appName, registryConfig).register(configRegistration);
+            attrSubscriber = SofaRegistryClient.getRegistryClient(appName, registryConfig).register(configRegistration);
 
             // 放入缓存
             subscribers.put(serviceName, listSubscriber);
@@ -269,13 +265,13 @@ public class SofaRegistry extends Registry {
             callback.remove(serviceName, config);
             if (callback.getListenerNum() == 0) {
                 // 已经没人订阅这个data Key了
-                SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
+                SofaRegistryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
                     subscriber.getGroup(),
                     RegistryType.SUBSCRIBER);
                 subscribers.remove(serviceName);
 
                 // 已经没人订阅这个config Key了
-                SofaRegsitryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
+                SofaRegistryClient.getRegistryClient(appName, registryConfig).unregister(serviceName,
                     subscriber.getGroup(),
                     RegistryType.CONFIGURATOR);
                 configurators.remove(serviceName);
@@ -294,20 +290,6 @@ public class SofaRegistry extends Registry {
                 LOGGER.errorWithApp(appName, "Error when batch unSubscribe", e);
             }
         }
-    }
-
-    /**
-     * 添加额外的属性
-     *
-     * @param publisherRegistration 注册或者订阅对象
-     * @param group           分组
-     */
-    private void addAttributes(PublisherRegistration publisherRegistration, String group) {
-        // if group == null; group = "DEFAULT_GROUP"
-        if (StringUtils.isNotEmpty(group)) {
-            publisherRegistration.setGroup(group);
-        }
-
     }
 
     /**

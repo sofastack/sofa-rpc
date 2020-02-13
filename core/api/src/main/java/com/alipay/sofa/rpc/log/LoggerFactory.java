@@ -35,7 +35,16 @@ public class LoggerFactory {
 
     public static Logger getLogger(String name) {
         try {
-            return (Logger) ClassUtils.forName(implClass).getConstructor(String.class).newInstance(name);
+            Object logInstance = ClassUtils.forName(implClass, Logger.class.getClassLoader())
+                .getConstructor(String.class)
+                .newInstance(name);
+            if (logInstance instanceof Logger) {
+                return (Logger) logInstance;
+            } else {
+                throw new SofaRpcRuntimeException(implClass + " is not type of  " + Logger.class);
+            }
+        } catch (SofaRpcRuntimeException ex) {
+            throw ex;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Error when getLogger of " + name
                 + ", implement is " + implClass + "", e);
@@ -44,7 +53,15 @@ public class LoggerFactory {
 
     public static Logger getLogger(Class clazz) {
         try {
-            return (Logger) ClassUtils.forName(implClass).getConstructor(Class.class).newInstance(clazz);
+            Object logInstance = ClassUtils.forName(implClass, Logger.class.getClassLoader())
+                .getConstructor(Class.class).newInstance(clazz);
+            if (logInstance instanceof Logger) {
+                return (Logger) logInstance;
+            } else {
+                throw new SofaRpcRuntimeException(implClass + " is not type of  " + Logger.class);
+            }
+        } catch (SofaRpcRuntimeException ex) {
+            throw ex;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Error when getLogger of " + clazz.getName()
                 + ", implement is " + implClass + "", e);

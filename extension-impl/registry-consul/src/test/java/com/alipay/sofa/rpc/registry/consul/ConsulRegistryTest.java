@@ -25,178 +25,227 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.ecwid.consul.v1.ConsulClient;
+import com.ecwid.consul.v1.Response;
+import com.ecwid.consul.v1.health.HealthServicesRequest;
+import com.ecwid.consul.v1.health.model.HealthService;
 import com.pszymczyk.consul.ConsulProcess;
 import com.pszymczyk.consul.ConsulStarterBuilder;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 /**
- * Test of ConsulRegistry
+ * Consul Registry Tests
  *
- * @author <a href=mailto:preciousdp11@gmail.com>dingpeng</a>
+ * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
 public class ConsulRegistryTest {
 
-    private static ConsulProcess  consul;
+    private static final String INTERFACE_ID        = "com.alipay.sofa.rpc.registry.consul.TestService";
 
-    private static RegistryConfig registryConfig;
+    private static final String CONSUL_SERVICE_NAME = "test-service";
 
-    private static ConsulRegistry registry;
+    private ConsulProcess       consul;
 
-    @BeforeClass
-    public static void setup() {
-        //language=JSON
-        String customConfiguration =
-                "{\n" +
-                    "  \"datacenter\": \"dc-test\",\n" +
-                    "  \"log_level\": \"info\"\n" +
-                    "}\n";
+    private RegistryConfig      registryConfig;
 
+    private ConsulRegistry      registry;
+
+    @Before
+    public void setup() {
         consul = ConsulStarterBuilder.consulStarter()
-            .withConsulVersion("1.2.1")
-            .withCustomConfig(customConfiguration)
+            .withConsulVersion("1.4.0")
             .build()
             .start();
 
         registryConfig = new RegistryConfig()
             .setProtocol("consul")
-            .setSubscribe(true)
             .setAddress("127.0.0.1:" + consul.getHttpPort())
-            .setParameter("username", "test")
-            .setParameter("interface", "testInterface")
             .setRegister(true);
 
         registry = (ConsulRegistry) RegistryFactory.getRegistry(registryConfig);
         registry.init();
     }
 
-    @AfterClass
-    public static void tearDown() throws Exception {
+    @After
+    public void tearDown() {
         registry.destroy();
         consul.close();
         registry = null;
     }
 
     @Test
-    public void testAll() throws Exception {
+    public void testRegister() {
+        ProviderConfig<?> providerConfig = providerConfig("consul-test-1", 12200, 12201, 12202);
+        registry.register(providerConfig);
 
-        int timeoutPerSub = 1000;
+        ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
+        HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
+            Assert.assertEquals(3, healthServices.getValue().size());
+        }, 10, TimeUnit.SECONDS);
 
-        ServerConfig serverConfig = new ServerConfig()
-            .setProtocol("bolt")
-            .setHost("localhost")
-            .setPort(12200);
+        registry.unRegister(providerConfig);
 
-        ProviderConfig<?> provider = new ProviderConfig();
-        provider.setInterfaceId("com.alipay.xxx.TestService")
-            .setUniqueId("unique123Id")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setProxy("javassist")
-            .setRegister(true)
-            .setRegistry(registryConfig)
-            .setSerialization("hessian2")
-            .setServer(serverConfig)
-            .setWeight(222)
-            .setTimeout(3000);
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
+            Assert.assertEquals(0, healthServices.getValue().size());
+        }, 10, TimeUnit.SECONDS);
+    }
 
-        // 注册
-        registry.register(provider);
+    @Test
+    public void testRegisterWithCustomName() {
+        ProviderConfig<?> providerConfig = providerConfig("consul-test-1", 12200, 12201, 12202);
+        providerConfig.setParameter(ConsulConstants.CONSUL_SERVICE_NAME_KEY, CONSUL_SERVICE_NAME);
+        registry.register(providerConfig);
 
-        ConsumerConfig<?> consumer = new ConsumerConfig();
-        consumer.setInterfaceId("com.alipay.xxx.TestService")
-            .setUniqueId("unique123Id")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setProxy("javassist")
-            .setSubscribe(true)
-            .setSerialization("java")
-            .setInvokeType("sync")
-            .setTimeout(4444);
+        ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
+        HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
+            Assert.assertEquals(3, healthServices.getValue().size());
+        }, 10, TimeUnit.SECONDS);
 
-        // 订阅
+        registry.unRegister(providerConfig);
+
+        Response<List<HealthService>> healthServicesAfterUnRegister = consulClient.getHealthServices(INTERFACE_ID, request);
+        assertUntil(() -> {
+            Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
+            Assert.assertEquals(0, healthServicesAfterUnRegister.getValue().size());
+        }, 10, TimeUnit.SECONDS);
+    }
+
+    @Test
+    public void testSubscribe() {
+        ProviderConfig<?> providerConfig = providerConfig("consul-test-1", 12200, 12201, 12202);
+        registry.register(providerConfig);
+
+        ConsumerConfig<?> consumerConfig = consumerConfig("consul-test-1");
+
+        assertUntil(() -> {
+            List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
+            Assert.assertEquals(1, providerGroups.size());
+            Assert.assertEquals(3, providerGroups.get(0).size());
+        }, 10, TimeUnit.SECONDS);
+
+        ConsumerConfig<?> consumerConfigWithAnotherUniqueId = consumerConfig("consul-test-2");
+
+        assertUntil(() -> {
+            List<ProviderGroup> providerGroups = registry.subscribe(consumerConfigWithAnotherUniqueId);
+            Assert.assertEquals(1, providerGroups.size());
+            Assert.assertEquals(0, providerGroups.get(0).size());
+        }, 10, TimeUnit.SECONDS);
+
+        registry.unSubscribe(consumerConfig);
+        registry.unSubscribe(consumerConfigWithAnotherUniqueId);
+    }
+
+    @Test
+    public void testSubscribeNotify() throws InterruptedException {
+        ProviderConfig<?> providerConfig = providerConfig("consul-test-1", 12200);
+        registry.register(providerConfig);
+
+        ConsumerConfig<?> consumerConfig = consumerConfig("consul-test-1");
+        MockProviderInfoListener listener = new MockProviderInfoListener();
+        consumerConfig.setProviderInfoListener(listener);
+
+        assertUntil(() -> {
+            List<ProviderGroup> providerGroups = registry.subscribe(consumerConfig);
+            Assert.assertEquals(1, providerGroups.size());
+            Assert.assertEquals(1, providerGroups.get(0).size());
+        }, 10, TimeUnit.SECONDS);
+
         CountDownLatch latch = new CountDownLatch(1);
-        MockProviderInfoListener providerInfoListener = new MockProviderInfoListener();
-        providerInfoListener.setCountDownLatch(latch);
-        consumer.setProviderInfoListener(providerInfoListener);
-        List<ProviderGroup> all = registry.subscribe(consumer);
-        providerInfoListener.updateAllProviders(all);
-        Map<String, ProviderInfo> ps = providerInfoListener.getData();
+        listener.setCountDownLatch(latch);
 
-        // 订阅 错误的uniqueId
-        ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
-        consumerNoUniqueId.setInterfaceId("com.alipay.xxx.TestService")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
+        providerConfig = providerConfig("consul-test-1", 12201, 12202);
+        registry.register(providerConfig);
+
+        boolean ok = latch.await(10, TimeUnit.SECONDS);
+        Assert.assertTrue(ok);
+
+        assertUntil(() -> {
+            Map<String, ProviderInfo> providers = listener.getData();
+            Assert.assertEquals(3, providers.size());
+        }, 10, TimeUnit.SECONDS);
+
+        latch = new CountDownLatch(1);
+        listener.setCountDownLatch(latch);
+
+        registry.unRegister(providerConfig);
+
+        ok = latch.await(10, TimeUnit.SECONDS);
+        Assert.assertTrue(ok);
+
+        assertUntil(() -> {
+            Map<String, ProviderInfo> providers = listener.getData();
+            Assert.assertEquals(1, providers.size());
+        }, 10, TimeUnit.SECONDS);
+    }
+
+    private ConsumerConfig<?> consumerConfig(String uniqueId) {
+        ConsumerConfig<?> consumer = new ConsumerConfig();
+        consumer.setInterfaceId(INTERFACE_ID)
+            .setUniqueId(uniqueId)
+            .setApplication(new ApplicationConfig().setAppName("consul-registry-test"))
             .setProxy("javassist")
             .setSubscribe(true)
             .setSerialization("java")
             .setInvokeType("sync")
             .setTimeout(4444);
-        latch = new CountDownLatch(1);
-        providerInfoListener.setCountDownLatch(latch);
-        consumerNoUniqueId.setProviderInfoListener(providerInfoListener);
-        all = registry.subscribe(consumerNoUniqueId);
-        providerInfoListener.updateAllProviders(all);
-        ps = providerInfoListener.getData();
 
-        // 反注册
-        latch = new CountDownLatch(1);
-        providerInfoListener.setCountDownLatch(latch);
-        registry.unRegister(provider);
-        latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
+        return consumer;
+    }
 
-        // 一次发2个端口的再次注册
-        latch = new CountDownLatch(2);
-        providerInfoListener.setCountDownLatch(latch);
-        provider.getServer().add(new ServerConfig()
-            .setProtocol("bolt")
-            .setHost("0.0.0.0")
-            .setPort(12201));
-        registry.register(provider);
-        latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
+    private ProviderConfig<?> providerConfig(String uniqueId, int... ports) {
+        ProviderConfig<?> provider = new ProviderConfig();
+        provider.setInterfaceId(INTERFACE_ID)
+                .setUniqueId(uniqueId)
+                .setApplication(new ApplicationConfig().setAppName("consul-registry-test"))
+                .setProxy("javassist")
+                .setRegister(true)
+                .setRegistry(registryConfig)
+                .setSerialization("hessian2")
+                .setWeight(222)
+                .setTimeout(3000);
 
-        // 重复订阅
-        ConsumerConfig<?> consumer2 = new ConsumerConfig();
-        consumer2.setInterfaceId("com.alipay.xxx.TestService")
-            .setUniqueId("unique123Id")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setProxy("javassist")
-            .setSubscribe(true)
-            .setSerialization("java")
-            .setInvokeType("sync")
-            .setTimeout(4444);
-        CountDownLatch latch2 = new CountDownLatch(1);
-        MockProviderInfoListener providerInfoListener2 = new MockProviderInfoListener();
-        providerInfoListener2.setCountDownLatch(latch2);
-        consumer2.setProviderInfoListener(providerInfoListener2);
-        providerInfoListener2.updateAllProviders(registry.subscribe(consumer2));
-        latch2.await(timeoutPerSub, TimeUnit.MILLISECONDS);
+        IntStream.of(ports)
+                .mapToObj(port ->
+                        new ServerConfig()
+                                .setProtocol("bolt")
+                                .setHost("localhost")
+                                .setPort(port)
+                ).forEach(provider::setServer);
+        return provider;
+    }
 
-        Map<String, ProviderInfo> ps2 = providerInfoListener2.getData();
-
-        // 取消订阅者1
-        registry.unSubscribe(consumer);
-
-        // 批量反注册，判断订阅者2的数据
-        latch = new CountDownLatch(2);
-        providerInfoListener2.setCountDownLatch(latch);
-        List<ProviderConfig> providerConfigList = new ArrayList<ProviderConfig>();
-        providerConfigList.add(provider);
-        registry.batchUnRegister(providerConfigList);
-
-        latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
-
-        // 批量取消订阅
-        List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
-        consumerConfigList.add(consumer2);
-        registry.batchUnSubscribe(consumerConfigList);
-
+    private void assertUntil(Runnable f, long time, TimeUnit unit) {
+        long until = System.currentTimeMillis() + unit.toMillis(time);
+        while (true) {
+            try {
+                f.run();
+                return;
+            } catch (AssertionError e) {
+                if (until < System.currentTimeMillis()) {
+                    throw e;
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e1) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+        }
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {

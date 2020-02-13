@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.5.6</version>
+    <version>5.6.4-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/sofastack/sofa-rpc</url>
@@ -51,18 +51,17 @@
 
     <properties>
         <!-- Build args -->
-        <maven.compiler.source>1.6</maven.compiler.source>
-        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
-        <sofa.rpc.version>${project.version}</sofa.rpc.version>
         <slf4j.version>1.7.21</slf4j.version>
         <sofa.common.tools.version>1.0.18</sofa.common.tools.version>
         <javassist.version>3.20.0-GA</javassist.version>
-        <netty.version>4.1.25.Final</netty.version>
-        <hessian.version>3.3.6</hessian.version>
-        <resteasy.version>3.0.12.Final</resteasy.version>
-        <bolt.version>1.4.6</bolt.version>
-        <tracer.version>2.1.2</tracer.version>
+        <netty.version>4.1.44.Final</netty.version>
+        <hessian.version>3.3.7</hessian.version>
+        <resteasy.version>3.6.3.Final</resteasy.version>
+        <bolt.version>1.5.6</bolt.version>
+        <tracer.version>3.0.8</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
@@ -72,174 +71,189 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-common</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-exception</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-client</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-filter</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-log</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-proxy</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-transport</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-extension-common</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api-compatible</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-bolt</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-dubbo</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-bootstrap-grpc</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-http</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-rest</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-sofa-hessian</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-protobuf</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-protostuff</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-msgpack</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-jackson</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-fault-tolerance</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-fault-hystrix</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-log-common-tools</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-consul</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-local</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-zk</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-nacos</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-mesh</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-sofa</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-bolt</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-http</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-resteasy</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-remoting-grpc</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-tracer-opentracing</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-tracer-opentracing-resteasy</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-metrics-lookout</artifactId>
-            <version>${sofa.rpc.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
-            <version>${sofa.rpc.version}</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
@@ -249,6 +263,10 @@
                 <exclusion>
                     <groupId>io.netty</groupId>
                     <artifactId>netty-all</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.alipay.sofa.common</groupId>
+                    <artifactId>sofa-common-tools</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -300,7 +318,7 @@
         </dependency>
         <dependency>
             <groupId>org.jboss.resteasy</groupId>
-            <artifactId>resteasy-jackson-provider</artifactId>
+            <artifactId>resteasy-jackson2-provider</artifactId>
             <version>${resteasy.version}</version>
         </dependency>
         <dependency>
@@ -389,10 +407,13 @@
                                     <include>com.alipay.sofa:sofa-rpc-api-compatible</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-dubbo</include>
+                                    <include>com.alipay.sofa:sofa-rpc-bootstrap-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-rest</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-protobuf</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-protostuff</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-jackson</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-msgpack</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-hystrix</include>
@@ -407,10 +428,9 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-remoting-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
-                                    <include>com.alipay.sofa:sofa-rpc-dynamic-apollo</include>
-
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>
@@ -467,6 +487,8 @@
                             <author>false</author>
                             <keywords>true</keywords>
                             <quiet>true</quiet>
+                            <failOnError>false</failOnError>
+                            <additionalparam>-Xdoclint:none</additionalparam>
                             <includeDependencySources>true</includeDependencySources>
                             <dependencySourceIncludes>
                                 <dependencySourceInclude>com.alipay.sofa:sofa-rpc-*</dependencySourceInclude>

@@ -25,7 +25,7 @@ import io.netty.handler.ssl.OpenSsl;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslProvider;
 import io.netty.handler.ssl.SupportedCipherSuiteFilter;
-import io.netty.handler.ssl.util.SelfSignedCertificate;
+import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 /**
  *
@@ -35,16 +35,19 @@ import io.netty.handler.ssl.util.SelfSignedCertificate;
 @Unstable
 public class SslContextBuilder {
 
-    public static final boolean SSL = System.getProperty("ssl") != null;
+    public static final boolean SSL                       = System.getProperty("ssl") != null;
+    public static final String  PROPERTY_CERTIFICATE_PATH = "certificate_path";
+    public static final String  PROPERTY_PRIVATE_KEY_PATH = "private_key_path";
+    public static final String  CERTIFICATE_PATH          = System.getProperty(PROPERTY_CERTIFICATE_PATH);
+    public static final String  PRIVATE_KEY_PATH          = System.getProperty(PROPERTY_PRIVATE_KEY_PATH);
 
     public static SslContext build() {
         // Configure SSL.
         SslContext sslCtx;
         try {
             if (SSL) {
-                // TODO need openssl 1.1.0+
                 SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
-                SelfSignedCertificate ssc = new SelfSignedCertificate();
+                SelfSignedCer ssc = new SelfSignedCer(CERTIFICATE_PATH, PRIVATE_KEY_PATH);
                 sslCtx = io.netty.handler.ssl.SslContextBuilder.forServer(ssc.certificate(), ssc.privateKey())
                     .sslProvider(provider)
                     /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2 specification.
@@ -64,6 +67,38 @@ public class SslContextBuilder {
             }
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Failed to start http/2 server!", e);
+        }
+        return sslCtx;
+    }
+
+    public static SslContext buildForClient() {
+        // Configure SSL.
+        SslContext sslCtx;
+        try {
+            if (SSL) {
+                SslProvider provider = OpenSsl.isAlpnSupported() ? SslProvider.OPENSSL : SslProvider.JDK;
+                sslCtx = io.netty.handler.ssl.SslContextBuilder.forClient()
+                    .sslProvider(provider)
+                    /* NOTE: the cipher filter may not include all ciphers required by the HTTP/2
+                     * specification. Please refer to the HTTP/2 specification for cipher
+                     * requirements.*/
+                    .ciphers(Http2SecurityUtil.CIPHERS, SupportedCipherSuiteFilter.INSTANCE)
+                    .trustManager(InsecureTrustManagerFactory.INSTANCE)
+                    .applicationProtocolConfig(
+                        new ApplicationProtocolConfig(
+                            ApplicationProtocolConfig.Protocol.ALPN,
+                            // NO_ADVERTISE is currently the only mode supported by both OpenSsl and JDK providers.
+                            ApplicationProtocolConfig.SelectorFailureBehavior.NO_ADVERTISE,
+                            // ACCEPT is currently the only mode supported by both OpenSsl and JDK providers.
+                            ApplicationProtocolConfig.SelectedListenerFailureBehavior.ACCEPT,
+                            ApplicationProtocolNames.HTTP_2,
+                            ApplicationProtocolNames.HTTP_1_1))
+                    .build();
+            } else {
+                sslCtx = null;
+            }
+        } catch (Exception e) {
+            throw new SofaRpcRuntimeException("Failed to start http/2 client!", e);
         }
         return sslCtx;
     }

@@ -39,6 +39,11 @@ public class RpcConstants {
     public static final String  REGISTRY_PROTOCOL_MESH             = "mesh";
 
     /**
+     * sofa 注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_SOFA             = "sofa";
+
+    /**
      * xml文件注册中心
      */
     public static final String  REGISTRY_PROTOCOL_LOCAL            = "local";
@@ -196,6 +201,20 @@ public class RpcConstants {
      * @since 5.5.0
      */
     public static final String  ALLOWED_ORIGINS                    = "allowedOrigins";
+
+    /**
+     * bolt server process in io thread
+     *
+     * @since 5.5.6
+     */
+    public static final String  PROCESS_IN_IOTHREAD                = "processInIOThread";
+
+    /**
+     * bolt server process timeout discard in process
+     *
+     * @since 5.6.0
+     */
+    public static final String  TIMEOUT_DISCARD_IN_SERVER          = "timeoutDiscard";
 
     /*--------Config配置值相关结束---------*/
 
@@ -486,4 +505,5 @@ public class RpcConstants {
 
     /* --------系统参数相关结束---------*/
 
+    public static final String  SOFA_REQUEST_HEADER_KEY            = "request_header_key";
 }

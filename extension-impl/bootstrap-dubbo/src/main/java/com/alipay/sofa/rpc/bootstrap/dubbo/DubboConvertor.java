@@ -50,6 +50,10 @@ public class DubboConvertor {
                 dubboRegistryConfigs.add(dubboRegistryConfig);
             }
             dubboConfig.setRegistries(dubboRegistryConfigs);
+        } else {
+            com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
+            dubboRegistryConfig.setAddress(com.alibaba.dubbo.config.RegistryConfig.NO_AVAILABLE);
+            dubboConfig.setRegistry(dubboRegistryConfig);
         }
     }
 

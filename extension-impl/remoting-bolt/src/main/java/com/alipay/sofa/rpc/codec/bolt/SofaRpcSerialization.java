@@ -16,6 +16,10 @@
  */
 package com.alipay.sofa.rpc.codec.bolt;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+
 import com.alipay.remoting.DefaultCustomSerializer;
 import com.alipay.remoting.InvokeContext;
 import com.alipay.remoting.exception.DeserializationException;
@@ -33,14 +37,12 @@ import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Sofa RPC BOLT 协议的对象序列化/反序列化自定义类
@@ -150,6 +152,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             // 解析头部
             Map<String, String> headerMap = mapSerializer.decode(header);
             requestCommand.setRequestHeader(headerMap);
+            RpcInvokeContext.getContext().put(RpcConstants.SOFA_REQUEST_HEADER_KEY,
+                Collections.unmodifiableMap(headerMap));
 
             return true;
         }
@@ -253,6 +257,14 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     Object sofaRequest = ClassUtils.forName(requestCommand.getRequestClass()).newInstance();
                     rpcSerializer.decode(new ByteArrayWrapperByteBuf(requestCommand.getContent()),
                         sofaRequest, headerMap);
+
+                    //for service mesh or other scene, we need to add more info from header
+                    if (sofaRequest instanceof SofaRequest) {
+                        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                            ((SofaRequest) sofaRequest).addRequestProp(entry.getKey(), entry.getValue());
+                        }
+                    }
+
                     requestCommand.setRequestObject(sofaRequest);
                 } finally {
                     Thread.currentThread().setContextClassLoader(oldClassLoader);

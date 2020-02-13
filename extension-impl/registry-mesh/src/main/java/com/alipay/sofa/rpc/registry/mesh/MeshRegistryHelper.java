@@ -44,7 +44,8 @@ public class MeshRegistryHelper {
             .setWeight(config.getWeight())
             .setSerializationType(config.getSerialization())
             .setProtocolType(server.getProtocol())
-            .setPath(server.getContextPath());
+            .setPath(server.getContextPath())
+            .setStaticAttrs(config.getParameters());
         String host = server.getHost();
         if (NetUtils.isLocalHost(host) || NetUtils.isAnyHost(host)) {
             host = SystemInfo.getLocalHost();
@@ -63,4 +64,5 @@ public class MeshRegistryHelper {
     public static String buildMeshKey(AbstractInterfaceConfig config, String protocol) {
         return ConfigUniqueNameGenerator.getUniqueName(config);
     }
+
 }
