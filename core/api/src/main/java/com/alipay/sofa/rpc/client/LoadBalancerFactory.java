@@ -36,8 +36,17 @@ public class LoadBalancerFactory {
      * @return LoadBalancer
      */
     public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap) {
+        return getLoadBalancer(consumerBootstrap, consumerBootstrap.getConsumerConfig().getLoadBalancer());
+    }
+
+    /**
+     * 根据名字和consumer得到负载均衡器
+     *
+     * @param consumerBootstrap 服务订阅者配置
+     * @return LoadBalancer
+     */
+    public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap, String loadBalancer) {
         try {
-            String loadBalancer = consumerBootstrap.getConsumerConfig().getLoadBalancer();
             ExtensionClass<LoadBalancer> ext = ExtensionLoaderFactory
                 .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
             if (ext == null) {

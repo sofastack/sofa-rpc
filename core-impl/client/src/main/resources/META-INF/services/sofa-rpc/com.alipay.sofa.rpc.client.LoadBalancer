@@ -4,3 +4,4 @@ random=com.alipay.sofa.rpc.client.lb.RandomLoadBalancer
 roundRobin=com.alipay.sofa.rpc.client.lb.RoundRobinLoadBalancer
 weightRoundRobin=com.alipay.sofa.rpc.client.lb.WeightRoundRobinLoadBalancer
 weightConsistentHash=com.alipay.sofa.rpc.client.lb.WeightConsistentHashLoadBalancer
+auto=com.alipay.sofa.rpc.client.lb.AutoLoadBalancer
