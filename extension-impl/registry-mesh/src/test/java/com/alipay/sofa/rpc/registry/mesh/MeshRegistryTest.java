@@ -297,7 +297,6 @@ public class MeshRegistryTest extends BaseMeshTest {
             ps.put(providerGroup.getName(), providerGroup);
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
