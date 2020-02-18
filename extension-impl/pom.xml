@@ -42,6 +42,7 @@
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
         <module>fault-hystrix</module>
+        <module>doc-swagger</module>
     </modules>
 
     <dependencyManagement>

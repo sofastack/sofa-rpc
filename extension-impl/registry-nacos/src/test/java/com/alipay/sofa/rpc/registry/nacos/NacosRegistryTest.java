@@ -82,7 +82,7 @@ public class NacosRegistryTest extends BaseNacosTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 1000;
+        int timeoutPerSub = 20000;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -227,7 +227,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -238,7 +237,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -250,7 +248,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -264,7 +261,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
