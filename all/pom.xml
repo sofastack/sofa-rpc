@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.6.4-SNAPSHOT</version>
+    <version>5.6.5-SNAPSHOT</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/sofastack/sofa-rpc</url>
@@ -65,6 +65,7 @@
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
+        <bolt.swagger.version>1.5.18</bolt.swagger.version>
     </properties>
 
     <dependencies>
@@ -260,6 +261,11 @@
             <artifactId>sofa-rpc-dynamic-apollo</artifactId>
             <version>${project.version}</version>
         </dependency>
+       <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-doc-swagger</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
@@ -330,6 +336,11 @@
             <groupId>com.alipay.sofa.lookout</groupId>
             <artifactId>lookout-api</artifactId>
             <version>${lookout.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.swagger</groupId>
+            <artifactId>swagger-core</artifactId>
+            <version>${bolt.swagger.version}</version>
         </dependency>
     </dependencies>
 
@@ -437,7 +448,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-dynamic-apollo</include>
-
+                                    <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->
                                 </includes>
                             </artifactSet>

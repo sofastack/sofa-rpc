@@ -14,28 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.common;
+package com.alipay.sofa.rpc.doc.swagger.utils;
 
 /**
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
- * @since 5.1.0
- * //FIXME 每次发布修改
+ * @author <a href=mailto:orezsilence@163.com>zhangchengxi</a>
  */
-public final class Version {
+public class DemoClass {
 
-    /**
-     * 当前RPC版本，例如：5.6.7
-     */
-    public static final String VERSION       = "5.6.5";
+    public void noParam() {
 
-    /**
-     * 当前RPC版本，例如： 5.6.7 对应 50607
-     */
-    public static final int    RPC_VERSION   = 50605;
+    }
 
-    /**
-     * 当前Build版本，每次发布修改
-     */
-    public static final String BUILD_VERSION = "5.6.5_20200218150127";
+    public void oneParam(Object a) {
+
+    }
+
+    public void multiParam(Object a, Object b) {
+
+    }
 }
