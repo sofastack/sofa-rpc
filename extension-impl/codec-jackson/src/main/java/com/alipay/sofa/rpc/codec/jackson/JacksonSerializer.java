@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
+import com.alipay.hessian.generic.model.GenericArray;
+import com.alipay.hessian.generic.model.GenericObject;
+import com.alipay.hessian.generic.util.GenericUtils;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -29,7 +32,11 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -57,53 +64,36 @@ import java.util.Map;
 @Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper  mapper        = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     private JacksonHelper jacksonHelper = new JacksonHelper();
 
+    public JacksonSerializer() {
+        CustomJacksonSerializerManager.addSerializer(SofaRequest.class,
+                new SofaRequestJacksonSerializer());
+       /* CustomJacksonSerializerManager.addSerializer(SofaResponse.class,
+                new SofaResponseJacksonSerializer(serializerFactory, genericSerializerFactory));*/
+    }
+
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
+        GenericObject genericObject = GenericUtils.convertToGenericObject(object);
+
+
+        if (object instanceof SofaRequest){
+            GenericArray methodArgs = GenericUtils.convertToGenericObject(((SofaRequest) object).getMethodArgs());
+            genericObject.putField("methodArgs",methodArgs);
+        }
+
         if (object == null) {
             throw buildSerializeError("Unsupported null message!");
-        } else if (object instanceof SofaRequest) {
-            return encodeSofaRequest((SofaRequest) object, context);
-        } else if (object instanceof SofaResponse) {
-            return encodeSofaResponse((SofaResponse) object, context);
         } else {
             try {
-                return new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(object));
+                return new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(genericObject));
             } catch (JsonProcessingException e) {
                 throw buildSerializeError(e.getMessage());
             }
         }
-    }
-
-    protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
-        throws SofaRpcException {
-        Object[] args = sofaRequest.getMethodArgs();
-        if (args.length > 1) {
-            throw buildSerializeError("Jackson only support one parameter!");
-        }
-        return encode(args[0], context);
-    }
-
-    protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
-        throws SofaRpcException {
-        AbstractByteBuf byteBuf;
-        if (sofaResponse.isError()) {
-            // rpc exception：error when body is illegal string
-            byteBuf = encode(sofaResponse.getErrorMsg(), context);
-        } else {
-            //ok: when json can be deserialize correctly.
-            Object appResponse = sofaResponse.getAppResponse();
-            if (appResponse instanceof Throwable) {
-                // biz exception：error when body is illegal string
-                byteBuf = encode(((Throwable) appResponse).getMessage(), context);
-            } else {
-                byteBuf = encode(appResponse, context);
-            }
-        }
-        return byteBuf;
     }
 
     @Override
@@ -135,96 +125,16 @@ public class JacksonSerializer extends AbstractSerializer {
 
     @Override
     public void decode(AbstractByteBuf data, Object template, Map<String, String> context) throws SofaRpcException {
+
         if (template == null) {
             throw buildDeserializeError("template is null!");
-        } else if (template instanceof SofaRequest) {
-            decodeSofaRequest(data, (SofaRequest) template, context);
-        } else if (template instanceof SofaResponse) {
-            decodeSofaResponse(data, (SofaResponse) template, context);
         } else {
-            throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
-        }
-    }
-
-    private void decodeSofaRequest(AbstractByteBuf data, SofaRequest sofaRequest, Map<String, String> head) {
-        if (head == null) {
-            throw buildDeserializeError("head is null!");
-        }
-        // 解析request信息
-        String targetService = head.remove(RemotingConstants.HEAD_TARGET_SERVICE);
-        if (targetService != null) {
-            sofaRequest.setTargetServiceUniqueName(targetService);
-            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetService);
-            sofaRequest.setInterfaceName(interfaceName);
-        } else {
-            throw buildDeserializeError("HEAD_TARGET_SERVICE is null");
-        }
-        String methodName = head.remove(RemotingConstants.HEAD_METHOD_NAME);
-        if (methodName != null) {
-            sofaRequest.setMethodName(methodName);
-        } else {
-            throw buildDeserializeError("HEAD_METHOD_NAME is null");
-        }
-        String targetApp = head.remove(RemotingConstants.HEAD_TARGET_APP);
-        if (targetApp != null) {
-            sofaRequest.setTargetAppName(targetApp);
-        }
-
-        // parse tracer and baggage
-        parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, head, sofaRequest);
-        if (RpcInvokeContext.isBaggageEnable()) {
-            parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, head, sofaRequest);
-        }
-        for (Map.Entry<String, String> entry : head.entrySet()) {
-            sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
-        }
-
-        // according interface and method name to find paramter types
-        Class requestClass = jacksonHelper.getReqClass(targetService,
-            sofaRequest.getMethodName());
-
-        Object pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(new Object[] { pbReq });
-        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
-    }
-
-    private void parseRequestHeader(String key, Map<String, String> headerMap,
-                                    SofaRequest sofaRequest) {
-        Map<String, String> traceMap = new HashMap<String, String>(8);
-        CodecUtils.treeCopyTo(key + ".", headerMap, traceMap, true);
-        if (!traceMap.isEmpty()) {
-            sofaRequest.addRequestProp(key, traceMap);
-        }
-    }
-
-    private void decodeSofaResponse(AbstractByteBuf data, SofaResponse sofaResponse, Map<String, String> head) {
-        if (head == null) {
-            throw buildDeserializeError("head is null!");
-        }
-        String targetService = head.remove(RemotingConstants.HEAD_TARGET_SERVICE);
-        if (targetService == null) {
-            throw buildDeserializeError("HEAD_TARGET_SERVICE is null");
-        }
-        String methodName = head.remove(RemotingConstants.HEAD_METHOD_NAME);
-        if (methodName == null) {
-            throw buildDeserializeError("HEAD_METHOD_NAME is null");
-        }
-
-        boolean isError = false;
-        if (StringUtils.TRUE.equals(head.remove(RemotingConstants.HEAD_RESPONSE_ERROR))) {
-            isError = true;
-        }
-        if (!head.isEmpty()) {
-            sofaResponse.setResponseProps(head);
-        }
-        if (isError) {
-            String errorMessage = (String) decode(data, String.class, head);
-            sofaResponse.setErrorMsg(errorMessage);
-        } else {
-            // according interface and method name to find paramter types
-            Class responseClass = jacksonHelper.getResClass(targetService, methodName);
-            Object pbRes = decode(data, responseClass, head);
-            sofaResponse.setAppResponse(pbRes);
+            CustomJacksonSerializer serializer = CustomJacksonSerializerManager.getSerializer(template.getClass());
+            if (serializer != null) {
+                serializer.decodeObjectByTemplate(data, context, template);
+            } else {
+                throw buildDeserializeError(template.getClass() + " template is not supported");
+            }
         }
     }
 }
