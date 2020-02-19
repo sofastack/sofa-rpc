@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -260,7 +261,7 @@ public class ProviderHelper {
                 providerInfo.setPath(StringUtils.EMPTY);
             }
         } catch (Exception e) {
-            throw new IllegalArgumentException("Failed to convert url to provider, the wrong url is:" + url, e);
+            throw new IllegalArgumentException(LogCodes.getLog(LogCodes.ERROR_CONVERT_URL, url), e);
         }
         return providerInfo;
     }

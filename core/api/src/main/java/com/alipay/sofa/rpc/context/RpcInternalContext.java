@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.StopWatch;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.net.InetSocketAddress;
@@ -350,8 +351,8 @@ public class RpcInternalContext implements Cloneable {
             }
         } else {
             if (!isValidInternalParamKey(key)) { // 打开附件传递功能，只能传 "_" 和 "." 开头的Key
-                throw new IllegalArgumentException("key must start with" + RpcConstants.INTERNAL_KEY_PREFIX
-                    + " or " + RpcConstants.HIDE_KEY_PREFIX);
+                throw new IllegalArgumentException(LogCodes.getLog(LogCodes.ERROR_ATTACHMENT_KEY,
+                    RpcConstants.INTERNAL_KEY_PREFIX, RpcConstants.HIDE_KEY_PREFIX));
             }
         }
         if (value == null) {

@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -79,7 +80,7 @@ public final class CompressorFactory {
     public static Compressor getCompressor(byte code) {
         Compressor compressor = TYPE_COMPRESSOR_MAP.get(code);
         if (compressor == null) {
-            throw new SofaRpcRuntimeException("Compressor Not Found :\"" + code + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_COMPRESSOR_NOT_FOUND, code));
         }
         return compressor;
     }

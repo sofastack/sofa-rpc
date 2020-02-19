@@ -86,6 +86,7 @@ public class LogCodes {
     public static final String                 ERROR_REGISTER_TO_REGISTRY                 = "010000020";
     public static final String                 ERROR_PROVIDER_ATTRIBUTE_COMPARE           = "010000021";
     public static final String                 ERROR_PROVIDER_ATTRIBUTE_CHANGE            = "010000022";
+    public static final String                 ERROR_CONVERT_URL                          = "010000023";
 
     //01001 consumer
     public static final String                 INFO_ADDRESS_WAIT_START                    = "010010001";
@@ -173,6 +174,7 @@ public class LogCodes {
     public static final String                 ERROR_RESPONSE_FUTURE_NULL                 = "020010004";
     public static final String                 ERROR_RESPONSE_FUTURE_NOT_CLEAR            = "020010005";
     public static final String                 WARN_PROCESS_PARSE_TARGET_METHOD           = "020010006";
+    public static final String                 ERROR_LOAD_CLUSTER                         = "020010007";
     // 02002 connectionholder
     public static final String                 INFO_CONNECT_PUT_TO_ALIVE                  = "020020001";
     public static final String                 INFO_CONNECT_PUT_TO_RETRY                  = "020020002";
@@ -184,7 +186,9 @@ public class LogCodes {
     public static final String                 ERROR_INVOKE_GET_CLIENT                    = "020020008";
     public static final String                 ERROR_TARGET_URL_INVALID                   = "020020009";
     public static final String                 LOCALFILEREGISTRY_FAIL_INVOKE              = "020020010";
+    public static final String                 ERROR_LOAD_CONNECTION_HOLDER               = "020020011";
     // 02003 loadbalancer
+    public static final String                 ERROR_LOAD_LOAD_BALANCER                   = "020030001";
     // 02004 router
     // 02005 codec
     public static final String                 WARN_DESERIALIZE_HEADER_ERROR              = "020050001";
@@ -193,12 +197,23 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_PROTOCOL_INVALID          = "020050004";
     public static final String                 ERROR_DECODE_RES_PROTOCOL_INVALID          = "020050005";
     public static final String                 ERROR_DECODE_CLASS_NOT_FOUND               = "020050006";
+    public static final String                 ERROR_COMPRESSOR_NOT_FOUND                 = "020050007";
+    public static final String                 ERROR_SERIALIZER_NOT_FOUND                 = "020050008";
+    public static final String                 ERROR_SERIALIZER                           = "020050009";
+
     // 02006 addressholder
     public static final String                 ERROR_NO_AVAILBLE_PROVIDER                 = "020060001";
     public static final String                 LOCALFILEREGISTRY_FAIL_READURL             = "020060002";
+    public static final String                 ERROR_LOAD_ADDRESS_HOLDER                  = "020060003";
     // 02007 cache
     // 02008 context
+    public static final String                 ERROR_ATTACHMENT_KEY                       = "020080001";
+    public static final String                 ERROR_ASYNC_THREAD_POOL_REJECT             = "020080002";
     // 02009 tracer
+    public static final String                 ERROR_FAIL_INIT_TRACER                     = "020090001";
+    public static final String                 ERROR_FAIL_LOAD_TRACER_EXT                 = "020090002";
+    public static final String                 ERROR_TRACER_CONSUMER_STACK                = "020090003";
+    public static final String                 ERROR_TRACER_PROVIDER_STACK                = "020090004";
     // 02010 server process
     public static final String                 INFO_SERVICE_METADATA_IS_NULL              = "020100001";
     public static final String                 WARN_CANNOT_FOUND_SERVICE_4_SERVER         = "020100002";
