@@ -133,7 +133,8 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 if (c > maxProxyCount) {
                     cnt.decrementAndGet();
                     // 超过最大数量，直接抛出异常
-                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_DUPLICATE_CONSUMER_CONFIG,key,maxProxyCount));
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_DUPLICATE_CONSUMER_CONFIG, key,
+                        maxProxyCount));
                 } else if (c > 1) {
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, "Duplicate consumer config with key {} has been referred!"
@@ -365,11 +366,13 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                     }
                 }
             } catch (SofaRpcRuntimeException e) {
-                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY, registryConfig.getId()),e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY,
+                    registryConfig.getId()), e);
             } catch (Throwable e) {
                 String appName = consumerConfig.getAppName();
                 if (LOGGER.isWarnEnabled(appName)) {
-                    LOGGER.warnWithApp(appName, LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY,registryConfig.getId()), e);
+                    LOGGER.warnWithApp(appName,
+                        LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY, registryConfig.getId()), e);
                 }
             }
         }
@@ -541,7 +544,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 if (newCluster != null) {
                     newCluster.destroy();
                 }
-                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SWITCH_CLUSTER_NEW),e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SWITCH_CLUSTER_NEW), e);
             }
             try { // 切换
                 cluster = newCluster;
