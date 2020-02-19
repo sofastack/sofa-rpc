@@ -215,8 +215,15 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND       = "020100013";
     public static final String                 ERROR_DISCARD_TIMEOUT_REQUEST              = "020100014";
     public static final String                 ERROR_DISCARD_TIMEOUT_RESPONSE             = "020100015";
+    public static final String                 ERROR_UNSUPPORTED_PROTOCOL                 = "020100016";
+    public static final String                 ERROR_GET_SERVER                           = "020100017";
+    public static final String                 ERROR_DESTROY_SERVER                       = "020100018";
     // 02011 protocol
+    public static final String                 ERROR_EXTENSION_NOT_FOUND                  = "020110001";
     // 02012 filter
+    public static final String                 ERROR_BUILD_FILTER_CHAIN                   = "020120001";
+    public static final String                 ERROR_NEXT_FILTER_AND_INVOKER_NULL         = "020120002";
+    public static final String                 ERROR_NEED_DECODE_METHOD                   = "020120003";
     // 02013 event
 
     // 02014 faulttorenence
