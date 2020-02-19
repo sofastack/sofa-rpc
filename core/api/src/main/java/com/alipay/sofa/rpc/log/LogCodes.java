@@ -144,6 +144,7 @@ public class LogCodes {
     public static final String                 ERROR_OSGI_UNRESGISTER_SERVICE             = "019990016";
     public static final String                 ERROR_ADDRESSING_CHAIN_EMPTY               = "019990017";
     public static final String                 ERROR_PROVIDER_GRPC_START                  = "019990018";
+    public static final String                 ERROR_SERVER_DESTROY                       = "019990019";
 
     //02 运行
     // 02000 泛化
@@ -165,6 +166,11 @@ public class LogCodes {
     public static final String                 ERROR_INVOKE_GET_CLIENT                    = "020020008";
     public static final String                 ERROR_TARGET_URL_INVALID                   = "020020009";
     public static final String                 LOCALFILEREGISTRY_FAIL_INVOKE              = "020020010";
+    public static final String                 ERROR_NOTIFY_CONSUMER_STATE                = "020020011";
+    public static final String                 WARN_NOTIFY_CONSUMER_STATE                 = "020020012";
+    public static final String                 ERROR_UPDATE_PROVIDERS                     = "020020013";
+    public static final String                 ERROR_DELETE_PROVIDERS                     = "020020014";
+
     // 02003 loadbalancer
     // 02004 router
     // 02005 codec
