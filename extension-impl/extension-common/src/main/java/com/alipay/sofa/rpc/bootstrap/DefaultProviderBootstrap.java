@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.bootstrap;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -28,6 +27,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
@@ -69,12 +69,12 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 是否已发布
      */
-    protected transient volatile boolean                        exported;
+    protected transient volatile boolean exported;
 
     /**
      * 服务端Invoker对象
      */
-    protected transient Invoker                                 providerProxyInvoker;
+    protected transient Invoker providerProxyInvoker;
 
     /**
      * 发布的服务配置
@@ -84,9 +84,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * 延迟加载的线程名工厂
      */
-    private final ThreadFactory                                 factory       = new NamedThreadFactory(
-                                                                                  "DELAY-EXPORT",
-                                                                                  true);
+    private final ThreadFactory factory = new NamedThreadFactory(
+            "DELAY-EXPORT",
+            true);
 
     @Override
     public void export() {
@@ -142,15 +142,10 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 if (c > maxProxyCount) {
                     decrementCounter(hasExportedInCurrent);
                     // 超过最大数量，直接抛出异常
-                    throw new SofaRpcRuntimeException("Duplicate provider config with key " + key
-                        + " has been exported more than " + maxProxyCount + " times!"
-                        + " Maybe it's wrong config, please check it."
-                        + " Ignore this if you did that on purpose!");
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_DUPLICATE_PROVIDER_CONFIG, key, maxProxyCount));
                 } else if (c > 1) {
                     if (LOGGER.isInfoEnabled(appName)) {
-                        LOGGER.infoWithApp(appName, "Duplicate provider config with key {} has been exported!"
-                            + " Maybe it's wrong config, please check it."
-                            + " Ignore this if you did that on purpose!", key);
+                        LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.WARN_DUPLICATE_PROVIDER_CONFIG, key, c));
                     }
                 }
             }
@@ -180,10 +175,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     }
 
                 } catch (SofaRpcRuntimeException e) {
-                    throw e;
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, serverConfig.getId()), e);
                 } catch (Exception e) {
-                    LOGGER.errorWithApp(appName, "Catch exception when register processor to server: "
-                        + serverConfig.getId(), e);
+                    LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, serverConfig.getId()), e);
                 }
             }
 
@@ -192,12 +186,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             register();
         } catch (Exception e) {
             decrementCounter(hasExportedInCurrent);
-
-            if (e instanceof SofaRpcRuntimeException) {
-                throw (SofaRpcRuntimeException) e;
-            } else {
-                throw new SofaRpcRuntimeException("Build provider proxy error!", e);
-            }
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_PROVIDER_PROXY), e);
         }
 
         // 记录一些缓存数据
@@ -231,15 +220,12 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         String key = providerConfig.buildKey();
         T ref = providerConfig.getRef();
         if (!proxyClass.isInstance(ref)) {
-            throw ExceptionUtils.buildRuntime("provider.ref",
-                ref == null ? "null" : ref.getClass().getName(),
-                "This is not an instance of " + providerConfig.getInterfaceId()
-                    + " in provider config with key " + key + " !");
+            String name = ref == null ? "null" : ref.getClass().getName();
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REFERENCE_AND_INTERFACE, name, providerConfig.getInterfaceId(), key));
         }
         // server 不能为空
         if (CommonUtils.isEmpty(providerConfig.getServer())) {
-            throw ExceptionUtils.buildRuntime("server", "NULL", "Value of \"server\" is not specified in provider" +
-                " config with key " + key + " !");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SERVER_EMPTY, key));
         }
         checkMethods(proxyClass);
     }
@@ -256,8 +242,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             if (methodsLimit.containsKey(methodName)) {
                 // 重名的方法
                 if (LOGGER.isWarnEnabled(providerConfig.getAppName())) {
+                    // TODO WARN
                     LOGGER.warnWithApp(providerConfig.getAppName(), "Method with same name \"" + itfClass.getName()
-                        + "." + methodName + "\" exists ! The usage of overloading method in rpc is deprecated.");
+                            + "." + methodName + "\" exists ! The usage of overloading method in rpc is deprecated.");
                 }
             }
             // 判断服务下方法的黑白名单
@@ -287,7 +274,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                 String key = providerConfig.buildKey() + ":" + protocol;
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, "Unexport provider config : {} {}", key, providerConfig.getId() != null
-                        ? "with bean id " + providerConfig.getId() : "");
+                            ? "with bean id " + providerConfig.getId() : "");
                 }
             }
 
@@ -305,9 +292,10 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                             server.unRegisterProcessor(providerConfig, serverConfig.isAutoStart());
                         } catch (Exception e) {
                             if (LOGGER.isWarnEnabled(appName)) {
+                                // TODO WARN
                                 LOGGER.warnWithApp(appName, "Catch exception when unRegister processor to server: " +
-                                    serverConfig.getId()
-                                    + ", but you can ignore if it's called by JVM shutdown hook", e);
+                                        serverConfig.getId()
+                                        + ", but you can ignore if it's called by JVM shutdown hook", e);
                             }
                         }
                     }
@@ -345,12 +333,11 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     try {
                         registry.register(providerConfig);
                     } catch (SofaRpcRuntimeException e) {
-                        throw e;
+                        throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REGISTER_TO_REGISTRY, registryConfig.getId()), e);
                     } catch (Throwable e) {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {
-                            LOGGER.warnWithApp(appName, "Catch exception when register to registry: "
-                                + registryConfig.getId(), e);
+                            LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_REGISTER_TO_REGISTRY, registryConfig.getId()), e);
                         }
                     }
                 }
@@ -372,9 +359,10 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     } catch (Exception e) {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {
+                            // TODO WARN
                             LOGGER.warnWithApp(appName, "Catch exception when unRegister from registry: " +
-                                registryConfig.getId()
-                                + ", but you can ignore if it's called by JVM shutdown hook", e);
+                                    registryConfig.getId()
+                                    + ", but you can ignore if it's called by JVM shutdown hook", e);
                         }
                     }
                 }
@@ -401,7 +389,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
 
             // TODO 可能需要处理ServerConfig的配置变化
             try { // 检查是否有变化
-                  // 是否过滤map?
+                // 是否过滤map?
                 for (Map.Entry<String, String> entry : newValues.entrySet()) {
                     String newValue = entry.getValue();
                     String oldValue = providerConfig.queryAttribute(entry.getKey());
@@ -412,7 +400,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     reexport = reexport || changed;
                 }
             } catch (Exception e) {
-                LOGGER.errorWithApp(appName, "Catch exception when provider attribute compare", e);
+                LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_PROVIDER_ATTRIBUTE_COMPARE), e);
                 return;
             }
 
@@ -429,7 +417,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     }
                     export();
                 } catch (Exception e) {
-                    LOGGER.errorWithApp(appName, "Catch exception when provider attribute changed", e);
+                    LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_PROVIDER_ATTRIBUTE_CHANGE), e);
                     //rollback old attrs
                     for (Map.Entry<String, String> entry : oldValues.entrySet()) {
                         providerConfig.updateAttribute(entry.getKey(), entry.getValue(), true);

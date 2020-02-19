@@ -77,6 +77,16 @@ public class LogCodes {
     public static final String                 ERROR_SERVICE_PUBLISHING                   = "010000011";
     public static final String                 ERROR_SERVICE_UNPUBLISHING                 = "010000012";
     public static final String                 ERROR_ROUTE_ADDRESS_SUBTOKEN_DECRY         = "010000013";
+    public static final String                 ERROR_DUPLICATE_PROVIDER_CONFIG  = "010000014";
+    public static final String                 WARN_DUPLICATE_PROVIDER_CONFIG  = "010000015";
+public static final String                     ERROR_REGISTER_PROCESSOR_TO_SERVER = "010000016";
+public static final String ERROR_BUILD_PROVIDER_PROXY = "010000017";
+public static final String ERROR_REFERENCE_AND_INTERFACE = "010000018";
+public static final String ERROR_SERVER_EMPTY = "010000019";
+public static final String ERROR_REGISTER_TO_REGISTRY = "010000020";
+public static final String ERROR_PROVIDER_ATTRIBUTE_COMPARE = "010000021";
+public static final String ERROR_PROVIDER_ATTRIBUTE_CHANGE = "010000022";
+
     //01001 consumer
     public static final String                 INFO_ADDRESS_WAIT_START                    = "010010001";
     public static final String                 INFO_ADDRESS_WAIT_OVER                     = "010010002";
@@ -91,6 +101,15 @@ public class LogCodes {
     public static final String                 ERROR_INIT_METHOD_SPECIAL                  = "010010011";
     public static final String                 WARN_PROCESS_ADDRESS_WAIT                  = "010010012";
     public static final String                 WARN_PROCESS_ADDRESS_WAIT_CONTINUE         = "010010013";
+    public static final String ERROR_DUPLICATE_CONSUMER_CONFIG = "010010014";
+    public static final String ERROR_BUILD_CONSUMER_PROXY= "010010015";
+    public static final String ERROR_SUBSCRIBE_FROM_REGISTRY= "010010016";
+    public static final String ERROR_CONSUMER_ATTRIBUTE_COMPARING= "010010017";
+    public static final String ERROR_CONSUMER_ATTRIBUTE_CHANGE= "010010018";
+    public static final String ERROR_CONSUMER_REFER_AFTER_CHANGE= "010010019";
+    public static final String ERROR_SWITCH_CLUSTER_NEW= "010010020";
+    public static final String WARN_SWITCH_CLUSTER_DESTROY= "010010021";
+
     //01002 dynamic
     //01003 ext
     public static final String                 ERROR_METRIC_REPORT_ERROR                  = "010030001";
