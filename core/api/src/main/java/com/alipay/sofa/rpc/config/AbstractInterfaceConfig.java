@@ -177,9 +177,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected boolean                                cache;
 
     /**
-     * 是否开启mock
+     * mock模式
      */
-    protected boolean                                mock;
+    protected String                                 mock;
 
     /**
      * 是否开启参数验证(jsr303)
@@ -569,12 +569,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
         return castThis();
     }
 
-    /**
-     * Is mock boolean.
-     *
-     * @return the boolean
-     */
-    public boolean isMock() {
+    public String getMock() {
         return mock;
     }
 
@@ -584,7 +579,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @param mock the mock
      * @return the mock
      */
-    public S setMock(boolean mock) {
+    public S setMock(String mock) {
         this.mock = mock;
         return castThis();
     }
