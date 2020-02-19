@@ -308,7 +308,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                             listener.onUnavailable(proxyIns);
                         } catch (Exception e) {
                             LOGGER.errorWithApp(consumerConfig.getAppName(),
-                                    LogCodes.getLog(LogCodes.ERROR_NOTIFY_CONSUMER_STATE,proxyIns.getClass().getName()));
+                                LogCodes.getLog(LogCodes.ERROR_NOTIFY_CONSUMER_STATE_UN, proxyIns.getClass().getName()));
                         }
                     }
                 }
@@ -335,7 +335,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                             listener.onAvailable(proxyIns);
                         } catch (Exception e) {
                             LOGGER.warnWithApp(consumerConfig.getAppName(),
-                                    LogCodes.getLog(LogCodes.WARN_NOTIFY_CONSUMER_STATE,proxyIns.getClass().getName()));
+                                LogCodes.getLog(LogCodes.WARN_NOTIFY_CONSUMER_STATE, proxyIns.getClass().getName()));
                         }
                     }
                 }
@@ -395,8 +395,11 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             }
         } catch (Exception e) {
             if (LOGGER.isErrorEnabled(consumerConfig.getAppName())) {
-                LOGGER.errorWithApp(consumerConfig.getAppName(),
-                        LogCodes.getLog(LogCodes.ERROR_UPDATE_PROVIDERS,consumerConfig.getInterfaceId(),providerGroup), e);
+                LOGGER
+                    .errorWithApp(
+                        consumerConfig.getAppName(),
+                        LogCodes.getLog(LogCodes.ERROR_UPDATE_PROVIDERS, consumerConfig.getInterfaceId(), providerGroup),
+                        e);
             }
         }
     }
@@ -443,7 +446,8 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                     threads) + 1)) * connectTimeout + 500;
                 latch.await(totalTimeout, TimeUnit.MILLISECONDS); // 一直等到子线程都结束
             } catch (InterruptedException e) {
-                LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_UPDATE_PROVIDERS,consumerConfig.getInterfaceId(),""), e);
+                LOGGER.errorWithApp(appName,
+                    LogCodes.getLog(LogCodes.ERROR_UPDATE_PROVIDERS, consumerConfig.getInterfaceId(), ""), e);
             } finally {
                 initPool.shutdown(); // 关闭线程池
             }
@@ -516,7 +520,8 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                     ClientTransportFactory.releaseTransport(transport, consumerConfig.getDisconnectTimeout());
                 }
             } catch (Exception e) {
-                LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_DELETE_PROVIDERS,consumerConfig.getInterfaceId(),providerInfo), e);
+                LOGGER.errorWithApp(appName,
+                    LogCodes.getLog(LogCodes.ERROR_DELETE_PROVIDERS, consumerConfig.getInterfaceId(), providerInfo), e);
             }
         }
     }

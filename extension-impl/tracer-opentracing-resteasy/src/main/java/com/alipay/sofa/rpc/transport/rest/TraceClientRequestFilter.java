@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.transport.rest;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.RestTracerAdapter;
@@ -53,7 +54,7 @@ public class TraceClientRequestFilter implements ClientRequestFilter {
 
             RestTracerAdapter.beforeSend(requestContext);
         } catch (Exception e) {
-            logger.error("the process of rest tracer client request occur error ", e);
+            logger.error(LogCodes.getLog(LogCodes.ERROR_TRACER_UNKNOWN_EXP, "filter", "rest", "client"), e);
         }
     }
 }

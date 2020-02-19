@@ -753,11 +753,13 @@ public abstract class AbstractCluster extends Cluster {
                 @Override
                 public void run() {
                     // 状态变化通知监听器
+                    final Object proxyIns = consumerBootstrap.getProxyIns();
                     for (ConsumerStateListener listener : onprepear) {
                         try {
-                            listener.onUnavailable(consumerBootstrap.getProxyIns());
+                            listener.onUnavailable(proxyIns);
                         } catch (Exception e) {
-                            LOGGER.error("Failed to notify consumer state listener when state change to unavailable");
+                            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_NOTIFY_CONSUMER_STATE_UN, proxyIns.getClass()
+                                .getName()));
                         }
                     }
                 }
@@ -778,11 +780,13 @@ public abstract class AbstractCluster extends Cluster {
                 @Override
                 public void run() {
                     // 状态变化通知监听器
+                    final Object proxyIns = consumerBootstrap.getProxyIns();
                     for (ConsumerStateListener listener : onprepear) {
                         try {
-                            listener.onAvailable(consumerBootstrap.getProxyIns());
+                            listener.onAvailable(proxyIns);
                         } catch (Exception e) {
-                            LOGGER.error("Failed to notify consumer state listener when state change to available");
+                            LOGGER.warn(LogCodes.getLog(LogCodes.WARN_NOTIFY_CONSUMER_STATE, proxyIns.getClass()
+                                .getName()));
                         }
                     }
                 }
