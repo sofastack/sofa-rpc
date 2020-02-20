@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.config;
 
+import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.struct.Cache;
 import com.alipay.sofa.rpc.common.utils.BeanUtils;
@@ -137,6 +138,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
 
     /**
      * 服务分组：不做为服务唯一标识的一部分
+     *
      * @deprecated 不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
     @Deprecated
@@ -179,7 +181,12 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * mock模式
      */
-    protected String                                 mock;
+    protected String                                 mockMode;
+
+    /**
+     * 是否开启mock
+     */
+    protected boolean                                mock;
 
     /**
      * 是否开启参数验证(jsr303)
@@ -475,7 +482,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param group the group
      * @return the group
-     * @deprecated Use {@link #setUniqueId(String)} 
+     * @deprecated Use {@link #setUniqueId(String)}
      */
     @Deprecated
     public S setGroup(String group) {
@@ -498,7 +505,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @param version the version
      * @return the version
-     * @deprecated Use {@link #setUniqueId(String)} 
+     * @deprecated Use {@link #setUniqueId(String)}
      */
     @Deprecated
     public S setVersion(String version) {
@@ -569,17 +576,31 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
         return castThis();
     }
 
-    public String getMock() {
+    public String getMockMode() {
+        return mockMode;
+    }
+
+    public S setMockMode(String mockMode) {
+        this.mockMode = mockMode;
+        if (StringUtils.equals(mockMode, MockMode.LOCAL) ||
+            StringUtils.equals(mockMode, MockMode.REMOTE)) {
+            this.setMock(true);
+        }
+        return castThis();
+    }
+
+    public boolean isMock() {
         return mock;
     }
 
     /**
-     * Sets mock.
+     * Sets mock. do not invoke this
+     * use setMockMode
      *
      * @param mock the mock
      * @return the mock
      */
-    public S setMock(String mock) {
+    public S setMock(boolean mock) {
         this.mock = mock;
         return castThis();
     }

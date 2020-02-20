@@ -283,8 +283,8 @@ public abstract class AbstractCluster extends Cluster {
         SofaResponse response = null;
         try {
             //为什么要放在这里，因为走了filter的话，就要求有地址了
-            if (StringUtils.equals(consumerConfig.getMock(), MockMode.LOCAL)) {
-                return doLocalMockInvoke(request);
+            if (consumerConfig.isMock()) {
+                return doMockInvoke(request);
             }
 
             // 做一些初始化检查，例如未连接可以连接
@@ -301,17 +301,25 @@ public abstract class AbstractCluster extends Cluster {
         }
     }
 
-    protected SofaResponse doLocalMockInvoke(SofaRequest request) {
-        SofaResponse response;
-        Object mockObject = consumerConfig.getMockRef();
-        response = new SofaResponse();
-        try {
-            Object appResponse = request.getMethod().invoke(mockObject, request.getMethodArgs());
-            response.setAppResponse(appResponse);
-        } catch (Throwable e) {
-            response.setErrorMsg(e.getMessage());
+    protected SofaResponse doMockInvoke(SofaRequest request) {
+        final String mockMode = consumerConfig.getMockMode();
+        if (MockMode.LOCAL.equalsIgnoreCase(mockMode)) {
+            SofaResponse response;
+            Object mockObject = consumerConfig.getMockRef();
+            response = new SofaResponse();
+            try {
+                Object appResponse = request.getMethod().invoke(mockObject, request.getMethodArgs());
+                response.setAppResponse(appResponse);
+            } catch (Throwable e) {
+                response.setErrorMsg(e.getMessage());
+            }
+            return response;
+        } else if (MockMode.REMOTE.equalsIgnoreCase(mockMode)) {
+            SofaResponse response = null;
+            return response;
+        } else {
+            throw new SofaRpcException("Can not recognize the mockMode " + mockMode);
         }
-        return response;
     }
 
     /**

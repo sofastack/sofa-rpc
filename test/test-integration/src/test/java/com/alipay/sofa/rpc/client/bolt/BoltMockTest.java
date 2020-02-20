@@ -38,7 +38,7 @@ public class BoltMockTest extends ActivelyDestroyTest {
             .setBootstrap("bolt")
             .setApplication(new ApplicationConfig().setAppName("clientApp"))
             .setReconnectPeriod(1000)
-            .setMock("local")
+            .setMockMode("local")
             .setMockRef(new HelloService() {
                 @Override
                 public String sayHello(String name, int age) {
