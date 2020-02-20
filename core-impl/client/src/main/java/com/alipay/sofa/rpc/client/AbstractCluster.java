@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.client.http.RpcHttpClient;
 import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.json.JSON;
@@ -328,20 +329,13 @@ public abstract class AbstractCluster extends Cluster {
             SofaResponse response = new SofaResponse();
             CloseableHttpClient client = HttpClients.createDefault();
             try {
-                HttpPost httpPost = new HttpPost(consumerConfig.getParameter("mockUrl"));
+                final String mockUrl = consumerConfig.getParameter("mockUrl");
                 Map<String, Object> parameters = new HashMap<>();
                 parameters.put("targetServiceUniqueName", request.getTargetServiceUniqueName());
                 parameters.put("methodName", request.getMethodName());
                 parameters.put("methodArgs", request.getMethodArgs());
                 parameters.put("methodArgSigs", request.getMethodArgSigs());
-                StringEntity entity = new StringEntity(JSON.toJSONString(parameters));
-                httpPost.setEntity(entity);
-                httpPost.setHeader("Accept", "application/json");
-                httpPost.setHeader("Content-type", "application/json");
-                CloseableHttpResponse httpResponse = null;
-                httpResponse = client.execute(httpPost);
-                String mockJson = EntityUtils.toString(httpResponse.getEntity());
-                Object mockAppResponse = JSON.parseObject(mockJson, request.getMethod().getReturnType());
+                Object mockAppResponse=  RpcHttpClient.getInstance().doPost(mockUrl,JSON.toJSONString(parameters),request.getMethod().getReturnType());
                 response.setAppResponse(mockAppResponse);
             } catch (Throwable e) {
                 response.setErrorMsg(e.getMessage());
