@@ -75,7 +75,7 @@ public final class Tracers {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_FAIL_INIT_TRACER), e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_TRACER_INIT), e);
         }
     }
 

@@ -114,6 +114,9 @@ public class LogCodes {
     //01002 dynamic
     //01003 ext
     public static final String                 ERROR_METRIC_REPORT_ERROR                  = "010030001";
+    public static final String                 ERROR_TRACER_INIT                          = "010030002";
+    public static final String                 ERROR_FILTER_CONSTRUCT                     = "010030003";
+
     //01004 listener
     //01005 module
 
@@ -129,6 +132,8 @@ public class LogCodes {
     public static final String                 INFO_REGISTRY_IGNORE                       = "010060003";
     public static final String                 LOCALFILEREGISTRY_FAIL_READFILE            = "010060004";
     public static final String                 ERROR_RPC_NETWORK_ADDRESS_LOAD             = "010060005";
+    public static final String                 ERROR_DESTRORY_REGISTRY                    = "010060006";
+
     //01007 log
     //01008 proxy generate
     //01009 transmit
@@ -186,7 +191,11 @@ public class LogCodes {
     public static final String                 ERROR_INVOKE_GET_CLIENT                    = "020020008";
     public static final String                 ERROR_TARGET_URL_INVALID                   = "020020009";
     public static final String                 LOCALFILEREGISTRY_FAIL_INVOKE              = "020020010";
-    public static final String                 ERROR_LOAD_CONNECTION_HOLDER               = "020020011";
+    public static final String                 ERROR_NOTIFY_CONSUMER_STATE_UN             = "020020011";
+    public static final String                 WARN_NOTIFY_CONSUMER_STATE                 = "020020012";
+    public static final String                 ERROR_UPDATE_PROVIDERS                     = "020020013";
+    public static final String                 ERROR_DELETE_PROVIDERS                     = "020020014";
+    public static final String                 ERROR_LOAD_CONNECTION_HOLDER               = "020020015";
     // 02003 loadbalancer
     public static final String                 ERROR_LOAD_LOAD_BALANCER                   = "020030001";
     // 02004 router
@@ -210,7 +219,7 @@ public class LogCodes {
     public static final String                 ERROR_ATTACHMENT_KEY                       = "020080001";
     public static final String                 ERROR_ASYNC_THREAD_POOL_REJECT             = "020080002";
     // 02009 tracer
-    public static final String                 ERROR_FAIL_INIT_TRACER                     = "020090001";
+    public static final String                 ERROR_TRACER_UNKNOWN_EXP                   = "020090001";
     public static final String                 ERROR_FAIL_LOAD_TRACER_EXT                 = "020090002";
     public static final String                 ERROR_TRACER_CONSUMER_STACK                = "020090003";
     public static final String                 ERROR_TRACER_PROVIDER_STACK                = "020090004";
@@ -233,10 +242,11 @@ public class LogCodes {
     public static final String                 ERROR_UNSUPPORTED_PROTOCOL                 = "020100016";
     public static final String                 ERROR_GET_SERVER                           = "020100017";
     public static final String                 ERROR_DESTROY_SERVER                       = "020100018";
+    public static final String                 ERROR_PROCESS_UNKNOWN                      = "020100019";
     // 02011 protocol
     public static final String                 ERROR_EXTENSION_NOT_FOUND                  = "020110001";
     // 02012 filter
-    public static final String                 ERROR_BUILD_FILTER_CHAIN                   = "020120001";
+    //    public static final String                 ERROR_BUILD_FILTER_CHAIN                   = "020120001";
     public static final String                 ERROR_NEXT_FILTER_AND_INVOKER_NULL         = "020120002";
     public static final String                 ERROR_NEED_DECODE_METHOD                   = "020120003";
     // 02013 event

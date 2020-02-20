@@ -129,8 +129,8 @@ public class FilterChain implements Invoker {
                         loadedFilters.add(filter);
                     }
                 } catch (Exception e) {
-                    LOGGER.error(LogCodes.getLog(LogCodes.ERROR_BUILD_FILTER_CHAIN), e);
-                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_FILTER_CHAIN), e);
+                    LOGGER.error(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);
                 }
             }
         }
