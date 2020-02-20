@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.client.bolt;
 
+import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
@@ -30,7 +32,7 @@ import org.junit.Test;
 public class BoltMockTest extends ActivelyDestroyTest {
 
     @Test
-    public void testAll() {
+    public void testLocal() {
 
         final ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
@@ -49,5 +51,26 @@ public class BoltMockTest extends ActivelyDestroyTest {
         HelloService helloService = consumerConfig.refer();
         Assert.assertEquals("mock", helloService.sayHello("xx", 22));
 
+    }
+
+    @Test
+    public void testRemote() {
+
+        HttpMockServer.initSever(1235);
+        HttpMockServer.addMockPath("/", JSON.toJSONString("mockJson"));
+        HttpMockServer.start();
+        final ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setBootstrap("bolt")
+            .setApplication(new ApplicationConfig().setAppName("clientApp"))
+            .setReconnectPeriod(1000)
+            .setMockMode(MockMode.REMOTE)
+            .setParameter("mockUrl", "http://127.0.0.1:1235/");
+
+        HelloService helloService = consumerConfig.refer();
+        Assert.assertEquals("mockJson", helloService.sayHello("xx", 22));
+
+        HttpMockServer.stop();
     }
 }

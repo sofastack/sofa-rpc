@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.client;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -49,12 +50,21 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.transport.ClientTransport;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
@@ -315,7 +325,32 @@ public abstract class AbstractCluster extends Cluster {
             }
             return response;
         } else if (MockMode.REMOTE.equalsIgnoreCase(mockMode)) {
-            SofaResponse response = null;
+            SofaResponse response = new SofaResponse();
+            CloseableHttpClient client = HttpClients.createDefault();
+            try {
+                HttpPost httpPost = new HttpPost(consumerConfig.getParameter("mockUrl"));
+                Map<String, Object> parameters = new HashMap<>();
+                parameters.put("targetServiceUniqueName", request.getTargetServiceUniqueName());
+                parameters.put("methodName", request.getMethodName());
+                parameters.put("methodArgs", request.getMethodArgs());
+                parameters.put("methodArgSigs", request.getMethodArgSigs());
+                StringEntity entity = new StringEntity(JSON.toJSONString(parameters));
+                httpPost.setEntity(entity);
+                httpPost.setHeader("Accept", "application/json");
+                httpPost.setHeader("Content-type", "application/json");
+                CloseableHttpResponse httpResponse = null;
+                httpResponse = client.execute(httpPost);
+                String mockJson = EntityUtils.toString(httpResponse.getEntity());
+                Object mockAppResponse = JSON.parseObject(mockJson, request.getMethod().getReturnType());
+                response.setAppResponse(mockAppResponse);
+            } catch (Throwable e) {
+                response.setErrorMsg(e.getMessage());
+            }finally {
+                try {
+                    client.close();
+                } catch (IOException ignored) {
+                }
+            }
             return response;
         } else {
             throw new SofaRpcException("Can not recognize the mockMode " + mockMode);
