@@ -49,6 +49,7 @@ import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
@@ -60,6 +61,7 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 import java.net.InetSocketAddress;
+import java.security.AlgorithmConstraints;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -155,7 +157,7 @@ public class BoltClientTransport extends ClientTransport {
         try {
             connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_CLOSE_CONNECTION), e);
         }
     }
 

@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.listener.ConfigListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -862,7 +863,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
             }
             return oldValue == null ? null : oldValue.toString();
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Exception when query attribute, The key is " + property, e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_QUERY_ATTRIBUTE, property), e);
         }
     }
 
@@ -941,8 +942,8 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
             }
             return changed;
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Exception when update attribute, The key is "
-                + property + " and value is " + newValueStr, e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UPDATE_ATTRIBUTE, property, newValueStr),
+                e);
         }
     }
 

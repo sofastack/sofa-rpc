@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -219,7 +220,7 @@ public class ScheduledService {
                     service.start();
                 }
             } catch (Exception e) {
-                LOGGER.error("Error when restart schedule service", e);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_RESTART_SCHEDULE_SERVICE), e);
             }
         }
         if (LOGGER.isWarnEnabled()) {

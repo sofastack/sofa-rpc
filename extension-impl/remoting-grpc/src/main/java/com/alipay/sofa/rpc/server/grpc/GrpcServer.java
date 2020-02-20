@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.Server;
@@ -95,8 +96,8 @@ public class GrpcServer implements Server {
                     LOGGER.info("Start the grpc server at port {}", serverConfig.getPort());
                 }
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException(
-                    "Failed to start grpc server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(), e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER_WITH_PORT, "grpc",
+                    serverConfig.getPort()), e);
             }
             started = true;
         }

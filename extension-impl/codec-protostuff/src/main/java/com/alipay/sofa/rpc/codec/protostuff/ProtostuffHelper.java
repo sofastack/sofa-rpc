@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentMap;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * @author leizhiyuan
@@ -105,20 +106,20 @@ public class ProtostuffHelper {
             }
         }
         if (pbMethod == null) {
-            throw new SofaRpcRuntimeException("Cannot found protobuf method: " + clazz.getName() + "." + methodName);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
+                methodName));
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
         if (parameterTypes == null
             || parameterTypes.length != 1) {
-            throw new SofaRpcRuntimeException("class based protobuf: " + clazz.getName()
-                + ", only support one protobuf parameter!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_ONLY_ONE_PARAM, "protobuf",
+                clazz.getName()));
         }
         Class reqClass = parameterTypes[0];
         requestClassCache.put(key, reqClass);
         Class resClass = pbMethod.getReturnType();
         if (resClass == void.class) {
-            throw new SofaRpcRuntimeException("class based protobuf: " + clazz.getName()
-                + ", only support return protobuf message!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOBUF_RETURN, clazz.getName()));
         }
         responseClassCache.put(key, resClass);
     }

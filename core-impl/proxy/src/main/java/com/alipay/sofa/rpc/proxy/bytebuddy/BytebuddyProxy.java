@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.proxy.bytebuddy;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.proxy.Proxy;
 import net.bytebuddy.ByteBuddy;
 import net.bytebuddy.dynamic.loading.ClassLoadingStrategy;
@@ -61,7 +62,7 @@ public class BytebuddyProxy implements Proxy {
         try {
             return cls.newInstance();
         } catch (Throwable t) {
-            throw new SofaRpcRuntimeException("construct proxy with bytebuddy occurs error", t);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROXY_CONSTRUCT, "bytebuddy"), t);
         }
 
     }

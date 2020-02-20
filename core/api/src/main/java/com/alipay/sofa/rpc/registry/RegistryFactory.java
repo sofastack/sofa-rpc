@@ -61,24 +61,23 @@ public class RegistryFactory {
                 LOGGER.warn("Size of registry is greater than 3, Please check it!");
             }
         }
+        String protocol = null;
         try {
             // 注意：RegistryConfig重写了equals方法，如果多个RegistryConfig属性一样，则认为是一个对象
             Registry registry = ALL_REGISTRIES.get(registryConfig);
             if (registry == null) {
+                protocol = registryConfig.getProtocol();
                 ExtensionClass<Registry> ext = ExtensionLoaderFactory.getExtensionLoader(Registry.class)
-                    .getExtensionClass(registryConfig.getProtocol());
+                    .getExtensionClass(protocol);
                 if (ext == null) {
-                    throw ExceptionUtils.buildRuntime("registry.protocol", registryConfig.getProtocol(),
-                        "Unsupported protocol of registry config !");
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", protocol));
                 }
                 registry = ext.getExtInstance(new Class[] { RegistryConfig.class }, new Object[] { registryConfig });
                 ALL_REGISTRIES.put(registryConfig, registry);
             }
             return registry;
-        } catch (SofaRpcRuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", protocol));
         }
     }
 

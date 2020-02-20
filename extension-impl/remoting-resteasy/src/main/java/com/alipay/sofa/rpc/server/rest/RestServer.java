@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
@@ -162,8 +163,8 @@ public class RestServer implements Server {
                     LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
                 }
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException(
-                    "Failed to start jetty server at port " + serverConfig.getPort() + ", cause: " + e.getMessage(), e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER_WITH_PORT, "rest",
+                    serverConfig.getPort()), e);
             }
             started = true;
         }
@@ -191,7 +192,7 @@ public class RestServer implements Server {
             }
             httpServer.stop();
         } catch (Exception e) {
-            LOGGER.error("Stop the http rest server at port " + serverConfig.getPort() + " error !", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_STOP_SERVER_WITH_PORT, serverConfig.getPort()), e);
         }
         started = false;
     }
@@ -214,8 +215,9 @@ public class RestServer implements Server {
 
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
-            LOGGER.error("Register jaxrs service error", e);
-            throw new SofaRpcRuntimeException("Register jaxrs service error", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, "restServer"), e);
+            throw new SofaRpcRuntimeException(
+                LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, "restServer"), e);
         }
     }
 
@@ -233,7 +235,7 @@ public class RestServer implements Server {
                 .removeRegistrations(providerConfig.getRef().getClass(), serverConfig.getContextPath());
             invokerCnt.decrementAndGet();
         } catch (Exception e) {
-            LOGGER.error("Unregister jaxrs service error", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_UNREG_PROCESSOR, "jaxrs"), e);
         }
         // 如果最后一个需要关闭，则关闭
         if (closeIfNoEntry && invokerCnt.get() == 0) {
