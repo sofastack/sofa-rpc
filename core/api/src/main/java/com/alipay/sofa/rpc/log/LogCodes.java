@@ -94,6 +94,9 @@ public class LogCodes {
     //01002 dynamic
     //01003 ext
     public static final String                 ERROR_METRIC_REPORT_ERROR                  = "010030001";
+    public static final String                 ERROR_TRACER_INIT                          = "010030002";
+    public static final String                 ERROR_FILTER_CONSTRUCT                     = "010030003";
+
     //01004 listener
     //01005 module
 
@@ -109,6 +112,8 @@ public class LogCodes {
     public static final String                 INFO_REGISTRY_IGNORE                       = "010060003";
     public static final String                 LOCALFILEREGISTRY_FAIL_READFILE            = "010060004";
     public static final String                 ERROR_RPC_NETWORK_ADDRESS_LOAD             = "010060005";
+    public static final String                 ERROR_DESTRORY_REGISTRY                    = "010060006";
+
     //01007 log
     //01008 proxy generate
     //01009 transmit
@@ -144,6 +149,7 @@ public class LogCodes {
     public static final String                 ERROR_OSGI_UNRESGISTER_SERVICE             = "019990016";
     public static final String                 ERROR_ADDRESSING_CHAIN_EMPTY               = "019990017";
     public static final String                 ERROR_PROVIDER_GRPC_START                  = "019990018";
+    public static final String                 ERROR_SERVER_DESTROY                       = "019990019";
 
     //02 运行
     // 02000 泛化
@@ -165,6 +171,11 @@ public class LogCodes {
     public static final String                 ERROR_INVOKE_GET_CLIENT                    = "020020008";
     public static final String                 ERROR_TARGET_URL_INVALID                   = "020020009";
     public static final String                 LOCALFILEREGISTRY_FAIL_INVOKE              = "020020010";
+    public static final String                 ERROR_NOTIFY_CONSUMER_STATE_UN             = "020020011";
+    public static final String                 WARN_NOTIFY_CONSUMER_STATE                 = "020020012";
+    public static final String                 ERROR_UPDATE_PROVIDERS                     = "020020013";
+    public static final String                 ERROR_DELETE_PROVIDERS                     = "020020014";
+
     // 02003 loadbalancer
     // 02004 router
     // 02005 codec
@@ -180,6 +191,8 @@ public class LogCodes {
     // 02007 cache
     // 02008 context
     // 02009 tracer
+    public static final String                 ERROR_TRACER_UNKNOWN_EXP                   = "020090001";
+
     // 02010 server process
     public static final String                 INFO_SERVICE_METADATA_IS_NULL              = "020100001";
     public static final String                 WARN_CANNOT_FOUND_SERVICE_4_SERVER         = "020100002";
@@ -196,6 +209,8 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND       = "020100013";
     public static final String                 ERROR_DISCARD_TIMEOUT_REQUEST              = "020100014";
     public static final String                 ERROR_DISCARD_TIMEOUT_RESPONSE             = "020100015";
+    public static final String                 ERROR_PROCESS_UNKNOWN                      = "020100016";
+
     // 02011 protocol
     // 02012 filter
     // 02013 event

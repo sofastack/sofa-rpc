@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -128,8 +129,8 @@ public class FilterChain implements Invoker {
                         loadedFilters.add(filter);
                     }
                 } catch (Exception e) {
-                    LOGGER.error("Error when build filter chain", e);
-                    throw new SofaRpcRuntimeException("Error when build filter chain", e);
+                    LOGGER.error(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);
                 }
             }
         }
