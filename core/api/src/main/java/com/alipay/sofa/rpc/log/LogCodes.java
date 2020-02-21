@@ -166,6 +166,7 @@ public class LogCodes {
     public static final String                 ERROR_CHECK_PASS                           = "010060024";
     public static final String                 ERROR_WATCH_HEALTH                         = "010060025";
     public static final String                 ERROR_CLOSE_PATH_CACHE                     = "010060026";
+    public static final String                 ERROR_INVALID_ATTRIBUTE                    = "010060027";
 
     //01007 log
     //01008 proxy generate
@@ -384,13 +385,15 @@ public class LogCodes {
      */
     public static String getLog(String code) {
         if (!LOG_CODES.containsKey(code)) {
-            throw new LogCodeNotFoundException(code);
+            LOGGER.error("LogCodes.getLog error, code not exist:"+code);
+            return "Can't get log message!!!";
         }
         try {
             return String.format(LOG, code, LOG_CODES.get(code), LogCodes.NOTE);
         } catch (Throwable e) {
-            throw new LogFormatException(code);
+            LOGGER.error("LogCodes.getLog error code="+code,e);
         }
+        return "Can't get log message!!!";
     }
 
     /**
@@ -407,22 +410,25 @@ public class LogCodes {
         try {
             return LOG_CODES.get(codeOrMsg);
         } catch (Throwable e) {
-            throw new LogFormatException(codeOrMsg);
+            LOGGER.error("LogCodes.getLiteLog error, codeOrMsg="+codeOrMsg,e);
         }
+        return "Can't get log message!!!";
     }
 
     public static String getLog(String code, Object... messages) {
         String message = LOG_CODES.get(code);
 
         if (message == null) {
-            throw new LogCodeNotFoundException(code);
+            LOGGER.error("LogCodes.getLog error, code not exist="+code);
+            return "Can't get log message!!!";
         }
 
         try {
             return String.format(LOG, code, MessageFormat.format(message, messages), LogCodes.NOTE);
         } catch (Throwable e) {
-            throw new LogFormatException(code);
+            LOGGER.error("LogCodes.getLog error, code="+code,e);
         }
+        return "Can't get log message!!!";
     }
 
     /**
@@ -442,7 +448,8 @@ public class LogCodes {
         try {
             return MessageFormat.format(message, messages);
         } catch (Throwable e) {
-            throw new LogFormatException(codeOrMsg);
+            LOGGER.error("LogCodes.getLog error, code="+codeOrMsg+"",e);
         }
+        return "Can't get log message!!!";
     }
 }
