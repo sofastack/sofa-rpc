@@ -10,7 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>sofa-rpc-remoting-grpc</artifactId>
-    <version>${revision}</version>
 
     <dependencies>
         <dependency>
@@ -45,7 +44,6 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>20.0</version>
         </dependency>
 
         <dependency>
