@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.transport.http;
 
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import io.netty.handler.codec.http2.Http2SecurityUtil;
 import io.netty.handler.ssl.ApplicationProtocolConfig;
 import io.netty.handler.ssl.ApplicationProtocolNames;
@@ -66,7 +67,7 @@ public class SslContextBuilder {
                 sslCtx = null;
             }
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to start http/2 server!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER, "HTTP/2"), e);
         }
         return sslCtx;
     }
@@ -98,7 +99,7 @@ public class SslContextBuilder {
                 sslCtx = null;
             }
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to start http/2 client!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_CLIENT, "HTTP/2"), e);
         }
         return sslCtx;
     }

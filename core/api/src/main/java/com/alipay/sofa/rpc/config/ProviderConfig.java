@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -172,10 +173,8 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
                     "null", "interfaceId must be not null");
             }
-        } catch (SofaRpcRuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_PROXY_CLASS), e);
         }
         return proxyClass;
     }

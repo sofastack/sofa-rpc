@@ -89,7 +89,7 @@ public class ProtocolFactory {
     public static Protocol getProtocol(byte code) {
         Protocol protocol = TYPE_PROTOCOL_MAP.get(code);
         if (protocol == null) {
-            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EXTENSION_NOT_FOUND, code));
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOCOL_NOT_FOUND, code));
         }
         return protocol;
     }

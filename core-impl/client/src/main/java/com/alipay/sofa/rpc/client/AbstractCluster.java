@@ -152,7 +152,7 @@ public abstract class AbstractCluster extends Cluster {
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException("Init provider's transport error!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_INIT_PROVIDER_TRANSPORT), e);
         }
 
         // 启动成功
@@ -160,9 +160,7 @@ public abstract class AbstractCluster extends Cluster {
 
         // 如果check=true表示强依赖
         if (consumerConfig.isCheck() && !isAvailable()) {
-            throw new SofaRpcRuntimeException("The consumer is depend on alive provider " +
-                "and there is no alive provider, you can ignore it " +
-                "by ConsumerConfig.setCheck(boolean) (default is false)");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_CHECK_ALIVE_PROVIDER));
         }
     }
 
@@ -171,7 +169,7 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected void checkClusterState() {
         if (destroyed) { // 已销毁
-            throw new SofaRpcRuntimeException("Client has been destroyed!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_CLIENT_DESTROYED));
         }
         if (!initialized) { // 未初始化
             init();

@@ -21,6 +21,7 @@ import com.alipay.remoting.Url;
 import com.alipay.remoting.exception.RemotingException;
 import com.alipay.remoting.rpc.RpcClient;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 /**
@@ -52,10 +53,8 @@ class AloneBoltClientConnectionManager extends BoltClientConnectionManager {
         Connection connection;
         try {
             connection = rpcClient.getConnection(url, url.getConnectTimeout());
-        } catch (InterruptedException e) {
-            throw new SofaRpcRuntimeException(e);
-        } catch (RemotingException e) {
-            throw new SofaRpcRuntimeException(e);
+        } catch (InterruptedException | RemotingException e) {
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_CONNECTION),e);
         }
         if (connection == null) {
             return null;

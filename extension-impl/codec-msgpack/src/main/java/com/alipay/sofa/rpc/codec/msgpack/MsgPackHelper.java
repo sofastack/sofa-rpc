@@ -19,6 +19,8 @@ package com.alipay.sofa.rpc.codec.msgpack;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
+
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -102,20 +104,20 @@ public class MsgPackHelper {
             }
         }
         if (pbMethod == null) {
-            throw new SofaRpcRuntimeException("Cannot found method: " + clazz.getName() + "." + methodName);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
+                methodName));
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
         if (parameterTypes == null
             || parameterTypes.length != 1) {
-            throw new SofaRpcRuntimeException("class based msgpack: " + clazz.getName()
-                + ", only support one parameter!");
+            throw new SofaRpcRuntimeException(
+                LogCodes.getLog(LogCodes.ERROR_ONLY_ONE_PARAM, "msgpack", clazz.getName()));
         }
         Class reqClass = parameterTypes[0];
         requestClassCache.put(key, reqClass);
         Class resClass = pbMethod.getReturnType();
         if (resClass == void.class) {
-            throw new SofaRpcRuntimeException("class based msgpack: " + clazz.getName()
-                + ", do not support void return type!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_VOID_RETURN, "msgpack", clazz.getName()));
         }
         responseClassCache.put(key, resClass);
     }

@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.core.invoke.SendableResponseCallback;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.HIDDEN_KEY_INVOKE_CONTEXT;
@@ -73,7 +74,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
     protected Byte parseSerializeType(String serialization) {
         Byte serializeType = SerializerFactory.getCodeByAlias(serialization);
         if (serializeType == null) {
-            throw new SofaRpcRuntimeException("Unsupported serialization type: " + serialization);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUPPORT_TYPE, serialization));
         }
         return serializeType;
     }

@@ -65,7 +65,7 @@ public class LookoutRequestFilter implements ContainerRequestFilter {
 
             context.setAttachment(RemotingConstants.HEAD_APP_NAME, appName);
         } catch (Exception e) {
-            logger.error("the process of lookout server request occur error ", e);
+            logger.error(LogCodes.getLog(LogCodes.ERROR_LOOKOUT_PROCESS), e);
         }
 
     }
