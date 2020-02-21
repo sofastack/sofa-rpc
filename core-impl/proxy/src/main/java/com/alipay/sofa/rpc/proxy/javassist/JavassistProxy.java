@@ -57,14 +57,14 @@ public class JavassistProxy implements Proxy {
     /**
      * Logger for this class
      */
-    private static final Logger              LOGGER          = LoggerFactory.getLogger(JavassistProxy.class);
+    private static final Logger            LOGGER          = LoggerFactory.getLogger(JavassistProxy.class);
 
-    private static AtomicInteger             counter         = new AtomicInteger();
+    private static AtomicInteger           counter         = new AtomicInteger();
 
     /**
      * 原始类和代理类的映射
      */
-    protected final static Map<Class, Class> PROXY_CLASS_MAP = new ConcurrentHashMap<Class, Class>();
+    private static final Map<Class, Class> PROXY_CLASS_MAP = new ConcurrentHashMap<Class, Class>();
 
     @Override
     @SuppressWarnings("unchecked")
@@ -143,12 +143,13 @@ public class JavassistProxy implements Proxy {
             Class<?>[] mType = m.getParameterTypes();
             Class<?> returnType = m.getReturnType();
 
-            sb.append(Modifier.toString(m.getModifiers()).replace("abstract", "") + " " +
-                ClassTypeUtils.getTypeStr(returnType) + " " + m.getName() + "( ");
+            sb.append(Modifier.toString(m.getModifiers()).replace("abstract", ""))
+                .append(" ").append(ClassTypeUtils.getTypeStr(returnType)).append(" ").append(m.getName())
+                .append("( ");
             int c = 0;
 
             for (Class<?> mp : mType) {
-                sb.append(" " + mp.getCanonicalName() + " arg" + c + " ,");
+                sb.append(" ").append(mp.getCanonicalName()).append(" arg").append(c).append(" ,");
                 c++;
             }
             sb.deleteCharAt(sb.length() - 1);
@@ -157,20 +158,20 @@ public class JavassistProxy implements Proxy {
             if (exceptions.length > 0) {
                 sb.append(" throws ");
                 for (Class<?> exception : exceptions) {
-                    sb.append(exception.getCanonicalName() + " ,");
+                    sb.append(exception.getCanonicalName()).append(" ,");
                 }
                 sb = sb.deleteCharAt(sb.length() - 1);
             }
             sb.append("{");
 
-            sb.append(" Class clazz = " + interfaceClass.getCanonicalName() + ".class;");
-            sb.append(" " + Method.class.getCanonicalName() + " method =  method_" + mi + ";");
-            sb.append(" Class[] paramTypes = new Class[" + c + "];");
-            sb.append(" Object[] paramValues = new Object[" + c + "];");
+            sb.append(" Class clazz = ").append(interfaceClass.getCanonicalName()).append(".class;");
+            sb.append(" ").append(Method.class.getCanonicalName()).append(" method =  method_").append(mi).append(";");
+            sb.append(" Class[] paramTypes = new Class[").append(c).append("];");
+            sb.append(" Object[] paramValues = new Object[").append(c).append("];");
             StringBuilder methodSig = new StringBuilder();
             for (int i = 0; i < c; i++) {
-                sb.append("paramValues[" + i + "] = ($w)$" + (i + 1) + ";");
-                sb.append("paramTypes[" + i + "] = " + mType[i].getCanonicalName() + ".class;");
+                sb.append("paramValues[").append(i).append("] = ($w)$").append(i + 1).append(";");
+                sb.append("paramTypes[").append(i).append("] = ").append(mType[i].getCanonicalName()).append(".class;");
                 methodSig.append("," + mType[i].getCanonicalName() + ".class");
             }
 
@@ -180,13 +181,15 @@ public class JavassistProxy implements Proxy {
                 + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");"
                 );
 
-            sb.append(SofaRequest.class.getCanonicalName() + " request = " +
-                MessageBuilder.class.getCanonicalName() +
-                ".buildSofaRequest(clazz, method, paramTypes, paramValues);");
-            sb.append(SofaResponse.class.getCanonicalName() + " response = " + "proxyInvoker.invoke(request);");
+            sb.append(SofaRequest.class.getCanonicalName()).append(" request = ")
+                .append(MessageBuilder.class.getCanonicalName())
+                .append(".buildSofaRequest(clazz, method, paramTypes, paramValues);");
+            sb.append(SofaResponse.class.getCanonicalName()).append(" response = ")
+                .append("proxyInvoker.invoke(request);");
             sb.append("if(response.isError()){");
-            sb.append("  throw new " + SofaRpcException.class.getName() + "(" + RpcErrorType.class.getName() +
-                ".SERVER_UNDECLARED_ERROR," + " response.getErrorMsg());");
+            sb.append("  throw new ").append(SofaRpcException.class.getName()).append("(")
+                .append(RpcErrorType.class.getName())
+                .append(".SERVER_UNDECLARED_ERROR,").append(" response.getErrorMsg());");
             sb.append("}");
 
             sb.append("Object ret = response.getAppResponse();");
@@ -196,7 +199,7 @@ public class JavassistProxy implements Proxy {
             if (returnType.equals(void.class)) {
                 sb.append(" return;");
             } else {
-                sb.append(" return " + asArgument(returnType, "ret") + ";");
+                sb.append(" return ").append(asArgument(returnType, "ret")).append(";");
             }
             sb.append("}");
 
@@ -220,8 +223,8 @@ public class JavassistProxy implements Proxy {
         // equals()
         sb.delete(0, sb.length());
         sb.append("public boolean equals(Object obj) {");
-        sb.append("  return this == obj || (getClass().isInstance($1) " +
-            "&& proxyInvoker.equals(" + JavassistProxy.class.getName() + ".parseInvoker($1)));");
+        sb.append("  return this == obj || (getClass().isInstance($1) && proxyInvoker.equals(")
+            .append(JavassistProxy.class.getName()).append(".parseInvoker($1)));");
         sb.append("}");
         resultList.add(sb.toString());
     }
@@ -269,17 +272,12 @@ public class JavassistProxy implements Proxy {
      * @return proxy invoker
      */
     public static Invoker parseInvoker(Object proxyObject) {
-        Field field;
         try {
-            field = proxyObject.getClass().getField("proxyInvoker");
-            if (field != null) {
-                if (!field.isAccessible()) {
-                    field.setAccessible(true);
-                }
-                return (Invoker) field.get(proxyObject);
-            } else {
-                return null;
+            Field field = proxyObject.getClass().getField("proxyInvoker");
+            if (!field.isAccessible()) {
+                field.setAccessible(true);
             }
+            return (Invoker) field.get(proxyObject);
         } catch (Exception e) {
             return null;
         }

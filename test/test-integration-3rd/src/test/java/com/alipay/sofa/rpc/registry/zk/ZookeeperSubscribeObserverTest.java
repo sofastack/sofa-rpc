@@ -16,12 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import java.util.concurrent.Callable;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.client.AddressHolder;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -30,9 +24,14 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import com.alipay.sofa.rpc.test.TestUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.concurrent.Callable;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -41,7 +40,7 @@ public class ZookeeperSubscribeObserverTest extends BaseZkTest {
 
     @Test
     public void testAll() throws Exception {
-        RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
+        RegistryConfig registryConfig = new RegistryConfig().setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181");
         ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
             .getRegistry(registryConfig);
@@ -60,7 +59,7 @@ public class ZookeeperSubscribeObserverTest extends BaseZkTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
         ProviderConfig<HelloService> providerConfig2 = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName()).setRef(new HelloServiceImpl(22111))
-            .setServer(serverConfig2).setRegistry(registryConfig).setRepeatedExportLimit(-1)
+            .setServer(serverConfig2).setRegistry(registryConfig)
             .setUniqueId("uniqueIdB").setRepeatedExportLimit(-1).setWeight(0);
 
         providerConfig.export();

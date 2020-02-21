@@ -24,7 +24,7 @@ import java.util.List;
 
 /**
  * 地址管理器
- * 
+ *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extensible(singleton = false)

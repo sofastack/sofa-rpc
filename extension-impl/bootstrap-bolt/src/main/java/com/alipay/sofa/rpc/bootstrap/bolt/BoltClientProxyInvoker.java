@@ -58,7 +58,7 @@ public class BoltClientProxyInvoker extends DefaultClientProxyInvoker {
         } else if (SERIALIZE_JAVA.equals(serialization)) {
             serializeType = RemotingConstants.SERIALIZE_CODE_JAVA;
         } else {
-            throw new SofaRpcRuntimeException("Unsupported serialization type");
+            serializeType = super.parseSerializeType(serialization);
         }
         return serializeType;
     }

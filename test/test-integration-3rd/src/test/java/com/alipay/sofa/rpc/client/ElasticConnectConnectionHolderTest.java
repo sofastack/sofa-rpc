@@ -16,12 +16,13 @@
  */
 package com.alipay.sofa.rpc.client;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import org.junit.AfterClass;
@@ -48,7 +49,7 @@ public class ElasticConnectConnectionHolderTest extends BaseZkTest {
     public static void startServer() throws Exception {
 
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setAddress("127.0.0.1:2181");
 
         serverConfig1 = new ServerConfig()

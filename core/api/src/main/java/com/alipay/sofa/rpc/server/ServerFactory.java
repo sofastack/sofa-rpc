@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -144,9 +145,22 @@ public final class ServerFactory {
             try {
                 server.destroy();
             } catch (Exception e) {
-                LOGGER.error("Error when destroy server with key:" + key, e);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_SERVER_DESTROY, key), e);
             }
         }
         SERVER_MAP.clear();
+    }
+
+    public static void destroyServer(ServerConfig serverConfig) {
+        try {
+            Server server = serverConfig.getServer();
+            if (server != null) {
+                serverConfig.setServer(null);
+                SERVER_MAP.remove(Integer.toString(serverConfig.getPort()));
+                server.destroy();
+            }
+        } catch (Exception e) {
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_SERVER_DESTROY, serverConfig.getPort()), e);
+        }
     }
 }

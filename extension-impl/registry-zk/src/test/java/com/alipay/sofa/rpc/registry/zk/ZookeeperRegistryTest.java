@@ -55,7 +55,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @BeforeClass
     public static void setUp() {
         registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
+            .setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
             .setSubscribe(true)
             .setAddress("127.0.0.1:2181")
             .setRegister(true);
@@ -79,7 +79,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 1000;
+        int timeoutPerSub = 10000;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -119,7 +119,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         List<ProviderGroup> all = registry.subscribe(consumer);
         providerInfoListener.updateAllProviders(all);
         Map<String, ProviderInfo> ps = providerInfoListener.getData();
-        Assert.assertTrue(ps.size() == 1);
+        Assert.assertEquals("after register: 1", 1, ps.size());
 
         // 订阅 错误的uniqueId
         ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
@@ -131,19 +131,20 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setInvokeType("sync")
             .setTimeout(4444);
         latch = new CountDownLatch(1);
-        providerInfoListener.setCountDownLatch(latch);
-        consumerNoUniqueId.setProviderInfoListener(providerInfoListener);
+        MockProviderInfoListener providerInfoListener3 = new MockProviderInfoListener();
+        providerInfoListener3.setCountDownLatch(latch);
+        consumerNoUniqueId.setProviderInfoListener(providerInfoListener3);
         all = registry.subscribe(consumerNoUniqueId);
-        providerInfoListener.updateAllProviders(all);
-        ps = providerInfoListener.getData();
-        Assert.assertTrue(ps.size() == 0);
+        providerInfoListener3.updateAllProviders(all);
+        Map<String, ProviderInfo> ps3 = providerInfoListener3.getData();
+        Assert.assertEquals("wrong uniqueId: 0", 0, ps3.size());
 
         // 反注册
         latch = new CountDownLatch(1);
         providerInfoListener.setCountDownLatch(latch);
         registry.unRegister(provider);
         latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps.size() == 0);
+        Assert.assertEquals("after unregister: 0", 0, ps.size());
 
         // 一次发2个端口的再次注册
         latch = new CountDownLatch(2);
@@ -154,7 +155,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setPort(12201));
         registry.register(provider);
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps.size() == 2);
+        Assert.assertEquals("after register two servers: 2", 2, ps.size());
 
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
@@ -174,7 +175,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         latch2.await(timeoutPerSub, TimeUnit.MILLISECONDS);
 
         Map<String, ProviderInfo> ps2 = providerInfoListener2.getData();
-        Assert.assertTrue(ps2.size() == 2);
+        Assert.assertEquals("after register duplicate: 2", 2, ps2.size());
 
         // 取消订阅者1
         registry.unSubscribe(consumer);
@@ -187,7 +188,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         registry.batchUnRegister(providerConfigList);
 
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(ps2.size() == 0);
+        Assert.assertEquals("after unregister: 0", 0, ps2.size());
 
         // 批量取消订阅
         List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
@@ -229,10 +230,10 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         registry.subscribeConfig(providerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap("timeout", "2000"));
         Map<String, String> configData = configListener.getData();
-        Assert.assertTrue(configData.size() == 1);
+        Assert.assertEquals(1, configData.size());
         configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
         configData = configListener.getData();
-        Assert.assertTrue(configData.size() == 2);
+        Assert.assertEquals(2, configData.size());
 
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
         consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
@@ -251,13 +252,15 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         registry.subscribeConfig(consumerConfig, configListener);
         configListener.attrUpdated(Collections.singletonMap(RpcConstants.CONFIG_KEY_TIMEOUT, "3333"));
         configData = configListener.getData();
-        Assert.assertTrue(configData.size() == 1);
+        Assert.assertEquals(1, configData.size());
         configListener.attrUpdated(Collections.singletonMap("uniqueId", "unique234Id"));
         configData = configListener.getData();
-        Assert.assertTrue(configData.size() == 2);
+        Assert.assertEquals(2, configData.size());
 
         latch.await(2000, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(configData.size() == 2);
+        Assert.assertEquals(2, configData.size());
+
+        registry.unRegister(providerConfig);
     }
 
     /**
@@ -288,7 +291,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         attributes.put(RpcConstants.CONFIG_KEY_SERIALIZATION, "java");
         configListener.attrUpdated(attributes);
         Map<String, String> configData = configListener.getData();
-        Assert.assertTrue(configData.size() == 3);
+        Assert.assertEquals(3, configData.size());
 
         consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
             .setUniqueId("unique123Id")
@@ -305,10 +308,10 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         attributes.put(RpcConstants.CONFIG_KEY_APP_NAME, "test-server2");
         configListener.attrUpdated(attributes);
         configData = configListener.getData();
-        Assert.assertTrue(configData.size() == 3);
+        Assert.assertEquals(3, configData.size());
 
         latch.await(2000, TimeUnit.MILLISECONDS);
-        Assert.assertTrue(configData.size() == 3);
+        Assert.assertEquals(3, configData.size());
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
@@ -326,12 +329,18 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             for (ProviderInfo providerInfo : providerGroup.getProviderInfos()) {
                 ps.put(providerInfo.getHost() + ":" + providerInfo.getPort(), providerInfo);
             }
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
+            }
         }
 
         @Override
         public void removeProvider(ProviderGroup providerGroup) {
             for (ProviderInfo providerInfo : providerGroup.getProviderInfos()) {
                 ps.remove(providerInfo.getHost() + ":" + providerInfo.getPort());
+            }
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
             }
         }
 
@@ -343,7 +352,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -354,6 +362,9 @@ public class ZookeeperRegistryTest extends BaseZkTest {
                 for (ProviderInfo providerInfo : providerGroup.getProviderInfos()) {
                     ps.put(providerInfo.getHost() + ":" + providerInfo.getPort(), providerInfo);
                 }
+            }
+            if (countDownLatch != null) {
+                countDownLatch.countDown();
             }
         }
 
@@ -382,7 +393,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
                 concurrentHashMap.put(StringUtils.toString(property), StringUtils.toString(newValue.get(property)));
                 if (countDownLatch != null) {
                     countDownLatch.countDown();
-                    countDownLatch = null;
                 }
             }
         }

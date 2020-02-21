@@ -29,6 +29,8 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.module.FaultToleranceModule;
 import com.alipay.sofa.rpc.module.Module;
 import org.junit.After;
@@ -38,10 +40,12 @@ import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
- * @author bystander
- * @version $Id: FaultBaseTest.java, v 0.1 2017年11月16日 下午3:14 bystander Exp $
+ * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
 public abstract class FaultBaseTest {
+
+    protected static final Logger                LOGGER    = LoggerFactory.getLogger(FaultBaseTest.class);
+
     public static final String                   APP_NAME1 = "testApp";
     public static final String                   APP_NAME2 = "testAnotherApp";
 

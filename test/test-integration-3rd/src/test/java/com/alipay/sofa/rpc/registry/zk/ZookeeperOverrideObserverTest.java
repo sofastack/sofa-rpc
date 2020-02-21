@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.registry.zk;
 
-import com.alipay.sofa.rpc.base.BaseZkTest;
 import com.alipay.sofa.rpc.client.AddressHolder;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
@@ -29,8 +28,8 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
+import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.TestUtils;
-
 import org.apache.zookeeper.CreateMode;
 import org.junit.Assert;
 import org.junit.Test;
@@ -51,7 +50,7 @@ public class ZookeeperOverrideObserverTest extends BaseZkTest {
     public void testAll() throws Exception {
 
         try {
-            RegistryConfig registryConfig = new RegistryConfig().setProtocol("zookeeper")
+            RegistryConfig registryConfig = new RegistryConfig().setProtocol(RpcConstants.REGISTRY_PROTOCOL_ZK)
                 .setAddress("127.0.0.1:2181");
             ZookeeperRegistry registry = (ZookeeperRegistry) RegistryFactory
                 .getRegistry(registryConfig);

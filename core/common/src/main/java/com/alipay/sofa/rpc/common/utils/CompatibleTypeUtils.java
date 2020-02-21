@@ -44,8 +44,9 @@ public class CompatibleTypeUtils {
      * <li> Number -&gt; Number </li>
      * <li> List -&gt; Array </li>
      * </ul>
+     *
      * @param value 原始值
-     * @param type 目标类型
+     * @param type  目标类型
      * @return 目标值
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
@@ -57,8 +58,8 @@ public class CompatibleTypeUtils {
             String string = (String) value;
             if (char.class.equals(type) || Character.class.equals(type)) {
                 if (string.length() != 1) {
-                    throw new IllegalArgumentException(String.format("CAN NOT convert String(%s) to char!" +
-                        " when convert String to char, the String MUST only 1 char.", string));
+                    throw new IllegalArgumentException(String.format("can not convert String(%s) to char!" +
+                        " when convert String to char, the String must only 1 char.", string));
                 }
                 return string.charAt(0);
             } else if (type.isEnum()) {
@@ -81,9 +82,18 @@ public class CompatibleTypeUtils {
                 return Byte.valueOf(string);
             } else if (type == Boolean.class || type == boolean.class) {
                 return Boolean.valueOf(string);
-            } else if (type == Date.class) {
+            } else if (type == Date.class || type == java.sql.Date.class || type == java.sql.Time.class ||
+                type == java.sql.Timestamp.class) {
                 try {
-                    return DateUtils.strToDate(string, DateUtils.DATE_FORMAT_TIME);
+                    if (type == Date.class) {
+                        return DateUtils.strToDate(string, DateUtils.DATE_FORMAT_TIME);
+                    } else if (type == java.sql.Date.class) {
+                        return new java.sql.Date(DateUtils.strToLong(string));
+                    } else if (type == java.sql.Timestamp.class) {
+                        return new java.sql.Timestamp(DateUtils.strToLong(string));
+                    } else {
+                        return new java.sql.Time(DateUtils.strToLong(string));
+                    }
                 } catch (ParseException e) {
                     throw new IllegalStateException("Failed to parse date " + value + " by format " +
                         DateUtils.DATE_FORMAT_TIME + ", cause: " + e.getMessage(), e);
@@ -111,6 +121,12 @@ public class CompatibleTypeUtils {
                 return BigDecimal.valueOf(number.doubleValue());
             } else if (type == Date.class) {
                 return new Date(number.longValue());
+            } else if (type == java.sql.Date.class) {
+                return new java.sql.Date(number.longValue());
+            } else if (type == java.sql.Time.class) {
+                return new java.sql.Time(number.longValue());
+            } else if (type == java.sql.Timestamp.class) {
+                return new java.sql.Timestamp(number.longValue());
             }
         } else if (value instanceof Collection) {
             Collection collection = (Collection) value;

@@ -18,28 +18,14 @@ else
 fi
 
 echo "Change version in root pom.xml ===>"
-sed "/<project /,/<name/ s/<version>[^\$].*<\/version>/<version>$1<\/version>/" $shellDir/../pom.xml
-sed "s/<rpc.version>.*<\/rpc.version>/<rpc.version>$1<\/rpc.version>/" $shellDir/../pom.xml
+sed "s/<revision>.*<\/revision>/<revision>$1<\/revision>/" $shellDir/../pom.xml
 
 echo "Change version in sofa-rpc-all ===>"
-sed "/<project /,/<dependencies/ s/<version>[^\$].*<\/version>/<version>$1<\/version>/" $shellDir/../all/pom.xml
-sed "s/<rpc.version>.*<\/rpc.version>/<rpc.version>$1<\/rpc.version>/" $shellDir/../all/pom.xml
+sed "/<project /,/<name/ s/<version>[^\$].*<\/version>/<version>$1<\/version>/" $shellDir/../all/pom.xml
 
 echo "Change version in sofa-rpc-bom ===>"
-sed "/sofa-rpc-bom</,/<dependencies/ s/<version>[^\$].*<\/version>/<version>$1<\/version>/" $shellDir/../bom/pom.xml
-sed "s/<rpc.version>.*<\/rpc.version>/<rpc.version>$1<\/rpc.version>/" $shellDir/../bom/pom.xml
+sed "s/<revision>.*<\/revision>/<revision>$1<\/revision>/" $shellDir/../bom/pom.xml
 
-cd $shellDir/..
-echo "Change version in subproject pom ===>"
-for filename in `find . -name "pom.xml" -mindepth 2`;do
-  if [ $filename == "./bom/pom.xml" ]; then
-     continue
-  elif [ $filename == "./all/pom.xml" ]; then
-     continue
-  fi
-	echo "Deal with $filename"
-	sed "/<parent>/,/<dependencies>/ s/<version>[^\$].*<\/version>/<version>$1<\/version>/" $filename
-done
 
 # echo "Change version in MANIFEST.MF"
 # echo "Deal with MANIFEST.MF"

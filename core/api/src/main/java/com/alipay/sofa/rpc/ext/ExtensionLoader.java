@@ -157,8 +157,8 @@ public class ExtensionLoader<T> {
             ClassLoader classLoader = ClassLoaderUtils.getClassLoader(getClass());
             loadFromClassLoader(classLoader, fullFileName);
         } catch (Throwable t) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Failed to load extension of extensible " + interfaceName + " from path:" + fullFileName,
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Failed to load extension of extensible " + interfaceName + " from path:" + fullFileName,
                     t);
             }
         }
@@ -184,8 +184,8 @@ public class ExtensionLoader<T> {
                         readLine(url, line);
                     }
                 } catch (Throwable t) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Failed to load extension of extensible " + interfaceName
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Failed to load extension of extensible " + interfaceName
                             + " from classloader: " + classLoader + " and file:" + url, t);
                     }
                 } finally {
@@ -212,6 +212,9 @@ public class ExtensionLoader<T> {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Extension {} of extensible {} is disabled, cause by: {}",
                     className, interfaceName, ExceptionUtils.toShortString(e, 2));
+            }
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Extension " + className + " of extensible " + interfaceName + " is disabled.", e);
             }
             return;
         }
@@ -304,6 +307,10 @@ public class ExtensionLoader<T> {
                     String[] rejection = extensionClass.getRejection();
                     if (CommonUtils.isNotEmpty(rejection)) {
                         for (String rej : rejection) {
+                            existed = all.get(rej);
+                            if (existed == null || extensionClass.getOrder() < existed.getOrder()) {
+                                continue;
+                            }
                             ExtensionClass removed = all.remove(rej);
                             if (removed != null) {
                                 if (LOGGER.isInfoEnabled()) {
@@ -352,8 +359,10 @@ public class ExtensionLoader<T> {
                 listener.onLoad(extensionClass); // 加载完毕，通知监听器
                 all.put(alias, extensionClass);
             } catch (Exception e) {
-                LOGGER.error("Error when load extension of extensible " + interfaceClass + " with alias: "
-                    + alias + ".", e);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
+                        + alias + ".", e);
+                }
             }
         } else {
             all.put(alias, extensionClass);

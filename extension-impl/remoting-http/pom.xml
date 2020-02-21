@@ -7,7 +7,7 @@
     <parent>
         <artifactId>sofa-rpc-extension-impl</artifactId>
         <groupId>com.alipay.sofa</groupId>
-        <version>5.5.0-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>sofa-rpc-remoting-http</artifactId>
@@ -34,9 +34,21 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-tcnative-boringssl-static</artifactId>
+          <classifier>${os.detected.classifier}</classifier>
+        </dependency>
     </dependencies>
 
     <build>
+        <extensions>
+          <extension>
+            <groupId>kr.motd.maven</groupId>
+            <artifactId>os-maven-plugin</artifactId>
+         </extension>
+        </extensions>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>

@@ -36,7 +36,7 @@ public class RpcOptions {
     public static final String EXTENSION_LOAD_PATH                      = "extension.load.path";
     /**
      * 需要被加载的模块列表，多个用逗号隔开
-     * 
+     *
      * @since 5.3.0
      */
     public static final String MODULE_LOAD_LIST                         = "module.load.list";
@@ -287,7 +287,7 @@ public class RpcOptions {
      * 默认连接管理器
      */
     public static final String CONSUMER_CONNECTION_HOLDER               = "consumer.connectionHolder";
-    /** 
+    /**
      * 默认地址管理器
      */
     public static final String CONSUMER_ADDRESS_HOLDER                  = "consumer.addressHolder";
@@ -362,7 +362,7 @@ public class RpcOptions {
      *
      * @since 5.5.0
      */
-    public static final String CONSUMER_CONNECT_ELASTIC_PRECENT         = "consumer.connect.elastic.precent";
+    public static final String CONSUMER_CONNECT_ELASTIC_PERCENT         = "consumer.connect.elastic.percent";
     /**
      * 初始化连接时建立连接的个数
      *
@@ -509,4 +509,35 @@ public class RpcOptions {
      * Whether to close lookout collection.
      */
     public static final String LOOKOUT_COLLECT_DISABLE                  = "lookout.collect.disable";
+
+    /**
+     * Automatic fault tolerance regulator
+     */
+    public static final String AFT_REGULATOR                            = "aft.regulator";
+    /**
+     * Automatic fault tolerance regulation strategy
+     */
+    public static final String AFT_REGULATION_STRATEGY                  = "aft.regulation.strategy";
+    /**
+     * Automatic fault tolerance recover strategy
+     */
+    public static final String AFT_RECOVER_STRATEGY                     = "aft.recover.strategy";
+    /**
+     * Automatic fault tolerance degrade strategy
+     */
+    public static final String AFT_DEGRADE_STRATEGY                     = "aft.degrade.strategy";
+    /**
+     * Automatic fault tolerance measure strategy
+     */
+    public static final String AFT_MEASURE_STRATEGY                     = "aft.measure.strategy";
+
+    /**
+     * 是否允许通过RpcInvokeContext.getTargetUrl创建tcp连接，默认允许
+     */
+    public static final String RPC_CREATE_CONN_WHEN_ABSENT              = "consumer.connect.create.when.absent";
+
+    /**
+     * use conn validate by server or not, usually we use it as sec or backlist ip
+     */
+    public static final String CONNNECTION_VALIDATE_SLEEP               = "connection.validate.sleep";
 }

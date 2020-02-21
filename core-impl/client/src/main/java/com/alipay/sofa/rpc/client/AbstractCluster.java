@@ -32,6 +32,9 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderInfoAddEvent;
 import com.alipay.sofa.rpc.event.ProviderInfoRemoveEvent;
@@ -336,7 +339,7 @@ public abstract class AbstractCluster extends Cluster {
      * @throws SofaRpcException rpc异常
      */
     protected ProviderInfo select(SofaRequest message, List<ProviderInfo> invokedProviderInfos)
-        throws SofaRpcException {
+            throws SofaRpcException {
         // 粘滞连接，当前连接可用
         if (consumerConfig.isSticky()) {
             if (lastProviderInfo != null) {
@@ -350,8 +353,30 @@ public abstract class AbstractCluster extends Cluster {
         }
         // 原始服务列表数据 --> 路由结果
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
+
+        //保存一下原始地址,为了打印
+        List<ProviderInfo> originalProviderInfos;
+
         if (CommonUtils.isEmpty(providerInfos)) {
+            /**
+             * 如果注册中心没有provider，可能上下文中指定了provider
+             *
+             * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
+             * 1. RpcInvokeContext.getContext().getTargetUrl()
+             */
+            RpcInternalContext context = RpcInternalContext.peekContext();
+            if (context != null) {
+                String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+                if (StringUtils.isNotBlank(targetIP)) {
+                    // 如果上下文指定provider，直接返回
+                    ProviderInfo providerInfo = selectPinpointProvider(targetIP, providerInfos);
+                    return providerInfo;
+                }
+            }
+
             throw noAvailableProviderException(message.getTargetServiceUniqueName());
+        } else {
+            originalProviderInfos = new ArrayList<>(providerInfos);
         }
         if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
             providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
@@ -361,15 +386,11 @@ public abstract class AbstractCluster extends Cluster {
         ProviderInfo providerInfo;
         RpcInternalContext context = RpcInternalContext.peekContext();
         if (context != null) {
-            targetIP = (String) RpcInternalContext.getContext().getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
+            targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
         if (StringUtils.isNotBlank(targetIP)) {
             // 如果指定了调用地址
             providerInfo = selectPinpointProvider(targetIP, providerInfos);
-            if (providerInfo == null) {
-                // 指定的不存在
-                throw unavailableProviderException(message.getTargetServiceUniqueName(), targetIP);
-            }
             ClientTransport clientTransport = selectByProvider(message, providerInfo);
             if (clientTransport == null) {
                 // 指定的不存在或已死，抛出异常
@@ -387,7 +408,8 @@ public abstract class AbstractCluster extends Cluster {
                 providerInfos.remove(providerInfo);
             } while (!providerInfos.isEmpty());
         }
-        throw noAvailableProviderException(message.getTargetServiceUniqueName());
+        throw unavailableProviderException(message.getTargetServiceUniqueName(),
+                convertProviders2Urls(originalProviderInfos));
     }
 
     /**
@@ -398,14 +420,18 @@ public abstract class AbstractCluster extends Cluster {
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
         ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
-        for (ProviderInfo providerInfo : providerInfos) {
-            if (providerInfo.getHost().equals(tp.getHost())
-                && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
-                && providerInfo.getPort() == tp.getPort()) {
-                return providerInfo;
+        // 存在注册中心provider才会遍历
+        if (CommonUtils.isNotEmpty(providerInfos)) {
+            for (ProviderInfo providerInfo : providerInfos) {
+                if (providerInfo.getHost().equals(tp.getHost())
+                    && StringUtils.equals(providerInfo.getProtocolType(), tp.getProtocolType())
+                    && providerInfo.getPort() == tp.getPort()) {
+                    return providerInfo;
+                }
             }
         }
-        return null;
+        // support direct target url
+        return tp;
     }
 
     /**
@@ -582,6 +608,24 @@ public abstract class AbstractCluster extends Cluster {
      * @return 调用超时
      */
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
+        // 动态配置优先
+        final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
+        if (StringUtils.isNotBlank(dynamicAlias)) {
+            String dynamicTimeout = null;
+            DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
+                consumerConfig.getAppName(),
+                dynamicAlias);
+
+            if (dynamicConfigManager != null) {
+                dynamicTimeout = dynamicConfigManager.getConsumerMethodProperty(request.getInterfaceName(),
+                    request.getMethodName(),
+                    "timeout");
+            }
+
+            if (StringUtils.isNotBlank(dynamicTimeout)) {
+                return Integer.parseInt(dynamicTimeout);
+            }
+        }
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
         if (timeout == null) {
@@ -709,11 +753,13 @@ public abstract class AbstractCluster extends Cluster {
                 @Override
                 public void run() {
                     // 状态变化通知监听器
+                    final Object proxyIns = consumerBootstrap.getProxyIns();
                     for (ConsumerStateListener listener : onprepear) {
                         try {
-                            listener.onUnavailable(consumerBootstrap.getProxyIns());
+                            listener.onUnavailable(proxyIns);
                         } catch (Exception e) {
-                            LOGGER.error("Failed to notify consumer state listener when state change to unavailable");
+                            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_NOTIFY_CONSUMER_STATE_UN, proxyIns.getClass()
+                                .getName()));
                         }
                     }
                 }
@@ -734,11 +780,13 @@ public abstract class AbstractCluster extends Cluster {
                 @Override
                 public void run() {
                     // 状态变化通知监听器
+                    final Object proxyIns = consumerBootstrap.getProxyIns();
                     for (ConsumerStateListener listener : onprepear) {
                         try {
-                            listener.onAvailable(consumerBootstrap.getProxyIns());
+                            listener.onAvailable(proxyIns);
                         } catch (Exception e) {
-                            LOGGER.error("Failed to notify consumer state listener when state change to available");
+                            LOGGER.warn(LogCodes.getLog(LogCodes.WARN_NOTIFY_CONSUMER_STATE, proxyIns.getClass()
+                                .getName()));
                         }
                     }
                 }
@@ -760,6 +808,18 @@ public abstract class AbstractCluster extends Cluster {
             }
         }
         return providerInfos;
+    }
+
+    private String convertProviders2Urls(List<ProviderInfo> providerInfos) {
+
+        StringBuilder sb = new StringBuilder();
+        if (CommonUtils.isNotEmpty(providerInfos)) {
+            for (ProviderInfo providerInfo : providerInfos) {
+                sb.append(providerInfo).append(",");
+            }
+        }
+
+        return sb.toString();
     }
 
     /**
@@ -787,5 +847,17 @@ public abstract class AbstractCluster extends Cluster {
     @Override
     public RouterChain getRouterChain() {
         return routerChain;
+    }
+
+    /**
+     * 判断分组是否包含指定服务
+     *
+     * @param groupName    分组名称
+     * @param providerInfo 分组是否包含指定服务
+     * @return true包含，false不包含
+     */
+    public boolean containsProviderInfo(String groupName, ProviderInfo providerInfo) {
+        ProviderGroup group = addressHolder.getProviderGroup(groupName);
+        return group != null && group.providerInfos.contains(providerInfo);
     }
 }

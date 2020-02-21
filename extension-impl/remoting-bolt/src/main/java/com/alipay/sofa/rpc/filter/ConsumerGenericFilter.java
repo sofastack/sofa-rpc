@@ -43,6 +43,10 @@ public class ConsumerGenericFilter extends Filter {
      */
     private static final String METHOD_GENERIC_INVOKE = "$genericInvoke";
 
+    private final static String REVISE_KEY            = "generic.revise";
+
+    private final static String REVISE_VALUE          = "true";
+
     /**
      * 是否自动加载
      *
@@ -58,8 +62,21 @@ public class ConsumerGenericFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
         try {
+
+            final String revised = (String) request.getRequestProp(REVISE_KEY);
+            //if has revised, invoke directly
+            if (REVISE_VALUE.equals(revised)) {
+                return invoker.invoke(request);
+            }
             String type = getSerializeFactoryType(request.getMethodName(), request.getMethodArgs());
             request.addRequestProp(RemotingConstants.HEAD_GENERIC_TYPE, type);
+
+            // 修正超时时间
+            Long clientTimeout = getClientTimeoutFromGenericContext(request.getMethodName(),
+                request.getMethodArgs());
+            if (clientTimeout != null && clientTimeout != 0) {
+                request.setTimeout(clientTimeout.intValue());
+            }
 
             // 修正请求对象
             Object[] genericArgs = request.getMethodArgs();
@@ -76,7 +93,7 @@ public class ConsumerGenericFilter extends Filter {
             String invokeType = consumerConfig.getMethodInvokeType(methodName);
             request.setInvokeType(invokeType);
             request.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE, invokeType);
-
+            request.addRequestProp(REVISE_KEY, REVISE_VALUE);
             return invoker.invoke(request);
         } catch (SofaRpcException e) {
             throw e;
@@ -108,5 +125,16 @@ public class ConsumerGenericFilter extends Filter {
             }
         }
         throw new SofaRpcException(RpcErrorType.CLIENT_FILTER, "Unsupported method of generic service");
+    }
+
+    private Long getClientTimeoutFromGenericContext(String method, Object[] args) throws SofaRpcException {
+        if (METHOD_GENERIC_INVOKE.equals(method)) {
+            if (args.length == 4 && args[3] instanceof GenericContext) {
+                return ((GenericContext) args[3]).getClientTimeout();
+            } else if (args.length == 5 && args[4] instanceof GenericContext) {
+                return ((GenericContext) args[4]).getClientTimeout();
+            }
+        }
+        return null;
     }
 }

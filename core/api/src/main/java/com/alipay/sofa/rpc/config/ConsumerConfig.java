@@ -20,7 +20,9 @@ import com.alipay.sofa.rpc.api.GenericService;
 import com.alipay.sofa.rpc.bootstrap.Bootstraps;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.Router;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -48,7 +50,6 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CONNECT_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_DISCONNECT_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_HEARTBEAT_PERIOD;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INJVM;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TYPE;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_LAZY;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_LOAD_BALANCER;
@@ -209,7 +210,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 客户端调用超时时间(毫秒)
      */
-    protected int                                   timeout            = getIntValue(CONSUMER_INVOKE_TIMEOUT);
+    protected int                                   timeout            = -1;
 
     /**
      * The Retries. 失败后重试次数
@@ -259,7 +260,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!proxyClass.isInterface()) {
+                if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(protocol) && !proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("consumer.interface",
                         interfaceId, "interfaceId must set interface class, not implement class");
                 }
@@ -882,7 +883,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     }
 
     /**
-     * Gets time out.
+     * Gets the timeout corresponding to the method name
      *
      * @param methodName the method name
      * @return the time out
@@ -904,10 +905,10 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     }
 
     /**
-     * Gets time out.
+     * Gets the call type corresponding to the method name
      *
      * @param methodName the method name
-     * @return the time out
+     * @return the call type
      */
     public String getMethodInvokeType(String methodName) {
         return (String) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_INVOKE_TYPE,
