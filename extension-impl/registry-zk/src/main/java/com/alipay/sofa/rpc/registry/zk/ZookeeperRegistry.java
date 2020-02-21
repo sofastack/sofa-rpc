@@ -101,10 +101,12 @@ import static com.alipay.sofa.rpc.registry.zk.ZookeeperRegistryHelper.buildProvi
 @Extension("zookeeper")
 public class ZookeeperRegistry extends Registry {
 
+    public static final String  EXT_NAME = "ZookeeperRegistry";
+
     /**
      * slf4j Logger for this class
      */
-    private final static Logger LOGGER = LoggerFactory.getLogger(ZookeeperRegistry.class);
+    private final static Logger LOGGER   = LoggerFactory.getLogger(ZookeeperRegistry.class);
 
     /**
      * 注册中心配置
@@ -195,7 +197,7 @@ public class ZookeeperRegistry extends Registry {
         }
         String addressInput = registryConfig.getAddress(); // xxx:2181,yyy:2181/path1/paht2
         if (StringUtils.isEmpty(addressInput)) {
-            throw new SofaRpcRuntimeException("Address of zookeeper registry is empty.");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EMPTY_ADDRESS, EXT_NAME));
         }
         int idx = addressInput.indexOf(CONTEXT_SEP);
         String address; // IP地址
@@ -274,7 +276,7 @@ public class ZookeeperRegistry extends Registry {
         try {
             zkClient.start();
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to start zookeeper zkClient", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_ZOOKEEPER_CLIENT_START), e);
         }
         return zkClient.getState() == CuratorFrameworkState.STARTED;
     }
@@ -391,7 +393,8 @@ public class ZookeeperRegistry extends Registry {
 
             }
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to register provider to zookeeperRegistry!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "zookeeperRegistry",
+                config.buildKey()), e);
         }
 
         if (EventBus.isEnable(ProviderPubEvent.class)) {
@@ -440,7 +443,7 @@ public class ZookeeperRegistry extends Registry {
             INTERFACE_CONFIG_CACHE.put(configPath, pathChildrenCache);
             configObserver.updateConfigAll(config, configPath, pathChildrenCache.getCurrentData());
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUB_PROVIDER_CONFIG, EXT_NAME), e);
         }
     }
 
@@ -485,7 +488,7 @@ public class ZookeeperRegistry extends Registry {
             INTERFACE_OVERRIDE_CACHE.put(overridePath, pathChildrenCache);
             overrideObserver.updateConfigAll(config, overridePath, pathChildrenCache.getCurrentData());
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to subscribe provider config from zookeeperRegistry!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUB_PROVIDER_OVERRIDE, EXT_NAME), e);
         }
     }
 
@@ -516,7 +519,7 @@ public class ZookeeperRegistry extends Registry {
                 }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unregister provider to zookeeperRegistry!", e);
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNREG_PROVIDER, EXT_NAME), e);
                 }
             }
         }
@@ -531,7 +534,7 @@ public class ZookeeperRegistry extends Registry {
                 }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unsubscribe provider config from zookeeperRegistry!",
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUB_PROVIDER_CONFIG, EXT_NAME),
                         e);
                 }
             }
@@ -622,7 +625,7 @@ public class ZookeeperRegistry extends Registry {
                     providerPath, pathChildrenCache.getCurrentData());
                 matchProviders = ZookeeperRegistryHelper.matchProviderInfos(config, providerInfos);
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to subscribe provider from zookeeperRegistry!", e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUB_PROVIDER, EXT_NAME), e);
             }
 
             if (EventBus.isEnable(ConsumerSubEvent.class)) {
@@ -662,7 +665,7 @@ public class ZookeeperRegistry extends Registry {
                     LOGGER.warn("consumer has exists in zookeeper, consumer=" + url);
                 }
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to register consumer to zookeeperRegistry!", e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_CONSUMER_CONFIG, EXT_NAME), e);
             }
         }
     }
@@ -680,7 +683,8 @@ public class ZookeeperRegistry extends Registry {
                 }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unregister consumer to zookeeperRegistry!", e);
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNREG_CONSUMER_CONFIG, EXT_NAME),
+                        e);
                 }
             }
         }
@@ -690,14 +694,15 @@ public class ZookeeperRegistry extends Registry {
                 providerObserver.removeProviderListener(config);
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unsubscribe provider from zookeeperRegistry!", e);
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUB_PROVIDER_CONFIG, EXT_NAME),
+                        e);
                 }
             }
             try {
                 configObserver.removeConfigListener(config);
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException("Failed to unsubscribe consumer config from zookeeperRegistry!",
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUB_CONSUMER_CONFIG, EXT_NAME),
                         e);
                 }
             }
@@ -707,8 +712,8 @@ public class ZookeeperRegistry extends Registry {
                     childrenCache.close();
                 } catch (Exception e) {
                     if (!RpcRunningState.isShuttingDown()) {
-                        throw new SofaRpcRuntimeException(
-                            "Failed to unsubscribe consumer config from zookeeperRegistry!", e);
+                        throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUB_CONSUMER_CONFIG,
+                            EXT_NAME), e);
                     }
                 }
             }
@@ -729,7 +734,7 @@ public class ZookeeperRegistry extends Registry {
 
     private CuratorFramework getAndCheckZkClient() {
         if (zkClient == null || zkClient.getState() != CuratorFrameworkState.STARTED) {
-            throw new SofaRpcRuntimeException("Zookeeper client is not available");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_ZOOKEEPER_CLIENT_UNAVAILABLE));
         }
         return zkClient;
     }
@@ -756,7 +761,7 @@ public class ZookeeperRegistry extends Registry {
             try {
                 entry.getValue().close();
             } catch (Exception e) {
-                LOGGER.error("Close PathChildrenCache error!", e);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_CLOSE_PATH_CACHE), e);
             }
         }
     }

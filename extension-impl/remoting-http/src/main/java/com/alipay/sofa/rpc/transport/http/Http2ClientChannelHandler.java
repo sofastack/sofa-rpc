@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.transport.http;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.netty.NettyHelper;
@@ -125,6 +126,6 @@ public class Http2ClientChannelHandler extends SimpleChannelInboundHandler<FullH
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        LOGGER.error("Client channel handler get exception!", cause);
+        LOGGER.error(LogCodes.getLog(LogCodes.ERROR_CATCH_EXCEPTION), cause);
     }
 }

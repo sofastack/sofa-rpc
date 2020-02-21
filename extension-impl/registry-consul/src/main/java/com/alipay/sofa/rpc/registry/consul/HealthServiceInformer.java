@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.ecwid.consul.v1.ConsulClient;
@@ -85,7 +86,7 @@ public class HealthServiceInformer {
             ProviderGroup providerGroup = new ProviderGroup(currentProviders());
             listeners.stream().filter(Objects::nonNull).forEach(l -> l.updateProviders(providerGroup));
         } catch (Exception e) {
-            LOGGER.error("Consul watch health service failed.", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_WATCH_HEALTH ,"Consul"), e);
         }
     }
 
