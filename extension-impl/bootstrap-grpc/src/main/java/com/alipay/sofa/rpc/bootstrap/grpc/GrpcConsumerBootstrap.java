@@ -175,22 +175,8 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
                 // proxyIns = (T) newBlockingChannel.invoke(null, channel);
                 blockingStubIns = (T) newBlockingChannel.invoke(null, channel);
 
-            } catch (ClassNotFoundException e) {
-                LOGGER.error("ClassNotFoundException");
+            } catch (Throwable e) {
                 throw e;
-            } catch (IllegalAccessException e) {
-                LOGGER.error("IllegalAccessException");
-                throw e;
-            } catch (NoSuchMethodException e) {
-                LOGGER.error("NoSuchMethodException");
-                throw e;
-            } catch (InvocationTargetException e) {
-                LOGGER.error("InvocationTargetException");
-                throw e;
-            } catch (IllegalArgumentException e) {
-                LOGGER.error("IllegalArgumentException");
-                throw e;
-            } finally {
             }
 
             // second, make proxy for that stub, using a fake channel.
