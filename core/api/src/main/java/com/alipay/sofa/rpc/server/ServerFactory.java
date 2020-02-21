@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -70,18 +69,16 @@ public final class ServerFactory {
                 ExtensionClass<Server> ext = ExtensionLoaderFactory.getExtensionLoader(Server.class)
                     .getExtensionClass(serverConfig.getProtocol());
                 if (ext == null) {
-                    throw ExceptionUtils.buildRuntime("server.protocol", serverConfig.getProtocol(),
-                        "Unsupported protocol of server!");
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUPPORTED_PROTOCOL,
+                        serverConfig.getProtocol()));
                 }
                 server = ext.getExtInstance();
                 server.init(serverConfig);
                 SERVER_MAP.put(serverConfig.getPort() + "", server);
             }
             return server;
-        } catch (SofaRpcRuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_SERVER), e);
         }
     }
 
@@ -145,7 +142,7 @@ public final class ServerFactory {
             try {
                 server.destroy();
             } catch (Exception e) {
-                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_SERVER_DESTROY, key), e);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_DESTROY_SERVER, key), e);
             }
         }
         SERVER_MAP.clear();
@@ -160,7 +157,7 @@ public final class ServerFactory {
                 server.destroy();
             }
         } catch (Exception e) {
-            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_SERVER_DESTROY, serverConfig.getPort()), e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_DESTROY_SERVER, serverConfig.getPort()), e);
         }
     }
 }
