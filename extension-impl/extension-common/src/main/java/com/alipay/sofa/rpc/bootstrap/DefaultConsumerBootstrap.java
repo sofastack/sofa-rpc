@@ -39,6 +39,7 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
@@ -132,10 +133,8 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 if (c > maxProxyCount) {
                     cnt.decrementAndGet();
                     // 超过最大数量，直接抛出异常
-                    throw new SofaRpcRuntimeException("Duplicate consumer config with key " + key
-                        + " has been referred more than " + maxProxyCount + " times!"
-                        + " Maybe it's wrong config, please check it."
-                        + " Ignore this if you did that on purpose!");
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_DUPLICATE_CONSUMER_CONFIG, key,
+                        maxProxyCount));
                 } else if (c > 1) {
                     if (LOGGER.isInfoEnabled(appName)) {
                         LOGGER.infoWithApp(appName, "Duplicate consumer config with key {} has been referred!"
@@ -174,11 +173,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 consumerConfig.setConfigListener(null);
                 consumerConfig.setProviderInfoListener(null);
                 cnt.decrementAndGet(); // 发布失败不计数
-                if (e instanceof SofaRpcRuntimeException) {
-                    throw (SofaRpcRuntimeException) e;
-                } else {
-                    throw new SofaRpcRuntimeException("Build consumer proxy error!", e);
-                }
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_CONSUMER_PROXY), e);
             }
             if (consumerConfig.getOnAvailable() != null && cluster != null) {
                 cluster.checkStateChange(false); // 状态变化通知监听器
@@ -371,13 +366,13 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                     }
                 }
             } catch (SofaRpcRuntimeException e) {
-                throw e;
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY,
+                    registryConfig.getId()), e);
             } catch (Throwable e) {
                 String appName = consumerConfig.getAppName();
                 if (LOGGER.isWarnEnabled(appName)) {
                     LOGGER.warnWithApp(appName,
-                        "Catch exception when subscribe from registry: " + registryConfig.getId()
-                            + ", but you can ignore if it's called by JVM shutdown hook", e);
+                        LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY, registryConfig.getId()), e);
                 }
             }
         }
@@ -499,7 +494,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                     rerefer = rerefer || changed;
                 }
             } catch (Exception e) {
-                LOGGER.errorWithApp(appName, "Catch exception when consumer attribute comparing", e);
+                LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_CONSUMER_ATTRIBUTE_COMPARING), e);
                 return;
             }
             if (rerefer) {
@@ -513,7 +508,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                         LOGGER.infoWithApp(appName, "Rerefer consumer {}", consumerConfig.buildKey());
                     }
                 } catch (Exception e) { // 切换属性出现异常
-                    LOGGER.errorWithApp(appName, "Catch exception when consumer attribute changed", e);
+                    LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_CONSUMER_ATTRIBUTE_CHANGE), e);
                     for (Map.Entry<String, String> entry : oldValues.entrySet()) { //rollback old attrs
                         consumerConfig.updateAttribute(entry.getKey(), entry.getValue(), true);
                     }
@@ -523,7 +518,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 try {
                     switchCluster();
                 } catch (Exception e) { //切换客户端出现异常
-                    LOGGER.errorWithApp(appName, "Catch exception when consumer refer after attribute changed", e);
+                    LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_CONSUMER_REFER_AFTER_CHANGE), e);
                     unSubscribe(); // 取消订阅新的
                     for (Map.Entry<String, String> entry : oldValues.entrySet()) { //rollback old attrs
                         consumerConfig.updateAttribute(entry.getKey(), entry.getValue(), true);
@@ -549,7 +544,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 if (newCluster != null) {
                     newCluster.destroy();
                 }
-                throw e;
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SWITCH_CLUSTER_NEW), e);
             }
             try { // 切换
                 cluster = newCluster;
@@ -559,7 +554,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
             } catch (Exception e) {
                 String appName = consumerConfig.getAppName();
                 if (LOGGER.isWarnEnabled(appName)) {
-                    LOGGER.warnWithApp(appName, "Catch exception when destroy old cluster", e);
+                    LOGGER.warnWithApp(appName, LogCodes.getLog(LogCodes.WARN_SWITCH_CLUSTER_DESTROY), e);
                 }
             }
         }

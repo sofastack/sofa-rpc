@@ -77,6 +77,17 @@ public class LogCodes {
     public static final String                 ERROR_SERVICE_PUBLISHING                   = "010000011";
     public static final String                 ERROR_SERVICE_UNPUBLISHING                 = "010000012";
     public static final String                 ERROR_ROUTE_ADDRESS_SUBTOKEN_DECRY         = "010000013";
+    public static final String                 ERROR_DUPLICATE_PROVIDER_CONFIG            = "010000014";
+    public static final String                 WARN_DUPLICATE_PROVIDER_CONFIG             = "010000015";
+    public static final String                 ERROR_REGISTER_PROCESSOR_TO_SERVER         = "010000016";
+    public static final String                 ERROR_BUILD_PROVIDER_PROXY                 = "010000017";
+    public static final String                 ERROR_REFERENCE_AND_INTERFACE              = "010000018";
+    public static final String                 ERROR_SERVER_EMPTY                         = "010000019";
+    public static final String                 ERROR_REGISTER_TO_REGISTRY                 = "010000020";
+    public static final String                 ERROR_PROVIDER_ATTRIBUTE_COMPARE           = "010000021";
+    public static final String                 ERROR_PROVIDER_ATTRIBUTE_CHANGE            = "010000022";
+    public static final String                 ERROR_CONVERT_URL                          = "010000023";
+
     //01001 consumer
     public static final String                 INFO_ADDRESS_WAIT_START                    = "010010001";
     public static final String                 INFO_ADDRESS_WAIT_OVER                     = "010010002";
@@ -91,6 +102,15 @@ public class LogCodes {
     public static final String                 ERROR_INIT_METHOD_SPECIAL                  = "010010011";
     public static final String                 WARN_PROCESS_ADDRESS_WAIT                  = "010010012";
     public static final String                 WARN_PROCESS_ADDRESS_WAIT_CONTINUE         = "010010013";
+    public static final String                 ERROR_DUPLICATE_CONSUMER_CONFIG            = "010010014";
+    public static final String                 ERROR_BUILD_CONSUMER_PROXY                 = "010010015";
+    public static final String                 ERROR_SUBSCRIBE_FROM_REGISTRY              = "010010016";
+    public static final String                 ERROR_CONSUMER_ATTRIBUTE_COMPARING         = "010010017";
+    public static final String                 ERROR_CONSUMER_ATTRIBUTE_CHANGE            = "010010018";
+    public static final String                 ERROR_CONSUMER_REFER_AFTER_CHANGE          = "010010019";
+    public static final String                 ERROR_SWITCH_CLUSTER_NEW                   = "010010020";
+    public static final String                 WARN_SWITCH_CLUSTER_DESTROY                = "010010021";
+
     //01002 dynamic
     //01003 ext
     public static final String                 ERROR_METRIC_REPORT_ERROR                  = "010030001";
@@ -149,7 +169,6 @@ public class LogCodes {
     public static final String                 ERROR_OSGI_UNRESGISTER_SERVICE             = "019990016";
     public static final String                 ERROR_ADDRESSING_CHAIN_EMPTY               = "019990017";
     public static final String                 ERROR_PROVIDER_GRPC_START                  = "019990018";
-    public static final String                 ERROR_SERVER_DESTROY                       = "019990019";
 
     //02 运行
     // 02000 泛化
@@ -160,6 +179,7 @@ public class LogCodes {
     public static final String                 ERROR_RESPONSE_FUTURE_NULL                 = "020010004";
     public static final String                 ERROR_RESPONSE_FUTURE_NOT_CLEAR            = "020010005";
     public static final String                 WARN_PROCESS_PARSE_TARGET_METHOD           = "020010006";
+    public static final String                 ERROR_LOAD_CLUSTER                         = "020010007";
     // 02002 connectionholder
     public static final String                 INFO_CONNECT_PUT_TO_ALIVE                  = "020020001";
     public static final String                 INFO_CONNECT_PUT_TO_RETRY                  = "020020002";
@@ -175,8 +195,9 @@ public class LogCodes {
     public static final String                 WARN_NOTIFY_CONSUMER_STATE                 = "020020012";
     public static final String                 ERROR_UPDATE_PROVIDERS                     = "020020013";
     public static final String                 ERROR_DELETE_PROVIDERS                     = "020020014";
-
+    public static final String                 ERROR_LOAD_CONNECTION_HOLDER               = "020020015";
     // 02003 loadbalancer
+    public static final String                 ERROR_LOAD_LOAD_BALANCER                   = "020030001";
     // 02004 router
     // 02005 codec
     public static final String                 WARN_DESERIALIZE_HEADER_ERROR              = "020050001";
@@ -185,14 +206,23 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_PROTOCOL_INVALID          = "020050004";
     public static final String                 ERROR_DECODE_RES_PROTOCOL_INVALID          = "020050005";
     public static final String                 ERROR_DECODE_CLASS_NOT_FOUND               = "020050006";
+    public static final String                 ERROR_COMPRESSOR_NOT_FOUND                 = "020050007";
+    public static final String                 ERROR_SERIALIZER_NOT_FOUND                 = "020050008";
+    public static final String                 ERROR_SERIALIZER                           = "020050009";
+
     // 02006 addressholder
     public static final String                 ERROR_NO_AVAILBLE_PROVIDER                 = "020060001";
     public static final String                 LOCALFILEREGISTRY_FAIL_READURL             = "020060002";
+    public static final String                 ERROR_LOAD_ADDRESS_HOLDER                  = "020060003";
     // 02007 cache
     // 02008 context
+    public static final String                 ERROR_ATTACHMENT_KEY                       = "020080001";
+    public static final String                 ERROR_ASYNC_THREAD_POOL_REJECT             = "020080002";
     // 02009 tracer
     public static final String                 ERROR_TRACER_UNKNOWN_EXP                   = "020090001";
-
+    public static final String                 ERROR_FAIL_LOAD_TRACER_EXT                 = "020090002";
+    public static final String                 ERROR_TRACER_CONSUMER_STACK                = "020090003";
+    public static final String                 ERROR_TRACER_PROVIDER_STACK                = "020090004";
     // 02010 server process
     public static final String                 INFO_SERVICE_METADATA_IS_NULL              = "020100001";
     public static final String                 WARN_CANNOT_FOUND_SERVICE_4_SERVER         = "020100002";
@@ -209,17 +239,26 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND       = "020100013";
     public static final String                 ERROR_DISCARD_TIMEOUT_REQUEST              = "020100014";
     public static final String                 ERROR_DISCARD_TIMEOUT_RESPONSE             = "020100015";
-    public static final String                 ERROR_PROCESS_UNKNOWN                      = "020100016";
-
+    public static final String                 ERROR_UNSUPPORTED_PROTOCOL                 = "020100016";
+    public static final String                 ERROR_GET_SERVER                           = "020100017";
+    public static final String                 ERROR_DESTROY_SERVER                       = "020100018";
+    public static final String                 ERROR_PROCESS_UNKNOWN                      = "020100019";
     // 02011 protocol
+    public static final String                 ERROR_EXTENSION_NOT_FOUND                  = "020110001";
     // 02012 filter
+    //    public static final String                 ERROR_BUILD_FILTER_CHAIN                   = "020120001";
+    public static final String                 ERROR_NEXT_FILTER_AND_INVOKER_NULL         = "020120002";
+    public static final String                 ERROR_NEED_DECODE_METHOD                   = "020120003";
     // 02013 event
 
     // 02014 faulttorenence
-
     public static final String                 INFO_REGULATION_ABNORMAL                   = "020140001";
     public static final String                 INFO_REGULATION_ABNORMAL_NOT_DEGRADE       = "020140002";
     public static final String                 WARN_SUCCESS_BY_RETRY                      = "020140003";
+    public static final String                 ERROR_ORIGIN_WEIGHT_ZERO                   = "020140004";
+    public static final String                 ERROR_WHEN_DO_MEASURE                      = "020140005";
+    public static final String                 ERROR_WHEN_DO_REGULATE                     = "020140006";
+
     // 02999 common通用的
     // 未知错误
 
