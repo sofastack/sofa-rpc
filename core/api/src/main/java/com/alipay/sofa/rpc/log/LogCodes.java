@@ -385,15 +385,15 @@ public class LogCodes {
      */
     public static String getLog(String code) {
         if (!LOG_CODES.containsKey(code)) {
-            LOGGER.error("LogCodes.getLog error, code not exist:"+code);
-            return "Can't get log message!!!";
+            LOGGER.error("LogCodes.getLog error, code does not exist:"+code);
+            return "Can't get log message,logCode="+code;
         }
         try {
             return String.format(LOG, code, LOG_CODES.get(code), LogCodes.NOTE);
         } catch (Throwable e) {
             LOGGER.error("LogCodes.getLog error code="+code,e);
         }
-        return "Can't get log message!!!";
+        return "LogCode format error,code="+code;
     }
 
     /**
@@ -412,7 +412,7 @@ public class LogCodes {
         } catch (Throwable e) {
             LOGGER.error("LogCodes.getLiteLog error, codeOrMsg="+codeOrMsg,e);
         }
-        return "Can't get log message!!!";
+        return "LogCodes.getLiteLog error, codeOrMsg="+codeOrMsg;
     }
 
     public static String getLog(String code, Object... messages) {
@@ -420,15 +420,15 @@ public class LogCodes {
 
         if (message == null) {
             LOGGER.error("LogCodes.getLog error, code not exist="+code);
-            return "Can't get log message!!!";
+            return "Can't get log message,logCode="+code;
         }
 
         try {
             return String.format(LOG, code, MessageFormat.format(message, messages), LogCodes.NOTE);
         } catch (Throwable e) {
-            LOGGER.error("LogCodes.getLog error, code="+code,e);
+            LOGGER.error("LogCode.getLog format error,code="+code,e);
         }
-        return "Can't get log message!!!";
+        return "LogCode.getLog format error,code="+code;
     }
 
     /**
@@ -448,8 +448,8 @@ public class LogCodes {
         try {
             return MessageFormat.format(message, messages);
         } catch (Throwable e) {
-            LOGGER.error("LogCodes.getLog error, code="+codeOrMsg+"",e);
+            LOGGER.error("LogCode.getLiteLog format error,code="+codeOrMsg+"",e);
         }
-        return "Can't get log message!!!";
+        return "LogCode.getLiteLog format error,code="+codeOrMsg;
     }
 }
