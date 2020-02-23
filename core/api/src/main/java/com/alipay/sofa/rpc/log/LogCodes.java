@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.log;
 
 import com.alipay.sofa.rpc.common.utils.IOUtils;
-import com.alipay.sofa.rpc.log.exception.LogCodeNotFoundException;
-import com.alipay.sofa.rpc.log.exception.LogFormatException;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -57,6 +55,9 @@ public class LogCodes {
                                                                                               .getLogger(LogCodes.class);
     protected final static String              LOG                                        = "RPC-%s: %s %s";
     protected static final Map<String, String> LOG_CODES                                  = new ConcurrentHashMap<String, String>();
+    public static final String CODE_DOES_NOT_EXIST = "LogCodes.getLog error, code does not exist:";
+    public static final String LITE_LOG_FORMAT_ERROR = "LogCode.getLiteLog format error,codeOrMsg=";
+    public static final String LOG_FORMAT_ERROR = "LogCode.getLog format error,code=";
 
     protected static String                    NOTE                                       = "";
 
@@ -385,15 +386,15 @@ public class LogCodes {
      */
     public static String getLog(String code) {
         if (!LOG_CODES.containsKey(code)) {
-            LOGGER.error("LogCodes.getLog error, code does not exist:"+code);
-            return "Can't get log message,logCode="+code;
+            LOGGER.error(CODE_DOES_NOT_EXIST+code);
+            return CODE_DOES_NOT_EXIST+code;
         }
         try {
             return String.format(LOG, code, LOG_CODES.get(code), LogCodes.NOTE);
         } catch (Throwable e) {
-            LOGGER.error("LogCodes.getLog error code="+code,e);
+            LOGGER.error(LOG_FORMAT_ERROR+code,e);
         }
-        return "LogCode format error,code="+code;
+        return LOG_FORMAT_ERROR+code;
     }
 
     /**
@@ -410,25 +411,25 @@ public class LogCodes {
         try {
             return LOG_CODES.get(codeOrMsg);
         } catch (Throwable e) {
-            LOGGER.error("LogCodes.getLiteLog error, codeOrMsg="+codeOrMsg,e);
+            LOGGER.error(LITE_LOG_FORMAT_ERROR+codeOrMsg,e);
         }
-        return "LogCodes.getLiteLog error, codeOrMsg="+codeOrMsg;
+        return LITE_LOG_FORMAT_ERROR +codeOrMsg;
     }
 
     public static String getLog(String code, Object... messages) {
         String message = LOG_CODES.get(code);
 
         if (message == null) {
-            LOGGER.error("LogCodes.getLog error, code not exist="+code);
-            return "Can't get log message,logCode="+code;
+            LOGGER.error(CODE_DOES_NOT_EXIST+code);
+            return CODE_DOES_NOT_EXIST +code;
         }
 
         try {
             return String.format(LOG, code, MessageFormat.format(message, messages), LogCodes.NOTE);
         } catch (Throwable e) {
-            LOGGER.error("LogCode.getLog format error,code="+code,e);
+            LOGGER.error(LOG_FORMAT_ERROR+code,e);
         }
-        return "LogCode.getLog format error,code="+code;
+        return LOG_FORMAT_ERROR +code;
     }
 
     /**
@@ -442,14 +443,14 @@ public class LogCodes {
         String message = LOG_CODES.get(codeOrMsg);
 
         if (message == null) {
-            return MessageFormat.format(codeOrMsg, messages);
+            message = codeOrMsg;
         }
 
         try {
             return MessageFormat.format(message, messages);
         } catch (Throwable e) {
-            LOGGER.error("LogCode.getLiteLog format error,code="+codeOrMsg+"",e);
+            LOGGER.error(LITE_LOG_FORMAT_ERROR+codeOrMsg,e);
         }
-        return "LogCode.getLiteLog format error,code="+codeOrMsg;
+        return LITE_LOG_FORMAT_ERROR+codeOrMsg;
     }
 }
