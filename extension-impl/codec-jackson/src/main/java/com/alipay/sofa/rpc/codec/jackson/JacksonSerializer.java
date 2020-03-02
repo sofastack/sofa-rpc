@@ -16,6 +16,12 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -29,11 +35,9 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Json serializer.
@@ -81,10 +85,11 @@ public class JacksonSerializer extends AbstractSerializer {
     protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
         throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
-        if (args.length > 1) {
-            throw buildSerializeError("Jackson only support one parameter!");
+        if (args.length == 1) {
+            return encode(args[0], context);
+        } else {
+            return encode(args, context);
         }
-        return encode(args[0], context);
     }
 
     protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
@@ -113,15 +118,6 @@ public class JacksonSerializer extends AbstractSerializer {
 
         if (clazz == null) {
             throw buildDeserializeError("class is null!");
-        } else if (data.readableBytes() <= 0) {
-            try {
-                result = clazz.newInstance();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            return result;
         } else {
             try {
                 result = mapper.readValue(data.array(), clazz);
@@ -179,13 +175,65 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
         }
 
-        // according interface and method name to find paramter types
-        Class requestClass = jacksonHelper.getReqClass(targetService,
-            sofaRequest.getMethodName());
+        // according interface and method name to find parameter types
+        JavaType[] requestClassList = jacksonHelper.getReqClass(targetService, sofaRequest.getMethodName());
+        Object[] reqList = decode(data, requestClassList);
+        sofaRequest.setMethodArgs(reqList);
+        sofaRequest.setMethodArgSigs(parseArgSigs(reqList));
+    }
 
-        Object pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(new Object[] { pbReq });
-        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
+    private Object[] decode(AbstractByteBuf data, JavaType[] clazzList) throws SofaRpcException {
+
+        if (clazzList == null || clazzList.length == 0) {
+            return new Object[0];
+        }
+
+        Object[] args = new Object[clazzList.length];
+
+        try {
+
+            JsonNode node = mapper.readTree(data.array());
+
+            // json data is json arry
+            if (node.isArray()) {
+                // first parameter is Array or Collection Type
+                if (clazzList.length == 1 && (!clazzList[0].isCollectionLikeType() || !clazzList[0].isArrayType())) {
+                    throw buildDeserializeError("JSON data can't be json array");
+                }
+                // if there is more than one parameter, but request json array size is not equal class type size.
+                if (clazzList.length > 1 && clazzList.length != node.size()) {
+                    throw buildDeserializeError("JSON Array size is not equal parameter size");
+                }
+
+                for (int i = 0; i < clazzList.length; i++) {
+                    args[i] = mapper.readValue(node.get(i).traverse(), clazzList[i]);
+                }
+            } else {
+
+                if (clazzList.length > 1) {
+                    throw buildDeserializeError("JSON data must be json array");
+                }
+
+                // json is other type(eg. map object string int...)
+                args[0] = mapper.readValue(node.traverse(), clazzList[0]);
+            }
+
+            return args;
+        } catch (SofaRpcException e) {
+            throw e;
+        } catch (IOException e) {
+            throw buildDeserializeError(e.getMessage());
+        }
+
+    }
+
+    private String[] parseArgSigs(Object[] reqList) {
+        List<String> argSigs = new ArrayList<String>();
+        for (Object req : reqList) {
+            argSigs.add(req.getClass().getName());
+        }
+
+        return argSigs.toArray(new String[argSigs.size()]);
     }
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,
