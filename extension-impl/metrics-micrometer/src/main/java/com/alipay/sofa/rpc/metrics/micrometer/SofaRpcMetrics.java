@@ -59,7 +59,7 @@ public class SofaRpcMetrics extends Subscriber implements MeterBinder, AutoClose
     private final Function<Tags, Timer> clientTotal = tags -> Timer.builder("sofa.client.total")
         .tags(tags)
         .register(initialed.get());
-    private Function<Tags, Timer> clientFail = tags -> Timer.builder("sofa.client.fail")
+    private final Function<Tags, Timer> clientFail = tags -> Timer.builder("sofa.client.fail")
         .tags(tags)
         .register(initialed.get());
     private final Function<Tags, Timer> serverTotal = tags -> Timer.builder("sofa.server.total")
