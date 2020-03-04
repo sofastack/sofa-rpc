@@ -112,6 +112,8 @@ public class ExtensionClass<T> implements Sortable {
                 } else {
                     return ClassUtils.newInstanceWithArgs(clazz, argTypes, args);
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_CREATE_EXT_INSTANCE,
                     clazz.getCanonicalName()), e);
