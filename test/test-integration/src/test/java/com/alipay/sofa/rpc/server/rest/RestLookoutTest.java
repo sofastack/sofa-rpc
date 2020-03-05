@@ -79,7 +79,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         }
         // 只有1个线程 执行
         serverConfig = new ServerConfig()
-            .setStopTimeout(10000)
+            .setStopTimeout(1000)
             .setPort(8802)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_REST)
             .setContextPath("/xyz");
