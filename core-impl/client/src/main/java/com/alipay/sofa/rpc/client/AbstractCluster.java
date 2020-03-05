@@ -51,14 +51,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.transport.ClientTransport;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -325,7 +318,6 @@ public abstract class AbstractCluster extends Cluster {
             return response;
         } else if (MockMode.REMOTE.equalsIgnoreCase(mockMode)) {
             SofaResponse response = new SofaResponse();
-            CloseableHttpClient client = HttpClients.createDefault();
             try {
                 final String mockUrl = consumerConfig.getParameter("mockUrl");
                 Map<String, Object> parameters = new HashMap<>();
@@ -337,11 +329,6 @@ public abstract class AbstractCluster extends Cluster {
                 response.setAppResponse(mockAppResponse);
             } catch (Throwable e) {
                 response.setErrorMsg(e.getMessage());
-            }finally {
-                try {
-                    client.close();
-                } catch (IOException ignored) {
-                }
             }
             return response;
         } else {
