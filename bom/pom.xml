@@ -451,6 +451,13 @@
                 <artifactId>lookout-core</artifactId>
                 <version>${lookout.version}</version>
             </dependency>
+            <!-- micrometer -->
+            <dependency>
+                <groupId>io.micrometer</groupId>
+                <artifactId>micrometer-core</artifactId>
+                <version>1.3.5</version>
+                <scope>provided</scope>
+            </dependency>
             <!-- Test libs -->
             <dependency>
                 <groupId>junit</groupId>
