@@ -60,7 +60,7 @@ public abstract class FaultBaseTest {
     @Before
     public void init() {
         // 只有1个线程 执行
-        ServerConfig serverConfig = new ServerConfig()
+        serverConfig = new ServerConfig()
             .setStopTimeout(60000)
             .setPort(12299)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)

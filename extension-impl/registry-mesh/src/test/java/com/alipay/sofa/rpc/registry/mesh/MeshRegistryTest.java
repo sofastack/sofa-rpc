@@ -33,9 +33,9 @@ import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceResult;
 import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceResult;
 import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceResult;
 import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceResult;
-import org.junit.AfterClass;
+import org.junit.After;
 import org.junit.Assert;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -51,22 +51,24 @@ import java.util.concurrent.TimeUnit;
  */
 public class MeshRegistryTest extends BaseMeshTest {
 
-    private static RegistryConfig registryConfig;
+    private RegistryConfig registryConfig;
 
-    private static MeshRegistry   registry;
+    private MeshRegistry   registry;
 
-    @BeforeClass
-    public static void setUp() {
+    private HttpMockServer httpMockServer;
 
-        HttpMockServer.initSever(7654);
+    @Before
+    public void setUp() {
+        httpMockServer = new HttpMockServer();
+        httpMockServer.initSever(7654);
 
         ApplicationInfoResult applicationInfoResult = new ApplicationInfoResult();
         applicationInfoResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.CONFIGS, JSON.toJSONString(applicationInfoResult));
+        httpMockServer.addMockPath(MeshEndpoint.CONFIGS, JSON.toJSONString(applicationInfoResult));
 
         PublishServiceResult publishServiceResult = new PublishServiceResult();
         publishServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.PUBLISH, JSON.toJSONString(publishServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.PUBLISH, JSON.toJSONString(publishServiceResult));
 
         SubscribeServiceResult subscribeServiceResult = new SubscribeServiceResult();
         subscribeServiceResult.setSuccess(true);
@@ -74,17 +76,17 @@ public class MeshRegistryTest extends BaseMeshTest {
         datas.add("127.0.0.1:12200?v=4.0&p=1");
         datas.add("127.0.0.1:12201?v=4.0&p=1");
         subscribeServiceResult.setDatas(datas);
-        HttpMockServer.addMockPath(MeshEndpoint.SUBCRIBE, JSON.toJSONString(subscribeServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.SUBCRIBE, JSON.toJSONString(subscribeServiceResult));
 
         UnPublishServiceResult unPublishServiceResult = new UnPublishServiceResult();
         unPublishServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.UN_PUBLISH, JSON.toJSONString(unPublishServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.UN_PUBLISH, JSON.toJSONString(unPublishServiceResult));
 
         UnSubscribeServiceResult unSubscribeServiceResult = new UnSubscribeServiceResult();
         unSubscribeServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.UN_SUBCRIBE, JSON.toJSONString(unSubscribeServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.UN_SUBCRIBE, JSON.toJSONString(unSubscribeServiceResult));
 
-        HttpMockServer.start();
+        httpMockServer.start();
         registryConfig = new RegistryConfig()
             .setProtocol("mesh")
             .setSubscribe(true)
@@ -92,24 +94,18 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setAddress("http://localhost:7654");
 
         registry = (MeshRegistry) RegistryFactory.getRegistry(registryConfig);
-
-        try {
-            registry.init();
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof SofaRpcRuntimeException);
-        }
         registry.init();
         registry.start();
     }
 
-    @AfterClass
-    public static void tearDown() {
+    @After
+    public void tearDown() {
         try {
             registry.destroy(); // destroy可能还会备份异常
             registry = null;
         } finally {
             // 清理数据
-            HttpMockServer.stop();
+            httpMockServer.stop();
         }
     }
 
@@ -132,9 +128,6 @@ public class MeshRegistryTest extends BaseMeshTest {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-
-        LOGGER.info("current registedAppValue is " + registedAppValue);
-        Assert.assertTrue(!registedAppValue);
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -212,7 +205,7 @@ public class MeshRegistryTest extends BaseMeshTest {
         Assert.assertNull(groups);
         Thread.sleep(3000);
         Map<String, ProviderGroup> ps = providerInfoListener.getData();
-        Assert.assertTrue(ps.size() == 1);
+        Assert.assertTrue(ps.toString(), ps.size() == 1);
 
         // 反注册
         CountDownLatch latch = new CountDownLatch(1);

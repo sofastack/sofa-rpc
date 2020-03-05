@@ -62,13 +62,6 @@ public class RestServerTest {
         server.start();
         Assert.assertTrue(server.started);
         Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
-        server.destroy();
-
-        // 销毁
-        server.init(serverConfig);
-        server.start();
-        Assert.assertTrue(server.started);
-        Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
         server.destroy(null);
 
         // 销毁
