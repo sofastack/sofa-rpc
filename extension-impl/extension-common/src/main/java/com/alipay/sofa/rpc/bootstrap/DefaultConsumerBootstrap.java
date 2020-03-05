@@ -173,7 +173,11 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 consumerConfig.setConfigListener(null);
                 consumerConfig.setProviderInfoListener(null);
                 cnt.decrementAndGet(); // 发布失败不计数
-                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_CONSUMER_PROXY), e);
+                if (e instanceof SofaRpcRuntimeException) {
+                    throw (SofaRpcRuntimeException) e;
+                } else {
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_CONSUMER_PROXY), e);
+                }
             }
             if (consumerConfig.getOnAvailable() != null && cluster != null) {
                 cluster.checkStateChange(false); // 状态变化通知监听器
@@ -184,7 +188,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     }
 
     /**
-     * for check fields and parameters of consumer config 
+     * for check fields and parameters of consumer config
      */
     protected void checkParameters() {
 
@@ -366,8 +370,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                     }
                 }
             } catch (SofaRpcRuntimeException e) {
-                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUBSCRIBE_FROM_REGISTRY,
-                    registryConfig.getId()), e);
+                throw e;
             } catch (Throwable e) {
                 String appName = consumerConfig.getAppName();
                 if (LOGGER.isWarnEnabled(appName)) {
@@ -544,7 +547,11 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 if (newCluster != null) {
                     newCluster.destroy();
                 }
-                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SWITCH_CLUSTER_NEW), e);
+                if (e instanceof SofaRpcRuntimeException) {
+                    throw e;
+                } else {
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SWITCH_CLUSTER_NEW), e);
+                }
             }
             try { // 切换
                 cluster = newCluster;

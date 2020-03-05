@@ -156,6 +156,8 @@ public class BoltClientTransport extends ClientTransport {
     public void disconnect() {
         try {
             connectionManager.closeConnection(RPC_CLIENT, transportConfig, url);
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_CLOSE_CONNECTION), e);
         }

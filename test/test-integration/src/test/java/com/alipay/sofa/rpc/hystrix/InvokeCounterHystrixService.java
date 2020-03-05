@@ -16,14 +16,37 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.test.HelloService;
+import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
- */
-public class HelloServiceFallback implements HelloService {
+public class InvokeCounterHystrixService implements HystrixService {
+
+    private int           sleep;
+
+    private String        result;
+
+    private AtomicInteger executeCount = new AtomicInteger(0);
+
+    public InvokeCounterHystrixService(int sleep) {
+        this.sleep = sleep;
+    }
+
+    public InvokeCounterHystrixService(String result) {
+        this.result = result;
+    }
+
     @Override
     public String sayHello(String name, int age) {
-        return "fallback " + name + " from server! age: " + age;
+        executeCount.incrementAndGet();
+        if (sleep > 0) {
+            try {
+                Thread.sleep(sleep);
+            } catch (Exception ignore) {
+            }
+        }
+        return result != null ? result : "hello " + name + " from server! age: " + age;
+    }
+
+    public int getExecuteCount() {
+        return executeCount.get();
     }
 }

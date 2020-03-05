@@ -862,6 +862,8 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 oldValue = BeanUtils.getProperty(this, property, propertyClazz);
             }
             return oldValue == null ? null : oldValue.toString();
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_QUERY_ATTRIBUTE, property), e);
         }
@@ -941,6 +943,8 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 }
             }
             return changed;
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UPDATE_ATTRIBUTE, property, newValueStr),
                 e);

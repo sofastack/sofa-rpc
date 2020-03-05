@@ -16,15 +16,13 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.test.HelloService;
-
 /**
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class HelloServiceFallbackFactory implements FallbackFactory<HelloService> {
+public class HystrixServiceFallbackFactory implements FallbackFactory<HystrixService> {
     @Override
-    public HelloService create(final FallbackContext context) {
-        return new HelloService() {
+    public HystrixService create(final FallbackContext context) {
+        return new HystrixService() {
             @Override
             public String sayHello(String name, int age) {
                 return "fallback " + name + " from server! age: " + age + ", error: " +

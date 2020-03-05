@@ -173,6 +173,8 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
                     "null", "interfaceId must be not null");
             }
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_PROXY_CLASS), e);
         }

@@ -162,6 +162,8 @@ public class RestServer implements Server {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER_WITH_PORT, "rest",
                     serverConfig.getPort()), e);
@@ -214,8 +216,10 @@ public class RestServer implements Server {
                 .addResourceFactory(new SofaResourceFactory(providerConfig, obj), serverConfig.getContextPath());
 
             invokerCnt.incrementAndGet();
-        } catch (Exception e) {
+        } catch (SofaRpcRuntimeException e) {
             LOGGER.error(LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, "restServer"), e);
+            throw e;
+        } catch (Exception e) {
             throw new SofaRpcRuntimeException(
                 LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, "restServer"), e);
         }

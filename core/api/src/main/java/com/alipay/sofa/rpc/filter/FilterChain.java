@@ -128,6 +128,9 @@ public class FilterChain implements Invoker {
                         // cache this for filter when async respond
                         loadedFilters.add(filter);
                     }
+                } catch (SofaRpcRuntimeException e) {
+                    LOGGER.error(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);
+                    throw e;
                 } catch (Exception e) {
                     LOGGER.error(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);
                     throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FILTER_CONSTRUCT), e);

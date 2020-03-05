@@ -49,6 +49,8 @@ public final class ProxyFactory {
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getProxy(clazz, proxyInvoker);
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Proxy", proxyType), e);
         }
@@ -69,6 +71,8 @@ public final class ProxyFactory {
             }
             Proxy proxy = ext.getExtInstance();
             return proxy.getInvoker(proxyObject);
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", proxyType));
         }
