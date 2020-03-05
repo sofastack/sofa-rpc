@@ -20,7 +20,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 public class DynamicHelper {
 
-    public static final String DEFAULT_DYNAMIC_VALUE = "RPC_DEFAULT_APOLLO_VALUE";
+    public static final String DEFAULT_DYNAMIC_VALUE = "RPC_DEFAULT_DYNAMIC_VALUE";
 
     public static boolean isNotDefault(String value) {
 
