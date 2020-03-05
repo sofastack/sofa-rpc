@@ -261,7 +261,7 @@
             <artifactId>sofa-rpc-metrics-lookout</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
+       <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-metrics-micrometer</artifactId>
             <version>${project.version}</version>
@@ -269,6 +269,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-doc-swagger</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -454,6 +459,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-dynamic-apollo</include>
                                     <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->
                                 </includes>

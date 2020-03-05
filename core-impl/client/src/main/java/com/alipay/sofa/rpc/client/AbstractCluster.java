@@ -35,6 +35,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderInfoAddEvent;
 import com.alipay.sofa.rpc.event.ProviderInfoRemoveEvent;
@@ -620,7 +621,7 @@ public abstract class AbstractCluster extends Cluster {
                     "timeout");
             }
 
-            if (StringUtils.isNotBlank(dynamicTimeout)) {
+            if (DynamicHelper.isNotDefault(dynamicTimeout) && StringUtils.isNotBlank(dynamicTimeout)) {
                 return Integer.parseInt(dynamicTimeout);
             }
         }
