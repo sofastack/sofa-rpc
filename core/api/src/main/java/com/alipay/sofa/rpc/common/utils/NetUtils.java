@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.common.utils;
 
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -123,10 +124,9 @@ public class NetUtils {
                     IOUtils.closeQuietly(ss);
                 }
             }
-            throw new SofaRpcRuntimeException("Can't bind to ANY port of " + host + ", please check config");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BIND_PORT_ERROR, host));
         } else {
-            throw new SofaRpcRuntimeException("The host " + host
-                + " is not found in network cards, please check config");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_HOST_NOT_FOUND, host));
         }
     }
 
@@ -281,7 +281,7 @@ public class NetUtils {
             }
         }
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("Can't get valid host, will use 127.0.0.1 instead.");
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_GET_HOST_FAIL));
         }
         return localAddress;
     }

@@ -116,7 +116,7 @@ public class LocalRegistry extends Registry {
 
         this.regFile = registryConfig.getFile();
         if (regFile == null) {
-            throw new SofaRpcRuntimeException("File of LocalRegistry is null");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOCAL_FILE_NULL));
         }
         // 先加载一些
         if (subscribe) {

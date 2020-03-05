@@ -17,8 +17,6 @@
 package com.alipay.sofa.rpc.log;
 
 import com.alipay.sofa.rpc.common.utils.IOUtils;
-import com.alipay.sofa.rpc.log.exception.LogCodeNotFoundException;
-import com.alipay.sofa.rpc.log.exception.LogFormatException;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -57,6 +55,9 @@ public class LogCodes {
                                                                                               .getLogger(LogCodes.class);
     protected final static String              LOG                                        = "RPC-%s: %s %s";
     protected static final Map<String, String> LOG_CODES                                  = new ConcurrentHashMap<String, String>();
+    public static final String                 CODE_DOES_NOT_EXIST                        = "LogCodes.getLog error, code does not exist:";
+    public static final String                 LITE_LOG_FORMAT_ERROR                      = "LogCode.getLiteLog format error,codeOrMsg=";
+    public static final String                 LOG_FORMAT_ERROR                           = "LogCode.getLog format error,code=";
 
     protected static String                    NOTE                                       = "";
 
@@ -77,6 +78,25 @@ public class LogCodes {
     public static final String                 ERROR_SERVICE_PUBLISHING                   = "010000011";
     public static final String                 ERROR_SERVICE_UNPUBLISHING                 = "010000012";
     public static final String                 ERROR_ROUTE_ADDRESS_SUBTOKEN_DECRY         = "010000013";
+    public static final String                 ERROR_DUPLICATE_PROVIDER_CONFIG            = "010000014";
+    public static final String                 WARN_DUPLICATE_PROVIDER_CONFIG             = "010000015";
+    public static final String                 ERROR_REGISTER_PROCESSOR_TO_SERVER         = "010000016";
+    public static final String                 ERROR_BUILD_PROVIDER_PROXY                 = "010000017";
+    public static final String                 ERROR_REFERENCE_AND_INTERFACE              = "010000018";
+    public static final String                 ERROR_SERVER_EMPTY                         = "010000019";
+    public static final String                 ERROR_REGISTER_TO_REGISTRY                 = "010000020";
+    public static final String                 ERROR_PROVIDER_ATTRIBUTE_COMPARE           = "010000021";
+    public static final String                 ERROR_PROVIDER_ATTRIBUTE_CHANGE            = "010000022";
+    public static final String                 ERROR_CONVERT_URL                          = "010000023";
+    public static final String                 ERROR_START_SERVER                         = "010000024";
+    public static final String                 ERROR_START_BOLT_SERVER                    = "010000025";
+    public static final String                 ERROR_OVERLOADING_METHOD                   = "010000026";
+    public static final String                 ERROR_GET_PROXY_CLASS                      = "010000027";
+    public static final String                 ERROR_START_SERVER_WITH_PORT               = "010000028";
+    public static final String                 ERROR_HTTP2_BIND                           = "010000029";
+    public static final String                 ERROR_STOP_SERVER_WITH_PORT                = "010000030";
+    public static final String                 ERROR_UNREG_PROCESSOR                      = "010000031";
+
     //01001 consumer
     public static final String                 INFO_ADDRESS_WAIT_START                    = "010010001";
     public static final String                 INFO_ADDRESS_WAIT_OVER                     = "010010002";
@@ -91,9 +111,26 @@ public class LogCodes {
     public static final String                 ERROR_INIT_METHOD_SPECIAL                  = "010010011";
     public static final String                 WARN_PROCESS_ADDRESS_WAIT                  = "010010012";
     public static final String                 WARN_PROCESS_ADDRESS_WAIT_CONTINUE         = "010010013";
+    public static final String                 ERROR_DUPLICATE_CONSUMER_CONFIG            = "010010014";
+    public static final String                 ERROR_BUILD_CONSUMER_PROXY                 = "010010015";
+    public static final String                 ERROR_SUBSCRIBE_FROM_REGISTRY              = "010010016";
+    public static final String                 ERROR_CONSUMER_ATTRIBUTE_COMPARING         = "010010017";
+    public static final String                 ERROR_CONSUMER_ATTRIBUTE_CHANGE            = "010010018";
+    public static final String                 ERROR_CONSUMER_REFER_AFTER_CHANGE          = "010010019";
+    public static final String                 ERROR_SWITCH_CLUSTER_NEW                   = "010010020";
+    public static final String                 WARN_SWITCH_CLUSTER_DESTROY                = "010010021";
+    public static final String                 ERROR_START_CLIENT                         = "010010022";
+
     //01002 dynamic
     //01003 ext
     public static final String                 ERROR_METRIC_REPORT_ERROR                  = "010030001";
+    public static final String                 ERROR_TRACER_INIT                          = "010030002";
+    public static final String                 ERROR_FILTER_CONSTRUCT                     = "010030003";
+    public static final String                 ERROR_CREATE_EXT_INSTANCE                  = "010030004";
+    public static final String                 ERROR_EXTENSION_CLASS_NULL                 = "010030005";
+    public static final String                 ERROR_EXTENSION_NOT_FOUND                  = "010030006";
+    public static final String                 ERROR_LOAD_EXT                             = "010030007";
+
     //01004 listener
     //01005 module
 
@@ -109,8 +146,32 @@ public class LogCodes {
     public static final String                 INFO_REGISTRY_IGNORE                       = "010060003";
     public static final String                 LOCALFILEREGISTRY_FAIL_READFILE            = "010060004";
     public static final String                 ERROR_RPC_NETWORK_ADDRESS_LOAD             = "010060005";
+    public static final String                 ERROR_DESTRORY_REGISTRY                    = "010060006";
+    public static final String                 ERROR_REG_PROVIDER                         = "010060007";
+    public static final String                 ERROR_UNREG_PROVIDER                       = "010060008";
+    public static final String                 ERROR_SUB_PROVIDER                         = "010060009";
+    public static final String                 ERROR_UNSUB_LISTENER                       = "010060010";
+    public static final String                 ERROR_SUB_PROVIDER_CONFIG                  = "010060011";
+    public static final String                 ERROR_SUB_PROVIDER_OVERRIDE                = "010060012";
+    public static final String                 ERROR_UNSUB_PROVIDER_CONFIG                = "010060013";
+    public static final String                 ERROR_REG_CONSUMER_CONFIG                  = "010060014";
+    public static final String                 ERROR_UNREG_CONSUMER_CONFIG                = "010060015";
+    public static final String                 ERROR_UNSUB_CONSUMER_CONFIG                = "010060016";
+    public static final String                 ERROR_LOCAL_FILE_NULL                      = "010060017";
+    public static final String                 ERROR_HEALTH_CHECK_URL                     = "010060018";
+    public static final String                 ERROR_ZOOKEEPER_CLIENT_UNAVAILABLE         = "010060019";
+    public static final String                 ERROR_ZOOKEEPER_CLIENT_START               = "010060020";
+    public static final String                 ERROR_EMPTY_ADDRESS                        = "010060021";
+    public static final String                 ERROR_INIT_NACOS_NAMING_SERVICE            = "010060022";
+    public static final String                 ERROR_READ_BACKUP_FILE                     = "010060023";
+    public static final String                 ERROR_CHECK_PASS                           = "010060024";
+    public static final String                 ERROR_WATCH_HEALTH                         = "010060025";
+    public static final String                 ERROR_CLOSE_PATH_CACHE                     = "010060026";
+    public static final String                 ERROR_INVALID_ATTRIBUTE                    = "010060027";
+
     //01007 log
     //01008 proxy generate
+    public static final String                 ERROR_PROXY_CONSTRUCT                      = "010080001";
     //01009 transmit
 
     public static final String                 INFO_TRANSMIT_INIT_FINISH                  = "010090001";
@@ -144,6 +205,14 @@ public class LogCodes {
     public static final String                 ERROR_OSGI_UNRESGISTER_SERVICE             = "019990016";
     public static final String                 ERROR_ADDRESSING_CHAIN_EMPTY               = "019990017";
     public static final String                 ERROR_PROVIDER_GRPC_START                  = "019990018";
+    public static final String                 ERROR_RESTART_SCHEDULE_SERVICE             = "019990019";
+    public static final String                 ERROR_GET_HOST_FAIL                        = "019990020";
+    public static final String                 ERROR_LOAD_RPC_CONFIGS                     = "019990021";
+    public static final String                 ERROR_NOT_FOUND_KEY                        = "019990022";
+    public static final String                 ERROR_BIND_PORT_ERROR                      = "019990023";
+    public static final String                 ERROR_HOST_NOT_FOUND                       = "019990024";
+    public static final String                 ERROR_QUERY_ATTRIBUTE                      = "019990025";
+    public static final String                 ERROR_UPDATE_ATTRIBUTE                     = "019990026";
 
     //02 运行
     // 02000 泛化
@@ -154,6 +223,16 @@ public class LogCodes {
     public static final String                 ERROR_RESPONSE_FUTURE_NULL                 = "020010004";
     public static final String                 ERROR_RESPONSE_FUTURE_NOT_CLEAR            = "020010005";
     public static final String                 WARN_PROCESS_PARSE_TARGET_METHOD           = "020010006";
+    public static final String                 ERROR_LOAD_CLUSTER                         = "020010007";
+    public static final String                 ERROR_DESTORY_ALL_TRANSPORT                = "020010008";
+    public static final String                 ERROR_BUILD_PROXY                          = "020010009";
+    public static final String                 ERROR_GET_CONNECTION                       = "020010010";
+    public static final String                 ERROR_INIT_PROVIDER_TRANSPORT              = "020010011";
+    public static final String                 ERROR_CHECK_ALIVE_PROVIDER                 = "020010012";
+    public static final String                 ERROR_CLIENT_DESTROYED                     = "020010013";
+    public static final String                 ERROR_CLOSE_CONNECTION                     = "020010014";
+    public static final String                 ERROR_CATCH_EXCEPTION                      = "020010015";
+
     // 02002 connectionholder
     public static final String                 INFO_CONNECT_PUT_TO_ALIVE                  = "020020001";
     public static final String                 INFO_CONNECT_PUT_TO_RETRY                  = "020020002";
@@ -165,7 +244,13 @@ public class LogCodes {
     public static final String                 ERROR_INVOKE_GET_CLIENT                    = "020020008";
     public static final String                 ERROR_TARGET_URL_INVALID                   = "020020009";
     public static final String                 LOCALFILEREGISTRY_FAIL_INVOKE              = "020020010";
+    public static final String                 ERROR_NOTIFY_CONSUMER_STATE_UN             = "020020011";
+    public static final String                 WARN_NOTIFY_CONSUMER_STATE                 = "020020012";
+    public static final String                 ERROR_UPDATE_PROVIDERS                     = "020020013";
+    public static final String                 ERROR_DELETE_PROVIDERS                     = "020020014";
+    public static final String                 ERROR_LOAD_CONNECTION_HOLDER               = "020020015";
     // 02003 loadbalancer
+    public static final String                 ERROR_LOAD_LOAD_BALANCER                   = "020030001";
     // 02004 router
     // 02005 codec
     public static final String                 WARN_DESERIALIZE_HEADER_ERROR              = "020050001";
@@ -174,12 +259,32 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_PROTOCOL_INVALID          = "020050004";
     public static final String                 ERROR_DECODE_RES_PROTOCOL_INVALID          = "020050005";
     public static final String                 ERROR_DECODE_CLASS_NOT_FOUND               = "020050006";
+    public static final String                 ERROR_COMPRESSOR_NOT_FOUND                 = "020050007";
+    public static final String                 ERROR_SERIALIZER_NOT_FOUND                 = "020050008";
+    public static final String                 ERROR_SERIALIZER                           = "020050009";
+    public static final String                 ERROR_UNSUPPORTED_SERIALIZE_TYPE           = "020050010";
+    public static final String                 ERROR_UNSUPPORTED_CONTENT_TYPE             = "020050011";
+    public static final String                 ERROR_ONLY_ONE_PARAM                       = "020050012";
+    public static final String                 ERROR_PROTOBUF_RETURN                      = "020050013";
+    public static final String                 ERROR_METHOD_NOT_FOUND                     = "020050014";
+    public static final String                 ERROR_VOID_RETURN                          = "020050015";
+    public static final String                 ERROR_UNSUPPORT_TYPE                       = "020050016";
+
     // 02006 addressholder
     public static final String                 ERROR_NO_AVAILBLE_PROVIDER                 = "020060001";
     public static final String                 LOCALFILEREGISTRY_FAIL_READURL             = "020060002";
+    public static final String                 ERROR_LOAD_ADDRESS_HOLDER                  = "020060003";
     // 02007 cache
     // 02008 context
+    public static final String                 ERROR_ATTACHMENT_KEY                       = "020080001";
+    public static final String                 ERROR_ASYNC_THREAD_POOL_REJECT             = "020080002";
     // 02009 tracer
+    public static final String                 ERROR_TRACER_UNKNOWN_EXP                   = "020090001";
+    public static final String                 ERROR_FAIL_LOAD_TRACER_EXT                 = "020090002";
+    public static final String                 ERROR_TRACER_CONSUMER_STACK                = "020090003";
+    public static final String                 ERROR_TRACER_PROVIDER_STACK                = "020090004";
+    public static final String                 ERROR_LOOKOUT_PROCESS                      = "020090005";
+
     // 02010 server process
     public static final String                 INFO_SERVICE_METADATA_IS_NULL              = "020100001";
     public static final String                 WARN_CANNOT_FOUND_SERVICE_4_SERVER         = "020100002";
@@ -196,15 +301,27 @@ public class LogCodes {
     public static final String                 ERROR_DECODE_REQ_SIG_CLASS_NOT_FOUND       = "020100013";
     public static final String                 ERROR_DISCARD_TIMEOUT_REQUEST              = "020100014";
     public static final String                 ERROR_DISCARD_TIMEOUT_RESPONSE             = "020100015";
+    public static final String                 ERROR_UNSUPPORTED_PROTOCOL                 = "020100016";
+    public static final String                 ERROR_GET_SERVER                           = "020100017";
+    public static final String                 ERROR_DESTROY_SERVER                       = "020100018";
+    public static final String                 ERROR_PROCESS_UNKNOWN                      = "020100019";
     // 02011 protocol
+    public static final String                 ERROR_PROTOCOL_NOT_FOUND                   = "020110001";
     // 02012 filter
+    //    public static final String                 ERROR_BUILD_FILTER_CHAIN                   = "020120001";
+    public static final String                 ERROR_NEXT_FILTER_AND_INVOKER_NULL         = "020120002";
+    public static final String                 ERROR_NEED_DECODE_METHOD                   = "020120003";
     // 02013 event
 
     // 02014 faulttorenence
-
     public static final String                 INFO_REGULATION_ABNORMAL                   = "020140001";
     public static final String                 INFO_REGULATION_ABNORMAL_NOT_DEGRADE       = "020140002";
     public static final String                 WARN_SUCCESS_BY_RETRY                      = "020140003";
+    public static final String                 ERROR_ORIGIN_WEIGHT_ZERO                   = "020140004";
+    public static final String                 ERROR_WHEN_DO_MEASURE                      = "020140005";
+    public static final String                 ERROR_WHEN_DO_REGULATE                     = "020140006";
+    public static final String                 ERROR_HYSTRIX_FALLBACK_FAIL                = "020140007";
+
     // 02999 common通用的
     // 未知错误
 
@@ -269,13 +386,15 @@ public class LogCodes {
      */
     public static String getLog(String code) {
         if (!LOG_CODES.containsKey(code)) {
-            throw new LogCodeNotFoundException(code);
+            LOGGER.error(CODE_DOES_NOT_EXIST + code);
+            return CODE_DOES_NOT_EXIST + code;
         }
         try {
             return String.format(LOG, code, LOG_CODES.get(code), LogCodes.NOTE);
         } catch (Throwable e) {
-            throw new LogFormatException(code);
+            LOGGER.error(LOG_FORMAT_ERROR + code, e);
         }
+        return LOG_FORMAT_ERROR + code;
     }
 
     /**
@@ -292,22 +411,25 @@ public class LogCodes {
         try {
             return LOG_CODES.get(codeOrMsg);
         } catch (Throwable e) {
-            throw new LogFormatException(codeOrMsg);
+            LOGGER.error(LITE_LOG_FORMAT_ERROR + codeOrMsg, e);
         }
+        return LITE_LOG_FORMAT_ERROR + codeOrMsg;
     }
 
     public static String getLog(String code, Object... messages) {
         String message = LOG_CODES.get(code);
 
         if (message == null) {
-            throw new LogCodeNotFoundException(code);
+            LOGGER.error(CODE_DOES_NOT_EXIST + code);
+            return CODE_DOES_NOT_EXIST + code;
         }
 
         try {
             return String.format(LOG, code, MessageFormat.format(message, messages), LogCodes.NOTE);
         } catch (Throwable e) {
-            throw new LogFormatException(code);
+            LOGGER.error(LOG_FORMAT_ERROR + code, e);
         }
+        return LOG_FORMAT_ERROR + code;
     }
 
     /**
@@ -321,13 +443,14 @@ public class LogCodes {
         String message = LOG_CODES.get(codeOrMsg);
 
         if (message == null) {
-            return MessageFormat.format(codeOrMsg, messages);
+            message = codeOrMsg;
         }
 
         try {
             return MessageFormat.format(message, messages);
         } catch (Throwable e) {
-            throw new LogFormatException(codeOrMsg);
+            LOGGER.error(LITE_LOG_FORMAT_ERROR + codeOrMsg, e);
         }
+        return LITE_LOG_FORMAT_ERROR + codeOrMsg;
     }
 }

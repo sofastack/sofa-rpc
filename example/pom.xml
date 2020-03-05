@@ -26,7 +26,6 @@
         <dependency>
             <groupId>io.swagger</groupId>
             <artifactId>swagger-core</artifactId>
-            <version>1.5.18</version>
         </dependency>
 
         <!-- grpc  -->

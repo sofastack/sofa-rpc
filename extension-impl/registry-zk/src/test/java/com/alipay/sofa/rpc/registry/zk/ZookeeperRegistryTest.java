@@ -48,6 +48,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ZookeeperRegistryTest extends BaseZkTest {
 
+    private static final String      TEST_SERVICE_NAME = "com.alipay.xxx.ZookeeperTestService";
+
     private static RegistryConfig    registryConfig;
 
     private static ZookeeperRegistry registry;
@@ -79,7 +81,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 10000;
+        int timeoutPerSub = 2000;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -87,7 +89,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setPort(12200);
 
         ProviderConfig<?> provider = new ProviderConfig();
-        provider.setInterfaceId("com.alipay.xxx.TestService")
+        provider.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -102,7 +104,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         registry.register(provider);
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
-        consumer.setInterfaceId("com.alipay.xxx.TestService")
+        consumer.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -123,7 +125,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
         // 订阅 错误的uniqueId
         ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
-        consumerNoUniqueId.setInterfaceId("com.alipay.xxx.TestService")
+        consumerNoUniqueId.setInterfaceId(TEST_SERVICE_NAME)
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
             .setSubscribe(true)
@@ -159,7 +161,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
-        consumer2.setInterfaceId("com.alipay.xxx.TestService")
+        consumer2.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -209,7 +211,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setPort(12200);
 
         ProviderConfig<?> providerConfig = new ProviderConfig();
-        providerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        providerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -236,7 +238,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         Assert.assertEquals(2, configData.size());
 
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
-        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        consumerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -271,7 +273,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @Test
     public void testOverrideObserver() throws InterruptedException {
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
-        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        consumerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -293,7 +295,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         Map<String, String> configData = configListener.getData();
         Assert.assertEquals(3, configData.size());
 
-        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        consumerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server1"))
             .setProxy("javassist")

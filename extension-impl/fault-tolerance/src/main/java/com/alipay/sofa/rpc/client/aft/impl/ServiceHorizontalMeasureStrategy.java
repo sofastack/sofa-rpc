@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.client.aft.ProviderInfoWeightManager;
 import com.alipay.sofa.rpc.common.utils.CalculateUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -295,9 +296,8 @@ public class ServiceHorizontalMeasureStrategy implements MeasureStrategy {
         InvocationStatDimension statDimension = invocationStat.getDimension();
         Integer originWeight = statDimension.getOriginWeight();
         if (originWeight == 0) {
-            LOGGER.errorWithApp(statDimension.getAppName(), "originWeight is 0,but is invoked. service["
-                + statDimension.getService() + "];ip["
-                + statDimension.getIp() + "].");
+            LOGGER.errorWithApp(statDimension.getAppName(),
+                LogCodes.getLog(LogCodes.ERROR_ORIGIN_WEIGHT_ZERO, statDimension.getService(), statDimension.getIp()));
             return -1;
         } else if (weight == null) { //如果地址还未被调控过或者已经恢复。
             return leastWindowCount;

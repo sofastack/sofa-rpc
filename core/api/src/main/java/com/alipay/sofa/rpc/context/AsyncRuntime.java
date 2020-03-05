@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -89,7 +90,8 @@ public class AsyncRuntime {
                                         executor.getTaskCount());
                                 }
                             }
-                            throw new RejectedExecutionException("Callback handler thread pool has bean exhausted");
+                            throw new RejectedExecutionException(
+                                LogCodes.getLog(LogCodes.ERROR_ASYNC_THREAD_POOL_REJECT));
                         }
                     };
                     asyncThreadPool = ThreadPoolUtils.newCachedThreadPool(

@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerEndHandleEvent;
 import com.alipay.sofa.rpc.event.rest.RestServerReceiveEvent;
 import com.alipay.sofa.rpc.event.rest.RestServerSendEvent;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.lookout.RestLookoutAdapter;
@@ -36,6 +37,7 @@ import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpResponse;
 import org.jboss.resteasy.plugins.server.netty.RequestDispatcher;
 import org.jboss.resteasy.spi.Failure;
+import sun.rmi.runtime.Log;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.net.InetSocketAddress;
@@ -107,7 +109,7 @@ public class SofaRestRequestHandler extends SimpleChannelInboundHandler {
                 } catch (Exception ex) {
                     response.reset();
                     response.setStatus(500);
-                    logger.error("Unexpected", ex); // todo 异常带给用户?
+                    logger.error(LogCodes.getLog(LogCodes.ERROR_PROCESS_UNKNOWN), ex); // todo 异常带给用户?
                     exception = ex;
                 } finally {
                     if (EventBus.isEnable(RestServerSendEvent.class)) {

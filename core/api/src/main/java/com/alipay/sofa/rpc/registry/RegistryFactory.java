@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -60,15 +61,16 @@ public class RegistryFactory {
                 LOGGER.warn("Size of registry is greater than 3, Please check it!");
             }
         }
+        String protocol = null;
         try {
             // 注意：RegistryConfig重写了equals方法，如果多个RegistryConfig属性一样，则认为是一个对象
             Registry registry = ALL_REGISTRIES.get(registryConfig);
             if (registry == null) {
+                protocol = registryConfig.getProtocol();
                 ExtensionClass<Registry> ext = ExtensionLoaderFactory.getExtensionLoader(Registry.class)
-                    .getExtensionClass(registryConfig.getProtocol());
+                    .getExtensionClass(protocol);
                 if (ext == null) {
-                    throw ExceptionUtils.buildRuntime("registry.protocol", registryConfig.getProtocol(),
-                        "Unsupported protocol of registry config !");
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", protocol));
                 }
                 registry = ext.getExtInstance(new Class[] { RegistryConfig.class }, new Object[] { registryConfig });
                 ALL_REGISTRIES.put(registryConfig, registry);
@@ -77,7 +79,7 @@ public class RegistryFactory {
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", protocol));
         }
     }
 
@@ -110,8 +112,7 @@ public class RegistryFactory {
                 registry.destroy();
                 ALL_REGISTRIES.remove(config);
             } catch (Exception e) {
-                LOGGER.error("Error when destroy registry :" + config
-                    + ", but you can ignore if it's called by JVM shutdown hook", e);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_DESTRORY_REGISTRY, config), e);
             }
         }
     }

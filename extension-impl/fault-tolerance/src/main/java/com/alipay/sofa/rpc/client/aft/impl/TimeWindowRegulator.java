@@ -182,7 +182,8 @@ public class TimeWindowRegulator implements Regulator {
                         regulationExecutor.submit(new RegulationRunnable(measureResult));
                     }
                 } catch (Exception e) {
-                    LOGGER.errorWithApp(measureModel.getAppName(), "Error when doMeasure: " + e.getMessage(), e);
+                    LOGGER.errorWithApp(measureModel.getAppName(),
+                        LogCodes.getLog(LogCodes.ERROR_WHEN_DO_MEASURE, e.getMessage()), e);
                 }
             }
         }
@@ -217,7 +218,7 @@ public class TimeWindowRegulator implements Regulator {
                     doRegulate(measureResultDetail);
                 } catch (Exception e) {
                     LOGGER.errorWithApp(measureResult.getMeasureModel().getAppName(),
-                        "Error when doRegulate: " + e.getMessage(), e);
+                        LogCodes.getLog(LogCodes.ERROR_WHEN_DO_REGULATE, e.getMessage()), e);
                 }
             }
         }
