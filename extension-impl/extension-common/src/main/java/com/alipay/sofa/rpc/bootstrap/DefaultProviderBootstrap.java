@@ -176,8 +176,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     }
 
                 } catch (SofaRpcRuntimeException e) {
-                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER,
-                        serverConfig.getId()), e);
+                    throw e;
                 } catch (Exception e) {
                     LOGGER.errorWithApp(appName,
                         LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, serverConfig.getId()), e);
@@ -189,6 +188,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             register();
         } catch (Exception e) {
             decrementCounter(hasExportedInCurrent);
+            if (e instanceof SofaRpcRuntimeException) {
+                throw e;
+            }
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_PROVIDER_PROXY), e);
         }
 
@@ -337,8 +339,7 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     try {
                         registry.register(providerConfig);
                     } catch (SofaRpcRuntimeException e) {
-                        throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REGISTER_TO_REGISTRY,
-                            registryConfig.getId()), e);
+                        throw e;
                     } catch (Throwable e) {
                         String appName = providerConfig.getAppName();
                         if (LOGGER.isWarnEnabled(appName)) {

@@ -66,6 +66,8 @@ public class SslContextBuilder {
             } else {
                 sslCtx = null;
             }
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER, "HTTP/2"), e);
         }
@@ -98,6 +100,8 @@ public class SslContextBuilder {
             } else {
                 sslCtx = null;
             }
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_CLIENT, "HTTP/2"), e);
         }

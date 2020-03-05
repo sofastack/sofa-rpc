@@ -29,6 +29,7 @@
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
         <module>metrics-lookout</module>
+        <module>metrics-micrometer</module>
         <module>registry-consul</module>
         <module>registry-local</module>
         <module>registry-zk</module>
