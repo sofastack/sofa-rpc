@@ -85,7 +85,6 @@ public class GrpcClientTransport extends ClientTransport {
                 channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 LOGGER.warn("GRPC channel shut down interrupted.");
-                e.printStackTrace();
             }
             channel = null;
         }

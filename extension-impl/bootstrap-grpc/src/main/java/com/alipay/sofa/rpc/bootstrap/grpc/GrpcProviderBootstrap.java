@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
@@ -363,7 +364,7 @@ public class GrpcProviderBootstrap<T> extends ProviderBootstrap<T> {
                     }
                     export();
                 } catch (Exception e) {
-                    LOGGER.errorWithApp(appName, "Catch exception when provider attribute changed", e);
+                    LOGGER.errorWithApp(appName, LogCodes.getLog(LogCodes.ERROR_PROVIDER_ATTRIBUTE_CHANGE), e);
                     //rollback old attrs
                     for (Map.Entry<String, String> entry : oldValues.entrySet()) {
                         providerConfig.updateAttribute(entry.getKey(), entry.getValue(), true);

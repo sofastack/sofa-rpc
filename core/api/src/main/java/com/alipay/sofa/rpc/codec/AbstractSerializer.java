@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.codec;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -26,19 +27,19 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 public abstract class AbstractSerializer implements Serializer {
 
     protected SofaRpcException buildSerializeError(String message) {
-        return new SofaRpcException(getErrorCode(true), message);
+        return new SofaRpcException(getErrorCode(true), LogCodes.getLog(LogCodes.ERROR_SERIALIZER, message));
     }
 
     protected SofaRpcException buildSerializeError(String message, Throwable throwable) {
-        return new SofaRpcException(getErrorCode(true), message, throwable);
+        return new SofaRpcException(getErrorCode(true), LogCodes.getLog(LogCodes.ERROR_SERIALIZER, message), throwable);
     }
 
     protected SofaRpcException buildDeserializeError(String message) {
-        return new SofaRpcException(getErrorCode(false), message);
+        return new SofaRpcException(getErrorCode(false), LogCodes.getLog(LogCodes.ERROR_SERIALIZER, message));
     }
 
     protected SofaRpcException buildDeserializeError(String message, Throwable throwable) {
-        return new SofaRpcException(getErrorCode(false), message, throwable);
+        return new SofaRpcException(getErrorCode(false), LogCodes.getLog(LogCodes.ERROR_SERIALIZER, message), throwable);
     }
 
     /**

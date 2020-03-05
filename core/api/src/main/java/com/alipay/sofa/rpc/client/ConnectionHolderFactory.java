@@ -17,10 +17,10 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Factory of ConnectionHolder
@@ -36,19 +36,21 @@ public class ConnectionHolderFactory {
      * @return ConnectionHolder
      */
     public static ConnectionHolder getConnectionHolder(ConsumerBootstrap consumerBootstrap) {
+        String connectionHolder = null;
         try {
-            String connectionHolder = consumerBootstrap.getConsumerConfig().getConnectionHolder();
+            connectionHolder = consumerBootstrap.getConsumerConfig().getConnectionHolder();
             ExtensionClass<ConnectionHolder> ext = ExtensionLoaderFactory
                 .getExtensionLoader(ConnectionHolder.class).getExtensionClass(connectionHolder);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("consumer.connectionHolder", connectionHolder,
-                    "Unsupported connectionHolder of client!");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_CONNECTION_HOLDER,
+                    connectionHolder));
             }
             return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_CONNECTION_HOLDER, connectionHolder),
+                e);
         }
     }
 }

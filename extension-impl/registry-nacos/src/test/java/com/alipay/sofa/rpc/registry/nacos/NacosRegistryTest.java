@@ -41,6 +41,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * The type Nacos registry test.
+ *
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
  */
 public class NacosRegistryTest extends BaseNacosTest {
@@ -48,6 +49,8 @@ public class NacosRegistryTest extends BaseNacosTest {
     private static RegistryConfig registryConfig;
 
     private NacosRegistry         registry;
+
+    private ServerConfig          serverConfig;
 
     /**
      * Sets up.
@@ -72,6 +75,7 @@ public class NacosRegistryTest extends BaseNacosTest {
     public void tearDown() {
         registry.destroy();
         registry = null;
+        serverConfig.destroy();
     }
 
     /**
@@ -82,15 +86,15 @@ public class NacosRegistryTest extends BaseNacosTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 1000;
+        int timeoutPerSub = 2000;
 
-        ServerConfig serverConfig = new ServerConfig()
+        serverConfig = new ServerConfig()
             .setProtocol("bolt")
             .setHost("0.0.0.0")
             .setPort(12200);
 
         ProviderConfig<?> provider = new ProviderConfig();
-        provider.setInterfaceId("com.alipay.xxx.TestService")
+        provider.setInterfaceId("com.alipay.xxx.NacosTestService")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setUniqueId("nacos-test")
             .setProxy("javassist")
@@ -106,7 +110,7 @@ public class NacosRegistryTest extends BaseNacosTest {
         Thread.sleep(1000);
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
-        consumer.setInterfaceId("com.alipay.xxx.TestService")
+        consumer.setInterfaceId("com.alipay.xxx.NacosTestService")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setUniqueId("nacos-test")
             .setProxy("javassist")
@@ -128,7 +132,7 @@ public class NacosRegistryTest extends BaseNacosTest {
 
         // 订阅 错误的uniqueId
         ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
-        consumerNoUniqueId.setInterfaceId("com.alipay.xxx.TestService")
+        consumerNoUniqueId.setInterfaceId("com.alipay.xxx.NacosTestService")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
             .setSubscribe(true)
@@ -165,7 +169,7 @@ public class NacosRegistryTest extends BaseNacosTest {
 
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
-        consumer2.setInterfaceId("com.alipay.xxx.TestService")
+        consumer2.setInterfaceId("com.alipay.xxx.NacosTestService")
             .setUniqueId("nacos-test")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -227,7 +231,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -238,7 +241,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -250,7 +252,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -264,7 +265,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 

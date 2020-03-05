@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.RestTracerAdapter;
@@ -42,7 +43,7 @@ public class TraceRequestFilter implements ContainerRequestFilter {
         try {
             RestTracerAdapter.serverFilter(requestContext);
         } catch (Exception e) {
-            logger.error("the process of rest tracer server request occur error ", e);
+            logger.error(LogCodes.getLog(LogCodes.ERROR_TRACER_UNKNOWN_EXP, "filter", "rest", "server"), e);
         }
 
     }

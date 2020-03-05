@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.netflix.hystrix.HystrixCommand;
@@ -94,9 +95,9 @@ public class SofaHystrixCommand extends HystrixCommand<SofaResponse> implements 
             actualResponse.setAppResponse(fallbackResult);
             return actualResponse;
         } catch (IllegalAccessException e) {
-            throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_HYSTRIX_FALLBACK_FAIL), e);
         } catch (InvocationTargetException e) {
-            throw new SofaRpcRuntimeException("Hystrix fallback method failed to execute.",
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_HYSTRIX_FALLBACK_FAIL),
                 e.getTargetException());
         }
     }

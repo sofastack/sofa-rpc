@@ -22,9 +22,8 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
-import com.alipay.sofa.rpc.test.HelloService;
-import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -35,33 +34,47 @@ import java.util.Collections;
  */
 public class HystrixFilterSyncTest extends ActivelyDestroyTest {
 
-    @Test
-    public void testSuccess() {
-        ProviderConfig<HelloService> providerConfig = defaultServer(0);
-        providerConfig.export();
+    private ProviderConfig<HystrixService> providerConfig;
+    private ServerConfig                   serverConfig;
+    private ConsumerConfig<HystrixService> consumerConfig;
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient();
-
-        HelloService helloService = consumerConfig.refer();
-
-        try {
-            String result = helloService.sayHello("abc", 24);
-            Assert.assertEquals("hello abc from server! age: 24", result);
-        } finally {
+    @After
+    public void afterMethod() {
+        if (providerConfig != null) {
             providerConfig.unExport();
+        }
+        if (serverConfig != null) {
+            serverConfig.destroy();
+        }
+        if (consumerConfig != null) {
             consumerConfig.unRefer();
         }
+
+    }
+
+    @Test
+    public void testSuccess() {
+        providerConfig = defaultServer(0);
+        providerConfig.export();
+
+        consumerConfig = defaultClient();
+
+        HystrixService helloService = consumerConfig.refer();
+
+        String result = helloService.sayHello("abc", 24);
+        Assert.assertEquals("hello abc from server! age: 24", result);
+
     }
 
     @Test
     public void testHystrixTimeout() {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        HelloService helloService = consumerConfig.refer();
+        HystrixService helloService = consumerConfig.refer();
 
         try {
             helloService.sayHello("abc", 24);
@@ -69,73 +82,58 @@ public class HystrixFilterSyncTest extends ActivelyDestroyTest {
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcException);
             Assert.assertTrue(e.getCause() instanceof HystrixRuntimeException);
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
         }
     }
 
     @Test
     public void testHystrixFallback() {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000)
             .setFilterRef(Collections.<Filter> singletonList(new HystrixFilter()));
 
-        SofaHystrixConfig.registerFallback(consumerConfig, new HelloServiceFallback());
+        SofaHystrixConfig.registerFallback(consumerConfig, new HystrixServiceFallback());
 
-        HelloService helloService = consumerConfig.refer();
+        HystrixService helloService = consumerConfig.refer();
 
-        try {
-            String result = helloService.sayHello("abc", 24);
-            Assert.assertEquals("fallback abc from server! age: 24", result);
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
-        }
+        String result = helloService.sayHello("abc", 24);
+        Assert.assertEquals("fallback abc from server! age: 24", result);
     }
 
     @Test
     public void testHystrixFallbackFactory() {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
+        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HystrixServiceFallbackFactory());
 
-        HelloService helloService = consumerConfig.refer();
+        HystrixService helloService = consumerConfig.refer();
 
-        try {
-            String result = helloService.sayHello("abc", 24);
-            Assert.assertEquals(
-                "fallback abc from server! age: 24, error: com.netflix.hystrix.exception.HystrixTimeoutException",
-                result);
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
-        }
+        String result = helloService.sayHello("abc", 24);
+        Assert.assertEquals(
+            "fallback abc from server! age: 24, error: com.netflix.hystrix.exception.HystrixTimeoutException",
+            result);
     }
 
-    private ProviderConfig<HelloService> defaultServer(int sleep) {
-        ServerConfig serverConfig = new ServerConfig()
+    private ProviderConfig<HystrixService> defaultServer(int sleep) {
+        serverConfig = new ServerConfig()
             .setPort(22222)
             .setDaemon(false);
 
-        ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(new HelloServiceImpl(sleep))
+        return new ProviderConfig<HystrixService>()
+            .setInterfaceId(HystrixService.class.getName())
+            .setRef(new InvokeCounterHystrixService(sleep))
             .setServer(serverConfig);
-
-        return providerConfig;
     }
 
-    private ConsumerConfig<HelloService> defaultClient() {
-        return new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
+    private ConsumerConfig<HystrixService> defaultClient() {
+        return new ConsumerConfig<HystrixService>()
+            .setInterfaceId(HystrixService.class.getName())
             .setDirectUrl("bolt://127.0.0.1:22222")
             .setParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED, String.valueOf(true));
     }

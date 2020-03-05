@@ -280,7 +280,6 @@ public class ConsulRegistryTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 

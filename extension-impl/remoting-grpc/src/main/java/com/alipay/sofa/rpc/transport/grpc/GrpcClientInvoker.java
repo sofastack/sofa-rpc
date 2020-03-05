@@ -16,8 +16,9 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
-import com.alibaba.fastjson.JSONObject;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
@@ -26,7 +27,6 @@ import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.stub.StreamObserver;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
@@ -57,8 +57,9 @@ public class GrpcClientInvoker {
 
     /**
      * The constructor
+     *
      * @param sofaRequest The SofaRequest
-     * @param channel The Channel
+     * @param channel     The Channel
      */
     public GrpcClientInvoker(SofaRequest sofaRequest, Channel channel) {
         this.channel = channel;
@@ -74,17 +75,20 @@ public class GrpcClientInvoker {
         try {
             requestClass.cast(request);
         } catch (ClassCastException e) {
-            LOGGER.error("Request type error!");
             throw e;
         }
         this.timeout = sofaRequest.getTimeout();
     }
 
     public SofaResponse invoke() {
-        Object response = invokeRequestMethod();
-        SofaResponse r = new SofaResponse();
-        r.setAppResponse(response);
-        return r;
+        SofaResponse sofaResponse = new SofaResponse();
+        try {
+            Object response = invokeRequestMethod();
+            sofaResponse.setAppResponse(response);
+        } catch (SofaRpcException e) {
+            sofaResponse.setErrorMsg(e.getMessage());
+        }
+        return sofaResponse;
     }
 
     private CallOptions buildCallOptions() {
@@ -103,20 +107,8 @@ public class GrpcClientInvoker {
             newBlockingStubMethod.setAccessible(true);
             stub = (io.grpc.stub.AbstractStub) newBlockingStubMethod.invoke(null, channel);
 
-        } catch (ClassNotFoundException e) {
-            LOGGER.error("ClassNotFoundException");
-
-        } catch (IllegalAccessException e) {
-            LOGGER.error("IllegalAccessException");
-
-        } catch (NoSuchMethodException e) {
-            LOGGER.error("NoSuchMethodException");
-
-        } catch (InvocationTargetException e) {
-            LOGGER.error("InvocationTargetException");
-
-        } catch (IllegalArgumentException e) {
-            LOGGER.error("IllegalArgumentException");
+        } catch (Throwable e) {
+            throw new SofaRpcException(RpcErrorType.UNKNOWN, e.getMessage(), e);
         }
         return stub;
     }
@@ -129,20 +121,8 @@ public class GrpcClientInvoker {
             requestMethod.setAccessible(true);
             r = requestMethod.invoke(getBlockingStub(), methodArgs[0]);
 
-        } catch (ClassNotFoundException e) {
-            LOGGER.error("ClassNotFoundException");
-
-        } catch (IllegalAccessException e) {
-            LOGGER.error("IllegalAccessException");
-
-        } catch (NoSuchMethodException e) {
-            LOGGER.error("NoSuchMethodException");
-
-        } catch (InvocationTargetException e) {
-            LOGGER.error("InvocationTargetException");
-
-        } catch (IllegalArgumentException e) {
-            LOGGER.error("IllegalArgumentException");
+        } catch (Throwable e) {
+            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e.getMessage(), e);
         }
         return r;
     }

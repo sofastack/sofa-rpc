@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.rest.SofaResourceFactory;
@@ -127,7 +128,7 @@ public class RestTracerAdapter {
             RestBaggageItemsHandler.decodeBaggageItemsFromRequest(request, sofaRequest);
         } catch (Throwable t) {
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("the process of rest tracer server receive occur error ", t);
+                LOGGER.warn(LogCodes.getLog(LogCodes.ERROR_TRACER_UNKNOWN_EXP, "receive", "rest", "server"), t);
             }
         }
     }

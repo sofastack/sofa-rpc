@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -425,7 +426,7 @@ public class ExtensionLoader<T> {
     public T getExtension(String alias) {
         ExtensionClass<T> extensionClass = getExtensionClass(alias);
         if (extensionClass == null) {
-            throw new SofaRpcRuntimeException("Not found extension of " + interfaceName + " named: \"" + alias + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EXTENSION_NOT_FOUND, interfaceName, alias));
         } else {
             if (extensible.singleton() && factory != null) {
                 T t = factory.get(alias);
@@ -456,7 +457,7 @@ public class ExtensionLoader<T> {
     public T getExtension(String alias, Class[] argTypes, Object[] args) {
         ExtensionClass<T> extensionClass = getExtensionClass(alias);
         if (extensionClass == null) {
-            throw new SofaRpcRuntimeException("Not found extension of " + interfaceName + " named: \"" + alias + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EXTENSION_NOT_FOUND, interfaceName, alias));
         } else {
             if (extensible.singleton() && factory != null) {
                 T t = factory.get(alias);

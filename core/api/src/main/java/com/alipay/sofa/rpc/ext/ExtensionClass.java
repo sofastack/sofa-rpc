@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.ext;
 import com.alipay.sofa.rpc.base.Sortable;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.util.Arrays;
 
@@ -111,11 +112,14 @@ public class ExtensionClass<T> implements Sortable {
                 } else {
                     return ClassUtils.newInstanceWithArgs(clazz, argTypes, args);
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException("create " + clazz.getCanonicalName() + " instance error", e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_CREATE_EXT_INSTANCE,
+                    clazz.getCanonicalName()), e);
             }
         }
-        throw new SofaRpcRuntimeException("Class of ExtensionClass is null");
+        throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EXTENSION_CLASS_NULL));
     }
 
     /**

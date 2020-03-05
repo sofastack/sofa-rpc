@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -110,7 +111,7 @@ public class ClientTransportFactory {
         try {
             CLIENT_TRANSPORT_HOLDER.destroy();
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_DESTORY_ALL_TRANSPORT), e);
         }
     }
 

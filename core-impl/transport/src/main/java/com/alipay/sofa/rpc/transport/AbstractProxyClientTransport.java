@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.lang.reflect.InvocationTargetException;
@@ -79,8 +80,10 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
         ProviderInfo provider = transportConfig.getProviderInfo();
         try {
             proxy = buildProxy(transportConfig);
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Fail to build proxy client of consumer!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_PROXY), e);
         }
         // 能telnet通
         open = proxy != null && NetUtils.canTelnet(provider.getHost(), provider.getPort(),

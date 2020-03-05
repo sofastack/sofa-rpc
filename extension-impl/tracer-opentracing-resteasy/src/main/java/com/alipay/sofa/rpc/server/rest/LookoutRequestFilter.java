@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.server.rest;
 
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.lookout.RestConstants;
@@ -64,7 +65,7 @@ public class LookoutRequestFilter implements ContainerRequestFilter {
 
             context.setAttachment(RemotingConstants.HEAD_APP_NAME, appName);
         } catch (Exception e) {
-            logger.error("the process of rest tracer server request occur error ", e);
+            logger.error(LogCodes.getLog(LogCodes.ERROR_LOOKOUT_PROCESS), e);
         }
 
     }

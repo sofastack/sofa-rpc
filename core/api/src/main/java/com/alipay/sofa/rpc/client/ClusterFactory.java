@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Factory of cluster
@@ -37,20 +38,21 @@ public class ClusterFactory {
      * @return Cluster对象
      */
     public static Cluster getCluster(ConsumerBootstrap consumerBootstrap) {
+        String cluster = null;
         try {
             ConsumerConfig consumerConfig = consumerBootstrap.getConsumerConfig();
+            cluster = consumerConfig.getCluster();
             ExtensionClass<Cluster> ext = ExtensionLoaderFactory.getExtensionLoader(Cluster.class)
-                .getExtensionClass(consumerConfig.getCluster());
+                .getExtensionClass(cluster);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("consumer.cluster",
-                    consumerConfig.getCluster(), "Unsupported cluster of client!");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_CLUSTER, cluster));
             }
             return ext.getExtInstance(new Class[] { ConsumerBootstrap.class },
                 new Object[] { consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_CLUSTER, cluster), e);
         }
     }
 }

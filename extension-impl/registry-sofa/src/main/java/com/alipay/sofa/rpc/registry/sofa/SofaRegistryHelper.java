@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -346,7 +347,7 @@ public class SofaRegistryHelper {
             try {
                 providerInfo.setProtocolType(protocolStr);
             } catch (Exception e) {
-                LOGGER.error("protocol is invalid : {}", originUrl);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_INVALID_ATTRIBUTE, "protocol", originUrl));
             }
         }
         // TODO SOFAVERSION v=4.0
@@ -357,7 +358,7 @@ public class SofaRegistryHelper {
             try {// 加入动态
                 providerInfo.setDynamicAttr(ATTR_TIMEOUT, Integer.parseInt(timeoutStr));
             } catch (Exception e) {
-                LOGGER.error("timeout is invalid : {}", originUrl);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_INVALID_ATTRIBUTE, "timeout", originUrl));
             }
         }
         // serializeType 使用字符传递
@@ -404,7 +405,7 @@ public class SofaRegistryHelper {
                 providerInfo.setWeight(weight);
                 providerInfo.setStaticAttr(ATTR_WEIGHT, weightStr);
             } catch (Exception e) {
-                LOGGER.error("weight is invalid : {}", originUrl);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_INVALID_ATTRIBUTE, "weight", originUrl));
             }
         }
         // warmupTime
@@ -416,7 +417,7 @@ public class SofaRegistryHelper {
                 warmupTime = Integer.parseInt(warmupTimeStr);
                 providerInfo.setStaticAttr(ATTR_WARMUP_TIME, warmupTimeStr);
             } catch (Exception e) {
-                LOGGER.error("warmupTime is invalid : {}", originUrl);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_INVALID_ATTRIBUTE, "warmupTime", originUrl));
             }
         }
         // warmupWeight
@@ -429,7 +430,7 @@ public class SofaRegistryHelper {
                 warmupWeight = Integer.parseInt(warmupWeightStr);
                 providerInfo.setStaticAttr(ATTR_WARMUP_WEIGHT, warmupWeightStr);
             } catch (Exception e) {
-                LOGGER.error("warmupWeight is invalid : {}", originUrl);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_INVALID_ATTRIBUTE, "warmupWeight", originUrl));
             }
         }
         // startTime
@@ -439,7 +440,7 @@ public class SofaRegistryHelper {
             try {
                 startTime = Long.parseLong(startTimeStr);
             } catch (Exception e) {
-                LOGGER.error("startTime is invalid : {}", originUrl);
+                LOGGER.error(LogCodes.getLog(LogCodes.ERROR_INVALID_ATTRIBUTE, "startTime", originUrl));
             }
         }
         if (startTime == 0) {

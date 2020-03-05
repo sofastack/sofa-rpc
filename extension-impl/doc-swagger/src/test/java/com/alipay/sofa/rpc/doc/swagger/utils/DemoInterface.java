@@ -14,27 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.hystrix;
+package com.alipay.sofa.rpc.doc.swagger.utils;
 
-import com.alipay.sofa.rpc.test.HelloServiceImpl;
+/**
+ * @author <a href=mailto:orezsilence@163.com>zhangchengxi</a>
+ */
+public interface DemoInterface {
+    void noParam();
 
-import java.util.concurrent.atomic.AtomicInteger;
+    void oneParam(Object a);
 
-public class InvokeCounterHelloService extends HelloServiceImpl {
-
-    private AtomicInteger executeCount = new AtomicInteger(0);
-
-    public InvokeCounterHelloService(int sleep) {
-        super(sleep);
-    }
-
-    @Override
-    public String sayHello(String name, int age) {
-        executeCount.incrementAndGet();
-        return super.sayHello(name, age);
-    }
-
-    public int getExecuteCount() {
-        return executeCount.get();
-    }
+    void multiParam(Object a, Object b);
 }
