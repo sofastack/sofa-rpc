@@ -37,7 +37,7 @@ public class HttpMockServer {
      * @param port
      * @return
      */
-    public static boolean initSever(int port) {
+    public boolean initSever(int port) {
 
         if (httpServer != null) {
 
@@ -58,7 +58,7 @@ public class HttpMockServer {
      *
      * @return
      */
-    public static boolean addMockPath(String path, final String responseJson) {
+    public boolean addMockPath(String path, final String responseJson) {
         httpServer.createContext(path, new HttpHandler() {
             public void handle(HttpExchange exchange) throws IOException {
                 byte[] response = responseJson.getBytes();
@@ -77,7 +77,7 @@ public class HttpMockServer {
      *
      * @return
      */
-    public static boolean start() {
+    public boolean start() {
         if (httpServer != null) {
             httpServer.start();
         } else {
@@ -93,7 +93,7 @@ public class HttpMockServer {
      *
      * @return
      */
-    public static boolean stop() {
+    public boolean stop() {
         if (httpServer != null) {
             httpServer.stop(0);
             httpServer = null;

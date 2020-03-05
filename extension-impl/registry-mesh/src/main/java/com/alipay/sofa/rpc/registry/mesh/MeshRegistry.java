@@ -386,5 +386,6 @@ public class MeshRegistry extends Registry {
     public void destroy() {
         // 销毁前备份一下
         client = null;
+        inited = false;
     }
 }
