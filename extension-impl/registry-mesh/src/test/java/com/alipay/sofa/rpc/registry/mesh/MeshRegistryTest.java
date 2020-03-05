@@ -94,12 +94,6 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setAddress("http://localhost:7654");
 
         registry = (MeshRegistry) RegistryFactory.getRegistry(registryConfig);
-
-        try {
-            registry.init();
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof SofaRpcRuntimeException);
-        }
         registry.init();
         registry.start();
     }
