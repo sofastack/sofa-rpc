@@ -80,6 +80,8 @@ public abstract class AbstractProxyClientTransport extends ClientTransport {
         ProviderInfo provider = transportConfig.getProviderInfo();
         try {
             proxy = buildProxy(transportConfig);
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BUILD_PROXY), e);
         }

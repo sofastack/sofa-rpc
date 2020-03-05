@@ -392,11 +392,12 @@ public class ZookeeperRegistry extends Registry {
                 }
 
             }
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "zookeeperRegistry",
                 config.buildKey()), e);
         }
-
         if (EventBus.isEnable(ProviderPubEvent.class)) {
             ProviderPubEvent event = new ProviderPubEvent(config);
             EventBus.post(event);
@@ -664,6 +665,8 @@ public class ZookeeperRegistry extends Registry {
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("consumer has exists in zookeeper, consumer=" + url);
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_CONSUMER_CONFIG, EXT_NAME), e);
             }
