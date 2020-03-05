@@ -500,12 +500,6 @@
                 <artifactId>jetty-alpn-openjdk8-client</artifactId>
                 <version>9.4.8.v20171121</version>
             </dependency>
-            <dependency>
-                <groupId>io.netty</groupId>
-                <artifactId>netty-tcnative-boringssl-static</artifactId>
-                <version>2.0.25.Final</version>
-                <classifier>${os.detected.classifier}</classifier>
-            </dependency>
         </dependencies>
     </dependencyManagement>
 
