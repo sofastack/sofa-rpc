@@ -256,14 +256,19 @@
             <artifactId>sofa-rpc-metrics-lookout</artifactId>
             <version>${project.version}</version>
         </dependency>
+       <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-metrics-micrometer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-doc-swagger</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-dynamic-apollo</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-       <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-doc-swagger</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -435,6 +440,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-fault-hystrix</include>
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>
                                     <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
+                                    <include>com.alipay.sofa:sofa-rpc-metrics-micrometer</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-consul</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-local</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
