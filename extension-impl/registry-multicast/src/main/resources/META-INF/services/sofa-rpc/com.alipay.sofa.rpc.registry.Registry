@@ -1,0 +1,1 @@
+multicast=com.alipay.sofa.rpc.registry.multicast.MulticastRegistry
