@@ -183,6 +183,8 @@ public class ConsulRegistry extends Registry {
                             LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, config.getInterfaceId()));
                 }
             }
+        }catch (SofaRpcRuntimeException e){
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "consulRegistry", config.buildKey()), e);
         }
@@ -219,8 +221,11 @@ public class ConsulRegistry extends Registry {
             }
         } catch (Exception e) {
             if (!RpcRunningState.isShuttingDown()) {
+                if ( e instanceof SofaRpcRuntimeException){
+                    throw e;
+                }else{
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNREG_PROVIDER ,EXT_NAME), e);
-            }
+            }}
         }
     }
 
@@ -251,7 +256,9 @@ public class ConsulRegistry extends Registry {
             }
 
             return Collections.singletonList(new ProviderGroup().addAll(providers));
-        } catch (Exception e) {
+        } catch (SofaRpcRuntimeException e){
+            throw e;
+        }catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUB_PROVIDER ,EXT_NAME), e);
         }
     }
@@ -376,7 +383,9 @@ public class ConsulRegistry extends Registry {
             String address;
             try {
                 address = new URL(properties.getHealthCheckProtocol(), host, port, properties.getHealthCheckPath()).toString();
-            } catch (Exception e) {
+            } catch (SofaRpcRuntimeException e){
+                throw e;
+            }catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_HEALTH_CHECK_URL ), e);
             }
             check.setHttp(address);
