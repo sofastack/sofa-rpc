@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
@@ -37,9 +36,17 @@ public class LoadBalancerFactory {
      * @return LoadBalancer
      */
     public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap) {
-        String loadBalancer = null;
+        return getLoadBalancer(consumerBootstrap, consumerBootstrap.getConsumerConfig().getLoadBalancer());
+    }
+
+    /**
+     * 根据名字和consumer得到负载均衡器
+     *
+     * @param consumerBootstrap 服务订阅者配置
+     * @return LoadBalancer
+     */
+    public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap, String loadBalancer) {
         try {
-            loadBalancer = consumerBootstrap.getConsumerConfig().getLoadBalancer();
             ExtensionClass<LoadBalancer> ext = ExtensionLoaderFactory
                 .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
             if (ext == null) {
