@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.dynamic.apollo;
 
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
@@ -26,14 +27,12 @@ public class ApolloDynamicConfigManagerTest {
     private final static Logger        logger                     = LoggerFactory
                                                                       .getLogger(ApolloDynamicConfigManagerTest.class);
 
-    private String                     defaultValue               = "RPC_DEFAULT_APOLLO_VALUE";
-
     private ApolloDynamicConfigManager apolloDynamicConfigManager = new ApolloDynamicConfigManager("test");
 
     @Test
     public void getProviderServiceProperty() {
         String result = apolloDynamicConfigManager.getProviderServiceProperty("serviceName", "timeout");
-        Assert.assertEquals(defaultValue, result);
+        Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 
     @Test

@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.dynamic.apollo;
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigKeyHelper;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigService;
@@ -35,8 +36,6 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
     private Config config;
 
-    private String defaultValue = "RPC_DEFAULT_APOLLO_VALUE";
-
     protected ApolloDynamicConfigManager(String appName) {
         super(appName);
         config = ConfigService.getAppConfig();
@@ -49,23 +48,27 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
     @Override
     public String getProviderServiceProperty(String service, String key) {
-        return config.getProperty(DynamicConfigKeyHelper.buildProviderServiceProKey(service, key), defaultValue);
+        return config.getProperty(DynamicConfigKeyHelper.buildProviderServiceProKey(service, key),
+            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
     }
 
     @Override
     public String getConsumerServiceProperty(String service, String key) {
-        return config.getProperty(DynamicConfigKeyHelper.buildConsumerServiceProKey(service, key), defaultValue);
+        return config.getProperty(DynamicConfigKeyHelper.buildConsumerServiceProKey(service, key),
+            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
 
     }
 
     @Override
     public String getProviderMethodProperty(String service, String method, String key) {
-        return config.getProperty(DynamicConfigKeyHelper.buildProviderMethodProKey(service, method, key), defaultValue);
+        return config.getProperty(DynamicConfigKeyHelper.buildProviderMethodProKey(service, method, key),
+            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
     }
 
     @Override
     public String getConsumerMethodProperty(String service, String method, String key) {
-        return config.getProperty(DynamicConfigKeyHelper.buildConsumerMethodProKey(service, method, key), defaultValue);
+        return config.getProperty(DynamicConfigKeyHelper.buildConsumerMethodProKey(service, method, key),
+            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
 
     }
 
