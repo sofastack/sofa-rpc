@@ -35,6 +35,7 @@
         <module>registry-zk</module>
         <module>registry-nacos</module>
         <module>registry-mesh</module>
+        <module>registry-multicast</module>
         <module>registry-sofa</module>
         <module>remoting-bolt</module>
         <module>remoting-http</module>
