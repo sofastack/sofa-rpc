@@ -128,6 +128,8 @@ public abstract class AbstractHttpServer implements Server {
                         EventBus.post(new ServerStartedEvent(serverConfig, bizThreadPool));
                     }
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER, "HTTP/2"), e);
             }

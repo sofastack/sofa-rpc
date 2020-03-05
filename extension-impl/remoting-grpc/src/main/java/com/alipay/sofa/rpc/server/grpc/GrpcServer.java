@@ -95,6 +95,8 @@ public class GrpcServer implements Server {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Start the grpc server at port {}", serverConfig.getPort());
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER_WITH_PORT, "grpc",
                     serverConfig.getPort()), e);

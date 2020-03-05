@@ -187,6 +187,8 @@ public class NacosRegistry extends Registry {
                     }
                     providerInstances.put(config, instances);
                 }
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "NacosRegistry",
                     config.buildKey()), e);
@@ -223,7 +225,11 @@ public class NacosRegistry extends Registry {
 
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNREG_PROVIDER, EXT_NAME), e);
+                    if (e instanceof SofaRpcRuntimeException) {
+                        throw (SofaRpcRuntimeException) e;
+                    } else {
+                        throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNREG_PROVIDER, EXT_NAME), e);
+                    }
                 }
             }
         }
@@ -290,6 +296,8 @@ public class NacosRegistry extends Registry {
                 List<ProviderInfo> providerInfos = NacosRegistryHelper.convertInstancesToProviders(allInstances);
                 List<ProviderInfo> matchProviders = RegistryUtils.matchProviderInfos(config, providerInfos);
                 return Collections.singletonList(new ProviderGroup().addAll(matchProviders));
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUB_PROVIDER, EXT_NAME), e);
             }
@@ -310,7 +318,12 @@ public class NacosRegistry extends Registry {
                 }
             } catch (Exception e) {
                 if (!RpcRunningState.isShuttingDown()) {
-                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUB_LISTENER, EXT_NAME), e);
+
+                    if (e instanceof SofaRpcRuntimeException) {
+                        throw (SofaRpcRuntimeException) e;
+                    } else {
+                        throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNSUB_LISTENER, EXT_NAME), e);
+                    }
                 }
             }
 

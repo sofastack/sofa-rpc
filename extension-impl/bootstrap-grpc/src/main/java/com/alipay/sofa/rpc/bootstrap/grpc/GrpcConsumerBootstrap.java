@@ -206,6 +206,8 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
                         return sofaResponse.getAppResponse();
                     }
                 });
+            } catch (SofaRpcRuntimeException e) {
+                throw e;
             } catch (Exception e) {
                 throw new SofaRpcRuntimeException("", e);
             }

@@ -46,6 +46,8 @@ public class LoadBalancerFactory {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_LOAD_BALANCER, loadBalancer));
             }
             return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_LOAD_BALANCER, loadBalancer), e);
         }
