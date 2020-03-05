@@ -168,6 +168,7 @@ public class LogCodes {
     public static final String                 ERROR_WATCH_HEALTH                         = "010060025";
     public static final String                 ERROR_CLOSE_PATH_CACHE                     = "010060026";
     public static final String                 ERROR_INVALID_ATTRIBUTE                    = "010060027";
+    public static final String                 ERROR_REGISTRY_NOT_SUPPORT                 = "010060028";
 
     //01007 log
     //01008 proxy generate
@@ -213,6 +214,7 @@ public class LogCodes {
     public static final String                 ERROR_HOST_NOT_FOUND                       = "019990024";
     public static final String                 ERROR_QUERY_ATTRIBUTE                      = "019990025";
     public static final String                 ERROR_UPDATE_ATTRIBUTE                     = "019990026";
+    public static final String                 ERROR_SERVER_PROTOCOL_NOT_SUPPORT          = "019990027";
 
     //02 运行
     // 02000 泛化
