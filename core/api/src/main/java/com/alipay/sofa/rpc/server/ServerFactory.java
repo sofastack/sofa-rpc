@@ -77,6 +77,8 @@ public final class ServerFactory {
                 SERVER_MAP.put(serverConfig.getPort() + "", server);
             }
             return server;
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_SERVER), e);
         }

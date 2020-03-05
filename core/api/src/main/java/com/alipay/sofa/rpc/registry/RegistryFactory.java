@@ -76,6 +76,8 @@ public class RegistryFactory {
                 ALL_REGISTRIES.put(registryConfig, registry);
             }
             return registry;
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "Registry", protocol));
         }

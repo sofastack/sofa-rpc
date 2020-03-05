@@ -42,6 +42,8 @@ public final class TracerFactory {
                 throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FAIL_LOAD_TRACER_EXT, tracerName));
             }
             return ext.getExtInstance();
+        } catch (SofaRpcRuntimeException e) {
+            throw e;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_FAIL_LOAD_TRACER_EXT, tracerName), e);
         }

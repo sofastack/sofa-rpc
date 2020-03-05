@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
+import com.alibaba.dubbo.common.Constants;
+import com.alibaba.dubbo.common.utils.ConfigUtils;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.service.GenericService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
@@ -31,6 +33,7 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,10 +52,15 @@ public class DubooServerTest {
 
     ConsumerConfig<DemoService> consumerConfig;
 
+    //dubbo close wait time
+    @AfterClass
+    public static void before() {
+        ConfigUtils.getProperties().put(Constants.SHUTDOWN_WAIT_KEY, "1");
+    }
+
     @Test
     //同步调用,直连
     public void testSync() {
-
         try {
             // 只有1个线程 执行
             ServerConfig serverConfig = new ServerConfig()
