@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -81,7 +82,7 @@ public final class SerializerFactory {
     public static Serializer getSerializer(byte type) {
         Serializer serializer = TYPE_SERIALIZER_MAP.get(type);
         if (serializer == null) {
-            throw new SofaRpcRuntimeException("Serializer Not Found :\"" + type + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SERIALIZER_NOT_FOUND, type));
         }
         return serializer;
     }

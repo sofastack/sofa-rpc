@@ -40,12 +40,20 @@ public class SofaHystrixConfig {
         FALLBACK_FACTORY_MAPPING.put(consumerConfig, new DefaultFallbackFactory<Object>(fallback));
     }
 
+    public static void clearFallback() {
+        FALLBACK_FACTORY_MAPPING.clear();
+    }
+
     public static void registerFallbackFactory(ConsumerConfig consumerConfig, FallbackFactory fallbackFactory) {
         FALLBACK_FACTORY_MAPPING.put(consumerConfig, fallbackFactory);
     }
 
     public static void registerSetterFactory(ConsumerConfig consumerConfig, SetterFactory setterFactory) {
         SETTER_FACTORY_MAPPING.put(consumerConfig, setterFactory);
+    }
+
+    public static void clearSetterFactory() {
+        SETTER_FACTORY_MAPPING.clear();
     }
 
     public static void registerGlobalFallbackFactory(FallbackFactory fallbackFactory) {

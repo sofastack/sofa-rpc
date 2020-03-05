@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.http.HttpServerHandler;
@@ -250,7 +251,7 @@ public class Http1ServerChannelHandler extends SimpleChannelInboundHandler<FullH
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        LOGGER.error("", cause);
+        LOGGER.error(LogCodes.getLog(LogCodes.ERROR_CATCH_EXCEPTION), cause);
         ctx.close();
     }
 }

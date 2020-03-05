@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import javax.annotation.concurrent.ThreadSafe;
 import java.util.Map;
@@ -91,7 +92,8 @@ public class FilterInvoker implements Invoker {
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         if (nextFilter == null && invoker == null) {
-            throw new SofaRpcException(RpcErrorType.SERVER_FILTER, "Next filter and invoker is null!");
+            throw new SofaRpcException(RpcErrorType.SERVER_FILTER,
+                LogCodes.getLog(LogCodes.ERROR_NEXT_FILTER_AND_INVOKER_NULL));
         }
         return nextFilter == null ?
             invoker.invoke(request) :

@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -63,17 +64,16 @@ public class DynamicConfigManagerFactory {
                     DynamicConfigManager.class)
                     .getExtensionClass(alias);
                 if (ext == null) {
-                    throw ExceptionUtils.buildRuntime("dynamic", alias,
-                        "Unsupported alias of dynamic config !");
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "DynamicConfigManager",
+                        alias));
                 }
                 registry = ext.getExtInstance(new Class[] { String.class }, new Object[] { appName });
                 ALL_DYNAMICS.put(alias, registry);
             }
             return registry;
-        } catch (SofaRpcRuntimeException e) {
-            throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "DynamicConfigManager", alias),
+                e);
         }
     }
 

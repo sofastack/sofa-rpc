@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
 import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
@@ -130,7 +131,7 @@ public abstract class AbstractHttpServer implements Server {
             } catch (SofaRpcRuntimeException e) {
                 throw e;
             } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Failed to start HTTP/2 server!", e);
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_SERVER, "HTTP/2"), e);
             }
         }
     }
@@ -185,8 +186,8 @@ public abstract class AbstractHttpServer implements Server {
             String methodName = method.getName();
             if (methodsLimit.containsKey(methodName)) {
                 // 重名的方法
-                throw new SofaRpcRuntimeException("Method with same name \"" + itfClass.getName() + "."
-                    + methodName + "\" exists ! The usage of overloading method is deprecated.");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_OVERLOADING_METHOD,
+                    itfClass.getName(), methodName));
             }
             methodsLimit.put(methodName, method);
         }

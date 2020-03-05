@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoader;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderListener;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -88,7 +89,7 @@ public class ProtocolFactory {
     public static Protocol getProtocol(byte code) {
         Protocol protocol = TYPE_PROTOCOL_MAP.get(code);
         if (protocol == null) {
-            throw new SofaRpcRuntimeException("Extension Not Found :\"" + code + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOCOL_NOT_FOUND, code));
         }
         return protocol;
     }

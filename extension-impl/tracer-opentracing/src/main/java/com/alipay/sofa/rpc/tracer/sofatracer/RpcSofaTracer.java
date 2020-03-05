@@ -40,6 +40,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.code.TracerResultCode;
 import com.alipay.sofa.rpc.tracer.sofatracer.factory.ReporterFactory;
@@ -605,13 +606,13 @@ public class RpcSofaTracer extends Tracer {
         if (rpcInternalContext.isConsumerSide()) {
             //客户端 tracer 堆栈中最多有 1 个(客户端 span 完毕,服务端 span 压栈所以最多一个)
             if (sofaTraceContext.getThreadLocalSpanSize() > 1) {
-                SelfLog.error("Pay attention,stack size error.Tracer consumer stack size more than one.");
+                SelfLog.error(LogCodes.getLog(LogCodes.ERROR_TRACER_CONSUMER_STACK));
                 SelfLog.flush();
             }
         } else if (rpcInternalContext.isProviderSide()) {
             //服务端 tracer 堆栈中应该为 0 个
             if (sofaTraceContext.getThreadLocalSpanSize() > 0) {
-                SelfLog.error("Pay attention,stack size error.Tracer provider stack size more than zero.");
+                SelfLog.error(LogCodes.getLog(LogCodes.ERROR_TRACER_PROVIDER_STACK));
                 SelfLog.flush();
             }
         }

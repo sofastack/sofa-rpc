@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -74,7 +75,7 @@ public final class Tracers {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to init Tracers", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_TRACER_INIT), e);
         }
     }
 
