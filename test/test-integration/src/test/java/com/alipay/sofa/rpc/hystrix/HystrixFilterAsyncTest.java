@@ -62,6 +62,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         if (consumerConfig != null) {
             consumerConfig.unRefer();
         }
+        SofaHystrixConfig.clearFallback();
+        SofaHystrixConfig.clearSetterFactory();
 
     }
 
@@ -145,7 +147,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HystrixServiceFallbackFactory());
 
         HystrixService HystrixService = consumerConfig.refer();
-
+        //wait server ok
+        Thread.sleep(2000);
         long start = System.currentTimeMillis();
         HystrixService.sayHello("abc", 24);
         Future future = SofaResponseFuture.getFuture();
@@ -186,7 +189,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
 
         HystrixService hystrixService = consumerConfig.refer();
-
+        //wait server ok
+        Thread.sleep(2000);
         for (int i = 0; i < 20; i++) {
             long start = System.currentTimeMillis();
             hystrixService.sayHello("abc", 24);
@@ -229,7 +233,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
 
         HystrixService HystrixService = consumerConfig.refer();
-
+        //wait server ok
+        Thread.sleep(2000);
         for (int i = 0; i < 20; i++) {
             long start = System.currentTimeMillis();
             HystrixService.sayHello("abc", 24);
@@ -262,6 +267,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         HystrixService HystrixService = consumerConfig.refer();
 
         try {
+            //wait server ok
+            Thread.sleep(2000);
             HystrixService.sayHello("abc", 24);
             Assert.fail();
         } catch (Exception e) {
