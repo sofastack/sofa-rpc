@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.List;
@@ -61,7 +62,7 @@ public class AutoLoadBalancer extends AbstractLoadBalancer {
             if (dynamicConfigManager != null) {
                 dynamicLoadBalancer = dynamicConfigManager.getConsumerServiceProperty(
                     request.getTargetServiceUniqueName(), LOAD_BALANCER_KEY);
-                if (StringUtils.isNotBlank(dynamicLoadBalancer)) {
+                if (DynamicHelper.isNotDefault(dynamicLoadBalancer) && StringUtils.isNotBlank(dynamicLoadBalancer)) {
                     LoadBalancer loadBalancer = LoadBalancerFactory.getLoadBalancer(consumerBootstrap,
                         dynamicLoadBalancer);
                     return loadBalancer.select(request, providerInfos);

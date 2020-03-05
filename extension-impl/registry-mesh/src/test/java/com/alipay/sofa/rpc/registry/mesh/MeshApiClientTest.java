@@ -85,7 +85,6 @@ public class MeshApiClientTest extends BaseMeshTest {
     @Test
     public void testPublish() {
         PublishServiceRequest request = new PublishServiceRequest();
-
         request.setServiceName("aa");
         ProviderMetaInfo providerMetaInfo = new ProviderMetaInfo();
         providerMetaInfo.setAppName("testApp");
