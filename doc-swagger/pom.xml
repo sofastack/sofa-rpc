@@ -3,7 +3,7 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
-        <artifactId>sofa-rpc-extension-impl</artifactId>
+        <artifactId>sofa-rpc-parent</artifactId>
         <groupId>com.alipay.sofa</groupId>
         <version>${revision}</version>
     </parent>
@@ -15,6 +15,7 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>io.swagger</groupId>
