@@ -10,12 +10,12 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-extension-impl</artifactId>
+    <artifactId>sofa-rpc-fault</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>extension-common</module>
-        <module>doc-swagger</module>
+        <module>fault-tolerance</module>
+        <module>fault-hystrix</module>
     </modules>
 
     <dependencyManagement>
