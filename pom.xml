@@ -31,6 +31,7 @@
         <module>registry</module>
         <module>bootstrap</module>
         <module>codec</module>
+        <module>remoting</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>

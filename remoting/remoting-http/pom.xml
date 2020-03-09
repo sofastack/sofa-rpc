@@ -3,43 +3,27 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
+    
     <parent>
+        <artifactId>sofa-rpc-remoting</artifactId>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-extension-impl</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-remoting-bolt</artifactId>
-
+    <artifactId>sofa-rpc-remoting-http</artifactId>
+    
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-extension-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-log-common-tools</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-
-        <!-- 网络 -->
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>bolt</artifactId>
-        </dependency>
+        
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-test-common</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -50,9 +34,21 @@
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+          <groupId>io.netty</groupId>
+          <artifactId>netty-tcnative-boringssl-static</artifactId>
+          <classifier>${os.detected.classifier}</classifier>
+        </dependency>
     </dependencies>
 
     <build>
+        <extensions>
+          <extension>
+            <groupId>kr.motd.maven</groupId>
+            <artifactId>os-maven-plugin</artifactId>
+         </extension>
+        </extensions>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
             <resource>
