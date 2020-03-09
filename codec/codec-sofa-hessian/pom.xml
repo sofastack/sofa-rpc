@@ -6,24 +6,28 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-core-impl</artifactId>
+        <artifactId>sofa-rpc-codec</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-codec</artifactId>
+    <artifactId>sofa-rpc-codec-sofa-hessian</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-extension-common</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-log</artifactId>
-            <version>${project.parent.version}</version>
-            <scope>test</scope>
+            <artifactId>hessian</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>

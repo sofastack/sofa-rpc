@@ -30,6 +30,7 @@
 
         <module>registry</module>
         <module>bootstrap</module>
+        <module>codec</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>

@@ -16,11 +16,6 @@
     <modules>
         <module>api-compatible</module>
         <module>extension-common</module>
-        <module>codec-protobuf</module>
-        <module>codec-jackson</module>
-        <module>codec-protostuff</module>
-        <module>codec-sofa-hessian</module>
-        <module>codec-msgpack</module>
         <module>fault-tolerance</module>
         <module>log-common-tools</module>
         <module>metrics-lookout</module>
@@ -61,7 +56,7 @@
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
-                <artifactId>sofa-rpc-codec</artifactId>
+                <artifactId>sofa-rpc-codec-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>

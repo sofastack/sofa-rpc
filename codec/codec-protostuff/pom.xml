@@ -6,11 +6,11 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-extension-impl</artifactId>
+        <artifactId>sofa-rpc-codec</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-codec-protobuf</artifactId>
+    <artifactId>sofa-rpc-codec-protostuff</artifactId>
 
     <dependencies>
         <dependency>
@@ -26,8 +26,12 @@
 
         <!-- 默认不主动依赖 -->
         <dependency>
-            <groupId>com.google.protobuf</groupId>
-            <artifactId>protobuf-java</artifactId>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.protostuff</groupId>
+            <artifactId>protostuff-runtime</artifactId>
         </dependency>
 
         <dependency>

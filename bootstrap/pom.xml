@@ -46,7 +46,7 @@
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
-                <artifactId>sofa-rpc-codec</artifactId>
+                <artifactId>sofa-rpc-codec-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>

@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-codec</artifactId>
+            <artifactId>sofa-rpc-codec-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -442,7 +442,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-api</include>
                                     <include>com.alipay.sofa:sofa-rpc-exception</include>
                                     <include>com.alipay.sofa:sofa-rpc-client</include>
-                                    <include>com.alipay.sofa:sofa-rpc-codec</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-api</include>
                                     <include>com.alipay.sofa:sofa-rpc-filter</include>
                                     <include>com.alipay.sofa:sofa-rpc-log</include>
                                     <include>com.alipay.sofa:sofa-rpc-proxy</include>
