@@ -6,11 +6,11 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-extension-impl</artifactId>
+        <artifactId>sofa-rpc-config</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+    <artifactId>sofa-rpc-config-apollo</artifactId>
 
     <dependencies>
         <dependency>

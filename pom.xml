@@ -34,6 +34,7 @@
         <module>remoting</module>
         <module>tracer</module>
         <module>metrics</module>
+        <module>config</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>
