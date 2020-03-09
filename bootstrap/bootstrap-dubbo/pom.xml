@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     
     <parent>
-        <artifactId>sofa-rpc-extension-impl</artifactId>
+        <artifactId>sofa-rpc-bootstrap</artifactId>
         <groupId>com.alipay.sofa</groupId>
         <version>${revision}</version>
     </parent>

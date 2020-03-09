@@ -29,6 +29,7 @@
         <module>extension-impl</module>
 
         <module>registry</module>
+        <module>bootstrap</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>
