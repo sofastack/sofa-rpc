@@ -16,7 +16,6 @@
     <modules>
         <module>extension-common</module>
         <module>fault-tolerance</module>
-        <module>log-common-tools</module>
         <module>fault-hystrix</module>
         <module>doc-swagger</module>
     </modules>
