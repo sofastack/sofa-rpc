@@ -13,11 +13,7 @@
     <artifactId>sofa-rpc-metrics-micrometer</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
+
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>

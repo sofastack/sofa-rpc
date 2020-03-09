@@ -19,7 +19,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
+            <artifactId>sofa-rpc-bootstrap-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>

@@ -13,15 +13,14 @@
     <artifactId>sofa-rpc-remoting-bolt</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
-            <version>${project.parent.version}</version>
+            <artifactId>sofa-rpc-codec-api</artifactId>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-log-common-tools</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
 
         <!-- 网络 -->

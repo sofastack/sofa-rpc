@@ -24,6 +24,21 @@
         <dependencies>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-transport</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-codec-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-exception</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
@@ -66,6 +81,11 @@
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-transport</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-log-common-tools</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
         </dependencies>

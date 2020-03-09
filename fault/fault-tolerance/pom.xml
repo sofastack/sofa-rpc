@@ -15,10 +15,8 @@
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
-            <version>${project.parent.version}</version>
+            <artifactId>sofa-rpc-api</artifactId>
         </dependency>
-
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-bootstrap-bolt</artifactId>
