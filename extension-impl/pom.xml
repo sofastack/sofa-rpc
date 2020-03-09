@@ -30,13 +30,6 @@
         <module>log-common-tools</module>
         <module>metrics-lookout</module>
         <module>metrics-micrometer</module>
-        <module>registry-consul</module>
-        <module>registry-local</module>
-        <module>registry-zk</module>
-        <module>registry-nacos</module>
-        <module>registry-mesh</module>
-        <module>registry-multicast</module>
-        <module>registry-sofa</module>
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>

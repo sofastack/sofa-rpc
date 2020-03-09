@@ -27,6 +27,8 @@
         <module>core-impl</module>
         <!-- 2 : Open Implements. eg: bolt + tracer + zk ... -->
         <module>extension-impl</module>
+
+        <module>registry</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>

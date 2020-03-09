@@ -6,11 +6,11 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-extension-impl</artifactId>
+        <artifactId>sofa-rpc-registry</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-registry-mesh</artifactId>
+    <artifactId>sofa-rpc-registry-zk</artifactId>
 
     <dependencies>
         <dependency>
@@ -18,7 +18,12 @@
             <artifactId>sofa-rpc-extension-common</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
-       
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
@@ -27,6 +32,11 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -92,4 +102,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>
