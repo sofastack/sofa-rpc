@@ -10,19 +10,12 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-extension-impl</artifactId>
+    <artifactId>sofa-rpc-tracer</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>api-compatible</module>
-        <module>extension-common</module>
-        <module>fault-tolerance</module>
-        <module>log-common-tools</module>
-        <module>metrics-lookout</module>
-        <module>metrics-micrometer</module>
-        <module>fault-hystrix</module>
-        <module>dynamic-apollo</module>
-        <module>doc-swagger</module>
+        <module>tracer-opentracing</module>
+        <module>tracer-opentracing-resteasy</module>
     </modules>
 
     <dependencyManagement>

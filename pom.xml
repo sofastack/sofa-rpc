@@ -32,6 +32,7 @@
         <module>bootstrap</module>
         <module>codec</module>
         <module>remoting</module>
+        <module>tracer</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>
