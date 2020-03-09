@@ -17,6 +17,7 @@
         <module>common</module>
         <module>exception</module>
         <module>api</module>
+        <module>api-compatible</module>
     </modules>
 
     <build>
