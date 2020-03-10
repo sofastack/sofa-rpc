@@ -108,7 +108,8 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcException);
-            Assert.assertTrue(e.getCause().getMessage(), e.getCause() instanceof HystrixRuntimeException);
+            final Throwable cause = e.getCause();
+            Assert.assertTrue(cause.getMessage(), cause instanceof HystrixRuntimeException);
             Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
         }
     }
