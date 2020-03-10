@@ -12,7 +12,10 @@
     <artifactId>sofa-rpc-remoting-grpc</artifactId>
 
     <dependencies>
-
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-log</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api</artifactId>
