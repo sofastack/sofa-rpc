@@ -1,1 +1,1 @@
-sofa=com.alipay.sofa.rpc.DefaultConsumerBootstrap
+sofa=com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap
