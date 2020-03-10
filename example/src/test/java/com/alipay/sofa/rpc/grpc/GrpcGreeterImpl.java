@@ -31,5 +31,4 @@ public class GrpcGreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
         responseObserver.onCompleted();
     }
 
-
 }
