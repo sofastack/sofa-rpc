@@ -6,25 +6,23 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-core</artifactId>
+        <artifactId>sofa-rpc-bootstrap</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-api</artifactId>
+    <artifactId>sofa-rpc-bootstrap-http</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-common</artifactId>
+            <artifactId>sofa-rpc-api</artifactId>
         </dependency>
-
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <scope>test</scope>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-bootstrap-api</artifactId>
         </dependency>
     </dependencies>
-    
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>

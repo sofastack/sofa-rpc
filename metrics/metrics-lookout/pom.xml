@@ -2,29 +2,49 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-
     <parent>
+        <artifactId>sofa-rpc-metrics</artifactId>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-core</artifactId>
         <version>${revision}</version>
     </parent>
+    <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sofa-rpc-api</artifactId>
+    <artifactId>sofa-rpc-metrics-lookout</artifactId>
 
     <dependencies>
+
+
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-common</artifactId>
+            <artifactId>sofa-rpc-log-common-tools</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
+
+        <dependency>
+            <groupId>com.alipay.sofa.lookout</groupId>
+            <artifactId>lookout-api</artifactId>
+        </dependency>
+
+        <!-- lookout -->
+        <dependency>
+            <groupId>com.alipay.sofa.lookout</groupId>
+            <artifactId>lookout-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
@@ -77,10 +97,8 @@
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
                     <includes>
-                        <!-- 这里需要根据自己的需要指定要跑的单元测试 -->
                         <include>**/*Test.java</include>
                     </includes>
-                    <!-- 如无特殊需求，将forkMode设置为once -->
                     <forkMode>once</forkMode>
                 </configuration>
             </plugin>

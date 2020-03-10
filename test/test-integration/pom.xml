@@ -43,7 +43,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-codec</artifactId>
+            <artifactId>sofa-rpc-codec-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -67,11 +67,7 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api-compatible</artifactId>
@@ -197,7 +193,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+            <artifactId>sofa-rpc-config-apollo</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>

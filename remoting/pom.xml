@@ -10,14 +10,14 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-core</artifactId>
+    <artifactId>sofa-rpc-remoting</artifactId>
     <packaging>pom</packaging>
-    
+
     <modules>
-        <module>common</module>
-        <module>exception</module>
-        <module>api</module>
-        <module>api-compatible</module>
+        <module>remoting-bolt</module>
+        <module>remoting-http</module>
+        <module>remoting-resteasy</module>
+        <module>remoting-grpc</module>
     </modules>
 
     <dependencyManagement>
@@ -25,6 +25,16 @@
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-transport</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-codec-api</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
             <dependency>
@@ -39,6 +49,42 @@
             </dependency>
             <dependency>
                 <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-client</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-codec-api</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-filter</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-log</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-proxy</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
+                <artifactId>sofa-rpc-transport</artifactId>
+                <version>${project.parent.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alipay.sofa</groupId>
                 <artifactId>sofa-rpc-log-common-tools</artifactId>
                 <version>${project.parent.version}</version>
             </dependency>
@@ -47,15 +93,6 @@
 
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>${maven.compiler.source}</source>
-                    <target>${maven.compiler.target}</target>
-                    <encoding>${project.build.sourceEncoding}</encoding>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-install-plugin</artifactId>

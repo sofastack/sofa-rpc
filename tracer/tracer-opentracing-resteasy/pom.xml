@@ -6,25 +6,50 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-core</artifactId>
+        <artifactId>sofa-rpc-tracer</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-api</artifactId>
+    <artifactId>sofa-rpc-tracer-opentracing-resteasy</artifactId>
 
     <dependencies>
+
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-common</artifactId>
+            <artifactId>sofa-rpc-remoting-resteasy</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.jboss.resteasy</groupId>
+            <artifactId>resteasy-netty4</artifactId>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.netty</groupId>
+                    <artifactId>netty</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
-    
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
@@ -86,4 +111,5 @@
             </plugin>
         </plugins>
     </build>
+
 </project>

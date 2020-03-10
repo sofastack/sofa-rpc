@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-codec</artifactId>
+            <artifactId>sofa-rpc-codec-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -120,12 +120,12 @@
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
+            <artifactId>sofa-rpc-api-compatible</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-api-compatible</artifactId>
+            <artifactId>sofa-rpc-bootstrap-api</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -275,7 +275,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+            <artifactId>sofa-rpc-config-apollo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -442,13 +442,13 @@
                                     <include>com.alipay.sofa:sofa-rpc-api</include>
                                     <include>com.alipay.sofa:sofa-rpc-exception</include>
                                     <include>com.alipay.sofa:sofa-rpc-client</include>
-                                    <include>com.alipay.sofa:sofa-rpc-codec</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-api</include>
                                     <include>com.alipay.sofa:sofa-rpc-filter</include>
                                     <include>com.alipay.sofa:sofa-rpc-log</include>
                                     <include>com.alipay.sofa:sofa-rpc-proxy</include>
                                     <include>com.alipay.sofa:sofa-rpc-transport</include>
-                                    <include>com.alipay.sofa:sofa-rpc-extension-common</include>
                                     <include>com.alipay.sofa:sofa-rpc-api-compatible</include>
+                                    <include>com.alipay.sofa:sofa-rpc-bootstrap-api</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-dubbo</include>
                                     <include>com.alipay.sofa:sofa-rpc-bootstrap-grpc</include>
@@ -477,7 +477,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
-                                    <include>com.alipay.sofa:sofa-rpc-dynamic-apollo</include>
+                                    <include>com.alipay.sofa:sofa-rpc-config-apollo</include>
                                     <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->
                                 </includes>

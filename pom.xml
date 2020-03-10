@@ -25,8 +25,18 @@
         <module>core</module>
         <!-- 1 : Common Implements. -->
         <module>core-impl</module>
-        <!-- 2 : Open Implements. eg: bolt + tracer + zk ... -->
-        <module>extension-impl</module>
+        <!-- 2 : swagger -->
+        <module>doc-swagger</module>
+
+        <module>registry</module>
+        <module>bootstrap</module>
+        <module>codec</module>
+        <module>remoting</module>
+        <module>tracer</module>
+        <module>metrics</module>
+        <module>config</module>
+        <module>fault</module>
+        <module>log-common-tools</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>

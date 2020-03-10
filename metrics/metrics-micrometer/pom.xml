@@ -6,25 +6,40 @@
 
     <parent>
         <groupId>com.alipay.sofa</groupId>
-        <artifactId>sofa-rpc-core</artifactId>
+        <artifactId>sofa-rpc-metrics</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-api</artifactId>
+    <artifactId>sofa-rpc-metrics-micrometer</artifactId>
 
     <dependencies>
+
+
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-common</artifactId>
+            <artifactId>sofa-rpc-log-common-tools</artifactId>
+            <version>${project.parent.version}</version>
         </dependency>
 
+        <!-- micrometer -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
-    
+
     <build>
         <sourceDirectory>src/main/java</sourceDirectory>
         <resources>
@@ -77,10 +92,8 @@
                 <configuration>
                     <skipTests>${skipTests}</skipTests>
                     <includes>
-                        <!-- 这里需要根据自己的需要指定要跑的单元测试 -->
                         <include>**/*Test.java</include>
                     </includes>
-                    <!-- 如无特殊需求，将forkMode设置为once -->
                     <forkMode>once</forkMode>
                 </configuration>
             </plugin>
