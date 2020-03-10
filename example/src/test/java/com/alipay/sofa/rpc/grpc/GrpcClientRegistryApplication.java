@@ -17,15 +17,15 @@
 package com.alipay.sofa.rpc.grpc;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-
 import io.grpc.StatusRuntimeException;
 import io.grpc.examples.helloworld.GreeterGrpc;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
+import io.grpc.examples.helloworld.SofaGreeterGrpc;
 
 import java.time.format.DateTimeFormatter;
 
@@ -44,13 +44,13 @@ public class GrpcClientRegistryApplication {
         RegistryConfig registryConfig = new RegistryConfig();
         registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
 
-        ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
+        ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
         consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setRegistry(registryConfig);
 
         // GreeterGrpc.GreeterBlockingStub s = new         
-        GreeterGrpc.GreeterBlockingStub greeterBlockingStub = (GreeterGrpc.GreeterBlockingStub) consumerConfig.refer();
+        SofaGreeterGrpc.IGreeter greeterBlockingStub = (SofaGreeterGrpc.IGreeter) consumerConfig.refer();
 
         LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
 

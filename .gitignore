@@ -20,4 +20,4 @@ logs/
 *.log
 
 #protobuf
-generated
+example/build/*
