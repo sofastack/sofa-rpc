@@ -23,29 +23,13 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
-import java.util.concurrent.atomic.AtomicInteger;
-
-import io.grpc.Channel;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
-
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.proxy.ProxyFactory;
+import io.grpc.CallOptions;
 
-import javassist.util.proxy.MethodHandler;
-import javassist.util.proxy.ProxyFactory;
-import javassist.util.proxy.ProxyObject;
-import com.alipay.sofa.rpc.message.MessageBuilder;
-
-import com.alipay.sofa.rpc.core.exception.RpcErrorType;
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
+import java.lang.reflect.Method;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Consumer bootstrap for grpc 
@@ -56,32 +40,20 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
     /**
-     * proxy of grpc client's XXXBlockingStub
-     */
-    ProxyObject                 proxyObject;
-
-    /**
      * Set by ConsumerConfig.setInterfaceID(), or interface attribution in XML service definition.
      * 
      * PLEASE NOTE: For GRPC transport, interfaceID won't refer to a real interface, it should be
      * FULL QUALIFIED name of the concrete CLASS, which is generated from .proto file.  
      * e.g. GreeterGrpc.class.getName()
      */
-    private final String        interfaceID;
+    private final String           interfaceID;
 
     /**
-     * Name of the service in .proto file.
-     * e.g. Greeter 
+     * 代理实现类
      */
-    private final String        serviceName;
+    protected transient volatile T proxyIns;
 
-    /**
-     * full qualified name of the blockingStub.
-     * e.g. GreeterBlockingStub
-     */
-    private final String        blockingStubName;
-
-    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcConsumerBootstrap.class);
+    private final static Logger    LOGGER = LoggerFactory.getLogger(GrpcConsumerBootstrap.class);
 
     /**
      * 构造函数
@@ -91,10 +63,6 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
     protected GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
         super(consumerConfig);
         this.interfaceID = consumerConfig.getInterfaceId();
-        String[] segments = this.interfaceID.split("\\.");
-        String lastSegment = segments[segments.length - 1];
-        this.serviceName = lastSegment.substring(0, lastSegment.length() - 4);
-        this.blockingStubName = this.interfaceID + "$" + this.serviceName + "BlockingStub";
     }
 
     /**
@@ -105,8 +73,8 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
      */
     @Override
     public synchronized T refer() {
-        if (this.proxyObject != null) {
-            return (T) this.proxyObject;
+        if (this.proxyIns != null) {
+            return (T) this.proxyIns;
         }
 
         String key = consumerConfig.buildKey();
@@ -155,63 +123,32 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
             String host;
             int port;
-            ManagedChannel channel;
-            if (cluster.getAddressHolder().getProviderInfos("").size() != 0) {
-                host = cluster.getAddressHolder().getProviderInfos("").get(0).getHost();
-                port = cluster.getAddressHolder().getProviderInfos("").get(0).getPort();
-            } else {
-                host = "localhost";
-                port = 50052;
-            }
-            channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+            /*  ManagedChannel channel;
+              if (cluster.getAddressHolder().getProviderInfos("").size() != 0) {
+                  host = cluster.getAddressHolder().getProviderInfos("").get(0).getHost();
+                  port = cluster.getAddressHolder().getProviderInfos("").get(0).getPort();
+              } else {
+                  host = "localhost";
+                  port = 50052;
+              }
+              channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();*/
 
-            // first, make GRPC client's XXXBlockingStub instance
-            T blockingStubIns = null;
-            try {
-                Method newBlockingChannel = Class
-                    .forName(consumerConfig.getInterfaceId())
-                    .getDeclaredMethod("newBlockingStub", Channel.class);
-                newBlockingChannel.setAccessible(true);
-                // proxyIns = (T) newBlockingChannel.invoke(null, channel);
-                blockingStubIns = (T) newBlockingChannel.invoke(null, channel);
+            final Method dubboStubMethod;
+            Class<?> enclosingClass = null;
+            /*  T stub;
+              try {
+                   enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
 
-            } catch (Throwable e) {
-                throw e;
-            }
+                  dubboStubMethod = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
+                          ProviderInfo.class, ConsumerConfig.class,int.class);
+                  stub = (T) dubboStubMethod.invoke(null, channel, CallOptions.DEFAULT, null, null,3000);
 
-            // second, make proxy for that stub, using a fake channel.
-            ProxyFactory proxyFactory = new ProxyFactory();
-            // proxyFactory.setSuperclass(Class.forName("io.grpc.examples.helloworld.GreeterGrpc$GreeterBlockingStub"));
-            proxyFactory.setSuperclass(Class.forName(blockingStubName));
-            Class<ProxyObject> proxyClass = proxyFactory.createClass();
-            try {
-                proxyObject = (ProxyObject) proxyClass.getConstructors()[0].newInstance(channel, proxyIns);
-                // this is a fake channel, so we shutdown to release resources.
-                channel.shutdown();
-                proxyObject.setHandler(new MethodHandler() {
-                    @Override
-                    public Object invoke(Object self, Method thisMethod, Method proceed, Object[] args)
-                        throws Throwable {
-                        SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(thisMethod.getDeclaringClass(),
-                            thisMethod, thisMethod.getParameterTypes(), args);
-
-                        SofaResponse sofaResponse = proxyInvoker.invoke(sofaRequest);
-                        if (sofaResponse.isError()) {
-                            throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, sofaResponse.getErrorMsg());
-                        }
-                        Object appResponse = sofaResponse.getAppResponse();
-                        if (appResponse instanceof Throwable) {
-                            throw (Throwable) appResponse;
-                        }
-                        return sofaResponse.getAppResponse();
-                    }
-                });
-            } catch (SofaRpcRuntimeException e) {
-                throw e;
-            } catch (Exception e) {
-                throw new SofaRpcRuntimeException("", e);
-            }
-
+              } catch (NoSuchMethodException e) {
+                  throw new IllegalArgumentException("Does not find getDubboStub in " + enclosingClass.getName() + ", please use the customized protoc-gen-dubbo-java to update the generated classes.");
+              }*/
+            // 创建代理类
+            proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
+                proxyInvoker);
         } catch (Exception e) {
             if (cluster != null) {
                 cluster.destroy();
@@ -232,7 +169,7 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
         }
         RpcRuntimeContext.cacheConsumerConfig(this);
 
-        return (T) this.proxyObject;
+        return (T) this.proxyIns;
     }
 
     /*
@@ -241,12 +178,19 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
          */
     @Override
     public synchronized void unRefer() {
-        if (this.proxyObject == null) {
+        if (this.proxyIns == null) {
             return;
         }
 
         // Do not disconnect. GPRC connection should be closed by connection holders.
-        this.proxyObject = null;
+        this.proxyIns = null;
     }
 
+    private static CallOptions buildCallOptions() {
+        // gRPC Deadline starts counting when it's created, so we need to create and add a new Deadline for each RPC call.
+        //        CallOptions callOptions = CallOptions.DEFAULT
+        //                .withDeadline(Deadline.after(url.getParameter(TIMEOUT_KEY, DEFAULT_TIMEOUT), TimeUnit.MILLISECONDS));
+        CallOptions callOptions = CallOptions.DEFAULT;
+        return callOptions;
+    }
 }

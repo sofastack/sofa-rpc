@@ -26,10 +26,14 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.Server;
 import io.grpc.BindableService;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerInterceptor;
+import io.grpc.ServerInterceptors;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.util.MutableHandlerRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -135,11 +139,14 @@ public class GrpcServer implements Server {
     @Override
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
         BindableService bindableService = (BindableService) providerConfig.getRef();
-        ServerServiceDefinition serverServiceDefinition = bindableService.bindService();
-        serviceInfo.put(bindableService, serverServiceDefinition);
-
+        List<ServerInterceptor> serverInterceptors = new ArrayList<ServerInterceptor>();
+        serverInterceptors.add(new ServerReqHeaderInterceptor());
+        serverInterceptors.add(new ServerResHeaderInterceptor());
         try {
-            handlerRegistry.addService(serverServiceDefinition);
+            ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
+                bindableService.bindService(), serverInterceptors);
+            serviceInfo.put(bindableService, serviceDefinition);
+            handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Register grpc service error", e);

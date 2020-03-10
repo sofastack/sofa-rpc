@@ -53,7 +53,7 @@ public class GrpcServerRegistryApplication {
         ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
             .setApplication(applicationConfig)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
-            .setInterfaceId(GreeterGrpc.class.getName())
+            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
             .setRef(new GrpcGreeterImpl())
             .setServer(serverConfig)
             .setRegistry(registryConfig);

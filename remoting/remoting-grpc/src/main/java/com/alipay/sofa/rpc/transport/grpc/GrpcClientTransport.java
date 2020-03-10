@@ -29,11 +29,15 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
-import io.grpc.ConnectivityState;
+import io.grpc.Channel;
+import io.grpc.ClientInterceptor;
+import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -73,9 +77,9 @@ public class GrpcClientTransport extends ClientTransport {
         if (isAvailable()) {
             return;
         }
-        ProviderInfo providerInfo = transportConfig.getProviderInfo();
-        channel = ManagedChannelBuilder.forAddress(providerInfo.getHost(), providerInfo.getPort()).usePlaintext()
-            .build();
+        //   ProviderInfo providerInfo = transportConfig.getProviderInfo();
+        /*  channel = ManagedChannelBuilder.forAddress(providerInfo.getHost(), providerInfo.getPort()).usePlaintext()
+              .build();*/
     }
 
     @Override
@@ -97,13 +101,15 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public boolean isAvailable() {
-        if (channel == null) {
+        /*if (channel == null) {
             return false;
         }
 
         ConnectivityState state = channel.getState(true);
         return state == ConnectivityState.IDLE || state == ConnectivityState.READY ||
-            state == ConnectivityState.CONNECTING;
+            state == ConnectivityState.CONNECTING;*/
+
+        return true;
     }
 
     @Override
@@ -129,7 +135,20 @@ public class GrpcClientTransport extends ClientTransport {
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
         try {
-            SofaResponse r = new GrpcClientInvoker(request, channel).invoke();
+            List<ClientInterceptor> clientInterceptors = new ArrayList<ClientInterceptor>();
+            clientInterceptors.add(new ClientHeaderClientInterceptor(null, null));
+
+            NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(providerInfo.getHost(),
+                providerInfo.getPort());
+            channelBuilder.disableRetry();
+            channelBuilder.usePlaintext();
+            channel = channelBuilder.build();
+
+            Channel proxyChannel = ClientInterceptors.intercept(this.channel, clientInterceptors);
+
+            final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
+
+            SofaResponse r = grpcClientInvoker.invoke(transportConfig.getConsumerConfig());
             return r;
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);

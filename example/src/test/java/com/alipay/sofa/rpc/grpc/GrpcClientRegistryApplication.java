@@ -22,7 +22,6 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
-import io.grpc.examples.helloworld.GreeterGrpc;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterGrpc;
@@ -45,7 +44,7 @@ public class GrpcClientRegistryApplication {
         registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
 
         ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
-        consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
+        consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setRegistry(registryConfig);
 
@@ -60,41 +59,22 @@ public class GrpcClientRegistryApplication {
         HelloRequest request = HelloRequest.newBuilder().setName("world").build();
         HelloReply reply = null;
         try {
-            for (int i = 0; i < 10000; i++) {
-                try {
-                    HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("" + i)
-                        .build();
-                    request = HelloRequest.newBuilder(request).setName("world_" + i).setDateTime(reqDateTime).build();
-                    reply = greeterBlockingStub.sayHello(request);
-                    LOGGER.info("Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
-                    // Object r = greeterBlockingStub.sayHello(request);
-                    // LOGGER.info("Greeting: {}, {}", r.toString(), r.toString());
-                } catch (StatusRuntimeException e) {
-                    LOGGER.error("RPC failed: {}", e.getStatus());
-                } catch (Throwable e) {
-                    LOGGER.error("Unexpected RPC call breaks", e);
-                }
-
-                try {
-                    Thread.sleep(2000);
-                } catch (Exception e) {
-                }
+            try {
+                HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
+                    .build();
+                request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
+                reply = greeterBlockingStub.sayHello(request);
+                LOGGER.info("Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
+                // Object r = greeterBlockingStub.sayHello(request);
+                // LOGGER.info("Greeting: {}, {}", r.toString(), r.toString());
+            } catch (StatusRuntimeException e) {
+                LOGGER.error("RPC failed: {}", e.getStatus());
+            } catch (Throwable e) {
+                LOGGER.error("Unexpected RPC call breaks", e);
             }
         } catch (Exception e) {
             LOGGER.error("Unexpected RPC call breaks", e);
         }
-
-        synchronized (GrpcClientRegistryApplication.class) {
-            try {
-                while (true) {
-                    GrpcClientRegistryApplication.class.wait();
-                }
-            } catch (InterruptedException e) {
-                LOGGER.error("Exit by Interrupted");
-            }
-        }
-
-        consumerConfig.unRefer();
 
     }
 }
