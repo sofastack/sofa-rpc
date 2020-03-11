@@ -31,7 +31,7 @@ public class ReferenceCountManagedChannel extends ManagedChannel {
 
     private final AtomicInteger referenceCount = new AtomicInteger(0);
 
-    private ManagedChannel grpcChannel;
+    private ManagedChannel      grpcChannel;
 
     public ReferenceCountManagedChannel(ManagedChannel delegated) {
         this.grpcChannel = delegated;
@@ -74,7 +74,8 @@ public class ReferenceCountManagedChannel extends ManagedChannel {
     }
 
     @Override
-    public <RequestT, ResponseT> ClientCall<RequestT, ResponseT> newCall(MethodDescriptor<RequestT, ResponseT> methodDescriptor, CallOptions callOptions) {
+    public <RequestT, ResponseT> ClientCall<RequestT, ResponseT> newCall(MethodDescriptor<RequestT, ResponseT> methodDescriptor,
+                                                                         CallOptions callOptions) {
         return grpcChannel.newCall(methodDescriptor, callOptions);
     }
 

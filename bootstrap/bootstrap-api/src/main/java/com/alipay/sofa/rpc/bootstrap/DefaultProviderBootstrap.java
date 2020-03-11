@@ -154,6 +154,8 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
         }
 
         try {
+
+            preProcessProviderTarget(providerConfig);
             // 构造请求调用器
             providerProxyInvoker = new ProviderProxyInvoker(providerConfig);
             // 初始化注册中心
@@ -476,5 +478,13 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
             }
         }
         return false;
+    }
+
+    /**
+     * make other provider bootstrap can do extra work
+     * @param providerConfig
+     */
+    protected void preProcessProviderTarget(ProviderConfig providerConfig) {
+        return;
     }
 }

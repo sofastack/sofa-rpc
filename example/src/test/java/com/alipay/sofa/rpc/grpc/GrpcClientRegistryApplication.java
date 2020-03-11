@@ -33,9 +33,9 @@ import java.time.format.DateTimeFormatter;
  */
 public class GrpcClientRegistryApplication {
 
-    static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] {DateTimeFormatter.ISO_DATE_TIME,
-            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-            DateTimeFormatter.BASIC_ISO_DATE};
+    static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] { DateTimeFormatter.ISO_DATE_TIME,
+                                                       DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+                                                       DateTimeFormatter.BASIC_ISO_DATE };
 
     public static void main(String[] args) {
         final Logger LOGGER = LoggerFactory.getLogger(GrpcClientRegistryApplication.class);
@@ -45,8 +45,8 @@ public class GrpcClientRegistryApplication {
 
         ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
         consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
-                .setRegistry(registryConfig);
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
+            .setRegistry(registryConfig);
 
         SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
 
@@ -54,13 +54,13 @@ public class GrpcClientRegistryApplication {
 
         LOGGER.info("Will try to greet " + "world" + " ...");
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
-                .build();
+            .build();
         HelloRequest request = HelloRequest.newBuilder().setName("world").build();
         HelloReply reply = null;
         try {
             try {
                 HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
-                        .build();
+                    .build();
                 request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
                 reply = greeterBlockingStub.sayHello(request);
                 LOGGER.info("Invoke Success,Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
