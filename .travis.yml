@@ -17,7 +17,7 @@ install:
 bundler_args: --retry 0
 
 script:
-  - travis_retry ./mvnw clean package -Pci-test
+  - travis_retry ./mvnw package -Pci-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
