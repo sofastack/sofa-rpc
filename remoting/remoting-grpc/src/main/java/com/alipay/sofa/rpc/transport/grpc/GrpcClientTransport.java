@@ -38,6 +38,8 @@ import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -49,13 +51,18 @@ import java.util.concurrent.TimeUnit;
 @Extension("grpc")
 public class GrpcClientTransport extends ClientTransport {
 
-    private ProviderInfo        providerInfo;
+    private ProviderInfo providerInfo;
 
-    private ManagedChannel      channel;
+    private ManagedChannel channel;
 
-    private InetSocketAddress   localAddress;
+    private InetSocketAddress localAddress;
 
-    private InetSocketAddress   remoteAddress;
+    private InetSocketAddress remoteAddress;
+
+    /* <address, gRPC channels> */
+    private final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
+
+    private final Object lock = new Object();
 
     private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
 
@@ -77,9 +84,8 @@ public class GrpcClientTransport extends ClientTransport {
         if (isAvailable()) {
             return;
         }
-        //   ProviderInfo providerInfo = transportConfig.getProviderInfo();
-        /*  channel = ManagedChannelBuilder.forAddress(providerInfo.getHost(), providerInfo.getPort()).usePlaintext()
-              .build();*/
+        ProviderInfo providerInfo = transportConfig.getProviderInfo();
+        channel = getSharedChannel(providerInfo);
     }
 
     @Override
@@ -92,6 +98,7 @@ public class GrpcClientTransport extends ClientTransport {
             }
             channel = null;
         }
+        channelMap.remove(providerInfo.toString());
     }
 
     @Override
@@ -101,15 +108,11 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public boolean isAvailable() {
-        /*if (channel == null) {
+        if (channel == null) {
             return false;
         }
 
-        ConnectivityState state = channel.getState(true);
-        return state == ConnectivityState.IDLE || state == ConnectivityState.READY ||
-            state == ConnectivityState.CONNECTING;*/
-
-        return true;
+        return !channel.isShutdown() && !channel.isTerminated();
     }
 
     @Override
@@ -137,12 +140,6 @@ public class GrpcClientTransport extends ClientTransport {
         try {
             List<ClientInterceptor> clientInterceptors = new ArrayList<ClientInterceptor>();
             clientInterceptors.add(new ClientHeaderClientInterceptor(null, null));
-
-            NettyChannelBuilder channelBuilder = NettyChannelBuilder.forAddress(providerInfo.getHost(),
-                providerInfo.getPort());
-            channelBuilder.disableRetry();
-            channelBuilder.usePlaintext();
-            channel = channelBuilder.build();
 
             Channel proxyChannel = ClientInterceptors.intercept(this.channel, clientInterceptors);
 
@@ -178,5 +175,43 @@ public class GrpcClientTransport extends ClientTransport {
     @Override
     public InetSocketAddress localAddress() {
         return localAddress;
+    }
+
+    /**
+     * Get shared channel connection
+     */
+    private ReferenceCountManagedChannel getSharedChannel(ProviderInfo url) {
+        String key = url.toString();
+        ReferenceCountManagedChannel channel = channelMap.get(key);
+
+        if (channel != null && !channel.isTerminated()) {
+            channel.incrementAndGetCount();
+            return channel;
+        }
+
+        synchronized (lock) {
+            channel = channelMap.get(key);
+            // double check
+            if (channel != null && !channel.isTerminated()) {
+                channel.incrementAndGetCount();
+            } else {
+                channel = new ReferenceCountManagedChannel(initChannel(url));
+                channelMap.put(key, channel);
+            }
+        }
+
+        return channel;
+    }
+
+    /**
+     * Create new connection
+     *
+     * @param url
+     */
+    private ManagedChannel initChannel(ProviderInfo url) {
+        NettyChannelBuilder builder = NettyChannelBuilder.forAddress(url.getHost(), url.getPort());
+        builder.usePlaintext();
+        builder.disableRetry();
+        return builder.build();
     }
 }

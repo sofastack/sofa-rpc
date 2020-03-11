@@ -33,9 +33,9 @@ import java.time.format.DateTimeFormatter;
  */
 public class GrpcClientRegistryApplication {
 
-    static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] { DateTimeFormatter.ISO_DATE_TIME,
-                                                       DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-                                                       DateTimeFormatter.BASIC_ISO_DATE };
+    static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] {DateTimeFormatter.ISO_DATE_TIME,
+            DateTimeFormatter.ISO_LOCAL_DATE_TIME,
+            DateTimeFormatter.BASIC_ISO_DATE};
 
     public static void main(String[] args) {
         final Logger LOGGER = LoggerFactory.getLogger(GrpcClientRegistryApplication.class);
@@ -45,28 +45,25 @@ public class GrpcClientRegistryApplication {
 
         ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
         consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
-            .setRegistry(registryConfig);
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
+                .setRegistry(registryConfig);
 
-        // GreeterGrpc.GreeterBlockingStub s = new         
-        SofaGreeterGrpc.IGreeter greeterBlockingStub = (SofaGreeterGrpc.IGreeter) consumerConfig.refer();
+        SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
 
         LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
 
         LOGGER.info("Will try to greet " + "world" + " ...");
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
-            .build();
+                .build();
         HelloRequest request = HelloRequest.newBuilder().setName("world").build();
         HelloReply reply = null;
         try {
             try {
                 HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
-                    .build();
+                        .build();
                 request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
                 reply = greeterBlockingStub.sayHello(request);
-                LOGGER.info("Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
-                // Object r = greeterBlockingStub.sayHello(request);
-                // LOGGER.info("Greeting: {}, {}", r.toString(), r.toString());
+                LOGGER.info("Invoke Success,Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
             } catch (StatusRuntimeException e) {
                 LOGGER.error("RPC failed: {}", e.getStatus());
             } catch (Throwable e) {

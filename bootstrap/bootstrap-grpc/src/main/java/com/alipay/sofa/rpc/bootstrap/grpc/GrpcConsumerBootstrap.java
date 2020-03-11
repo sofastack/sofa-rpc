@@ -28,11 +28,10 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import io.grpc.CallOptions;
 
-import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Consumer bootstrap for grpc 
+ * Consumer bootstrap for grpc
  *
  * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
  */
@@ -41,23 +40,23 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
     /**
      * Set by ConsumerConfig.setInterfaceID(), or interface attribution in XML service definition.
-     * 
+     * <p>
      * PLEASE NOTE: For GRPC transport, interfaceID won't refer to a real interface, it should be
-     * FULL QUALIFIED name of the concrete CLASS, which is generated from .proto file.  
+     * FULL QUALIFIED name of the concrete CLASS, which is generated from .proto file.
      * e.g. GreeterGrpc.class.getName()
      */
-    private final String           interfaceID;
+    private final String interfaceID;
 
     /**
      * 代理实现类
      */
     protected transient volatile T proxyIns;
 
-    private final static Logger    LOGGER = LoggerFactory.getLogger(GrpcConsumerBootstrap.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcConsumerBootstrap.class);
 
     /**
      * 构造函数
-     
+     *
      * @param consumerConfig 服务消费者配置
      */
     protected GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
@@ -98,14 +97,14 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
                 cnt.decrementAndGet();
                 // 超过最大数量，直接抛出异常
                 throw new SofaRpcRuntimeException("Duplicate consumer config with key " + key
-                    + " has been referred more than " + maxProxyCount + " times!"
-                    + " Maybe it's wrong config, please check it."
-                    + " Ignore this if you did that on purpose!");
+                        + " has been referred more than " + maxProxyCount + " times!"
+                        + " Maybe it's wrong config, please check it."
+                        + " Ignore this if you did that on purpose!");
             } else if (c > 1) {
                 if (LOGGER.isInfoEnabled(appName)) {
                     LOGGER.infoWithApp(appName, "Duplicate consumer config with key {} has been referred!"
-                        + " Maybe it's wrong config, please check it."
-                        + " Ignore this if you did that on purpose!", key);
+                            + " Maybe it's wrong config, please check it."
+                            + " Ignore this if you did that on purpose!", key);
                 }
             }
         }
@@ -120,35 +119,9 @@ public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
             cluster.init();
             // 构造Invoker对象（执行链）
             proxyInvoker = buildClientProxyInvoker(this);
-
-            String host;
-            int port;
-            /*  ManagedChannel channel;
-              if (cluster.getAddressHolder().getProviderInfos("").size() != 0) {
-                  host = cluster.getAddressHolder().getProviderInfos("").get(0).getHost();
-                  port = cluster.getAddressHolder().getProviderInfos("").get(0).getPort();
-              } else {
-                  host = "localhost";
-                  port = 50052;
-              }
-              channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();*/
-
-            final Method dubboStubMethod;
-            Class<?> enclosingClass = null;
-            /*  T stub;
-              try {
-                   enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
-
-                  dubboStubMethod = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
-                          ProviderInfo.class, ConsumerConfig.class,int.class);
-                  stub = (T) dubboStubMethod.invoke(null, channel, CallOptions.DEFAULT, null, null,3000);
-
-              } catch (NoSuchMethodException e) {
-                  throw new IllegalArgumentException("Does not find getDubboStub in " + enclosingClass.getName() + ", please use the customized protoc-gen-dubbo-java to update the generated classes.");
-              }*/
             // 创建代理类
             proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
-                proxyInvoker);
+                    proxyInvoker);
         } catch (Exception e) {
             if (cluster != null) {
                 cluster.destroy();
