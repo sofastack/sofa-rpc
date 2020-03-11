@@ -17,7 +17,10 @@
 package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.server.grpc.GrpcHeadKeys;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -29,6 +32,9 @@ import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Grpc客户端侧的拦截器，主要是发送隐式传参，状态记录等
@@ -49,7 +55,10 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
      */
     private ProviderInfo       rpcUrl;
 
-    public ClientHeaderClientInterceptor(ConsumerConfig metadata, ProviderInfo rpcUrl) {
+    private SofaRequest        sofaRequest;
+
+    public ClientHeaderClientInterceptor(SofaRequest sofaRequest, ConsumerConfig metadata, ProviderInfo rpcUrl) {
+        this.sofaRequest = sofaRequest;
         this.serviceMetadata = metadata;
         this.rpcUrl = rpcUrl;
     }
@@ -59,29 +68,22 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                                                                CallOptions callOptions, Channel next) {
 
         //LOGGER.info("header received from client:" + requestHeaders); 这里和下面不在一个线程
+
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(
             method, callOptions)) {
 
             @Override
             public void start(Listener<RespT> responseListener, Metadata requestHeader) {
-                /*  // 客户端设置请求服务端的Header
-                  RequestBase request = (RequestBase) RpcInvokeContext.getContext().get(
-                      SOFA_REQUEST_KEY);
-                  Map<String, String> header = new HashMap<String, String>();
-                  header.put(SofaConstants.HEAD_METHOD_NAME, request.getMethodName());
-                  header.put(SofaConstants.HEAD_TARGET_SERVICE, request.getTargetServiceUniqueName());
-                  if (request instanceof SofaRequest) {
-                      SofaRequest sofaRequest = (SofaRequest) request;
-                      header.put(SofaConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
-                      Map<String, Object> requestProps = sofaRequest.getRequestProps();
-                      if (requestProps != null) { // <String, Object> 转扁平化 <String, String>
-                          ContextMapConverter.flatCopyTo("", requestProps, header);
-                      }
-                  }
-
-                  for (Map.Entry<String, String> entry : header.entrySet()) {
-                      requestHeader.put(GrpcHeadKeys.getKey(entry.getKey()), entry.getValue());
-                  }*/
+                // 客户端设置请求服务端的Header
+                Map<String, String> header = new HashMap<String, String>();
+                header.put(RemotingConstants.HEAD_METHOD_NAME, sofaRequest.getMethodName());
+                header.put(RemotingConstants.HEAD_TARGET_SERVICE, sofaRequest.getTargetServiceUniqueName());
+                header.put(RemotingConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
+                String tracerStr = (String) sofaRequest.getRequestProp(RemotingConstants.NEW_RPC_TRACE_NAME);
+                header.put(RemotingConstants.NEW_RPC_TRACE_NAME, tracerStr);
+                for (Map.Entry<String, String> entry : header.entrySet()) {
+                    requestHeader.put(GrpcHeadKeys.getKey(entry.getKey()), entry.getValue());
+                }
 
                 // LOGGER.info("[2]response header received from server:{}", requestHeader);
 

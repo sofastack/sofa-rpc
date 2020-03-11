@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ServerSendEvent;
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -26,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * 服务端设置返回响应Header的拦截器
- *
+ * <p>
  * Created by zhanggeng on 2017/1/25.
  */
 public class ServerResHeaderInterceptor implements ServerInterceptor {
@@ -37,14 +40,9 @@ public class ServerResHeaderInterceptor implements ServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
                                                                  final Metadata requestHeaders,
                                                                  ServerCallHandler<ReqT, RespT> next) {
-
         return next.startCall(new SimpleForwardingServerCall<ReqT, RespT>(call) {
             @Override
             public void sendHeaders(Metadata responseHeaders) {
-                // 服务端设置响应Header  TODO
-                //                responseHeaders.put(ClientKeys.TRACE_ID_KEY, (String) RpcContext.getContext().getAttachment("traceId"));
-                //                responseHeaders.put(ClientKeys.ELASPED_TIME, (String) RpcContext.getContext().getAttachment("elapsed"));
-                //                LOGGER.info("[4]send response Headers:{}", responseHeaders);
                 super.sendHeaders(responseHeaders);
             }
 
@@ -52,6 +50,10 @@ public class ServerResHeaderInterceptor implements ServerInterceptor {
             public void sendMessage(RespT message) {
                 //                LOGGER.info("[5]send response message:{}", message);
                 super.sendMessage(message);
+                if (EventBus.isEnable(ServerSendEvent.class)) {
+                    SofaRequest sofaRequest = new SofaRequest();
+                    EventBus.post(new ServerSendEvent(sofaRequest, null, null));
+                }
             }
         }, requestHeaders);
     }

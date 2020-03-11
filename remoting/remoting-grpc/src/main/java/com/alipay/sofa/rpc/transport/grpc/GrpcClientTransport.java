@@ -18,10 +18,14 @@ package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.SystemInfo;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
+import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
+import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -137,18 +141,31 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
+        SofaResponse r = null;
+        SofaRpcException throwable = null;
+
         try {
+            RpcInternalContext context = RpcInternalContext.getContext();
+
+            beforeSend(context, request);
+
             List<ClientInterceptor> clientInterceptors = new ArrayList<ClientInterceptor>();
-            clientInterceptors.add(new ClientHeaderClientInterceptor(null, null));
+            clientInterceptors.add(new ClientHeaderClientInterceptor(request, null, null));
 
             Channel proxyChannel = ClientInterceptors.intercept(this.channel, clientInterceptors);
 
             final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
 
-            SofaResponse r = grpcClientInvoker.invoke(transportConfig.getConsumerConfig());
+            r = grpcClientInvoker.invoke(transportConfig.getConsumerConfig());
             return r;
         } catch (Exception e) {
+            throwable = convertToRpcException(e);
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);
+        } finally {
+            if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                        transportConfig.getProviderInfo(), request, r, throwable));
+            }
         }
     }
 
@@ -213,5 +230,36 @@ public class GrpcClientTransport extends ClientTransport {
         builder.usePlaintext();
         builder.disableRetry();
         return builder.build();
+    }
+
+    /**
+     * 调用前设置一些属性
+     *
+     * @param context RPC上下文
+     * @param request 请求对象
+     */
+    protected void beforeSend(RpcInternalContext context, SofaRequest request) {
+        context.setLocalAddress(localAddress());
+        if (EventBus.isEnable(ClientBeforeSendEvent.class)) {
+            EventBus.post(new ClientBeforeSendEvent(request));
+        }
+    }
+
+    /**
+     * 转换调用出现的异常为RPC异常
+     *
+     * @param e 异常
+     * @return RPC异常
+     */
+    protected SofaRpcException convertToRpcException(Exception e) {
+        SofaRpcException exception;
+        if (e instanceof SofaRpcException) {
+            exception = (SofaRpcException) e;
+        }
+        // 客户端未知
+        else {
+            exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
+        }
+        return exception;
     }
 }
