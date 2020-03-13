@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.6.5-SNAPSHOT</version>
+    <version>5.6.5</version>
 
     <name>${project.groupId}:${project.artifactId}</name>
     <url>http://github.com/sofastack/sofa-rpc</url>
@@ -275,7 +275,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+            <artifactId>sofa-rpc-config-apollo</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -477,7 +477,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
-                                    <include>com.alipay.sofa:sofa-rpc-dynamic-apollo</include>
+                                    <include>com.alipay.sofa:sofa-rpc-config-apollo</include>
                                     <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->
                                 </includes>
