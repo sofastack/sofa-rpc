@@ -10,7 +10,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+    <artifactId>sofa-rpc-config-apollo</artifactId>
 
     <dependencies>
         <dependency>
