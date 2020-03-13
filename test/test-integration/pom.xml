@@ -197,7 +197,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-dynamic-apollo</artifactId>
+            <artifactId>sofa-rpc-config-apollo</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
