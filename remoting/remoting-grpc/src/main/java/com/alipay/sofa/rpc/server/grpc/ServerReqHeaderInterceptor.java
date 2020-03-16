@@ -16,13 +16,14 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
-import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
+import io.grpc.Status;
+import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,10 +34,17 @@ import org.slf4j.LoggerFactory;
  */
 public class ServerReqHeaderInterceptor implements ServerInterceptor {
 
-    public static final Logger  LOGGER         = LoggerFactory
-                                                   .getLogger(ServerReqHeaderInterceptor.class);
+    public static final Logger               LOGGER        = LoggerFactory
+                                                               .getLogger(ServerReqHeaderInterceptor.class);
 
-    private final static String CONTEXT_PRRFIX = RemotingConstants.RPC_TRACE_NAME + ".";
+    public static final Metadata.Key<String> GRPC_STATUS   = Metadata.Key.of("grpc-status",
+                                                               Metadata.ASCII_STRING_MARSHALLER);
+
+    public static final Metadata.Key<String> GRPC_MESSAGE  = Metadata.Key.of("grpc-message",
+                                                               Metadata.ASCII_STRING_MARSHALLER);
+
+    public static final Metadata.Key<String> GRPC_ENCODING = Metadata.Key.of("grpc-encoding",
+                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
@@ -53,12 +61,26 @@ public class ServerReqHeaderInterceptor implements ServerInterceptor {
                 super.onComplete();
             }
 
+            //客户端发完了
             @Override
             public void onHalfClose() {
                 // LOGGER.info("[1]header received from client:" + requestHeaders + " from " + socketAddress.toString());
-                // 服务端收到请求Header
+                // 服务端收到请求Header 如果用户是代码中直接抛出异常，会走到这里的
                 GrpcTracerAdapter.serverReceived(call, requestHeaders);
-                super.onHalfClose();
+                try {
+                    super.onHalfClose();
+                } catch (Throwable t) {
+                    // 统一处理异常
+                    StatusRuntimeException exception = fromThrowable(t);
+                    // 调用 call.close() 发送 Status 和 metadata
+                    // 这个方式和 onError()本质是一样的
+                    call.close(exception.getStatus(), exception.getTrailers());
+                }
+            }
+
+            private StatusRuntimeException fromThrowable(Throwable t) {
+                final Metadata trailers = new Metadata();
+                return new StatusRuntimeException(Status.UNKNOWN, trailers);
             }
         };
     }

@@ -27,6 +27,8 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
+import io.grpc.Status;
+import io.grpc.StatusException;
 import io.grpc.stub.StreamObserver;
 
 import java.lang.reflect.Method;
@@ -107,14 +109,16 @@ public class GrpcClientInvoker {
 
             Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
 
-            Method dubboStubMethod = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
+            Method sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
                 ProviderInfo.class, ConsumerConfig.class, int.class);
-            Object stub = dubboStubMethod.invoke(null, channel, CallOptions.DEFAULT, null, null, 3000);
+            Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, null, null, 3000);
 
             r = method.invoke(stub, methodArgs[0]);
 
         } catch (Throwable e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e.getMessage(), e);
+            Status status = Status.fromThrowable(e);
+            StatusException grpcException = status.asException();
+            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, grpcException);
         }
         return r;
     }

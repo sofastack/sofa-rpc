@@ -157,8 +157,6 @@ public class GrpcTracerAdapter {
      */
     public static void serverSend(final Metadata requestHeaders, SofaResponse response, Throwable throwable) {
         if (EventBus.isEnable(ServerSendEvent.class)) {
-            SocketAddress address = (SocketAddress) RpcInvokeContext.getContext().get(
-                GrpcContants.SOFA_REMOTE_ADDR_KEY);
             SofaRequest request = (SofaRequest) RpcInvokeContext.getContext()
                 .get(GrpcContants.SOFA_REQUEST_KEY);
             if (request == null) {
@@ -170,7 +168,6 @@ public class GrpcTracerAdapter {
             if (request.getMethodName() == null) {
                 request.setMethodName(requestHeaders.get(GrpcHeadKeys.HEAD_KEY_METHOD_NAME));
             }
-            //添加requst TODO
             EventBus.post(new ServerSendEvent(request, response, throwable));
         }
     }

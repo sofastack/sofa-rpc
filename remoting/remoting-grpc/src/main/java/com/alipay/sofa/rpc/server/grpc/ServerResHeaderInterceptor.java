@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
 import io.grpc.Metadata;
@@ -44,11 +45,14 @@ public class ServerResHeaderInterceptor implements ServerInterceptor {
                 super.sendHeaders(responseHeaders);
             }
 
+            //服务端发完了
             @Override
             public void sendMessage(RespT message) {
                 //                LOGGER.info("[5]send response message:{}", message);
                 super.sendMessage(message);
-                GrpcTracerAdapter.serverSend(requestHeaders, null, null);
+                SofaResponse sofaResponse = new SofaResponse();
+                sofaResponse.setAppResponse(message);
+                GrpcTracerAdapter.serverSend(requestHeaders, sofaResponse, null);
             }
         }, requestHeaders);
     }
