@@ -27,50 +27,56 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class GrpcHeadKeys {
 
-    protected static ConcurrentHashMap<String, Key<String>> keyMap                   = new ConcurrentHashMap<String, Key<String>>();
+    protected static ConcurrentHashMap<String, Key<String>> keyMap                    = new ConcurrentHashMap<String, Key<String>>();
 
-    public static final Key<String>                         HEAD_KEY_TARGET_SERVICE  = Key
-                                                                                         .of(RemotingConstants.HEAD_TARGET_SERVICE,
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_TARGET_SERVICE   = Key
+                                                                                          .of(RemotingConstants.HEAD_TARGET_SERVICE,
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_METHOD_NAME     = Key
-                                                                                         .of(RemotingConstants.HEAD_METHOD_NAME,
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_METHOD_NAME      = Key
+                                                                                          .of(RemotingConstants.HEAD_METHOD_NAME,
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_TARGET_APP      = Key
-                                                                                         .of(RemotingConstants.HEAD_TARGET_APP,
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_TARGET_APP       = Key
+                                                                                          .of(RemotingConstants.HEAD_TARGET_APP,
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_SERVICE_VERSION = Key
-                                                                                         .of("meta-service-version",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_SERVICE_VERSION  = Key
+                                                                                          .of("meta-service-version",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_TRACE_ID        = Key
-                                                                                         .of("meta-trace-traceid",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_TRACE_ID         = Key
+                                                                                          .of("meta-trace-traceid",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_RPC_ID          = Key
-                                                                                         .of("meta-trace-rpcid",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_RPC_ID           = Key
+                                                                                          .of("meta-trace-rpcid",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_META_TYPE       = Key
-                                                                                         .of("meta-type",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_META_TYPE        = Key
+                                                                                          .of("meta-type",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_SAMP_TYPE       = Key
-                                                                                         .of("meta-trace-samp",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
-    public static final Key<String>                         HEAD_KEY_CURRENT_APP     = Key
-                                                                                         .of("meta-trace-current-app",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_SAMP_TYPE        = Key
+                                                                                          .of("meta-trace-samp",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_CURRENT_APP      = Key
+                                                                                          .of("meta-trace-current-app",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_INVOKE_TYPE     = Key
-                                                                                         .of("meta-trace-invoke-type",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_INVOKE_TYPE      = Key
+                                                                                          .of("meta-trace-invoke-type",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_PROTOCOL_TYPE   = Key
-                                                                                         .of("meta-trace-protocol-type",
-                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_PROTOCOL_TYPE    = Key
+                                                                                          .of("meta-trace-protocol-type",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_BIZ_BAGGAGE_TYPE = Key
+                                                                                          .of("meta-trace-biz-baggage",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_SYS_BAGGAGE_TYPE = Key
+                                                                                          .of("meta-trace-sys-baggage",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
     public static Key<String> getKey(String key) {
         Key<String> headKey = keyMap.get(key);
