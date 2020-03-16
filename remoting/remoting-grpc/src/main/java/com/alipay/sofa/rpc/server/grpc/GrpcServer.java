@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.Server;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
@@ -138,7 +139,13 @@ public class GrpcServer implements Server {
 
     @Override
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
-        BindableService bindableService = (BindableService) providerConfig.getRef();
+        Object obj = null;
+        try {
+            obj = ProxyFactory.buildProxy(providerConfig.getProxy(), BindableService.class, instance);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        BindableService bindableService = (BindableService) obj;
         List<ServerInterceptor> serverInterceptors = new ArrayList<ServerInterceptor>();
         serverInterceptors.add(new ServerReqHeaderInterceptor());
         serverInterceptors.add(new ServerResHeaderInterceptor());

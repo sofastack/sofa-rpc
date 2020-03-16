@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
+import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -80,7 +81,13 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                 header.put(RemotingConstants.HEAD_TARGET_SERVICE, sofaRequest.getTargetServiceUniqueName());
                 header.put(RemotingConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
                 String tracerStr = (String) sofaRequest.getRequestProp(RemotingConstants.NEW_RPC_TRACE_NAME);
-                header.put(RemotingConstants.NEW_RPC_TRACE_NAME, tracerStr);
+
+                SofaTracerSpanContext spanContext = SofaTracerSpanContext.deserializeFromString(tracerStr);
+                header.put(GrpcHeadKeys.HEAD_KEY_SERVICE_VERSION.name(), "1.0");
+                header.put(GrpcHeadKeys.HEAD_KEY_TRACE_ID.name(), spanContext.getTraceId());
+                header.put(GrpcHeadKeys.HEAD_KEY_RPC_ID.name(), spanContext.getSpanId());
+                header.put(GrpcHeadKeys.HEAD_KEY_META_TYPE.name(), "rpc");
+                //  header.put(RemotingConstants.NEW_RPC_TRACE_NAME, tracerStr);
                 for (Map.Entry<String, String> entry : header.entrySet()) {
                     requestHeader.put(GrpcHeadKeys.getKey(entry.getKey()), entry.getValue());
                 }

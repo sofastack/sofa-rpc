@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
@@ -26,6 +27,8 @@ import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.net.SocketAddress;
 
 /**
  * 服务端设置返回响应Header的拦截器
@@ -51,8 +54,21 @@ public class ServerResHeaderInterceptor implements ServerInterceptor {
                 //                LOGGER.info("[5]send response message:{}", message);
                 super.sendMessage(message);
                 if (EventBus.isEnable(ServerSendEvent.class)) {
-                    SofaRequest sofaRequest = new SofaRequest();
-                    EventBus.post(new ServerSendEvent(sofaRequest, null, null));
+                    SocketAddress address = (SocketAddress) RpcInvokeContext.getContext().get(
+                        GrpcContants.SOFA_REMOTE_ADDR_KEY);
+                    SofaRequest request = (SofaRequest) RpcInvokeContext.getContext()
+                        .get(GrpcContants.SOFA_REQUEST_KEY);
+                    if (request == null) {
+                        request = new SofaRequest();
+                    }
+                    if (request.getTargetServiceUniqueName() == null) {
+                        request.setTargetServiceUniqueName(requestHeaders.get(GrpcHeadKeys.HEAD_KEY_TARGET_SERVICE));
+                    }
+                    if (request.getMethodName() == null) {
+                        request.setMethodName(requestHeaders.get(GrpcHeadKeys.HEAD_KEY_METHOD_NAME));
+                    }
+                    //添加requst TODO
+                    EventBus.post(new ServerSendEvent(request, null, null));
                 }
             }
         }, requestHeaders);
