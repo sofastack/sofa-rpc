@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.config.GrpcInterceptorManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -28,13 +29,10 @@ import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.Server;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
-import io.grpc.ServerInterceptor;
 import io.grpc.ServerInterceptors;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.util.MutableHandlerRegistry;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -146,12 +144,9 @@ public class GrpcServer implements Server {
             e.printStackTrace();
         }
         BindableService bindableService = (BindableService) obj;
-        List<ServerInterceptor> serverInterceptors = new ArrayList<ServerInterceptor>();
-        serverInterceptors.add(new ServerReqHeaderInterceptor());
-        serverInterceptors.add(new ServerResHeaderInterceptor());
         try {
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
-                bindableService.bindService(), serverInterceptors);
+                bindableService.bindService(), GrpcInterceptorManager.getInternalProviderClasses());
             serviceInfo.put(providerConfig, serviceDefinition);
             handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();

@@ -18,7 +18,9 @@ package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.config.GrpcInterceptorManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -30,18 +32,16 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import com.alipay.sofa.rpc.server.grpc.GrpcContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import io.grpc.Channel;
-import io.grpc.ClientInterceptor;
 import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
@@ -57,7 +57,6 @@ public class GrpcClientTransport extends ClientTransport {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
 
-
     private ProviderInfo providerInfo;
 
     private ManagedChannel channel;
@@ -70,7 +69,6 @@ public class GrpcClientTransport extends ClientTransport {
     private final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
 
     private final Object lock = new Object();
-
 
     /**
      * The constructor
@@ -151,11 +149,12 @@ public class GrpcClientTransport extends ClientTransport {
 
             beforeSend(context, request);
 
-            List<ClientInterceptor> clientInterceptors = new ArrayList<ClientInterceptor>();
-            clientInterceptors.add(new ClientHeaderClientInterceptor(request, null, null));
-            Channel proxyChannel = ClientInterceptors.intercept(this.channel, clientInterceptors);
+            RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+            invokeContext.put(GrpcContants.SOFA_REQUEST_KEY, request);
+
+            Channel proxyChannel = ClientInterceptors.intercept(this.channel, GrpcInterceptorManager.getInternalConsumerClasses());
             final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
-            sofaResponse = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(),timeout);
+            sofaResponse = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(), timeout);
             return sofaResponse;
         } catch (Exception e) {
             throwable = convertToRpcException(e);

@@ -16,9 +16,9 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.server.grpc.GrpcContants;
 import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -42,10 +42,7 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
     public static final Logger LOGGER = LoggerFactory
                                           .getLogger(ClientHeaderClientInterceptor.class);
 
-    private SofaRequest        sofaRequest;
-
-    public ClientHeaderClientInterceptor(SofaRequest sofaRequest, ConsumerConfig metadata, ProviderInfo rpcUrl) {
-        this.sofaRequest = sofaRequest;
+    public ClientHeaderClientInterceptor() {
     }
 
     @Override
@@ -60,6 +57,8 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
             @Override
             public void start(Listener<RespT> responseListener, Metadata requestHeader) {
 
+                RpcInvokeContext context = RpcInvokeContext.getContext();
+                SofaRequest sofaRequest = (SofaRequest) context.get(GrpcContants.SOFA_REQUEST_KEY);
                 GrpcTracerAdapter.beforeSend(sofaRequest, requestHeader);
 
                 // LOGGER.info("[2]response header received from server:{}", requestHeader);
