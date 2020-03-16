@@ -42,21 +42,10 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
     public static final Logger LOGGER = LoggerFactory
                                           .getLogger(ClientHeaderClientInterceptor.class);
 
-    /**
-     * 服务配置信息
-     */
-    private ConsumerConfig     serviceMetadata;
-    /**
-     * 当前拦截器对应的RpcUrl关键字
-     */
-    private ProviderInfo       rpcUrl;
-
     private SofaRequest        sofaRequest;
 
     public ClientHeaderClientInterceptor(SofaRequest sofaRequest, ConsumerConfig metadata, ProviderInfo rpcUrl) {
         this.sofaRequest = sofaRequest;
-        this.serviceMetadata = metadata;
-        this.rpcUrl = rpcUrl;
     }
 
     @Override

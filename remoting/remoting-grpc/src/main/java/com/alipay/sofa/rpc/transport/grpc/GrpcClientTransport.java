@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.SystemInfo;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -55,6 +55,9 @@ import java.util.concurrent.TimeUnit;
 @Extension("grpc")
 public class GrpcClientTransport extends ClientTransport {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
+
+
     private ProviderInfo providerInfo;
 
     private ManagedChannel channel;
@@ -68,7 +71,6 @@ public class GrpcClientTransport extends ClientTransport {
 
     private final Object lock = new Object();
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
 
     /**
      * The constructor
@@ -80,7 +82,7 @@ public class GrpcClientTransport extends ClientTransport {
         providerInfo = transportConfig.getProviderInfo();
         connect();
         remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
-        localAddress = InetSocketAddress.createUnresolved(SystemInfo.getLocalHost(), 0);// 端口不准
+        localAddress = InetSocketAddress.createUnresolved(NetUtils.getLocalIpv4(), 0);// 端口不准
     }
 
     @Override
@@ -141,7 +143,7 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
-        SofaResponse r = null;
+        SofaResponse sofaResponse = null;
         SofaRpcException throwable = null;
 
         try {
@@ -151,20 +153,17 @@ public class GrpcClientTransport extends ClientTransport {
 
             List<ClientInterceptor> clientInterceptors = new ArrayList<ClientInterceptor>();
             clientInterceptors.add(new ClientHeaderClientInterceptor(request, null, null));
-
             Channel proxyChannel = ClientInterceptors.intercept(this.channel, clientInterceptors);
-
             final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
-
-            r = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(),timeout);
-            return r;
+            sofaResponse = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(),timeout);
+            return sofaResponse;
         } catch (Exception e) {
             throwable = convertToRpcException(e);
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);
         } finally {
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
                 EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                        transportConfig.getProviderInfo(), request, r, throwable));
+                        transportConfig.getProviderInfo(), request, sofaResponse, throwable));
             }
         }
     }

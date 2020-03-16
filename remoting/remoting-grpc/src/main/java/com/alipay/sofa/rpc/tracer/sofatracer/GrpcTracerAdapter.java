@@ -22,6 +22,7 @@ import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -41,6 +42,8 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_APP_NAME;
 
 /**
  * 客户端：startRpc ——&gt; filter --&gt; beforeSend --&gt; 存入tracer信息 --&gt; clientReceived
@@ -79,9 +82,17 @@ public class GrpcTracerAdapter {
         header.put(GrpcHeadKeys.HEAD_KEY_TRACE_ID.name(), spanContext.getTraceId());
         header.put(GrpcHeadKeys.HEAD_KEY_RPC_ID.name(), spanContext.getSpanId());
         header.put(GrpcHeadKeys.HEAD_KEY_META_TYPE.name(), "rpc");
+        header.put(GrpcHeadKeys.HEAD_KEY_CURRENT_APP.name(), (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
+        header.put(GrpcHeadKeys.HEAD_KEY_PROTOCOL_TYPE.name(),
+            (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_PROTOCOL));
+        header.put(GrpcHeadKeys.HEAD_KEY_INVOKE_TYPE.name(),
+            (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_INVOKE_TYPE));
+
         //  header.put(RemotingConstants.NEW_RPC_TRACE_NAME, tracerStr);
         for (Map.Entry<String, String> entry : header.entrySet()) {
-            requestHeader.put(GrpcHeadKeys.getKey(entry.getKey()), entry.getValue());
+            if (StringUtils.isNotBlank(entry.getValue())) {
+                requestHeader.put(GrpcHeadKeys.getKey(entry.getKey()), entry.getValue());
+            }
         }
     }
 
@@ -125,6 +136,19 @@ public class GrpcTracerAdapter {
                     requestHeaders.get(GrpcHeadKeys.HEAD_KEY_SAMP_TYPE));
             }
 
+            if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_CURRENT_APP)) {
+                sofaRequest.addRequestProp(HEAD_APP_NAME, requestHeaders.get(GrpcHeadKeys.HEAD_KEY_CURRENT_APP));
+            }
+
+            if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_PROTOCOL_TYPE)) {
+                sofaRequest.addRequestProp(RemotingConstants.HEAD_PROTOCOL,
+                    requestHeaders.get(GrpcHeadKeys.HEAD_KEY_PROTOCOL_TYPE));
+            }
+            if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_INVOKE_TYPE)) {
+                sofaRequest.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE,
+                    requestHeaders.get(GrpcHeadKeys.HEAD_KEY_INVOKE_TYPE));
+            }
+
             if (!traceMap.isEmpty()) {
                 sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
             }
@@ -147,6 +171,10 @@ public class GrpcTracerAdapter {
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
+                // 从请求里获取ConsumerTracerFilter额外传递的信息
+                serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
+                //serverSpan.setTag(RpcSpanTags.PROTOCOL, (String) request.getRequestProp(HEAD_PROTOCOL));
+                //serverSpan.setTag(RpcSpanTags.INVOKE_TYPE, (String) request.getRequestProp(HEAD_INVOKE_TYPE));*/
             }
         } catch (Throwable e) {
         }

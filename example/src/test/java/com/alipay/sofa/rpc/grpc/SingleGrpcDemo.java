@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.alipay.sofa.rpc.grpc;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -14,10 +30,13 @@ import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterGrpc;
 
 public class SingleGrpcDemo {
-    static final Logger LOGGER = LoggerFactory.getLogger(SingleGrpcDemo.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleGrpcDemo.class);
 
     public static void main(String[] args) {
-        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("grpc-server");
+
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("grpc-client");
+
+        ApplicationConfig serverApp = new ApplicationConfig().setAppName("grpc-server");
 
         int port = 50052;
         if (args.length != 0) {
@@ -26,28 +45,28 @@ public class SingleGrpcDemo {
         }
 
         RegistryConfig registryConfig = new RegistryConfig()
-                .setProtocol("zookeeper")
-                .setAddress("127.0.0.1:2181");
+            .setProtocol("zookeeper")
+            .setAddress("127.0.0.1:2181");
 
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
-                .setPort(port);
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
+            .setPort(port);
 
         ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
-                .setApplication(applicationConfig)
-                .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
-                .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
-                .setRef(new GrpcGreeterImpl())
-                .setServer(serverConfig)
-                .setRegistry(registryConfig);
+            .setApplication(serverApp)
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
+            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+            .setRef(new GrpcGreeterImpl())
+            .setServer(serverConfig)
+            .setRegistry(registryConfig);
 
         providerConfig.export();
 
-
         ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
         consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
-                .setRegistry(registryConfig);
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
+            .setRegistry(registryConfig)
+            .setApplication(clientApp);
 
         SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
 
@@ -55,13 +74,13 @@ public class SingleGrpcDemo {
 
         LOGGER.info("Will try to greet " + "world" + " ...");
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
-                .build();
+            .build();
         HelloRequest request = HelloRequest.newBuilder().setName("world").build();
         HelloReply reply = null;
         try {
             try {
                 HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
-                        .build();
+                    .build();
                 request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
                 reply = greeterBlockingStub.sayHello(request);
                 LOGGER.info("Invoke Success,Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
@@ -72,6 +91,12 @@ public class SingleGrpcDemo {
             }
         } catch (Exception e) {
             LOGGER.error("Unexpected RPC call breaks", e);
+        }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }

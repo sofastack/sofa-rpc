@@ -60,6 +60,17 @@ public class GrpcHeadKeys {
     public static final Key<String>                         HEAD_KEY_SAMP_TYPE       = Key
                                                                                          .of("meta-trace-samp",
                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_CURRENT_APP     = Key
+                                                                                         .of("meta-trace-current-app",
+                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+
+    public static final Key<String>                         HEAD_KEY_INVOKE_TYPE     = Key
+                                                                                         .of("meta-trace-invoke-type",
+                                                                                             Metadata.ASCII_STRING_MARSHALLER);
+
+    public static final Key<String>                         HEAD_KEY_PROTOCOL_TYPE   = Key
+                                                                                         .of("meta-trace-protocol-type",
+                                                                                             Metadata.ASCII_STRING_MARSHALLER);
 
     public static Key<String> getKey(String key) {
         Key<String> headKey = keyMap.get(key);

@@ -34,17 +34,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ServerReqHeaderInterceptor implements ServerInterceptor {
 
-    public static final Logger               LOGGER        = LoggerFactory
-                                                               .getLogger(ServerReqHeaderInterceptor.class);
-
-    public static final Metadata.Key<String> GRPC_STATUS   = Metadata.Key.of("grpc-status",
-                                                               Metadata.ASCII_STRING_MARSHALLER);
-
-    public static final Metadata.Key<String> GRPC_MESSAGE  = Metadata.Key.of("grpc-message",
-                                                               Metadata.ASCII_STRING_MARSHALLER);
-
-    public static final Metadata.Key<String> GRPC_ENCODING = Metadata.Key.of("grpc-encoding",
-                                                               Metadata.ASCII_STRING_MARSHALLER);
+    public static final Logger LOGGER = LoggerFactory
+                                          .getLogger(ServerReqHeaderInterceptor.class);
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,

@@ -27,11 +27,11 @@ public class GrpcGreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
     public void sayHello(HelloRequest request, StreamObserver<HelloReply> responseObserver) {
         System.out.println("Executing thread is " + Thread.currentThread().getName());
         HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + request.getName()).build();
-        //  responseObserver.onNext(reply);
-        //  responseObserver.onCompleted();
-        // responseObserver.onError(new RuntimeException("fuck"));
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+        //    responseObserver.onError(new RuntimeException("fuck"));
 
-        throw new RuntimeException("xx");
+        //        throw new RuntimeException("xx");
     }
 
 }

@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.grpc;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.log.Logger;
@@ -26,19 +27,15 @@ import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterGrpc;
 
-import java.time.format.DateTimeFormatter;
-
 /**
  * @author <a href="mailto:luanyanqiang@dibgroup.cn">Luan Yanqiang</a>
  */
 public class GrpcClientRegistryApplication {
-
-    static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] { DateTimeFormatter.ISO_DATE_TIME,
-                                                       DateTimeFormatter.ISO_LOCAL_DATE_TIME,
-                                                       DateTimeFormatter.BASIC_ISO_DATE };
+    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientRegistryApplication.class);
 
     public static void main(String[] args) {
-        final Logger LOGGER = LoggerFactory.getLogger(GrpcClientRegistryApplication.class);
+
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("grpc-client");
 
         RegistryConfig registryConfig = new RegistryConfig();
         registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
@@ -46,7 +43,8 @@ public class GrpcClientRegistryApplication {
         ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
         consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
-            .setRegistry(registryConfig);
+            .setRegistry(registryConfig)
+            .setApplication(clientApp);
 
         SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
 

@@ -50,38 +50,38 @@ public class GrpcServer implements Server {
     /**
      * Logger
      */
-    private static final Logger                                           LOGGER          = LoggerFactory
-                                                                                              .getLogger(GrpcServer.class);
+    private static final Logger                                          LOGGER          = LoggerFactory
+                                                                                             .getLogger(GrpcServer.class);
     /**
      * server config
      */
-    protected ServerConfig                                                serverConfig;
+    protected ServerConfig                                               serverConfig;
 
     /**
      * Is it already started
      */
-    protected volatile boolean                                            started;
+    protected volatile boolean                                           started;
 
     /**
      * grpc server
      */
-    protected io.grpc.Server                                              server;
+    protected io.grpc.Server                                             server;
 
     /**
      * service registry
      */
-    protected MutableHandlerRegistry                                      handlerRegistry = new MutableHandlerRegistry();
+    protected MutableHandlerRegistry                                     handlerRegistry = new MutableHandlerRegistry();
 
     /**
      * The mapping relationship between BindableService and ServerServiceDefinition
      */
-    protected ConcurrentHashMap<BindableService, ServerServiceDefinition> serviceInfo     = new ConcurrentHashMap<BindableService,
-                                                                                                  ServerServiceDefinition>();
+    protected ConcurrentHashMap<ProviderConfig, ServerServiceDefinition> serviceInfo     = new ConcurrentHashMap<ProviderConfig,
+                                                                                                 ServerServiceDefinition>();
 
     /**
      * invoker count
      */
-    protected AtomicInteger                                               invokerCnt      = new AtomicInteger();
+    protected AtomicInteger                                              invokerCnt      = new AtomicInteger();
 
     @Override
     public void init(ServerConfig serverConfig) {
@@ -152,19 +152,19 @@ public class GrpcServer implements Server {
         try {
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
                 bindableService.bindService(), serverInterceptors);
-            serviceInfo.put(bindableService, serviceDefinition);
+            serviceInfo.put(providerConfig, serviceDefinition);
             handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Register grpc service error", e);
-            serviceInfo.remove(bindableService);
+            serviceInfo.remove(providerConfig);
         }
     }
 
     @Override
     public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry) {
         try {
-            ServerServiceDefinition serverServiceDefinition = serviceInfo.get(providerConfig.getRef());
+            ServerServiceDefinition serverServiceDefinition = serviceInfo.get(providerConfig);
             handlerRegistry.removeService(serverServiceDefinition);
             invokerCnt.decrementAndGet();
         } catch (Exception e) {
