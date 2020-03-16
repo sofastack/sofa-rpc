@@ -16,12 +16,10 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
-import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.server.grpc.GrpcHeadKeys;
+import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -33,9 +31,6 @@ import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Grpc客户端侧的拦截器，主要是发送隐式传参，状态记录等
@@ -75,22 +70,8 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
 
             @Override
             public void start(Listener<RespT> responseListener, Metadata requestHeader) {
-                // 客户端设置请求服务端的Header
-                Map<String, String> header = new HashMap<String, String>();
-                header.put(RemotingConstants.HEAD_METHOD_NAME, sofaRequest.getMethodName());
-                header.put(RemotingConstants.HEAD_TARGET_SERVICE, sofaRequest.getTargetServiceUniqueName());
-                header.put(RemotingConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
-                String tracerStr = (String) sofaRequest.getRequestProp(RemotingConstants.NEW_RPC_TRACE_NAME);
 
-                SofaTracerSpanContext spanContext = SofaTracerSpanContext.deserializeFromString(tracerStr);
-                header.put(GrpcHeadKeys.HEAD_KEY_SERVICE_VERSION.name(), "1.0");
-                header.put(GrpcHeadKeys.HEAD_KEY_TRACE_ID.name(), spanContext.getTraceId());
-                header.put(GrpcHeadKeys.HEAD_KEY_RPC_ID.name(), spanContext.getSpanId());
-                header.put(GrpcHeadKeys.HEAD_KEY_META_TYPE.name(), "rpc");
-                //  header.put(RemotingConstants.NEW_RPC_TRACE_NAME, tracerStr);
-                for (Map.Entry<String, String> entry : header.entrySet()) {
-                    requestHeader.put(GrpcHeadKeys.getKey(entry.getKey()), entry.getValue());
-                }
+                GrpcTracerAdapter.beforeSend(sofaRequest, requestHeader);
 
                 // LOGGER.info("[2]response header received from server:{}", requestHeader);
 

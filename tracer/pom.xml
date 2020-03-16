@@ -16,6 +16,7 @@
     <modules>
         <module>tracer-opentracing</module>
         <module>tracer-opentracing-resteasy</module>
+        <module>tracer-opentracing-grpc</module>
     </modules>
 
     <dependencyManagement>

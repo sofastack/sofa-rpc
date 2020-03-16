@@ -16,27 +16,15 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
-import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
-import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
-import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.event.EventBus;
-import com.alipay.sofa.rpc.event.ServerReceiveEvent;
+import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
 import io.grpc.ForwardingServerCallListener;
-import io.grpc.Grpc;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.net.SocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * 服务端收请求Header的拦截器
@@ -69,61 +57,7 @@ public class ServerReqHeaderInterceptor implements ServerInterceptor {
             public void onHalfClose() {
                 // LOGGER.info("[1]header received from client:" + requestHeaders + " from " + socketAddress.toString());
                 // 服务端收到请求Header
-                SofaRequest sofaRequest = new SofaRequest();
-                Map<String, String> traceMap = new HashMap<String, String>();
-
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_TARGET_SERVICE)) {
-                    sofaRequest.setTargetServiceUniqueName(requestHeaders
-                        .get(GrpcHeadKeys.HEAD_KEY_TARGET_SERVICE));
-                    sofaRequest.setInterfaceName(requestHeaders
-                        .get(GrpcHeadKeys.HEAD_KEY_TARGET_SERVICE));
-                }
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_TARGET_APP)) {
-                    sofaRequest.setTargetAppName(requestHeaders
-                        .get(GrpcHeadKeys.HEAD_KEY_TARGET_APP));
-                }
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_TRACE_ID)) {
-                    traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
-                        requestHeaders.get(GrpcHeadKeys.HEAD_KEY_TRACE_ID));
-                }
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_RPC_ID)) {
-                    traceMap
-                        .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(GrpcHeadKeys.HEAD_KEY_RPC_ID));
-                }
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_RPC_ID)) {
-                    traceMap
-                        .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(GrpcHeadKeys.HEAD_KEY_RPC_ID));
-                }
-
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
-                    //   traceMap.put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(GrpcHeadKeys.HEAD_KEY_RPC_ID));
-                }
-
-                if (requestHeaders.containsKey(GrpcHeadKeys.HEAD_KEY_SAMP_TYPE)) {
-                    traceMap.put(TracerCompatibleConstants.SAMPLING_MARK,
-                        requestHeaders.get(GrpcHeadKeys.HEAD_KEY_SAMP_TYPE));
-                }
-
-                if (!traceMap.isEmpty()) {
-                    sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
-                }
-
-                RpcInvokeContext.getContext().put(GrpcContants.SOFA_REQUEST_KEY, sofaRequest);
-
-                SocketAddress socketAddress = call.getAttributes().get(
-                    Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
-                RpcInvokeContext.getContext().put(GrpcContants.SOFA_REMOTE_ADDR_KEY, socketAddress);
-
-                if (EventBus.isEnable(ServerReceiveEvent.class)) {
-                    EventBus.post(new ServerReceiveEvent(sofaRequest));
-                }
-
-                SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
-                SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
-                if (serverSpan != null) {
-                    serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
-                }
-
+                GrpcTracerAdapter.serverReceived(call, requestHeaders);
                 super.onHalfClose();
             }
         };

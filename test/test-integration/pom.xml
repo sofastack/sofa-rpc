@@ -184,6 +184,11 @@
             <artifactId>sofa-rpc-tracer-opentracing-resteasy</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing-grpc</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
