@@ -29,9 +29,8 @@ public class GrpcGreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
         HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + request.getName()).build();
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
-        //    responseObserver.onError(new RuntimeException("fuck"));
-
-        //        throw new RuntimeException("xx");
+        // responseObserver.onError(new RuntimeException("fuck"));
+        //  throw new RuntimeException("xx");
     }
 
 }

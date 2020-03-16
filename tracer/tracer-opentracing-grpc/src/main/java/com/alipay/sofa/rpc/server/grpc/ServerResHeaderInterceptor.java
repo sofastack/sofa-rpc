@@ -16,13 +16,14 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
-import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptor;
+import io.grpc.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,17 +43,30 @@ public class ServerResHeaderInterceptor implements ServerInterceptor {
         return next.startCall(new SimpleForwardingServerCall<ReqT, RespT>(call) {
             @Override
             public void sendHeaders(Metadata responseHeaders) {
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[4]send response header:{}", responseHeaders);
+                }
                 super.sendHeaders(responseHeaders);
             }
 
             //服务端发完了
             @Override
             public void sendMessage(RespT message) {
-                //                LOGGER.info("[5]send response message:{}", message);
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[5]send response message:{}", message);
+                }
                 super.sendMessage(message);
-                SofaResponse sofaResponse = new SofaResponse();
-                sofaResponse.setAppResponse(message);
-                GrpcTracerAdapter.serverSend(requestHeaders, sofaResponse, null);
+
+                final RpcInvokeContext context = RpcInvokeContext.getContext();
+                context.put(GrpcContants.SOFA_APP_RESPONSE_KEY, message);
+            }
+
+            @Override
+            public void close(Status status, Metadata trailers) {
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[6]send response message:{},trailers:{}", status, trailers);
+                }
+                super.close(status, trailers);
             }
         }, requestHeaders);
     }

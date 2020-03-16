@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Metadata;
@@ -41,21 +44,35 @@ public class ServerReqHeaderInterceptor implements ServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
                                                                  final Metadata requestHeaders,
                                                                  ServerCallHandler<ReqT, RespT> next) {
-
-        //LOGGER.info("header received from client:" + requestHeaders); 这里和下面不在一个线程
+        //这里和下面不在一个线程
+        if (RpcRunningState.isDebugMode()) {
+            LOGGER.info("[1]header received from client:" + requestHeaders);
+        }
         return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
             next.startCall(call, requestHeaders)) {
 
+            //完成的时候走到这里
             @Override
             public void onComplete() {
                 // 和代码执行不一定在一个线程池
                 super.onComplete();
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[7]server processed done received from client:" + requestHeaders);
+                }
+                SofaResponse sofaResponse = new SofaResponse();
+                final RpcInvokeContext context = RpcInvokeContext.getContext();
+                Throwable exp = (Throwable) context.get(GrpcContants.SOFA_APP_EXCEPTION_KEY);
+                Object appResponse = context.get(GrpcContants.SOFA_APP_RESPONSE_KEY);
+                sofaResponse.setAppResponse(appResponse);
+                GrpcTracerAdapter.serverSend(requestHeaders, sofaResponse, exp);
             }
 
             //客户端发完了
             @Override
             public void onHalfClose() {
-                // LOGGER.info("[1]header received from client:" + requestHeaders + " from " + socketAddress.toString());
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[2]body received done from client:" + requestHeaders);
+                }
                 // 服务端收到请求Header 如果用户是代码中直接抛出异常，会走到这里的
                 GrpcTracerAdapter.serverReceived(call, requestHeaders);
                 try {
@@ -66,6 +83,9 @@ public class ServerReqHeaderInterceptor implements ServerInterceptor {
                     // 调用 call.close() 发送 Status 和 metadata
                     // 这个方式和 onError()本质是一样的
                     call.close(exception.getStatus(), exception.getTrailers());
+
+                    final RpcInvokeContext context = RpcInvokeContext.getContext();
+                    context.put(GrpcContants.SOFA_APP_EXCEPTION_KEY, t);
                 }
             }
 

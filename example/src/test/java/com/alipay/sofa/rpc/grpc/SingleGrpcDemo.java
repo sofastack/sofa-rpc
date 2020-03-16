@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
@@ -33,6 +34,8 @@ public class SingleGrpcDemo {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleGrpcDemo.class);
 
     public static void main(String[] args) {
+
+        RpcRunningState.setDebugMode(true);
 
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("grpc-client");
 

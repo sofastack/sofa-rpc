@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.server.grpc.GrpcContants;
 import com.alipay.sofa.rpc.tracer.sofatracer.GrpcTracerAdapter;
@@ -48,9 +49,10 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
     @Override
     public <ReqT, RespT> ClientCall<ReqT, RespT> interceptCall(MethodDescriptor<ReqT, RespT> method,
                                                                CallOptions callOptions, Channel next) {
-
-        //LOGGER.info("header received from client:" + requestHeaders); 这里和下面不在一个线程
-
+        //这里和下面不在一个线程
+        if (RpcRunningState.isDebugMode()) {
+            LOGGER.info("[1]header send from client:");
+        }
         return new ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(next.newCall(
             method, callOptions)) {
 
@@ -60,26 +62,30 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                 RpcInvokeContext context = RpcInvokeContext.getContext();
                 SofaRequest sofaRequest = (SofaRequest) context.get(GrpcContants.SOFA_REQUEST_KEY);
                 GrpcTracerAdapter.beforeSend(sofaRequest, requestHeader);
-
-                // LOGGER.info("[2]response header received from server:{}", requestHeader);
-
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[2]prepare to send from client:{}", requestHeader);
+                }
                 super.start(new SimpleForwardingClientCallListener<RespT>(responseListener) {
                     @Override
                     public void onHeaders(Metadata responseHeader) {
-                        // 客户端收到响应Header  TODO
-                        //LOGGER.info("[3]response header received from server:{}", responseHeader);
+                        // 客户端收到响应Header
+                        LOGGER.info("[3]response header received from server:{}", responseHeader);
                         super.onHeaders(responseHeader);
                     }
 
                     @Override
                     public void onMessage(RespT message) {
-                        //LOGGER.info("[4]response message received from server:{}", message);
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[4]response message received from server:{}", message);
+                        }
                         super.onMessage(message);
                     }
 
                     @Override
                     public void onClose(Status status, Metadata trailers) {
-                        //LOGGER.info("------------onClose--------------");
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[5]response close received from server:{},trailers:{}", status, trailers);
+                        }
                         if (status.getCode() == Status.UNAVAILABLE.getCode()) { // 当前连接已经不可用
                             /*  GrpcConnectionHolder.getInstance().refresh(serviceMetadata,
                                   rpcUrl.toString(), false);*/
@@ -87,6 +93,13 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                         super.onClose(status, trailers);
                     }
 
+                    @Override
+                    public void onReady() {
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[5]client is ready");
+                        }
+                        super.onReady();
+                    }
                 }, requestHeader);
             }
 

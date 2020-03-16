@@ -53,9 +53,8 @@ public class GrpcTracerModule implements Module {
     public void install() {
         // 注册Tracer相关类
         GrpcInterceptorManager.registerCustomConsumerInstance(new ClientHeaderClientInterceptor());
-
-        GrpcInterceptorManager.registerCustomProviderInstance(new ServerResHeaderInterceptor());
         GrpcInterceptorManager.registerCustomProviderInstance(new ServerReqHeaderInterceptor());
+        GrpcInterceptorManager.registerCustomProviderInstance(new ServerResHeaderInterceptor());
 
     }
 
