@@ -42,22 +42,22 @@ import java.util.concurrent.TimeUnit;
  */
 public class GrpcClientInvoker {
 
-    private final Channel        channel;
+    private final Channel channel;
 
     private final Object         request;
     private final StreamObserver responseObserver;
     private final Class          requestClass;
 
-    private final Method         method;
-    private final String[]       methodArgSigs;
-    private final Object[]       methodArgs;
+    private final Method   method;
+    private final String[] methodArgSigs;
+    private final Object[] methodArgs;
 
-    private final String         serviceName;
-    private final String         interfaceName;
+    private final String serviceName;
+    private final String interfaceName;
 
-    private final Integer        timeout;
+    private final Integer timeout;
 
-    private final static Logger  LOGGER = LoggerFactory.getLogger(GrpcClientInvoker.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientInvoker.class);
 
     /**
      * The constructor
@@ -84,10 +84,10 @@ public class GrpcClientInvoker {
         this.timeout = sofaRequest.getTimeout();
     }
 
-    public SofaResponse invoke(ConsumerConfig consumerConfig) {
+    public SofaResponse invoke(ConsumerConfig consumerConfig,int timeout) {
         SofaResponse sofaResponse = new SofaResponse();
         try {
-            Object response = invokeRequestMethod(consumerConfig);
+            Object response = invokeRequestMethod(consumerConfig,timeout);
             sofaResponse.setAppResponse(response);
         } catch (SofaRpcException e) {
             sofaResponse.setErrorMsg(e.getMessage());
@@ -103,24 +103,24 @@ public class GrpcClientInvoker {
         return callOptions;
     }
 
-    public Object invokeRequestMethod(ConsumerConfig consumerConfig) {
-        Object r = null;
+    public Object invokeRequestMethod(ConsumerConfig consumerConfig,int timeout) {
+        Object appResponse = null;
         try {
 
             Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
 
             Method sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
-                ProviderInfo.class, ConsumerConfig.class, int.class);
-            Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, null, null, 3000);
+                    ProviderInfo.class, ConsumerConfig.class, int.class);
+            Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, null, null, timeout);
 
-            r = method.invoke(stub, methodArgs[0]);
+            appResponse = method.invoke(stub, methodArgs[0]);
 
         } catch (Throwable e) {
             Status status = Status.fromThrowable(e);
             StatusException grpcException = status.asException();
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, grpcException);
         }
-        return r;
+        return appResponse;
     }
 
 }

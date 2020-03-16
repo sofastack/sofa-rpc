@@ -156,7 +156,7 @@ public class GrpcClientTransport extends ClientTransport {
 
             final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
 
-            r = grpcClientInvoker.invoke(transportConfig.getConsumerConfig());
+            r = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(),timeout);
             return r;
         } catch (Exception e) {
             throwable = convertToRpcException(e);
