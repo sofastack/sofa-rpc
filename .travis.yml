@@ -14,8 +14,6 @@ install:
   - ./mvnw clean install -Pci-install -B -U -e
   - sh ./tools/check_format.sh
 
-bundler_args: --retry 0
-
 script:
   - travis_retry ./mvnw package -Pci-test
 
