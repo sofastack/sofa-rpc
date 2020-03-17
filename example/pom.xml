@@ -13,7 +13,7 @@
     <properties>
         <protoc.version>3.6.1</protoc.version>
         <protoc-gen-grpc-java.version>1.17.0</protoc-gen-grpc-java.version>
-        <sofa.rpc.compiler.version>0.0.1</sofa.rpc.compiler.version>
+        <sofa.rpc.compiler.version>0.0.1-SNAPSHOT</sofa.rpc.compiler.version>
         <grpc.version>1.27.2</grpc.version>
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     </properties>
@@ -249,19 +249,6 @@
                     <target>${maven.compiler.target}</target>
                     <encoding>${project.build.sourceEncoding}</encoding>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.github.neokidd.maven.plugins</groupId>
-                <artifactId>hack-modifier-maven-plugin</artifactId>
-                <version>1.0.0</version>
-                <executions>
-                <execution>
-                    <phase>process-classes</phase>
-                    <goals>
-                    <goal>hack</goal>
-                    </goals>
-                </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

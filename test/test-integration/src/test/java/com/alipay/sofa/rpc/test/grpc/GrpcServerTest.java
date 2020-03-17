@@ -25,9 +25,9 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import io.grpc.examples.helloworld.GreeterGrpc;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
+import io.grpc.examples.helloworld.SofaGreeterGrpc;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -50,21 +50,21 @@ public class GrpcServerTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setPort(port);
 
-        ProviderConfig<GreeterImpl> providerConfig = new ProviderConfig<GreeterImpl>()
+        ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
             .setApplication(applicationConfig)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
-            .setInterfaceId(GreeterGrpc.class.getName())
+            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
             .setRef(new GreeterImpl())
             .setServer(serverConfig);
 
         providerConfig.export();
 
-        ConsumerConfig<GreeterGrpc.GreeterBlockingStub> consumerConfig = new ConsumerConfig<GreeterGrpc.GreeterBlockingStub>();
-        consumerConfig.setInterfaceId(GreeterGrpc.class.getName())
+        ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setDirectUrl("grpc://127.0.0.1:" + port);
 
-        GreeterGrpc.GreeterBlockingStub greeterBlockingStub = consumerConfig.refer();
+        SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
 
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
             .build();
