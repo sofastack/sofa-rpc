@@ -35,6 +35,7 @@
         <jackson.databind.version>2.9.10.3</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
+        <grpc.version>1.27.2</grpc.version>
 
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
@@ -458,6 +459,23 @@
                 <version>1.3.5</version>
                 <scope>provided</scope>
             </dependency>
+
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-netty-shaded</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-protobuf</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.grpc</groupId>
+                <artifactId>grpc-stub</artifactId>
+                <version>${grpc.version}</version>
+            </dependency>
+
             <!-- Test libs -->
             <dependency>
                 <groupId>junit</groupId>

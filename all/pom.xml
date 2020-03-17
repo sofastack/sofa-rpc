@@ -68,6 +68,8 @@
         <bolt.swagger.version>1.5.18</bolt.swagger.version>
         <httpclient.version>4.5.11</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
+        <grpc.version>1.27.2</grpc.version>
+        <guava.version>28.2-jre</guava.version>
     </properties>
 
     <dependencies>
@@ -373,6 +375,26 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>${httpclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-netty-shaded</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-protobuf</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-stub</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
     </dependencies>

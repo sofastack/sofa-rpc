@@ -53,14 +53,13 @@ public class GrpcHeadKeys {
                                                                                           .of("meta-trace-rpcid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_OLD_TRACE_ID         = Key
-            .of("sofa-trace-traceid",
-                    Metadata.ASCII_STRING_MARSHALLER);
+    public static final Key<String>                         HEAD_KEY_OLD_TRACE_ID     = Key
+                                                                                          .of("sofa-trace-traceid",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_OLD_RPC_ID           = Key
-            .of("sofa-trace-rpcid",
-                    Metadata.ASCII_STRING_MARSHALLER);
-
+    public static final Key<String>                         HEAD_KEY_OLD_RPC_ID       = Key
+                                                                                          .of("sofa-trace-rpcid",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_META_TYPE        = Key
                                                                                           .of("meta-type",
