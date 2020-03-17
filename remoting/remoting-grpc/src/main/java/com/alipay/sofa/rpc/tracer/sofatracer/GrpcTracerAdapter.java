@@ -58,7 +58,7 @@ public class GrpcTracerAdapter {
     /**
      * slf4j for this class
      */
-    private static final Logger LOGGER             = LoggerFactory.getLogger(GrpcTracerAdapter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GrpcTracerAdapter.class);
 
     /**
      * 存入tracer信息
