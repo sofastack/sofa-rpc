@@ -88,6 +88,8 @@ public class GrpcTracerAdapter {
             SofaTracerSpanContext sofaTracerSpanContext = clientSpan.getSofaTracerSpanContext();
             header.put(GrpcHeadKeys.HEAD_KEY_TRACE_ID.name(), sofaTracerSpanContext.getTraceId());
             header.put(GrpcHeadKeys.HEAD_KEY_RPC_ID.name(), sofaTracerSpanContext.getSpanId());
+            header.put(GrpcHeadKeys.HEAD_KEY_OLD_TRACE_ID.name(), sofaTracerSpanContext.getTraceId());
+            header.put(GrpcHeadKeys.HEAD_KEY_OLD_RPC_ID.name(), sofaTracerSpanContext.getSpanId());
 
             header.put(GrpcHeadKeys.HEAD_KEY_BIZ_BAGGAGE_TYPE.name(),
                 sofaTracerSpanContext.getBizSerializedBaggage());
