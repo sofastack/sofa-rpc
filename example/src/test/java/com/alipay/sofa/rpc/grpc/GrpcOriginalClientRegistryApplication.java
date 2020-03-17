@@ -16,39 +16,28 @@
  */
 package com.alipay.sofa.rpc.grpc;
 
-import java.time.format.DateTimeFormatter;
-import java.time.LocalDateTime;
-
+import io.grpc.ManagedChannel;
 import io.grpc.examples.helloworld.GreeterGrpc;
-import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.HelloReply;
-import io.grpc.stub.StreamObserver;
+import io.grpc.examples.helloworld.HelloRequest;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
-class GreeterImpl extends GreeterGrpc.GreeterImplBase {
+import java.time.format.DateTimeFormatter;
 
-    //Intentionally using unsupported format
+/**
+ * @author <a href="mailto:luanyanqiang@dibgroup.cn">Luan Yanqiang</a>
+ */
+public class GrpcOriginalClientRegistryApplication {
+
     static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] { DateTimeFormatter.ISO_DATE_TIME,
                                                        DateTimeFormatter.ISO_LOCAL_DATE_TIME,
                                                        DateTimeFormatter.BASIC_ISO_DATE };
 
-    @Override
-    public void sayHello(HelloRequest req, StreamObserver<HelloReply> responseObserver) {
-        HelloRequest.DateTime reqDateTime = req.getDateTime();
-        int i = 0;
-        try {
-            i = Integer.parseInt(reqDateTime.getTime());
-        } catch (Exception e) {
-            //TODO: handle exception
-        }
-        LocalDateTime dt = LocalDateTime.now();
-        String dtStr = dt.format(datetimeFormatter[i % datetimeFormatter.length]);
-        HelloRequest.DateTime rplyDateTime = HelloRequest.DateTime.newBuilder(reqDateTime)
-            .setDate(dtStr).build();
-        HelloReply reply = HelloReply.newBuilder()
-            .setMessage("Hello " + req.getName())
-            .setDateTime(rplyDateTime)
+    public static void main(String[] args) {
+        ManagedChannel channel = NettyChannelBuilder.forAddress("127.0.0.1", 50052).usePlaintext()
             .build();
-        responseObserver.onNext(reply);
-        responseObserver.onCompleted();
+        GreeterGrpc.GreeterBlockingStub client = GreeterGrpc.newBlockingStub(channel);
+        HelloReply res = client.sayHello(HelloRequest.newBuilder().setName("fuck").build());
+        System.out.println(res);
     }
 }

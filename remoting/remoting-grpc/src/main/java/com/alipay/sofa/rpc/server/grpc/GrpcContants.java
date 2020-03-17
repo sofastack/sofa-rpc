@@ -14,20 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.bootstrap.grpc;
-
-import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.ext.Extension;
+package com.alipay.sofa.rpc.server.grpc;
 
 /**
- * Consumer bootstrap for grpc
- *
- * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
+ * Created by zhanggeng on 2017/2/13.
  */
-@Extension("grpc")
-public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
-    public GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
-        super(consumerConfig);
-    }
+public class GrpcContants {
+
+    public static final String SOFA_REQUEST_KEY       = "_SOFA_REQUEST";
+
+    public static final String SOFA_REMOTE_ADDR_KEY   = "_SOFA_REMOTE_ADDR";
+
+    public static final String SOFA_APP_RESPONSE_KEY  = "_SOFA_RESPONSE";
+
+    public static final String SOFA_APP_EXCEPTION_KEY = "_SOFA_EXCEPTION";
+
 }

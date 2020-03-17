@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.grpc;
 
+import com.alipay.sofa.rpc.config.GrpcInterceptorManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -24,10 +25,12 @@ import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.Server;
 import io.grpc.BindableService;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.ServerBuilder;
+import io.grpc.ServerInterceptors;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.util.MutableHandlerRegistry;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -45,38 +48,38 @@ public class GrpcServer implements Server {
     /**
      * Logger
      */
-    private static final Logger                                           LOGGER          = LoggerFactory
-                                                                                              .getLogger(GrpcServer.class);
+    private static final Logger                                          LOGGER          = LoggerFactory
+                                                                                             .getLogger(GrpcServer.class);
     /**
      * server config
      */
-    protected ServerConfig                                                serverConfig;
+    protected ServerConfig                                               serverConfig;
 
     /**
      * Is it already started
      */
-    protected volatile boolean                                            started;
+    protected volatile boolean                                           started;
 
     /**
      * grpc server
      */
-    protected io.grpc.Server                                              server;
+    protected io.grpc.Server                                             server;
 
     /**
      * service registry
      */
-    protected MutableHandlerRegistry                                      handlerRegistry = new MutableHandlerRegistry();
+    protected MutableHandlerRegistry                                     handlerRegistry = new MutableHandlerRegistry();
 
     /**
      * The mapping relationship between BindableService and ServerServiceDefinition
      */
-    protected ConcurrentHashMap<BindableService, ServerServiceDefinition> serviceInfo     = new ConcurrentHashMap<BindableService,
-                                                                                                  ServerServiceDefinition>();
+    protected ConcurrentHashMap<ProviderConfig, ServerServiceDefinition> serviceInfo     = new ConcurrentHashMap<ProviderConfig,
+                                                                                                 ServerServiceDefinition>();
 
     /**
      * invoker count
      */
-    protected AtomicInteger                                               invokerCnt      = new AtomicInteger();
+    protected AtomicInteger                                              invokerCnt      = new AtomicInteger();
 
     @Override
     public void init(ServerConfig serverConfig) {
@@ -134,23 +137,29 @@ public class GrpcServer implements Server {
 
     @Override
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
-        BindableService bindableService = (BindableService) providerConfig.getRef();
-        ServerServiceDefinition serverServiceDefinition = bindableService.bindService();
-        serviceInfo.put(bindableService, serverServiceDefinition);
-
+        Object obj = null;
         try {
-            handlerRegistry.addService(serverServiceDefinition);
+            obj = ProxyFactory.buildProxy(providerConfig.getProxy(), BindableService.class, instance);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        BindableService bindableService = (BindableService) obj;
+        try {
+            ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
+                bindableService.bindService(), GrpcInterceptorManager.getInternalProviderClasses());
+            serviceInfo.put(providerConfig, serviceDefinition);
+            handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Register grpc service error", e);
-            serviceInfo.remove(bindableService);
+            serviceInfo.remove(providerConfig);
         }
     }
 
     @Override
     public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry) {
         try {
-            ServerServiceDefinition serverServiceDefinition = serviceInfo.get(providerConfig.getRef());
+            ServerServiceDefinition serverServiceDefinition = serviceInfo.get(providerConfig);
             handlerRegistry.removeService(serverServiceDefinition);
             invokerCnt.decrementAndGet();
         } catch (Exception e) {

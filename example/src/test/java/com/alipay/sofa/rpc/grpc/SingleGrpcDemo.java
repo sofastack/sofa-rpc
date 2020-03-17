@@ -19,7 +19,10 @@ package com.alipay.sofa.rpc.grpc;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
@@ -27,18 +30,40 @@ import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterGrpc;
 
-/**
- * @author <a href="mailto:luanyanqiang@dibgroup.cn">Luan Yanqiang</a>
- */
-public class GrpcClientRegistryApplication {
-    private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientRegistryApplication.class);
+public class SingleGrpcDemo {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleGrpcDemo.class);
 
     public static void main(String[] args) {
 
+        RpcRunningState.setDebugMode(true);
+
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("grpc-client");
 
-        RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
+        ApplicationConfig serverApp = new ApplicationConfig().setAppName("grpc-server");
+
+        int port = 50052;
+        if (args.length != 0) {
+            LOGGER.debug("first arg is {}", args[0]);
+            port = Integer.valueOf(args[0]);
+        }
+
+        RegistryConfig registryConfig = new RegistryConfig()
+            .setProtocol("zookeeper")
+            .setAddress("127.0.0.1:2181");
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
+            .setPort(port);
+
+        ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
+            .setApplication(serverApp)
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
+            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+            .setRef(new GrpcGreeterImpl())
+            .setServer(serverConfig)
+            .setRegistry(registryConfig);
+
+        providerConfig.export();
 
         ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
         consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
@@ -69,6 +94,12 @@ public class GrpcClientRegistryApplication {
             }
         } catch (Exception e) {
             LOGGER.error("Unexpected RPC call breaks", e);
+        }
+
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
     }

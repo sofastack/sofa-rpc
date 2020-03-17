@@ -50,11 +50,11 @@ public class GrpcServerRegistryApplication {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_GRPC)
             .setPort(port);
 
-        ProviderConfig<GreeterImpl> providerConfig = new ProviderConfig<GreeterImpl>()
+        ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
             .setApplication(applicationConfig)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_GRPC)
-            .setInterfaceId(GreeterGrpc.class.getName())
-            .setRef(new GreeterImpl())
+            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+            .setRef(new GrpcGreeterImpl())
             .setServer(serverConfig)
             .setRegistry(registryConfig);
 

@@ -260,6 +260,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing-grpc</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-metrics-lookout</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -477,6 +482,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-remoting-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
+                                    <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-grpc</include>
                                     <include>com.alipay.sofa:sofa-rpc-config-apollo</include>
                                     <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->

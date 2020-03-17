@@ -17,23 +17,33 @@
 package com.alipay.sofa.rpc.transport.grpc;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.SystemInfo;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
+import com.alipay.sofa.rpc.config.GrpcInterceptorManager;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
+import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
+import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import com.alipay.sofa.rpc.server.grpc.GrpcContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
-import io.grpc.ConnectivityState;
+import io.grpc.Channel;
+import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -45,15 +55,20 @@ import java.util.concurrent.TimeUnit;
 @Extension("grpc")
 public class GrpcClientTransport extends ClientTransport {
 
-    private ProviderInfo        providerInfo;
-
-    private ManagedChannel      channel;
-
-    private InetSocketAddress   localAddress;
-
-    private InetSocketAddress   remoteAddress;
-
     private final static Logger LOGGER = LoggerFactory.getLogger(GrpcClientTransport.class);
+
+    private ProviderInfo providerInfo;
+
+    private ManagedChannel channel;
+
+    private InetSocketAddress localAddress;
+
+    private InetSocketAddress remoteAddress;
+
+    /* <address, gRPC channels> */
+    private final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
+
+    private final Object lock = new Object();
 
     /**
      * The constructor
@@ -65,7 +80,7 @@ public class GrpcClientTransport extends ClientTransport {
         providerInfo = transportConfig.getProviderInfo();
         connect();
         remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
-        localAddress = InetSocketAddress.createUnresolved(SystemInfo.getLocalHost(), 0);// 端口不准
+        localAddress = InetSocketAddress.createUnresolved(NetUtils.getLocalIpv4(), 0);// 端口不准
     }
 
     @Override
@@ -74,8 +89,7 @@ public class GrpcClientTransport extends ClientTransport {
             return;
         }
         ProviderInfo providerInfo = transportConfig.getProviderInfo();
-        channel = ManagedChannelBuilder.forAddress(providerInfo.getHost(), providerInfo.getPort()).usePlaintext()
-            .build();
+        channel = getSharedChannel(providerInfo);
     }
 
     @Override
@@ -88,6 +102,7 @@ public class GrpcClientTransport extends ClientTransport {
             }
             channel = null;
         }
+        channelMap.remove(providerInfo.toString());
     }
 
     @Override
@@ -101,9 +116,7 @@ public class GrpcClientTransport extends ClientTransport {
             return false;
         }
 
-        ConnectivityState state = channel.getState(true);
-        return state == ConnectivityState.IDLE || state == ConnectivityState.READY ||
-            state == ConnectivityState.CONNECTING;
+        return !channel.isShutdown() && !channel.isTerminated();
     }
 
     @Override
@@ -128,11 +141,29 @@ public class GrpcClientTransport extends ClientTransport {
 
     @Override
     public SofaResponse syncSend(SofaRequest request, int timeout) throws SofaRpcException {
+        SofaResponse sofaResponse = null;
+        SofaRpcException throwable = null;
+
         try {
-            SofaResponse r = new GrpcClientInvoker(request, channel).invoke();
-            return r;
+            RpcInternalContext context = RpcInternalContext.getContext();
+
+            beforeSend(context, request);
+
+            RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+            invokeContext.put(GrpcContants.SOFA_REQUEST_KEY, request);
+
+            Channel proxyChannel = ClientInterceptors.intercept(this.channel, GrpcInterceptorManager.getInternalConsumerClasses());
+            final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
+            sofaResponse = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(), timeout);
+            return sofaResponse;
         } catch (Exception e) {
+            throwable = convertToRpcException(e);
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);
+        } finally {
+            if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                        transportConfig.getProviderInfo(), request, sofaResponse, throwable));
+            }
         }
     }
 
@@ -159,5 +190,74 @@ public class GrpcClientTransport extends ClientTransport {
     @Override
     public InetSocketAddress localAddress() {
         return localAddress;
+    }
+
+    /**
+     * Get shared channel connection
+     */
+    private ReferenceCountManagedChannel getSharedChannel(ProviderInfo url) {
+        String key = url.toString();
+        ReferenceCountManagedChannel channel = channelMap.get(key);
+
+        if (channel != null && !channel.isTerminated()) {
+            channel.incrementAndGetCount();
+            return channel;
+        }
+
+        synchronized (lock) {
+            channel = channelMap.get(key);
+            // double check
+            if (channel != null && !channel.isTerminated()) {
+                channel.incrementAndGetCount();
+            } else {
+                channel = new ReferenceCountManagedChannel(initChannel(url));
+                channelMap.put(key, channel);
+            }
+        }
+
+        return channel;
+    }
+
+    /**
+     * Create new connection
+     *
+     * @param url
+     */
+    private ManagedChannel initChannel(ProviderInfo url) {
+        NettyChannelBuilder builder = NettyChannelBuilder.forAddress(url.getHost(), url.getPort());
+        builder.usePlaintext();
+        builder.disableRetry();
+        return builder.build();
+    }
+
+    /**
+     * 调用前设置一些属性
+     *
+     * @param context RPC上下文
+     * @param request 请求对象
+     */
+    protected void beforeSend(RpcInternalContext context, SofaRequest request) {
+        context.setLocalAddress(localAddress());
+        if (EventBus.isEnable(ClientBeforeSendEvent.class)) {
+            EventBus.post(new ClientBeforeSendEvent(request));
+        }
+    }
+
+    /**
+     * 转换调用出现的异常为RPC异常
+     *
+     * @param e 异常
+     * @return RPC异常
+     */
+    protected SofaRpcException convertToRpcException(Exception e) {
+        SofaRpcException exception;
+        if (e instanceof SofaRpcException) {
+            exception = (SofaRpcException) e;
+        }
+        // 客户端未知
+        else {
+            exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
+        }
+        return exception;
     }
 }

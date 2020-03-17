@@ -14,20 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.bootstrap.grpc;
+package com.alipay.sofa.rpc.grpc;
 
-import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.ext.Extension;
+import io.grpc.examples.helloworld.HelloReply;
+import io.grpc.examples.helloworld.HelloRequest;
+import io.grpc.examples.helloworld.SofaGreeterGrpc;
+import io.grpc.stub.StreamObserver;
 
-/**
- * Consumer bootstrap for grpc
- *
- * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
- */
-@Extension("grpc")
-public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
-    public GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
-        super(consumerConfig);
+public class GrpcGreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
+
+    @Override
+    public void sayHello(HelloRequest request, StreamObserver<HelloReply> responseObserver) {
+        System.out.println("Executing thread is " + Thread.currentThread().getName());
+        HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + request.getName()).build();
+        responseObserver.onNext(reply);
+        responseObserver.onCompleted();
+        // responseObserver.onError(new RuntimeException("fuck"));
+        //  throw new RuntimeException("xx");
     }
+
 }

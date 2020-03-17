@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
+import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -25,6 +27,8 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
+import io.grpc.Status;
+import io.grpc.StatusException;
 import io.grpc.stub.StreamObserver;
 
 import java.lang.reflect.Method;
@@ -80,10 +84,10 @@ public class GrpcClientInvoker {
         this.timeout = sofaRequest.getTimeout();
     }
 
-    public SofaResponse invoke() {
+    public SofaResponse invoke(ConsumerConfig consumerConfig, int timeout) {
         SofaResponse sofaResponse = new SofaResponse();
         try {
-            Object response = invokeRequestMethod();
+            Object response = invokeRequestMethod(consumerConfig, timeout);
             sofaResponse.setAppResponse(response);
         } catch (SofaRpcException e) {
             sofaResponse.setErrorMsg(e.getMessage());
@@ -99,32 +103,25 @@ public class GrpcClientInvoker {
         return callOptions;
     }
 
-    public io.grpc.stub.AbstractStub getBlockingStub() {
-        io.grpc.stub.AbstractStub stub = null;
+    public Object invokeRequestMethod(ConsumerConfig consumerConfig, int timeout) {
+        Object appResponse = null;
         try {
-            Method newBlockingStubMethod = Class.forName(serviceName)
-                .getDeclaredMethod("newBlockingStub", Channel.class);
-            newBlockingStubMethod.setAccessible(true);
-            stub = (io.grpc.stub.AbstractStub) newBlockingStubMethod.invoke(null, channel);
+
+            Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
+
+            Method sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
+                ProviderInfo.class, ConsumerConfig.class, int.class);
+            Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, null, null, timeout);
+
+            appResponse = method.invoke(stub, methodArgs[0]);
 
         } catch (Throwable e) {
-            throw new SofaRpcException(RpcErrorType.UNKNOWN, e.getMessage(), e);
+            LOGGER.error("grpc invoke error", e);
+            Status status = Status.fromThrowable(e);
+            StatusException grpcException = status.asException();
+            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, grpcException);
         }
-        return stub;
-    }
-
-    public Object invokeRequestMethod() {
-        Object r = null;
-        try {
-            Method requestMethod = Class.forName(interfaceName)
-                .getDeclaredMethod(method.getName(), Class.forName(methodArgSigs[0]));
-            requestMethod.setAccessible(true);
-            r = requestMethod.invoke(getBlockingStub(), methodArgs[0]);
-
-        } catch (Throwable e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e.getMessage(), e);
-        }
-        return r;
+        return appResponse;
     }
 
 }

@@ -14,20 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.bootstrap.grpc;
+package com.alipay.sofa.gen.grpc.reactive;
 
-import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.gen.base.AbstractGenerator;
+import com.salesforce.jprotoc.ProtocPlugin;
 
-/**
- * Consumer bootstrap for grpc
- *
- * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
- */
-@Extension("grpc")
-public class GrpcConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
-    public GrpcConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
-        super(consumerConfig);
+public class RxSofaGrpcGenerator extends AbstractGenerator {
+    @Override
+    protected String getClassPrefix() {
+        return "RxSofa";
+    }
+
+    @Override
+    protected String getClassSuffix() {
+        return "Grpc";
+    }
+
+    public static void main(String[] args) {
+        if (args.length == 0) {
+            ProtocPlugin.generate(new RxSofaGrpcGenerator());
+        } else {
+            ProtocPlugin.debug(new RxSofaGrpcGenerator(), args[0]);
+        }
     }
 }
