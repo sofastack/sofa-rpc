@@ -24,7 +24,7 @@ import io.grpc.stub.StreamObserver;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-class GreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
+public class GreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
 
     //Intentionally using unsupported format
     static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] { DateTimeFormatter.ISO_DATE_TIME,

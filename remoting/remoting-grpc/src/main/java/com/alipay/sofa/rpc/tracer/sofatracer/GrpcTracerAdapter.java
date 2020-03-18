@@ -23,6 +23,7 @@ import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
+import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -58,12 +59,13 @@ public class GrpcTracerAdapter {
     /**
      * slf4j for this class
      */
-    private static final Logger LOGGER = LoggerFactory.getLogger(GrpcTracerAdapter.class);
+    private static final Logger LOGGER     = LoggerFactory.getLogger(GrpcTracerAdapter.class);
+    private static final String USERID_KEY = "userid";
 
     /**
      * 存入tracer信息
      *
-     * @param sofaRequest SofaRequest
+     * @param sofaRequest   SofaRequest
      * @param requestHeader Metadata
      */
     public static void beforeSend(SofaRequest sofaRequest, Metadata requestHeader) {
@@ -75,15 +77,13 @@ public class GrpcTracerAdapter {
         header.put(RemotingConstants.HEAD_METHOD_NAME, sofaRequest.getMethodName());
         header.put(RemotingConstants.HEAD_TARGET_SERVICE, sofaRequest.getTargetServiceUniqueName());
         header.put(RemotingConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
-        String tracerStr = (String) sofaRequest.getRequestProp(RemotingConstants.NEW_RPC_TRACE_NAME);
-
         //客户端的启动
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         //获取并不弹出
         SofaTracerSpan clientSpan = sofaTraceContext.getCurrentSpan();
         if (clientSpan == null) {
             SelfLog.warn("ClientSpan is null.Before call interface=" + sofaRequest.getInterfaceName() + ",method=" +
-                sofaRequest.getMethodName());
+                    sofaRequest.getMethodName());
         } else {
             SofaTracerSpanContext sofaTracerSpanContext = clientSpan.getSofaTracerSpanContext();
             header.put(GrpcHeadKeys.HEAD_KEY_TRACE_ID.name(), sofaTracerSpanContext.getTraceId());
@@ -92,21 +92,30 @@ public class GrpcTracerAdapter {
             header.put(GrpcHeadKeys.HEAD_KEY_OLD_RPC_ID.name(), sofaTracerSpanContext.getSpanId());
 
             header.put(GrpcHeadKeys.HEAD_KEY_BIZ_BAGGAGE_TYPE.name(),
-                sofaTracerSpanContext.getBizSerializedBaggage());
+                    sofaTracerSpanContext.getBizSerializedBaggage());
 
             header.put(GrpcHeadKeys.HEAD_KEY_SYS_BAGGAGE_TYPE.name(),
-                sofaTracerSpanContext.getSysSerializedBaggage());
+                    sofaTracerSpanContext.getSysSerializedBaggage());
         }
         //获取 RPC 上下文
+
+        RpcInvokeContext internalContext = RpcInvokeContext.getContext();
+        String route = (String) internalContext.get(USERID_KEY);
+
+        if (StringUtils.isNotBlank(route)) {
+            Map<String, String> map = new HashMap<>();
+            map.put(USERID_KEY, route);
+            header.put(GrpcHeadKeys.HEAD_KEY_ROUTE_INFO.name(), JSONUtils.toJSONString(map));
+        }
 
         header.put(GrpcHeadKeys.HEAD_KEY_SERVICE_VERSION.name(), "1.0");
 
         header.put(GrpcHeadKeys.HEAD_KEY_META_TYPE.name(), "rpc");
         header.put(GrpcHeadKeys.HEAD_KEY_CURRENT_APP.name(), (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
         header.put(GrpcHeadKeys.HEAD_KEY_PROTOCOL_TYPE.name(),
-            (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_PROTOCOL));
+                (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_PROTOCOL));
         header.put(GrpcHeadKeys.HEAD_KEY_INVOKE_TYPE.name(),
-            (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_INVOKE_TYPE));
+                (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_INVOKE_TYPE));
 
         for (Map.Entry<String, String> entry : header.entrySet()) {
             if (StringUtils.isNotBlank(entry.getValue())) {

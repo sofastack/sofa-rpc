@@ -86,6 +86,10 @@ public class GrpcHeadKeys {
                                                                                           .of("meta-trace-sys-baggage",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
+    public static final Key<String>                         HEAD_KEY_ROUTE_INFO       = Key
+                                                                                          .of("meta-unit-info",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+
     public static Key<String> getKey(String key) {
         Key<String> headKey = keyMap.get(key);
         if (headKey == null) {
