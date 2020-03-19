@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -68,7 +69,7 @@ public class GrpcTracerAdapter {
      * @param sofaRequest   SofaRequest
      * @param requestHeader Metadata
      */
-    public static void beforeSend(SofaRequest sofaRequest, Metadata requestHeader) {
+    public static void beforeSend(SofaRequest sofaRequest, ConsumerConfig consumerConfig,Metadata requestHeader) {
 
         // 客户端设置请求服务端的Header
         // tracer信息放入request 发到服务端
@@ -116,6 +117,12 @@ public class GrpcTracerAdapter {
                 (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_PROTOCOL));
         header.put(GrpcHeadKeys.HEAD_KEY_INVOKE_TYPE.name(),
                 (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_INVOKE_TYPE));
+
+        header.put(GrpcHeadKeys.HEAD_KEY_SOURCE_TENANTID.name(),
+                (String) consumerConfig.getParameter("interworking.source"));
+
+        header.put(GrpcHeadKeys.HEAD_KEY_TARGET_TENANTID.name(),
+                (String) consumerConfig.getParameter("interworking.target"));
 
         for (Map.Entry<String, String> entry : header.entrySet()) {
             if (StringUtils.isNotBlank(entry.getValue())) {

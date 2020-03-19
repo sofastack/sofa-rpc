@@ -87,7 +87,15 @@ public class GrpcHeadKeys {
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_ROUTE_INFO       = Key
-                                                                                          .of("meta-unit-info",
+                                                                                          .of("meta-route",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+
+    public static final Key<String>                         HEAD_KEY_SOURCE_TENANTID  = Key
+                                                                                          .of("meta-tenantid",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+
+    public static final Key<String>                         HEAD_KEY_TARGET_TENANTID  = Key
+                                                                                          .of("meta-target-tenantid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static Key<String> getKey(String key) {

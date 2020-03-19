@@ -151,7 +151,7 @@ public class GrpcClientTransport extends ClientTransport {
 
             RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
             invokeContext.put(GrpcContants.SOFA_REQUEST_KEY, request);
-
+            invokeContext.put(GrpcContants.SOFA_CONSUMER_CONFIG_KEY, transportConfig.getConsumerConfig());
             Channel proxyChannel = ClientInterceptors.intercept(this.channel, GrpcInterceptorManager.getInternalConsumerClasses());
             final GrpcClientInvoker grpcClientInvoker = new GrpcClientInvoker(request, proxyChannel);
             sofaResponse = grpcClientInvoker.invoke(transportConfig.getConsumerConfig(), timeout);

@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.transport.grpc;
 
+import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -61,7 +62,9 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
 
                 RpcInvokeContext context = RpcInvokeContext.getContext();
                 SofaRequest sofaRequest = (SofaRequest) context.get(GrpcContants.SOFA_REQUEST_KEY);
-                GrpcTracerAdapter.beforeSend(sofaRequest, requestHeader);
+
+                ConsumerConfig consumerConfig = (ConsumerConfig) context.get(GrpcContants.SOFA_CONSUMER_CONFIG_KEY);
+                GrpcTracerAdapter.beforeSend(sofaRequest, consumerConfig, requestHeader);
                 if (RpcRunningState.isDebugMode()) {
                     LOGGER.info("[2]prepare to send from client:{}", requestHeader);
                 }
