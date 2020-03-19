@@ -39,7 +39,7 @@ public class BlackListFileLoaderTest {
         String s = System.getProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE);
         try {
             System.setProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, "-java.net.Socket");
-            blacks = BlackListFileLoader.loadFile("/sofa-rpc/serialize_blacklist.txt");
+            blacks = BlackListFileLoader.loadFile();
         } finally {
             if (s != null) {
                 System.setProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, s);

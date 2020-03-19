@@ -40,15 +40,24 @@ public class BlackListFileLoader {
 
     private static final Logger      LOGGER                    = LoggerFactory.getLogger(BlackListFileLoader.class);
 
-    public static final List<String> SOFA_SERIALIZE_BLACK_LIST = loadFile("/sofa-rpc/serialize_blacklist.txt");
+    public static final List<String> SOFA_SERIALIZE_BLACK_LIST = loadFile();
 
-    static List<String> loadFile(String path) {
+    static List<String> loadFile() {
         List<String> blackPrefixList = new ArrayList<String>();
         InputStream input = null;
+        InputStream extInput = null;
         try {
+            // 原始序列化黑名单类
+            String path = "/sofa-rpc/serialize_blacklist.txt";
             input = BlackListFileLoader.class.getResourceAsStream(path);
             if (input != null) {
                 readToList(input, "UTF-8", blackPrefixList);
+            }
+            // 应用额外增加的需要过滤的黑名单
+            path = "/META-INF/sofa-rpc/serialize_blacklist.txt";
+            extInput = BlackListFileLoader.class.getResourceAsStream(path);
+            if (extInput != null) {
+                readToList(extInput, "UTF-8", blackPrefixList);
             }
             String overStr = SofaConfigs.getStringValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, "");
             if (StringUtils.isNotBlank(overStr)) {
@@ -63,6 +72,7 @@ public class BlackListFileLoader {
             }
         } finally {
             closeQuietly(input);
+            closeQuietly(extInput);
         }
         return blackPrefixList;
     }
