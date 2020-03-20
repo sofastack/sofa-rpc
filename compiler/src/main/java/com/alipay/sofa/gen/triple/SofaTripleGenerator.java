@@ -14,28 +14,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.gen.grpc.reactive;
+package com.alipay.sofa.gen.triple;
 
 import com.alipay.sofa.gen.base.AbstractGenerator;
 import com.salesforce.jprotoc.ProtocPlugin;
 
-public class ReactorSofaGrpcGenerator extends AbstractGenerator {
-
-    @Override
-    protected String getClassPrefix() {
-        return "ReactorSofa";
-    }
-
-    @Override
-    protected String getClassSuffix() {
-        return "Grpc";
-    }
+public class SofaTripleGenerator extends AbstractGenerator {
 
     public static void main(String[] args) {
         if (args.length == 0) {
-            ProtocPlugin.generate(new ReactorSofaGrpcGenerator());
+            ProtocPlugin.generate(new SofaTripleGenerator());
         } else {
-            ProtocPlugin.debug(new ReactorSofaGrpcGenerator(), args[0]);
+            ProtocPlugin.debug(new SofaTripleGenerator(), args[0]);
         }
+    }
+
+    @Override
+    protected String getClassPrefix() {
+        return "Sofa";
+    }
+
+    protected String getClassSuffix() {
+        return "Triple";
     }
 }

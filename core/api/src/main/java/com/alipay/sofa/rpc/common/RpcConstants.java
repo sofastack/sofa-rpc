@@ -153,7 +153,7 @@ public class RpcConstants {
      */
     public static final String  PROTOCOL_TYPE_BOLT                 = "bolt";
     /**
-     * 协议类型：GRPC
+     * 协议类型：triple
      *
      * @since 5.1.0
      */

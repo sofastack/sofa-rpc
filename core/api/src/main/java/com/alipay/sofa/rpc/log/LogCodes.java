@@ -206,7 +206,7 @@ public class LogCodes {
     public static final String                 ERROR_OSGI_RESGISTER_SERVICE               = "019990015";
     public static final String                 ERROR_OSGI_UNRESGISTER_SERVICE             = "019990016";
     public static final String                 ERROR_ADDRESSING_CHAIN_EMPTY               = "019990017";
-    public static final String                 ERROR_PROVIDER_GRPC_START                  = "019990018";
+    public static final String                 ERROR_PROVIDER_TRIPLE_START                = "019990018";
     public static final String                 ERROR_RESTART_SCHEDULE_SERVICE             = "019990019";
     public static final String                 ERROR_GET_HOST_FAIL                        = "019990020";
     public static final String                 ERROR_LOAD_RPC_CONFIGS                     = "019990021";

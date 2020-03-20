@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
 /**
- * Consumer bootstrap for grpc
+ * Consumer bootstrap for tri
  *
  * @author <a href=mailto:yqluan@gmail.com>Yanqiang Oliver Luan (neokidd)</a>
  */

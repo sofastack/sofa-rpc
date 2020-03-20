@@ -76,7 +76,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.alipay.sofa.gen.grpc.SofaGrpcGenerator</mainClass>
+                            <mainClass>com.alipay.sofa.gen.triple.SofaTripleGenerator</mainClass>
                         </manifest>
                     </archive>
                 </configuration>

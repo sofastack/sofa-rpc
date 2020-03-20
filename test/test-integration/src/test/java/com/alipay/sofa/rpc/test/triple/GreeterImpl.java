@@ -14,17 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.grpc;
+package com.alipay.sofa.rpc.test.triple;
 
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterGrpc;
+import io.grpc.examples.helloworld.SofaGreeterTriple;
 import io.grpc.stub.StreamObserver;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class GreeterImpl extends SofaGreeterGrpc.GreeterImplBase {
+public class GreeterImpl extends SofaGreeterTriple.GreeterImplBase {
 
     //Intentionally using unsupported format
     static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] { DateTimeFormatter.ISO_DATE_TIME,

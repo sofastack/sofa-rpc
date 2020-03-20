@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.grpc;
+package com.alipay.sofa.rpc.test.triple;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -27,7 +27,7 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterGrpc;
+import io.grpc.examples.helloworld.SofaGreeterTriple;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -50,21 +50,21 @@ public class TripleServerTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setPort(port);
 
-        ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
             .setApplication(applicationConfig)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setRef(new GreeterImpl())
             .setServer(serverConfig);
 
         providerConfig.export();
 
-        ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
-        consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("grpc://127.0.0.1:" + port);
+            .setDirectUrl("tri://127.0.0.1:" + port);
 
-        SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
+        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
 
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
             .build();

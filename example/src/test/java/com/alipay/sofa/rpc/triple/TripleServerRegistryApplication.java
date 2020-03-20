@@ -50,10 +50,10 @@ public class TripleServerRegistryApplication {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setPort(port);
 
-        ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
             .setApplication(applicationConfig)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setRef(new TripleGreeterImpl())
             .setServer(serverConfig)
             .setRegistry(registryConfig);

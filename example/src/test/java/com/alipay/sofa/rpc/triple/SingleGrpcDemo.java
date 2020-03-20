@@ -28,7 +28,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterGrpc;
+import io.grpc.examples.helloworld.SofaGreeterTriple;
 
 public class SingleGrpcDemo {
     private static final Logger LOGGER = LoggerFactory.getLogger(SingleGrpcDemo.class);
@@ -55,23 +55,23 @@ public class SingleGrpcDemo {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setPort(port);
 
-        ProviderConfig<SofaGreeterGrpc.IGreeter> providerConfig = new ProviderConfig<SofaGreeterGrpc.IGreeter>()
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
             .setApplication(serverApp)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setRef(new TripleGreeterImpl())
             .setServer(serverConfig)
             .setRegistry(registryConfig);
 
         providerConfig.export();
 
-        ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
-        consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setRegistry(registryConfig)
             .setApplication(clientApp);
 
-        SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
+        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
 
         LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
 

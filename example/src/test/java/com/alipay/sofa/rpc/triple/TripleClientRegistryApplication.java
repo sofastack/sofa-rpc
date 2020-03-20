@@ -25,7 +25,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterGrpc;
+import io.grpc.examples.helloworld.SofaGreeterTriple;
 
 /**
  * @author <a href="mailto:luanyanqiang@dibgroup.cn">Luan Yanqiang</a>
@@ -40,13 +40,13 @@ public class TripleClientRegistryApplication {
         RegistryConfig registryConfig = new RegistryConfig();
         registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
 
-        ConsumerConfig<SofaGreeterGrpc.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterGrpc.IGreeter>();
-        consumerConfig.setInterfaceId(SofaGreeterGrpc.IGreeter.class.getName())
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setRegistry(registryConfig)
             .setApplication(clientApp);
 
-        SofaGreeterGrpc.IGreeter greeterBlockingStub = consumerConfig.refer();
+        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
 
         LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
 
