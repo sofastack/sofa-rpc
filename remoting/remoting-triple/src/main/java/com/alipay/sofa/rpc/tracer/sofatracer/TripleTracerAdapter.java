@@ -106,7 +106,7 @@ public class TripleTracerAdapter {
         if (StringUtils.isNotBlank(route)) {
             Map<String, String> map = new HashMap<>();
             map.put(USERID_KEY, route);
-            header.put(TripleHeadKeys.HEAD_KEY_ROUTE_INFO.name(), JSONUtils.toJSONString(map));
+            header.put(TripleHeadKeys.HEAD_KEY_UNIT_INFO.name(), JSONUtils.toJSONString(map));
         }
 
         header.put(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION.name(), "1.0");

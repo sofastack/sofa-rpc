@@ -42,15 +42,15 @@ public class TripleHeadKeys {
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_SERVICE_VERSION  = Key
-                                                                                          .of("meta-service-version",
+                                                                                          .of("tri-service-version",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_TRACE_ID         = Key
-                                                                                          .of("meta-trace-traceid",
+                                                                                          .of("tri-trace-traceid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_RPC_ID           = Key
-                                                                                          .of("meta-trace-rpcid",
+                                                                                          .of("tri-trace-rpcid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_OLD_TRACE_ID     = Key
@@ -62,40 +62,40 @@ public class TripleHeadKeys {
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_META_TYPE        = Key
-                                                                                          .of("meta-type",
+                                                                                          .of("tri-type",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_SAMP_TYPE        = Key
-                                                                                          .of("meta-trace-samp",
+                                                                                          .of("tri-trace-samp",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
     public static final Key<String>                         HEAD_KEY_CURRENT_APP      = Key
-                                                                                          .of("meta-trace-current-app",
+                                                                                          .of("tri-trace-current-app",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_INVOKE_TYPE      = Key
-                                                                                          .of("meta-trace-invoke-type",
+                                                                                          .of("tri-trace-invoke-type",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_PROTOCOL_TYPE    = Key
-                                                                                          .of("meta-trace-protocol-type",
+                                                                                          .of("tri-trace-protocol-type",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
     public static final Key<String>                         HEAD_KEY_BIZ_BAGGAGE_TYPE = Key
-                                                                                          .of("meta-trace-biz-baggage",
+                                                                                          .of("tri-trace-biz-baggage",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
     public static final Key<String>                         HEAD_KEY_SYS_BAGGAGE_TYPE = Key
-                                                                                          .of("meta-trace-sys-baggage",
+                                                                                          .of("tri-trace-sys-baggage",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_ROUTE_INFO       = Key
-                                                                                          .of("meta-route",
+    public static final Key<String>                         HEAD_KEY_UNIT_INFO        = Key
+                                                                                          .of("tri-unit-info",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_SOURCE_TENANTID  = Key
-                                                                                          .of("meta-tenantid",
+                                                                                          .of("tri-tenantid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_TARGET_TENANTID  = Key
-                                                                                          .of("meta-target-tenantid",
+                                                                                          .of("tri-target-tenantid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static Key<String> getKey(String key) {
