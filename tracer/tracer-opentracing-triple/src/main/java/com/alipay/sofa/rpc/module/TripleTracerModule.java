@@ -31,8 +31,8 @@ import com.alipay.sofa.rpc.transport.triple.ClientHeaderClientInterceptor;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">zhanggeng</a>
  */
-@Extension("sofaTracer-grpc")
-public class GrpcTracerModule implements Module {
+@Extension("sofaTracer-triple")
+public class TripleTracerModule implements Module {
 
     /**
      * 是否启动Tracer
