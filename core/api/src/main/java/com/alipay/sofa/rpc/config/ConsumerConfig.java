@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.listener.ConsumerStateListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
@@ -59,7 +60,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROTOCOL;
 
 /**
  * 服务消费者配置
- * 
+ *
  * @param <T> the type parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
@@ -239,7 +240,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     @Override
     public String buildKey() {
-        return protocol + "://" + interfaceId + ":" + uniqueId;
+        return protocol + "://" + this.getInterfaceId() + ":" + uniqueId;
     }
 
     /**
@@ -973,5 +974,23 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public ConsumerConfig<T> setProviderInfoListener(ProviderInfoListener providerInfoListener) {
         this.providerInfoListener = providerInfoListener;
         return this;
+    }
+
+    @Override
+    public String getInterfaceId() {
+        if (StringUtils.equals(RpcConstants.PROTOCOL_TYPE_TRIPLE, this.getProtocol())) {
+            Class enclosingClass = this.getProxyClass().getEnclosingClass();
+            Method sofaStub = null;
+            String serviceName = interfaceId;
+            try {
+                sofaStub = enclosingClass.getDeclaredMethod("getServiceName");
+                serviceName = (String) sofaStub.invoke(null);
+            } catch (Throwable e) {
+                //ignore
+            }
+            return serviceName;
+        } else {
+            return interfaceId;
+        }
     }
 }

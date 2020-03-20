@@ -37,9 +37,9 @@ public class SingleGrpcDemo {
 
         RpcRunningState.setDebugMode(true);
 
-        ApplicationConfig clientApp = new ApplicationConfig().setAppName("grpc-client");
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
 
-        ApplicationConfig serverApp = new ApplicationConfig().setAppName("grpc-server");
+        ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
 
         int port = 50052;
         if (args.length != 0) {

@@ -27,6 +27,10 @@ public static RxSofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel, io.
 return new RxSofa{{serviceName}}Stub(channel, callOptions, providerInfo, consumerConfig, timeout);
 }
 
+public static String getServiceName() {
+return {{packageName}}.{{serviceName}}Grpc.SERVICE_NAME;
+}
+
 {{#javaDoc}}
     {{{javaDoc}}}
 {{/javaDoc}}

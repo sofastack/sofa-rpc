@@ -552,6 +552,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
 
     /**
      * set provider bootstrap
+     *
      * @param providerBootstrap
      */
     public void setProviderBootstrap(ProviderBootstrap providerBootstrap) {

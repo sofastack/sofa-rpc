@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.triple;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
@@ -35,16 +34,18 @@ public class TripleClientRegistryApplication {
 
     public static void main(String[] args) {
 
-        ApplicationConfig clientApp = new ApplicationConfig().setAppName("grpc-client");
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
 
-        RegistryConfig registryConfig = new RegistryConfig();
-        registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");
+        /*   RegistryConfig registryConfig = new RegistryConfig();
+           registryConfig.setProtocol("zookeeper").setAddress("127.0.0.1:2181");*/
 
         ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
         consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setRegistry(registryConfig)
-            .setApplication(clientApp);
+            //.setRegistry(registryConfig)
+            .setApplication(clientApp)
+            .setDirectUrl("tri://10.15.232.18:19544")
+            .setRegister(false);
 
         SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
 

@@ -109,6 +109,10 @@ public static Sofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel, io.gr
 return new Sofa{{serviceName}}Stub(channel, callOptions, providerInfo, consumerConfig, timeout);
 }
 
+public static String getServiceName() {
+  return {{packageName}}.{{serviceName}}Grpc.SERVICE_NAME;
+}
+
 public interface I{{serviceName}} {
 {{#unaryMethods}}
     {{#javaDoc}}

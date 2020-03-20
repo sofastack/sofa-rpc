@@ -27,6 +27,10 @@ public static ReactorSofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel
 return new ReactorSofa{{serviceName}}Stub(channel, callOptions, providerInfo, consumerConfig,timeout);
 }
 
+public static String getServiceName() {
+return {{packageName}}.{{serviceName}}Grpc.SERVICE_NAME;
+}
+
 {{#javaDoc}}
     {{{javaDoc}}}
 {{/javaDoc}}

@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
+import java.lang.reflect.Method;
+
 /**
  * Consumer bootstrap for tri
  *
@@ -29,5 +31,21 @@ import com.alipay.sofa.rpc.ext.Extension;
 public class TripleConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
     public TripleConsumerBootstrap(ConsumerConfig<T> consumerConfig) {
         super(consumerConfig);
+    }
+
+    @Override
+    public T refer() {
+        Class enclosingClass = this.getConsumerConfig().getProxyClass().getEnclosingClass();
+        Method sofaStub = null;
+        String serviceName = this.getConsumerConfig().getInterfaceId();
+        try {
+            sofaStub = enclosingClass.getDeclaredMethod("getServiceName");
+            serviceName = (String) sofaStub.invoke(null);
+        } catch (Throwable e) {
+            //ignore
+        }
+
+        this.getConsumerConfig().setVirtualInterfaceId(serviceName);
+        return super.refer();
     }
 }

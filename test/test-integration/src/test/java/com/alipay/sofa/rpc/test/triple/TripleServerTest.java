@@ -42,7 +42,7 @@ public class TripleServerTest {
     //同步调用,直连
     public void testSync() {
 
-        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("grpc-server");
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
 
         int port = 50052;
 

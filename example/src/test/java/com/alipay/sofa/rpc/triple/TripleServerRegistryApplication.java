@@ -17,13 +17,12 @@
 package com.alipay.sofa.rpc.triple;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.config.RegistryConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import io.grpc.examples.helloworld.*;
+import io.grpc.examples.helloworld.SofaGreeterTriple;
 
 /**
  * @author <a href="mailto:leizhiyuan@gmail.com">leizhiyuan</a>
@@ -34,17 +33,17 @@ public class TripleServerRegistryApplication {
 
     public static void main(String[] args) {
 
-        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("grpc-server");
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
 
-        int port = 50052;
+        int port = 50051;
         if (args.length != 0) {
             LOGGER.debug("first arg is {}", args[0]);
             port = Integer.valueOf(args[0]);
         }
 
-        RegistryConfig registryConfig = new RegistryConfig()
-            .setProtocol("zookeeper")
-            .setAddress("127.0.0.1:2181");
+        /*   RegistryConfig registryConfig = new RegistryConfig()
+               .setProtocol("zookeeper")
+               .setAddress("127.0.0.1:2181");*/
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -56,7 +55,8 @@ public class TripleServerRegistryApplication {
             .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
             .setRef(new TripleGreeterImpl())
             .setServer(serverConfig)
-            .setRegistry(registryConfig);
+            .setRegister(false);
+        // .setRegistry(registryConfig);
 
         providerConfig.export();
 
