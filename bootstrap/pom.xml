@@ -17,7 +17,7 @@
         <module>bootstrap-api</module>
         <module>bootstrap-bolt</module>
         <module>bootstrap-dubbo</module>
-        <module>bootstrap-grpc</module>
+        <module>bootstrap-triple</module>
         <module>bootstrap-http</module>
         <module>bootstrap-rest</module>
     </modules>

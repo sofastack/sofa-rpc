@@ -17,7 +17,7 @@
         <module>remoting-bolt</module>
         <module>remoting-http</module>
         <module>remoting-resteasy</module>
-        <module>remoting-grpc</module>
+        <module>remoting-triple</module>
     </modules>
 
     <dependencyManagement>

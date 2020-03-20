@@ -179,7 +179,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-remoting-grpc</artifactId>
+            <artifactId>sofa-rpc-remoting-triple</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -194,7 +194,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-tracer-opentracing-grpc</artifactId>
+            <artifactId>sofa-rpc-tracer-opentracing-triple</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 

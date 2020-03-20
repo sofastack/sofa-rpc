@@ -130,8 +130,8 @@ public class NacosRegistryHelperTest {
         serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_TR);
         assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:DEFAULT");
 
-        serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_GRPC);
-        assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:" + RpcConstants.PROTOCOL_TYPE_GRPC);
+        serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_TRIPLE);
+        assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:" + RpcConstants.PROTOCOL_TYPE_TRIPLE);
 
         serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_REST);
         assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:" + RpcConstants.PROTOCOL_TYPE_REST);
