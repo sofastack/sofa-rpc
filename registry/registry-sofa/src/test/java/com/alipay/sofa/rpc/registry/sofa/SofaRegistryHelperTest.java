@@ -216,7 +216,7 @@ public class SofaRegistryHelperTest {
         Assert.assertTrue((Integer) provider.getDynamicAttr(".xx.timeout") == 2000);
         Assert.assertTrue("false".equals(provider.getAttr(".xx._AUTORECONNECT")));
 
-        url = "grpc://10.15.232.229:55555?_CONNECTIONNUM=1&v=4.0&_SERIALIZETYPE=11&app_name=test&p=1&_TIMEOUT=4000";
+        url = "tri://10.15.232.229:55555?_CONNECTIONNUM=1&v=4.0&_SERIALIZETYPE=11&app_name=test&p=1&_TIMEOUT=4000";
         provider = SofaRegistryHelper.parseProviderInfo(url);
 
         Assert.assertTrue(RpcConstants.PROTOCOL_TYPE_TRIPLE.equals(provider.getProtocolType()));
