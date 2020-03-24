@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -28,7 +29,9 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
+import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
+import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 import io.grpc.BindableService;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -38,6 +41,7 @@ import io.grpc.util.MutableHandlerRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -88,7 +92,21 @@ public class TripleServer implements Server {
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        server = ServerBuilder.forPort(serverConfig.getPort()).fallbackHandlerRegistry(handlerRegistry).build();
+        server = ServerBuilder.forPort(serverConfig.getPort()).
+            fallbackHandlerRegistry(handlerRegistry)
+            .executor(initThreadPool(serverConfig))
+            .build();
+    }
+
+    protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
+        ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
+        threadPool.setThreadFactory(new NamedThreadFactory(
+            "SEV-TRIPLE-BIZ-" + serverConfig.getPort(), serverConfig.isDaemon()));
+        threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
+        if (serverConfig.isPreStartCore()) { // 初始化核心线程池
+            threadPool.prestartAllCoreThreads();
+        }
+        return threadPool;
     }
 
     @Override
@@ -100,7 +118,7 @@ public class TripleServer implements Server {
             try {
                 server.start();
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Start the grpc server at port {}", serverConfig.getPort());
+                    LOGGER.info("Start the triple server at port {}", serverConfig.getPort());
                 }
             } catch (SofaRpcRuntimeException e) {
                 throw e;
@@ -130,11 +148,11 @@ public class TripleServer implements Server {
         try {
             // 关闭端口，不关闭线程池
             if (LOGGER.isInfoEnabled()) {
-                LOGGER.info("Stop the http rest server at port {}", serverConfig.getPort());
+                LOGGER.info("Stop the triple server at port {}", serverConfig.getPort());
             }
             server.shutdown();
         } catch (Exception e) {
-            LOGGER.error("Stop the http rest server at port " + serverConfig.getPort() + " error !", e);
+            LOGGER.error("Stop the triple server at port " + serverConfig.getPort() + " error !", e);
         }
         started = false;
     }
@@ -151,7 +169,7 @@ public class TripleServer implements Server {
 
         try {
             final ServerServiceDefinition serviceDef = bindableService.bindService();
-            List<TripleServerInterceptor> interceptorList=new ArrayList<>();
+            List<TripleServerInterceptor> interceptorList = new ArrayList<>();
             interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
             interceptorList.add(new ServerResHeaderInterceptor(serviceDef));
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
@@ -160,7 +178,7 @@ public class TripleServer implements Server {
             handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
-            LOGGER.error("Register grpc service error", e);
+            LOGGER.error("Register triple service error", e);
             serviceInfo.remove(providerConfig);
         }
     }
@@ -172,7 +190,7 @@ public class TripleServer implements Server {
             handlerRegistry.removeService(serverServiceDefinition);
             invokerCnt.decrementAndGet();
         } catch (Exception e) {
-            LOGGER.error("Unregister grpc service error", e);
+            LOGGER.error("Unregister triple service error", e);
         }
         if (closeIfNoEntry && invokerCnt.get() == 0) {
             stop();
