@@ -16,11 +16,13 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
-import com.alipay.sofa.rpc.config.TripleInterceptorManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.interceptor.ServerReqHeaderInterceptor;
+import com.alipay.sofa.rpc.interceptor.ServerResHeaderInterceptor;
+import com.alipay.sofa.rpc.interceptor.TripleServerInterceptor;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -33,6 +35,8 @@ import io.grpc.ServerInterceptors;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.util.MutableHandlerRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -144,9 +148,14 @@ public class TripleServer implements Server {
             e.printStackTrace();
         }
         BindableService bindableService = (BindableService) obj;
+
         try {
+            final ServerServiceDefinition serviceDef = bindableService.bindService();
+            List<TripleServerInterceptor> interceptorList=new ArrayList<>();
+            interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
+            interceptorList.add(new ServerResHeaderInterceptor(serviceDef));
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
-                bindableService.bindService(), TripleInterceptorManager.getInternalProviderClasses());
+                    serviceDef, interceptorList);
             serviceInfo.put(providerConfig, serviceDefinition);
             handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();

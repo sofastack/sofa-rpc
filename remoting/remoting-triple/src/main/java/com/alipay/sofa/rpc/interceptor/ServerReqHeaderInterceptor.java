@@ -14,17 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.server.triple;
+package com.alipay.sofa.rpc.interceptor;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.tracer.sofatracer.TripleTracerAdapter;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
@@ -35,10 +36,14 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Created by zhanggeng on 2017/1/25.
  */
-public class ServerReqHeaderInterceptor implements ServerInterceptor {
+public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
 
     public static final Logger LOGGER = LoggerFactory
                                           .getLogger(ServerReqHeaderInterceptor.class);
+
+    public ServerReqHeaderInterceptor(ServerServiceDefinition serverServiceDefinition) {
+        super(serverServiceDefinition);
+    }
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
@@ -48,6 +53,8 @@ public class ServerReqHeaderInterceptor implements ServerInterceptor {
         if (RpcRunningState.isDebugMode()) {
             LOGGER.info("[1]header received from client:" + requestHeaders);
         }
+
+        final ServerServiceDefinition serverServiceDefinition = this.getServerServiceDefinition();
         return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
             next.startCall(call, requestHeaders)) {
 
@@ -74,7 +81,7 @@ public class ServerReqHeaderInterceptor implements ServerInterceptor {
                     LOGGER.info("[2]body received done from client:" + requestHeaders);
                 }
                 // 服务端收到请求Header 如果用户是代码中直接抛出异常，会走到这里的
-                TripleTracerAdapter.serverReceived(call, requestHeaders);
+                TripleTracerAdapter.serverReceived(serverServiceDefinition, call, requestHeaders);
                 try {
                     super.onHalfClose();
                 } catch (Throwable t) {

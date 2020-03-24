@@ -40,6 +40,7 @@ import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
 import io.grpc.Grpc;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
+import io.grpc.ServerServiceDefinition;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -69,7 +70,7 @@ public class TripleTracerAdapter {
      * @param sofaRequest   SofaRequest
      * @param requestHeader Metadata
      */
-    public static void beforeSend(SofaRequest sofaRequest, ConsumerConfig consumerConfig,Metadata requestHeader) {
+    public static void beforeSend(SofaRequest sofaRequest, ConsumerConfig consumerConfig, Metadata requestHeader) {
 
         // 客户端设置请求服务端的Header
         // tracer信息放入request 发到服务端
@@ -134,7 +135,8 @@ public class TripleTracerAdapter {
     /**
      * 适配服务端serverReceived
      */
-    public static void serverReceived(final ServerCall call, Metadata requestHeaders) {
+    public static void serverReceived(ServerServiceDefinition serverServiceDefinition, final ServerCall call,
+                                      Metadata requestHeaders) {
         try {
             SofaRequest sofaRequest = new SofaRequest();
             Map<String, String> traceMap = new HashMap<String, String>();
@@ -144,6 +146,10 @@ public class TripleTracerAdapter {
                     .get(TripleHeadKeys.HEAD_KEY_TARGET_SERVICE));
                 sofaRequest.setInterfaceName(requestHeaders
                     .get(TripleHeadKeys.HEAD_KEY_TARGET_SERVICE));
+            } else {
+                String serviceName = serverServiceDefinition.getServiceDescriptor().getName();
+                sofaRequest.setTargetServiceUniqueName(serviceName);
+                sofaRequest.setInterfaceName(serviceName);
             }
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TARGET_APP)) {
                 sofaRequest.setTargetAppName(requestHeaders

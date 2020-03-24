@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.transport.triple;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
-import com.alipay.sofa.rpc.config.TripleInterceptorManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
@@ -29,6 +28,7 @@ import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.interceptor.ClientHeaderClientInterceptor;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
@@ -36,8 +36,6 @@ import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
-import io.grpc.Channel;
-import io.grpc.ClientInterceptors;
 import io.grpc.ManagedChannel;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
@@ -152,8 +150,7 @@ public class TripleClientTransport extends ClientTransport {
             RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
             invokeContext.put(TripleContants.SOFA_REQUEST_KEY, request);
             invokeContext.put(TripleContants.SOFA_CONSUMER_CONFIG_KEY, transportConfig.getConsumerConfig());
-            Channel proxyChannel = ClientInterceptors.intercept(this.channel, TripleInterceptorManager.getInternalConsumerClasses());
-            final TripleClientInvoker tripleClientInvoker = new TripleClientInvoker(request, proxyChannel);
+            final TripleClientInvoker tripleClientInvoker = new TripleClientInvoker(request, channel);
             sofaResponse = tripleClientInvoker.invoke(transportConfig.getConsumerConfig(), timeout);
             return sofaResponse;
         } catch (Exception e) {
@@ -224,9 +221,11 @@ public class TripleClientTransport extends ClientTransport {
      * @param url
      */
     private ManagedChannel initChannel(ProviderInfo url) {
+        ClientHeaderClientInterceptor clientHeaderClientInterceptor = new ClientHeaderClientInterceptor();
         NettyChannelBuilder builder = NettyChannelBuilder.forAddress(url.getHost(), url.getPort());
         builder.usePlaintext();
         builder.disableRetry();
+        builder.intercept(clientHeaderClientInterceptor);
         return builder.build();
     }
 

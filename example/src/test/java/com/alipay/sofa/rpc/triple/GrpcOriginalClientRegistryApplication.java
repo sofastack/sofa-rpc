@@ -34,7 +34,7 @@ public class GrpcOriginalClientRegistryApplication {
                                                        DateTimeFormatter.BASIC_ISO_DATE };
 
     public static void main(String[] args) {
-        ManagedChannel channel = NettyChannelBuilder.forAddress("127.0.0.1", 50052).usePlaintext()
+        ManagedChannel channel = NettyChannelBuilder.forAddress("127.0.0.1", 50051).usePlaintext()
             .build();
         GreeterGrpc.GreeterBlockingStub client = GreeterGrpc.newBlockingStub(channel);
         HelloReply res = client.sayHello(HelloRequest.newBuilder().setName("fuck").build());

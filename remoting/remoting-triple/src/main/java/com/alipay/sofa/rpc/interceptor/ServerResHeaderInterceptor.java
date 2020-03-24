@@ -14,15 +14,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.server.triple;
+package com.alipay.sofa.rpc.interceptor;
 
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.server.triple.TripleContants;
 import io.grpc.ForwardingServerCall.SimpleForwardingServerCall;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
 import io.grpc.ServerCallHandler;
-import io.grpc.ServerInterceptor;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,9 +33,13 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Created by zhanggeng on 2017/1/25.
  */
-public class ServerResHeaderInterceptor implements ServerInterceptor {
+public class ServerResHeaderInterceptor extends TripleServerInterceptor {
 
     public static final Logger LOGGER = LoggerFactory.getLogger(ServerResHeaderInterceptor.class);
+
+    public ServerResHeaderInterceptor(ServerServiceDefinition serverServiceDefinition) {
+        super(serverServiceDefinition);
+    }
 
     @Override
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
