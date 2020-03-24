@@ -66,6 +66,8 @@ public class TripleClientTransport extends ClientTransport {
 
     private InetSocketAddress remoteAddress;
 
+    protected TripleClientInvoker tripleClientInvoker;
+
     /* <address, gRPC channels> */
     private final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
 
@@ -91,6 +93,7 @@ public class TripleClientTransport extends ClientTransport {
         }
         ProviderInfo providerInfo = transportConfig.getProviderInfo();
         channel = getSharedChannel(providerInfo);
+        tripleClientInvoker = new TripleClientInvoker(transportConfig.getConsumerConfig(), channel);
     }
 
     @Override
@@ -99,7 +102,7 @@ public class TripleClientTransport extends ClientTransport {
             try {
                 channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
-                LOGGER.warn("GRPC channel shut down interrupted.");
+                LOGGER.warn("Triple channel shut down interrupted.");
             }
             channel = null;
         }
@@ -153,8 +156,7 @@ public class TripleClientTransport extends ClientTransport {
             RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
             invokeContext.put(TripleContants.SOFA_REQUEST_KEY, request);
             invokeContext.put(TripleContants.SOFA_CONSUMER_CONFIG_KEY, transportConfig.getConsumerConfig());
-            final TripleClientInvoker tripleClientInvoker = new TripleClientInvoker(request, channel);
-            sofaResponse = tripleClientInvoker.invoke(transportConfig.getConsumerConfig(), timeout);
+            sofaResponse = tripleClientInvoker.invoke(request, timeout);
             return sofaResponse;
         } catch (Exception e) {
             throwable = convertToRpcException(e);

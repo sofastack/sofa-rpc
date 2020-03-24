@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.transport.triple;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -25,10 +24,8 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
-import io.grpc.stub.StreamObserver;
 
 import java.lang.reflect.Method;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Invoker for Grpc
@@ -37,77 +34,34 @@ import java.util.concurrent.TimeUnit;
  * @date 2018.12.15 7:06 PM
  */
 public class TripleClientInvoker {
+    private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientInvoker.class);
 
-    private final Channel        channel;
+    private Channel             channel;
 
-    private final Object         request;
-    private final StreamObserver responseObserver;
-    private final Class          requestClass;
+    private ConsumerConfig      consumerConfig;
 
-    private final Method         method;
-    private final String[]       methodArgSigs;
-    private final Object[]       methodArgs;
+    private Method              sofaStub;
 
-    private final String         serviceName;
-    private final String         interfaceName;
-
-    private final Integer        timeout;
-
-    private final static Logger  LOGGER = LoggerFactory.getLogger(TripleClientInvoker.class);
-
-    /**
-     * The constructor
-     *
-     * @param sofaRequest The SofaRequest
-     * @param channel     The Channel
-     */
-    public TripleClientInvoker(SofaRequest sofaRequest, Channel channel) {
+    public TripleClientInvoker(ConsumerConfig consumerConfig, Channel channel) {
         this.channel = channel;
-        this.method = sofaRequest.getMethod();
-        this.methodArgs = sofaRequest.getMethodArgs();
-        this.methodArgSigs = sofaRequest.getMethodArgSigs();
-        this.interfaceName = sofaRequest.getInterfaceName();
-        this.serviceName = interfaceName.substring(0, interfaceName.indexOf('$'));
-        this.request = methodArgs[0];
-        this.responseObserver = methodArgs.length == 2 ? (StreamObserver) methodArgs[1] : null;
-        this.requestClass = ClassUtils.forName(methodArgSigs[0]);
-
+        this.consumerConfig = consumerConfig;
+        Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
         try {
-            requestClass.cast(request);
-        } catch (ClassCastException e) {
-            throw e;
+            sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
+                ProviderInfo.class, ConsumerConfig.class, int.class);
+        } catch (NoSuchMethodException e) {
+            LOGGER.error("getSofaStub not found in enclosingClass" + enclosingClass.getName());
         }
-        this.timeout = sofaRequest.getTimeout();
     }
 
-    public SofaResponse invoke(ConsumerConfig consumerConfig, int timeout)
+    public SofaResponse invoke(SofaRequest sofaRequest, int timeout)
         throws Exception {
         SofaResponse sofaResponse = new SofaResponse();
-        Object response = invokeRequestMethod(consumerConfig, timeout);
-        sofaResponse.setAppResponse(response);
+        ProviderInfo providerInfo = null;
+        Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, providerInfo, consumerConfig, timeout);
+        final Method method = sofaRequest.getMethod();
+        Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
+        sofaResponse.setAppResponse(appResponse);
         return sofaResponse;
     }
-
-    private CallOptions buildCallOptions() {
-        CallOptions callOptions = CallOptions.DEFAULT;
-        if (timeout != null) {
-            callOptions = callOptions.withDeadlineAfter(timeout, TimeUnit.SECONDS);
-        }
-        return callOptions;
-    }
-
-    public Object invokeRequestMethod(ConsumerConfig consumerConfig, int timeout)
-        throws Exception {
-        Object appResponse = null;
-        Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
-
-        Method sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
-            ProviderInfo.class, ConsumerConfig.class, int.class);
-        Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, null, null, timeout);
-
-        appResponse = method.invoke(stub, methodArgs[0]);
-
-        return appResponse;
-    }
-
 }

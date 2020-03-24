@@ -49,7 +49,7 @@ public class TripleClientRegistryApplication {
 
         SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
 
-        LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
+        LOGGER.info("Triple stub bean successful: {}", greeterBlockingStub.getClass().getName());
 
         LOGGER.info("Will try to greet " + "world" + " ...");
         HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
