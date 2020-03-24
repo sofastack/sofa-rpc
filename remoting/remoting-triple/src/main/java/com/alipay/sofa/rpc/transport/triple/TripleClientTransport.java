@@ -58,20 +58,20 @@ public class TripleClientTransport extends ClientTransport {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientTransport.class);
 
-    private ProviderInfo providerInfo;
+    protected ProviderInfo providerInfo;
 
-    private ManagedChannel channel;
+    protected ManagedChannel channel;
 
-    private InetSocketAddress localAddress;
+    protected InetSocketAddress localAddress;
 
-    private InetSocketAddress remoteAddress;
+    protected InetSocketAddress remoteAddress;
 
-    protected TripleClientInvoker tripleClientInvoker;
+    protected TripleInvoker tripleClientInvoker;
 
     /* <address, gRPC channels> */
-    private final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
+    protected final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
 
-    private final Object lock = new Object();
+    protected final Object lock = new Object();
 
     /**
      * The constructor
@@ -93,7 +93,11 @@ public class TripleClientTransport extends ClientTransport {
         }
         ProviderInfo providerInfo = transportConfig.getProviderInfo();
         channel = getSharedChannel(providerInfo);
-        tripleClientInvoker = new TripleClientInvoker(transportConfig.getConsumerConfig(), channel);
+        tripleClientInvoker = buildClientInvoker();
+    }
+
+    protected TripleClientInvoker buildClientInvoker() {
+        return new TripleClientInvoker(transportConfig.getConsumerConfig(), channel);
     }
 
     @Override

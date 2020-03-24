@@ -33,7 +33,7 @@ import java.lang.reflect.Method;
  * @author LiangEn.LiWei; Yanqiang Oliver Luan (neokidd)
  * @date 2018.12.15 7:06 PM
  */
-public class TripleClientInvoker {
+public class TripleClientInvoker implements TripleInvoker {
     private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientInvoker.class);
 
     private Channel             channel;
@@ -54,6 +54,7 @@ public class TripleClientInvoker {
         }
     }
 
+    @Override
     public SofaResponse invoke(SofaRequest sofaRequest, int timeout)
         throws Exception {
         SofaResponse sofaResponse = new SofaResponse();
