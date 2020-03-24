@@ -155,7 +155,7 @@ public class TripleClientTransport extends ClientTransport {
             return sofaResponse;
         } catch (Exception e) {
             throwable = convertToRpcException(e);
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Grpc invoke error", e);
+            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Triple invoke error", e);
         } finally {
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
                 EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),

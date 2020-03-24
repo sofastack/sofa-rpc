@@ -30,8 +30,8 @@ import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterTriple;
 
-public class SingleGrpcDemo {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SingleGrpcDemo.class);
+public class SingleTripleDemo {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SingleTripleDemo.class);
 
     public static void main(String[] args) {
 
