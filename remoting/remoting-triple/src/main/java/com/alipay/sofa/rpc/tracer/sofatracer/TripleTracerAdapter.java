@@ -119,12 +119,17 @@ public class TripleTracerAdapter {
         header.put(TripleHeadKeys.HEAD_KEY_INVOKE_TYPE.name(),
                 (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_INVOKE_TYPE));
 
-        header.put(TripleHeadKeys.HEAD_KEY_SOURCE_TENANTID.name(),
-                (String) consumerConfig.getParameter("interworking.source"));
+        final String source = consumerConfig.getParameter("interworking.source");
+        if (StringUtils.isNotBlank(source)) {
+            header.put(TripleHeadKeys.HEAD_KEY_SOURCE_TENANTID.name(),
+                    source);
+        }
 
-        header.put(TripleHeadKeys.HEAD_KEY_TARGET_TENANTID.name(),
-                (String) consumerConfig.getParameter("interworking.target"));
-
+        final String target = consumerConfig.getParameter("interworking.target");
+        if (StringUtils.isNotBlank(source)) {
+            header.put(TripleHeadKeys.HEAD_KEY_TARGET_TENANTID.name(),
+                    target);
+        }
         for (Map.Entry<String, String> entry : header.entrySet()) {
             if (StringUtils.isNotBlank(entry.getValue())) {
                 requestHeader.put(TripleHeadKeys.getKey(entry.getKey()), entry.getValue());

@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
@@ -37,6 +38,8 @@ import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 import io.grpc.ManagedChannel;
+import io.grpc.Status;
+import io.grpc.StatusException;
 import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 import java.net.InetSocketAddress;
@@ -155,7 +158,7 @@ public class TripleClientTransport extends ClientTransport {
             return sofaResponse;
         } catch (Exception e) {
             throwable = convertToRpcException(e);
-            throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, "Triple invoke error", e);
+            throw throwable;
         } finally {
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
                 EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
@@ -252,9 +255,14 @@ public class TripleClientTransport extends ClientTransport {
         SofaRpcException exception;
         if (e instanceof SofaRpcException) {
             exception = (SofaRpcException) e;
+            return exception;
         }
-        // 客户端未知
-        else {
+        Status status = Status.fromThrowable(e);
+        StatusException grpcException = status.asException();
+
+        if (status.getCode() == Status.DEADLINE_EXCEEDED.getCode()) {
+            exception = new SofaTimeOutException(grpcException);
+        } else {
             exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
         }
         return exception;

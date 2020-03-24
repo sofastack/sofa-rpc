@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterTriple;
@@ -73,6 +74,50 @@ public class TripleServerTest {
         reply = greeterBlockingStub.sayHello(request);
 
         Assert.assertNotNull(reply);
+
+    }
+
+    @Test
+    //同步调用,直连
+    public void testSyncTimeout() {
+
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
+
+        int port = 50052;
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setPort(port);
+
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+            .setApplication(applicationConfig)
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setRef(new GreeterImpl())
+            .setServer(serverConfig);
+
+        providerConfig.export();
+
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setDirectUrl("tri://127.0.0.1:" + port)
+            .setTimeout(1);
+
+        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
+
+        HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
+            .build();
+        HelloReply reply = null;
+        HelloRequest request = HelloRequest.newBuilder().setName("world").setDateTime(dateTime).build();
+
+        boolean exp = false;
+        try {
+            reply = greeterBlockingStub.sayHello(request);
+        } catch (SofaTimeOutException e) {
+            exp = true;
+        }
+        Assert.assertTrue(exp);
 
     }
 
