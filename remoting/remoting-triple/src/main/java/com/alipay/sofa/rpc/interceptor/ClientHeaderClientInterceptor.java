@@ -89,10 +89,6 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                         if (RpcRunningState.isDebugMode()) {
                             LOGGER.info("[5]response close received from server:{},trailers:{}", status, trailers);
                         }
-                        if (status.getCode() == Status.UNAVAILABLE.getCode()) { // 当前连接已经不可用
-                            /*  GrpcConnectionHolder.getInstance().refresh(serviceMetadata,
-                                  rpcUrl.toString(), false);*/
-                        }
                         super.onClose(status, trailers);
                     }
 

@@ -80,7 +80,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 if (RpcRunningState.isDebugMode()) {
                     LOGGER.info("[2]body received done from client:" + requestHeaders);
                 }
-                // 服务端收到请求Header 如果用户是代码中直接抛出异常，会走到这里的
+                // 服务端收到所有信息
                 TripleTracerAdapter.serverReceived(serverServiceDefinition, call, requestHeaders);
                 try {
                     super.onHalfClose();
