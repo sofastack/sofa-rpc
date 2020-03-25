@@ -33,9 +33,12 @@ import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
 import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 import io.grpc.BindableService;
-import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
 import io.grpc.ServerServiceDefinition;
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
+import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
+import io.grpc.netty.shaded.io.netty.channel.epoll.EpollEventLoopGroup;
+import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.util.MutableHandlerRegistry;
 
 import java.util.ArrayList;
@@ -92,10 +95,39 @@ public class TripleServer implements Server {
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        server = ServerBuilder.forPort(serverConfig.getPort()).
+        server = NettyServerBuilder.forPort(serverConfig.getPort()).
             fallbackHandlerRegistry(handlerRegistry)
+            .bossEventLoopGroup(constructBossEventLoopGroup())
+            .workerEventLoopGroup(constructWorkerEventLoopGroup())
             .executor(initThreadPool(serverConfig))
             .build();
+    }
+
+    private EventLoopGroup constructWorkerEventLoopGroup() {
+
+        int workerThreads = serverConfig.getIoThreads();
+        workerThreads = workerThreads <= 0 ? Runtime.getRuntime().availableProcessors() * 2 : workerThreads;
+        NamedThreadFactory threadName =
+                new NamedThreadFactory("SEV-WORKER-" + serverConfig.getPort(), serverConfig.isDaemon());
+        EventLoopGroup workerGroup = serverConfig.isEpoll() ?
+            new EpollEventLoopGroup(workerThreads, threadName) :
+            new NioEventLoopGroup(workerThreads, threadName);
+
+        return workerGroup;
+    }
+
+    /**
+     * default as bolt
+     *
+     * @return
+     */
+    private EventLoopGroup constructBossEventLoopGroup() {
+        NamedThreadFactory threadName =
+                new NamedThreadFactory("SEV-BOSS-" + serverConfig.getPort(), serverConfig.isDaemon());
+        EventLoopGroup bossGroup = serverConfig.isEpoll() ?
+            new EpollEventLoopGroup(1, threadName) :
+            new NioEventLoopGroup(1, threadName);
+        return bossGroup;
     }
 
     protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
