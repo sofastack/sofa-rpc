@@ -37,8 +37,11 @@ import io.grpc.ServerInterceptors;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
+import io.grpc.netty.shaded.io.netty.channel.ServerChannel;
 import io.grpc.netty.shaded.io.netty.channel.epoll.EpollEventLoopGroup;
+import io.grpc.netty.shaded.io.netty.channel.epoll.EpollServerSocketChannel;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
+import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.util.MutableHandlerRegistry;
 
 import java.util.ArrayList;
@@ -100,7 +103,14 @@ public class TripleServer implements Server {
             .bossEventLoopGroup(constructBossEventLoopGroup())
             .workerEventLoopGroup(constructWorkerEventLoopGroup())
             .executor(initThreadPool(serverConfig))
+            .channelType(constructChannel())
             .build();
+    }
+
+    private Class<? extends ServerChannel> constructChannel() {
+        return serverConfig.isEpoll() ?
+            EpollServerSocketChannel.class :
+            NioServerSocketChannel.class;
     }
 
     private EventLoopGroup constructWorkerEventLoopGroup() {
