@@ -208,6 +208,8 @@ public class TripleClientTransport extends ClientTransport {
         if (channel != null && !channel.isTerminated()) {
             channel.incrementAndGetCount();
             return channel;
+        } else if (channel != null) {
+            channel.shutdownNow();
         }
 
         synchronized (lock) {
