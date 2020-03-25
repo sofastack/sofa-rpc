@@ -269,13 +269,13 @@ public class TripleClientTransport extends ClientTransport {
         if (status.getCode() == Status.DEADLINE_EXCEEDED.getCode()) {
             exception = new SofaTimeOutException(grpcException);
         } else if (status.getCode() == Status.NOT_FOUND.getCode()) {
-            exception = new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, e);
+            exception = new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, grpcException);
         } else if (status.getCode() == Status.UNAVAILABLE.getCode()) {
-            exception = new SofaRpcException(RpcErrorType.CLIENT_NETWORK, e);
+            exception = new SofaRpcException(RpcErrorType.CLIENT_NETWORK, grpcException);
         } else if (status.getCode() == Status.RESOURCE_EXHAUSTED.getCode()) {
-            exception = new SofaRpcException(RpcErrorType.SERVER_BUSY, e);
+            exception = new SofaRpcException(RpcErrorType.SERVER_BUSY, grpcException);
         } else {
-            exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, e);
+            exception = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR, grpcException);
         }
         return exception;
     }
