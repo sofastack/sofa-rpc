@@ -51,14 +51,16 @@ public class TripleHeadKeys {
 
     public static final Key<String>                         HEAD_KEY_RPC_ID           = Key
                                                                                           .of("tri-trace-rpcid",
-                                                                                              Metadata.ASCII_STRING_MARSHALLER);
 
-    public static final Key<String>                         HEAD_KEY_OLD_TRACE_ID     = Key
-                                                                                          .of("sofa-trace-traceid",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
+    //will be lowercase in http2
+    public static final Key<String>                         HEAD_KEY_OLD_TRACE_ID     = Key
+                                                                                          .of("SOFA-TraceId",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+    //will be lowercase in http2
 
     public static final Key<String>                         HEAD_KEY_OLD_RPC_ID       = Key
-                                                                                          .of("sofa-trace-rpcid",
+                                                                                          .of("SOFA-RpcId",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
     public static final Key<String>                         HEAD_KEY_META_TYPE        = Key
