@@ -40,6 +40,11 @@ public class BlackListFileLoader {
 
     private static final Logger      LOGGER                    = LoggerFactory.getLogger(BlackListFileLoader.class);
 
+    // hessian主序列化黑名单类配置文件路径
+    private static final String BLACK_LISY_PATH = "/sofa-rpc/serialize_blacklist.txt";
+    // 应用额外增加的需要过滤的黑名单配置文件路径
+    private static final String EXT_BLACK_LISY_PATH = "/sofa-rpc/serialize_blacklist_ext.txt";
+    
     public static final List<String> SOFA_SERIALIZE_BLACK_LIST = loadFile();
 
     static List<String> loadFile() {
@@ -47,15 +52,13 @@ public class BlackListFileLoader {
         InputStream input = null;
         InputStream extInput = null;
         try {
-            // 原始序列化黑名单类
-            String path = "/sofa-rpc/serialize_blacklist.txt";
-            input = BlackListFileLoader.class.getResourceAsStream(path);
+            // 读主序列化黑名单
+            input = BlackListFileLoader.class.getResourceAsStream(BLACK_LISY_PATH);
             if (input != null) {
                 readToList(input, "UTF-8", blackPrefixList);
             }
-            // 应用额外增加的需要过滤的黑名单
-            path = "/META-INF/sofa-rpc/serialize_blacklist.txt";
-            extInput = BlackListFileLoader.class.getResourceAsStream(path);
+            // 读应用额外增加的需要过滤的黑名单
+            extInput = BlackListFileLoader.class.getResourceAsStream(EXT_BLACK_LISY_PATH);
             if (extInput != null) {
                 readToList(extInput, "UTF-8", blackPrefixList);
             }

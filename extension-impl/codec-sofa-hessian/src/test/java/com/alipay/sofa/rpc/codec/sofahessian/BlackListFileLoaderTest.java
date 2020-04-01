@@ -64,6 +64,15 @@ public class BlackListFileLoaderTest {
             pass = false;
         }
         Assert.assertFalse(pass);
+        
+        // 验证扩展黑名单
+        pass = true;
+        try {
+            className = filter.resolve("com.alipay.hessian.ext.BlackListExt");
+        } catch (Exception e) {
+            pass = false;
+        }
+        Assert.assertFalse(pass);
     }
 
     @Test
