@@ -74,6 +74,49 @@ public class BlackListFileLoaderTest {
         }
         Assert.assertFalse(pass);
     }
+    
+    /* 
+     * 验证hessian扩展黑名单存在和被参数替换的情景
+     * 
+     */
+    @Test
+    public void testReplaceExtBalck() throws Exception {
+
+        List<String> blacks;
+
+        String s = System.getProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE);
+        try {
+        	// 通过参数设置扩展的黑名单被移除名单列表
+            System.setProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, "-com.alipay.hessian.ext.BlackListExt");
+            blacks = BlackListFileLoader.loadFile();
+        } finally {
+            if (s != null) {
+            	// 恢复原始值
+                System.setProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, s);
+            }
+        }
+
+        NameBlackListFilter filter = new NameBlackListFilter(blacks);
+        boolean pass = true;   
+        String className = null;
+        // 验证扩展黑名单被移除名单
+        try {
+            className = filter.resolve("com.alipay.hessian.ext.BlackListExt");
+        } catch (Exception e) {
+            pass = false;
+        }
+        Assert.assertNotNull(className);
+        Assert.assertTrue(pass);
+        
+        //验证没有被替换的扩展黑名单在名单列表中
+        pass = true;
+        try {
+            className = filter.resolve("com.alipay.hessian.ext.BlackListExt2");
+        } catch (Exception e) {
+            pass = false;
+        }
+        Assert.assertFalse(pass);
+    }
 
     @Test
     public void overrideBlackList() {

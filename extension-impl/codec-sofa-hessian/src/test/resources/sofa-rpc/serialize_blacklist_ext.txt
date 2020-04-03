@@ -1,1 +1,2 @@
 com.alipay.hessian.ext.BlackListExt
+com.alipay.hessian.ext.BlackListExt2
