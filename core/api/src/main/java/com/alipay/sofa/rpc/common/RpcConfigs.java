@@ -73,7 +73,6 @@ public class RpcConfigs {
             loadCustom("META-INF/sofa-rpc/rpc-config.json");
 
             // load system properties
-            CFG.putAll(new HashMap(System.getProperties())); // 注意部分属性可能被覆盖为字符串
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_RPC_CONFIGS), e);
         }
@@ -420,5 +419,12 @@ public class RpcConfigs {
          * @param newValue the new value
          */
         public void onChange(T oldValue, T newValue);
+    }
+
+    /**
+     * reload system properties for test
+     */
+    public static void reloadSystemProperties() {
+        CFG.putAll(new HashMap(System.getProperties())); // 注意部分属性可能被覆盖为字符串
     }
 }
