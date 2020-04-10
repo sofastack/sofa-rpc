@@ -160,15 +160,21 @@ public class TripleTracerAdapter {
                 sofaRequest.setTargetAppName(requestHeaders
                     .get(TripleHeadKeys.HEAD_KEY_TARGET_APP));
             }
-            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TRACE_ID)) {
+
+            //先取兼容的
+            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_OLD_TRACE_ID)) {
+                traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
+                    requestHeaders.get(TripleHeadKeys.HEAD_KEY_OLD_TRACE_ID));
+            }
+            else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TRACE_ID)) {
                 traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_TRACE_ID));
             }
-            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
+            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_OLD_RPC_ID)) {
                 traceMap
-                    .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
+                    .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_OLD_RPC_ID));
             }
-            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
+            else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
             }
