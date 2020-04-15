@@ -114,6 +114,8 @@ public class TripleTracerAdapter {
 
         header.put(TripleHeadKeys.HEAD_KEY_META_TYPE.name(), "rpc");
         header.put(TripleHeadKeys.HEAD_KEY_CURRENT_APP.name(), (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
+        header.put(TripleHeadKeys.HEAD_KEY_CONSUMER_APP.name(), (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
+
         header.put(TripleHeadKeys.HEAD_KEY_PROTOCOL_TYPE.name(),
                 (String) sofaRequest.getRequestProp(RemotingConstants.HEAD_PROTOCOL));
         header.put(TripleHeadKeys.HEAD_KEY_INVOKE_TYPE.name(),
