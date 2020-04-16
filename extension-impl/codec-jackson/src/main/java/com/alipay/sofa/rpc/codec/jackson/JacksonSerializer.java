@@ -179,7 +179,7 @@ public class JacksonSerializer extends AbstractSerializer {
         JavaType[] requestClassList = jacksonHelper.getReqClass(targetService, sofaRequest.getMethodName());
         Object[] reqList = decode(data, requestClassList);
         sofaRequest.setMethodArgs(reqList);
-        sofaRequest.setMethodArgSigs(parseArgSigs(reqList));
+        sofaRequest.setMethodArgSigs(parseArgSigs(requestClassList));
     }
 
     private Object[] decode(AbstractByteBuf data, JavaType[] clazzList) throws SofaRpcException {
@@ -197,17 +197,23 @@ public class JacksonSerializer extends AbstractSerializer {
             // json data is json arry
             if (node.isArray()) {
                 // first parameter is Array or Collection Type
-                if (clazzList.length == 1 && (!clazzList[0].isCollectionLikeType() || !clazzList[0].isArrayType())) {
-                    throw buildDeserializeError("JSON data can't be json array");
-                }
-                // if there is more than one parameter, but request json array size is not equal class type size.
-                if (clazzList.length > 1 && clazzList.length != node.size()) {
-                    throw buildDeserializeError("JSON Array size is not equal parameter size");
+                if (clazzList.length == 1) {
+                    if (!clazzList[0].isCollectionLikeType() && !clazzList[0].isArrayType()) {
+                        throw buildDeserializeError("JSON data can't be json array");
+                    }
+                    args[0] = mapper.readValue(node.traverse(), clazzList[0]);
+                    return args;
+                } else {
+                    // if there is more than one parameter, but request json array size is not equal class type size.
+                    if (clazzList.length != node.size()) {
+                        throw buildDeserializeError("JSON Array size is not equal parameter size");
+                    }
+
+                    for (int i = 0; i < clazzList.length; i++) {
+                        args[i] = mapper.readValue(node.get(i).traverse(), clazzList[i]);
+                    }
                 }
 
-                for (int i = 0; i < clazzList.length; i++) {
-                    args[i] = mapper.readValue(node.get(i).traverse(), clazzList[i]);
-                }
             } else {
 
                 if (clazzList.length > 1) {
@@ -227,10 +233,10 @@ public class JacksonSerializer extends AbstractSerializer {
 
     }
 
-    private String[] parseArgSigs(Object[] reqList) {
+    private String[] parseArgSigs(JavaType[] reqList) {
         List<String> argSigs = new ArrayList<String>();
-        for (Object req : reqList) {
-            argSigs.add(req.getClass().getName());
+        for (JavaType type : reqList) {
+            argSigs.add(type.getRawClass().getName());
         }
 
         return argSigs.toArray(new String[argSigs.size()]);
