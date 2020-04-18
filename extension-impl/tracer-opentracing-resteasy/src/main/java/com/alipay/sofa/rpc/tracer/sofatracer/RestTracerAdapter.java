@@ -22,10 +22,13 @@ import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.context.BaggageResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.rest.SofaResourceFactory;
@@ -37,10 +40,14 @@ import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpResponse;
 
 import javax.ws.rs.client.ClientRequestContext;
+import javax.ws.rs.client.ClientResponseContext;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MultivaluedMap;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
@@ -50,6 +57,7 @@ import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
  * 服务端：serverReceived --&gt; filter --&gt; serverSend
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
+ * @author <a href="mailto:chpengzh@foxmail.com">Chen.Pengzhi</a>
  */
 public class RestTracerAdapter {
 
@@ -65,7 +73,7 @@ public class RestTracerAdapter {
      *
      * @param requestContext ClientRequestContext
      */
-    public static void storeTracerInfo(ClientRequestContext requestContext) {
+    public static void beforeSend(ClientRequestContext requestContext) {
 
         // tracer信息放入request 发到服务端
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
@@ -80,6 +88,8 @@ public class RestTracerAdapter {
         if (appName != null) {
             requestContext.getHeaders().add(RemotingConstants.HEAD_APP_NAME, appName);
         }
+
+        RestBaggageItemsHandler.encodeBaggageItemToRequest(requestContext.getHeaders());
     }
 
     /**
@@ -114,9 +124,11 @@ public class RestTracerAdapter {
                 }
             }
             Tracers.serverReceived(sofaRequest);
+
+            RestBaggageItemsHandler.decodeBaggageItemsFromRequest(request, sofaRequest);
         } catch (Throwable t) {
             if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("the process of rest tracer server receive occur error ", t);
+                LOGGER.warn(LogCodes.getLog(LogCodes.ERROR_TRACER_UNKNOWN_EXP, "receive", "rest", "server"), t);
             }
         }
     }
@@ -211,11 +223,135 @@ public class RestTracerAdapter {
                     (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE));
             }
 
+            RestBaggageItemsHandler.encodeBaggageItemsToResponse(response, sofaResponse);
             Tracers.serverSend(sofaRequest, sofaResponse, null);
         } catch (Throwable t) {
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("the process of rest tracer server send occur error ", t);
             }
+        }
+    }
+
+    /**
+     * Handle response callback from server handler
+     *
+     * @param responseContext   response instance
+     */
+    public static void clientReceived(ClientResponseContext responseContext) {
+        RestBaggageItemsHandler.decodeBaggageItemsFromResponse(responseContext.getHeaders());
+    }
+
+    private static class RestBaggageItemsHandler {
+
+        private static final String RPC_REQUEST_BAGGAGE_PREFIX      = RemotingConstants.RPC_REQUEST_BAGGAGE + ".";
+
+        private static final int    RPC_REQUEST_BAGGAGE_PREFIX_LEN  = RPC_REQUEST_BAGGAGE_PREFIX.length();
+
+        private static final String RPC_RESPONSE_BAGGAGE_PREFIX     = RemotingConstants.RPC_RESPONSE_BAGGAGE + ".";
+
+        private static final int    RPC_RESPONSE_BAGGAGE_PREFIX_LEN = RPC_RESPONSE_BAGGAGE_PREFIX.length();
+
+        /**
+         * Encode baggage items from invoke context to request headers
+         *
+         * @param headers request headers
+         */
+        private static void encodeBaggageItemToRequest(MultivaluedMap<String, Object> headers) {
+            // Attach baggage items
+            RpcInvokeContext rpcInvokeContext = RpcInvokeContext.peekContext();
+            if (rpcInvokeContext == null || !RpcInvokeContext.isBaggageEnable() ||
+                rpcInvokeContext.getAllRequestBaggage() == null ||
+                rpcInvokeContext.getAllRequestBaggage().isEmpty()) {
+                return;
+            }
+
+            Map<String, String> baggageItems = rpcInvokeContext.getAllRequestBaggage();
+            for (Map.Entry<String, String> entry : baggageItems.entrySet()) {
+                String baggageKey = RPC_REQUEST_BAGGAGE_PREFIX + entry.getKey();
+                headers.putSingle(baggageKey, entry.getValue());
+            }
+        }
+
+        /**
+         * Decode baggage items from netty request to sofa request context
+         *
+         * @param request       netty http request
+         * @param sofaRequest   rpc request holder
+         */
+        private static void decodeBaggageItemsFromRequest(NettyHttpRequest request,
+                                                          SofaRequest sofaRequest) {
+            HttpHeaders headers = request.getHttpHeaders();
+            // Decode baggage items
+            MultivaluedMap<String, String> headerMaps = headers.getRequestHeaders();
+            if (!RpcInvokeContext.isBaggageEnable() || headerMaps == null || headerMaps.isEmpty()) {
+                return;
+            }
+
+            Map<String, String> baggageItems = new HashMap<String, String>();
+            for (Map.Entry<String, List<String>> entry : headerMaps.entrySet()) {
+                if (!entry.getKey().startsWith(RPC_REQUEST_BAGGAGE_PREFIX) ||
+                    entry.getValue() == null ||
+                    entry.getValue().isEmpty()) {
+                    continue;
+                }
+
+                String value = entry.getValue().get(0);
+                String key = entry.getKey().substring(RPC_REQUEST_BAGGAGE_PREFIX_LEN);
+                baggageItems.put(key, value);
+            }
+            sofaRequest.addRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE, baggageItems);
+
+            BaggageResolver.pickupFromRequest(RpcInvokeContext.peekContext(), sofaRequest, true);
+        }
+
+        /**
+         * Encode baggage items from sofa response to http response context
+         *
+         * @param response     netty response
+         * @param sofaResponse rpc response holder
+         */
+        private static void encodeBaggageItemsToResponse(NettyHttpResponse response,
+                                                         SofaResponse sofaResponse) {
+            RpcInvokeContext context = RpcInvokeContext.peekContext();
+            if (response == null || context == null ||
+                context.getAllResponseBaggage() == null ||
+                context.getAllResponseBaggage().isEmpty()) {
+                return;
+            }
+
+            for (Map.Entry<String, String> entry : context.getAllResponseBaggage().entrySet()) {
+                String key = RPC_RESPONSE_BAGGAGE_PREFIX + entry.getKey();
+                String value = entry.getValue();
+                response.getOutputHeaders().add(key, value);
+            }
+
+            BaggageResolver.carryWithResponse(context, sofaResponse);
+        }
+
+        /**
+         * Decode baggage items from response headers to invoke context
+         *
+         * @param headers response headers
+         */
+        private static void decodeBaggageItemsFromResponse(MultivaluedMap<String, String> headers) {
+            if (!RpcInvokeContext.isBaggageEnable() || headers == null || headers.isEmpty()) {
+                return;
+            }
+
+            Map<String, String> baggageItems = new LinkedHashMap<String, String>();
+            for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
+                if (!entry.getKey().startsWith(RPC_RESPONSE_BAGGAGE_PREFIX) ||
+                    entry.getValue() == null ||
+                    entry.getValue().isEmpty()) {
+                    continue;
+                }
+
+                String key = entry.getKey().substring(RPC_RESPONSE_BAGGAGE_PREFIX_LEN);
+                String value = entry.getValue().get(0);
+                baggageItems.put(key, value);
+            }
+
+            RpcInvokeContext.getContext().putAllResponseBaggage(baggageItems);
         }
     }
 }

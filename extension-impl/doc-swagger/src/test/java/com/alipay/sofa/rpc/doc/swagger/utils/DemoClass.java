@@ -14,16 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.hystrix;
-
-import com.alipay.sofa.rpc.test.HelloService;
+package com.alipay.sofa.rpc.doc.swagger.utils;
 
 /**
- * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ * @author <a href=mailto:orezsilence@163.com>zhangchengxi</a>
  */
-public class HelloServiceFallback implements HelloService {
-    @Override
-    public String sayHello(String name, int age) {
-        return "fallback " + name + " from server! age: " + age;
+public class DemoClass {
+
+    public void noParam() {
+
+    }
+
+    public void oneParam(Object a) {
+
+    }
+
+    public void multiParam(Object a, Object b) {
+
     }
 }

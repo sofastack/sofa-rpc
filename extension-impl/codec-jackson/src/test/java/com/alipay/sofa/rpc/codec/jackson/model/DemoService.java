@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.codec.jackson.model;
 
+import java.util.Map;
+
 /**
  * @author bystander
  * @version $Id: DemoRequest.java, v 0.1 2018年07月06日 10:44 AM bystander Exp $
@@ -23,5 +25,7 @@ package com.alipay.sofa.rpc.codec.jackson.model;
 public interface DemoService {
 
     public DemoResponse say(DemoRequest demoRequest);
+
+    public DemoResponse say2(DemoRequest demoRequest, Map<String, String> ctx, int id);
 
 }

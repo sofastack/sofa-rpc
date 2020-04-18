@@ -27,13 +27,13 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.filter.Filter;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
-import com.alipay.sofa.rpc.test.HelloService;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 import com.netflix.hystrix.exception.HystrixRuntimeException;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -45,45 +45,61 @@ import java.util.concurrent.Future;
  */
 public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
-    private static final int HYSTRIX_DEFAULT_TIMEOUT = 1000;
+    private static final int               HYSTRIX_DEFAULT_TIMEOUT = 1000;
+
+    private ProviderConfig<HystrixService> providerConfig;
+    private ServerConfig                   serverConfig;
+    private ConsumerConfig<HystrixService> consumerConfig;
+
+    @After
+    public void afterMethod() {
+        if (providerConfig != null) {
+            providerConfig.unExport();
+        }
+        if (serverConfig != null) {
+            serverConfig.destroy();
+        }
+        if (consumerConfig != null) {
+            consumerConfig.unRefer();
+        }
+        SofaHystrixConfig.clearFallback();
+        SofaHystrixConfig.clearSetterFactory();
+
+    }
 
     @Test
     public void testSuccess() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(0);
+        providerConfig = defaultServer(0);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient();
+        consumerConfig = defaultClient();
 
-        HelloService helloService = consumerConfig.refer();
+        HystrixService HystrixService = consumerConfig.refer();
 
-        try {
-            helloService.sayHello("abc", 24);
-            Future future = SofaResponseFuture.getFuture();
-            Assert.assertFalse(future.isDone());
-            Assert.assertFalse(future.isCancelled());
-            String result = (String) SofaResponseFuture.getResponse(10000, true);
-            Assert.assertTrue(future.isDone());
-            Assert.assertEquals("hello abc from server! age: 24", result);
-            Assert.assertEquals(1, ((InvokeCounterHelloService) providerConfig.getRef()).getExecuteCount());
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
-        }
+        HystrixService.sayHello("abc", 24);
+        Future future = SofaResponseFuture.getFuture();
+        Assert.assertFalse(future.isDone());
+        Assert.assertFalse(future.isCancelled());
+        String result = (String) SofaResponseFuture.getResponse(10000, true);
+        Assert.assertTrue(future.isDone());
+        Assert.assertEquals("hello abc from server! age: 24", result);
+        Assert.assertEquals(1, ((InvokeCounterHystrixService) providerConfig.getRef()).getExecuteCount());
+
     }
 
     @Test
     public void testHystrixTimeout() {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        HelloService helloService = consumerConfig.refer();
+        HystrixService HystrixService = consumerConfig.refer();
 
         long start = System.currentTimeMillis();
         try {
-            helloService.sayHello("abc", 24);
+            HystrixService.sayHello("abc", 24);
             Future future = SofaResponseFuture.getFuture();
             Assert.assertFalse(future.isDone());
             Assert.assertFalse(future.isCancelled());
@@ -92,70 +108,58 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcException);
-            Assert.assertTrue(e.getCause() instanceof HystrixRuntimeException);
+            Assert.assertTrue(e.getCause().getMessage(), e.getCause() instanceof HystrixRuntimeException);
             Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
         }
     }
 
     @Test
     public void testHystrixFallback() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        ProviderConfig<HystrixService> providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        SofaHystrixConfig.registerFallback(consumerConfig, new HelloServiceFallback());
+        SofaHystrixConfig.registerFallback(consumerConfig, new HystrixServiceFallback());
 
-        HelloService helloService = consumerConfig.refer();
+        HystrixService HystrixService = consumerConfig.refer();
 
-        try {
-            long start = System.currentTimeMillis();
-            helloService.sayHello("abc", 24);
-            Future future = SofaResponseFuture.getFuture();
-            Assert.assertFalse(future.isDone());
-            Assert.assertFalse(future.isCancelled());
-            Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
-            String result = (String) SofaResponseFuture.getResponse(10000, true);
-            Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
-            Assert.assertEquals("fallback abc from server! age: 24", result);
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
-        }
+        long start = System.currentTimeMillis();
+        HystrixService.sayHello("abc", 24);
+        Future future = SofaResponseFuture.getFuture();
+        Assert.assertFalse(future.isDone());
+        Assert.assertFalse(future.isCancelled());
+        Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
+        String result = (String) SofaResponseFuture.getResponse(10000, true);
+        Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
+        Assert.assertEquals("fallback abc from server! age: 24", result);
+
     }
 
     @Test
     public void testHystrixFallbackFactory() throws InterruptedException {
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
-
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
+        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HystrixServiceFallbackFactory());
 
-        HelloService helloService = consumerConfig.refer();
-
-        try {
-            long start = System.currentTimeMillis();
-            helloService.sayHello("abc", 24);
-            Future future = SofaResponseFuture.getFuture();
-            Assert.assertFalse(future.isDone());
-            Assert.assertFalse(future.isCancelled());
-            Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
-            String result = (String) SofaResponseFuture.getResponse(10000, true);
-            Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
-            Assert.assertEquals(
-                "fallback abc from server! age: 24, error: com.netflix.hystrix.exception.HystrixTimeoutException",
-                result);
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
-        }
+        HystrixService HystrixService = consumerConfig.refer();
+        //wait server ok
+        Thread.sleep(2000);
+        long start = System.currentTimeMillis();
+        HystrixService.sayHello("abc", 24);
+        Future future = SofaResponseFuture.getFuture();
+        Assert.assertFalse(future.isDone());
+        Assert.assertFalse(future.isCancelled());
+        Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
+        String result = (String) SofaResponseFuture.getResponse(10000, true);
+        Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
+        Assert.assertEquals(
+            "fallback abc from server! age: 24, error: com.netflix.hystrix.exception.HystrixTimeoutException",
+            result);
     }
 
     @Test
@@ -175,34 +179,31 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             }
         };
 
-        ProviderConfig<HelloService> providerConfig = defaultServer(0);
+        providerConfig = defaultServer(0);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
+        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HystrixServiceFallbackFactory());
         SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
 
-        HelloService helloService = consumerConfig.refer();
-
-        try {
-            for (int i = 0; i < 20; i++) {
-                long start = System.currentTimeMillis();
-                helloService.sayHello("abc", 24);
-                String result = (String) SofaResponseFuture.getResponse(10000, true);
-                Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
-                Assert.assertEquals(
-                    "fallback abc from server! age: 24, error: java.lang.RuntimeException",
-                    result);
-                Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
-            }
-            // 熔断时服务端不应该接收到任何请求
-            Assert.assertEquals(0, ((InvokeCounterHelloService) providerConfig.getRef()).getExecuteCount());
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
+        HystrixService hystrixService = consumerConfig.refer();
+        //wait server ok
+        Thread.sleep(2000);
+        for (int i = 0; i < 20; i++) {
+            long start = System.currentTimeMillis();
+            hystrixService.sayHello("abc", 24);
+            String result = (String) SofaResponseFuture.getResponse(10000, true);
+            Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
+            Assert.assertEquals(
+                "fallback abc from server! age: 24, error: java.lang.RuntimeException",
+                result);
+            Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
         }
+        // 熔断时服务端不应该接收到任何请求
+        Assert.assertEquals(0, ((InvokeCounterHystrixService) providerConfig.getRef()).getExecuteCount());
+
     }
 
     @Test
@@ -222,54 +223,53 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             }
         };
 
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
+        consumerConfig = defaultClient()
             .setTimeout(10000);
 
-        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HelloServiceFallbackFactory());
+        SofaHystrixConfig.registerFallbackFactory(consumerConfig, new HystrixServiceFallbackFactory());
         SofaHystrixConfig.registerSetterFactory(consumerConfig, setterFactory);
 
-        HelloService helloService = consumerConfig.refer();
-
-        try {
-            for (int i = 0; i < 20; i++) {
-                long start = System.currentTimeMillis();
-                helloService.sayHello("abc", 24);
-                Future future = SofaResponseFuture.getFuture();
-                // 第一个请求用于阻塞线程池，其他请求会直接线程池拒绝
-                if (i > 0) {
-                    Assert.assertTrue(future.isDone());
-                    Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
-                    String result = (String) SofaResponseFuture.getResponse(10000, true);
-                    Assert.assertEquals(
-                        "fallback abc from server! age: 24, error: java.util.concurrent.RejectedExecutionException",
-                        result);
-                    Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
-                }
+        HystrixService HystrixService = consumerConfig.refer();
+        //wait server ok
+        Thread.sleep(2000);
+        for (int i = 0; i < 20; i++) {
+            long start = System.currentTimeMillis();
+            HystrixService.sayHello("abc", 24);
+            Future future = SofaResponseFuture.getFuture();
+            // 第一个请求用于阻塞线程池，其他请求会直接线程池拒绝
+            if (i > 0) {
+                Assert.assertTrue(future.isDone());
+                Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
+                String result = (String) SofaResponseFuture.getResponse(10000, true);
+                Assert.assertEquals(
+                    "fallback abc from server! age: 24, error: java.util.concurrent.RejectedExecutionException",
+                    result);
+                Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
             }
-            // 只有第一个线程执行了，所以服务端只会收到一个请求
-            Assert.assertEquals(1, ((InvokeCounterHelloService) providerConfig.getRef()).getExecuteCount());
-        } finally {
-            providerConfig.unExport();
-            consumerConfig.unRefer();
         }
+        // 只有第一个线程执行了，所以服务端只会收到一个请求
+        Assert.assertEquals(1, ((InvokeCounterHystrixService) providerConfig.getRef()).getExecuteCount());
+
     }
 
     @Test
     public void testHystrixLockNotRelease() {
         // 通过 filter mock 锁超时的情况
-        ProviderConfig<HelloService> providerConfig = defaultServer(2000);
+        providerConfig = defaultServer(2000);
         providerConfig.export();
 
-        ConsumerConfig<HelloService> consumerConfig = defaultClient()
-            .setFilterRef(Collections.<Filter> singletonList(new MockTimeoutFilter(2000)))
+        consumerConfig = defaultClient()
+            .setFilterRef(Collections.<Filter> singletonList(new MockTimeoutFilter(4000)))
             .setTimeout(10000);
-        HelloService helloService = consumerConfig.refer();
+        HystrixService HystrixService = consumerConfig.refer();
 
         try {
-            helloService.sayHello("abc", 24);
+            //wait server ok
+            Thread.sleep(2000);
+            HystrixService.sayHello("abc", 24);
             Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaTimeOutException);
@@ -281,23 +281,23 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
     }
 
-    private ProviderConfig<HelloService> defaultServer(int sleep) {
-        InvokeCounterHelloService helloService = new InvokeCounterHelloService(sleep);
+    private ProviderConfig<HystrixService> defaultServer(int sleep) {
+        InvokeCounterHystrixService hystrixService = new InvokeCounterHystrixService(sleep);
 
-        ServerConfig serverConfig = new ServerConfig()
+        serverConfig = new ServerConfig()
             .setPort(22222)
             .setDaemon(false);
 
-        return new ProviderConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setRef(helloService)
+        return new ProviderConfig<HystrixService>()
+            .setInterfaceId(HystrixService.class.getName())
+            .setRef(hystrixService)
             .setServer(serverConfig)
             .setRepeatedExportLimit(-1);
     }
 
-    private ConsumerConfig<HelloService> defaultClient() {
-        return new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
+    private ConsumerConfig<HystrixService> defaultClient() {
+        return new ConsumerConfig<HystrixService>()
+            .setInterfaceId(HystrixService.class.getName())
             .setDirectUrl("bolt://127.0.0.1:22222")
             .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
             .setParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED, String.valueOf(true))

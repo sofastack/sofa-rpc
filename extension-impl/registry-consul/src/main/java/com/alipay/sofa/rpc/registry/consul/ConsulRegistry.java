@@ -64,7 +64,7 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
  * <li> subscribe instances change event.</li>
  * <li> custom health check, e.g. tcp, http.</li>
  * </ol>
- *
+ * <p>
  * The data structure in Consul consists of three parts: service name, service id, tag.
  *
  * <ol>
@@ -72,7 +72,7 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
  * <li> tag can be used to filter a set of instances which can be subscribed, we use interfaceId + version + uniqueId + protocol to identify it.</li>
  * <li> each instance needs to have a unique service id so it won't be overwritten by other instances, we use tag + host + port to identify it.</li>
  * </ol>
- *
+ * <p>
  * Here is an example:
  * <pre>
  * {
@@ -92,20 +92,22 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 @Extension("consul")
 public class ConsulRegistry extends Registry {
 
+    public static final String EXT_NAME="ConsulRegistry";
+
     /**
      * Logger
      */
-    private final static Logger                LOGGER                 = LoggerFactory.getLogger(ConsulRegistry.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(ConsulRegistry.class);
 
-    private final ConsulRegistryProperties     properties;
+    private final ConsulRegistryProperties properties;
 
-    private Map<String, ScheduledFuture>       heartbeatFutures       = new ConcurrentHashMap<>();
+    private Map<String, ScheduledFuture> heartbeatFutures = new ConcurrentHashMap<>();
 
     private Map<String, HealthServiceInformer> healthServiceInformers = new ConcurrentHashMap<>();
 
-    private ConsulClient                       consulClient;
+    private ConsulClient consulClient;
 
-    private ScheduledExecutorService           heartbeatExecutor;
+    private ScheduledExecutorService heartbeatExecutor;
 
     protected ConsulRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
@@ -181,8 +183,10 @@ public class ConsulRegistry extends Registry {
                             LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, config.getInterfaceId()));
                 }
             }
+        }catch (SofaRpcRuntimeException e){
+            throw e;
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to register provider to consulRegistry!", e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "consulRegistry", config.buildKey()), e);
         }
 
         if (EventBus.isEnable(ProviderPubEvent.class)) {
@@ -217,8 +221,11 @@ public class ConsulRegistry extends Registry {
             }
         } catch (Exception e) {
             if (!RpcRunningState.isShuttingDown()) {
-                throw new SofaRpcRuntimeException("Failed to unregister provider to consulRegistry!", e);
-            }
+                if ( e instanceof SofaRpcRuntimeException){
+                    throw e;
+                }else{
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UNREG_PROVIDER ,EXT_NAME), e);
+            }}
         }
     }
 
@@ -249,8 +256,10 @@ public class ConsulRegistry extends Registry {
             }
 
             return Collections.singletonList(new ProviderGroup().addAll(providers));
-        } catch (Exception e) {
-            throw new SofaRpcRuntimeException("Failed to subscribe provider from consulRegistry!", e);
+        } catch (SofaRpcRuntimeException e){
+            throw e;
+        }catch (Exception e) {
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_SUB_PROVIDER ,EXT_NAME), e);
         }
     }
 
@@ -327,7 +336,7 @@ public class ConsulRegistry extends Registry {
         try {
             consulClient.agentCheckPass("service:" + service.getId(), "TTL check passing by SOFA RPC");
         } catch (Exception e) {
-            LOGGER.error("Consul check pass failed.", e);
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_CHECK_PASS ,"Consul"), e);
         }
     }
 
@@ -374,8 +383,10 @@ public class ConsulRegistry extends Registry {
             String address;
             try {
                 address = new URL(properties.getHealthCheckProtocol(), host, port, properties.getHealthCheckPath()).toString();
-            } catch (Exception e) {
-                throw new SofaRpcRuntimeException("Invalid health check url!", e);
+            } catch (SofaRpcRuntimeException e){
+                throw e;
+            }catch (Exception e) {
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_HEALTH_CHECK_URL ), e);
             }
             check.setHttp(address);
             check.setMethod(properties.getHealthCheckMethod());

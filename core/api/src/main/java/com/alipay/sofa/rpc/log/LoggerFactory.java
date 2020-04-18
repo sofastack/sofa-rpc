@@ -43,6 +43,8 @@ public class LoggerFactory {
             } else {
                 throw new SofaRpcRuntimeException(implClass + " is not type of  " + Logger.class);
             }
+        } catch (SofaRpcRuntimeException ex) {
+            throw ex;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Error when getLogger of " + name
                 + ", implement is " + implClass + "", e);
@@ -58,6 +60,8 @@ public class LoggerFactory {
             } else {
                 throw new SofaRpcRuntimeException(implClass + " is not type of  " + Logger.class);
             }
+        } catch (SofaRpcRuntimeException ex) {
+            throw ex;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException("Error when getLogger of " + clazz.getName()
                 + ", implement is " + implClass + "", e);

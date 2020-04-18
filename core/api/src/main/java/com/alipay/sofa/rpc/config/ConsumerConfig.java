@@ -20,7 +20,9 @@ import com.alipay.sofa.rpc.api.GenericService;
 import com.alipay.sofa.rpc.bootstrap.Bootstraps;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.Router;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -258,7 +260,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!proxyClass.isInterface()) {
+                if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(protocol) && !proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("consumer.interface",
                         interfaceId, "interfaceId must set interface class, not implement class");
                 }

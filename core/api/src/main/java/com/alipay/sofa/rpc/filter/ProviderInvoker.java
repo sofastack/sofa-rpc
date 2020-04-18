@@ -94,7 +94,8 @@ public class ProviderInvoker<T> extends FilterInvoker {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
             if (method == null) {
-                throw new SofaRpcException(RpcErrorType.SERVER_FILTER, "Need decode method first!");
+                throw new SofaRpcException(RpcErrorType.SERVER_FILTER,
+                    LogCodes.getLog(LogCodes.ERROR_NEED_DECODE_METHOD));
             }
             Object result = method.invoke(providerConfig.getRef(), request.getMethodArgs());
 

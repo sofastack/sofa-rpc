@@ -17,10 +17,10 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Factory of load balancer
@@ -36,19 +36,27 @@ public class LoadBalancerFactory {
      * @return LoadBalancer
      */
     public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap) {
+        return getLoadBalancer(consumerBootstrap, consumerBootstrap.getConsumerConfig().getLoadBalancer());
+    }
+
+    /**
+     * 根据名字和consumer得到负载均衡器
+     *
+     * @param consumerBootstrap 服务订阅者配置
+     * @return LoadBalancer
+     */
+    public static LoadBalancer getLoadBalancer(ConsumerBootstrap consumerBootstrap, String loadBalancer) {
         try {
-            String loadBalancer = consumerBootstrap.getConsumerConfig().getLoadBalancer();
             ExtensionClass<LoadBalancer> ext = ExtensionLoaderFactory
                 .getExtensionLoader(LoadBalancer.class).getExtensionClass(loadBalancer);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("consumer.loadBalancer",
-                    loadBalancer, "Unsupported loadBalancer of client!");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_LOAD_BALANCER, loadBalancer));
             }
             return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_LOAD_BALANCER, loadBalancer), e);
         }
     }
 }

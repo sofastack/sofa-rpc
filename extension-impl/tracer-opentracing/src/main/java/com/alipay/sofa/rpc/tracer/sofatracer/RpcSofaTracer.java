@@ -40,6 +40,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.tracer.Tracer;
 import com.alipay.sofa.rpc.tracer.sofatracer.code.TracerResultCode;
 import com.alipay.sofa.rpc.tracer.sofatracer.factory.ReporterFactory;
@@ -73,7 +74,7 @@ public class RpcSofaTracer extends Tracer {
      */
     public static final String ERROR_SOURCE    = "rpc";
 
-    private SofaTracer         sofaTracer;
+    protected SofaTracer       sofaTracer;
 
     public RpcSofaTracer() {
         //构造 client 的日志打印实例
@@ -202,20 +203,11 @@ public class RpcSofaTracer extends Tracer {
             //系统
             oldTracerContext.put(TracerCompatibleConstants.PEN_SYS_ATTRS_KEY,
                 sofaTracerSpanContext.getSysSerializedBaggage());
-            Map<String, Object> attachments = rpcInternalContext.getAttachments();
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_APP_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_APP));
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_ZONE_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_ZONE));
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_IDC_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_IDC));
-            oldTracerContext.put(TracerCompatibleConstants.CALLER_IP_KEY,
-                getEmptyStringIfNull(attachments, RpcSpanTags.REMOTE_IP));
             request.addRequestProp(RemotingConstants.RPC_TRACE_NAME, oldTracerContext);
         }
     }
 
-    private String getEmptyStringIfNull(Map map, String key) {
+    protected String getEmptyStringIfNull(Map map, String key) {
         if (map == null || map.size() <= 0) {
             return StringUtils.EMPTY;
         }
@@ -364,7 +356,7 @@ public class RpcSofaTracer extends Tracer {
 
     private void generateClientErrorContext(Map<String, String> context, SofaRequest request, SofaTracerSpan clientSpan) {
         Map<String, String> tagsWithStr = clientSpan.getTagsWithStr();
-        //记录的上下文信息
+        //记录的上下文信息// do not change this key
         context.put("serviceName", tagsWithStr.get(RpcSpanTags.SERVICE));
         context.put("methodName", tagsWithStr.get(RpcSpanTags.METHOD));
         context.put("protocol", tagsWithStr.get(RpcSpanTags.PROTOCOL));
@@ -382,6 +374,8 @@ public class RpcSofaTracer extends Tracer {
     @Override
     public void serverReceived(SofaRequest request) {
 
+        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+
         Map<String, String> tags = new HashMap<String, String>();
         //server tags 必须设置
         tags.put(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER);
@@ -396,15 +390,22 @@ public class RpcSofaTracer extends Tracer {
             //新
             spanContext = SofaTracerSpanContext.deserializeFromString(spanStrs);
         }
+        SofaTracerSpan serverSpan;
+        //使用客户端的进行初始化，如果上游没有，需要新建
         if (spanContext == null) {
-            SelfLog.error("SpanContext created error when server received and root SpanContext created.");
-            spanContext = SofaTracerSpanContext.rootStart();
+            serverSpan = (SofaTracerSpan) this.sofaTracer.buildSpan(request.getInterfaceName())
+                .asChildOf(spanContext)
+                .withTag(Tags.SPAN_KIND.getKey(), Tags.SPAN_KIND_SERVER)
+                .start();
+        } else {
+            //有的话，需要new，采样会正确
+            serverSpan = new SofaTracerSpan(this.sofaTracer, System.currentTimeMillis(),
+                request.getInterfaceName()
+                , spanContext, tags);
         }
+        //重新获取
+        spanContext = serverSpan.getSofaTracerSpanContext();
 
-        SofaTracerSpan serverSpan = new SofaTracerSpan(this.sofaTracer, System.currentTimeMillis(),
-            request.getInterfaceName()
-            , spanContext, tags);
-        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         // Record server receive event
         serverSpan.log(LogData.SERVER_RECV_EVENT_VALUE);
         //放到线程上下文
@@ -605,13 +606,13 @@ public class RpcSofaTracer extends Tracer {
         if (rpcInternalContext.isConsumerSide()) {
             //客户端 tracer 堆栈中最多有 1 个(客户端 span 完毕,服务端 span 压栈所以最多一个)
             if (sofaTraceContext.getThreadLocalSpanSize() > 1) {
-                SelfLog.error("Pay attention,stack size error.Tracer consumer stack size more than one.");
+                SelfLog.error(LogCodes.getLog(LogCodes.ERROR_TRACER_CONSUMER_STACK));
                 SelfLog.flush();
             }
         } else if (rpcInternalContext.isProviderSide()) {
             //服务端 tracer 堆栈中应该为 0 个
             if (sofaTraceContext.getThreadLocalSpanSize() > 0) {
-                SelfLog.error("Pay attention,stack size error.Tracer provider stack size more than zero.");
+                SelfLog.error(LogCodes.getLog(LogCodes.ERROR_TRACER_PROVIDER_STACK));
                 SelfLog.flush();
             }
         }

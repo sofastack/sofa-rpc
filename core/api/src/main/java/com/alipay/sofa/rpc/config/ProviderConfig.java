@@ -18,11 +18,13 @@ package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.bootstrap.Bootstraps;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -158,8 +160,14 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
                 if (!proxyClass.isInterface()) {
-                    throw ExceptionUtils.buildRuntime("service.interfaceId",
-                        interfaceId, "interfaceId must set interface class, not implement class");
+                    if ((getServer() != null) && getServer().size() != 0) {
+                        for (int i = 0; i < getServer().size(); i++) {
+                            if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(getServer().get(i).getProtocol())) {
+                                throw ExceptionUtils.buildRuntime("service.interfaceId",
+                                    interfaceId, "interfaceId must set interface class, not implement class");
+                            }
+                        }
+                    }
                 }
             } else {
                 throw ExceptionUtils.buildRuntime("service.interfaceId",
@@ -168,7 +176,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_GET_PROXY_CLASS), e);
         }
         return proxyClass;
     }

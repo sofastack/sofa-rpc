@@ -48,6 +48,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class ZookeeperRegistryTest extends BaseZkTest {
 
+    private static final String      TEST_SERVICE_NAME = "com.alipay.xxx.ZookeeperTestService";
+
     private static RegistryConfig    registryConfig;
 
     private static ZookeeperRegistry registry;
@@ -79,7 +81,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @Test
     public void testProviderObserver() throws Exception {
 
-        int timeoutPerSub = 1000;
+        int timeoutPerSub = 2000;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -87,7 +89,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setPort(12200);
 
         ProviderConfig<?> provider = new ProviderConfig();
-        provider.setInterfaceId("com.alipay.xxx.TestService")
+        provider.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -102,7 +104,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         registry.register(provider);
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
-        consumer.setInterfaceId("com.alipay.xxx.TestService")
+        consumer.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -123,7 +125,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
         // 订阅 错误的uniqueId
         ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
-        consumerNoUniqueId.setInterfaceId("com.alipay.xxx.TestService")
+        consumerNoUniqueId.setInterfaceId(TEST_SERVICE_NAME)
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
             .setSubscribe(true)
@@ -131,12 +133,13 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setInvokeType("sync")
             .setTimeout(4444);
         latch = new CountDownLatch(1);
-        providerInfoListener.setCountDownLatch(latch);
-        consumerNoUniqueId.setProviderInfoListener(providerInfoListener);
+        MockProviderInfoListener providerInfoListener3 = new MockProviderInfoListener();
+        providerInfoListener3.setCountDownLatch(latch);
+        consumerNoUniqueId.setProviderInfoListener(providerInfoListener3);
         all = registry.subscribe(consumerNoUniqueId);
-        providerInfoListener.updateAllProviders(all);
-        ps = providerInfoListener.getData();
-        Assert.assertEquals("wrong uniqueId: 0", 0, ps.size());
+        providerInfoListener3.updateAllProviders(all);
+        Map<String, ProviderInfo> ps3 = providerInfoListener3.getData();
+        Assert.assertEquals("wrong uniqueId: 0", 0, ps3.size());
 
         // 反注册
         latch = new CountDownLatch(1);
@@ -158,7 +161,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
 
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
-        consumer2.setInterfaceId("com.alipay.xxx.TestService")
+        consumer2.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -208,7 +211,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             .setPort(12200);
 
         ProviderConfig<?> providerConfig = new ProviderConfig();
-        providerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        providerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -235,7 +238,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         Assert.assertEquals(2, configData.size());
 
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
-        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        consumerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -270,7 +273,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
     @Test
     public void testOverrideObserver() throws InterruptedException {
         ConsumerConfig<?> consumerConfig = new ConsumerConfig();
-        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        consumerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server"))
             .setProxy("javassist")
@@ -292,7 +295,7 @@ public class ZookeeperRegistryTest extends BaseZkTest {
         Map<String, String> configData = configListener.getData();
         Assert.assertEquals(3, configData.size());
 
-        consumerConfig.setInterfaceId("com.alipay.xxx.TestService")
+        consumerConfig.setInterfaceId(TEST_SERVICE_NAME)
             .setUniqueId("unique123Id")
             .setApplication(new ApplicationConfig().setAppName("test-server1"))
             .setProxy("javassist")
@@ -330,7 +333,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -341,7 +343,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -353,7 +354,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -367,7 +367,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
             }
             if (countDownLatch != null) {
                 countDownLatch.countDown();
-                countDownLatch = null;
             }
         }
 
@@ -396,7 +395,6 @@ public class ZookeeperRegistryTest extends BaseZkTest {
                 concurrentHashMap.put(StringUtils.toString(property), StringUtils.toString(newValue.get(property)));
                 if (countDownLatch != null) {
                     countDownLatch.countDown();
-                    countDownLatch = null;
                 }
             }
         }

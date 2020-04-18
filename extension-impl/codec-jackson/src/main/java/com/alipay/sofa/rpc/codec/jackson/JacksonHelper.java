@@ -16,27 +16,33 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.concurrent.ConcurrentHashMap;
+
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
-
-import java.lang.reflect.Method;
-import java.util.concurrent.ConcurrentHashMap;
+import com.alipay.sofa.rpc.log.LogCodes;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
  */
 public class JacksonHelper {
 
+    private ObjectMapper                          mapper             = new ObjectMapper();
+
     /**
      * Request service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, Class> requestClassCache  = new ConcurrentHashMap<String, Class>();
+    private ConcurrentHashMap<String, JavaType[]> requestClassCache  = new ConcurrentHashMap<String, JavaType[]>();
 
     /**
      * Response service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, Class> responseClassCache = new ConcurrentHashMap<String, Class>();
+    private ConcurrentHashMap<String, Class>      responseClassCache = new ConcurrentHashMap<String, Class>();
 
     /**
      * Fetch request class for cache according  service and method
@@ -45,11 +51,11 @@ public class JacksonHelper {
      * @param methodName method name
      * @return request class
      */
-    public Class getReqClass(String service, String methodName) {
+    public JavaType[] getReqClass(String service, String methodName) {
 
         String key = buildMethodKey(service, methodName);
-        Class reqClass = requestClassCache.get(key);
-        if (reqClass == null) {
+        Type[] reqClassList = requestClassCache.get(key);
+        if (reqClassList == null) {
             //read interface and method from cache
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
@@ -105,20 +111,20 @@ public class JacksonHelper {
             }
         }
         if (pbMethod == null) {
-            throw new SofaRpcRuntimeException("Cannot found method: " + clazz.getName() + "." + methodName);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
+                methodName));
         }
-        Class[] parameterTypes = pbMethod.getParameterTypes();
-        if (parameterTypes == null
-            || parameterTypes.length != 1) {
-            throw new SofaRpcRuntimeException("class based jackson: " + clazz.getName()
-                + ", only support one parameter!");
+        Type[] parameterTypes = pbMethod.getGenericParameterTypes();
+        JavaType[] javaTypes = new JavaType[parameterTypes.length];
+        for (int i = 0; i < parameterTypes.length; i++) {
+            JavaType javaType = mapper.getTypeFactory().constructType(parameterTypes[i]);
+            javaTypes[i] = javaType;
         }
-        Class reqClass = parameterTypes[0];
-        requestClassCache.put(key, reqClass);
+
+        requestClassCache.put(key, javaTypes);
         Class resClass = pbMethod.getReturnType();
         if (resClass == void.class) {
-            throw new SofaRpcRuntimeException("class based jackson: " + clazz.getName()
-                + ", do not support void return type!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_VOID_RETURN, "jackson", clazz.getName()));
         }
         responseClassCache.put(key, resClass);
     }

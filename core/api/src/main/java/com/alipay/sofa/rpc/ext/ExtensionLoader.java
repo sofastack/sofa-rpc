@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -157,8 +158,8 @@ public class ExtensionLoader<T> {
             ClassLoader classLoader = ClassLoaderUtils.getClassLoader(getClass());
             loadFromClassLoader(classLoader, fullFileName);
         } catch (Throwable t) {
-            if (LOGGER.isErrorEnabled()) {
-                LOGGER.error("Failed to load extension of extensible " + interfaceName + " from path:" + fullFileName,
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Failed to load extension of extensible " + interfaceName + " from path:" + fullFileName,
                     t);
             }
         }
@@ -184,8 +185,8 @@ public class ExtensionLoader<T> {
                         readLine(url, line);
                     }
                 } catch (Throwable t) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn("Failed to load extension of extensible " + interfaceName
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Failed to load extension of extensible " + interfaceName
                             + " from classloader: " + classLoader + " and file:" + url, t);
                     }
                 } finally {
@@ -359,8 +360,10 @@ public class ExtensionLoader<T> {
                 listener.onLoad(extensionClass); // 加载完毕，通知监听器
                 all.put(alias, extensionClass);
             } catch (Exception e) {
-                LOGGER.error("Error when load extension of extensible " + interfaceClass + " with alias: "
-                    + alias + ".", e);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
+                        + alias + ".", e);
+                }
             }
         } else {
             all.put(alias, extensionClass);
@@ -423,7 +426,7 @@ public class ExtensionLoader<T> {
     public T getExtension(String alias) {
         ExtensionClass<T> extensionClass = getExtensionClass(alias);
         if (extensionClass == null) {
-            throw new SofaRpcRuntimeException("Not found extension of " + interfaceName + " named: \"" + alias + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EXTENSION_NOT_FOUND, interfaceName, alias));
         } else {
             if (extensible.singleton() && factory != null) {
                 T t = factory.get(alias);
@@ -454,7 +457,7 @@ public class ExtensionLoader<T> {
     public T getExtension(String alias, Class[] argTypes, Object[] args) {
         ExtensionClass<T> extensionClass = getExtensionClass(alias);
         if (extensionClass == null) {
-            throw new SofaRpcRuntimeException("Not found extension of " + interfaceName + " named: \"" + alias + "\"!");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_EXTENSION_NOT_FOUND, interfaceName, alias));
         } else {
             if (extensible.singleton() && factory != null) {
                 T t = factory.get(alias);

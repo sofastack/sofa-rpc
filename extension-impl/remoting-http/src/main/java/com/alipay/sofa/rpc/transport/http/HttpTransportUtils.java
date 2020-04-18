@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Constants of HTTP protocol
@@ -48,8 +49,8 @@ public class HttpTransportUtils {
         if (code != null) {
             return code;
         } else {
-            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, "Unsupported serialize type " + serialization
-                + " in http protocol.");
+            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, LogCodes.getLog(
+                LogCodes.ERROR_UNSUPPORTED_SERIALIZE_TYPE, serialization));
         }
     }
 
@@ -71,8 +72,8 @@ public class HttpTransportUtils {
                 return getSerializeTypeByName(RpcConstants.SERIALIZE_HESSIAN2);
             }
         }
-        throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, "Unsupported content type " + contentType
-            + " in http protocol, please set HTTP HEAD: '" + RemotingConstants.HEAD_SERIALIZE_TYPE + "'.");
+        throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, LogCodes.getLog(
+            LogCodes.ERROR_UNSUPPORTED_CONTENT_TYPE, contentType, RemotingConstants.HEAD_SERIALIZE_TYPE));
     }
 
     protected static String[] getInterfaceIdAndMethod(String uri) {

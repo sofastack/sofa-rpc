@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.log.LogCodes;
 
 /**
  * Factory of address holder.
@@ -36,19 +37,19 @@ public class AddressHolderFactory {
      * @return AddressHolder
      */
     public static AddressHolder getAddressHolder(ConsumerBootstrap consumerBootstrap) {
+        String addressHolder = null;
         try {
-            String connectionHolder = consumerBootstrap.getConsumerConfig().getAddressHolder();
+            addressHolder = consumerBootstrap.getConsumerConfig().getAddressHolder();
             ExtensionClass<AddressHolder> ext = ExtensionLoaderFactory.getExtensionLoader(AddressHolder.class)
-                .getExtensionClass(connectionHolder);
+                .getExtensionClass(addressHolder);
             if (ext == null) {
-                throw ExceptionUtils.buildRuntime("consumer.addressHolder", connectionHolder,
-                    "Unsupported addressHolder of client!");
+                throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_ADDRESS_HOLDER, addressHolder));
             }
             return ext.getExtInstance(new Class[] { ConsumerBootstrap.class }, new Object[] { consumerBootstrap });
         } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Throwable e) {
-            throw new SofaRpcRuntimeException(e.getMessage(), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_ADDRESS_HOLDER, addressHolder), e);
         }
     }
 }

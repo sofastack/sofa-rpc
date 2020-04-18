@@ -41,7 +41,9 @@ import org.junit.Test;
  */
 public class MeshApiClientTest extends BaseMeshTest {
 
-    private MeshApiClient meshApiClient;
+    private MeshApiClient  meshApiClient;
+
+    private HttpMockServer httpMockServer;
 
     @Test
     public void testApplicationInfo() {
@@ -53,35 +55,36 @@ public class MeshApiClientTest extends BaseMeshTest {
 
     @Before
     public void before() {
+
+        httpMockServer = new HttpMockServer();
         meshApiClient = new MeshApiClient("http://localhost:7654");
 
-        HttpMockServer.initSever(7654);
+        httpMockServer.initSever(7654);
         ApplicationInfoResult applicationInfoResult = new ApplicationInfoResult();
         applicationInfoResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.CONFIGS, JSON.toJSONString(applicationInfoResult));
+        httpMockServer.addMockPath(MeshEndpoint.CONFIGS, JSON.toJSONString(applicationInfoResult));
 
         PublishServiceResult publishServiceResult = new PublishServiceResult();
         publishServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.PUBLISH, JSON.toJSONString(publishServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.PUBLISH, JSON.toJSONString(publishServiceResult));
 
         SubscribeServiceResult subscribeServiceResult = new SubscribeServiceResult();
         subscribeServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.SUBCRIBE, JSON.toJSONString(subscribeServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.SUBCRIBE, JSON.toJSONString(subscribeServiceResult));
 
         UnPublishServiceResult unPublishServiceResult = new UnPublishServiceResult();
         unPublishServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.UN_PUBLISH, JSON.toJSONString(unPublishServiceResult));
+        httpMockServer.addMockPath(MeshEndpoint.UN_PUBLISH, JSON.toJSONString(unPublishServiceResult));
 
         UnSubscribeServiceResult unSubscribeServiceResult = new UnSubscribeServiceResult();
         unSubscribeServiceResult.setSuccess(true);
-        HttpMockServer.addMockPath(MeshEndpoint.UN_SUBCRIBE, JSON.toJSONString(unSubscribeServiceResult));
-        HttpMockServer.start();
+        httpMockServer.addMockPath(MeshEndpoint.UN_SUBCRIBE, JSON.toJSONString(unSubscribeServiceResult));
+        httpMockServer.start();
     }
 
     @Test
     public void testPublish() {
         PublishServiceRequest request = new PublishServiceRequest();
-
         request.setServiceName("aa");
         ProviderMetaInfo providerMetaInfo = new ProviderMetaInfo();
         providerMetaInfo.setAppName("testApp");
@@ -121,6 +124,6 @@ public class MeshApiClientTest extends BaseMeshTest {
     @After
     public void after() {
         meshApiClient = null;
-        HttpMockServer.stop();
+        httpMockServer.stop();
     }
 }

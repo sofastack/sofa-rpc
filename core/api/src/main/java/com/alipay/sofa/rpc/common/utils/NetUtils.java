@@ -17,12 +17,16 @@
 package com.alipay.sofa.rpc.common.utils;
 
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.io.IOException;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.MulticastSocket;
 import java.net.NetworkInterface;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -123,10 +127,9 @@ public class NetUtils {
                     IOUtils.closeQuietly(ss);
                 }
             }
-            throw new SofaRpcRuntimeException("Can't bind to ANY port of " + host + ", please check config");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_BIND_PORT_ERROR, host));
         } else {
-            throw new SofaRpcRuntimeException("The host " + host
-                + " is not found in network cards, please check config");
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_HOST_NOT_FOUND, host));
         }
     }
 
@@ -281,7 +284,7 @@ public class NetUtils {
             }
         }
         if (LOGGER.isErrorEnabled()) {
-            LOGGER.error("Can't get valid host, will use 127.0.0.1 instead.");
+            LOGGER.error(LogCodes.getLog(LogCodes.ERROR_GET_HOST_FAIL));
         }
         return localAddress;
     }
@@ -495,4 +498,53 @@ public class NetUtils {
             IOUtils.closeQuietly(socket);
         }
     }
+
+    /**
+     *
+     * @param multicastSocket
+     * @param multicastAddress
+     */
+    public static void joinMulticastGroup(MulticastSocket multicastSocket, InetAddress multicastAddress)
+        throws IOException {
+        setInterface(multicastSocket, multicastAddress instanceof Inet6Address);
+        multicastSocket.setLoopbackMode(false);
+        multicastSocket.joinGroup(multicastAddress);
+    }
+
+    public static void setInterface(MulticastSocket multicastSocket, boolean preferIpv6) throws IOException {
+        boolean interfaceSet = false;
+        Enumeration interfaces = NetworkInterface.getNetworkInterfaces();
+        while (interfaces.hasMoreElements()) {
+            NetworkInterface i = (NetworkInterface) interfaces.nextElement();
+            Enumeration addresses = i.getInetAddresses();
+            while (addresses.hasMoreElements()) {
+                InetAddress address = (InetAddress) addresses.nextElement();
+                if (preferIpv6 && address instanceof Inet6Address) {
+                    try {
+                        if (address.isReachable(100)) {
+                            multicastSocket.setInterface(address);
+                            interfaceSet = true;
+                            break;
+                        }
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                } else if (!preferIpv6 && address instanceof Inet4Address) {
+                    try {
+                        if (address.isReachable(100)) {
+                            multicastSocket.setInterface(address);
+                            interfaceSet = true;
+                            break;
+                        }
+                    } catch (IOException e) {
+                        // ignore
+                    }
+                }
+            }
+            if (interfaceSet) {
+                break;
+            }
+        }
+    }
+
 }

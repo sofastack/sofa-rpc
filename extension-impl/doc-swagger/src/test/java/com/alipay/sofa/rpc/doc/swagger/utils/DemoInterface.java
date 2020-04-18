@@ -14,22 +14,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.hystrix;
-
-import com.alipay.sofa.rpc.test.HelloService;
+package com.alipay.sofa.rpc.doc.swagger.utils;
 
 /**
- * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
+ * @author <a href=mailto:orezsilence@163.com>zhangchengxi</a>
  */
-public class HelloServiceFallbackFactory implements FallbackFactory<HelloService> {
-    @Override
-    public HelloService create(final FallbackContext context) {
-        return new HelloService() {
-            @Override
-            public String sayHello(String name, int age) {
-                return "fallback " + name + " from server! age: " + age + ", error: " +
-                    context.getException().getClass().getName();
-            }
-        };
-    }
+public interface DemoInterface {
+    void noParam();
+
+    void oneParam(Object a);
+
+    void multiParam(Object a, Object b);
 }

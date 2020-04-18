@@ -14,27 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.hystrix;
+package com.alipay.sofa.rpc.msgpack;
 
-import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
-import java.util.concurrent.atomic.AtomicInteger;
+/**
+ * Quick Start demo implements
+ */
+public class HelloServiceImpl implements HelloService {
 
-public class InvokeCounterHelloService extends HelloServiceImpl {
-
-    private AtomicInteger executeCount = new AtomicInteger(0);
-
-    public InvokeCounterHelloService(int sleep) {
-        super(sleep);
-    }
+    private final static Logger LOGGER = LoggerFactory.getLogger(HelloServiceImpl.class);
 
     @Override
-    public String sayHello(String name, int age) {
-        executeCount.incrementAndGet();
-        return super.sayHello(name, age);
-    }
-
-    public int getExecuteCount() {
-        return executeCount.get();
+    public String sayHello(String string) {
+        LOGGER.info("Server receive: " + string);
+        return "hello " + string + " ！";
     }
 }

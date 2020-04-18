@@ -16,6 +16,13 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoResponse;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoService;
@@ -28,12 +35,9 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -89,7 +93,7 @@ public class JacksonSerializerTest {
 
     @Test
     public void testSofaRequest() throws Exception {
-        SofaRequest request = buildRequest();
+        SofaRequest request = buildSayRequest();
         AbstractByteBuf data = serializer.encode(request, null);
         boolean error = false;
         try {
@@ -107,6 +111,22 @@ public class JacksonSerializerTest {
         }
         Assert.assertTrue(error);
 
+        // parameters size error
+        Map<String, String> errorHead = new HashMap<String, String>();
+        errorHead.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        errorHead.put(RemotingConstants.HEAD_METHOD_NAME, "say");
+        errorHead.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+
+        try {
+            SofaRequest say2Request = buildSay2Request();
+            AbstractByteBuf say2Data = serializer.encode(say2Request, errorHead);
+            serializer.decode(say2Data, new SofaRequest(), errorHead);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        // success
         Map<String, String> head = new HashMap<String, String>();
         head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
         head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
@@ -128,17 +148,6 @@ public class JacksonSerializerTest {
         Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
             request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
 
-        // null request
-        head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        newRequest = new SofaRequest();
-        serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, head);
-        final Object[] methodArgs = newRequest.getMethodArgs();
-        Assert.assertEquals(null, ((DemoRequest) methodArgs[0]).getName());
     }
 
     @Test
@@ -188,18 +197,6 @@ public class JacksonSerializerTest {
         Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
         Assert.assertEquals("result", ((DemoResponse) newResponse.getAppResponse()).getWord());
 
-        // null response
-        head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        newResponse = new SofaResponse();
-        serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newResponse, head);
-        Assert.assertFalse(newResponse.isError());
-        Assert.assertNotNull(newResponse.getAppResponse());
-        Assert.assertEquals(null, ((DemoResponse) newResponse.getAppResponse()).getWord());
-
         // error response
         head = new HashMap<String, String>();
         head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
@@ -216,18 +213,118 @@ public class JacksonSerializerTest {
         Assert.assertEquals(response.getErrorMsg(), newResponse.getErrorMsg());
     }
 
-    private SofaRequest buildRequest() throws NoSuchMethodException {
-        SofaRequest request = new SofaRequest();
-        request.setInterfaceName(DemoService.class.getName());
-        request.setMethodName("say");
-        request.setMethod(DemoService.class.getMethod("say", DemoRequest.class));
+    @Test
+    public void testMoreParameters() throws NoSuchMethodException {
+        SofaRequest request = buildSay2Request();
+        AbstractByteBuf data = serializer.encode(request, null);
+        boolean error = false;
+        try {
+            serializer.decode(data, SofaRequest.class, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
+        try {
+            serializer.decode(data, new SofaRequest(), null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
+
+        // parameters size error
+        Map<String, String> errorHead1 = new HashMap<String, String>();
+        errorHead1.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        errorHead1.put(RemotingConstants.HEAD_METHOD_NAME, "say2");
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            DemoRequest req = new DemoRequest();
+            req.setName("123");
+            serializer
+                .decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(req)), new SofaRequest(), errorHead1);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        // parameters size error
+        Map<String, String> errorHead2 = new HashMap<String, String>();
+        errorHead2.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        errorHead2.put(RemotingConstants.HEAD_METHOD_NAME, "say2");
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            DemoRequest req = new DemoRequest();
+            req.setName("123");
+            serializer.decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(new Object[] { req, "123" })),
+                new SofaRequest(),
+                errorHead2);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "say2");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put("unkown", "yes");
+
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
+
+        Assert.assertEquals(newRequest.getInterfaceName(), request.getInterfaceName());
+        Assert.assertEquals(newRequest.getMethodName(), request.getMethodName());
+        Assert.assertEquals(newRequest.getMethodArgs().length, request.getMethodArgs().length);
+        Assert.assertEquals("name", ((DemoRequest) newRequest.getMethodArgs()[0]).getName());
+        Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
+        Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
+        Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+
+    }
+
+    private SofaRequest buildSayRequest() throws NoSuchMethodException {
         final DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("name");
-        request.setMethodArgs(new Object[] { demoRequest });
-        request.setMethodArgSigs(new String[] { DemoRequest.class.getCanonicalName() });
+        return buildRequest("say", new Object[] { demoRequest });
+    }
+
+    private SofaRequest buildSay2Request() throws NoSuchMethodException {
+        final DemoRequest demoRequest = new DemoRequest();
+        demoRequest.setName("name");
+
+        Map<String, String> ctx = new HashMap<String, String>();
+        ctx.put("abc", "123");
+
+        return buildRequest("say2", new Object[] { demoRequest, ctx, 123 });
+    }
+
+    private SofaRequest buildRequest(String methodName, Object[] args) throws NoSuchMethodException {
+        SofaRequest request = new SofaRequest();
+        request.setInterfaceName(DemoService.class.getName());
+        request.setMethodName(methodName);
+        Method method = null;
+        for (Method m : DemoService.class.getMethods()) {
+            if (m.getName().equals(methodName)) {
+                method = m;
+            }
+        }
+        request.setMethod(method);
+        request.setMethodArgs(args);
+        List<String> argSigs = new ArrayList<String>();
+        for (Object req : args) {
+            argSigs.add(req.getClass().getName());
+        }
+        request.setMethodArgSigs(argSigs.toArray(new String[argSigs.size()]));
         request.setTargetServiceUniqueName(DemoService.class.getName() + ":1.0");
         request.setTargetAppName("targetApp");
-        request.setSerializeType((byte) 11);
+        request.setSerializeType((byte) 12);
         request.setTimeout(1024);
         request.setInvokeType(RpcConstants.INVOKER_TYPE_SYNC);
         Map<String, String> map = new HashMap<String, String>();
