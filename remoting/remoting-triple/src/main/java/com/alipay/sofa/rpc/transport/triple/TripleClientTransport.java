@@ -135,7 +135,9 @@ public class TripleClientTransport extends ClientTransport {
         if (ConnectivityState.SHUTDOWN == state || ConnectivityState.TRANSIENT_FAILURE == state) {
             return false;
         }
-        //对于idle 和 connecting的,暂时置为失败，靠外面去重连
+        if (ConnectivityState.IDLE == state || ConnectivityState.CONNECTING == state) {
+            return true;
+        }
         return false;
     }
 
@@ -217,7 +219,7 @@ public class TripleClientTransport extends ClientTransport {
         String key = url.toString();
         ReferenceCountManagedChannel channel = channelMap.get(key);
 
-        if (channelAvailable(channel)){
+        if (channelAvailable(channel)) {
             channel.incrementAndGetCount();
             return channel;
         } else if (channel != null) {
@@ -227,7 +229,7 @@ public class TripleClientTransport extends ClientTransport {
         synchronized (lock) {
             channel = channelMap.get(key);
             // double check
-            if (channel != null && !channel.isTerminated()) {
+            if (channelAvailable(channel)) {
                 channel.incrementAndGetCount();
             } else {
                 channel = new ReferenceCountManagedChannel(initChannel(url));
