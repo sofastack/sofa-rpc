@@ -140,7 +140,7 @@ public class ConsulRegistry extends Registry {
 
     @Override
     public void destroy(DestroyHook hook) {
-        hook.postDestroy();
+        hook.preDestroy();
         destroy();
         hook.postDestroy();
     }
