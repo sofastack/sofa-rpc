@@ -103,12 +103,12 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             Future future = SofaResponseFuture.getFuture();
             Assert.assertFalse(future.isDone());
             Assert.assertFalse(future.isCancelled());
-            Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
             SofaResponseFuture.getResponse(10000, true);
             Assert.fail();
         } catch (Exception e) {
             Assert.assertTrue(e instanceof SofaRpcException);
-            Assert.assertTrue(e.getCause().getMessage(), e.getCause() instanceof HystrixRuntimeException);
+            final Throwable cause = e.getCause();
+            Assert.assertTrue(cause.getMessage(), cause instanceof HystrixRuntimeException);
             Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
         }
     }
@@ -130,7 +130,6 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
         Future future = SofaResponseFuture.getFuture();
         Assert.assertFalse(future.isDone());
         Assert.assertFalse(future.isCancelled());
-        Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
         String result = (String) SofaResponseFuture.getResponse(10000, true);
         Assert.assertTrue((System.currentTimeMillis() - start) > HYSTRIX_DEFAULT_TIMEOUT);
         Assert.assertEquals("fallback abc from server! age: 24", result);
@@ -234,7 +233,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
         HystrixService HystrixService = consumerConfig.refer();
         //wait server ok
-        Thread.sleep(2000);
+        Thread.sleep(3000);
         for (int i = 0; i < 20; i++) {
             long start = System.currentTimeMillis();
             HystrixService.sayHello("abc", 24);
@@ -242,7 +241,6 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
             // 第一个请求用于阻塞线程池，其他请求会直接线程池拒绝
             if (i > 0) {
                 Assert.assertTrue(future.isDone());
-                Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
                 String result = (String) SofaResponseFuture.getResponse(10000, true);
                 Assert.assertEquals(
                     "fallback abc from server! age: 24, error: java.util.concurrent.RejectedExecutionException",
@@ -250,6 +248,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
                 Assert.assertTrue((System.currentTimeMillis() - start) < HYSTRIX_DEFAULT_TIMEOUT);
             }
         }
+        Thread.sleep(3000);
         // 只有第一个线程执行了，所以服务端只会收到一个请求
         Assert.assertEquals(1, ((InvokeCounterHystrixService) providerConfig.getRef()).getExecuteCount());
 

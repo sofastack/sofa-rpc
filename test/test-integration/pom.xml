@@ -12,6 +12,14 @@
 
     <artifactId>sofa-rpc-test-integration</artifactId>
 
+    <properties>
+        <protoc.version>3.6.1</protoc.version>
+        <protoc-gen-grpc-java.version>1.17.0</protoc-gen-grpc-java.version>
+        <sofa.rpc.compiler.version>0.0.1-SNAPSHOT</sofa.rpc.compiler.version>
+        <grpc.version>1.27.2</grpc.version>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+    </properties>
+
     <dependencies>
         <!-- add all transitive dependencies for calculate code coverage -->
         <dependency>
@@ -43,7 +51,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-codec</artifactId>
+            <artifactId>sofa-rpc-codec-api</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -67,11 +75,7 @@
             <version>${project.parent.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-extension-common</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
+
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api-compatible</artifactId>
@@ -175,7 +179,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-remoting-grpc</artifactId>
+            <artifactId>sofa-rpc-remoting-triple</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
@@ -186,6 +190,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-tracer-opentracing-resteasy</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing-triple</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
 
@@ -277,7 +286,13 @@
                 </includes>
             </testResource>
         </testResources>
-
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.1</version>
+            </extension>
+        </extensions>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -309,29 +324,47 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.5.1</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.5.1-1:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:3.7.1:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.17.0:exe:${os.detected.classifier}</pluginArtifact>
+                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
+                    <outputDirectory>build/generated/source/proto/main/java</outputDirectory>
+                    <clearOutputDirectory>false</clearOutputDirectory>
+                    <protocPlugins>
+                        <protocPlugin>
+                            <id>sofa-triple</id>
+                            <groupId>com.alipay.sofa</groupId>
+                            <artifactId>sofa-rpc-compiler</artifactId>
+                            <version>${sofa.rpc.compiler.version}</version>
+                            <mainClass>com.alipay.sofa.gen.triple.SofaTripleGenerator</mainClass>
+                        </protocPlugin>
+                    </protocPlugins>
                 </configuration>
                 <executions>
                     <execution>
                         <goals>
                             <goal>compile</goal>
                             <goal>compile-custom</goal>
+                            <goal>test-compile</goal>
+                            <goal>test-compile-custom</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>com.github.neokidd.maven.plugins</groupId>
-                <artifactId>hack-modifier-maven-plugin</artifactId>
-                <version>1.0.0</version>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.0.0</version>
                 <executions>
                     <execution>
-                        <phase>process-classes</phase>
+                        <phase>generate-sources</phase>
                         <goals>
-                            <goal>hack</goal>
+                            <goal>add-source</goal>
                         </goals>
+                        <configuration>
+                            <sources>
+                                <source>build/generated/source/proto/main/java</source>
+                            </sources>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

@@ -17,6 +17,7 @@
     </organization>
 
     <modules>
+        <module>compiler</module>
         <!-- ALl-in-one -->
         <module>all</module>
         <!-- Project Management -->
@@ -25,8 +26,18 @@
         <module>core</module>
         <!-- 1 : Common Implements. -->
         <module>core-impl</module>
-        <!-- 2 : Open Implements. eg: bolt + tracer + zk ... -->
-        <module>extension-impl</module>
+        <!-- 2 : swagger -->
+        <module>doc-swagger</module>
+
+        <module>registry</module>
+        <module>bootstrap</module>
+        <module>codec</module>
+        <module>remoting</module>
+        <module>tracer</module>
+        <module>metrics</module>
+        <module>config</module>
+        <module>fault</module>
+        <module>log-common-tools</module>
         <!-- Other Code -->
         <module>example</module>
         <module>test</module>
@@ -46,7 +57,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>5.6.6-SNAPSHOT</revision>
+        <revision>5.7.0-SNAPSHOT</revision>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
