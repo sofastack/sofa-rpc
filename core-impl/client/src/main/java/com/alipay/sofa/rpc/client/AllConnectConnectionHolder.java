@@ -126,7 +126,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     /**
      * 客户端变化provider的锁
      */
-    private Lock                                           providerLock             = new ReentrantLock();
+    protected Lock                                         providerLock             = new ReentrantLock();
 
     /**
      * Gets retry connections.
