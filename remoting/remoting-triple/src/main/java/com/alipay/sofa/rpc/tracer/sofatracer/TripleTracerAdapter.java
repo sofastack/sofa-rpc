@@ -128,7 +128,7 @@ public class TripleTracerAdapter {
         }
 
         final String target = consumerConfig.getParameter("interworking.target");
-        if (StringUtils.isNotBlank(source)) {
+        if (StringUtils.isNotBlank(target)) {
             header.put(TripleHeadKeys.HEAD_KEY_TARGET_TENANTID.name(),
                     target);
         }

@@ -72,7 +72,9 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                     @Override
                     public void onHeaders(Metadata responseHeader) {
                         // 客户端收到响应Header
-                        LOGGER.info("[3]response header received from server:{}", responseHeader);
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[3]response header received from server:{}", responseHeader);
+                        }
                         super.onHeaders(responseHeader);
                     }
 
