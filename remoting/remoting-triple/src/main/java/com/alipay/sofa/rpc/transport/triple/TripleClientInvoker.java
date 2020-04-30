@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.transport.triple;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -36,11 +37,11 @@ import java.lang.reflect.Method;
 public class TripleClientInvoker implements TripleInvoker {
     private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientInvoker.class);
 
-    private Channel             channel;
+    protected Channel           channel;
 
-    private ConsumerConfig      consumerConfig;
+    protected ConsumerConfig    consumerConfig;
 
-    private Method              sofaStub;
+    protected Method            sofaStub;
 
     public TripleClientInvoker(ConsumerConfig consumerConfig, Channel channel) {
         this.channel = channel;
@@ -59,10 +60,26 @@ public class TripleClientInvoker implements TripleInvoker {
         throws Exception {
         SofaResponse sofaResponse = new SofaResponse();
         ProviderInfo providerInfo = null;
-        Object stub = sofaStub.invoke(null, channel, CallOptions.DEFAULT, providerInfo, consumerConfig, timeout);
+        Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), providerInfo,
+            consumerConfig, timeout);
         final Method method = sofaRequest.getMethod();
         Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
         sofaResponse.setAppResponse(appResponse);
         return sofaResponse;
+    }
+
+    /**
+     * set some custom info
+     * @param sofaRequest
+     * @param timeout
+     * @return
+     */
+    protected CallOptions buildCustomCallOptions(SofaRequest sofaRequest, int timeout) {
+        CallOptions tripleCallOptions = CallOptions.DEFAULT;
+        final String target = consumerConfig.getParameter("interworking.target");
+        if (StringUtils.isNotBlank(target)) {
+            tripleCallOptions = tripleCallOptions.withAuthority(target);
+        }
+        return tripleCallOptions;
     }
 }
