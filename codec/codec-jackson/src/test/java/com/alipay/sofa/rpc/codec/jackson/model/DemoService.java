@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec.jackson.model;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -27,5 +28,7 @@ public interface DemoService {
     public DemoResponse say(DemoRequest demoRequest);
 
     public DemoResponse say2(DemoRequest demoRequest, Map<String, String> ctx, int id);
+
+    public DemoResponse say3(List<DemoRequest> list);
 
 }

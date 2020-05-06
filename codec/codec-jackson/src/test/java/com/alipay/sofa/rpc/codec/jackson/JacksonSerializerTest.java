@@ -289,6 +289,82 @@ public class JacksonSerializerTest {
 
     }
 
+    @Test
+    public void testListParameter() throws NoSuchMethodException {
+        SofaRequest request = buildSay3Request();
+        AbstractByteBuf data = serializer.encode(request, null);
+        boolean error = false;
+        try {
+            serializer.decode(data, SofaRequest.class, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
+        try {
+            serializer.decode(data, new SofaRequest(), null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        error = false;
+
+        // parameters size error
+        Map<String, String> errorHead1 = new HashMap<String, String>();
+        errorHead1.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        errorHead1.put(RemotingConstants.HEAD_METHOD_NAME, "say3");
+
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            DemoRequest req = new DemoRequest();
+            req.setName("123");
+            serializer
+                .decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(req)), new SofaRequest(), errorHead1);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        // parameters size error
+        Map<String, String> errorHead2 = new HashMap<String, String>();
+        errorHead2.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        errorHead2.put(RemotingConstants.HEAD_METHOD_NAME, "say3");
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            DemoRequest req = new DemoRequest();
+            req.setName("123");
+            serializer.decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(new Object[] { req, "123" })),
+                new SofaRequest(),
+                errorHead2);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "say3");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put("unkown", "yes");
+
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
+
+        Assert.assertEquals(newRequest.getInterfaceName(), request.getInterfaceName());
+        Assert.assertEquals(newRequest.getMethodName(), request.getMethodName());
+        Assert.assertEquals(newRequest.getMethodArgs().length, request.getMethodArgs().length);
+        Assert.assertEquals("name", ((List<DemoRequest>) newRequest.getMethodArgs()[0]).get(0).getName());
+        Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
+        Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
+        Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+
+    }
+
     private SofaRequest buildSayRequest() throws NoSuchMethodException {
         final DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("name");
@@ -303,6 +379,16 @@ public class JacksonSerializerTest {
         ctx.put("abc", "123");
 
         return buildRequest("say2", new Object[] { demoRequest, ctx, 123 });
+    }
+
+    private SofaRequest buildSay3Request() throws NoSuchMethodException {
+        final DemoRequest demoRequest = new DemoRequest();
+        demoRequest.setName("name");
+
+        List<DemoRequest> list = new ArrayList<DemoRequest>();
+        list.add(demoRequest);
+
+        return buildRequest("say3", new Object[] { list });
     }
 
     private SofaRequest buildRequest(String methodName, Object[] args) throws NoSuchMethodException {
