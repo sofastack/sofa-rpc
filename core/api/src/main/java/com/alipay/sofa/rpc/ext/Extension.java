@@ -69,4 +69,11 @@ public @interface Extension {
      * @since 5.2.0
      */
     String[] rejection() default {};
+
+    /**
+     * 指明扩展了哪个扩展点
+     *
+     * @return 扩展点
+     */
+    Class<?> extensionPoint() default void.class;
 }

@@ -351,4 +351,12 @@ public class ExtensionLoaderTest {
         Assert.assertArrayEquals(loader.parseAliasAndClassName("aa=1111  #aa  "), new String[] { "aa", "1111" });
         Assert.assertArrayEquals(loader.parseAliasAndClassName("  aa=1111  #aa  "), new String[] { "aa", "1111" });
     }
+
+    @Test
+    public void testDynamicLoadExtension() {
+        ExtensionLoader<Filter> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class);
+        extensionLoader.loadExtension(DynamicFilter.class);
+        Filter dynamic0 = extensionLoader.getExtension("dynamic0");
+        Assert.assertTrue(dynamic0 instanceof DynamicFilter);
+    }
 }
