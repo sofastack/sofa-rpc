@@ -52,6 +52,9 @@ public class ExtensionLoaderFactory {
                 }
             }
         }
+        if (listener != null) {
+            loader.addListener(listener);
+        }
         return loader;
     }
 

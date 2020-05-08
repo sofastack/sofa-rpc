@@ -34,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class ExtensionLoader<T> {
     /**
      * 加载监听器
      */
-    protected final ExtensionLoaderListener<T>               listener;
+    protected final List<ExtensionLoaderListener<T>>         listeners;
 
     /**
      * 构造函数（自动加载）
@@ -113,7 +114,7 @@ public class ExtensionLoader<T> {
         if (RpcRunningState.isShuttingDown()) {
             this.interfaceClass = null;
             this.interfaceName = null;
-            this.listener = null;
+            this.listeners = null;
             this.factory = null;
             this.extensible = null;
             this.all = null;
@@ -126,7 +127,10 @@ public class ExtensionLoader<T> {
         }
         this.interfaceClass = interfaceClass;
         this.interfaceName = ClassTypeUtils.getTypeStr(interfaceClass);
-        this.listener = listener;
+        this.listeners = new ArrayList<>();
+        if(listener!= null){
+            listeners.add(listener);
+        }
         Extensible extensible = interfaceClass.getAnnotation(Extensible.class);
         if (extensible == null) {
             throw new IllegalArgumentException(
@@ -361,19 +365,19 @@ public class ExtensionLoader<T> {
     }
 
     private void loadSuccess(String alias, ExtensionClass<T> extensionClass) {
-        if (listener != null) {
+        if (listeners != null) {
             try {
-                listener.onLoad(extensionClass); // 加载完毕，通知监听器
-                all.put(alias, extensionClass);
+                for (ExtensionLoaderListener<T> listener : listeners) {
+                    listener.onLoad(extensionClass);
+                }
             } catch (Exception e) {
                 if (LOGGER.isDebugEnabled()) {
                     LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
                         + alias + ".", e);
                 }
             }
-        } else {
-            all.put(alias, extensionClass);
         }
+        all.put(alias, extensionClass);
     }
 
     protected String[] parseAliasAndClassName(String line) {
@@ -488,5 +492,17 @@ public class ExtensionLoader<T> {
             throw new IllegalArgumentException("Can not load extension of null");
         }
         loadExtension(null, loadedClass, LOAD_FROM_CODE, loadedClass.getName());
+    }
+
+    public void addListener(ExtensionLoaderListener<T> listener) {
+        synchronized (this) {
+            if (!listeners.contains(listener)) {
+                this.listeners.add(listener);
+                for (ExtensionClass<T> value : all.values()) {
+                    listener.onLoad(value);
+                }
+            }
+        }
+
     }
 }

@@ -26,6 +26,9 @@ import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  *
@@ -358,5 +361,26 @@ public class ExtensionLoaderTest {
         extensionLoader.loadExtension(DynamicFilter.class);
         Filter dynamic0 = extensionLoader.getExtension("dynamic0");
         Assert.assertTrue(dynamic0 instanceof DynamicFilter);
+    }
+
+    @Test
+    public void testAddListener(){
+        ExtensionLoader<Filter> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class);
+        extensionLoader.loadExtension(DynamicFilter.class);
+        ConcurrentMap<String, ExtensionClass<Filter>> all = extensionLoader.all;
+        String alias = "dynamic0";
+        Assert.assertTrue(all.containsKey(alias));
+
+
+        List<String> filters = new ArrayList<>();
+        extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
+            @Override
+            public void onLoad(ExtensionClass<Filter> extensionClass) {
+                filters.add(extensionClass.getAlias());
+            }
+        });
+
+        Assert.assertTrue(filters.contains(alias));
+
     }
 }
