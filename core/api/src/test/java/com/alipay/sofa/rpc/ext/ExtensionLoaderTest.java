@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.protocol.Protocol;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
@@ -39,6 +40,15 @@ public class ExtensionLoaderTest {
 
     /** Logger for ExtensionLoaderTest **/
     private static final Logger LOGGER = LoggerFactory.getLogger(ExtensionLoaderTest.class);
+
+    @Before
+    public void before() throws NoSuchFieldException, IllegalAccessException {
+        Field loaderMap = ExtensionLoaderFactory.class.getDeclaredField("LOADER_MAP");
+        loaderMap.setAccessible(true);
+        ConcurrentMap<Class, ExtensionLoader> map = ((ConcurrentMap<Class, ExtensionLoader>) loaderMap.get(null));
+        map.clear();
+
+    }
 
     @Test
     public void testInit() throws Exception {
