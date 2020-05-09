@@ -383,7 +383,8 @@ public class ExtensionLoaderTest {
 
 
         List<String> filters = new ArrayList<>();
-        extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
+        extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class);
+        extensionLoader.addListener( new  ExtensionLoaderListener<Filter>() {
             @Override
             public void onLoad(ExtensionClass<Filter> extensionClass) {
                 filters.add(extensionClass.getAlias());
