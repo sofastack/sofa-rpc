@@ -122,19 +122,19 @@ public class ExtensionLoader<T> {
         }
         // 接口为空，既不是接口，也不是抽象类
         if (interfaceClass == null ||
-            !(interfaceClass.isInterface() || Modifier.isAbstract(interfaceClass.getModifiers()))) {
+                !(interfaceClass.isInterface() || Modifier.isAbstract(interfaceClass.getModifiers()))) {
             throw new IllegalArgumentException("Extensible class must be interface or abstract class!");
         }
         this.interfaceClass = interfaceClass;
         this.interfaceName = ClassTypeUtils.getTypeStr(interfaceClass);
         this.listeners = new ArrayList<>();
-        if(listener!= null){
+        if (listener != null) {
             listeners.add(listener);
         }
         Extensible extensible = interfaceClass.getAnnotation(Extensible.class);
         if (extensible == null) {
             throw new IllegalArgumentException(
-                "Error when load extensible interface " + interfaceName + ", must add annotation @Extensible.");
+                    "Error when load extensible interface " + interfaceName + ", must add annotation @Extensible.");
         } else {
             this.extensible = extensible;
         }
@@ -366,16 +366,17 @@ public class ExtensionLoader<T> {
 
     private void loadSuccess(String alias, ExtensionClass<T> extensionClass) {
         if (listeners != null) {
-            try {
-                for (ExtensionLoaderListener<T> listener : listeners) {
+            for (ExtensionLoaderListener<T> listener : listeners) {
+                try {
                     listener.onLoad(extensionClass);
-                }
-            } catch (Exception e) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
-                        + alias + ".", e);
+                } catch (Exception e) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
+                            + alias + ".", e);
+                    }
                 }
             }
+
         }
         all.put(alias, extensionClass);
     }
@@ -499,7 +500,15 @@ public class ExtensionLoader<T> {
             if (!listeners.contains(listener)) {
                 this.listeners.add(listener);
                 for (ExtensionClass<T> value : all.values()) {
-                    listener.onLoad(value);
+                    try {
+                        listener.onLoad(value);
+                    } catch (Exception e) {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Error when notify listener  of extensible " + interfaceClass +
+                                " with alias: "
+                                + value.getAlias() + ".", e);
+                        }
+                    }
                 }
             }
         }
