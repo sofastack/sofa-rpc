@@ -167,16 +167,14 @@ public class TripleTracerAdapter {
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_OLD_TRACE_ID)) {
                 traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_OLD_TRACE_ID));
-            }
-            else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TRACE_ID)) {
+            } else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TRACE_ID)) {
                 traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_TRACE_ID));
             }
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_OLD_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_OLD_RPC_ID));
-            }
-            else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
+            } else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
             }
@@ -243,6 +241,7 @@ public class TripleTracerAdapter {
                 //serverSpan.setTag(RpcSpanTags.INVOKE_TYPE, (String) request.getRequestProp(HEAD_INVOKE_TYPE));*/
             }
         } catch (Throwable e) {
+            LOGGER.warn("triple serverReceived tracer error", e);
         }
     }
 

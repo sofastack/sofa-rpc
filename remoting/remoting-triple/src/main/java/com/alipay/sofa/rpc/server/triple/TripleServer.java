@@ -205,7 +205,7 @@ public class TripleServer implements Server {
         try {
             obj = ProxyFactory.buildProxy(providerConfig.getProxy(), BindableService.class, instance);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("build triple proxy error", e);
         }
         BindableService bindableService = (BindableService) obj;
 
