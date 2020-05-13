@@ -22,7 +22,6 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.interceptor.ServerReqHeaderInterceptor;
-import com.alipay.sofa.rpc.interceptor.ServerResHeaderInterceptor;
 import com.alipay.sofa.rpc.interceptor.TripleServerInterceptor;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
@@ -213,7 +212,6 @@ public class TripleServer implements Server {
             final ServerServiceDefinition serviceDef = bindableService.bindService();
             List<TripleServerInterceptor> interceptorList = new ArrayList<>();
             interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
-            interceptorList.add(new ServerResHeaderInterceptor(serviceDef));
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
                     serviceDef, interceptorList);
             serviceInfo.put(providerConfig, serviceDefinition);

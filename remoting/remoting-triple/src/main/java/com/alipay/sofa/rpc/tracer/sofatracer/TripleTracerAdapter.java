@@ -142,10 +142,13 @@ public class TripleTracerAdapter {
     /**
      * 适配服务端serverReceived
      */
-    public static void serverReceived(ServerServiceDefinition serverServiceDefinition, final ServerCall call,
+    public static void serverReceived(SofaRequest sofaRequest, ServerServiceDefinition serverServiceDefinition,
+                                      final ServerCall call,
                                       Metadata requestHeaders) {
         try {
-            SofaRequest sofaRequest = new SofaRequest();
+            if (sofaRequest == null) {
+                sofaRequest = new SofaRequest();
+            }
             Map<String, String> traceMap = new HashMap<String, String>();
 
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TARGET_SERVICE)) {
@@ -248,10 +251,9 @@ public class TripleTracerAdapter {
     /**
      * 适配服务端serverSend
      */
-    public static void serverSend(final Metadata requestHeaders, SofaResponse response, Throwable throwable) {
+    public static void serverSend(SofaRequest request, final Metadata requestHeaders, SofaResponse response,
+                                  Throwable throwable) {
         if (EventBus.isEnable(ServerSendEvent.class)) {
-            SofaRequest request = (SofaRequest) RpcInvokeContext.getContext()
-                .get(TripleContants.SOFA_REQUEST_KEY);
             if (request == null) {
                 request = new SofaRequest();
             }
