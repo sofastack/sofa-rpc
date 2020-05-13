@@ -98,8 +98,9 @@ public class ExtensionLoaderTest {
         loader = new ExtensionLoader<Filter>(Filter.class, false, new TestErrorLoadListener());
         loader.loadFromFile("META-INF/ext3/");
         Assert.assertFalse(loader.getAllExtensions().isEmpty());
-        extensionClass = loader.getExtensionClass("rightxx0");
-        Assert.assertNull(extensionClass);
+        // 现在 listener 抛出异常,不会导致 extension 加载失败
+        //        extensionClass = loader.getExtensionClass("rightxx0");
+        //        Assert.assertNull(extensionClass);
         extensionClass = loader.getExtensionClass("rightxx1");
         Assert.assertNotNull(extensionClass);
         Assert.assertTrue(extensionClass.getOrder() == 128);
