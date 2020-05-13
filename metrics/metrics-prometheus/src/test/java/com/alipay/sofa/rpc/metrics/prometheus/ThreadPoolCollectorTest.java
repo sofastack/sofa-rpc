@@ -56,5 +56,4 @@ public class ThreadPoolCollectorTest {
         Assert.assertEquals(0.0, CollectorRegistry.defaultRegistry.getSampleValue("thread_pool_queue_size", labelNames, labelValues), 0.01);
 
     }
-
 }
