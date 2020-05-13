@@ -210,8 +210,7 @@ public class TripleServer implements Server {
 
         try {
             final ServerServiceDefinition serviceDef = bindableService.bindService();
-            List<TripleServerInterceptor> interceptorList = new ArrayList<>();
-            interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
+            List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
                     serviceDef, interceptorList);
             serviceInfo.put(providerConfig, serviceDefinition);
@@ -221,6 +220,17 @@ public class TripleServer implements Server {
             LOGGER.error("Register triple service error", e);
             serviceInfo.remove(providerConfig);
         }
+    }
+
+    /**
+     * build chain
+     * @param serviceDef
+     * @return
+     */
+    protected List<TripleServerInterceptor> buildInterceptorChain(ServerServiceDefinition serviceDef) {
+        List<TripleServerInterceptor> interceptorList = new ArrayList<>();
+        interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
+        return interceptorList;
     }
 
     @Override
