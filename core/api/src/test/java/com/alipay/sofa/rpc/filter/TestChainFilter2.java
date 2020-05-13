@@ -30,7 +30,7 @@ import java.util.Map;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter2")
+@Extension(value = "testChainFilter2", order = 2)
 public class TestChainFilter2 extends Filter {
 
     @Override

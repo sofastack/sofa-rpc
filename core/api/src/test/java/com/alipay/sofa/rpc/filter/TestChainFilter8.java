@@ -25,7 +25,7 @@ import com.alipay.sofa.rpc.ext.Extension;
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension("testChainFilter8")
+@Extension(value = "testChainFilter8", order = 8)
 @AutoActive(providerSide = true, consumerSide = true)
 public class TestChainFilter8 extends Filter {
 
