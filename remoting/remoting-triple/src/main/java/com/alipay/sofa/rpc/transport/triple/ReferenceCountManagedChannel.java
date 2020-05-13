@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.transport.triple;
 
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.MethodDescriptor;
 
@@ -82,5 +83,10 @@ public class ReferenceCountManagedChannel extends ManagedChannel {
     @Override
     public String authority() {
         return grpcChannel.authority();
+    }
+
+    @Override
+    public ConnectivityState getState(boolean requestConnection) {
+        return this.grpcChannel.getState(requestConnection);
     }
 }

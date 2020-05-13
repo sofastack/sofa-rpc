@@ -37,6 +37,7 @@ import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusException;
@@ -120,11 +121,24 @@ public class TripleClientTransport extends ClientTransport {
 
     @Override
     public boolean isAvailable() {
+        return channelAvailable(channel);
+    }
+
+    protected boolean channelAvailable(ManagedChannel channel) {
         if (channel == null) {
             return false;
         }
-
-        return !channel.isShutdown() && !channel.isTerminated();
+        ConnectivityState state = channel.getState(false);
+        if (ConnectivityState.READY == state) {
+            return true;
+        }
+        if (ConnectivityState.SHUTDOWN == state || ConnectivityState.TRANSIENT_FAILURE == state) {
+            return false;
+        }
+        if (ConnectivityState.IDLE == state || ConnectivityState.CONNECTING == state) {
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -205,7 +219,7 @@ public class TripleClientTransport extends ClientTransport {
         String key = url.toString();
         ReferenceCountManagedChannel channel = channelMap.get(key);
 
-        if (channel != null && !channel.isTerminated()) {
+        if (channelAvailable(channel)) {
             channel.incrementAndGetCount();
             return channel;
         } else if (channel != null) {
@@ -215,7 +229,7 @@ public class TripleClientTransport extends ClientTransport {
         synchronized (lock) {
             channel = channelMap.get(key);
             // double check
-            if (channel != null && !channel.isTerminated()) {
+            if (channelAvailable(channel)) {
                 channel.incrementAndGetCount();
             } else {
                 channel = new ReferenceCountManagedChannel(initChannel(url));

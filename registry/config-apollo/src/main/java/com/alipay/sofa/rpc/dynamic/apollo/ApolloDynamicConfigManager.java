@@ -14,21 +14,3 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.jackson.model;
-
-import java.util.List;
-import java.util.Map;
-
-/**
- * @author bystander
- * @version $Id: DemoRequest.java, v 0.1 2018年07月06日 10:44 AM bystander Exp $
- */
-public interface DemoService {
-
-    public DemoResponse say(DemoRequest demoRequest);
-
-    public DemoResponse say2(DemoRequest demoRequest, Map<String, String> ctx, int id);
-
-    public DemoResponse say3(List<DemoRequest> list);
-
-}

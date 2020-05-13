@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.fliggy.fcecore.tripleservice.generated";
+option java_outer_classname = "TripleCoreMgetService";
+option objc_class_prefix = "HLW";
+
+package com.fliggy.fcecore.tripleservice;
+
+service Greeter {
+    rpc getTripleData (MultiMtopTripleRequest) returns (MultiMtopTripleResponse) {
+    }
+}
+
+message MultiMtopTripleRequest {
+        string rids = 1;
+        string sids = 2;
+        string params = 3;
+        string extParams = 4;
+        string userId = 5;
+        string pressureUserId = 6;
+        string device = 7;
+        string ttid = 8;
+        string source = 9;
+        bool debug = 10;
+        bool mock = 11;
+        repeated  ComplexValue results =12;
+}
+
+message ComplexValue {
+    string key=1;
+    string value =2;
+}
+
+message MultiMtopTripleResponse {
+    string data = 1;
+}
