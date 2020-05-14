@@ -37,6 +37,7 @@ import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
+import io.grpc.ClientInterceptor;
 import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
@@ -246,12 +247,16 @@ public class TripleClientTransport extends ClientTransport {
      * @param url
      */
     private ManagedChannel initChannel(ProviderInfo url) {
-        ClientHeaderClientInterceptor clientHeaderClientInterceptor = new ClientHeaderClientInterceptor();
+        ClientInterceptor clientHeaderClientInterceptor = buildClientHeaderClientInterceptor();
         NettyChannelBuilder builder = NettyChannelBuilder.forAddress(url.getHost(), url.getPort());
         builder.usePlaintext();
         builder.disableRetry();
         builder.intercept(clientHeaderClientInterceptor);
         return builder.build();
+    }
+
+    protected ClientInterceptor buildClientHeaderClientInterceptor() {
+        return new ClientHeaderClientInterceptor();
     }
 
     /**

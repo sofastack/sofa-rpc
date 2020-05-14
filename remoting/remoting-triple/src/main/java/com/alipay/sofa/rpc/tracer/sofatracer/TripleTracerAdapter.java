@@ -22,6 +22,7 @@ import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -161,6 +162,11 @@ public class TripleTracerAdapter {
                 sofaRequest.setTargetServiceUniqueName(serviceName);
                 sofaRequest.setInterfaceName(serviceName);
             }
+
+            final String serviceName = call.getMethodDescriptor().getServiceName();
+            sofaRequest.setTargetServiceUniqueName(serviceName);
+            sofaRequest.setInterfaceName(serviceName);
+
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TARGET_APP)) {
                 sofaRequest.setTargetAppName(requestHeaders
                     .get(TripleHeadKeys.HEAD_KEY_TARGET_APP));
@@ -234,14 +240,17 @@ public class TripleTracerAdapter {
                 EventBus.post(new ServerReceiveEvent(sofaRequest));
             }
 
+            String methodName;
+            String fullMethodName = call.getMethodDescriptor().getFullMethodName();
+            methodName = StringUtils.substringAfter(fullMethodName, serviceName + "/");
             SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
+                serverSpan.setTag("method", methodName);
                 // 从请求里获取ConsumerTracerFilter额外传递的信息
                 serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
-                //serverSpan.setTag(RpcSpanTags.PROTOCOL, (String) request.getRequestProp(HEAD_PROTOCOL));
-                //serverSpan.setTag(RpcSpanTags.INVOKE_TYPE, (String) request.getRequestProp(HEAD_INVOKE_TYPE));*/
+                serverSpan.setTag("protocol", RpcConstants.PROTOCOL_TYPE_TRIPLE);
             }
         } catch (Throwable e) {
             LOGGER.warn("triple serverReceived tracer error", e);
