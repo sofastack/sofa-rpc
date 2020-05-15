@@ -50,7 +50,8 @@ public final class CompressorFactory {
     private final static ExtensionLoader<Compressor>     EXTENSION_LOADER    = buildLoader();
 
     private static ExtensionLoader<Compressor> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Compressor.class, new ExtensionLoaderListener<Compressor>() {
+        ExtensionLoader<Compressor> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Compressor.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Compressor>() {
             @Override
             public void onLoad(ExtensionClass<Compressor> extensionClass) {
                 // 除了保留 tag：Compressor外， 需要保留 code：Compressor
@@ -58,6 +59,7 @@ public final class CompressorFactory {
                 TYPE_CODE_MAP.put(extensionClass.getAlias(), extensionClass.getCode());
             }
         });
+        return extensionLoader;
     }
 
     /**

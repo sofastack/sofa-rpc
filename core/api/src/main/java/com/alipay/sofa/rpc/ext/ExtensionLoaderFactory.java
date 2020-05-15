@@ -36,6 +36,10 @@ public class ExtensionLoaderFactory {
     /**
      * Get extension loader by extensible class with listener
      *
+     * This method is deprecated, use com.alipay.sofa.rpc.ext.ExtensionLoaderFactory#getExtensionLoader(java.lang.Class) instead.
+     * Use com.alipay.sofa.rpc.ext.ExtensionLoader#addListener(com.alipay.sofa.rpc.ext.ExtensionLoaderListener) to add listener.
+     *
+     * @deprecated
      * @param clazz    Extensible class
      * @param listener Listener of ExtensionLoader
      * @param <T>      Class

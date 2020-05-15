@@ -14,40 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.filter;
+package com.alipay.sofa.rpc.ext;
 
-import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.filter.Filter;
+import com.alipay.sofa.rpc.filter.FilterInvoker;
 
 /**
- *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author zhaowang
+ * @version : DynamicFilter.java, v 0.1 2020年05月08日 1:59 下午 zhaowang Exp $
  */
-@Extension(value = "testChainFilter1", order = 1)
-public class TestChainFilter1 extends Filter {
-
-    @Override
-    public boolean needToLoad(FilterInvoker invoker) {
-        return false;
-    }
-
+@Extension("dynamic0")
+public class DynamicFilter extends Filter {
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        request.getMethodArgs()[0] = request.getMethodArgs()[0] + "_q1";
-        SofaResponse response = invoker.invoke(request);
-        if (!request.isAsync()) {
-            response.setAppResponse(response.getAppResponse() + "_s1");
-        }
-        return response;
-    }
-
-    @Override
-    public void onAsyncResponse(ConsumerConfig config, SofaRequest request, SofaResponse response, Throwable throwable)
-        throws SofaRpcException {
-        response.setAppResponse(response.getAppResponse() + "_a1");
+        return null;
     }
 }

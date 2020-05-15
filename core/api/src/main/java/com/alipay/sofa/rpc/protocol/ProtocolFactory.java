@@ -53,7 +53,8 @@ public class ProtocolFactory {
     private final static ExtensionLoader<Protocol>     EXTENSION_LOADER  = buildLoader();
 
     private static ExtensionLoader<Protocol> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Protocol.class, new ExtensionLoaderListener<Protocol>() {
+        ExtensionLoader<Protocol> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Protocol.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Protocol>() {
             @Override
             public void onLoad(ExtensionClass<Protocol> extensionClass) {
                 // 除了保留 alias：Protocol外， 需要保留 code：Protocol
@@ -67,6 +68,7 @@ public class ProtocolFactory {
                 }
             }
         });
+        return extensionLoader;
     }
 
     /**
