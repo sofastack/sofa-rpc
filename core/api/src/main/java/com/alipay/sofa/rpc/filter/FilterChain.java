@@ -74,7 +74,8 @@ public class FilterChain implements Invoker {
     private final static ExtensionLoader<Filter>             EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Filter> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
+        ExtensionLoader<Filter> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Filter>() {
             @Override
             public void onLoad(ExtensionClass<Filter> extensionClass) {
                 Class<? extends Filter> implClass = extensionClass.getClazz();
@@ -95,6 +96,7 @@ public class FilterChain implements Invoker {
                 }
             }
         });
+        return extensionLoader;
     }
 
     /**

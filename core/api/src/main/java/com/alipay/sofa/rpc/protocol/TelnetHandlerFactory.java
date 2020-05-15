@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Factory of TelnetHandler
- * 
+ *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 @Unstable
@@ -52,18 +52,19 @@ public class TelnetHandlerFactory {
     private final static ExtensionLoader<TelnetHandler> EXTENSION_LOADER = buildLoader();
 
     private static ExtensionLoader<TelnetHandler> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(TelnetHandler.class,
-            new ExtensionLoaderListener<TelnetHandler>() {
-                @Override
-                public void onLoad(ExtensionClass<TelnetHandler> extensionClass) {
-                    // 自己维护支持列表，不托管给ExtensionLoaderFactory
-                    TelnetHandler handler = extensionClass.getExtInstance();
-                    supportedCmds.put(handler.getCommand(), handler);
-                    if (LOGGER.isDebugEnabled()) {
-                        LOGGER.debug("Add telnet handler {}:{}.", handler.getCommand(), handler);
-                    }
+        ExtensionLoader<TelnetHandler> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(TelnetHandler.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<TelnetHandler>() {
+            @Override
+            public void onLoad(ExtensionClass<TelnetHandler> extensionClass) {
+                // 自己维护支持列表，不托管给ExtensionLoaderFactory
+                TelnetHandler handler = extensionClass.getExtInstance();
+                supportedCmds.put(handler.getCommand(), handler);
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("Add telnet handler {}:{}.", handler.getCommand(), handler);
                 }
-            });
+            }
+        });
+        return extensionLoader;
     }
 
     public static TelnetHandler getHandler(String command) {

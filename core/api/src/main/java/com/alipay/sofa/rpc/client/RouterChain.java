@@ -69,7 +69,8 @@ public class RouterChain {
     private final static ExtensionLoader<Router>             EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Router> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Router.class, new ExtensionLoaderListener<Router>() {
+        ExtensionLoader<Router> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Router.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Router>() {
             @Override
             public void onLoad(ExtensionClass<Router> extensionClass) {
                 Class<? extends Router> implClass = extensionClass.getClazz();
@@ -90,6 +91,7 @@ public class RouterChain {
                 }
             }
         });
+        return extensionLoader;
     }
 
     /**
