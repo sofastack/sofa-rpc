@@ -22,6 +22,7 @@ import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -142,10 +143,13 @@ public class TripleTracerAdapter {
     /**
      * 适配服务端serverReceived
      */
-    public static void serverReceived(ServerServiceDefinition serverServiceDefinition, final ServerCall call,
+    public static void serverReceived(SofaRequest sofaRequest, ServerServiceDefinition serverServiceDefinition,
+                                      final ServerCall call,
                                       Metadata requestHeaders) {
         try {
-            SofaRequest sofaRequest = new SofaRequest();
+            if (sofaRequest == null) {
+                sofaRequest = new SofaRequest();
+            }
             Map<String, String> traceMap = new HashMap<String, String>();
 
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TARGET_SERVICE)) {
@@ -158,6 +162,11 @@ public class TripleTracerAdapter {
                 sofaRequest.setTargetServiceUniqueName(serviceName);
                 sofaRequest.setInterfaceName(serviceName);
             }
+
+            final String serviceName = call.getMethodDescriptor().getServiceName();
+            sofaRequest.setTargetServiceUniqueName(serviceName);
+            sofaRequest.setInterfaceName(serviceName);
+
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TARGET_APP)) {
                 sofaRequest.setTargetAppName(requestHeaders
                     .get(TripleHeadKeys.HEAD_KEY_TARGET_APP));
@@ -167,16 +176,14 @@ public class TripleTracerAdapter {
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_OLD_TRACE_ID)) {
                 traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_OLD_TRACE_ID));
-            }
-            else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TRACE_ID)) {
+            } else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_TRACE_ID)) {
                 traceMap.put(TracerCompatibleConstants.TRACE_ID_KEY,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_TRACE_ID));
             }
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_OLD_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_OLD_RPC_ID));
-            }
-            else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
+            } else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
             }
@@ -233,26 +240,29 @@ public class TripleTracerAdapter {
                 EventBus.post(new ServerReceiveEvent(sofaRequest));
             }
 
+            String methodName;
+            String fullMethodName = call.getMethodDescriptor().getFullMethodName();
+            methodName = StringUtils.substringAfter(fullMethodName, serviceName + "/");
             SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
+                serverSpan.setTag("method", methodName);
                 // 从请求里获取ConsumerTracerFilter额外传递的信息
                 serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
-                //serverSpan.setTag(RpcSpanTags.PROTOCOL, (String) request.getRequestProp(HEAD_PROTOCOL));
-                //serverSpan.setTag(RpcSpanTags.INVOKE_TYPE, (String) request.getRequestProp(HEAD_INVOKE_TYPE));*/
+                serverSpan.setTag("protocol", RpcConstants.PROTOCOL_TYPE_TRIPLE);
             }
         } catch (Throwable e) {
+            LOGGER.warn("triple serverReceived tracer error", e);
         }
     }
 
     /**
      * 适配服务端serverSend
      */
-    public static void serverSend(final Metadata requestHeaders, SofaResponse response, Throwable throwable) {
+    public static void serverSend(SofaRequest request, final Metadata requestHeaders, SofaResponse response,
+                                  Throwable throwable) {
         if (EventBus.isEnable(ServerSendEvent.class)) {
-            SofaRequest request = (SofaRequest) RpcInvokeContext.getContext()
-                .get(TripleContants.SOFA_REQUEST_KEY);
             if (request == null) {
                 request = new SofaRequest();
             }

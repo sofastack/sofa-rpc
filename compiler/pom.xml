@@ -38,6 +38,7 @@
         <java_source_version>1.8</java_source_version>
         <java_target_version>1.8</java_target_version>
         <file_encoding>UTF-8</file_encoding>
+        <module.deploy.skip>true</module.deploy.skip>
     </properties>
 
     <dependencies>
@@ -110,6 +111,13 @@
                 <configuration>
                     <configFile>${user.dir}/tools/codestyle/formatter.xml</configFile>
                     <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>${module.deploy.skip}</skip>
                 </configuration>
             </plugin>
         </plugins>

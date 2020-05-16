@@ -17,7 +17,6 @@
     </organization>
 
     <modules>
-        <module>compiler</module>
         <!-- ALl-in-one -->
         <module>all</module>
         <!-- Project Management -->
