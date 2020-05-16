@@ -16,11 +16,17 @@
  */
 package com.alipay.sofa.rpc.interceptor;
 
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
+import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
+import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.server.triple.TripleContants;
+import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.tracer.sofatracer.TripleTracerAdapter;
+import io.grpc.Context;
+import io.grpc.Contexts;
+import io.grpc.ForwardingServerCall;
 import io.grpc.ForwardingServerCallListener;
 import io.grpc.Metadata;
 import io.grpc.ServerCall;
@@ -49,14 +55,59 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
                                                                  final Metadata requestHeaders,
                                                                  ServerCallHandler<ReqT, RespT> next) {
+        final ServerServiceDefinition serverServiceDefinition = this.getServerServiceDefinition();
+
+        SofaResponse sofaResponse = new SofaResponse();
+        final Throwable[] throwable = { null };
+        SofaRequest sofaRequest = null;
+        TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
+
+        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+        SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
+
+        Context ctxWithSpan = Context.current()
+            .withValue(TracingContextKey.getKey(), serverSpan)
+            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context());
+
         //这里和下面不在一个线程
         if (RpcRunningState.isDebugMode()) {
             LOGGER.info("[1]header received from client:" + requestHeaders);
         }
 
-        final ServerServiceDefinition serverServiceDefinition = this.getServerServiceDefinition();
-        return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
-            next.startCall(call, requestHeaders)) {
+        ServerCall<ReqT, RespT> realCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
+            @Override
+            public void sendHeaders(Metadata responseHeaders) {
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[4]send response header:{}", responseHeaders);
+                }
+                super.sendHeaders(responseHeaders);
+            }
+
+            //服务端发完了
+            @Override
+            public void sendMessage(RespT message) {
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[5]send response message:{}", message);
+                }
+                super.sendMessage(message);
+
+                sofaResponse.setAppResponse(message);
+            }
+
+            @Override
+            public void close(Status status, Metadata trailers) {
+                if (RpcRunningState.isDebugMode()) {
+                    LOGGER.info("[6]send response message:{},trailers:{}", status, trailers);
+                }
+                super.close(status, trailers);
+            }
+        };
+
+        ServerCall.Listener<ReqT> listenerWithContext =
+                Contexts.interceptCall(ctxWithSpan, realCall, requestHeaders, next);
+
+        ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT> result = new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
+            listenerWithContext) {
 
             //完成的时候走到这里
             @Override
@@ -66,12 +117,9 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 if (RpcRunningState.isDebugMode()) {
                     LOGGER.info("[7]server processed done received from client:" + requestHeaders);
                 }
-                SofaResponse sofaResponse = new SofaResponse();
-                final RpcInvokeContext context = RpcInvokeContext.getContext();
-                Throwable exp = (Throwable) context.get(TripleContants.SOFA_APP_EXCEPTION_KEY);
-                Object appResponse = context.get(TripleContants.SOFA_APP_RESPONSE_KEY);
-                sofaResponse.setAppResponse(appResponse);
-                TripleTracerAdapter.serverSend(requestHeaders, sofaResponse, exp);
+
+                TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
+                TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, throwable[0]);
             }
 
             //客户端发完了
@@ -81,7 +129,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                     LOGGER.info("[2]body received done from client:" + requestHeaders);
                 }
                 // 服务端收到所有信息
-                TripleTracerAdapter.serverReceived(serverServiceDefinition, call, requestHeaders);
+                TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
                 try {
                     super.onHalfClose();
                 } catch (Throwable t) {
@@ -90,9 +138,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                     // 调用 call.close() 发送 Status 和 metadata
                     // 这个方式和 onError()本质是一样的
                     call.close(exception.getStatus(), exception.getTrailers());
-
-                    final RpcInvokeContext context = RpcInvokeContext.getContext();
-                    context.put(TripleContants.SOFA_APP_EXCEPTION_KEY, t);
+                    throwable[0] = t;
                 }
             }
 
@@ -101,5 +147,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 return new StatusRuntimeException(Status.UNKNOWN, trailers);
             }
         };
+
+        return result;
     }
 }

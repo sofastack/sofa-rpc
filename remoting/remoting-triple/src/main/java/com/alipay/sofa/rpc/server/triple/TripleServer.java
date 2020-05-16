@@ -22,7 +22,6 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.interceptor.ServerReqHeaderInterceptor;
-import com.alipay.sofa.rpc.interceptor.ServerResHeaderInterceptor;
 import com.alipay.sofa.rpc.interceptor.TripleServerInterceptor;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
@@ -205,17 +204,15 @@ public class TripleServer implements Server {
         try {
             obj = ProxyFactory.buildProxy(providerConfig.getProxy(), BindableService.class, instance);
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.error("build triple proxy error", e);
         }
         BindableService bindableService = (BindableService) obj;
 
         try {
             final ServerServiceDefinition serviceDef = bindableService.bindService();
-            List<TripleServerInterceptor> interceptorList = new ArrayList<>();
-            interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
-            interceptorList.add(new ServerResHeaderInterceptor(serviceDef));
+            List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
-                    serviceDef, interceptorList);
+                serviceDef, interceptorList);
             serviceInfo.put(providerConfig, serviceDefinition);
             handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();
@@ -223,6 +220,17 @@ public class TripleServer implements Server {
             LOGGER.error("Register triple service error", e);
             serviceInfo.remove(providerConfig);
         }
+    }
+
+    /**
+     * build chain
+     * @param serviceDef
+     * @return
+     */
+    protected List<TripleServerInterceptor> buildInterceptorChain(ServerServiceDefinition serviceDef) {
+        List<TripleServerInterceptor> interceptorList = new ArrayList<>();
+        interceptorList.add(new ServerReqHeaderInterceptor(serviceDef));
+        return interceptorList;
     }
 
     @Override
