@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper  mapper        = new ObjectMapper();
+    private ObjectMapper mapper = new ObjectMapper();
 
     private JacksonHelper jacksonHelper = new JacksonHelper();
 
@@ -83,7 +83,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
-        throws SofaRpcException {
+            throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
         if (args.length == 1) {
             return encode(args[0], context);
@@ -93,7 +93,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
-        throws SofaRpcException {
+            throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
             // rpc exception：error when body is illegal string
@@ -276,9 +276,14 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaResponse.setErrorMsg(errorMessage);
         } else {
             // according interface and method name to find paramter types
-            Class responseClass = jacksonHelper.getResClass(targetService, methodName);
-            Object pbRes = decode(data, responseClass, head);
-            sofaResponse.setAppResponse(pbRes);
+            JavaType respType = jacksonHelper.getResClass(targetService, methodName);
+            Object result;
+            try {
+                result = mapper.readValue(data.array(), respType);
+            } catch (IOException e) {
+                throw buildDeserializeError(e.getMessage());
+            }
+            sofaResponse.setAppResponse(result);
         }
     }
 }
