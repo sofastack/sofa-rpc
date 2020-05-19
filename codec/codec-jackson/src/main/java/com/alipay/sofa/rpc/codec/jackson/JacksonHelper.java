@@ -32,17 +32,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class JacksonHelper {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper                          mapper             = new ObjectMapper();
 
     /**
      * Request service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, JavaType[]> requestClassCache = new ConcurrentHashMap<String, JavaType[]>();
+    private ConcurrentHashMap<String, JavaType[]> requestClassCache  = new ConcurrentHashMap<String, JavaType[]>();
 
     /**
      * Response service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, JavaType> responseClassCache = new ConcurrentHashMap<String, JavaType>();
+    private ConcurrentHashMap<String, JavaType>   responseClassCache = new ConcurrentHashMap<String, JavaType>();
 
     /**
      * Fetch request class for cache according  service and method
@@ -111,7 +111,8 @@ public class JacksonHelper {
             }
         }
         if (jsonMethod == null) {
-            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(), methodName));
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
+                methodName));
         }
 
         // parse request types

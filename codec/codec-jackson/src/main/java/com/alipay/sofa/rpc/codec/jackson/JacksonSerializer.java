@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper mapper = new ObjectMapper();
+    private ObjectMapper  mapper        = new ObjectMapper();
 
     private JacksonHelper jacksonHelper = new JacksonHelper();
 
@@ -83,7 +83,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
-            throws SofaRpcException {
+        throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
         if (args.length == 1) {
             return encode(args[0], context);
@@ -93,7 +93,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     protected AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
-            throws SofaRpcException {
+        throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
             // rpc exception：error when body is illegal string

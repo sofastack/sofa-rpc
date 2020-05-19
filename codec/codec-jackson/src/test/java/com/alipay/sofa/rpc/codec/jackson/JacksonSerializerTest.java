@@ -146,7 +146,7 @@ public class JacksonSerializerTest {
         Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
         Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
         Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
-                request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
 
     }
 
@@ -272,7 +272,7 @@ public class JacksonSerializerTest {
             DemoRequest req = new DemoRequest();
             req.setName("123");
             serializer
-                    .decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(req)), new SofaRequest(), errorHead1);
+                .decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(req)), new SofaRequest(), errorHead1);
         } catch (Exception e) {
             error = true;
         }
@@ -286,9 +286,9 @@ public class JacksonSerializerTest {
             ObjectMapper mapper = new ObjectMapper();
             DemoRequest req = new DemoRequest();
             req.setName("123");
-            serializer.decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(new Object[] {req, "123"})),
-                    new SofaRequest(),
-                    errorHead2);
+            serializer.decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(new Object[] { req, "123" })),
+                new SofaRequest(),
+                errorHead2);
         } catch (Exception e) {
             error = true;
         }
@@ -312,7 +312,7 @@ public class JacksonSerializerTest {
         Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
         Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
         Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
-                request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
 
     }
 
@@ -348,7 +348,7 @@ public class JacksonSerializerTest {
             DemoRequest req = new DemoRequest();
             req.setName("123");
             serializer
-                    .decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(req)), new SofaRequest(), errorHead1);
+                .decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(req)), new SofaRequest(), errorHead1);
         } catch (Exception e) {
             error = true;
         }
@@ -362,9 +362,9 @@ public class JacksonSerializerTest {
             ObjectMapper mapper = new ObjectMapper();
             DemoRequest req = new DemoRequest();
             req.setName("123");
-            serializer.decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(new Object[] {req, "123"})),
-                    new SofaRequest(),
-                    errorHead2);
+            serializer.decode(new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(new Object[] { req, "123" })),
+                new SofaRequest(),
+                errorHead2);
         } catch (Exception e) {
             error = true;
         }
@@ -388,14 +388,14 @@ public class JacksonSerializerTest {
         Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
         Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
         Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
-                request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
 
     }
 
     private SofaRequest buildSayRequest() throws NoSuchMethodException {
         final DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("name");
-        return buildRequest("say", new Object[] {demoRequest});
+        return buildRequest("say", new Object[] { demoRequest });
     }
 
     private SofaRequest buildSay2Request() throws NoSuchMethodException {
@@ -405,7 +405,7 @@ public class JacksonSerializerTest {
         Map<String, String> ctx = new HashMap<String, String>();
         ctx.put("abc", "123");
 
-        return buildRequest("say2", new Object[] {demoRequest, ctx, 123});
+        return buildRequest("say2", new Object[] { demoRequest, ctx, 123 });
     }
 
     private SofaRequest buildSay3Request() throws NoSuchMethodException {
@@ -415,7 +415,7 @@ public class JacksonSerializerTest {
         List<DemoRequest> list = new ArrayList<DemoRequest>();
         list.add(demoRequest);
 
-        return buildRequest("say3", new Object[] {list});
+        return buildRequest("say3", new Object[] { list });
     }
 
     private SofaRequest buildRequest(String methodName, Object[] args) throws NoSuchMethodException {
