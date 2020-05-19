@@ -56,7 +56,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>5.7.1</revision>
+        <revision>5.7.2-SNAPSHOT</revision>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
