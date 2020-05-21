@@ -276,9 +276,14 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaResponse.setErrorMsg(errorMessage);
         } else {
             // according interface and method name to find paramter types
-            Class responseClass = jacksonHelper.getResClass(targetService, methodName);
-            Object pbRes = decode(data, responseClass, head);
-            sofaResponse.setAppResponse(pbRes);
+            JavaType respType = jacksonHelper.getResClass(targetService, methodName);
+            Object result;
+            try {
+                result = mapper.readValue(data.array(), respType);
+            } catch (IOException e) {
+                throw buildDeserializeError(e.getMessage());
+            }
+            sofaResponse.setAppResponse(result);
         }
     }
 }

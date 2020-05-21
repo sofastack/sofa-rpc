@@ -214,6 +214,33 @@ public class JacksonSerializerTest {
     }
 
     @Test
+    public void testListResponse() {
+        // success response
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "say3");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        SofaResponse response = new SofaResponse();
+        final DemoResponse response1 = new DemoResponse();
+        response1.setWord("result");
+
+        List<DemoResponse> listResponse = new ArrayList<DemoResponse>();
+        listResponse.add(response1);
+
+        response.setAppResponse(listResponse);
+
+        AbstractByteBuf data = serializer.encode(response, null);
+        SofaResponse newResponse = new SofaResponse();
+        serializer.decode(data, newResponse, head);
+        Assert.assertFalse(newResponse.isError());
+        Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
+        Assert.assertEquals("result", ((List<DemoResponse>) newResponse.getAppResponse()).get(0).getWord());
+
+    }
+
+    @Test
     public void testMoreParameters() throws NoSuchMethodException {
         SofaRequest request = buildSay2Request();
         AbstractByteBuf data = serializer.encode(request, null);
