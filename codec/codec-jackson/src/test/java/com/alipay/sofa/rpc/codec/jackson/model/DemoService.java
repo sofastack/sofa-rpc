@@ -29,6 +29,6 @@ public interface DemoService {
 
     public DemoResponse say2(DemoRequest demoRequest, Map<String, String> ctx, int id);
 
-    public DemoResponse say3(List<DemoRequest> list);
+    public List<DemoResponse> say3(List<DemoRequest> list);
 
 }
