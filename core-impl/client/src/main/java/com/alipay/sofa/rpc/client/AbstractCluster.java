@@ -461,7 +461,7 @@ public abstract class AbstractCluster extends Cluster {
      * @return the provider
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
-        ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
+        ProviderInfo tp = convertToProviderInfo(targetIP);
         // 存在注册中心provider才会遍历
         if (CommonUtils.isNotEmpty(providerInfos)) {
             for (ProviderInfo providerInfo : providerInfos) {
@@ -474,6 +474,10 @@ public abstract class AbstractCluster extends Cluster {
         }
         // support direct target url
         return tp;
+    }
+
+    protected ProviderInfo convertToProviderInfo(String targetIP) {
+        return ProviderHelper.toProviderInfo(targetIP);
     }
 
     /**
