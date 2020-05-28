@@ -20,6 +20,8 @@ import com.alipay.remoting.CustomSerializerManager;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 /**
  * Register custom serializer to bolt.
  *
@@ -29,7 +31,18 @@ public class SofaRpcSerializationRegister {
 
     private static final SofaRpcSerialization RPC_SERIALIZATION = new SofaRpcSerialization();
 
+    private static volatile AtomicBoolean     registered        = new AtomicBoolean(false);
+
     public static void registerCustomSerializer() {
+        if (registered.compareAndSet(false, true)) {
+            innerRegisterCustomSerializer();
+        }
+    }
+
+    /**
+     * we can override or rewrite the method
+     */
+    protected static void innerRegisterCustomSerializer() {
         // 注册序列化器到bolt
         if (CustomSerializerManager.getCustomSerializer(SofaRequest.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaRequest.class.getName(),
