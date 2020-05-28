@@ -1,0 +1,23 @@
+
+
+
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "com.alibaba.triple.proto";
+option java_outer_classname = "GenericProto";
+option objc_class_prefix = "HLW";
+
+service GenericService {
+    rpc generic (Request) returns (Response) {}
+}
+
+message Request {
+    repeated bytes  args = 1;
+    repeated string argTypes = 2;
+}
+
+message Response {
+    bytes  data = 1;
+    string type = 2;
+}

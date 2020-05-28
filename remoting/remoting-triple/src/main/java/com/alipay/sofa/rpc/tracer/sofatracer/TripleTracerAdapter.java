@@ -163,6 +163,10 @@ public class TripleTracerAdapter {
                 sofaRequest.setInterfaceName(serviceName);
             }
 
+            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_METHOD_NAME)) {
+                sofaRequest.setMethodName(requestHeaders.get(TripleHeadKeys.HEAD_KEY_METHOD_NAME));
+            }
+
             final String serviceName = call.getMethodDescriptor().getServiceName();
             sofaRequest.setTargetServiceUniqueName(serviceName);
             sofaRequest.setInterfaceName(serviceName);

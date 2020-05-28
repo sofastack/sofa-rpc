@@ -16,17 +16,34 @@
  */
 package com.alipay.sofa.rpc.transport.triple;
 
+import com.alibaba.triple.proto.Request;
+import com.alibaba.triple.proto.Response;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.codec.Serializer;
+import com.alipay.sofa.rpc.codec.SerializerFactory;
+import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.transport.AbstractByteBuf;
+import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import com.google.protobuf.ByteString;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
+import io.grpc.MethodDescriptor;
+import io.grpc.stub.ClientCalls;
+import io.grpc.stub.StreamObserver;
 
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.alipay.sofa.rpc.utils.SofaProtoUtils.checkIfUseGeneric;
+import static com.alipay.sofa.rpc.utils.SofaProtoUtils.isProtoClass;
+import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
  * Invoker for Grpc
@@ -43,29 +60,76 @@ public class TripleClientInvoker implements TripleInvoker {
 
     protected Method            sofaStub;
 
+    protected boolean           useGeneric;
+
     public TripleClientInvoker(ConsumerConfig consumerConfig, Channel channel) {
         this.channel = channel;
         this.consumerConfig = consumerConfig;
-        Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
-        try {
-            sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
-                ProviderInfo.class, ConsumerConfig.class, int.class);
-        } catch (NoSuchMethodException e) {
-            LOGGER.error("getSofaStub not found in enclosingClass" + enclosingClass.getName());
+        useGeneric = checkIfUseGeneric(consumerConfig);
+        if (useGeneric) {
+            // TODO 这里不需要做什么的话,就删掉这个{}
+
+        } else {
+            Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
+            try {
+                sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
+                    ProviderInfo.class, ConsumerConfig.class, int.class);
+            } catch (NoSuchMethodException e) {
+                LOGGER.error("getSofaStub not found in enclosingClass" + enclosingClass.getName());
+            }
         }
     }
 
     @Override
     public SofaResponse invoke(SofaRequest sofaRequest, int timeout)
         throws Exception {
-        SofaResponse sofaResponse = new SofaResponse();
-        ProviderInfo providerInfo = null;
-        Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), providerInfo,
-            consumerConfig, timeout);
-        final Method method = sofaRequest.getMethod();
-        Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
-        sofaResponse.setAppResponse(appResponse);
-        return sofaResponse;
+        if (!useGeneric) {
+            SofaResponse sofaResponse = new SofaResponse();
+            ProviderInfo providerInfo = null;
+            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), providerInfo,
+                consumerConfig, timeout);
+            final Method method = sofaRequest.getMethod();
+            Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
+            sofaResponse.setAppResponse(appResponse);
+            return sofaResponse;
+        } else {
+            String serviceName = sofaRequest.getInterfaceName();
+            String methodName = sofaRequest.getMethodName();
+            MethodDescriptor.Marshaller<?> requestMarshaller = null;
+            MethodDescriptor.Marshaller<?> responseMarshaller = null;
+            requestMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Request.getDefaultInstance());
+            responseMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Response.getDefaultInstance());
+            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor.newBuilder()
+                .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+                .setFullMethodName(generateFullMethodName(serviceName, methodName)).setSampledToLocalTracing(true)
+                .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
+                .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
+                .build();
+
+            Serializer serializer = SerializerFactory.getSerializer("hessian2");
+            Request.Builder builder = Request.newBuilder();
+
+            String[] methodArgSigs = sofaRequest.getMethodArgSigs();
+            Object[] methodArgs = sofaRequest.getMethodArgs();
+
+            for (int i = 0; i < methodArgSigs.length; i++) {
+                builder.addArgs(ByteString.copyFrom(serializer.encode(methodArgs[i], null).array()));
+                builder.addArgTypes(methodArgSigs[i]);
+            }
+            Request request = builder.build();
+
+            Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
+                buildCustomCallOptions(sofaRequest, timeout), request);
+
+            byte[] responseDate = response.getData().toByteArray();
+            Class returnType = ClassUtils.forName(response.getType());
+            Object appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
+
+            SofaResponse sofaResponse = new SofaResponse();
+            sofaResponse.setAppResponse(appResponse);
+            return sofaResponse;
+        }
+
     }
 
     /**

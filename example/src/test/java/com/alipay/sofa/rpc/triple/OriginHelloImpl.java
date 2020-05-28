@@ -16,24 +16,26 @@
  */
 package com.alipay.sofa.rpc.triple;
 
-import io.grpc.examples.helloworld.HelloReply;
-import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterTriple;
-import io.grpc.stub.StreamObserver;
-import org.springframework.util.ClassUtils;
-
-import java.util.Set;
-
-public class TripleGreeterImpl extends SofaGreeterTriple.GreeterImplBase {
+/**
+ * @author zhaowang
+ * @version : OriginHelloImpl.java, v 0.1 2020年05月28日 3:12 下午 zhaowang Exp $
+ */
+public class OriginHelloImpl implements OriginHello {
+    @Override
+    public String hello0() {
+        return "hello0" + 123;
+    }
 
     @Override
-    public void sayHello(HelloRequest request, StreamObserver<HelloReply> responseObserver) {
-        System.out.println("Executing thread is " + Thread.currentThread().getName());
-        HelloReply reply = HelloReply.newBuilder().setMessage("Hello " + request.getName()).build();
-        responseObserver.onNext(reply);
-        responseObserver.onCompleted();
-        // responseObserver.onError(new RuntimeException("fuck"));
-        //  throw new RuntimeException("xx");
+    public String hello1(String hello) {
+        return "hello, " + hello;
+    }
+
+    @Override
+    public HelloResponse hello2(HelloRequest1 helloRequest, HelloRequest2 request2) {
+        HelloResponse helloResponse = new HelloResponse();
+        helloResponse.setMessage(helloRequest.getName() + request2.getName());
+        return helloResponse;
     }
 
 }
