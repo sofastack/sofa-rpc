@@ -48,7 +48,7 @@ public class PrometheusModule implements Module {
         return prometheusClientExist();
     }
 
-    public static boolean prometheusClientExist() {
+    private static boolean prometheusClientExist() {
         try {
             Class.forName("io.prometheus.client.CollectorRegistry");
             return RpcConfigs.getBooleanValue(METRICS_PROMETHEUS_ENABLE);
@@ -84,5 +84,6 @@ public class PrometheusModule implements Module {
         EventBus.unRegister(ServerStartedEvent.class, subscriber);
         EventBus.unRegister(ServerStoppedEvent.class, subscriber);
         httpServer.stop();
+        httpServer = null;
     }
 }

@@ -304,5 +304,5 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   // prometheus metric endpoint 端口
   "metrics.prometheus.port": 19090,
   // 是否启用 prometheus metrics
-  "metrics.prometheus.enable": true,
+  "metrics.prometheus.enable": true
 }

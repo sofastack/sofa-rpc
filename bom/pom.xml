@@ -472,11 +472,6 @@
                 <artifactId>simpleclient_httpserver</artifactId>
                 <version>${prometheus.client.version}</version>
             </dependency>
-            <dependency>
-                <groupId>io.prometheus</groupId>
-                <artifactId>simpleclient_hotspot</artifactId>
-                <version>${prometheus.client.version}</version>
-            </dependency>
 
             <dependency>
                 <groupId>io.grpc</groupId>

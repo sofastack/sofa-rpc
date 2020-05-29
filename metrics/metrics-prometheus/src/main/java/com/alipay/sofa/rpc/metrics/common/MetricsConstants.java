@@ -21,7 +21,6 @@ package com.alipay.sofa.rpc.metrics.common;
  * @version : MetricsConstants.java, v 0.1 2020年04月01日 9:21 下午 zhaowang Exp $
  */
 public class MetricsConstants {
-    // todo 重新起名字
 
     // metric name
     public static final String CLIENT_COUNTER       = "client_counter";
