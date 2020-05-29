@@ -163,10 +163,6 @@ public class TripleTracerAdapter {
                 sofaRequest.setInterfaceName(serviceName);
             }
 
-            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_METHOD_NAME)) {
-                sofaRequest.setMethodName(requestHeaders.get(TripleHeadKeys.HEAD_KEY_METHOD_NAME));
-            }
-
             final String serviceName = call.getMethodDescriptor().getServiceName();
             sofaRequest.setTargetServiceUniqueName(serviceName);
             sofaRequest.setInterfaceName(serviceName);
@@ -247,6 +243,7 @@ public class TripleTracerAdapter {
             String methodName;
             String fullMethodName = call.getMethodDescriptor().getFullMethodName();
             methodName = StringUtils.substringAfter(fullMethodName, serviceName + "/");
+            sofaRequest.setMethodName(methodName);
             SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
