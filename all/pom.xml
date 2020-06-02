@@ -68,7 +68,7 @@
         <bolt.swagger.version>1.5.18</bolt.swagger.version>
         <httpclient.version>4.5.11</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
-        <grpc.version>1.27.2</grpc.version>
+        <grpc.version>1.28.0</grpc.version>
         <guava.version>27.0-jre</guava.version>
     </properties>
 
