@@ -370,6 +370,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             return false;
         }
         String processInIOThread = parameters.get(RpcConstants.PROCESS_IN_IOTHREAD);
-        return Boolean.parseBoolean(parameters.get(processInIOThread));
+        return Boolean.parseBoolean(processInIOThread);
     }
 }
