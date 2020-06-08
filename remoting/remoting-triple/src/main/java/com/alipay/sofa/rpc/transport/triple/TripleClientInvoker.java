@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.transport.triple;
 
-import com.alibaba.triple.proto.Request;
-import com.alibaba.triple.proto.Response;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
@@ -28,21 +26,20 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.google.protobuf.ByteString;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
 import io.grpc.stub.ClientCalls;
-import io.grpc.stub.StreamObserver;
+import triple.Request;
+import triple.Response;
 
 import java.lang.reflect.Method;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ResourceBundle;
 
+import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
 import static com.alipay.sofa.rpc.utils.SofaProtoUtils.checkIfUseGeneric;
-import static com.alipay.sofa.rpc.utils.SofaProtoUtils.isProtoClass;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
@@ -52,7 +49,9 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * @date 2018.12.15 7:06 PM
  */
 public class TripleClientInvoker implements TripleInvoker {
-    private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientInvoker.class);
+    private final static Logger LOGGER                = LoggerFactory.getLogger(TripleClientInvoker.class);
+
+    private final static String DEFAULT_SERIALIZATION = SERIALIZE_HESSIAN2;
 
     protected Channel           channel;
 
@@ -62,14 +61,16 @@ public class TripleClientInvoker implements TripleInvoker {
 
     protected boolean           useGeneric;
 
+    private Serializer          serializer;
+    private String              serialization;
+
     public TripleClientInvoker(ConsumerConfig consumerConfig, Channel channel) {
         this.channel = channel;
         this.consumerConfig = consumerConfig;
         useGeneric = checkIfUseGeneric(consumerConfig);
-        if (useGeneric) {
-            // TODO 这里不需要做什么的话,就删掉这个{}
+        cacheCommonData(consumerConfig);
 
-        } else {
+        if (!useGeneric) {
             Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
             try {
                 sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
@@ -78,6 +79,19 @@ public class TripleClientInvoker implements TripleInvoker {
                 LOGGER.error("getSofaStub not found in enclosingClass" + enclosingClass.getName());
             }
         }
+    }
+
+    private void cacheCommonData(ConsumerConfig consumerConfig) {
+        String serialization = consumerConfig.getSerialization();
+        if (StringUtils.isBlank(serialization)) {
+            serialization = getDefaultSerialization();
+        }
+        this.serialization = serialization;
+        this.serializer = SerializerFactory.getSerializer(serialization);
+    }
+
+    protected String getDefaultSerialization() {
+        return DEFAULT_SERIALIZATION;
     }
 
     @Override
@@ -106,8 +120,8 @@ public class TripleClientInvoker implements TripleInvoker {
                 .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
                 .build();
 
-            Serializer serializer = SerializerFactory.getSerializer("hessian2");
             Request.Builder builder = Request.newBuilder();
+            builder.setSerializeType(serialization);
 
             String[] methodArgSigs = sofaRequest.getMethodArgSigs();
             Object[] methodArgs = sofaRequest.getMethodArgs();

@@ -16,28 +16,27 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
-import com.alibaba.triple.proto.GenericServiceGrpc;
-import com.alibaba.triple.proto.Request;
-import com.alibaba.triple.proto.Response;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
 import io.grpc.stub.StreamObserver;
+import triple.GenericServiceGrpc;
+import triple.Request;
+import triple.Response;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.server.triple.TripleContants.SOFA_REQUEST_KEY;
-
 
 /**
  * @author zhaowang
@@ -45,28 +44,27 @@ import static com.alipay.sofa.rpc.server.triple.TripleContants.SOFA_REQUEST_KEY;
  */
 public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBase {
 
-    protected Object ref;
-    protected Class proxyClass;
-    protected Map<String, Method> methodMap = new ConcurrentHashMap<>();
-    protected Serializer serializer;
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
+
+    protected Object            ref;
+    protected Class             proxyClass;
 
     public GenericServiceImpl(ProviderConfig providerConfig) {
         super();
         ref = providerConfig.getRef();
         proxyClass = providerConfig.getProxyClass();
-        serializer = SerializerFactory.getSerializer("hessian2");
-        // TODO  调用 真正的方法
     }
 
     @Override
     public void generic(Request request, StreamObserver<Response> responseObserver) {
-        // TODO 异常处理
-        SofaRequest sofaRequest = (SofaRequest)RpcInvokeContext.getContext().get(SOFA_REQUEST_KEY);
+        SofaRequest sofaRequest = (SofaRequest) RpcInvokeContext.getContext().get(SOFA_REQUEST_KEY);
         String methodName = sofaRequest.getMethodName();
         Class[] argTypes = getArgTypes(request);
         try {
+            Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
+
             Method declaredMethod = proxyClass.getDeclaredMethod(methodName, argTypes);
-            Object result = declaredMethod.invoke(ref, getInvokeArgs(request, argTypes));
+            Object result = declaredMethod.invoke(ref, getInvokeArgs(request, argTypes, serializer));
 
             Response.Builder builder = Response.newBuilder();
             builder.setType(declaredMethod.getReturnType().getName());
@@ -74,15 +72,10 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
             Response build = builder.build();
             responseObserver.onNext(build);
             responseObserver.onCompleted();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            LOGGER.error("Invoke " + methodName + " error:", e);
+            throw new SofaRpcRuntimeException(e);
         }
-
-
     }
 
     private Class[] getArgTypes(Request request) {
@@ -96,12 +89,13 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
         return argTypes;
     }
 
-    private Object[] getInvokeArgs(Request request, Class[] argTypes) {
+    private Object[] getInvokeArgs(Request request, Class[] argTypes, Serializer serializer) {
         List<ByteString> argsList = request.getArgsList();
         Object[] args = new Object[argsList.size()];
 
         for (int i = 0; i < argsList.size(); i++) {
-            Object arg = serializer.decode(new ByteArrayWrapperByteBuf(argsList.get(i).toByteArray()), argTypes[i], null);
+            Object arg = serializer.decode(new ByteArrayWrapperByteBuf(argsList.get(i).toByteArray()), argTypes[i],
+                null);
             args[i] = arg;
         }
         return args;

@@ -16,9 +16,6 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
-import com.alibaba.triple.proto.GenericServiceGrpc;
-import com.alibaba.triple.proto.Request;
-import com.alibaba.triple.proto.Response;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -50,6 +47,8 @@ import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.protobuf.ProtoUtils;
 import io.grpc.util.MutableHandlerRegistry;
+import triple.Request;
+import triple.Response;
 
 import java.util.ArrayList;
 import java.util.List;

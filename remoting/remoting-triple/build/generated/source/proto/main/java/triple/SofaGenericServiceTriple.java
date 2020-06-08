@@ -1,11 +1,11 @@
-    package com.alibaba.triple.proto;
+    package triple;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 
 import java.util.concurrent.TimeUnit;
 
-import static com.alibaba.triple.proto.GenericServiceGrpc.getServiceDescriptor;
+import static triple.GenericServiceGrpc.getServiceDescriptor;
 import static io.grpc.stub.ServerCalls.asyncUnaryCall;
 import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
@@ -39,19 +39,19 @@ futureStub = GenericServiceGrpc.newFutureStub(channel).build(channel, callOption
 stub = GenericServiceGrpc.newStub(channel).build(channel, callOptions);
 }
 
-    public com.alibaba.triple.proto.Response generic(com.alibaba.triple.proto.Request request) {
+    public triple.Response generic(triple.Request request) {
     return blockingStub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .generic(request);
     }
 
-    public com.google.common.util.concurrent.ListenableFuture<com.alibaba.triple.proto.Response> genericAsync(com.alibaba.triple.proto.Request request) {
+    public com.google.common.util.concurrent.ListenableFuture<triple.Response> genericAsync(triple.Request request) {
     return futureStub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .generic(request);
     }
 
-    public void generic(com.alibaba.triple.proto.Request request, io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response> responseObserver){
+    public void generic(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver){
     stub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .generic(request, responseObserver);
@@ -64,19 +64,19 @@ return new SofaGenericServiceStub(channel, callOptions, providerInfo, consumerCo
 }
 
 public static String getServiceName() {
-  return com.alibaba.triple.proto.GenericServiceGrpc.SERVICE_NAME;
+  return triple.GenericServiceGrpc.SERVICE_NAME;
 }
 
 public interface IGenericService {
-    default public com.alibaba.triple.proto.Response generic(com.alibaba.triple.proto.Request request) {
+    default public triple.Response generic(triple.Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-    default public com.google.common.util.concurrent.ListenableFuture<com.alibaba.triple.proto.Response> genericAsync(com.alibaba.triple.proto.Request request) {
+    default public com.google.common.util.concurrent.ListenableFuture<triple.Response> genericAsync(triple.Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-    public void generic(com.alibaba.triple.proto.Request request, io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response> responseObserver);
+    public void generic(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver);
 
 }
 
@@ -89,28 +89,28 @@ this.proxiedImpl = proxiedImpl;
 }
 
     @java.lang.Override
-    public final com.alibaba.triple.proto.Response generic(com.alibaba.triple.proto.Request request) {
+    public final triple.Response generic(triple.Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
     @java.lang.Override
-    public final com.google.common.util.concurrent.ListenableFuture<com.alibaba.triple.proto.Response> genericAsync(com.alibaba.triple.proto.Request request) {
+    public final com.google.common.util.concurrent.ListenableFuture<triple.Response> genericAsync(triple.Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-        public void generic(com.alibaba.triple.proto.Request request,
-        io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response> responseObserver) {
-        asyncUnimplementedUnaryCall(com.alibaba.triple.proto.GenericServiceGrpc.getGenericMethod(), responseObserver);
+        public void generic(triple.Request request,
+        io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
+        asyncUnimplementedUnaryCall(triple.GenericServiceGrpc.getGenericMethod(), responseObserver);
         }
 
 @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
 return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
     .addMethod(
-    com.alibaba.triple.proto.GenericServiceGrpc.getGenericMethod(),
+    triple.GenericServiceGrpc.getGenericMethod(),
     asyncUnaryCall(
     new MethodHandlers<
-    com.alibaba.triple.proto.Request,
-    com.alibaba.triple.proto.Response>(
+    triple.Request,
+    triple.Response>(
     proxiedImpl, METHODID_GENERIC)))
 .build();
 }
@@ -141,8 +141,8 @@ public void invoke(Req request, io.grpc.stub.StreamObserver
 <Resp> responseObserver) {
     switch (methodId) {
             case METHODID_GENERIC:
-            serviceImpl.generic((com.alibaba.triple.proto.Request) request,
-            (io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response>) responseObserver);
+            serviceImpl.generic((triple.Request) request,
+            (io.grpc.stub.StreamObserver<triple.Response>) responseObserver);
             break;
     default:
     throw new java.lang.AssertionError();

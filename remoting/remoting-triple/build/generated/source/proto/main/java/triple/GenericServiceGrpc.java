@@ -1,4 +1,4 @@
-package com.alibaba.triple.proto;
+package triple;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
@@ -27,29 +27,29 @@ public final class GenericServiceGrpc {
   public static final String SERVICE_NAME = "GenericService";
 
   // Static method descriptors that strictly reflect the proto.
-  private static volatile io.grpc.MethodDescriptor<com.alibaba.triple.proto.Request,
-      com.alibaba.triple.proto.Response> getGenericMethod;
+  private static volatile io.grpc.MethodDescriptor<triple.Request,
+      triple.Response> getGenericMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "generic",
-      requestType = com.alibaba.triple.proto.Request.class,
-      responseType = com.alibaba.triple.proto.Response.class,
+      requestType = triple.Request.class,
+      responseType = triple.Response.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<com.alibaba.triple.proto.Request,
-      com.alibaba.triple.proto.Response> getGenericMethod() {
-    io.grpc.MethodDescriptor<com.alibaba.triple.proto.Request, com.alibaba.triple.proto.Response> getGenericMethod;
+  public static io.grpc.MethodDescriptor<triple.Request,
+      triple.Response> getGenericMethod() {
+    io.grpc.MethodDescriptor<triple.Request, triple.Response> getGenericMethod;
     if ((getGenericMethod = GenericServiceGrpc.getGenericMethod) == null) {
       synchronized (GenericServiceGrpc.class) {
         if ((getGenericMethod = GenericServiceGrpc.getGenericMethod) == null) {
           GenericServiceGrpc.getGenericMethod = getGenericMethod =
-              io.grpc.MethodDescriptor.<com.alibaba.triple.proto.Request, com.alibaba.triple.proto.Response>newBuilder()
+              io.grpc.MethodDescriptor.<triple.Request, triple.Response>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "generic"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.alibaba.triple.proto.Request.getDefaultInstance()))
+                  triple.Request.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.alibaba.triple.proto.Response.getDefaultInstance()))
+                  triple.Response.getDefaultInstance()))
               .setSchemaDescriptor(new GenericServiceMethodDescriptorSupplier("generic"))
               .build();
         }
@@ -108,8 +108,8 @@ public final class GenericServiceGrpc {
 
     /**
      */
-    public void generic(com.alibaba.triple.proto.Request request,
-        io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response> responseObserver) {
+    public void generic(triple.Request request,
+        io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
       asyncUnimplementedUnaryCall(getGenericMethod(), responseObserver);
     }
 
@@ -119,8 +119,8 @@ public final class GenericServiceGrpc {
             getGenericMethod(),
             asyncUnaryCall(
               new MethodHandlers<
-                com.alibaba.triple.proto.Request,
-                com.alibaba.triple.proto.Response>(
+                triple.Request,
+                triple.Response>(
                   this, METHODID_GENERIC)))
           .build();
     }
@@ -142,8 +142,8 @@ public final class GenericServiceGrpc {
 
     /**
      */
-    public void generic(com.alibaba.triple.proto.Request request,
-        io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response> responseObserver) {
+    public void generic(triple.Request request,
+        io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
       asyncUnaryCall(
           getChannel().newCall(getGenericMethod(), getCallOptions()), request, responseObserver);
     }
@@ -165,7 +165,7 @@ public final class GenericServiceGrpc {
 
     /**
      */
-    public com.alibaba.triple.proto.Response generic(com.alibaba.triple.proto.Request request) {
+    public triple.Response generic(triple.Request request) {
       return blockingUnaryCall(
           getChannel(), getGenericMethod(), getCallOptions(), request);
     }
@@ -187,8 +187,8 @@ public final class GenericServiceGrpc {
 
     /**
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.alibaba.triple.proto.Response> generic(
-        com.alibaba.triple.proto.Request request) {
+    public com.google.common.util.concurrent.ListenableFuture<triple.Response> generic(
+        triple.Request request) {
       return futureUnaryCall(
           getChannel().newCall(getGenericMethod(), getCallOptions()), request);
     }
@@ -214,8 +214,8 @@ public final class GenericServiceGrpc {
     public void invoke(Req request, io.grpc.stub.StreamObserver<Resp> responseObserver) {
       switch (methodId) {
         case METHODID_GENERIC:
-          serviceImpl.generic((com.alibaba.triple.proto.Request) request,
-              (io.grpc.stub.StreamObserver<com.alibaba.triple.proto.Response>) responseObserver);
+          serviceImpl.generic((triple.Request) request,
+              (io.grpc.stub.StreamObserver<triple.Response>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -239,7 +239,7 @@ public final class GenericServiceGrpc {
 
     @java.lang.Override
     public com.google.protobuf.Descriptors.FileDescriptor getFileDescriptor() {
-      return com.alibaba.triple.proto.GenericProto.getDescriptor();
+      return triple.GenericProto.getDescriptor();
     }
 
     @java.lang.Override

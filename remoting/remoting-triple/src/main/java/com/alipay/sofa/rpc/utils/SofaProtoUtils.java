@@ -19,9 +19,6 @@ package com.alipay.sofa.rpc.utils;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
@@ -36,14 +33,11 @@ import java.util.Set;
  */
 public class SofaProtoUtils {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SofaProtoUtils.class);
-
     public static boolean isProtoClass(Object object) {
         return object instanceof BindableService;
     }
 
     public static Set<String> getMethodNames(String interfaceId) {
-        // TODO
         HashSet<String> result = new HashSet<>();
         Class interfaceClass = ClassUtils.forName(interfaceId);
         Method[] methods = interfaceClass.getMethods();
