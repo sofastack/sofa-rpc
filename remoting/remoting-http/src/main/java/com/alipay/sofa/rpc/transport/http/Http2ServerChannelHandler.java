@@ -63,6 +63,7 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
                                                                    .getLogger(Http2ServerChannelHandler.class);
 
     private final Http2Connection.PropertyKey headerKey        = encoder().connection().newKey();
+    private final Http2Connection.PropertyKey messageKey       = encoder().connection().newKey();
 
     private final HttpServerHandler           serverHandler;
 
@@ -114,11 +115,20 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
     @Override
     public int onDataRead(ChannelHandlerContext ctx, int streamId, ByteBuf data, int padding, boolean endOfStream) {
         int processed = data.readableBytes() + padding;
+
+        Http2Stream http2Stream = connection().stream(streamId);
+        ByteBuf msg = http2Stream.getProperty(messageKey);
+        if (msg == null) {
+            msg = ctx.alloc().buffer();
+            http2Stream.setProperty(messageKey, msg);
+        }
+        final int dataReadableBytes = data.readableBytes();
+        msg.writeBytes(data, data.readerIndex(), dataReadableBytes);
+
         if (endOfStream) {
-            Http2Stream http2Stream = connection().stream(streamId);
             // read cached http2 header from stream
             Http2Headers headers = http2Stream.getProperty(headerKey);
-            handleRequest(ctx, streamId, headers, data);
+            handleRequest(ctx, streamId, headers, msg);
         }
         return processed;
     }
