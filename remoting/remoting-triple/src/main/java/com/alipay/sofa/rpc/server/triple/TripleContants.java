@@ -23,12 +23,6 @@ public class TripleContants {
 
     public static final String SOFA_REQUEST_KEY         = "_SOFA_REQUEST";
 
-    public static final String SOFA_REMOTE_ADDR_KEY     = "_SOFA_REMOTE_ADDR";
-
-    public static final String SOFA_APP_RESPONSE_KEY    = "_SOFA_RESPONSE";
-
-    public static final String SOFA_APP_EXCEPTION_KEY   = "_SOFA_EXCEPTION";
-
     public static final String SOFA_CONSUMER_CONFIG_KEY = "_SOFA_CONSUMER_CONFIG";
 
 }
