@@ -16,16 +16,19 @@
  */
 package com.alipay.sofa.rpc.tracer.sofatracer;
 
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 import io.grpc.Context;
 import io.opentracing.Span;
 import io.opentracing.SpanContext;
 
 public class TracingContextKey {
 
-    public static final String                    KEY_NAME         = "io.opentracing.active-span";
-    public static final String                    KEY_CONTEXT_NAME = "io.opentracing.active-span-context";
-    private static final Context.Key<Span>        key              = Context.key(KEY_NAME);
-    private static final Context.Key<SpanContext> keyContext       = Context.key(KEY_CONTEXT_NAME);
+    public static final String                    KEY_NAME              = "io.opentracing.active-span";
+    public static final String                    KEY_CONTEXT_NAME      = "io.opentracing.active-span-context";
+    private static final Context.Key<Span>        key                   = Context.key(KEY_NAME);
+    private static final Context.Key<SpanContext> keyContext            = Context.key(KEY_CONTEXT_NAME);
+    public static final String                    KEY_SOFA_REQUEST_NAME = "io.opentracing.sofa-request";
+    private static final Context.Key<SofaRequest> keySofaRequest        = Context.key(KEY_SOFA_REQUEST_NAME);
 
     /**
      * Retrieves the active span.
@@ -56,5 +59,9 @@ public class TracingContextKey {
 
     public static SpanContext activeSpanContext() {
         return keyContext.get();
+    }
+
+    public static Context.Key<SofaRequest> getKeySofaRequest() {
+        return keySofaRequest;
     }
 }

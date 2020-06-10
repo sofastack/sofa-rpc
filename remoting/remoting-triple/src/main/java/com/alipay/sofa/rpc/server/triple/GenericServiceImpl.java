@@ -20,14 +20,15 @@ import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 import triple.GenericServiceGrpc;
 import triple.Request;
@@ -57,7 +58,9 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
 
     @Override
     public void generic(Request request, StreamObserver<Response> responseObserver) {
-        SofaRequest sofaRequest = (SofaRequest) RpcInvokeContext.getContext().get(SOFA_REQUEST_KEY);
+
+        SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
+
         String methodName = sofaRequest.getMethodName();
         Class[] argTypes = getArgTypes(request);
         try {
