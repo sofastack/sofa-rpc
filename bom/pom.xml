@@ -31,7 +31,7 @@
         <!-- serialization -->
         <hessian.version>3.3.7</hessian.version>
         <thrift.version>0.9.2</thrift.version>
-        <protobuf.version>3.5.1</protobuf.version>
+        <protobuf.version>3.11.0</protobuf.version>
         <jackson.version>2.9.10</jackson.version>
         <jackson.databind.version>2.9.10.4</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
