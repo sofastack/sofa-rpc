@@ -19,9 +19,12 @@ package com.alipay.sofa.rpc.bootstrap.triple;
 import com.alipay.sofa.rpc.bootstrap.DefaultProviderBootstrap;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
@@ -31,6 +34,8 @@ import java.lang.reflect.Method;
  */
 @Extension("tri")
 public class TripleProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TripleProviderBootstrap.class);
 
     /**
      * 构造函数
@@ -49,6 +54,11 @@ public class TripleProviderBootstrap<T> extends DefaultProviderBootstrap<T> {
             Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(),
                 providerProxyInvoker);
             method.invoke(providerConfig.getRef(), obj);
+        } catch (NoSuchMethodException e) {
+            LOGGER
+                .info(
+                    "{} don't hava method setProxiedImpl, will treated as origin provider service instead of grpc service.",
+                    implClass);
         } catch (Exception e) {
             throw new IllegalStateException(
                 "Failed to set sofa proxied service impl to stub, please make sure your stub "

@@ -243,6 +243,7 @@ public class TripleTracerAdapter {
             String methodName;
             String fullMethodName = call.getMethodDescriptor().getFullMethodName();
             methodName = StringUtils.substringAfter(fullMethodName, serviceName + "/");
+            sofaRequest.setMethodName(methodName);
             SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
