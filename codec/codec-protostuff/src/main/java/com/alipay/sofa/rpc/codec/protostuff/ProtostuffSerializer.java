@@ -16,9 +16,6 @@
  */
 package com.alipay.sofa.rpc.codec.protostuff;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -36,11 +33,14 @@ import io.protostuff.ProtostuffIOUtil;
 import io.protostuff.Schema;
 import io.protostuff.runtime.RuntimeSchema;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * protostuff serializer.
  * @author leizhiyuan
  */
-@Extension(value = "protostuff", code = 12)
+@Extension(value = "protostuff", code = 14)
 public class ProtostuffSerializer extends AbstractSerializer {
 
     private final ProtostuffHelper protostuffHelper   = new ProtostuffHelper();
