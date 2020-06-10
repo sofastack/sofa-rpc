@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -36,7 +35,6 @@ import com.alipay.sofa.rpc.event.ServerReceiveEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
 import io.grpc.Grpc;
 import io.grpc.Metadata;
@@ -224,20 +222,15 @@ public class TripleTracerAdapter {
                 sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
             }
 
-            final RpcInvokeContext context = RpcInvokeContext.getContext();
-            context.put(TripleContants.SOFA_REQUEST_KEY, sofaRequest);
-
-            SocketAddress socketAddress = call.getAttributes().get(
-                Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
-            context.put(TripleContants.SOFA_REMOTE_ADDR_KEY, socketAddress);
-
-            RpcInternalContext internalContext = RpcInternalContext.getContext();
-            internalContext.setProviderSide(true);
-            if (socketAddress instanceof InetSocketAddress) {
-                internalContext.setRemoteAddress((InetSocketAddress) socketAddress);
-            }
             if (EventBus.isEnable(ServerReceiveEvent.class)) {
                 EventBus.post(new ServerReceiveEvent(sofaRequest));
+            }
+
+            String remoteIp = "";
+            SocketAddress socketAddress = call.getAttributes().get(
+                Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
+            if (socketAddress instanceof InetSocketAddress) {
+                remoteIp = ((InetSocketAddress) socketAddress).getHostName();
             }
 
             String methodName;
@@ -247,11 +240,13 @@ public class TripleTracerAdapter {
             SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
+                //FIXME modify the dep relation
                 serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
                 serverSpan.setTag("method", methodName);
                 // 从请求里获取ConsumerTracerFilter额外传递的信息
                 serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
                 serverSpan.setTag("protocol", RpcConstants.PROTOCOL_TYPE_TRIPLE);
+                serverSpan.setTag("remote.ip", remoteIp);
             }
         } catch (Throwable e) {
             LOGGER.warn("triple serverReceived tracer error", e);
