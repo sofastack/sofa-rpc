@@ -20,6 +20,12 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-sofa-hessian</artifactId>
+            <version>${revision}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>

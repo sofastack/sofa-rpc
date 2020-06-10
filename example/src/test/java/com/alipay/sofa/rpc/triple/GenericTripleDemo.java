@@ -26,15 +26,15 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.StatusRuntimeException;
-import io.grpc.examples.helloworld.HelloReply;
-import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterTriple;
 
-public class SingleTripleDemo {
-    private static final Logger LOGGER = LoggerFactory.getLogger(SingleTripleDemo.class);
+/**
+ * @author zhaowang
+ * @version : GenericTripleDemo.java, v 0.1 2020年05月28日 3:15 下午 zhaowang Exp $
+ */
+public class GenericTripleDemo {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GenericTripleDemo.class);
 
     public static void main(String[] args) {
-
         RpcRunningState.setDebugMode(true);
 
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
@@ -55,39 +55,36 @@ public class SingleTripleDemo {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setPort(port);
 
-        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+        ProviderConfig<OriginHello> providerConfig = new ProviderConfig<OriginHello>()
             .setApplication(serverApp)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
-            .setRef(new TripleGreeterImpl())
+            .setInterfaceId(OriginHello.class.getName())
+            .setRef(new OriginHelloImpl())
             .setServer(serverConfig)
             .setRegistry(registryConfig);
 
         providerConfig.export();
 
-        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
-        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+        ConsumerConfig<OriginHello> consumerConfig = new ConsumerConfig<OriginHello>();
+        consumerConfig.setInterfaceId(OriginHello.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setRegistry(registryConfig)
             .setApplication(clientApp);
 
-        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
+        OriginHello helloService = consumerConfig.refer();
 
-        LOGGER.info("Grpc stub bean successful: {}", greeterBlockingStub.getClass().getName());
+        LOGGER.info("Grpc stub bean successful: {}", helloService.getClass().getName());
 
         LOGGER.info("Will try to greet " + "world" + " ...");
-        HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
-            .build();
-        HelloRequest request = HelloRequest.newBuilder().setName("world").build();
-        HelloReply reply = null;
         while (true) {
             try {
                 try {
-                    HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
-                        .build();
-                    request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
-                    reply = greeterBlockingStub.sayHello(request);
-                    LOGGER.info("Invoke Success,Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
+                    HelloRequest1 helloRequest1 = new HelloRequest1();
+                    helloRequest1.setName("ab");
+                    HelloRequest2 helloRequest2 = new HelloRequest2();
+                    helloRequest2.setName("cd");
+                    HelloResponse result = helloService.hello2(helloRequest1, helloRequest2);
+                    LOGGER.info("Invoke Success,hello: {} ", result.getMessage());
                 } catch (StatusRuntimeException e) {
                     LOGGER.error("RPC failed: {}", e.getStatus());
                 } catch (Throwable e) {
@@ -96,12 +93,12 @@ public class SingleTripleDemo {
             } catch (Exception e) {
                 LOGGER.error("Unexpected RPC call breaks", e);
             }
-
             try {
                 Thread.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         }
 
     }
