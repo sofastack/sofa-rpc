@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.interceptor;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -38,8 +37,6 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static com.alipay.sofa.rpc.server.triple.TripleContants.SOFA_REQUEST_KEY;
 
 /**
  * 服务端收请求Header的拦截器
@@ -65,13 +62,13 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
         final Throwable[] throwable = { null };
         SofaRequest sofaRequest = new SofaRequest();
         TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
-
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
 
         Context ctxWithSpan = Context.current()
             .withValue(TracingContextKey.getKey(), serverSpan)
-            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context());
+            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context())
+            .withValue(TracingContextKey.getKeySofaRequest(), sofaRequest);
 
         //这里和下面不在一个线程
         if (RpcRunningState.isDebugMode()) {
@@ -142,7 +139,6 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 }
                 // 服务端收到所有信息
                 TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
-                RpcInvokeContext.getContext().put(SOFA_REQUEST_KEY, sofaRequest);
                 try {
                     super.onHalfClose();
                 } catch (Throwable t) {
@@ -160,7 +156,6 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 return new StatusRuntimeException(Status.UNKNOWN, trailers);
             }
         };
-
         return result;
     }
 }
