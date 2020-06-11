@@ -67,6 +67,7 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
             Object result = declaredMethod.invoke(ref, getInvokeArgs(request, argTypes, serializer));
 
             Response.Builder builder = Response.newBuilder();
+            builder.setSerializeType(request.getSerializeType());
             builder.setType(declaredMethod.getReturnType().getName());
             builder.setData(ByteString.copyFrom(serializer.encode(result, null).array()));
             Response build = builder.build();
@@ -94,9 +95,9 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
         Object[] args = new Object[argsList.size()];
 
         for (int i = 0; i < argsList.size(); i++) {
-            Object arg = serializer.decode(new ByteArrayWrapperByteBuf(argsList.get(i).toByteArray()), argTypes[i],
+            byte[] data = argsList.get(i).toByteArray();
+            args[i] = serializer.decode(new ByteArrayWrapperByteBuf(data), argTypes[i],
                 null);
-            args[i] = arg;
         }
         return args;
     }
