@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.transport.triple;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -36,7 +35,6 @@ import triple.Request;
 import triple.Response;
 
 import java.lang.reflect.Method;
-import java.util.ResourceBundle;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
 import static com.alipay.sofa.rpc.utils.SofaProtoUtils.checkIfUseGeneric;
@@ -127,7 +125,9 @@ public class TripleClientInvoker implements TripleInvoker {
             Object[] methodArgs = sofaRequest.getMethodArgs();
 
             for (int i = 0; i < methodArgSigs.length; i++) {
-                builder.addArgs(ByteString.copyFrom(serializer.encode(methodArgs[i], null).array()));
+                Object arg = methodArgs[i];
+                ByteString argByteString = ByteString.copyFrom(serializer.encode(arg, null).array());
+                builder.addArgs(argByteString);
                 builder.addArgTypes(methodArgSigs[i]);
             }
             Request request = builder.build();
@@ -135,12 +135,19 @@ public class TripleClientInvoker implements TripleInvoker {
             Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
                 buildCustomCallOptions(sofaRequest, timeout), request);
 
-            byte[] responseDate = response.getData().toByteArray();
-            Class returnType = ClassUtils.forName(response.getType());
-            Object appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
-
             SofaResponse sofaResponse = new SofaResponse();
-            sofaResponse.setAppResponse(appResponse);
+            byte[] responseDate = response.getData().toByteArray();
+            Class returnType = sofaRequest.getMethod().getReturnType();
+            if (returnType != void.class) {
+                if (responseDate != null && responseDate.length > 0) {
+                    Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
+                    Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate),
+                        returnType,
+                        null);
+                    sofaResponse.setAppResponse(appResponse);
+                }
+            }
+
             return sofaResponse;
         }
 

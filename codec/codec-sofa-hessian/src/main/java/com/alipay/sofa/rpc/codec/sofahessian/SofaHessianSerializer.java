@@ -128,7 +128,7 @@ public class SofaHessianSerializer extends AbstractSerializer {
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) {
 
-        CustomHessianSerializer serializer = CustomHessianSerializerManager.getSerializer(object.getClass());
+        CustomHessianSerializer serializer = getCustomSerializer(object);
         if (serializer != null) {
             return serializer.encodeObject(object, context);
         } else {
@@ -174,12 +174,19 @@ public class SofaHessianSerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         } else {
-            CustomHessianSerializer serializer = CustomHessianSerializerManager.getSerializer(template.getClass());
+            CustomHessianSerializer serializer = getCustomSerializer(template);
             if (serializer != null) {
                 serializer.decodeObjectByTemplate(data, context, template);
             } else {
                 throw buildDeserializeError(template.getClass() + " template is not supported");
             }
         }
+    }
+
+    private static CustomHessianSerializer getCustomSerializer(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        return CustomHessianSerializerManager.getSerializer(obj.getClass());
     }
 }
