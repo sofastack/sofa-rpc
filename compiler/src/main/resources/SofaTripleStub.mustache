@@ -114,9 +114,7 @@ public interface I{{serviceName}} {
     {{#deprecated}}
         @java.lang.Deprecated
     {{/deprecated}}
-    default public {{outputType}} {{methodName}}({{inputType}} request) {
-    throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
-    }
+    public {{outputType}} {{methodName}}({{inputType}} request);
 
     {{#javaDoc}}
         {{{javaDoc}}}
@@ -124,9 +122,7 @@ public interface I{{serviceName}} {
     {{#deprecated}}
         @java.lang.Deprecated
     {{/deprecated}}
-    default public com.google.common.util.concurrent.ListenableFuture<{{outputType}}> {{methodName}}Async({{inputType}} request) {
-    throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
-    }
+    public com.google.common.util.concurrent.ListenableFuture<{{outputType}}> {{methodName}}Async({{inputType}} request);
 
     {{#javaDoc}}
         {{{javaDoc}}}
