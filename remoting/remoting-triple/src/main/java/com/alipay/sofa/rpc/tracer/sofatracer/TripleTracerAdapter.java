@@ -109,7 +109,9 @@ public class TripleTracerAdapter {
             header.put(TripleHeadKeys.HEAD_KEY_UNIT_INFO.name(), JSONUtils.toJSONString(map));
         }
 
-        header.put(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION.name(), "1.0");
+        if (StringUtils.isNotEmpty(consumerConfig.getUniqueId())) {
+            header.put(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION.name(), consumerConfig.getUniqueId());
+        }
 
         header.put(TripleHeadKeys.HEAD_KEY_META_TYPE.name(), "rpc");
         header.put(TripleHeadKeys.HEAD_KEY_CURRENT_APP.name(), (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
