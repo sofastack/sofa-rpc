@@ -22,4 +22,8 @@ package com.alipay.sofa.rpc.server.triple;
  */
 public interface HelloService {
     String hello(String name);
+
+    long testPrimitiveType(long a);
+
+    long[] testArray(long[] longs);
 }
