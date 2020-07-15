@@ -16,14 +16,32 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import io.grpc.stub.StreamObserver;
+
 /**
  * @author zhaowang
- * @version : HelloService.java, v 0.1 2020年06月04日 8:26 下午 zhaowang Exp $
+ * @version : MockStreamObserver.java, v 0.1 2020年06月30日 11:58 上午 zhaowang Exp $
  */
-public interface HelloService {
-    String hello(String name);
+public class MockStreamObserver<V> implements StreamObserver<V> {
 
-    long testPrimitiveType(long a);
+    private V value;
 
-    long[] testArray(long[] longs);
+    public V getValue() {
+        return value;
+    }
+
+    @Override
+    public void onNext(V value) {
+        this.value = value;
+    }
+
+    @Override
+    public void onError(Throwable t) {
+
+    }
+
+    @Override
+    public void onCompleted() {
+
+    }
 }

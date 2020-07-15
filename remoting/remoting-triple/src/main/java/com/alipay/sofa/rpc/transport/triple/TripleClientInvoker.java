@@ -35,6 +35,7 @@ import triple.Request;
 import triple.Response;
 
 import java.lang.reflect.Method;
+import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
 import static com.alipay.sofa.rpc.utils.SofaProtoUtils.checkIfUseGeneric;
@@ -116,19 +117,7 @@ public class TripleClientInvoker implements TripleInvoker {
                 .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
                 .build();
 
-            Request.Builder builder = Request.newBuilder();
-            builder.setSerializeType(serialization);
-
-            String[] methodArgSigs = sofaRequest.getMethodArgSigs();
-            Object[] methodArgs = sofaRequest.getMethodArgs();
-
-            for (int i = 0; i < methodArgSigs.length; i++) {
-                Object arg = methodArgs[i];
-                ByteString argByteString = ByteString.copyFrom(serializer.encode(arg, null).array());
-                builder.addArgs(argByteString);
-                builder.addArgTypes(methodArgSigs[i]);
-            }
-            Request request = builder.build();
+            Request request = getRequest(sofaRequest, serialization, serializer);
 
             Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
                 buildCustomCallOptions(sofaRequest, timeout), request);
@@ -151,6 +140,22 @@ public class TripleClientInvoker implements TripleInvoker {
 
     }
 
+    public static Request getRequest(SofaRequest sofaRequest, String serialization, Serializer serializer) {
+        Request.Builder builder = Request.newBuilder();
+        builder.setSerializeType(serialization);
+
+        String[] methodArgSigs = sofaRequest.getMethodArgSigs();
+        Object[] methodArgs = sofaRequest.getMethodArgs();
+
+        for (int i = 0; i < methodArgSigs.length; i++) {
+            Object arg = methodArgs[i];
+            ByteString argByteString = ByteString.copyFrom(serializer.encode(arg, null).array());
+            builder.addArgs(argByteString);
+            builder.addArgTypes(methodArgSigs[i]);
+        }
+        return builder.build();
+    }
+
     /**
      * set some custom info
      * @param sofaRequest
@@ -162,6 +167,9 @@ public class TripleClientInvoker implements TripleInvoker {
         final String target = consumerConfig.getParameter("interworking.target");
         if (StringUtils.isNotBlank(target)) {
             tripleCallOptions = tripleCallOptions.withAuthority(target);
+        }
+        if (timeout >= 0) {
+            tripleCallOptions = tripleCallOptions.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
         }
         return tripleCallOptions;
     }
