@@ -78,8 +78,7 @@ public class SofaProtoUtilsTest {
     }
 
     static class NeedGeneric {
-        public void getSofaStub1(Channel channel, CallOptions callOptions,
-                                 ProviderInfo providerInfo, ConsumerConfig consumerConfig, int integer) {
+        public void getSofaStub1(Channel channel, CallOptions callOptions, int integer) {
 
         }
 
@@ -89,8 +88,7 @@ public class SofaProtoUtilsTest {
     }
 
     static class DoNotNeedGeneric {
-        public void getSofaStub(Channel channel, CallOptions callOptions,
-                                ProviderInfo providerInfo, ConsumerConfig consumerConfig, int integer) {
+        public void getSofaStub(Channel channel, CallOptions callOptions, int integer) {
 
         }
 
