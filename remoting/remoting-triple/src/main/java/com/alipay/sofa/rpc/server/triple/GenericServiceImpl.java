@@ -18,7 +18,7 @@ package com.alipay.sofa.rpc.server.triple;
 
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -36,8 +36,6 @@ import triple.Response;
 
 import java.lang.reflect.Method;
 import java.util.List;
-
-import static com.alipay.sofa.rpc.server.triple.TripleContants.SOFA_REQUEST_KEY;
 
 /**
  * @author zhaowang
@@ -88,7 +86,7 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
         Class[] argTypes = new Class[size];
         for (int i = 0; i < size; i++) {
             String typeName = argTypesList.get(i);
-            argTypes[i] = ClassUtils.forName(typeName);
+            argTypes[i] = ClassTypeUtils.getClass(typeName);
         }
         return argTypes;
     }

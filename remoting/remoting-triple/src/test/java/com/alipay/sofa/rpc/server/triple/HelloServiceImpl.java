@@ -26,4 +26,14 @@ public class HelloServiceImpl implements HelloService {
     public String hello(String name) {
         return "hello " + name;
     }
+
+    @Override
+    public long testPrimitiveType(long a) {
+        return a;
+    }
+
+    @Override
+    public long[] testArray(long[] longs) {
+        return longs;
+    }
 }
