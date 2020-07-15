@@ -71,8 +71,7 @@ public class TripleClientInvoker implements TripleInvoker {
         if (!useGeneric) {
             Class enclosingClass = consumerConfig.getProxyClass().getEnclosingClass();
             try {
-                sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
-                    ProviderInfo.class, ConsumerConfig.class, int.class);
+                sofaStub = enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class, int.class);
             } catch (NoSuchMethodException e) {
                 LOGGER.error("getSofaStub not found in enclosingClass" + enclosingClass.getName());
             }
@@ -98,8 +97,7 @@ public class TripleClientInvoker implements TripleInvoker {
         if (!useGeneric) {
             SofaResponse sofaResponse = new SofaResponse();
             ProviderInfo providerInfo = null;
-            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), providerInfo,
-                consumerConfig, timeout);
+            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), timeout);
             final Method method = sofaRequest.getMethod();
             Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
             sofaResponse.setAppResponse(appResponse);

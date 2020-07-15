@@ -2,9 +2,6 @@
     package {{packageName}};
 {{/packageName}}
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-
 import java.util.concurrent.TimeUnit;
 
 import static {{packageName}}.{{serviceName}}Grpc.getServiceDescriptor;
@@ -23,8 +20,8 @@ comments = "Source: {{protoName}}")
 public final class {{className}} {
 private {{className}}() {}
 
-public static ReactorSofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, ProviderInfo providerInfo, ConsumerConfig consumerConfig, int timeout) {
-return new ReactorSofa{{serviceName}}Stub(channel, callOptions, providerInfo, consumerConfig,timeout);
+public static ReactorSofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, int timeout) {
+return new ReactorSofa{{serviceName}}Stub(channel, callOptions, timeout);
 }
 
 public static String getServiceName() {
@@ -36,15 +33,11 @@ return {{packageName}}.{{serviceName}}Grpc.SERVICE_NAME;
 {{/javaDoc}}
 public static final class ReactorSofa{{serviceName}}Stub implements IReactor{{serviceName}} {
 
-protected ProviderInfo providerInfo;
-protected ConsumerConfig consumerConfig;
 protected int timeout;
 
 protected {{serviceName}}Grpc.{{serviceName}}Stub stub;
 
-public ReactorSofa{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, ProviderInfo providerInfo, ConsumerConfig consumerConfig, int timeout) {
-this.providerInfo = providerInfo;
-this.consumerConfig = consumerConfig;
+public ReactorSofa{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, int timeout) {
 this.timeout = timeout;
 stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
 }
