@@ -119,7 +119,7 @@ public class TripleClientInvoker implements TripleInvoker {
                 .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
                 .build();
 
-            Request request = getRequest(sofaRequest,serialization,serializer);
+            Request request = getRequest(sofaRequest, serialization, serializer);
 
             Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
                 buildCustomCallOptions(sofaRequest, timeout), request);
@@ -142,7 +142,7 @@ public class TripleClientInvoker implements TripleInvoker {
 
     }
 
-    public static Request getRequest(SofaRequest sofaRequest,String serialization,Serializer serializer) {
+    public static Request getRequest(SofaRequest sofaRequest, String serialization, Serializer serializer) {
         Request.Builder builder = Request.newBuilder();
         builder.setSerializeType(serialization);
 

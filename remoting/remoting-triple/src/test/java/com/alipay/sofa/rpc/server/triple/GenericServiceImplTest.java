@@ -1,6 +1,18 @@
-/**
- * Alipay.com Inc.
- * Copyright (c) 2004-2020 All Rights Reserved.
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 package com.alipay.sofa.rpc.server.triple;
 
@@ -27,10 +39,10 @@ import java.lang.reflect.Method;
  */
 public class GenericServiceImplTest {
 
-    private static String serialization = "hessian2";
-    private static Serializer serializer = new SofaHessianSerializer();
+    private static String                       serialization = "hessian2";
+    private static Serializer                   serializer    = new SofaHessianSerializer();
 
-    private GenericServiceImpl genericService;
+    private GenericServiceImpl                  genericService;
     private MockStreamObserver<triple.Response> responseObserver;
 
     public GenericServiceImplTest(){
@@ -81,16 +93,16 @@ public class GenericServiceImplTest {
 
         long[] appResponse1 = (long[]) appResponse;
 
-        Assert.assertEquals(l,appResponse1[0]);
+        Assert.assertEquals(l, appResponse1[0]);
 
     }
 
     private void doInvoke(Request request) {
-        genericService.generic(request,responseObserver);
+        genericService.generic(request, responseObserver);
     }
 
     private Object getReturnValue(Method method) {
-        Object appResponse=null;
+        Object appResponse = null;
         Response response = responseObserver.getValue();
         byte[] responseDate = response.getData().toByteArray();
         Class returnType = method.getReturnType();
@@ -98,14 +110,14 @@ public class GenericServiceImplTest {
             if (responseDate != null && responseDate.length > 0) {
                 Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
                 appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate),
-                        returnType,
-                        null);
+                    returnType,
+                    null);
             }
         }
         return appResponse;
     }
 
-    private Request buildRequest(Method method,Object[] args){
+    private Request buildRequest(Method method, Object[] args) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(HelloService.class, method, parameterTypes, args);
         Request request = TripleClientInvoker.getRequest(sofaRequest, serialization, serializer);
@@ -113,6 +125,5 @@ public class GenericServiceImplTest {
         context.attach();
         return request;
     }
-
 
 }
