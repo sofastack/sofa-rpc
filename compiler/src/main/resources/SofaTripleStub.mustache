@@ -2,9 +2,6 @@
     package {{packageName}};
 {{/packageName}}
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.config.ConsumerConfig;
-
 import java.util.concurrent.TimeUnit;
 
 import static {{packageName}}.{{serviceName}}Grpc.getServiceDescriptor;
@@ -26,17 +23,13 @@ private {{className}}() {}
 
 public static class Sofa{{serviceName}}Stub implements I{{serviceName}} {
 
-protected ProviderInfo providerInfo;
-protected ConsumerConfig consumerConfig;
 protected int timeout;
 
 protected {{serviceName}}Grpc.{{serviceName}}BlockingStub blockingStub;
 protected {{serviceName}}Grpc.{{serviceName}}FutureStub futureStub;
 protected {{serviceName}}Grpc.{{serviceName}}Stub stub;
 
-public Sofa{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions,ProviderInfo providerInfo, ConsumerConfig consumerConfig, int timeout) {
-this.providerInfo = providerInfo;
-this.consumerConfig = consumerConfig;
+public Sofa{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, int timeout) {
 this.timeout = timeout;
 
 blockingStub = {{serviceName}}Grpc.newBlockingStub(channel).build(channel, callOptions);
@@ -105,8 +98,8 @@ stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
 {{/biStreamingMethods}}
 }
 
-public static Sofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, ProviderInfo providerInfo, ConsumerConfig consumerConfig, int timeout) {
-return new Sofa{{serviceName}}Stub(channel, callOptions, providerInfo, consumerConfig, timeout);
+public static Sofa{{serviceName}}Stub getSofaStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions,int timeout) {
+return new Sofa{{serviceName}}Stub(channel, callOptions, timeout);
 }
 
 public static String getServiceName() {

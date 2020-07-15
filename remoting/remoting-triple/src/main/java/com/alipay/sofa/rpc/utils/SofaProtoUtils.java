@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.utils;
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import io.grpc.BindableService;
@@ -52,8 +51,7 @@ public class SofaProtoUtils {
         Class enclosingClass = proxyClass.getEnclosingClass();
         if (enclosingClass != null) {
             try {
-                enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class,
-                    ProviderInfo.class, ConsumerConfig.class, int.class);
+                enclosingClass.getDeclaredMethod("getSofaStub", Channel.class, CallOptions.class, int.class);
                 return false;
             } catch (NoSuchMethodException e) {
                 //ignore
