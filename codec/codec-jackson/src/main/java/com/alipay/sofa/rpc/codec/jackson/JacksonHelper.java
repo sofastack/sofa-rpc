@@ -42,7 +42,7 @@ public class JacksonHelper {
     /**
      * Response service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, Class>      responseClassCache = new ConcurrentHashMap<String, Class>();
+    private ConcurrentHashMap<String, JavaType>   responseClassCache = new ConcurrentHashMap<String, JavaType>();
 
     /**
      * Fetch request class for cache according  service and method
@@ -71,10 +71,10 @@ public class JacksonHelper {
      * @param methodName method name
      * @return response class
      */
-    public Class getResClass(String service, String methodName) {
+    public JavaType getResClass(String service, String methodName) {
         String key = service + "#" + methodName;
-        Class reqClass = responseClassCache.get(key);
-        if (reqClass == null) {
+        JavaType reqType = responseClassCache.get(key);
+        if (reqType == null) {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
@@ -102,30 +102,34 @@ public class JacksonHelper {
      * @param methodName method name
      */
     private void loadClassToCache(String key, Class clazz, String methodName) {
-        Method pbMethod = null;
+        Method jsonMethod = null;
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
             if (methodName.equals(method.getName())) {
-                pbMethod = method;
+                jsonMethod = method;
                 break;
             }
         }
-        if (pbMethod == null) {
+        if (jsonMethod == null) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
                 methodName));
         }
-        Type[] parameterTypes = pbMethod.getGenericParameterTypes();
+
+        // parse request types
+        Type[] parameterTypes = jsonMethod.getGenericParameterTypes();
         JavaType[] javaTypes = new JavaType[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
             JavaType javaType = mapper.getTypeFactory().constructType(parameterTypes[i]);
             javaTypes[i] = javaType;
         }
-
         requestClassCache.put(key, javaTypes);
-        Class resClass = pbMethod.getReturnType();
-        if (resClass == void.class) {
+
+        // parse response types
+        Type resType = jsonMethod.getGenericReturnType();
+        if (resType == void.class) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_VOID_RETURN, "jackson", clazz.getName()));
         }
-        responseClassCache.put(key, resClass);
+        JavaType resJavaType = mapper.getTypeFactory().constructType(resType);
+        responseClassCache.put(key, resJavaType);
     }
 }

@@ -27,13 +27,17 @@ import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
 import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
+import com.alipay.sofa.rpc.utils.SofaProtoUtils;
 import io.grpc.BindableService;
+import io.grpc.MethodDescriptor;
+import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptors;
+import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
+import io.grpc.ServiceDescriptor;
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder;
 import io.grpc.netty.shaded.io.netty.channel.EventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.ServerChannel;
@@ -41,13 +45,19 @@ import io.grpc.netty.shaded.io.netty.channel.epoll.EpollEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.epoll.EpollServerSocketChannel;
 import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.grpc.protobuf.ProtoUtils;
 import io.grpc.util.MutableHandlerRegistry;
+import triple.Request;
+import triple.Response;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
  * Grpc server base on io.gprc
@@ -200,16 +210,17 @@ public class TripleServer implements Server {
 
     @Override
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
-        Object obj = null;
+        Object ref = providerConfig.getRef();
         try {
-            obj = ProxyFactory.buildProxy(providerConfig.getProxy(), BindableService.class, instance);
-        } catch (Exception e) {
-            LOGGER.error("build triple proxy error", e);
-        }
-        BindableService bindableService = (BindableService) obj;
+            final ServerServiceDefinition serviceDef;
+            if (SofaProtoUtils.isProtoClass(ref)) {
+                BindableService bindableService = (BindableService) providerConfig.getRef();
+                serviceDef = bindableService.bindService();
 
-        try {
-            final ServerServiceDefinition serviceDef = bindableService.bindService();
+            } else {
+                GenericServiceImpl genericService = new GenericServiceImpl(providerConfig);
+                serviceDef = buildSofaServiceDef(genericService, providerConfig, instance);
+            }
             List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
                 serviceDef, interceptorList);
@@ -220,10 +231,72 @@ public class TripleServer implements Server {
             LOGGER.error("Register triple service error", e);
             serviceInfo.remove(providerConfig);
         }
+
+    }
+
+    private ServerServiceDefinition buildSofaServiceDef(GenericServiceImpl genericService,
+                                                        ProviderConfig providerConfig, Invoker instance) {
+        ServerServiceDefinition templateDefinition = genericService.bindService();
+        ServerCallHandler<Request, Response> templateHandler = (ServerCallHandler<Request, Response>) templateDefinition
+            .getMethods().iterator().next().getServerCallHandler();
+        List<MethodDescriptor<Request, Response>> methodDescriptor = getMethodDescriptor(providerConfig);
+        List<ServerMethodDefinition<Request, Response>> methodDefs = getMethodDefinitions(templateHandler,
+            methodDescriptor);
+        ServerServiceDefinition.Builder builder = ServerServiceDefinition.builder(getServiceDescriptor(
+            templateDefinition, providerConfig, methodDescriptor));
+        for (ServerMethodDefinition<Request, Response> methodDef : methodDefs) {
+            builder.addMethod(methodDef);
+
+        }
+        return builder.build();
+
+    }
+
+    private List<ServerMethodDefinition<Request, Response>> getMethodDefinitions(ServerCallHandler<Request, Response> templateHandler,List<MethodDescriptor<Request, Response>> methodDescriptors) {
+        List<ServerMethodDefinition<Request, Response>> result = new ArrayList<>();
+
+        for (MethodDescriptor<Request, Response> methodDescriptor : methodDescriptors) {
+            ServerMethodDefinition<Request, Response> serverMethodDefinition = ServerMethodDefinition.create(methodDescriptor, templateHandler);
+            result.add(serverMethodDefinition);
+        }
+        return result;
+    }
+
+    private ServiceDescriptor getServiceDescriptor(ServerServiceDefinition template, ProviderConfig providerConfig,
+                                                   List<MethodDescriptor<Request, Response>> methodDescriptors) {
+        String serviceName = providerConfig.getInterfaceId();
+        ServiceDescriptor.Builder builder = ServiceDescriptor.newBuilder(serviceName)
+            .setSchemaDescriptor(template.getServiceDescriptor().getSchemaDescriptor());
+        for (MethodDescriptor<Request, Response> methodDescriptor : methodDescriptors) {
+            builder.addMethod(methodDescriptor);
+        }
+        return builder.build();
+
+    }
+
+    private List<MethodDescriptor<Request, Response>> getMethodDescriptor( ProviderConfig providerConfig) {
+        List<MethodDescriptor<Request, Response>> result = new ArrayList<>();
+
+        Set<String> methodNames = SofaProtoUtils.getMethodNames(providerConfig.getInterfaceId());
+        for (String name : methodNames) {
+            MethodDescriptor<Request, Response> methodDescriptor = MethodDescriptor.<Request, Response>newBuilder()
+                    .setType(MethodDescriptor.MethodType.UNARY)
+                    .setFullMethodName(generateFullMethodName(providerConfig.getInterfaceId(), name))
+                    .setSampledToLocalTracing(true)
+                    .setRequestMarshaller(ProtoUtils.marshaller(
+                            Request.getDefaultInstance()))
+                    .setResponseMarshaller(ProtoUtils.marshaller(
+                            Response.getDefaultInstance()))
+                    .build();
+            result.add(methodDescriptor);
+        }
+
+        return result;
     }
 
     /**
      * build chain
+     *
      * @param serviceDef
      * @return
      */

@@ -375,7 +375,8 @@ public class ProviderInfo implements Serializable {
      */
     public ProviderStatus getStatus() {
         if (status == ProviderStatus.WARMING_UP) {
-            if (System.currentTimeMillis() > (Long) getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME)) {
+            Object dynamicAttr = getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME);
+            if (dynamicAttr != null && System.currentTimeMillis() > (Long) dynamicAttr) {
                 // 如果已经过了预热时间，恢复为正常
                 status = ProviderStatus.AVAILABLE;
                 setDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME, null);

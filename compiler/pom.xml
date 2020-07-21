@@ -26,7 +26,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-compiler</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <packaging>jar</packaging>
 
@@ -109,7 +109,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <configFile>${user.dir}/tools/codestyle/formatter.xml</configFile>
+                    <configFile>${user.dir}/../tools/codestyle/formatter.xml</configFile>
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>

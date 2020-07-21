@@ -20,6 +20,12 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-api</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-sofa-hessian</artifactId>
+            <version>${revision}</version>
+            <scope>test</scope>
+        </dependency>
 
         <dependency>
             <groupId>com.alibaba</groupId>
@@ -31,17 +37,14 @@
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.27.2</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-protobuf</artifactId>
-            <version>1.27.2</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
-            <version>1.27.2</version>
         </dependency>
         
         <dependency>

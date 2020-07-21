@@ -80,26 +80,28 @@ public class SingleTripleDemo {
             .build();
         HelloRequest request = HelloRequest.newBuilder().setName("world").build();
         HelloReply reply = null;
-        try {
+        while (true) {
             try {
-                HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
-                    .build();
-                request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
-                reply = greeterBlockingStub.sayHello(request);
-                LOGGER.info("Invoke Success,Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
-            } catch (StatusRuntimeException e) {
-                LOGGER.error("RPC failed: {}", e.getStatus());
-            } catch (Throwable e) {
+                try {
+                    HelloRequest.DateTime reqDateTime = HelloRequest.DateTime.newBuilder(dateTime).setTime("")
+                        .build();
+                    request = HelloRequest.newBuilder(request).setName("world").setDateTime(reqDateTime).build();
+                    reply = greeterBlockingStub.sayHello(request);
+                    LOGGER.info("Invoke Success,Greeting: {}, {}", reply.getMessage(), reply.getDateTime().getDate());
+                } catch (StatusRuntimeException e) {
+                    LOGGER.error("RPC failed: {}", e.getStatus());
+                } catch (Throwable e) {
+                    LOGGER.error("Unexpected RPC call breaks", e);
+                }
+            } catch (Exception e) {
                 LOGGER.error("Unexpected RPC call breaks", e);
             }
-        } catch (Exception e) {
-            LOGGER.error("Unexpected RPC call breaks", e);
-        }
 
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
 
     }

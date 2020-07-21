@@ -20,6 +20,7 @@ import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
@@ -59,15 +60,15 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
 
         SofaResponse sofaResponse = new SofaResponse();
         final Throwable[] throwable = { null };
-        SofaRequest sofaRequest = null;
+        SofaRequest sofaRequest = new SofaRequest();
         TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
-
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
 
         Context ctxWithSpan = Context.current()
             .withValue(TracingContextKey.getKey(), serverSpan)
-            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context());
+            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context())
+            .withValue(TracingContextKey.getKeySofaRequest(), sofaRequest);
 
         //这里和下面不在一个线程
         if (RpcRunningState.isDebugMode()) {
@@ -117,8 +118,16 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 if (RpcRunningState.isDebugMode()) {
                     LOGGER.info("[7]server processed done received from client:" + requestHeaders);
                 }
-
                 TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
+
+                //进行一下补偿
+                SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
+                SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
+                serverSpan.setStartTime(originalSpan.getStartTime());
+                serverSpan.setTag("remote.ip", originalSpan.getTagsWithStr().get("remote.ip"));
+                long endTime = RpcRuntimeContext.now();
+                serverSpan.setTag("biz.impl.time", endTime - originalSpan.getStartTime());
                 TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, throwable[0]);
             }
 
@@ -147,7 +156,6 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 return new StatusRuntimeException(Status.UNKNOWN, trailers);
             }
         };
-
         return result;
     }
 }
