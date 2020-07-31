@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
+import com.alipay.sofa.rpc.common.utils.TimeWaitLogger;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -75,21 +76,19 @@ public class AsyncRuntime {
                     NamedThreadFactory threadFactory = new NamedThreadFactory("RPC-CB", true);
 
                     RejectedExecutionHandler handler = new RejectedExecutionHandler() {
-                        private int i = 1;
+                        private final TimeWaitLogger timeWaitLogger = new TimeWaitLogger(1000);
 
                         @Override
                         public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
-                            if (i++ % 7 == 0) {
-                                i = 1;
                                 if (LOGGER.isWarnEnabled()) {
-                                    LOGGER.warn("Task:{} has been reject because of threadPool exhausted!" +
-                                        " pool:{}, active:{}, queue:{}, taskcnt: {}", r,
-                                        executor.getPoolSize(),
-                                        executor.getActiveCount(),
-                                        executor.getQueue().size(),
-                                        executor.getTaskCount());
+                                    timeWaitLogger.logWithWaitTime( ()->LOGGER.warn("Task:{} has been reject because of threadPool exhausted!" +
+                                                    " pool:{}, active:{}, queue:{}, taskcnt: {}", r,
+                                            executor.getPoolSize(),
+                                            executor.getActiveCount(),
+                                            executor.getQueue().size(),
+                                            executor.getTaskCount()));
+
                                 }
-                            }
                             throw new RejectedExecutionException(
                                 LogCodes.getLog(LogCodes.ERROR_ASYNC_THREAD_POOL_REJECT));
                         }

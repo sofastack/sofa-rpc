@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server;
 
+import com.alipay.sofa.rpc.common.utils.TimeWaitLogger;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -31,15 +32,21 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class SofaRejectedExecutionHandler implements RejectedExecutionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SofaRejectedExecutionHandler.class);
+    private static final Logger  LOGGER         = LoggerFactory.getLogger(SofaRejectedExecutionHandler.class);
+    private final TimeWaitLogger timeWaitLogger = new TimeWaitLogger(1000);
 
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn(LogCodes.getLog(LogCodes.ERROR_PROVIDER_TR_POOL_REJECTION, executor.getActiveCount(),
-                executor.getPoolSize(), executor.getLargestPoolSize(), executor
-                    .getCorePoolSize(), executor.getMaximumPoolSize(), executor.getQueue()
-                    .size(), executor.getQueue().remainingCapacity()));
+            timeWaitLogger.logWithWaitTime(() -> LOGGER.warn(LogCodes.getLog(LogCodes.ERROR_PROVIDER_TR_POOL_REJECTION,
+                    executor.getActiveCount(),
+                    executor.getPoolSize(),
+                    executor.getLargestPoolSize(),
+                    executor.getCorePoolSize(),
+                    executor.getMaximumPoolSize(),
+                    executor.getQueue().size(),
+                    executor.getQueue().remainingCapacity())));
+
         }
         throw new RejectedExecutionException();
     }
