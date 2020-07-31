@@ -33,7 +33,7 @@ public class TimeWaitLoggerTest {
         AtomicLong atomicLong = new AtomicLong();
         new Thread(()->{
             while (true){
-                timeWaitLogger.logWithWaitTime(atomicLong::incrementAndGet);
+                timeWaitLogger.logWithRunnable(atomicLong::incrementAndGet);
             }
         }).start();
         Thread.sleep(1500);
@@ -48,7 +48,7 @@ public class TimeWaitLoggerTest {
             AtomicLong atomicLong = new AtomicLong();
             new Thread(()->{
                 while (true){
-                    timeWaitLogger.logWithWaitTime(atomicLong::incrementAndGet);
+                    timeWaitLogger.logWithRunnable(atomicLong::incrementAndGet);
                 }
             }).start();
             Thread.sleep(1500);
@@ -61,7 +61,7 @@ public class TimeWaitLoggerTest {
         AtomicLong atomicLong = new AtomicLong();
         new Thread(()->{
             while (true){
-                timeWaitLogger.logWithWaitTime(atomicLong::incrementAndGet);
+                timeWaitLogger.logWithRunnable(atomicLong::incrementAndGet);
             }
         }).start();
         Thread.sleep(1500);

@@ -18,6 +18,9 @@ package com.alipay.sofa.rpc.common.utils;
 
 import com.alipay.sofa.rpc.common.SofaConfigs;
 
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+
 /**
  * @author zhaowang
  * @version : TimeWaitLogger.java, v 0.1 2020年07月31日 10:46 上午 zhaowang Exp $
@@ -25,16 +28,16 @@ import com.alipay.sofa.rpc.common.SofaConfigs;
 public class TimeWaitLogger {
 
     public static final String DISABLE_TIME_WAIT_CONF = "sofa.rpc.log.disableTimeWaitLog";
-    private long               waitTime;
+    private final long         waitTime;
     private long               lastLogTime;
-    private boolean            disabled;
+    private final boolean      disabled;
 
     public TimeWaitLogger(long waitTimeMills) {
         this.waitTime = waitTimeMills;
-        init();
+        this.disabled = SofaConfigs.getBooleanValue(DISABLE_TIME_WAIT_CONF, false);
     }
 
-    public void logWithWaitTime(Runnable runnable) {
+    public void logWithRunnable(Runnable runnable) {
         long currentTimeMillis = System.currentTimeMillis();
         if (currentTimeMillis > lastLogTime + waitTime || disabled) {
             lastLogTime = currentTimeMillis;
@@ -42,8 +45,18 @@ public class TimeWaitLogger {
         }
     }
 
-    protected void init() {
-        this.disabled = SofaConfigs.getBooleanValue(DISABLE_TIME_WAIT_CONF, false);
+    public <T> void logWithConsumer(Consumer<T> consumer, T t) {
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis > lastLogTime + waitTime || disabled) {
+            lastLogTime = currentTimeMillis;
+            consumer.accept(t);
+        }
     }
 
+    public <T, R> void logWithBiConsume(BiConsumer<T, R> biConsumer, T r, R executor) {
+        long currentTimeMillis = System.currentTimeMillis();
+        if (currentTimeMillis > lastLogTime + waitTime || disabled) {
+            biConsumer.accept(r, executor);
+        }
+    }
 }
