@@ -477,6 +477,16 @@ public class RpcConstants {
      * 配置key:protocol
      */
     public static final String  CONFIG_KEY_PROTOCOL                = "protocol";
+
+    /**
+     * 是否启用日志间隔打印
+     * true: 每次日志都会打印
+     * false: 每次打印一次之后进入静默期
+     *
+     * @see com.alipay.sofa.rpc.log.TimeWaitLogger
+     */
+    public static final String  DISABLE_LOG_TIME_WAIT_CONF         = "sofa.rpc.log.disableTimeWaitLog";
+
     /*--------配置项相关结束---------*/
 
     /*--------客户端相关开始---------*/
