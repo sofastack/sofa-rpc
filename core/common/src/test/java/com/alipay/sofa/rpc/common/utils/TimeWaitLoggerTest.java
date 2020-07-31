@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
+import com.alipay.sofa.rpc.common.log.TimeWaitLogger;
 import org.junit.Assert;
 import org.junit.Test;
 
