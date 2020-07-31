@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.common.log;
+package com.alipay.sofa.rpc.log;
 
 import com.alipay.sofa.rpc.common.SofaConfigs;
 

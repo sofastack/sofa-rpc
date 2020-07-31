@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.server;
 
-import com.alipay.sofa.rpc.common.log.TimeWaitLogger;
+import com.alipay.sofa.rpc.log.TimeWaitLogger;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
