@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server;
 
+import com.alipay.sofa.rpc.log.TimeWaitLogger;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -23,6 +24,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.function.Consumer;
 
 /**
  * RejectedExecutionHandler when thread pool is full.
@@ -31,15 +33,20 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 public class SofaRejectedExecutionHandler implements RejectedExecutionHandler {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SofaRejectedExecutionHandler.class);
-
+    private static final Logger  LOGGER         = LoggerFactory.getLogger(SofaRejectedExecutionHandler.class);
+    private final TimeWaitLogger timeWaitLogger = new TimeWaitLogger(1000);
+    private final Consumer<ThreadPoolExecutor> logConsumer = (executor) -> LOGGER.warn(LogCodes.getLog(LogCodes.ERROR_PROVIDER_TR_POOL_REJECTION,
+            executor.getActiveCount(),
+            executor.getPoolSize(),
+            executor.getLargestPoolSize(),
+            executor.getCorePoolSize(),
+            executor.getMaximumPoolSize(),
+            executor.getQueue().size(),
+            executor.getQueue().remainingCapacity()));
     @Override
     public void rejectedExecution(Runnable r, ThreadPoolExecutor executor) {
         if (LOGGER.isWarnEnabled()) {
-            LOGGER.warn(LogCodes.getLog(LogCodes.ERROR_PROVIDER_TR_POOL_REJECTION, executor.getActiveCount(),
-                executor.getPoolSize(), executor.getLargestPoolSize(), executor
-                    .getCorePoolSize(), executor.getMaximumPoolSize(), executor.getQueue()
-                    .size(), executor.getQueue().remainingCapacity()));
+            timeWaitLogger.logWithConsumer(logConsumer,executor);
         }
         throw new RejectedExecutionException();
     }
