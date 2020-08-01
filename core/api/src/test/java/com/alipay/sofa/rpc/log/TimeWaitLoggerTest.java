@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.log;
 
-import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,7 +43,7 @@ public class TimeWaitLoggerTest {
 
     @Test
     public void testDisable() throws InterruptedException {
-        System.setProperty(RpcConstants.DISABLE_LOG_TIME_WAIT_CONF,"true");
+        System.setProperty(RpcOptions.DISABLE_LOG_TIME_WAIT_CONF,"true");
         try{
             TimeWaitLogger timeWaitLogger = new TimeWaitLogger(1000);
             AtomicLong atomicLong = new AtomicLong();
@@ -55,7 +55,7 @@ public class TimeWaitLoggerTest {
             Thread.sleep(1500);
             Assert.assertTrue(atomicLong.get()>1000);
         }finally {
-            System.setProperty(RpcConstants.DISABLE_LOG_TIME_WAIT_CONF,"");
+            System.setProperty(RpcOptions.DISABLE_LOG_TIME_WAIT_CONF,"");
         }
 
         TimeWaitLogger timeWaitLogger = new TimeWaitLogger(1000);

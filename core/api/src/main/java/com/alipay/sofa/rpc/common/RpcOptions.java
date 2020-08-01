@@ -540,4 +540,14 @@ public class RpcOptions {
      * use conn validate by server or not, usually we use it as sec or backlist ip
      */
     public static final String CONNNECTION_VALIDATE_SLEEP               = "connection.validate.sleep";
+
+    /**
+     * 是否启用日志间隔打印
+     * true: 每次日志都会打印
+     * false: 每次打印一次之后进入静默期
+     *
+     * @see com.alipay.sofa.rpc.log.TimeWaitLogger
+     */
+    public static final String DISABLE_LOG_TIME_WAIT_CONF               = "sofa.rpc.log.disableTimeWaitLog";
+
 }

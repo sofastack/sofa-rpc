@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.log;
 
-import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.SofaConfigs;
 
 import java.util.function.BiConsumer;
@@ -34,7 +34,7 @@ public class TimeWaitLogger {
 
     public TimeWaitLogger(long waitTimeMills) {
         this.waitTime = waitTimeMills;
-        this.disabled = SofaConfigs.getBooleanValue(RpcConstants.DISABLE_LOG_TIME_WAIT_CONF, false);
+        this.disabled = SofaConfigs.getBooleanValue(RpcOptions.DISABLE_LOG_TIME_WAIT_CONF, false);
     }
 
     public void logWithRunnable(Runnable runnable) {
