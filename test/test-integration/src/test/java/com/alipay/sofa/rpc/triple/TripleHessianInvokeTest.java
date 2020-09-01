@@ -94,4 +94,64 @@ public class TripleHessianInvokeTest {
         Assert.assertNull(response1);
 
     }
+
+    @Test
+    public void testInvokeWithUniqueId() throws InterruptedException {
+        String uniqueId = "uniqueId";
+        RpcRunningState.setDebugMode(true);
+
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
+
+        ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
+
+        int port = 50062;
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setPort(port);
+
+        TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
+        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
+            .setApplication(serverApp)
+            .setUniqueId(uniqueId)
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setInterfaceId(TripleHessianInterface.class.getName())
+            .setRef(ref)
+            .setServer(serverConfig)
+            .setRegister(false);
+
+        providerConfig.export();
+
+        ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
+        consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setDirectUrl("localhost:" + port)
+            .setUniqueId(uniqueId)
+            .setRegister(false)
+            .setApplication(clientApp);
+
+        TripleHessianInterface helloService = consumerConfig.refer();
+
+        Thread.sleep(10 * 1000);
+        LOGGER.info("Grpc stub bean successful: {}", helloService.getClass().getName());
+        helloService.call();
+        Assert.assertEquals("call", ref.getFlag());
+
+        String s = helloService.call1();
+        Assert.assertEquals("call1", ref.getFlag());
+        Assert.assertEquals("call1", s);
+
+        Request request = new Request();
+        int age = RandomUtils.nextInt();
+        request.setAge(age);
+        String call2 = "call2";
+        request.setFlag(call2);
+        Response response = helloService.call2(request);
+        Assert.assertEquals(age, response.getAge());
+        Assert.assertEquals(call2, response.getFlag());
+
+        Response response1 = helloService.call2(null);
+        Assert.assertNull(response1);
+
+    }
 }

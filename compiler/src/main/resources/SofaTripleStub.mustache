@@ -4,7 +4,9 @@
 
 import java.util.concurrent.TimeUnit;
 
+import static com.alipay.sofa.rpc.constant.TripleConstant.UNIQUE_ID;
 import static {{packageName}}.{{serviceName}}Grpc.getServiceDescriptor;
+import static io.grpc.stub.ClientCalls.blockingUnaryCall;
 import static io.grpc.stub.ServerCalls.asyncUnaryCall;
 import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
 import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
@@ -28,10 +30,13 @@ protected int timeout;
 protected {{serviceName}}Grpc.{{serviceName}}BlockingStub blockingStub;
 protected {{serviceName}}Grpc.{{serviceName}}FutureStub futureStub;
 protected {{serviceName}}Grpc.{{serviceName}}Stub stub;
+protected io.grpc.CallOptions callOptions;
+protected String uniqueId;
 
 public Sofa{{serviceName}}Stub(io.grpc.Channel channel, io.grpc.CallOptions callOptions, int timeout) {
 this.timeout = timeout;
-
+this.callOptions = callOptions;
+uniqueId= callOptions.getOption(UNIQUE_ID);
 blockingStub = {{serviceName}}Grpc.newBlockingStub(channel).build(channel, callOptions);
 futureStub = {{serviceName}}Grpc.newFutureStub(channel).build(channel, callOptions);
 stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
@@ -45,9 +50,11 @@ stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
         @java.lang.Deprecated
     {{/deprecated}}
     public {{outputType}} {{methodName}}({{inputType}} request) {
-    return blockingStub
-    .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
-    .{{methodName}}(request);
+    io.grpc.MethodDescriptor<{{inputType}}, {{outputType}}> method = {{serviceName}}Grpc.get{{methodNamePascalCase}}Method();
+    if(isNotEmpty(uniqueId)){
+        method = method.toBuilder().setFullMethodName(getFullNameWithUniqueId(method.getFullMethodName(), callOptions.getOption(UNIQUE_ID))).build();
+    }
+    return blockingUnaryCall(blockingStub.getChannel(),method,callOptions,request);
     }
 
     public com.google.common.util.concurrent.ListenableFuture<{{outputType}}> {{methodName}}Async({{inputType}} request) {
@@ -60,6 +67,19 @@ stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
     stub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .{{methodName}}(request, responseObserver);
+    }
+
+    private boolean isNotEmpty(String uniqueId) {
+        return uniqueId != null && uniqueId.length() > 0;
+    }
+
+    private String getFullNameWithUniqueId(String fullMethodName, String uniqueId) {
+        int i = fullMethodName.indexOf("/");
+        if (i > 0 &&  isNotEmpty(uniqueId)) {
+            String[] split = fullMethodName.split("/");
+            fullMethodName = split[0] + "." + uniqueId + "/" + split[1];
+        }
+        return fullMethodName;
     }
 
 {{/unaryMethods}}

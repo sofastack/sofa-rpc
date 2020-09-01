@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.server.triple;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -51,12 +52,14 @@ import triple.Request;
 import triple.Response;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.alipay.sofa.rpc.utils.SofaProtoUtils.getFullNameWithUniqueId;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
@@ -212,7 +215,7 @@ public class TripleServer implements Server {
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
         Object ref = providerConfig.getRef();
         try {
-            final ServerServiceDefinition serviceDef;
+            ServerServiceDefinition serviceDef;
             if (SofaProtoUtils.isProtoClass(ref)) {
                 BindableService bindableService = (BindableService) providerConfig.getRef();
                 serviceDef = bindableService.bindService();
@@ -221,6 +224,10 @@ public class TripleServer implements Server {
                 GenericServiceImpl genericService = new GenericServiceImpl(providerConfig);
                 serviceDef = buildSofaServiceDef(genericService, providerConfig, instance);
             }
+            if (StringUtils.isNotBlank(providerConfig.getUniqueId())) {
+                serviceDef = appendUniqueIdToServiceDef(providerConfig.getUniqueId(), serviceDef);
+            }
+
             List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
                 serviceDef, interceptorList);
@@ -232,6 +239,25 @@ public class TripleServer implements Server {
             serviceInfo.remove(providerConfig);
         }
 
+    }
+
+    private ServerServiceDefinition appendUniqueIdToServiceDef(String uniqueId, ServerServiceDefinition serviceDef) {
+        final String newServiceName = serviceDef.getServiceDescriptor().getName() + "." + uniqueId;
+
+        ServerServiceDefinition.Builder builder = ServerServiceDefinition.builder(newServiceName);
+
+        Collection<ServerMethodDefinition<?, ?>> methods = serviceDef.getMethods();
+        for (ServerMethodDefinition method : methods) {
+            MethodDescriptor<?, ?> methodDescriptor = method.getMethodDescriptor();
+            String fullMethodName = methodDescriptor.getFullMethodName();
+            MethodDescriptor<?, ?> methodDescriptorWithUniqueId = methodDescriptor.toBuilder()
+                .setFullMethodName(getFullNameWithUniqueId(fullMethodName, uniqueId)).build();
+            ServerMethodDefinition<?, ?> newServerMethodDefinition = ServerMethodDefinition.create(
+                methodDescriptorWithUniqueId, method.getServerCallHandler());
+            builder.addMethod(newServerMethodDefinition);
+        }
+        serviceDef = builder.build();
+        return serviceDef;
     }
 
     private ServerServiceDefinition buildSofaServiceDef(GenericServiceImpl genericService,

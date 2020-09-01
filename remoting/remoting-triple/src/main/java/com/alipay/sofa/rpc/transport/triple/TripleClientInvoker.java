@@ -38,7 +38,9 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
+import static com.alipay.sofa.rpc.constant.TripleConstant.UNIQUE_ID;
 import static com.alipay.sofa.rpc.utils.SofaProtoUtils.checkIfUseGeneric;
+import static com.alipay.sofa.rpc.utils.SofaProtoUtils.getFullNameWithUniqueId;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
@@ -98,7 +100,8 @@ public class TripleClientInvoker implements TripleInvoker {
         if (!useGeneric) {
             SofaResponse sofaResponse = new SofaResponse();
             ProviderInfo providerInfo = null;
-            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), timeout);
+            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout, consumerConfig),
+                timeout);
             final Method method = sofaRequest.getMethod();
             Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
             sofaResponse.setAppResponse(appResponse);
@@ -110,9 +113,12 @@ public class TripleClientInvoker implements TripleInvoker {
             MethodDescriptor.Marshaller<?> responseMarshaller = null;
             requestMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Request.getDefaultInstance());
             responseMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Response.getDefaultInstance());
-            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor.newBuilder()
+            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor
+                .newBuilder()
                 .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-                .setFullMethodName(generateFullMethodName(serviceName, methodName)).setSampledToLocalTracing(true)
+                .setFullMethodName(
+                    getFullNameWithUniqueId(generateFullMethodName(serviceName, methodName),
+                        consumerConfig.getUniqueId())).setSampledToLocalTracing(true)
                 .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
                 .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
                 .build();
@@ -120,7 +126,7 @@ public class TripleClientInvoker implements TripleInvoker {
             Request request = getRequest(sofaRequest, serialization, serializer);
 
             Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
-                buildCustomCallOptions(sofaRequest, timeout), request);
+                buildCustomCallOptions(sofaRequest, timeout, consumerConfig), request);
 
             SofaResponse sofaResponse = new SofaResponse();
             byte[] responseDate = response.getData().toByteArray();
@@ -162,7 +168,7 @@ public class TripleClientInvoker implements TripleInvoker {
      * @param timeout
      * @return
      */
-    protected CallOptions buildCustomCallOptions(SofaRequest sofaRequest, int timeout) {
+    protected CallOptions buildCustomCallOptions(SofaRequest sofaRequest, int timeout, ConsumerConfig consumerConfig) {
         CallOptions tripleCallOptions = CallOptions.DEFAULT;
         final String target = consumerConfig.getParameter("interworking.target");
         if (StringUtils.isNotBlank(target)) {
@@ -170,6 +176,9 @@ public class TripleClientInvoker implements TripleInvoker {
         }
         if (timeout >= 0) {
             tripleCallOptions = tripleCallOptions.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        }
+        if (StringUtils.isNotBlank(consumerConfig.getUniqueId())) {
+            tripleCallOptions = tripleCallOptions.withOption(UNIQUE_ID, consumerConfig.getUniqueId());
         }
         return tripleCallOptions;
     }
