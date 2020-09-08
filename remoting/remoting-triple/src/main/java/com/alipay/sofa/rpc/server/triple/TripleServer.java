@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.interceptor.ServerReqHeaderInterceptor;
 import com.alipay.sofa.rpc.interceptor.TripleServerInterceptor;
@@ -47,6 +49,7 @@ import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.protobuf.ProtoUtils;
 import io.grpc.util.MutableHandlerRegistry;
+import org.omg.PortableServer.ThreadPolicy;
 import triple.Request;
 import triple.Response;
 
@@ -104,14 +107,21 @@ public class TripleServer implements Server {
      */
     protected AtomicInteger                                              invokerCnt      = new AtomicInteger();
 
+    /**
+     * Thread pool
+     * @param serverConfig ServerConfig
+     */
+    private ThreadPoolExecutor                                           bizThreadPool;
+
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
+        bizThreadPool = initThreadPool(serverConfig);
         server = NettyServerBuilder.forPort(serverConfig.getPort()).
             fallbackHandlerRegistry(handlerRegistry)
             .bossEventLoopGroup(constructBossEventLoopGroup())
             .workerEventLoopGroup(constructWorkerEventLoopGroup())
-            .executor(initThreadPool(serverConfig))
+            .executor(bizThreadPool)
             .channelType(constructChannel())
             .build();
     }
@@ -166,10 +176,16 @@ public class TripleServer implements Server {
             return;
         }
         synchronized (this) {
+            if (started) {
+                return;
+            }
             try {
                 server.start();
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Start the triple server at port {}", serverConfig.getPort());
+                }
+                if (EventBus.isEnable(ServerStartedEvent.class)) {
+                    EventBus.post(new ServerStartedEvent(serverConfig, bizThreadPool));
                 }
             } catch (SofaRpcRuntimeException e) {
                 throw e;
@@ -336,4 +352,14 @@ public class TripleServer implements Server {
             hook.postDestroy();
         }
     }
+
+    /**
+     * 得到业务线程池
+     *
+     * @return 业务线程池
+     */
+    public ThreadPoolExecutor getBizThreadPool() {
+        return bizThreadPool;
+    }
+
 }
