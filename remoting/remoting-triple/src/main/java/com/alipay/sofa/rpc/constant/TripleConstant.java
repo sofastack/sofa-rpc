@@ -23,5 +23,12 @@ import io.grpc.CallOptions;
  * @version : TripleConstant.java, v 0.1 2020年09月01日 8:05 下午 zhaowang Exp $
  */
 public class TripleConstant {
-    public static final CallOptions.Key<String> UNIQUE_ID = CallOptions.Key.createWithDefault("uniqueId", "");
+    public static final CallOptions.Key<String> UNIQUE_ID                        = CallOptions.Key.createWithDefault(
+                                                                                     "uniqueId", "");
+    public static final String                  TRIPLE_EXPOSE_OLD                = "triple.use.old.path";
+    public static final String                  EXPOSE_OLD_UNIQUE_ID_SERVICE_KEY = "triple_expose_old_unique_id_service";
+    public static final Boolean                 EXPOSE_OLD_UNIQUE_ID_SERVICE     = Boolean.valueOf(System.getProperty(
+                                                                                     EXPOSE_OLD_UNIQUE_ID_SERVICE_KEY,
+                                                                                     "false"));
+
 }

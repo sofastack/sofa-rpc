@@ -59,6 +59,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.alipay.sofa.rpc.constant.TripleConstant.EXPOSE_OLD_UNIQUE_ID_SERVICE;
+import static com.alipay.sofa.rpc.constant.TripleConstant.TRIPLE_EXPOSE_OLD;
 import static com.alipay.sofa.rpc.utils.SofaProtoUtils.getFullNameWithUniqueId;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
@@ -76,6 +78,12 @@ public class TripleServer implements Server {
      */
     private static final Logger                                          LOGGER          = LoggerFactory
                                                                                              .getLogger(TripleServer.class);
+    /**
+    * The mapping relationship between BindableService and ServerServiceDefinition
+    */
+    protected ConcurrentHashMap<ProviderConfig, ServerServiceDefinition> oldServiceInfo  = new ConcurrentHashMap<ProviderConfig,
+                                                                                                 ServerServiceDefinition>();
+
     /**
      * server config
      */
@@ -216,6 +224,7 @@ public class TripleServer implements Server {
         Object ref = providerConfig.getRef();
         try {
             ServerServiceDefinition serviceDef;
+
             if (SofaProtoUtils.isProtoClass(ref)) {
                 BindableService bindableService = (BindableService) providerConfig.getRef();
                 serviceDef = bindableService.bindService();
@@ -224,8 +233,20 @@ public class TripleServer implements Server {
                 GenericServiceImpl genericService = new GenericServiceImpl(providerConfig);
                 serviceDef = buildSofaServiceDef(genericService, providerConfig, instance);
             }
+            ServerServiceDefinition oldServiceDef;
+            oldServiceDef = serviceDef;
             if (StringUtils.isNotBlank(providerConfig.getUniqueId())) {
                 serviceDef = appendUniqueIdToServiceDef(providerConfig.getUniqueId(), serviceDef);
+                if (exposeOldUniqueIdService(providerConfig)) {
+                    List<TripleServerInterceptor> interceptorList = buildInterceptorChain(oldServiceDef);
+                    ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
+                        oldServiceDef, interceptorList);
+                    oldServiceInfo.put(providerConfig, serviceDefinition);
+                    ServerServiceDefinition ssd = handlerRegistry.addService(serviceDefinition);
+                    if (ssd != null) {
+                        throw new IllegalStateException("Can not expose service with same name");
+                    }
+                }
             }
 
             List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
@@ -235,10 +256,22 @@ public class TripleServer implements Server {
             handlerRegistry.addService(serviceDefinition);
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
-            LOGGER.error("Register triple service error", e);
+            String msg = "Register triple service error";
+            LOGGER.error(msg, e);
             serviceInfo.remove(providerConfig);
+            throw new SofaRpcRuntimeException(msg, e);
         }
 
+    }
+
+    private boolean exposeOldUniqueIdService(ProviderConfig providerConfig) {
+        //default false
+        String exposeOld = providerConfig.getParameter(TRIPLE_EXPOSE_OLD);
+        if (StringUtils.isBlank(exposeOld)) {
+            return EXPOSE_OLD_UNIQUE_ID_SERVICE;
+        } else {
+            return Boolean.parseBoolean(exposeOld);
+        }
     }
 
     private ServerServiceDefinition appendUniqueIdToServiceDef(String uniqueId, ServerServiceDefinition serviceDef) {
@@ -250,8 +283,11 @@ public class TripleServer implements Server {
         for (ServerMethodDefinition method : methods) {
             MethodDescriptor<?, ?> methodDescriptor = method.getMethodDescriptor();
             String fullMethodName = methodDescriptor.getFullMethodName();
-            MethodDescriptor<?, ?> methodDescriptorWithUniqueId = methodDescriptor.toBuilder()
-                .setFullMethodName(getFullNameWithUniqueId(fullMethodName, uniqueId)).build();
+            MethodDescriptor<?, ?> methodDescriptorWithUniqueId = methodDescriptor
+                .toBuilder()
+                .setFullMethodName(
+                    getFullNameWithUniqueId(fullMethodName, uniqueId))
+                .build();
             ServerMethodDefinition<?, ?> newServerMethodDefinition = ServerMethodDefinition.create(
                 methodDescriptorWithUniqueId, method.getServerCallHandler());
             builder.addMethod(newServerMethodDefinition);
@@ -336,6 +372,12 @@ public class TripleServer implements Server {
     public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry) {
         try {
             ServerServiceDefinition serverServiceDefinition = serviceInfo.get(providerConfig);
+            if (exposeOldUniqueIdService(providerConfig)) {
+                ServerServiceDefinition oldServiceDef = oldServiceInfo.get(providerConfig);
+                if (oldServiceDef != null) {
+                    handlerRegistry.removeService(oldServiceDef);
+                }
+            }
             handlerRegistry.removeService(serverServiceDefinition);
             invokerCnt.decrementAndGet();
         } catch (Exception e) {
