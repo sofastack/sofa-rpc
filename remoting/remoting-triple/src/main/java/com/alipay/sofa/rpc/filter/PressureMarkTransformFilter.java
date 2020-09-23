@@ -52,7 +52,6 @@ public class PressureMarkTransformFilter extends Filter {
         SofaTracerSpan currentSpan = SofaTraceContextHolder.getSofaTraceContext().getCurrentSpan();
         boolean loadTest = TracerUtils.isLoadTest(currentSpan);
         if (loadTest) {
-            RpcInvokeContext.removeContext();
             Map<String, String> metaHolder = MetadataHolder.getMetaHolder();
             metaHolder.put(HEAD_KEY_TRAFFIC_TYPE.name(), PRESSURE);
         }
