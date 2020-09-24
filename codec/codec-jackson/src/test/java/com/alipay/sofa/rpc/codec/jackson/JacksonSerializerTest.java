@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest;
+import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest2;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoResponse;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoService;
 import com.alipay.sofa.rpc.common.RemotingConstants;
@@ -462,4 +464,37 @@ public class JacksonSerializerTest {
         });
         return request;
     }
+
+    @Test
+    public void testJacksonFeature() throws UnsupportedEncodingException {
+
+        try {
+            JacksonSerializer serializer = new JacksonSerializer();
+            serializer.decode(new ByteArrayWrapperByteBuf("{\"a\":1}".getBytes("UTF-8")), DemoRequest.class, null);
+            Assert.fail();
+        } catch (SofaRpcException e) {
+            // ok
+        } catch (Throwable e) {
+            Assert.fail();
+        }
+
+        try {
+            JacksonSerializer serializer = new JacksonSerializer();
+            serializer.encode(new DemoRequest2(), null);
+            Assert.fail();
+        } catch (SofaRpcException e) {
+            // ok
+        } catch (Throwable e) {
+            Assert.fail();
+        }
+
+        System.setProperty("sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES", "false");
+        JacksonSerializer serializer = new JacksonSerializer();
+        serializer.decode(new ByteArrayWrapperByteBuf("{\"a\":1}".getBytes("UTF-8")), DemoRequest.class, null);
+
+        System.setProperty("sofa.rpc.codec.jackson.SerializationFeature.FAIL_ON_EMPTY_BEANS", "false");
+        serializer = new JacksonSerializer();
+        serializer.encode(new DemoRequest2(), null);
+    }
+
 }

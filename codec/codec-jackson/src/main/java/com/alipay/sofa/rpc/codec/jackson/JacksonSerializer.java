@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
@@ -35,9 +36,11 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
  * Json serializer.
@@ -61,9 +64,40 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 @Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper  mapper        = new ObjectMapper();
+    private ObjectMapper        mapper                        = new ObjectMapper();
 
-    private JacksonHelper jacksonHelper = new JacksonHelper();
+    private JacksonHelper       jacksonHelper                 = new JacksonHelper();
+
+    private static final String DESERIALIZATIONFEATURE_PREFIX = "sofa.rpc.codec.jackson.DeserializationFeature.";
+
+    private static final String SERIALIZATIONFEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
+
+    public JacksonSerializer() {
+
+        Properties properties = System.getProperties();
+        for (String key : properties.stringPropertyNames()) {
+            if (key.startsWith(DESERIALIZATIONFEATURE_PREFIX)) {
+                String enumName = StringUtils.substringAfter(key, DESERIALIZATIONFEATURE_PREFIX);
+                for (DeserializationFeature df : DeserializationFeature.values()) {
+                    if (df.name().equals(enumName)) {
+                        boolean state = Boolean.parseBoolean(properties.getProperty(key));
+                        mapper.configure(df, state);
+                        break;
+                    }
+                }
+            }
+            if (key.startsWith(SERIALIZATIONFEATURE_PREFIX)) {
+                String enumName = StringUtils.substringAfter(key, SERIALIZATIONFEATURE_PREFIX);
+                for (SerializationFeature sf : SerializationFeature.values()) {
+                    if (sf.name().equals(enumName)) {
+                        boolean state = Boolean.parseBoolean(properties.getProperty(key));
+                        mapper.configure(sf, state);
+                        break;
+                    }
+                }
+            }
+        }
+    }
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
