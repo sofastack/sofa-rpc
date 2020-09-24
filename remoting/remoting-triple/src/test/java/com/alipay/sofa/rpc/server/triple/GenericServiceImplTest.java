@@ -49,7 +49,7 @@ public class GenericServiceImplTest {
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<>();
         providerConfig.setRef(new HelloServiceImpl());
         providerConfig.setProxyClass(HelloService.class);
-        genericService = new GenericServiceImpl(providerConfig);
+        genericService = new GenericServiceImpl(providerConfig.getRef(),providerConfig.getProxyClass());
         responseObserver = new MockStreamObserver<>();
     }
 

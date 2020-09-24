@@ -16,12 +16,7 @@
  */
 package com.alipay.sofa.rpc.utils;
 
-import com.alipay.sofa.rpc.api.GenericService;
-import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.json.JSONSerializer;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.server.triple.GenericServiceImpl;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;

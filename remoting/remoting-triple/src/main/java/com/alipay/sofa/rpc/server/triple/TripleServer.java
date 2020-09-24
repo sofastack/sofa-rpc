@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
 import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
@@ -234,8 +235,11 @@ public class TripleServer implements Server {
                 serviceDef = bindableService.bindService();
 
             } else {
-                GenericServiceImpl genericService = new GenericServiceImpl(providerConfig);
-                serviceDef = buildSofaServiceDef(genericService, providerConfig, instance);
+                Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(),
+                    instance);
+                GenericServiceImpl genericService = new GenericServiceImpl(obj, providerConfig.getProxyClass());
+                genericService.setProxiedImpl(genericService);
+                serviceDef = buildSofaServiceDef(genericService, providerConfig);
             }
             List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
@@ -251,7 +255,7 @@ public class TripleServer implements Server {
     }
 
     private ServerServiceDefinition buildSofaServiceDef(GenericServiceImpl genericService,
-                                                        ProviderConfig providerConfig, Invoker instance) {
+                                                        ProviderConfig providerConfig) {
         ServerServiceDefinition templateDefinition = genericService.bindService();
         ServerCallHandler<Request, Response> templateHandler = (ServerCallHandler<Request, Response>) templateDefinition
             .getMethods().iterator().next().getServerCallHandler();

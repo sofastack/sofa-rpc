@@ -21,6 +21,7 @@ import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.sofa.rpc.common.MetadataHolder;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
@@ -45,6 +46,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_APP_NAME;
 
@@ -134,6 +136,14 @@ public class TripleTracerAdapter {
                     target);
         }
         for (Map.Entry<String, String> entry : header.entrySet()) {
+            if (StringUtils.isNotBlank(entry.getValue())) {
+                requestHeader.put(TripleHeadKeys.getKey(entry.getKey()), entry.getValue());
+            }
+        }
+
+        // set custom headers
+        Set<Map.Entry<String, String>> entries = MetadataHolder.getMetaHolder().entrySet();
+        for (Map.Entry<String, String> entry : entries) {
             if (StringUtils.isNotBlank(entry.getValue())) {
                 requestHeader.put(TripleHeadKeys.getKey(entry.getKey()), entry.getValue());
             }

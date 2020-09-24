@@ -30,9 +30,9 @@ import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
 import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
-import triple.GenericServiceGrpc;
 import triple.Request;
 import triple.Response;
+import triple.SofaGenericServiceTriple;
 
 import java.lang.reflect.Method;
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.List;
  * @author zhaowang
  * @version : GenericServiceImpl.java, v 0.1 2020年05月27日 9:19 下午 zhaowang Exp $
  */
-public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBase {
+public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceImplBase {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
 
@@ -52,6 +52,12 @@ public class GenericServiceImpl extends GenericServiceGrpc.GenericServiceImplBas
         super();
         ref = providerConfig.getRef();
         proxyClass = providerConfig.getProxyClass();
+    }
+
+    public GenericServiceImpl(Object ref, Class proxyClass) {
+        super();
+        this.ref = ref;
+        this.proxyClass = proxyClass;
     }
 
     @Override
