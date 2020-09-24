@@ -105,6 +105,11 @@ public class TripleHeadKeys {
                                                                                           .of("tri-consumer-appname",
                                                                                               Metadata.ASCII_STRING_MARSHALLER);
 
+    //for auth
+    public static final Key<String>                         HEAD_KEY_TRAFFIC_TYPE     = Key
+                                                                                          .of("tri-traffic-type",
+                                                                                              Metadata.ASCII_STRING_MARSHALLER);
+
     public static Key<String> getKey(String key) {
         Key<String> headKey = keyMap.get(key);
         if (headKey == null) {
