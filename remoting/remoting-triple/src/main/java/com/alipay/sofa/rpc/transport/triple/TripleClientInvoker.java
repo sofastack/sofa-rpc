@@ -102,7 +102,7 @@ public class TripleClientInvoker implements TripleInvoker {
         throws Exception {
         if (!useGeneric) {
             SofaResponse sofaResponse = new SofaResponse();
-            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout, consumerConfig),
+            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout),
                 timeout);
             final Method method = sofaRequest.getMethod();
             Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
@@ -130,7 +130,7 @@ public class TripleClientInvoker implements TripleInvoker {
             Request request = getRequest(sofaRequest, serialization, serializer);
 
             Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
-                buildCustomCallOptions(sofaRequest, timeout, consumerConfig), request);
+                buildCustomCallOptions(sofaRequest, timeout), request);
 
             SofaResponse sofaResponse = new SofaResponse();
             byte[] responseDate = response.getData().toByteArray();
@@ -172,7 +172,7 @@ public class TripleClientInvoker implements TripleInvoker {
      * @param timeout
      * @return
      */
-    protected CallOptions buildCustomCallOptions(SofaRequest sofaRequest, int timeout, ConsumerConfig consumerConfig) {
+    protected CallOptions buildCustomCallOptions(SofaRequest sofaRequest, int timeout) {
         CallOptions tripleCallOptions = CallOptions.DEFAULT;
         final String target = consumerConfig.getParameter("interworking.target");
         if (StringUtils.isNotBlank(target)) {
