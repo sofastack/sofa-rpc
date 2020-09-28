@@ -116,6 +116,7 @@ public class TripleHessianInvokeTest {
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setInterfaceId(TripleHessianInterface.class.getName())
             .setRef(ref)
+            .setRepeatedExportLimit(-1)
             .setServer(serverConfig)
             .setRegister(false);
 
@@ -208,6 +209,7 @@ public class TripleHessianInvokeTest {
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setInterfaceId(TripleHessianInterface.class.getName())
             .setRef(ref)
+            .setRepeatedExportLimit(-1)
             .setServer(serverConfig)
             .setRegister(false);
 
