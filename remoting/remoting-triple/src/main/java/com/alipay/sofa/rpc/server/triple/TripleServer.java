@@ -244,7 +244,7 @@ public class TripleServer implements Server {
                     oldServiceInfo.put(providerConfig, serviceDefinition);
                     ServerServiceDefinition ssd = handlerRegistry.addService(serviceDefinition);
                     if (ssd != null) {
-                        throw new IllegalStateException("Can not expose service with same name");
+                        throw new IllegalStateException("Can not expose service with same name:"+serviceDefinition.getServiceDescriptor().getName());
                     }
                 }
             }
@@ -253,7 +253,10 @@ public class TripleServer implements Server {
             ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
                 serviceDef, interceptorList);
             serviceInfo.put(providerConfig, serviceDefinition);
-            handlerRegistry.addService(serviceDefinition);
+            ServerServiceDefinition ssd = handlerRegistry.addService(serviceDefinition);
+            if (ssd != null) {
+                throw new IllegalStateException("Can not expose service with same name:"+serviceDefinition.getServiceDescriptor().getName());
+            }
             invokerCnt.incrementAndGet();
         } catch (Exception e) {
             String msg = "Register triple service error";

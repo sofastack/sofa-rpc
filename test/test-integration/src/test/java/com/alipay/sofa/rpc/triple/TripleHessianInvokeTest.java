@@ -92,18 +92,20 @@ public class TripleHessianInvokeTest {
         Response response1 = helloService.call2(null);
         Assert.assertNull(response1);
 
+        providerConfig.unExport();
+        serverConfig.destroy();
     }
 
     @Test
     public void testInvokeWithUniqueId() throws InterruptedException {
-        String uniqueId = "uniqueId";
+        String uniqueId = "uniqueId1";
         RpcRunningState.setDebugMode(true);
 
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
 
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
 
-        int port = 50062;
+        int port = 50063;
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -185,6 +187,9 @@ public class TripleHessianInvokeTest {
 
         response1 = helloService.call2(null);
         Assert.assertNull(response1);
+
+        providerConfig.unExport();
+        serverConfig.destroy();
     }
 
     @Test
@@ -231,7 +236,7 @@ public class TripleHessianInvokeTest {
             .setPort(port);
 
         ref = new TripleHessianInterfaceImpl();
-        providerConfig = new ProviderConfig<TripleHessianInterface>()
+        ProviderConfig<TripleHessianInterface> providerConfig2 = new ProviderConfig<TripleHessianInterface>()
             .setApplication(serverApp)
             .setUniqueId(uniqueId)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -240,12 +245,17 @@ public class TripleHessianInvokeTest {
             .setServer(serverConfig)
             .setRegister(false);
 
-        providerConfig.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
+        providerConfig2.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
 
         try {
-            providerConfig.export();
+            providerConfig2.export();
             Assert.fail();
         } catch (Exception e) {
+
+        }finally {
+            providerConfig2.unExport();
+            providerConfig.unExport();
+            serverConfig.destroy();
 
         }
     }
