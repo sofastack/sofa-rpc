@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.transport.triple;
 
-import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -38,7 +37,10 @@ import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
+import static com.alipay.sofa.rpc.constant.TripleConstant.TRIPLE_EXPOSE_OLD;
+import static com.alipay.sofa.rpc.constant.TripleConstant.UNIQUE_ID;
 import static com.alipay.sofa.rpc.utils.SofaProtoUtils.checkIfUseGeneric;
+import static com.alipay.sofa.rpc.utils.SofaProtoUtils.getFullNameWithUniqueId;
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
@@ -62,11 +64,14 @@ public class TripleClientInvoker implements TripleInvoker {
 
     private Serializer          serializer;
     private String              serialization;
+    private boolean             useOldPath;
 
     public TripleClientInvoker(ConsumerConfig consumerConfig, Channel channel) {
         this.channel = channel;
         this.consumerConfig = consumerConfig;
         useGeneric = checkIfUseGeneric(consumerConfig);
+        //default false
+        useOldPath = Boolean.parseBoolean(consumerConfig.getParameter(TRIPLE_EXPOSE_OLD));
         cacheCommonData(consumerConfig);
 
         if (!useGeneric) {
@@ -97,8 +102,8 @@ public class TripleClientInvoker implements TripleInvoker {
         throws Exception {
         if (!useGeneric) {
             SofaResponse sofaResponse = new SofaResponse();
-            ProviderInfo providerInfo = null;
-            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout), timeout);
+            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout),
+                timeout);
             final Method method = sofaRequest.getMethod();
             Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
             sofaResponse.setAppResponse(appResponse);
@@ -110,9 +115,14 @@ public class TripleClientInvoker implements TripleInvoker {
             MethodDescriptor.Marshaller<?> responseMarshaller = null;
             requestMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Request.getDefaultInstance());
             responseMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Response.getDefaultInstance());
-            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor.newBuilder()
+            String fullMethodName = generateFullMethodName(serviceName, methodName);
+            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor
+                .newBuilder()
                 .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-                .setFullMethodName(generateFullMethodName(serviceName, methodName)).setSampledToLocalTracing(true)
+                .setFullMethodName(useOldPath ? fullMethodName :
+                    getFullNameWithUniqueId(fullMethodName,
+                        consumerConfig.getUniqueId()))
+                .setSampledToLocalTracing(true)
                 .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
                 .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
                 .build();
@@ -170,6 +180,9 @@ public class TripleClientInvoker implements TripleInvoker {
         }
         if (timeout >= 0) {
             tripleCallOptions = tripleCallOptions.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS);
+        }
+        if (StringUtils.isNotBlank(consumerConfig.getUniqueId())) {
+            tripleCallOptions = tripleCallOptions.withOption(UNIQUE_ID, consumerConfig.getUniqueId());
         }
         return tripleCallOptions;
     }

@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.constant.TripleConstant;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
@@ -74,6 +75,107 @@ public class TripleServerTest {
         reply = greeterBlockingStub.sayHello(request);
 
         Assert.assertNotNull(reply);
+
+    }
+
+    @Test
+    //同步调用,直连 有uniqueId
+    public void testSyncWithUniqueId() {
+
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
+
+        int port = 50052;
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setPort(port);
+
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+            .setApplication(applicationConfig)
+            .setUniqueId("abc")
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setRef(new GreeterImpl())
+            .setServer(serverConfig);
+
+        providerConfig.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
+
+        providerConfig.export();
+
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setUniqueId("abc")
+            .setDirectUrl("tri://127.0.0.1:" + port);
+
+        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
+
+        HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
+            .build();
+        HelloReply reply = null;
+        HelloRequest request = HelloRequest.newBuilder().setName("world").setDateTime(dateTime).build();
+        reply = greeterBlockingStub.sayHello(request);
+
+        Assert.assertNotNull(reply);
+
+        consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setDirectUrl("tri://127.0.0.1:" + port);
+
+        greeterBlockingStub = consumerConfig.refer();
+
+        dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
+            .build();
+        request = HelloRequest.newBuilder().setName("world").setDateTime(dateTime).build();
+        reply = greeterBlockingStub.sayHello(request);
+
+        Assert.assertNotNull(reply);
+
+    }
+
+    @Test
+    public void testExposeTwice() {
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
+
+        int port = 50052;
+
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setPort(port);
+
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+            .setApplication(applicationConfig)
+            .setUniqueId("abc")
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setRef(new GreeterImpl())
+            .setServer(serverConfig);
+
+        providerConfig.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
+
+        providerConfig.export();
+        applicationConfig = new ApplicationConfig().setAppName("triple-server");
+
+        serverConfig = new ServerConfig()
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setPort(port);
+        providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+            .setApplication(applicationConfig)
+            .setUniqueId("abcd")
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+            .setRef(new GreeterImpl())
+            .setServer(serverConfig);
+
+        providerConfig.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
+
+        try {
+            providerConfig.export();
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
 
     }
 
