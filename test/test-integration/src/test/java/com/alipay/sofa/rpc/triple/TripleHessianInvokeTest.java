@@ -252,7 +252,7 @@ public class TripleHessianInvokeTest {
             Assert.fail();
         } catch (Exception e) {
 
-        }finally {
+        } finally {
             providerConfig2.unExport();
             providerConfig.unExport();
             serverConfig.destroy();
