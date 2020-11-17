@@ -495,6 +495,10 @@ public class JacksonSerializerTest {
         System.setProperty("sofa.rpc.codec.jackson.SerializationFeature.FAIL_ON_EMPTY_BEANS", "false");
         serializer = new JacksonSerializer();
         serializer.encode(new DemoRequest2(), null);
+
+        System.setProperty("sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES", "true");
+        System.setProperty("sofa.rpc.codec.jackson.SerializationFeature.FAIL_ON_EMPTY_BEANS", "true");
+
     }
 
 }
