@@ -46,7 +46,7 @@ SOFARPC 是一个高可扩展性、高性能、生产级的 Java RPC 框架。�
 
 - **钉钉群**
 
-  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*QkNdTrDjk_8AAAAAAAAAAABkARQnAQ" height="250" width="250">
+  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*am-XQKObyJ8AAAAAAAAAAABkARQnAQ" height="250" width="250">
 
 ## 致谢
 
