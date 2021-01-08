@@ -298,6 +298,7 @@ public class MeshRegistry extends Registry {
         String key = MeshRegistryHelper.buildMeshKey(consumerConfig, consumerConfig.getProtocol());
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
         subscribeRequest.setServiceName(key);
+        subscribeRequest.setProperties(consumerConfig.getParameters());
         return subscribeRequest;
     }
 
