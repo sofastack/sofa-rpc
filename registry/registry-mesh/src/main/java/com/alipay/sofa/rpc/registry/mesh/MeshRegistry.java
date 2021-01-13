@@ -177,6 +177,7 @@ public class MeshRegistry extends Registry {
         PublishServiceRequest publishServiceRequest = new PublishServiceRequest();
         publishServiceRequest.setServiceName(serviceName);
         publishServiceRequest.setProtocolType(protocol);
+        publishServiceRequest.setPort(String.valueOf(providerInfo.getPort()));
         ProviderMetaInfo providerMetaInfo = new ProviderMetaInfo();
         providerMetaInfo.setProtocol(providerInfo.getProtocolType());
         providerMetaInfo.setSerializeType(providerInfo.getSerializationType());
