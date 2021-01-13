@@ -25,10 +25,10 @@ public class PublishServiceRequest {
 
     private String           port;
 
-    // value type example: DEFAULT, XFIRE, bolt or tr
+    // Value example: DEFAULT, XFIRE, bolt or tr
     private String           protocolType;
 
-    // timeout, appName, serialize or properties
+    // Contains: timeout, appName, serialize or properties
     private ProviderMetaInfo providerMetaInfo;
 
     private boolean          onlyPublishInCloud;

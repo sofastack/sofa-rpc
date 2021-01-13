@@ -23,13 +23,13 @@ import java.util.Map;
  * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class SubscribeServiceRequest {
-
     private String              serviceName;
 
-    //这个值是类似DEFAULT/XFIRE这种，也有可能是tr
+    // Value example: DEFAULT, XFIRE, bolt or tr
     private String              protocolType;
 
-    //this should be xxx-pool.alipay.com or  xxx.alipay.com,can be null
+    // Value should be in form: xxx-pool.alipay.com or xxx.alipay.com
+    // targetAppAddress is nullable
     private String              targetAppAddress;
 
     private boolean             vipEnforce;
@@ -98,14 +98,13 @@ public class SubscribeServiceRequest {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("SubscribeServiceRequest{");
-        sb.append("serviceName='").append(serviceName).append('\'');
-        sb.append(", protocolType='").append(protocolType).append('\'');
-        sb.append(", targetAppAddress='").append(targetAppAddress).append('\'');
-        sb.append(", vipEnforce=").append(vipEnforce);
-        sb.append(", vipOnly=").append(vipOnly);
-        sb.append(", localCloudFirst=").append(localCloudFirst);
-        sb.append('}');
-        return sb.toString();
+        return "SubscribeServiceRequest{" + "serviceName='" + serviceName + '\'' +
+                ", protocolType='" + protocolType + '\'' +
+                ", targetAppAddress='" + targetAppAddress + '\'' +
+                ", vipEnforce=" + vipEnforce +
+                ", vipOnly=" + vipOnly +
+                ", localCloudFirst=" + localCloudFirst +
+                ", properties=" + properties +
+                '}';
     }
 }
