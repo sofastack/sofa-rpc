@@ -24,14 +24,14 @@ import java.util.Map;
  */
 public class UnSubscribeServiceRequest {
 
-    private String serviceName;
+    private String              serviceName;
 
     // Value should be in form: xxx-pool.alipay.com or xxx.alipay.com
     // targetAppAddress is nullable
-    private String targetAppAddress;
+    private String              targetAppAddress;
 
     // Value example: DEFAULT, XFIRE, bolt or tr
-    private String protocolType;
+    private String              protocolType;
 
     private Map<String, String> properties;
 
@@ -70,9 +70,9 @@ public class UnSubscribeServiceRequest {
     @Override
     public String toString() {
         return "UnSubscribeServiceRequest{" + "serviceName='" + serviceName + '\'' +
-                ", targetAppAddress='" + targetAppAddress + '\'' +
-                ", protocolType='" + protocolType + '\'' +
-                ", properties=" + properties +
-                '}';
+            ", targetAppAddress='" + targetAppAddress + '\'' +
+            ", protocolType='" + protocolType + '\'' +
+            ", properties=" + properties +
+            '}';
     }
 }

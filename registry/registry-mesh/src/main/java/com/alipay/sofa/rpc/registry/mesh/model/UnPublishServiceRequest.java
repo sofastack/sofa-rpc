@@ -23,10 +23,10 @@ import java.util.Map;
  * @version $Id: PublishServiceRequest.java, v 0.1 2018年04月03日 11:27 AM bystander Exp $
  */
 public class UnPublishServiceRequest {
-    private String serviceName;
+    private String              serviceName;
 
     // Value example: DEFAULT, XFIRE, bolt or tr
-    private String protocolType;
+    private String              protocolType;
 
     private Map<String, String> properties;
 
@@ -57,8 +57,8 @@ public class UnPublishServiceRequest {
     @Override
     public String toString() {
         return "UnPublishServiceRequest{" + "serviceName='" + serviceName + '\'' +
-                ", protocolType='" + protocolType + '\'' +
-                ", properties='" + properties +
-                '}';
+            ", protocolType='" + protocolType + '\'' +
+            ", properties='" + properties +
+            '}';
     }
 }

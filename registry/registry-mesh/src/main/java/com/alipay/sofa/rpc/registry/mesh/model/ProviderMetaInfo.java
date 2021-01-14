@@ -76,10 +76,10 @@ public class ProviderMetaInfo {
     @Override
     public String toString() {
         return "ProviderMetaInfo{" + "protocol='" + protocol + '\'' +
-                ", version='" + version + '\'' +
-                ", serializeType='" + serializeType + '\'' +
-                ", appName='" + appName + '\'' +
-                ", properties=" + properties +
-                '}';
+            ", version='" + version + '\'' +
+            ", serializeType='" + serializeType + '\'' +
+            ", appName='" + appName + '\'' +
+            ", properties=" + properties +
+            '}';
     }
 }

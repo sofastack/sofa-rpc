@@ -76,9 +76,9 @@ public class PublishServiceRequest {
     @Override
     public String toString() {
         return "PublishServiceRequest{" + "serviceName='" + serviceName + '\'' +
-                ", protocolType='" + protocolType + '\'' +
-                ", providerMetaInfo=" + providerMetaInfo +
-                ", onlyPublishInCloud=" + onlyPublishInCloud +
-                '}';
+            ", protocolType='" + protocolType + '\'' +
+            ", providerMetaInfo=" + providerMetaInfo +
+            ", onlyPublishInCloud=" + onlyPublishInCloud +
+            '}';
     }
 }

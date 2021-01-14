@@ -99,12 +99,12 @@ public class SubscribeServiceRequest {
     @Override
     public String toString() {
         return "SubscribeServiceRequest{" + "serviceName='" + serviceName + '\'' +
-                ", protocolType='" + protocolType + '\'' +
-                ", targetAppAddress='" + targetAppAddress + '\'' +
-                ", vipEnforce=" + vipEnforce +
-                ", vipOnly=" + vipOnly +
-                ", localCloudFirst=" + localCloudFirst +
-                ", properties=" + properties +
-                '}';
+            ", protocolType='" + protocolType + '\'' +
+            ", targetAppAddress='" + targetAppAddress + '\'' +
+            ", vipEnforce=" + vipEnforce +
+            ", vipOnly=" + vipOnly +
+            ", localCloudFirst=" + localCloudFirst +
+            ", properties=" + properties +
+            '}';
     }
 }
