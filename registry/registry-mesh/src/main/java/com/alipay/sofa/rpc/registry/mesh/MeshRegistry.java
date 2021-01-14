@@ -229,8 +229,8 @@ public class MeshRegistry extends Registry {
 
         UnPublishServiceRequest unPublishServiceRequest = new UnPublishServiceRequest();
         unPublishServiceRequest.setServiceName(serviceName);
+        unPublishServiceRequest.setProperties(providerInfo.getStaticAttrs());
         client.unPublishService(unPublishServiceRequest);
-
     }
 
     @Override
@@ -364,6 +364,7 @@ public class MeshRegistry extends Registry {
         UnSubscribeServiceRequest unsubscribeRequest = new UnSubscribeServiceRequest();
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
         unsubscribeRequest.setServiceName(key);
+        unsubscribeRequest.setProperties(config.getParameters());
         return unsubscribeRequest;
     }
 
