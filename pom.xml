@@ -56,7 +56,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>gi5.7.7-SNAPSHOT</revision>
+        <revision>5.7.7-SNAPSHOT</revision>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
         <maven.javadoc.skip>true</maven.javadoc.skip>
