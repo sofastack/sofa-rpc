@@ -39,6 +39,16 @@ public class MultiProtocolServerExpTest extends ActivelyDestroyTest {
     @Test
     public void testMultiProtocolExp() throws NoSuchFieldException {
         try {
+            Field field = DefaultProviderBootstrap.class.getDeclaredField("EXPORTED_KEYS");
+            Map map = null;
+            field.setAccessible(true);
+            map = (ConcurrentMap<String, AtomicInteger>) field.get(null);
+            map.clear();
+        } catch (IllegalAccessException e1) {
+            e1.printStackTrace();
+        }
+
+        try {
             // 只有2个线程 执行
             ServerConfig serverConfig = new ServerConfig()
                 .setStopTimeout(0)
