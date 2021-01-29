@@ -37,6 +37,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
+@Deprecated
 public final class SofaConfigs {
     /**
      * 外部加载器
