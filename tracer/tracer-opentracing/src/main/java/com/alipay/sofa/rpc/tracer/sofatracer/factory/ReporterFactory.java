@@ -21,6 +21,8 @@ import com.alipay.common.tracer.core.reporter.digest.DiskReporterImpl;
 import com.alipay.common.tracer.core.reporter.facade.Reporter;
 import com.alipay.common.tracer.core.reporter.stat.SofaTracerStatisticReporter;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.sofa.common.config.SofaConfigs;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 /**
@@ -28,7 +30,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
  */
 public class ReporterFactory {
 
-    private static String REPORT_TYPE = System.getProperty("reporter_type", "DISK");
+    private static String REPORT_TYPE = SofaConfigs.getOrDefault(RpcConfigKeys.TRACER_EXPOSE_TYPE);
 
     public static Reporter build(String digestLog, String digestRollingPolicy,
                                  String digestLogReserveConfig, SpanEncoder<SofaTracerSpan> spanEncoder,
