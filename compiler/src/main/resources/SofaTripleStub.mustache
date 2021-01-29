@@ -69,6 +69,8 @@ stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
     .{{methodName}}(request, responseObserver);
     }
 
+{{/unaryMethods}}
+
     private boolean isNotEmpty(String uniqueId) {
         return uniqueId != null && uniqueId.length() > 0;
     }
@@ -81,8 +83,6 @@ stub = {{serviceName}}Grpc.newStub(channel).build(channel, callOptions);
         }
         return fullMethodName;
     }
-
-{{/unaryMethods}}
 {{#serverStreamingMethods}}
     {{#javaDoc}}
         {{{javaDoc}}}
