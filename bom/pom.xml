@@ -46,7 +46,7 @@
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.2.3</logback.version>
         <!-- Test libs -->
-        <junit.version>4.10</junit.version>
+        <junit.version>4.13.1</junit.version>
         <!-- alipay libs -->
         <bolt.version>1.5.6</bolt.version>
         <sofa.common.tools.version>1.0.18</sofa.common.tools.version>
