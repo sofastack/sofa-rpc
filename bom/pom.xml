@@ -27,7 +27,7 @@
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <swagger.version>1.5.18</swagger.version>
         <asm.version>7.0</asm.version>
-        <guava.version>27.0-jre</guava.version>
+        <guava.version>29.0-jre</guava.version>
         <!-- serialization -->
         <hessian.version>3.3.7</hessian.version>
         <thrift.version>0.9.2</thrift.version>
