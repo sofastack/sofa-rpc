@@ -13,6 +13,10 @@
     <artifactId>sofa-rpc-common</artifactId>
     
     <dependencies>
+        <dependency>
+            <groupId>com.alipay.sofa.common</groupId>
+            <artifactId>sofa-common-tools</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
