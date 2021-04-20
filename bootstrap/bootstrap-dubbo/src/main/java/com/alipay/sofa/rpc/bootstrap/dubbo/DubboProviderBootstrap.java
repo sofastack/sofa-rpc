@@ -60,6 +60,12 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
      */
     private ServiceConfig<T>             serviceConfig;
 
+
+    /**
+     * dubbo service version
+     */
+    private static final String VERSION = "version";
+
     @Override
     public void export() {
         if (exported) {
@@ -132,7 +138,11 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         serviceConfig.setInterface(providerConfig.getInterfaceId());
         serviceConfig.setRef(providerConfig.getRef());
         serviceConfig.setGroup(providerConfig.getUniqueId());
-        serviceConfig.setVersion("1.0");
+        if (providerConfig.getParameters().containsKey(VERSION)) {
+            serviceConfig.setVersion(providerConfig.getParameter(VERSION));
+        } else {
+            serviceConfig.setVersion("1.0");
+        }
         serviceConfig.setActives(providerConfig.getConcurrents());
         serviceConfig.setDelay(providerConfig.getDelay());
         serviceConfig.setDynamic(providerConfig.isDynamic());
