@@ -63,7 +63,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     /**
      * dubbo service version
      */
-    private static final String VERSION = "version";
+    private static final String          VERSION = "version";
 
     @Override
     public void export() {
