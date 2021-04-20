@@ -62,6 +62,11 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     }
 
     /**
+     * dubbo service version
+     */
+    private static final String VERSION = "version";
+
+    /**
      * Refer t.
      *
      * @return the t
@@ -104,7 +109,11 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         referenceConfig.setId(consumerConfig.getId());
         referenceConfig.setInterface(consumerConfig.getInterfaceId());
         referenceConfig.setGroup(consumerConfig.getUniqueId());
-        referenceConfig.setVersion("1.0");
+        if (consumerConfig.getParameters().containsKey(VERSION)) {
+            referenceConfig.setVersion(consumerConfig.getParameter(VERSION));
+        } else {
+            referenceConfig.setVersion("1.0");
+        }
         referenceConfig.setActives(consumerConfig.getConcurrents());
         referenceConfig.setCluster(consumerConfig.getCluster());
         referenceConfig.setConnections(consumerConfig.getConnectionNum());
