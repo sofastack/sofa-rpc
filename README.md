@@ -4,6 +4,7 @@
 [![Coverage Status](https://codecov.io/gh/sofastack/sofa-rpc/branch/master/graph/badge.svg)](https://codecov.io/gh/sofastack/sofa-rpc)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
 [![Maven](https://img.shields.io/github/release/sofastack/sofa-rpc.svg)](https://github.com/sofastack/sofa-rpc/releases)
+[![Percentage of issues still open](http://isitmaintained.com/badge/open/sofastack/sofa-rpc.svg)](http://isitmaintained.com/project/sofastack/sofa-rpc "Percentage of issues still open")
 
 ## Overview
 
