@@ -53,6 +53,11 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     protected transient volatile T proxyIns;
 
     /**
+     * dubbo service version
+     */
+    private static final String    VERSION = "version";
+
+    /**
      * 构造函数
      *
      * @param consumerConfig 服务消费者配置
