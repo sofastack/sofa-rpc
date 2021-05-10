@@ -109,7 +109,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         referenceConfig.setId(consumerConfig.getId());
         referenceConfig.setInterface(consumerConfig.getInterfaceId());
         referenceConfig.setGroup(consumerConfig.getUniqueId());
-        if (consumerConfig.getParameters().containsKey(VERSION)) {
+        if (consumerConfig.getParameters() != null && consumerConfig.getParameters().containsKey(VERSION)) {
             referenceConfig.setVersion(consumerConfig.getParameter(VERSION));
         } else {
             referenceConfig.setVersion("1.0");
