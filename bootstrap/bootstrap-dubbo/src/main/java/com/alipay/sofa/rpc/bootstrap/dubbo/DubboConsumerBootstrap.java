@@ -53,6 +53,11 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     protected transient volatile T proxyIns;
 
     /**
+     * dubbo service version
+     */
+    private static final String    VERSION = "version";
+
+    /**
      * 构造函数
      *
      * @param consumerConfig 服务消费者配置
@@ -104,7 +109,11 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         referenceConfig.setId(consumerConfig.getId());
         referenceConfig.setInterface(consumerConfig.getInterfaceId());
         referenceConfig.setGroup(consumerConfig.getUniqueId());
-        referenceConfig.setVersion("1.0");
+        if (consumerConfig.getParameters() != null && consumerConfig.getParameters().containsKey(VERSION)) {
+            referenceConfig.setVersion(consumerConfig.getParameter(VERSION));
+        } else {
+            referenceConfig.setVersion("1.0");
+        }
         referenceConfig.setActives(consumerConfig.getConcurrents());
         referenceConfig.setCluster(consumerConfig.getCluster());
         referenceConfig.setConnections(consumerConfig.getConnectionNum());

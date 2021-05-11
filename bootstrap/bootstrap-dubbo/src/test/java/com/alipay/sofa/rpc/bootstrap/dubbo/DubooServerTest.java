@@ -246,6 +246,85 @@ public class DubooServerTest {
 
     }
 
+    @Test
+    //同步调用,直连,dubbo 服务指定版本version
+    public void testWithParameterWithVersion() {
+        try {
+            // 只有1个线程 执行
+            ServerConfig serverConfig = new ServerConfig()
+                .setStopTimeout(60000)
+                .setPort(20880)
+                .setProtocol("dubbo")
+                .setQueues(100).setCoreThreads(1).setMaxThreads(2);
+
+            // 发布一个服务，每个请求要执行1秒
+            ApplicationConfig serverApplacation = new ApplicationConfig();
+            serverApplacation.setAppName("server");
+            providerConfig = new ProviderConfig<DemoService>()
+                .setInterfaceId(DemoService.class.getName())
+                .setRef(new DemoServiceImpl())
+                .setBootstrap("dubbo")
+                .setServer(serverConfig)
+                .setParameter("version", "1.0.1")
+                .setRegister(false).setApplication(serverApplacation);
+            providerConfig.export();
+
+            ApplicationConfig clientApplication = new ApplicationConfig();
+            clientApplication.setAppName("client");
+            consumerConfig = new ConsumerConfig<DemoService>()
+                .setInterfaceId(DemoService.class.getName())
+                .setDirectUrl("dubbo://127.0.0.1:20880")
+                .setBootstrap("dubbo")
+                .setTimeout(30000)
+                .setParameter("version", "1.0.1")
+                .setRegister(false).setProtocol("dubbo").setApplication(clientApplication);
+            final DemoService demoService = consumerConfig.refer();
+
+            String result = demoService.sayHello("xxx");
+            Assert.assertTrue(result.equalsIgnoreCase("hello xxx"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.assertTrue(false);
+        }
+    }
+
+    @Test(expected = com.alibaba.dubbo.rpc.RpcException.class)
+    //同步调用,直连,dubbo 消费没有指定dubbo服务版本version
+    public void testConsumerWithNoDubboServiceVersion() {
+        // 只有1个线程 执行
+        ServerConfig serverConfig = new ServerConfig()
+            .setStopTimeout(60000)
+            .setPort(20880)
+            .setProtocol("dubbo")
+            .setQueues(100).setCoreThreads(1).setMaxThreads(2);
+
+        // 发布一个服务，每个请求要执行1秒
+        ApplicationConfig serverApplacation = new ApplicationConfig();
+        serverApplacation.setAppName("server");
+        providerConfig = new ProviderConfig<DemoService>()
+            .setInterfaceId(DemoService.class.getName())
+            .setRef(new DemoServiceImpl())
+            .setBootstrap("dubbo")
+            .setServer(serverConfig)
+            .setParameter("version", "1.0.1")
+            .setRegister(false).setApplication(serverApplacation);
+        providerConfig.export();
+
+        ApplicationConfig clientApplication = new ApplicationConfig();
+        clientApplication.setAppName("client");
+        consumerConfig = new ConsumerConfig<DemoService>()
+            .setInterfaceId(DemoService.class.getName())
+            .setDirectUrl("dubbo://127.0.0.1:20880")
+            .setBootstrap("dubbo")
+            .setTimeout(30000)
+            .setRegister(false).setProtocol("dubbo").setApplication(clientApplication);
+        final DemoService demoService = consumerConfig.refer();
+
+        String result = demoService.sayHello("xxx");
+        Assert.assertTrue(result.equalsIgnoreCase("hello xxx"));
+
+    }
+
     @BeforeClass
     public static void adBeforeClass() {
         RpcRunningState.setUnitTestMode(true);
