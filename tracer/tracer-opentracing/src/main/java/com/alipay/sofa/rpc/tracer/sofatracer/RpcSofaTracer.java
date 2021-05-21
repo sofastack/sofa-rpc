@@ -450,16 +450,22 @@ public class RpcSofaTracer extends Tracer {
     }
 
     private boolean parseSampled(Map<String, String> contextMap, SofaTracerSpanContext spanContext) {
-        // 新版本中tracer标记不在 baggage 中,兼容老版本
-        String oldSampledMark = spanContext.getSysBaggage().get(
-            TracerCompatibleConstants.SAMPLING_MARK);
-        // 默认不会设置采样标记，即默认采样
-        if (StringUtils.isBlank(oldSampledMark) || "true".equals(oldSampledMark)) {
-            return true;
+        // 1. 新版本从 context 里获取采样标记
+        String sampleMark = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.SAMPLING_MARK);
+        // 新版本有显示设置采样标记
+        if (StringUtils.isNotBlank(sampleMark)) {
+            return Boolean.parseBoolean(sampleMark);
         }
-        // 除显示获取 tracer 上下文中的采样标记之外，默认全部采样
-        String sampledStr = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.SAMPLING_MARK);
-        return StringUtils.isNotBlank(sampledStr) ? Boolean.valueOf(sampledStr) : true;
+
+        // 2. 老版本从 baggage 里获取采样标记
+        sampleMark = spanContext.getSysBaggage().get(TracerCompatibleConstants.SAMPLING_MARK);
+        // 老版本有显示设置采样标记
+        if (StringUtils.isNotBlank(sampleMark)) {
+            return Boolean.parseBoolean(sampleMark);
+        }
+
+        // 新老版本都没有显示设置标记，则默认采样
+        return true;
     }
 
     @Override
