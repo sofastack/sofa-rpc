@@ -185,8 +185,8 @@ public abstract class AbstractCluster extends Cluster {
     @Override
     public void addProvider(ProviderGroup providerGroup) {
         // 包装了各个组件的操作
-        addressHolder.addProvider(providerGroup);
         connectionHolder.addProvider(providerGroup);
+        addressHolder.addProvider(providerGroup);
         if (EventBus.isEnable(ProviderInfoAddEvent.class)) {
             ProviderInfoAddEvent event = new ProviderInfoAddEvent(consumerConfig, providerGroup);
             EventBus.post(event);
