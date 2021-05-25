@@ -29,7 +29,6 @@ import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 
 /**
@@ -56,6 +55,7 @@ public class SofaHessianSerializerTest {
         AbstractByteBuf data = serializer.encode("xxx", null);
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
+
         boolean error = false;
         try {
             serializer.decode(data, "", null);
@@ -79,14 +79,6 @@ public class SofaHessianSerializerTest {
             error = true;
         }
         Assert.assertTrue(error);
-    }
-
-    @Test
-    public void encodeLocalDateTime() {
-        LocalDateTime localDateTime = LocalDateTime.now();
-        AbstractByteBuf data = serializer.encode(localDateTime, null);
-        LocalDateTime decodeLocalDateTime = (LocalDateTime) serializer.decode(data, LocalDateTime.class, null);
-        Assert.assertTrue(localDateTime.equals(decodeLocalDateTime));
     }
 
     @Test
