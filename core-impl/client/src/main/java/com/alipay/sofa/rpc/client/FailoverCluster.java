@@ -88,9 +88,9 @@ public class FailoverCluster extends AbstractCluster {
                     throwable = e;
                     time++;
                 } else {
-                    if(throwable != null){
+                    if (throwable != null) {
                         throw throwable;
-                    }else {
+                    } else {
                         throw e;
                     }
                 }
@@ -105,7 +105,7 @@ public class FailoverCluster extends AbstractCluster {
                         time + 1); // 重试次数
                 }
             }
-            if(providerInfo != null){
+            if (providerInfo != null) {
                 invokedProviderInfos.add(providerInfo);
             }
         } while (time <= retries);
