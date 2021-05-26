@@ -185,7 +185,7 @@ public class RpcSofaTracer extends Tracer {
         RpcInternalContext rpcInternalContext = RpcInternalContext.getContext();
         ProviderInfo providerInfo;
         if ((providerInfo = rpcInternalContext.getProviderInfo()) != null &&
-            providerInfo.getRpcVersion() >= 50100) { // 版本>5.1.0
+            getRpcVersionFromProvider(providerInfo) >= 50100) { // 版本>5.1.0
             //新调用新:缓存在 Request 中
             String serializedSpanContext = sofaTracerSpanContext.serializeSpanContext();
             request.addRequestProp(RemotingConstants.NEW_RPC_TRACE_NAME, serializedSpanContext);
@@ -205,6 +205,24 @@ public class RpcSofaTracer extends Tracer {
                 sofaTracerSpanContext.getSysSerializedBaggage());
             request.addRequestProp(RemotingConstants.RPC_TRACE_NAME, oldTracerContext);
         }
+    }
+
+    private int getRpcVersionFromProvider(ProviderInfo providerInfo) {
+        if (providerInfo == null) {
+            return 0;
+        }
+
+        int ver = providerInfo.getRpcVersion();
+        if (ver > 0) {
+            return ver;
+        }
+
+        String verStr = providerInfo.getStaticAttr(RpcConstants.CONFIG_KEY_RPC_VERSION);
+        if (StringUtils.isNotBlank(verStr)) {
+            return Integer.parseInt(verStr);
+        }
+
+        return 0;
     }
 
     protected String getEmptyStringIfNull(Map map, String key) {
@@ -430,11 +448,13 @@ public class RpcSofaTracer extends Tracer {
                 String callerZone = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_ZONE_KEY);
                 String callerIdc = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_IDC_KEY);
                 String callerIp = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_IP_KEY);
+
                 SofaTracerSpanContext spanContext = new SofaTracerSpanContext(traceId, rpcId);
-                //解析采样标记
-                spanContext.setSampled(parseSampled(contextMap, spanContext));
+
                 spanContext.deserializeBizBaggage(bizBaggage);
                 spanContext.deserializeSysBaggage(sysBaggage);
+                //解析采样标记
+                spanContext.setSampled(parseSampled(contextMap, spanContext));
                 //tags
                 tags.put(RpcSpanTags.REMOTE_APP, callerApp);
                 tags.put(RpcSpanTags.REMOTE_ZONE, callerZone);
