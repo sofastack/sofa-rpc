@@ -90,7 +90,7 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
             } catch (Exception ignore) {
             }
         }
-        Assert.assertEquals(count1, 2);
+        Assert.assertEquals(2, count1);
 
         ConsumerConfig<HelloService> consumerConfig2 = new ConsumerConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
