@@ -424,9 +424,9 @@ public abstract class AbstractCluster extends Cluster {
             // 已经调用异常的本次不再重试
             providerInfos.removeAll(invokedProviderInfos);
             // If all providers have retried once, then select by loadBalancer without filter.
-            if(CommonUtils.isEmpty(providerInfos)){
+            /*if(CommonUtils.isEmpty(providerInfos)){
                 providerInfos = originalProviderInfos;
-            }
+            }*/
         }
 
         String targetIP = null;
