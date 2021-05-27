@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRouteException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
@@ -419,6 +420,46 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
         } finally {
             RpcConfigs.putValue(RpcOptions.RPC_CREATE_CONN_WHEN_ABSENT, prev);
         }
+    }
+
+    @Test(expected = SofaTimeOutException.class)
+    public void testRetryLogicThrowException() {
+        //one provider and retry twice
+        ServerConfig serverConfig = new ServerConfig()
+            .setStopTimeout(0)
+            .setPort(22222)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+            .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+
+        // 发布一个服务，每个请求要执行2秒
+        ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl() {
+                AtomicInteger cnt = new AtomicInteger();
+
+                @Override
+                public String sayHello(String name, int age) {
+                    try {
+                        Thread.sleep(2000);
+                    } catch (Exception ignore) {
+                    }
+                    LOGGER.info("xxxxxxxxxxxxxxxxx" + age);
+                    return "hello " + name + " from server! age: " + age;
+                }
+            })
+            .setServer(serverConfig)
+            .setRegister(false);
+        providerConfig.export();
+
+        ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setDirectUrl("bolt://127.0.0.1:22222")
+            .setCluster("failover")
+            .setTimeout(1000)
+            .setRetries(2) // 失败后自动重试2次
+            .setRegister(false);
+        final HelloService helloService = consumerConfig.refer();
+        helloService.sayHello("xxx", 20);
     }
 
     @After

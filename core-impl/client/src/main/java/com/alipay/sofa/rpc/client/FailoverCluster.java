@@ -88,6 +88,7 @@ public class FailoverCluster extends AbstractCluster {
                     throwable = e;
                     time++;
                 } else {
+                    // throw the exception that caused the retry
                     if (throwable != null) {
                         throw throwable;
                     } else {
