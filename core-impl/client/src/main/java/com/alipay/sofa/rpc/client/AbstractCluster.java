@@ -185,8 +185,8 @@ public abstract class AbstractCluster extends Cluster {
     @Override
     public void addProvider(ProviderGroup providerGroup) {
         // 包装了各个组件的操作
-        addressHolder.addProvider(providerGroup);
         connectionHolder.addProvider(providerGroup);
+        addressHolder.addProvider(providerGroup);
         if (EventBus.isEnable(ProviderInfoAddEvent.class)) {
             ProviderInfoAddEvent event = new ProviderInfoAddEvent(consumerConfig, providerGroup);
             EventBus.post(event);
@@ -420,8 +420,13 @@ public abstract class AbstractCluster extends Cluster {
         } else {
             originalProviderInfos = new ArrayList<>(providerInfos);
         }
-        if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
-            providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
+        if (CommonUtils.isNotEmpty(invokedProviderInfos)) {
+            // 已经调用异常的本次不再重试
+            providerInfos.removeAll(invokedProviderInfos);
+            // If all providers have retried once, then select by loadBalancer without filter.
+            if(CommonUtils.isEmpty(providerInfos)){
+                providerInfos = originalProviderInfos;
+            }
         }
 
         String targetIP = null;
