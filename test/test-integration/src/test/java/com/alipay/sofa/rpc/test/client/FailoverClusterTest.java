@@ -435,8 +435,6 @@ public class FailoverClusterTest extends ActivelyDestroyTest {
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setRef(new HelloServiceImpl() {
-                AtomicInteger cnt = new AtomicInteger();
-
                 @Override
                 public String sayHello(String name, int age) {
                     try {
