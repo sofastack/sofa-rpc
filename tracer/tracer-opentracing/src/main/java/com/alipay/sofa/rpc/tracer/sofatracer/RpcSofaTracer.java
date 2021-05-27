@@ -185,7 +185,7 @@ public class RpcSofaTracer extends Tracer {
         RpcInternalContext rpcInternalContext = RpcInternalContext.getContext();
         ProviderInfo providerInfo;
         if ((providerInfo = rpcInternalContext.getProviderInfo()) != null &&
-            providerInfo.getRpcVersion() >= 50100) { // 版本>5.1.0
+            getRpcVersionFromProvider(providerInfo) >= 50100) { // 版本>5.1.0
             //新调用新:缓存在 Request 中
             String serializedSpanContext = sofaTracerSpanContext.serializeSpanContext();
             request.addRequestProp(RemotingConstants.NEW_RPC_TRACE_NAME, serializedSpanContext);
@@ -205,6 +205,24 @@ public class RpcSofaTracer extends Tracer {
                 sofaTracerSpanContext.getSysSerializedBaggage());
             request.addRequestProp(RemotingConstants.RPC_TRACE_NAME, oldTracerContext);
         }
+    }
+
+    private int getRpcVersionFromProvider(ProviderInfo providerInfo) {
+        if (providerInfo == null) {
+            return 0;
+        }
+
+        int ver = providerInfo.getRpcVersion();
+        if (ver > 0) {
+            return ver;
+        }
+
+        String verStr = providerInfo.getStaticAttr(RpcConstants.CONFIG_KEY_RPC_VERSION);
+        if (StringUtils.isNotBlank(verStr)) {
+            return Integer.parseInt(verStr);
+        }
+
+        return 0;
     }
 
     protected String getEmptyStringIfNull(Map map, String key) {
@@ -430,11 +448,13 @@ public class RpcSofaTracer extends Tracer {
                 String callerZone = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_ZONE_KEY);
                 String callerIdc = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_IDC_KEY);
                 String callerIp = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.CALLER_IP_KEY);
+
                 SofaTracerSpanContext spanContext = new SofaTracerSpanContext(traceId, rpcId);
-                //解析采样标记
-                spanContext.setSampled(parseSampled(contextMap, spanContext));
+
                 spanContext.deserializeBizBaggage(bizBaggage);
                 spanContext.deserializeSysBaggage(sysBaggage);
+                //解析采样标记
+                spanContext.setSampled(parseSampled(contextMap, spanContext));
                 //tags
                 tags.put(RpcSpanTags.REMOTE_APP, callerApp);
                 tags.put(RpcSpanTags.REMOTE_ZONE, callerZone);
@@ -450,16 +470,22 @@ public class RpcSofaTracer extends Tracer {
     }
 
     private boolean parseSampled(Map<String, String> contextMap, SofaTracerSpanContext spanContext) {
-        // 新版本中tracer标记不在 baggage 中,兼容老版本
-        String oldSampledMark = spanContext.getSysBaggage().get(
-            TracerCompatibleConstants.SAMPLING_MARK);
-        // 默认不会设置采样标记，即默认采样
-        if (StringUtils.isBlank(oldSampledMark) || "true".equals(oldSampledMark)) {
-            return true;
+        // 1. 新版本从 context 里获取采样标记
+        String sampleMark = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.SAMPLING_MARK);
+        // 新版本有显示设置采样标记
+        if (StringUtils.isNotBlank(sampleMark)) {
+            return Boolean.parseBoolean(sampleMark);
         }
-        // 除显示获取 tracer 上下文中的采样标记之外，默认全部采样
-        String sampledStr = this.getEmptyStringIfNull(contextMap, TracerCompatibleConstants.SAMPLING_MARK);
-        return StringUtils.isNotBlank(sampledStr) ? Boolean.valueOf(sampledStr) : true;
+
+        // 2. 老版本从 baggage 里获取采样标记
+        sampleMark = spanContext.getSysBaggage().get(TracerCompatibleConstants.SAMPLING_MARK);
+        // 老版本有显示设置采样标记
+        if (StringUtils.isNotBlank(sampleMark)) {
+            return Boolean.parseBoolean(sampleMark);
+        }
+
+        // 新老版本都没有显示设置标记，则默认采样
+        return true;
     }
 
     @Override
