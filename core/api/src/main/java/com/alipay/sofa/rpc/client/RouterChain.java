@@ -165,8 +165,10 @@ public class RouterChain {
         }
         List<Router> actualRouters = new ArrayList<Router>();
         for (ExtensionClass<Router> extensionRouter : extensionRouters) {
-            Router actualRoute = extensionRouter.getExtInstance();
-            actualRouters.add(actualRoute);
+            if (extensionRouter != null) {
+                Router actualRoute = extensionRouter.getExtInstance();
+                actualRouters.add(actualRoute);
+            }
         }
         // 加入自定义的过滤器
         actualRouters.addAll(customRouters);
