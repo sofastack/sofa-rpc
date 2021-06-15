@@ -146,7 +146,10 @@ public class RouterChain {
                 if (startsWithExcludePrefix(routerAlias)) { // 排除用的特殊字符
                     excludes.add(routerAlias.substring(1));
                 } else {
-                    extensionRouters.add(EXTENSION_LOADER.getExtensionClass(routerAlias));
+                    ExtensionClass<Router> extensionRouter = EXTENSION_LOADER.getExtensionClass(routerAlias);
+                    if (extensionRouter != null) {
+                        extensionRouters.add(extensionRouter);
+                    }
                 }
             }
         }
@@ -165,10 +168,8 @@ public class RouterChain {
         }
         List<Router> actualRouters = new ArrayList<Router>();
         for (ExtensionClass<Router> extensionRouter : extensionRouters) {
-            if (extensionRouter != null) {
-                Router actualRoute = extensionRouter.getExtInstance();
-                actualRouters.add(actualRoute);
-            }
+            Router actualRoute = extensionRouter.getExtInstance();
+            actualRouters.add(actualRoute);
         }
         // 加入自定义的过滤器
         actualRouters.addAll(customRouters);
