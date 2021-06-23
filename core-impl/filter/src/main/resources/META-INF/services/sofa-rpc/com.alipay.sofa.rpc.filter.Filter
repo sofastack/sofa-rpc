@@ -1,3 +1,4 @@
 # name                                                         # order
 com.alipay.sofa.rpc.filter.ProviderExceptionFilter             # -20000
 com.alipay.sofa.rpc.filter.ConsumerExceptionFilter             # -20000
+com.alipay.sofa.rpc.filter.ConsumerCustomHeaderFilter          # Ordered.LOWEST_PRECEDENCE
