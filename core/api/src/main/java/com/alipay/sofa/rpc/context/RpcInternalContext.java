@@ -521,7 +521,7 @@ public class RpcInternalContext implements Cloneable {
      * @param key header key
      * @param value header value
      */
-    public void putCustomHeader(String key, String value) {
+    public void addCustomHeader(String key, String value) {
         customHeader.put(key, value);
     }
 

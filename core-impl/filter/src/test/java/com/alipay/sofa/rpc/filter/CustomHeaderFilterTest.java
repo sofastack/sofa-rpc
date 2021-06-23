@@ -16,38 +16,48 @@
  */
 package com.alipay.sofa.rpc.filter;
 
-import com.alipay.sofa.common.utils.Ordered;
-import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.ext.Extension;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.Map;
 
 /**
- * Set customHeader to  SofaRequest.requestProps
- *
  * @author zhaowang
- * @version : ConsumerCustomHeaderFilter.java, v 0.1 2021年06月23日 2:05 下午 zhaowang
+ * @version : CustomHeaderFilterTest.java, v 0.1 2021年06月23日 2:26 下午 zhaowang
  */
-@AutoActive(consumerSide = true)
-@Extension(value = "consumerException", order = Ordered.LOWEST_PRECEDENCE)
-public class ConsumerCustomHeaderFilter extends Filter {
+public class CustomHeaderFilterTest {
 
-    @Override
-    public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        setCustomHeader(request);
-        return invoker.invoke(request);
+    @Test
+    public void testCustomFilter() {
+        RpcInternalContext.getContext().addCustomHeader("a", "b");
+        ConsumerCustomHeaderFilter filter = new ConsumerCustomHeaderFilter();
+        SofaRequest request = new SofaRequest();
+        filter.invoke(new EmptyInvoker(null), request);
+        Assert.assertTrue(RpcInternalContext.getContext().getCustomHeader().isEmpty());
+        Assert.assertEquals("b", request.getRequestProp("a"));
     }
 
-    private void setCustomHeader(SofaRequest sofaRequest) {
-        RpcInternalContext context = RpcInternalContext.getContext();
-        Map customHeader = context.getCustomHeader();
-        if (CommonUtils.isNotEmpty(customHeader)) {
-            sofaRequest.addRequestProps(customHeader);
+    static class EmptyInvoker extends FilterInvoker {
+
+        public Map<String, String> getMetaHolder() {
+            return metaHolder;
         }
-        context.clearCustomHeader();
+
+        private Map<String, String> metaHolder;
+
+        protected EmptyInvoker(AbstractInterfaceConfig config) {
+            super(config);
+        }
+
+        @Override
+        public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
+            return null;
+        }
     }
+
 }
