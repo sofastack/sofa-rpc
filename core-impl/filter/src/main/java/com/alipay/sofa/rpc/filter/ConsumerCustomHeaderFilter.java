@@ -33,7 +33,7 @@ import java.util.Map;
  * @version : ConsumerCustomHeaderFilter.java, v 0.1 2021年06月23日 2:05 下午 zhaowang
  */
 @AutoActive(consumerSide = true)
-@Extension(value = "consumerException", order = Ordered.LOWEST_PRECEDENCE)
+@Extension(value = "consumerCustomHeader", order = Ordered.LOWEST_PRECEDENCE)
 public class ConsumerCustomHeaderFilter extends Filter {
 
     @Override
