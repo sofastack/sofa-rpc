@@ -264,7 +264,12 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                             ((SofaRequest) sofaRequest).addRequestProp(entry.getKey(), entry.getValue());
                         }
                     }
-
+                    // Try to obtain the unique name of the target service from the headerMap.
+                    // Due to the MOSN routing logic, it may be different from the original service unique name.
+                    String headerService = headerMap.get(RemotingConstants.HEAD_SERVICE);
+                    if (StringUtils.isNotBlank(headerService)) {
+                        ((SofaRequest) sofaRequest).setTargetServiceUniqueName(headerService);
+                    }
                     requestCommand.setRequestObject(sofaRequest);
                 } finally {
                     Thread.currentThread().setContextClassLoader(oldClassLoader);
