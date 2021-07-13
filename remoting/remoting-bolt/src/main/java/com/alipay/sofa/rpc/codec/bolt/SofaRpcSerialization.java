@@ -263,12 +263,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                         for (Map.Entry<String, String> entry : headerMap.entrySet()) {
                             ((SofaRequest) sofaRequest).addRequestProp(entry.getKey(), entry.getValue());
                         }
-                    }
-                    // Try to obtain the unique name of the target service from the headerMap.
-                    // Due to the MOSN routing logic, it may be different from the original service unique name.
-                    String headerService = headerMap.get(RemotingConstants.HEAD_SERVICE);
-                    if (StringUtils.isNotBlank(headerService)) {
-                        ((SofaRequest) sofaRequest).setTargetServiceUniqueName(headerService);
+                        setRequestPropertiesWithHeaderInfo(headerMap, ((SofaRequest) sofaRequest));
                     }
                     requestCommand.setRequestObject(sofaRequest);
                 } finally {
@@ -416,4 +411,19 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME, cost);
     }
+
+    /**
+     * 使用header中的值替换部分请求属性
+     * @param headerMap header
+     * @param request SofaRequest
+     */
+    protected void setRequestPropertiesWithHeaderInfo(Map<String, String> headerMap, SofaRequest request) {
+        // Try to obtain the unique name of the target service from the headerMap.
+        // Due to the MOSN routing logic, it may be different from the original service unique name.
+        String headerService = headerMap.get(RemotingConstants.HEAD_SERVICE);
+        if (StringUtils.isNotBlank(headerService)) {
+            request.setTargetServiceUniqueName(headerService);
+        }
+    }
+
 }
