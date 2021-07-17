@@ -24,6 +24,9 @@ import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  *
@@ -52,7 +55,7 @@ public class GenericClientMain {
                     new Object[] { "1111" });
                 LOGGER.warn("generic return :{}", s1);
 
-                GenericObject genericObject = new GenericObject(
+                /*GenericObject genericObject = new GenericObject(
                     "com.alipay.sofa.rpc.invoke.generic.TestObj");
                 genericObject.putField("str", "xxxx");
                 genericObject.putField("num", 222);
@@ -65,7 +68,16 @@ public class GenericClientMain {
                 TestObj o3 = testService.$genericInvoke("echoObj",
                     new String[] { "com.alipay.sofa.rpc.invoke.generic.TestObj" },
                     new Object[] { genericObject }, TestObj.class);
-                LOGGER.warn("generic return :{}", o3);
+                LOGGER.warn("generic return :{}", o3);*/
+
+                Map<String, Object> map = new HashMap<>();
+                map.put("str", "xxxx");
+                map.put("num", 222);
+
+                TestObj o4 =  (TestObj) testService.$invoke("echoObj",
+                        new String[] { "java.util.HashMap" },
+                        new Object[] { map });
+                LOGGER.warn("generic return!!!!!!!!! :{}", o4);
 
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);

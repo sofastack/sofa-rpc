@@ -22,10 +22,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
-import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN;
-import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
-import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_JAVA;
-import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_PROTOBUF;
+import static com.alipay.sofa.rpc.common.RpcConstants.*;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -57,6 +54,8 @@ public class BoltClientProxyInvoker extends DefaultClientProxyInvoker {
             serializeType = RemotingConstants.SERIALIZE_CODE_PROTOBUF;
         } else if (SERIALIZE_JAVA.equals(serialization)) {
             serializeType = RemotingConstants.SERIALIZE_CODE_JAVA;
+        } else if (SERIALIZE_JSON.equals(serialization)) {
+            serializeType = RemotingConstants.SERIALIZE_CODE_JSON;
         } else {
             serializeType = super.parseSerializeType(serialization);
         }

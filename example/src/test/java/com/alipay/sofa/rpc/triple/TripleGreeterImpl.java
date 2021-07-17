@@ -20,9 +20,6 @@ import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterTriple;
 import io.grpc.stub.StreamObserver;
-import org.springframework.util.ClassUtils;
-
-import java.util.Set;
 
 public class TripleGreeterImpl extends SofaGreeterTriple.GreeterImplBase {
 
