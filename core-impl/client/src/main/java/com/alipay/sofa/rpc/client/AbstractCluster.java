@@ -684,7 +684,7 @@ public abstract class AbstractCluster extends Cluster {
             timeout = consumerConfig.getMethodTimeout(request.getMethodName());
             if (timeout == null || timeout < 0) {
                 // 再取服务端配置
-                timeout = (Integer) providerInfo.getDynamicAttr(ATTR_TIMEOUT);
+                timeout = Integer.parseInt(providerInfo.getAttr(ATTR_TIMEOUT));
                 if (timeout == null) {
                     // 取框架默认值
                     timeout = getIntValue(CONSUMER_INVOKE_TIMEOUT);
