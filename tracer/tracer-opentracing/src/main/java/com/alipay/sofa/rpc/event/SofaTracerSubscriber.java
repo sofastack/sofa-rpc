@@ -48,7 +48,7 @@ public class SofaTracerSubscriber extends Subscriber {
 
         else if (eventClass == ClientAsyncReceiveEvent.class) {
             ClientAsyncReceiveEvent event = (ClientAsyncReceiveEvent) originEvent;
-            // 拿出tracer信息 让入Tracer自己的上下文
+            // 拿出tracer信息 写入Tracer自己的上下文
             Tracers.clientAsyncReceivedPrepare();
             // 记录收到返回
             Tracers.clientReceived(event.getRequest(), event.getResponse(), event.getThrowable());

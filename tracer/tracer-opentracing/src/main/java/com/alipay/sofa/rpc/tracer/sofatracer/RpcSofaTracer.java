@@ -281,6 +281,11 @@ public class RpcSofaTracer extends Tracer {
 
             //adjust for generic invoke
             clientSpan.setTag(RpcSpanTags.METHOD, request.getMethodName());
+
+            clientSpan.setTag(RpcSpanTags.SEND_TIME_COST, "10");
+            clientSpan.setTag(RpcSpanTags.PHASE_TIME_COST, "R1=20&R2=18&R3=11");
+            clientSpan.setTag(RpcSpanTags.SPECIAL_TIME_MARK, "11111111111&2222222222");
+            clientSpan.setTag(RpcSpanTags.ROUTER_FORWARD_DETAIL, "0.1F0.2T");
         }
 
         Throwable throwableShow = exceptionThrow;
@@ -507,6 +512,11 @@ public class RpcSofaTracer extends Tracer {
         serverSpan.setTag(RpcSpanTags.REQ_SIZE, (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE));
         //当前线程名
         serverSpan.setTag(RpcSpanTags.CURRENT_THREAD_NAME, Thread.currentThread().getName());
+
+        serverSpan.setTag(RpcSpanTags.SERVER_SEND_TIME_COST, "20");
+        serverSpan.setTag(RpcSpanTags.SERVER_PHASE_TIME_COST, "R1=10&R2=20&R3=50");
+        serverSpan.setTag(RpcSpanTags.SERVER_SPECIAL_TIME_MARK, "11112222&33334444");
+        serverSpan.setTag(RpcSpanTags.SERVER_ROUTER_FORWARD_DETAIL, "0.3T0.4T");
 
         Throwable throwableShow = exception;
         String tracerErrorCode = StringUtils.EMPTY;
