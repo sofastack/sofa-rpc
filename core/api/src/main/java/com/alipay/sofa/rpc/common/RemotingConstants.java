@@ -81,6 +81,13 @@ public class RemotingConstants {
     public static final byte   SERIALIZE_CODE_PROTOBUF    = 11;
 
     /**
+     * json  对应bolt固定同步里的codec字段
+     *
+     * @see com.alipay.sofa.rpc.common.RpcConstants#SERIALIZE_JSON
+     */
+    public static final Byte   SERIALIZE_CODE_JSON        = 12;
+
+    /**
      * 普通序列化：序列化反序列化均使用SofaSerializerFactory
      */
     public static final String SERIALIZE_FACTORY_NORMAL   = "0";

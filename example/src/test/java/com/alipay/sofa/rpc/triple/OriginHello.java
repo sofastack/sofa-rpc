@@ -16,9 +16,6 @@
  */
 package com.alipay.sofa.rpc.triple;
 
-import io.grpc.examples.helloworld.HelloReply;
-import io.grpc.examples.helloworld.HelloRequest;
-
 /**
  * @author zhaowang
  * @version : OriginHello.java, v 0.1 2020年05月28日 3:10 下午 zhaowang Exp $
