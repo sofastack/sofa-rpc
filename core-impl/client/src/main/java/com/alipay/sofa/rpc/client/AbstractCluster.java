@@ -701,11 +701,11 @@ public abstract class AbstractCluster extends Cluster {
      * @return
      */
     private int parseInt(String str) {
-        try{
+        try {
             if (StringUtils.isNotBlank(str)) {
                 return Integer.parseInt(str);
             }
-        }catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
 
         }
         return -1;
