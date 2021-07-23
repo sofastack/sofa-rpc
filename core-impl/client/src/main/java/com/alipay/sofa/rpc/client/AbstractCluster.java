@@ -679,13 +679,13 @@ public abstract class AbstractCluster extends Cluster {
         }
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
-        if (timeout == null) {
+        if (timeout == null || timeout <= 0) {
             // 取客户端配置（先方法级别再接口级别）
             timeout = consumerConfig.getMethodTimeout(request.getMethodName());
-            if (timeout == null || timeout < 0) {
+            if (timeout == null || timeout <= 0) {
                 // 再取服务端配置
                 timeout = Integer.parseInt(providerInfo.getAttr(ATTR_TIMEOUT));
-                if (timeout == null) {
+                if (timeout == null || timeout <= 0) {
                     // 取框架默认值
                     timeout = getIntValue(CONSUMER_INVOKE_TIMEOUT);
                 }
