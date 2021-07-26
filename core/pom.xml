@@ -19,6 +19,10 @@
         <module>api</module>
         <module>api-compatible</module>
     </modules>
+         
+    <properties>
+        <transmittable.version>2.2.0</transmittable.version>
+    </properties>
 
     <dependencyManagement>
         <dependencies>
