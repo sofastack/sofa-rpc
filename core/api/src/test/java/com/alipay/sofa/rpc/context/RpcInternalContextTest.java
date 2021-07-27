@@ -200,4 +200,11 @@ public class RpcInternalContextTest {
         Assert.assertFalse(RpcInternalContext.isHiddenParamKey("_xx"));
         Assert.assertFalse(RpcInternalContext.isHiddenParamKey("aaaa"));
     }
+
+    @Test public void testCheckContext(){
+    RpcInternalContext.getContext().setAttachment("_testKey","666");
+        new Thread(()->{
+            Assert.assertEquals(RpcInternalContext.getContext().getAttachment("_testKey"),"666");
+        }).start();
+    }
 }

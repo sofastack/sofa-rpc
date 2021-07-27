@@ -26,7 +26,6 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>transmittable-thread-local</artifactId>
-            <version>${transmittable.version}</version>
         </dependency>
     </dependencies>
     
