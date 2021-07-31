@@ -37,7 +37,6 @@ import org.jboss.resteasy.plugins.server.netty.NettyHttpRequest;
 import org.jboss.resteasy.plugins.server.netty.NettyHttpResponse;
 import org.jboss.resteasy.plugins.server.netty.RequestDispatcher;
 import org.jboss.resteasy.spi.Failure;
-import sun.rmi.runtime.Log;
 
 import javax.ws.rs.core.HttpHeaders;
 import java.net.InetSocketAddress;
