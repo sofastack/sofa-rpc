@@ -202,10 +202,28 @@ public class RpcInternalContextTest {
     }
 
     @Test
-    public void testCheckContext(){
-        RpcInternalContext.getContext().setAttachment("_testKey","666");
-        new Thread(()->{
-            Assert.assertEquals(RpcInternalContext.getContext().getAttachment("_testKey"),"666");
-        }).start();
+    public void testCheckContext() throws ExecutionException, InterruptedException {
+
+        RpcInternalContext.getContext().setAttachment("_testKey", "TransmittableThreadLocal-value-set-in-parent");
+
+        ThreadLocal<String> threadLocalContext = new ThreadLocal<String>();
+        threadLocalContext.set("ThreadLocal-value-set-in-parent");
+
+        FutureTask<String[]> task1 = new FutureTask<String[]>(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                String[] result = new String[2];
+                result[0] = threadLocalContext.get();
+                result[1] = (String) RpcInternalContext.getContext().getAttachment("_testKey");
+                return result;
+            }
+        });
+        new Thread(task1).start();
+
+        while (!task1.isDone()) {
+            Assert.assertEquals(null, task1.get()[0]);
+            Assert.assertEquals("TransmittableThreadLocal-value-set-in-parent", task1.get()[1]);
+        }
+
     }
 }
