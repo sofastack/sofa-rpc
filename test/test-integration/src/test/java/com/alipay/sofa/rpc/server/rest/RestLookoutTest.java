@@ -189,7 +189,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
                 String methodName = tag.value();
 
                 if (methodName.equals("query")) {
-                    assertMethod(metric, false, 2, "query", 1203, 352);
+                    assertMethod(metric, false, 1, "query", 1203, 352);
 
                 } else {
                     System.out.println("consumer do not fix");
