@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.filter;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -52,6 +53,14 @@ public class ConsumerInvoker extends FilterInvoker {
         // 设置下服务器应用
         ProviderInfo providerInfo = RpcInternalContext.getContext().getProviderInfo();
         String appName = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME);
+        if (RpcInternalContext.isAttachmentEnable()) {
+            Long consumerFilterStartTime = (Long) RpcInternalContext.getContext().removeAttachment(
+                RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
+            if (consumerFilterStartTime != null) {
+                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
+                    System.nanoTime() - consumerFilterStartTime);
+            }
+        }
         if (StringUtils.isNotEmpty(appName)) {
             sofaRequest.setTargetAppName(appName);
         }

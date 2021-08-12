@@ -393,8 +393,14 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         }
+        // TODO R1
         // 原始服务列表数据 --> 路由结果
+        long routerStartTime = System.nanoTime();
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
+        RpcInternalContext context = RpcInternalContext.peekContext();
+        if (context != null) {
+            context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, System.nanoTime()-routerStartTime);
+        }
 
         //保存一下原始地址,为了打印
         List<ProviderInfo> originalProviderInfos;
@@ -406,7 +412,6 @@ public abstract class AbstractCluster extends Cluster {
              * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
              * 1. RpcInvokeContext.getContext().getTargetUrl()
              */
-            RpcInternalContext context = RpcInternalContext.peekContext();
             if (context != null) {
                 String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
                 if (StringUtils.isNotBlank(targetIP)) {
@@ -431,7 +436,6 @@ public abstract class AbstractCluster extends Cluster {
 
         String targetIP = null;
         ProviderInfo providerInfo;
-        RpcInternalContext context = RpcInternalContext.peekContext();
         if (context != null) {
             targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
@@ -446,8 +450,13 @@ public abstract class AbstractCluster extends Cluster {
             return providerInfo;
         } else {
             do {
+                // TODO R4
                 // 再进行负载均衡筛选
+                long loadBalanceStartTime = System.nanoTime();
                 providerInfo = loadBalancer.select(message, providerInfos);
+                if(context != null){
+                    context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, System.nanoTime()-loadBalanceStartTime);
+                }
                 ClientTransport transport = selectByProvider(message, providerInfo);
                 if (transport != null) {
                     return providerInfo;
@@ -513,6 +522,7 @@ public abstract class AbstractCluster extends Cluster {
      * @return 一个可用的transport或者null
      */
     protected ClientTransport selectByProvider(SofaRequest message, ProviderInfo providerInfo) {
+        //TODO Maybe R2
         ClientTransport transport = connectionHolder.getAvailableClientTransport(providerInfo);
         if (transport != null) {
             if (transport.isAvailable()) {
@@ -547,6 +557,7 @@ public abstract class AbstractCluster extends Cluster {
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
         context.setProviderInfo(providerInfo);
+        context.setAttachment(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO, System.nanoTime());
         return filterChain.invoke(request);
     }
 

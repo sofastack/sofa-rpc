@@ -90,6 +90,16 @@ public class ProviderInvoker<T> extends FilterInvoker {
 
         SofaResponse sofaResponse = new SofaResponse();
         long startTime = RpcRuntimeContext.now();
+        long bizStartTime = System.nanoTime();
+        if (RpcInternalContext.isAttachmentEnable()) {
+            Long providerFilterStartTime = (Long) RpcInternalContext.getContext().removeAttachment(
+                RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO);
+            if (providerFilterStartTime != null) {
+                //服务端过滤器执行时间
+                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
+                    bizStartTime - providerFilterStartTime);
+            }
+        }
         try {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
@@ -116,6 +126,10 @@ public class ProviderInvoker<T> extends FilterInvoker {
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);
+                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
+                    System.nanoTime() - bizStartTime);
+                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
+                    RpcRuntimeContext.currentMicroseconds());
             }
         }
 

@@ -37,6 +37,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -61,7 +62,6 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 import java.net.InetSocketAddress;
-import java.security.AlgorithmConstraints;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -401,8 +401,10 @@ public class BoltClientTransport extends ClientTransport {
     protected void afterSend(RpcInternalContext context, InvokeContext invokeContext, SofaRequest request) {
         currentRequests.decrementAndGet();
         if (RpcInternalContext.isAttachmentEnable()) {
+            //TODO R2
             putToContextIfNotNull(invokeContext, InvokeContext.CLIENT_CONN_CREATETIME, context,
                 RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME);
+            putToContext(invokeContext, context);
         }
         if (EventBus.isEnable(ClientAfterSendEvent.class)) {
             EventBus.post(new ClientAfterSendEvent(request));
@@ -447,6 +449,28 @@ public class BoltClientTransport extends ClientTransport {
         Object value = invokeContext.get(oldKey);
         if (value != null) {
             context.setAttachment(key, value);
+        }
+    }
+
+    private void putToContext(InvokeContext invokeContext, RpcInternalContext context) {
+        Long connStartTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_START_IN_NANO);
+        Long connEndTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_END_IN_NANO);
+        if (connStartTime != null && connEndTime != null) {
+            context.setAttachment(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, connEndTime - connStartTime);
+        }
+
+        // 记录发送完成的时间，微秒
+        Long sendTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_AFTER_SEND);
+        if (sendTime != null) {
+            context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO,
+                RpcRuntimeContext.getMicrosecondsByNano(sendTime));
+        }
+
+        // 记录收到bolt传过来的数据的时间，微秒
+        Long receiveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_RECEIVED);
+        if (receiveTime != null) {
+            context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO,
+                RpcRuntimeContext.getMicrosecondsByNano(receiveTime));
         }
     }
 

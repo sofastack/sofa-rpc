@@ -49,12 +49,16 @@ import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcServerDigestSpanJsonE
 import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcClientStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcServerStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.TracerRecord;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.type.RpcTracerLogEnum;
 import io.opentracing.tag.Tags;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
+import java.util.TreeMap;
+import java.util.concurrent.TimeUnit;
 
 /**
  * SofaTracer
@@ -282,10 +286,8 @@ public class RpcSofaTracer extends Tracer {
             //adjust for generic invoke
             clientSpan.setTag(RpcSpanTags.METHOD, request.getMethodName());
 
-            clientSpan.setTag(RpcSpanTags.SEND_TIME_COST, "10");
-            clientSpan.setTag(RpcSpanTags.PHASE_TIME_COST, "R1=20&R2=18&R3=11");
-            clientSpan.setTag(RpcSpanTags.SPECIAL_TIME_MARK, "11111111111&2222222222");
-            clientSpan.setTag(RpcSpanTags.ROUTER_FORWARD_DETAIL, "0.1F0.2T");
+            clientSpan.setTag(RpcSpanTags.PHASE_TIME_COST, generateClientPhaseTimeCostSpan(context));
+            clientSpan.setTag(RpcSpanTags.SPECIAL_TIME_MARK, generateClientSpecialTimeMarkSpan(context));
         }
 
         Throwable throwableShow = exceptionThrow;
@@ -375,6 +377,62 @@ public class RpcSofaTracer extends Tracer {
             //restore parent
             sofaTraceContext.push(clientSpan.getParentSofaTracerSpan());
         }
+    }
+
+    private String generateClientSpecialTimeMarkSpan(RpcInternalContext context) {
+        Long sendTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO);
+        Long receiverTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO);
+        StringBuilder sb = new StringBuilder(calculateMicroTime(sendTime).toString());
+        return sb.append("&").append(calculateMicroTime(receiverTime).toString()).toString();
+    }
+
+    private String generateClientPhaseTimeCostSpan(RpcInternalContext context){
+
+        TreeMap<String, String> resultMap = new TreeMap<>();
+        Long routerTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO);
+        Long connTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO);
+        Long filterTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO);
+        Long balancerTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO);
+        Long reqSerializeTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO);
+        Long respDeSerializeTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO);
+        resultMap.put(TracerRecord.R1.toString(), calculateNanoTime(routerTime).toString());
+        resultMap.put(TracerRecord.R2.toString(), calculateNanoTime(connTime).toString());
+        resultMap.put(TracerRecord.R3.toString(), calculateNanoTime(filterTime).toString());
+        resultMap.put(TracerRecord.R4.toString(), calculateNanoTime(balancerTime).toString());
+        resultMap.put(TracerRecord.R5.toString(),appendResult(calculateNanoTime(reqSerializeTime).toString(), calculateNanoTime(respDeSerializeTime).toString()));
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+            sb.append(entry.getKey());
+            sb.append("=");
+            sb.append(entry.getValue());
+            sb.append("&");
+        }
+        return sb.toString();
+    }
+
+    private Long calculateNanoTime(Long time) {
+        if (time == null) {
+            return -1L;
+        }
+        return TimeUnit.MICROSECONDS.convert(time, TimeUnit.NANOSECONDS);
+    }
+
+    private Long calculateMicroTime(Long time) {
+        if (time == null) {
+            return -1L;
+        }
+        return time;
+    }
+
+    private String appendResult(String... strings) {
+        StringJoiner stringJoiner = new StringJoiner("/");
+        for (String string : strings) {
+            stringJoiner.add(string);
+        }
+        return stringJoiner.toString();
+
     }
 
     private void generateClientErrorContext(Map<String, String> context, SofaRequest request, SofaTracerSpan clientSpan) {
@@ -513,10 +571,8 @@ public class RpcSofaTracer extends Tracer {
         //当前线程名
         serverSpan.setTag(RpcSpanTags.CURRENT_THREAD_NAME, Thread.currentThread().getName());
 
-        serverSpan.setTag(RpcSpanTags.SERVER_SEND_TIME_COST, "20");
-        serverSpan.setTag(RpcSpanTags.SERVER_PHASE_TIME_COST, "R1=10&R2=20&R3=50");
-        serverSpan.setTag(RpcSpanTags.SERVER_SPECIAL_TIME_MARK, "11112222&33334444");
-        serverSpan.setTag(RpcSpanTags.SERVER_ROUTER_FORWARD_DETAIL, "0.3T0.4T");
+        serverSpan.setTag(RpcSpanTags.SERVER_PHASE_TIME_COST, generateServerPhaseTimeCostSpan(context));
+        serverSpan.setTag(RpcSpanTags.SERVER_SPECIAL_TIME_MARK, generateServerSpecialTimeMark(context));
 
         Throwable throwableShow = exception;
         String tracerErrorCode = StringUtils.EMPTY;
@@ -563,6 +619,39 @@ public class RpcSofaTracer extends Tracer {
         // 结果码（00=成功/01=业务异常/02=RPC逻辑错误）
         serverSpan.setTag(RpcSpanTags.RESULT_CODE, resultCode);
         serverSpan.finish();
+    }
+
+    private String generateServerSpecialTimeMark(RpcInternalContext context) {
+        Long boltReceiveTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO);
+        Long serverSendTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO);
+        StringBuilder sb = new StringBuilder(calculateMicroTime(boltReceiveTime).toString());
+        return sb.append("&").append(calculateMicroTime(serverSendTime).toString()).toString();
+    }
+
+    private String generateServerPhaseTimeCostSpan(RpcInternalContext context) {
+        TreeMap<String, String> resultMap = new TreeMap<>();
+        Long reqDeSerializeTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO);
+        Long respSerializeTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO);
+        Long bizWaitTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO);
+        Long bizProcessTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO);
+        Long ambushTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_SERVER_AMBUSH_TIME_NANO);
+        Long filterTime = (Long) context.getAttachment(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO);
+
+        resultMap.put(TracerRecord.R6.toString(),appendResult(calculateNanoTime(reqDeSerializeTime).toString(), calculateNanoTime(respSerializeTime).toString()));
+        resultMap.put(TracerRecord.R7.toString(), calculateNanoTime(bizWaitTime).toString());
+        resultMap.put(TracerRecord.R8.toString(), calculateNanoTime(bizProcessTime).toString());
+        resultMap.put(TracerRecord.R9.toString(), calculateNanoTime(ambushTime).toString());
+        resultMap.put(TracerRecord.R10.toString(), calculateNanoTime(filterTime).toString());
+
+        StringBuilder sb = new StringBuilder();
+
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
+            sb.append(entry.getKey());
+            sb.append("=");
+            sb.append(entry.getValue());
+            sb.append("&");
+        }
+        return sb.toString();
     }
 
     private void generateServerErrorContext(Map<String, String> context, SofaRequest request,

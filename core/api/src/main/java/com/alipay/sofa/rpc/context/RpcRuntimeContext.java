@@ -203,6 +203,27 @@ public class RpcRuntimeContext {
     }
 
     /**
+     * 获取当前时间，微秒
+     *
+     * @return
+     */
+    public static long currentMicroseconds() {
+        long currentTime = System.currentTimeMillis() * 1000;
+        long nanoTime = System.nanoTime();
+        return currentTime + (nanoTime - nanoTime / 1000000 * 1000000) / 1000;
+    }
+
+    /**
+     * 根据时间差获取，时间，微秒
+     *
+     */
+    public static long getMicrosecondsByNano(long nanoTime) {
+        long currentTime = System.currentTimeMillis() * 1000;
+        long currentNanoTime = System.nanoTime();
+        return currentTime + (nanoTime - nanoTime / 1000000 * 1000000) / 1000 - (currentNanoTime - nanoTime) / 1000;
+    }
+
+    /**
      * 增加缓存ConsumerConfig
      *
      * @param consumerConfig the consumer config

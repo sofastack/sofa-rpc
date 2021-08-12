@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.server;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -62,6 +64,8 @@ public class ProviderProxyInvoker implements Invoker {
      */
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
+        RpcInternalContext context = RpcInternalContext.getContext();
+        context.setAttachment(RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO, System.nanoTime());
         return filterChain.invoke(request);
     }
 
