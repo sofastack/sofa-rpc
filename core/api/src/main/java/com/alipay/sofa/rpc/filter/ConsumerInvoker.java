@@ -53,6 +53,7 @@ public class ConsumerInvoker extends FilterInvoker {
         // 设置下服务器应用
         ProviderInfo providerInfo = RpcInternalContext.getContext().getProviderInfo();
         String appName = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME);
+        //R3: Record consumer filter execution time
         if (RpcInternalContext.isAttachmentEnable()) {
             Long consumerFilterStartTime = (Long) RpcInternalContext.getContext().removeAttachment(
                 RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);

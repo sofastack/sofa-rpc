@@ -95,7 +95,6 @@ public class FilterInvoker implements Invoker {
             throw new SofaRpcException(RpcErrorType.SERVER_FILTER,
                 LogCodes.getLog(LogCodes.ERROR_NEXT_FILTER_AND_INVOKER_NULL));
         }
-        // TODO R3
         return nextFilter == null ?
             invoker.invoke(request) :
             nextFilter.invoke(invoker, request);

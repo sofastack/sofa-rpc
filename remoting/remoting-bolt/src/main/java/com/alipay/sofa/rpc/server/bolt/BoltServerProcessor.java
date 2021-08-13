@@ -113,7 +113,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 远程返回的通道
 
             if (RpcInternalContext.isAttachmentEnable()) {
-                //TODO R7
                 InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
                 if (boltInvokeCtx != null) {
                     // rpc线程池等待时间 Long
@@ -239,12 +238,14 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
     }
 
     private void putToContext(InvokeContext invokeContext, RpcInternalContext context) {
+        //The time when the server receives the first packet, in microseconds
         Long arriveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_HEADER_IN_NANO);
         if (arriveTime != null) {
             context.setAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
                 RpcRuntimeContext.getMicrosecondsByNano(arriveTime));
         }
 
+        //R7：Thread waiting time
         Long enterQueueTime = invokeContext.get(InvokeContext.BOLT_PROCESS_BEFORE_DISPATCH_IN_NANO);
         Long processStartTime = invokeContext.get(InvokeContext.BOLT_PROCESS_START_PROCESS_IN_NANO);
 

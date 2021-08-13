@@ -91,6 +91,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
         SofaResponse sofaResponse = new SofaResponse();
         long startTime = RpcRuntimeContext.now();
         long bizStartTime = System.nanoTime();
+        //R10: Record provider filter execution time
         if (RpcInternalContext.isAttachmentEnable()) {
             Long providerFilterStartTime = (Long) RpcInternalContext.getContext().removeAttachment(
                 RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO);
@@ -123,11 +124,13 @@ public class ProviderInvoker<T> extends FilterInvoker {
             sofaResponse.setAppResponse(e.getCause());
         } finally {
             if (RpcInternalContext.isAttachmentEnable()) {
+                //R8: Record business processing execution time
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
                     System.nanoTime() - bizStartTime);
+                //Record server processing completion time
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
                     RpcRuntimeContext.currentMicroseconds());
             }

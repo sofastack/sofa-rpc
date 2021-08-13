@@ -198,7 +198,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new SerializationException(ex.getMessage(), ex);
             } finally {
-                //TODO R5 part One
+                //R5：record request serialization time
                 recordSerializeRequest(requestCommand, invokeContext, serializeStartTime);
             }
         }
@@ -280,7 +280,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new DeserializationException(ex.getMessage(), ex);
             } finally {
-                //TODO R6 part one
+                //R6：Record request deserialization time
                 recordDeserializeRequest(requestCommand, deserializeStartTime);
             }
         }
@@ -324,7 +324,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new SerializationException(ex.getMessage(), ex);
             } finally {
-                //TODO R6 part two
+                //R6：Record response serialization time
                 recordSerializeResponse(responseCommand, serializeStartTime);
             }
         }
@@ -387,7 +387,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new DeserializationException(ex.getMessage(), ex);
             } finally {
-                //TODO R5 part two
+                //R5：Record response deserialization time
                 recordDeserializeResponse(responseCommand, invokeContext, deserializeStartTime);
             }
         }

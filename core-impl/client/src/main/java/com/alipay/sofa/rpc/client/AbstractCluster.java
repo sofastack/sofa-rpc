@@ -393,7 +393,7 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         }
-        // TODO R1
+        // R1：Record routing address time
         // 原始服务列表数据 --> 路由结果
         long routerStartTime = System.nanoTime();
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
@@ -450,7 +450,7 @@ public abstract class AbstractCluster extends Cluster {
             return providerInfo;
         } else {
             do {
-                // TODO R4
+                // R4：Record load balancing time
                 // 再进行负载均衡筛选
                 long loadBalanceStartTime = System.nanoTime();
                 providerInfo = loadBalancer.select(message, providerInfos);
@@ -522,7 +522,6 @@ public abstract class AbstractCluster extends Cluster {
      * @return 一个可用的transport或者null
      */
     protected ClientTransport selectByProvider(SofaRequest message, ProviderInfo providerInfo) {
-        //TODO Maybe R2
         ClientTransport transport = connectionHolder.getAvailableClientTransport(providerInfo);
         if (transport != null) {
             if (transport.isAvailable()) {
