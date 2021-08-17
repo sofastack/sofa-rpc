@@ -15,7 +15,7 @@ install:
   - sh ./tools/check_format.sh
 
 script:
-  - travis_retry ./mvnw package -Pci-test
+  - ./mvnw package -Pci-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
