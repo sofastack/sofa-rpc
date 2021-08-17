@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRouteException;
@@ -398,10 +399,8 @@ public abstract class AbstractCluster extends Cluster {
         long routerStartTime = System.nanoTime();
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
         RpcInternalContext context = RpcInternalContext.peekContext();
-        if (context != null) {
-            context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, System.nanoTime()-routerStartTime);
-        }
-
+        RpcInvokeContext rpcInvokeContext = RpcInvokeContext.getContext();
+        rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, System.nanoTime()-routerStartTime);
         //保存一下原始地址,为了打印
         List<ProviderInfo> originalProviderInfos;
 
@@ -454,9 +453,8 @@ public abstract class AbstractCluster extends Cluster {
                 // 再进行负载均衡筛选
                 long loadBalanceStartTime = System.nanoTime();
                 providerInfo = loadBalancer.select(message, providerInfos);
-                if(context != null){
-                    context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, System.nanoTime()-loadBalanceStartTime);
-                }
+                rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, System.nanoTime()-loadBalanceStartTime);
+
                 ClientTransport transport = selectByProvider(message, providerInfo);
                 if (transport != null) {
                     return providerInfo;
@@ -556,7 +554,7 @@ public abstract class AbstractCluster extends Cluster {
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
         context.setProviderInfo(providerInfo);
-        context.setAttachment(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO, System.nanoTime());
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO, System.nanoTime());
         return filterChain.invoke(request);
     }
 

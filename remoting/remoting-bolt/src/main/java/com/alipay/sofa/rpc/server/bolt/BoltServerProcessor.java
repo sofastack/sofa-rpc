@@ -118,7 +118,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     // rpc线程池等待时间 Long
                     putToContextIfNotNull(boltInvokeCtx, InvokeContext.BOLT_PROCESS_WAIT_TIME,
                         context, RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME);
-                    putToContext(boltInvokeCtx, context);
+                    putToContext(boltInvokeCtx);
                 }
             }
             if (EventBus.isEnable(ServerReceiveEvent.class)) {
@@ -237,20 +237,21 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         }
     }
 
-    private void putToContext(InvokeContext invokeContext, RpcInternalContext context) {
+    private void putToContext(InvokeContext invokeContext) {
         //The time when the server receives the first packet, in microseconds
         Long arriveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_HEADER_IN_NANO);
         if (arriveTime != null) {
-            context.setAttachment(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
                 RpcRuntimeContext.getMicrosecondsByNano(arriveTime));
         }
 
-        //R7：Thread waiting time
+        // R7：Thread waiting time
         Long enterQueueTime = invokeContext.get(InvokeContext.BOLT_PROCESS_BEFORE_DISPATCH_IN_NANO);
         Long processStartTime = invokeContext.get(InvokeContext.BOLT_PROCESS_START_PROCESS_IN_NANO);
 
         if (enterQueueTime != null && processStartTime != null) {
-            context.setAttachment(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO, processStartTime - enterQueueTime);
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO,
+                processStartTime - enterQueueTime);
         }
 
     }

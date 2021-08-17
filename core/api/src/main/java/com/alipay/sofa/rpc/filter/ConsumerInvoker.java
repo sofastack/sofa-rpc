@@ -22,6 +22,7 @@ import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -53,15 +54,14 @@ public class ConsumerInvoker extends FilterInvoker {
         // 设置下服务器应用
         ProviderInfo providerInfo = RpcInternalContext.getContext().getProviderInfo();
         String appName = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME);
-        //R3: Record consumer filter execution time
-        if (RpcInternalContext.isAttachmentEnable()) {
-            Long consumerFilterStartTime = (Long) RpcInternalContext.getContext().removeAttachment(
-                RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
-            if (consumerFilterStartTime != null) {
-                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
-                    System.nanoTime() - consumerFilterStartTime);
-            }
+        // R3: Record consumer filter execution time
+        Long consumerFilterStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
+        if (consumerFilterStartTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
+                System.nanoTime() - consumerFilterStartTime);
         }
+
         if (StringUtils.isNotEmpty(appName)) {
             sofaRequest.setTargetAppName(appName);
         }

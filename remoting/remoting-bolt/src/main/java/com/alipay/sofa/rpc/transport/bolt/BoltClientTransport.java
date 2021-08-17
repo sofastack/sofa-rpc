@@ -37,6 +37,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -403,7 +404,7 @@ public class BoltClientTransport extends ClientTransport {
         if (RpcInternalContext.isAttachmentEnable()) {
             putToContextIfNotNull(invokeContext, InvokeContext.CLIENT_CONN_CREATETIME, context,
                 RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME);
-            putToContext(invokeContext, context);
+            putToContext(invokeContext);
         }
         if (EventBus.isEnable(ClientAfterSendEvent.class)) {
             EventBus.post(new ClientAfterSendEvent(request));
@@ -451,25 +452,26 @@ public class BoltClientTransport extends ClientTransport {
         }
     }
 
-    private void putToContext(InvokeContext invokeContext, RpcInternalContext context) {
-        //R2: Connection time
+    private void putToContext(InvokeContext invokeContext) {
+        // R2: Connection time
         Long connStartTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_START_IN_NANO);
         Long connEndTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_END_IN_NANO);
         if (connStartTime != null && connEndTime != null) {
-            context.setAttachment(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, connEndTime - connStartTime);
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO,
+                connEndTime - connStartTime);
         }
 
         // Client sending completion time, in microseconds
         Long sendTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_AFTER_SEND);
         if (sendTime != null) {
-            context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO,
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO,
                 RpcRuntimeContext.getMicrosecondsByNano(sendTime));
         }
 
         // The time when the client receives the request, in microseconds
         Long receiveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_RECEIVED);
         if (receiveTime != null) {
-            context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO,
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO,
                 RpcRuntimeContext.getMicrosecondsByNano(receiveTime));
         }
     }

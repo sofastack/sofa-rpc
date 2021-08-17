@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.cache.RpcCacheManager;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.DateUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.log.Logger;
@@ -42,6 +43,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 全局的运行时上下文
@@ -208,9 +210,10 @@ public class RpcRuntimeContext {
      * @return
      */
     public static long currentMicroseconds() {
-        long currentTime = System.currentTimeMillis() * 1000;
+        long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+        ;
         long nanoTime = System.nanoTime();
-        return currentTime + (nanoTime - nanoTime / 1000000 * 1000000) / 1000;
+        return currentTime + TimeUnit.MICROSECONDS.convert(nanoTime % 1000000, TimeUnit.NANOSECONDS);
     }
 
     /**
@@ -218,9 +221,10 @@ public class RpcRuntimeContext {
      *
      */
     public static long getMicrosecondsByNano(long nanoTime) {
-        long currentTime = System.currentTimeMillis() * 1000;
+        long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         long currentNanoTime = System.nanoTime();
-        return currentTime + (nanoTime - nanoTime / 1000000 * 1000000) / 1000 - (currentNanoTime - nanoTime) / 1000;
+        return currentTime + TimeUnit.MICROSECONDS.convert(currentNanoTime % 1000000, TimeUnit.NANOSECONDS)
+            - TimeUnit.MICROSECONDS.convert(currentNanoTime - nanoTime, TimeUnit.NANOSECONDS);
     }
 
     /**

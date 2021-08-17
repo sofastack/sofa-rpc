@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.filter;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -75,7 +76,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
 
-        /*// 将接口的<sofa:param />的配置复制到RpcInternalContext TODO
+        /*// 将接口的<sofa:param />的配置复制到RpcInternalContext
         RpcInternalContext context = RpcInternalContext.getContext();
         Map params = providerConfig.getParameters();
         if (params != null) {
@@ -91,16 +92,15 @@ public class ProviderInvoker<T> extends FilterInvoker {
         SofaResponse sofaResponse = new SofaResponse();
         long startTime = RpcRuntimeContext.now();
         long bizStartTime = System.nanoTime();
-        //R10: Record provider filter execution time
-        if (RpcInternalContext.isAttachmentEnable()) {
-            Long providerFilterStartTime = (Long) RpcInternalContext.getContext().removeAttachment(
-                RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO);
-            if (providerFilterStartTime != null) {
-                //服务端过滤器执行时间
-                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
-                    bizStartTime - providerFilterStartTime);
-            }
+        // R10: Record provider filter execution time
+        Long providerFilterStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO);
+        if (providerFilterStartTime != null) {
+            //服务端过滤器执行时间
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
+                bizStartTime - providerFilterStartTime);
         }
+
         try {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
@@ -124,16 +124,16 @@ public class ProviderInvoker<T> extends FilterInvoker {
             sofaResponse.setAppResponse(e.getCause());
         } finally {
             if (RpcInternalContext.isAttachmentEnable()) {
-                //R8: Record business processing execution time
+                // R8: Record business processing execution time
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);
-                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
-                    System.nanoTime() - bizStartTime);
-                //Record server processing completion time
-                RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
-                    RpcRuntimeContext.currentMicroseconds());
             }
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
+                System.nanoTime() - bizStartTime);
+            //Record server processing completion time
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
+                RpcRuntimeContext.currentMicroseconds());
         }
 
         return sofaResponse;
