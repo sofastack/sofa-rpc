@@ -95,8 +95,8 @@ public class JavassistProxy implements Proxy {
                 constructor.setBody("{super(new " + UselessInvocationHandler.class.getName() + "());}");
                 mCtc.addConstructor(constructor);
 
-                List<String> fieldList = new ArrayList<>();
-                List<String> methodList = new ArrayList<>();
+                List<String> fieldList = new ArrayList<String>();
+                List<String> methodList = new ArrayList<String>();
 
                 fieldList.add("public " + Invoker.class.getCanonicalName() + " proxyInvoker = null;");
                 createMethod(interfaceClass, fieldList, methodList);
