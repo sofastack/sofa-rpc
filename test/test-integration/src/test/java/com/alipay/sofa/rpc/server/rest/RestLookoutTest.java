@@ -54,7 +54,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     private final static Logger         LOGGER = LoggerFactory.getLogger(RestLookoutTest.class);
 
-    private static ServerConfig         serverConfig;
+    private ServerConfig                serverConfig;
 
     private ProviderConfig<RestService> providerConfig;
 
@@ -89,13 +89,6 @@ public class RestLookoutTest extends ActivelyDestroyTest {
                 registry.removeMetric(id);
             }
         }
-        // 只有1个线程 执行
-        serverConfig = new ServerConfig()
-            .setStopTimeout(1000)
-            .setPort(8802)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_REST)
-            .setContextPath("/xyz");
-        //.setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
     }
 
@@ -110,6 +103,14 @@ public class RestLookoutTest extends ActivelyDestroyTest {
      */
     @Before
     public void beforeMethod() {
+
+        // 只有1个线程 执行
+        serverConfig = new ServerConfig()
+            .setStopTimeout(1000)
+            .setPort(8802)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_REST)
+            .setContextPath("/xyz");
+        //.setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
         // 发布一个服务，每个请求要执行1秒
         ApplicationConfig serverApplication = new ApplicationConfig();
@@ -152,6 +153,9 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         }
         if (consumerConfig != null) {
             consumerConfig.unRefer();
+        }
+        if (serverConfig != null) {
+            serverConfig.destroy();
         }
 
     }

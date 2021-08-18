@@ -31,10 +31,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
@@ -60,14 +57,25 @@ import static org.junit.Assert.assertTrue;
  */
 public class RpcLookoutTest extends ActivelyDestroyTest {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
+    private final static Logger                   LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
 
-    static Field                corePoolSize;
-    static Field                maxPoolSize;
-    static Field                queueSize;
+    static Field                                  corePoolSize;
+    static Field                                  maxPoolSize;
+    static Field                                  queueSize;
+
+    private static ServerConfig                   serverConfig;
+
+    private static ProviderConfig<LookoutService> providerConfig;
+
+    private static ConsumerConfig<LookoutService> consumerConfig;
+
+    private static LookoutService                 lookoutService;
 
     @BeforeClass
     public static void beforeClass() {
+
+        RpcRunningState.setUnitTestMode(false);
+
         try {
             Class clazz = RpcLookout.class;
             Class[] innerClazzs = clazz.getDeclaredClasses();
@@ -101,7 +109,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
             }
         }
-        RpcRunningState.setUnitTestMode(false);
 
         try {
             invoke();
@@ -109,7 +116,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         } catch (InterruptedException e) {
             LOGGER.error("", e);
         }
-
     }
 
     @AfterClass
@@ -132,14 +138,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      */
     private static void invoke() {
 
-        ServerConfig serverConfig = new ServerConfig()
-            .setPort(12200)
+        serverConfig = new ServerConfig()
+            .setPort(12201)
             .setCoreThreads(30)
             .setMaxThreads(500)
             .setQueues(600)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
 
-        ProviderConfig<LookoutService> providerConfig = new ProviderConfig<LookoutService>()
+        providerConfig = new ProviderConfig<LookoutService>()
             .setInterfaceId(LookoutService.class.getName())
             .setRef(new LookoutServiceImpl())
             .setServer(serverConfig)
@@ -179,16 +185,16 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         methodConfigs.add(methodConfigCallback);
         methodConfigs.add(methodConfigOneway);
 
-        ConsumerConfig<LookoutService> consumerConfig = new ConsumerConfig<LookoutService>()
+        consumerConfig = new ConsumerConfig<LookoutService>()
             .setInterfaceId(LookoutService.class.getName())
             .setProtocol("bolt")
             .setBootstrap("bolt")
             .setMethods(methodConfigs)
             .setTimeout(3000)
             .setRegister(false)
-            .setDirectUrl("bolt://127.0.0.1:12200?appName=TestLookOutServer")
+            .setDirectUrl("bolt://127.0.0.1:12201?appName=TestLookOutServer")
             .setApplication(new ApplicationConfig().setAppName("TestLookOutClient"));
-        LookoutService lookoutService = consumerConfig.refer();
+        lookoutService = consumerConfig.refer();
 
         //sync
         for (int i = 0; i < 3; i++) {
