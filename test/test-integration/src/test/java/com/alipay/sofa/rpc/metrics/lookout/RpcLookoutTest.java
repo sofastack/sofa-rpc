@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.metrics.lookout;
 
+import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Measurement;
 import com.alipay.lookout.api.Metric;
@@ -40,6 +41,7 @@ import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import java.util.Iterator;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -89,6 +91,15 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
             Lookout.setRegistry(registry);
+        } else {
+            //clear all metrics now
+            Iterator<Metric> itar = registry.iterator();
+            while (itar.hasNext()) {
+                Metric metric = itar.next();
+                Id id = metric.id();
+                registry.removeMetric(id);
+
+            }
         }
         RpcRunningState.setUnitTestMode(false);
 
@@ -155,7 +166,8 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 }
 
                 @Override
-                public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
+                public void onSofaException(SofaRpcException sofaException, String methodName,
+                                            RequestBase request) {
 
                 }
             });

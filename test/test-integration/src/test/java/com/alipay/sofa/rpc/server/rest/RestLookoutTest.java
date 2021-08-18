@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Measurement;
 import com.alipay.lookout.api.Metric;
@@ -32,6 +33,7 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import java.util.Iterator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -78,6 +80,14 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
             Lookout.setRegistry(registry);
+        } else {
+            //clear all metrics now
+            Iterator<Metric> itar = registry.iterator();
+            while (itar.hasNext()) {
+                Metric metric = itar.next();
+                Id id = metric.id();
+                registry.removeMetric(id);
+            }
         }
         // 只有1个线程 执行
         serverConfig = new ServerConfig()
