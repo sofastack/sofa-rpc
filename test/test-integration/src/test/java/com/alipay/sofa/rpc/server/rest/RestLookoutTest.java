@@ -58,6 +58,8 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     private ConsumerConfig<RestService> consumerConfig;
 
+    private RestService                 helloService;
+
     private Metric fetchWithName(String name) {
         for (Metric metric : Lookout.registry()) {
             if (metric.id().name().equalsIgnoreCase(name)) {
@@ -117,7 +119,10 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         consumerConfig = new ConsumerConfig<RestService>()
             .setInterfaceId(RestService.class.getName())
             .setDirectUrl(
-                "rest://127.0.0.1:8802/xyz?uniqueId=&version=1.0&timeout=0&delay=-1&id=rpc-cfg-0&dynamic=true&weight=100&accepts=100000&startTime=1523240755024&appName=" +
+                "rest://127.0.0.1:8802/xyz?uniqueId=&version=1"
+                    + ".0&timeout=0&delay=-1&id=rpc-cfg-0&dynamic=true&weight=100&accepts=100000"
+                    + "&startTime=1523240755024&appName="
+                    +
                     serverApplication.getAppName() + "&pid=22385&language=java&rpcVer=50300")
             .setProtocol("rest")
             .setBootstrap("rest")
@@ -125,9 +130,8 @@ public class RestLookoutTest extends ActivelyDestroyTest {
             .setConnectionNum(5)
             .setRegister(false)
             .setApplication(clientApplication);
-        final RestService helloService = consumerConfig.refer();
+        helloService = consumerConfig.refer();
 
-        Assert.assertEquals(helloService.query(11), "hello world !null");
     }
 
     @After
@@ -146,8 +150,11 @@ public class RestLookoutTest extends ActivelyDestroyTest {
      * test provider service stats
      */
     @Test
-    public void testProviderServiceStats() {
+    public void testServiceStats() {
 
+        Assert.assertEquals(helloService.query(11), "hello world !null");
+
+        //wait metrics info
         try {
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
@@ -159,41 +166,24 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         for (Tag tag : metric.id().tags()) {
             if (tag.key().equalsIgnoreCase("method")) {
                 String methodName = tag.value();
-
                 if (methodName.equals("query")) {
-                    assertMethod(metric, true, 2, "query", 0, 0);
-
+                    assertMethod(metric, true, 1, "query", 0, 0);
                 } else {
                     System.out.println("provider do not fix,methodName=" + methodName);
                 }
             }
         }
-    }
 
-    /**
-     * test consumer service stats
-     */
-    @Test
-    public void testConsumerServiceStats() {
+        //metrics for consumer
+        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
 
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        Metric metric = fetchWithName("rpc.consumer.service.stats");
-
-        for (Tag tag : metric.id().tags()) {
+        for (Tag tag : consumerMetric.id().tags()) {
             if (tag.key().equalsIgnoreCase("method")) {
                 String methodName = tag.value();
-
                 if (methodName.equals("query")) {
-                    assertMethod(metric, false, 2, "query", 1203, 352);
-
+                    assertMethod(consumerMetric, false, 1, "query", 1203, 352);
                 } else {
                     System.out.println("consumer do not fix");
-
                 }
             }
         }

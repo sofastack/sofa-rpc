@@ -39,6 +39,7 @@ import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -55,7 +56,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
-public class RpcLookoutTest {
+public class RpcLookoutTest extends ActivelyDestroyTest {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
 
@@ -103,9 +104,7 @@ public class RpcLookoutTest {
     @AfterClass
     public static void adAfterClass() {
         RpcRunningState.setUnitTestMode(true);
-        RpcRuntimeContext.destroy();
-        RpcInternalContext.removeContext();
-        RpcInvokeContext.removeContext();
+        ActivelyDestroyTest.adAfterClass();
     }
 
     private Metric fetchWithName(String name) {
