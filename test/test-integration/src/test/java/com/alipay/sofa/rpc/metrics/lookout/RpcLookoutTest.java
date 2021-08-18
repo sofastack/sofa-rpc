@@ -101,11 +101,11 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             Lookout.setRegistry(registry);
         } else {
             //clear all metrics now
-            Iterator<Metric> itar = registry.iterator();
+            Iterator<Metric> itar = currentRegistry.iterator();
             while (itar.hasNext()) {
                 Metric metric = itar.next();
                 Id id = metric.id();
-                registry.removeMetric(id);
+                currentRegistry.removeMetric(id);
 
             }
         }
