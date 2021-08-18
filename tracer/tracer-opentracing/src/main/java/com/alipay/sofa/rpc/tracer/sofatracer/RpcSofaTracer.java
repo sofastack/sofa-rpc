@@ -383,8 +383,8 @@ public class RpcSofaTracer extends Tracer {
     private String generateClientSpecialTimeMarkSpan(RpcInvokeContext context) {
         Long sendTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO);
         Long receiverTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO);
-        StringBuilder sb = new StringBuilder(calculateMicroTime(sendTime).toString());
-        return sb.append("&").append(calculateMicroTime(receiverTime).toString()).toString();
+        StringBuilder sb = new StringBuilder(checkTime(sendTime).toString());
+        return sb.append("&").append(checkTime(receiverTime).toString()).toString();
     }
 
     private String generateClientPhaseTimeCostSpan(RpcInvokeContext context){
@@ -420,7 +420,7 @@ public class RpcSofaTracer extends Tracer {
         return TimeUnit.MICROSECONDS.convert(time, TimeUnit.NANOSECONDS);
     }
 
-    private Long calculateMicroTime(Long time) {
+    private Long checkTime(Long time) {
         if (time == null) {
             return -1L;
         }
@@ -626,8 +626,8 @@ public class RpcSofaTracer extends Tracer {
     private String generateServerSpecialTimeMark(RpcInvokeContext context) {
         Long boltReceiveTime = (Long) context.get(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO);
         Long serverSendTime = (Long) context.get(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO);
-        StringBuilder sb = new StringBuilder(calculateMicroTime(boltReceiveTime).toString());
-        return sb.append("&").append(calculateMicroTime(serverSendTime).toString()).toString();
+        StringBuilder sb = new StringBuilder(checkTime(boltReceiveTime).toString());
+        return sb.append("&").append(checkTime(serverSendTime).toString()).toString();
     }
 
     private String generateServerPhaseTimeCostSpan(RpcInvokeContext context) {

@@ -17,9 +17,9 @@
 package com.alipay.sofa.rpc.tracer.sofatracer.log.tags;
 
 /**
- * 阶段说明	                        TraceLog字符串	备注
+ * 阶段说明（单位微秒）                TraceLog字符串	备注
  * 路由寻址（client）	                R1
- * 建立链接（client） 	            R2
+ * 建立链接（client）	                R2
  * Filter过滤（client）	            R3
  * 负载均衡LB（client）	            R4
  * 请求序列化/响应反序列化（client） 	R5

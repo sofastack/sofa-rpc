@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.DateUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -112,15 +113,16 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             context.setRemoteAddress(bizCtx.getRemoteHost(), bizCtx.getRemotePort()); // 远程地址
             context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 远程返回的通道
 
+            InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
             if (RpcInternalContext.isAttachmentEnable()) {
-                InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
                 if (boltInvokeCtx != null) {
                     // rpc线程池等待时间 Long
                     putToContextIfNotNull(boltInvokeCtx, InvokeContext.BOLT_PROCESS_WAIT_TIME,
                         context, RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME);
-                    putToContext(boltInvokeCtx);
                 }
             }
+
+            putToContext(boltInvokeCtx);
             if (EventBus.isEnable(ServerReceiveEvent.class)) {
                 EventBus.post(new ServerReceiveEvent(request));
             }
@@ -238,11 +240,11 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
     }
 
     private void putToContext(InvokeContext invokeContext) {
-        //The time when the server receives the first packet, in microseconds
+        // S1:The time when the server receives the first packet, in microseconds
         Long arriveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_HEADER_IN_NANO);
         if (arriveTime != null) {
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
-                RpcRuntimeContext.getMicrosecondsByNano(arriveTime));
+                    DateUtils.getMicrosecondsByNano(arriveTime));
         }
 
         // R7：Thread waiting time

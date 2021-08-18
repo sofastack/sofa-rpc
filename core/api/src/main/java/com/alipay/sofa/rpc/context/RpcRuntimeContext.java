@@ -42,7 +42,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.TimeUnit;
 
 /**
  * 全局的运行时上下文
@@ -201,29 +200,6 @@ public class RpcRuntimeContext {
      */
     public static long now() {
         return System.currentTimeMillis();
-    }
-
-    /**
-     * 获取当前时间，微秒
-     *
-     * @return
-     */
-    public static long currentMicroseconds() {
-        long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-        ;
-        long nanoTime = System.nanoTime();
-        return currentTime + TimeUnit.MICROSECONDS.convert(nanoTime % 1000000, TimeUnit.NANOSECONDS);
-    }
-
-    /**
-     * 根据时间差获取，时间，微秒
-     *
-     */
-    public static long getMicrosecondsByNano(long nanoTime) {
-        long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-        long currentNanoTime = System.nanoTime();
-        return currentTime + TimeUnit.MICROSECONDS.convert(currentNanoTime % 1000000, TimeUnit.NANOSECONDS)
-            - TimeUnit.MICROSECONDS.convert(currentNanoTime - nanoTime, TimeUnit.NANOSECONDS);
     }
 
     /**

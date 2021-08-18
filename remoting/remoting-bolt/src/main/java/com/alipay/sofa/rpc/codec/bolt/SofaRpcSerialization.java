@@ -213,7 +213,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
     protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext,
                                           long serializeStartTime) {
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO,
-                System.nanoTime() - serializeStartTime);
+            System.nanoTime() - serializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -294,7 +294,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     private void recordDeserializeRequest(RequestCommand requestCommand, long deserializeStartTime) {
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, System.nanoTime() -
-                deserializeStartTime);
+            deserializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -338,7 +338,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     private void recordSerializeResponse(RpcResponseCommand responseCommand, long serializeStartTime) {
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, System.nanoTime() -
-                serializeStartTime);
+            serializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -409,7 +409,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
     private void recordDeserializeResponse(RpcResponseCommand responseCommand, InvokeContext invokeContext,
                                            long deserializeStartTime) {
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO, System.nanoTime() -
-                deserializeStartTime);
+            deserializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }

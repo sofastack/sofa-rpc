@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.filter;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.DateUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -131,9 +132,9 @@ public class ProviderInvoker<T> extends FilterInvoker {
             }
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
                 System.nanoTime() - bizStartTime);
-            //Record server processing completion time
+            // S2:Record server processing completion time
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
-                RpcRuntimeContext.currentMicroseconds());
+                    DateUtils.currentMicroseconds());
         }
 
         return sofaResponse;
