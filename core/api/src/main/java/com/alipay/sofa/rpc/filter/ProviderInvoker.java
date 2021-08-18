@@ -123,8 +123,8 @@ public class ProviderInvoker<T> extends FilterInvoker {
             cutCause(e.getCause());
             sofaResponse.setAppResponse(e.getCause());
         } finally {
+            // R8: Record business processing execution time
             if (RpcInternalContext.isAttachmentEnable()) {
-                // R8: Record business processing execution time
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);

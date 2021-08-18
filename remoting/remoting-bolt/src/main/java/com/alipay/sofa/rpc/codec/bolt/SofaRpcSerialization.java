@@ -212,6 +212,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext,
                                           long serializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO,
+                System.nanoTime() - serializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -231,8 +233,6 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         // 记录请求序列化大小和请求序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME, cost);
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO,
-            System.nanoTime() - serializeStartTime);
     }
 
     @Override
@@ -293,6 +293,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      * @param requestCommand 请求对象
      */
     private void recordDeserializeRequest(RequestCommand requestCommand, long deserializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, System.nanoTime() -
+                deserializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -305,8 +307,6 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         // 记录请求反序列化大小和请求反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, requestSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME, cost);
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, System.nanoTime() -
-            deserializeStartTime);
     }
 
     @Override
@@ -337,6 +337,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      * @param responseCommand 响应体
      */
     private void recordSerializeResponse(RpcResponseCommand responseCommand, long serializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, System.nanoTime() -
+                serializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -349,8 +351,6 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         // 记录响应序列化大小和请求序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME, cost);
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, System.nanoTime() -
-            serializeStartTime);
     }
 
     @Override
@@ -408,6 +408,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     private void recordDeserializeResponse(RpcResponseCommand responseCommand, InvokeContext invokeContext,
                                            long deserializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO, System.nanoTime() -
+                deserializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -427,8 +429,6 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         // 记录响应反序列化大小和响应反序列化耗时
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, respSize);
         context.setAttachment(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME, cost);
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO, System.nanoTime() -
-            deserializeStartTime);
     }
 
     /**

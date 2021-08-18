@@ -26,7 +26,6 @@ import com.alipay.sofa.rpc.common.Version;
 import com.alipay.sofa.rpc.common.cache.RpcCacheManager;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.DateUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.log.Logger;
