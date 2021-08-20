@@ -539,7 +539,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             }
         }
         if (!tagAssert) {
-            Assert.fail();
+            Assert.fail("tag assert not executed");
         }
 
         // invoke info
@@ -603,7 +603,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             }
         }
         if (!invokeInfoAssert) {
-            Assert.fail();
+            Assert.fail("invoke assert not executed");
         }
     }
 }
