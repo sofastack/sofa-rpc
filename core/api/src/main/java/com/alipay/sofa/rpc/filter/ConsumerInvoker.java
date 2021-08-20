@@ -51,23 +51,18 @@ public class ConsumerInvoker extends FilterInvoker {
 
     @Override
     public SofaResponse invoke(SofaRequest sofaRequest) throws SofaRpcException {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO, System.nanoTime());
         // 设置下服务器应用
         ProviderInfo providerInfo = RpcInternalContext.getContext().getProviderInfo();
         String appName = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME);
-        // R3: Record consumer filter execution time
-        Long consumerFilterStartTime = (Long) RpcInvokeContext.getContext().get(
-            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
-        if (consumerFilterStartTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
-                System.nanoTime() - consumerFilterStartTime);
-        }
-
         if (StringUtils.isNotEmpty(appName)) {
             sofaRequest.setTargetAppName(appName);
         }
 
         // 目前只是通过client发送给服务端
-        return consumerBootstrap.getCluster().sendMsg(providerInfo, sofaRequest);
+        SofaResponse sofaResponse = consumerBootstrap.getCluster().sendMsg(providerInfo, sofaRequest);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO, System.nanoTime());
+        return sofaResponse;
     }
 
 }

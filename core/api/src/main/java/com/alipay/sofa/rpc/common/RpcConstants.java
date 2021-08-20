@@ -377,10 +377,46 @@ public class RpcConstants {
                                                                                  "consumer_filter_start_time_nano";
 
     /**
+     * 内部使用的key：_consumer_filter_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_filter_end_time_nano";
+
+    /**
+     * 内部使用的key：_consumer_invoke_start_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_invoke_start_time_nano";
+
+    /**
+     * 内部使用的key：_consumer_invoke_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_invoke_end_time_nano";
+
+    /**
      * 内部使用的key：_provider_filter_start_time_nano， long
      */
     public static final String  INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO = INTERNAL_KEY_PREFIX +
                                                                                  "provider_filter_start_time_nano";
+
+    /**
+     * 内部使用的key：_provider_filter_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_FILTER_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_filter_end_time_nano";
+
+    /**
+     * 内部使用的key：_provider_invoke_start_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_invoke_start_time_nano";
+
+    /**
+     * 内部使用的key：_provider_invoke_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_invoke_end_time_nano";
 
     /**
      * 内部使用的key：_client_filter_time_nano 客户端过滤器耗时，long，纳秒级别

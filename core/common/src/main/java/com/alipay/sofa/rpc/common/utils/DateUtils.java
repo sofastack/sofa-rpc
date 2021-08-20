@@ -35,7 +35,7 @@ public class DateUtils {
     /**
      * 每秒微秒数
      */
-    public static final int    MICROSECONDS_PER_SECOND = 1000000;
+    public static final int    MICROSECONDS_PER_SECOND  = 1000000;
     /**
      * 每分毫秒数 60*1000
      */
@@ -172,7 +172,8 @@ public class DateUtils {
     public static long getMicrosecondsByNano(long nanoTime) {
         long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
         long currentNanoTime = System.nanoTime();
-        return currentTime + TimeUnit.MICROSECONDS.convert(currentNanoTime % MICROSECONDS_PER_SECOND, TimeUnit.NANOSECONDS)
-                - TimeUnit.MICROSECONDS.convert(currentNanoTime - nanoTime, TimeUnit.NANOSECONDS);
+        return currentTime +
+            TimeUnit.MICROSECONDS.convert(currentNanoTime % MICROSECONDS_PER_SECOND, TimeUnit.NANOSECONDS)
+            - TimeUnit.MICROSECONDS.convert(currentNanoTime - nanoTime, TimeUnit.NANOSECONDS);
     }
 }

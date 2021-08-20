@@ -465,14 +465,14 @@ public class BoltClientTransport extends ClientTransport {
         Long sendTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_AFTER_SEND);
         if (sendTime != null) {
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO,
-                    DateUtils.getMicrosecondsByNano(sendTime));
+                DateUtils.getMicrosecondsByNano(sendTime));
         }
 
         // C2:The time when the client receives the request, in microseconds
         Long receiveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_RECEIVED);
         if (receiveTime != null) {
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO,
-                    DateUtils.getMicrosecondsByNano(receiveTime));
+                DateUtils.getMicrosecondsByNano(receiveTime));
         }
     }
 

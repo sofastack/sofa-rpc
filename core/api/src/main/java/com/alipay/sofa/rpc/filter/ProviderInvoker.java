@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.filter;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.utils.DateUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -93,15 +92,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
         SofaResponse sofaResponse = new SofaResponse();
         long startTime = RpcRuntimeContext.now();
         long bizStartTime = System.nanoTime();
-        // R10: Record provider filter execution time
-        Long providerFilterStartTime = (Long) RpcInvokeContext.getContext().get(
-            RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO);
-        if (providerFilterStartTime != null) {
-            //服务端过滤器执行时间
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
-                bizStartTime - providerFilterStartTime);
-        }
-
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO, System.nanoTime());
         try {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
@@ -132,9 +123,9 @@ public class ProviderInvoker<T> extends FilterInvoker {
             }
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
                 System.nanoTime() - bizStartTime);
-            // S2:Record server processing completion time
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
-                    DateUtils.currentMicroseconds());
+
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO,
+                System.nanoTime());
         }
 
         return sofaResponse;

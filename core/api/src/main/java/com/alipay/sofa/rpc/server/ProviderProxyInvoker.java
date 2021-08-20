@@ -66,7 +66,26 @@ public class ProviderProxyInvoker implements Invoker {
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO, System.nanoTime());
-        return filterChain.invoke(request);
+        SofaResponse sofaResponse = filterChain.invoke(request);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_END_TIME_NANO, System.nanoTime());
+        calculateProviderFilterTime();
+        return sofaResponse;
+    }
+
+    private void calculateProviderFilterTime() {
+        // R10: Record provider filter execution time
+        Long filterStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO);
+        Long filterEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_PROVIDER_FILTER_END_TIME_NANO);
+        Long invokerStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO);
+        Long invokerEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO);
+        if (filterStartTime != null && filterEndTime != null && invokerStartTime != null && invokerEndTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
+                filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime));
+        }
     }
 
     /**

@@ -555,7 +555,26 @@ public abstract class AbstractCluster extends Cluster {
         RpcInternalContext context = RpcInternalContext.getContext();
         context.setProviderInfo(providerInfo);
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO, System.nanoTime());
-        return filterChain.invoke(request);
+        SofaResponse sofaResponse = filterChain.invoke(request);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO, System.nanoTime());
+        calculateConsumerFilterTime();
+        return sofaResponse;
+    }
+
+    private void calculateConsumerFilterTime() {
+        // R3: Record consumer filter execution time
+        Long filterStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
+        Long filterEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO);
+        Long invokerStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO);
+        Long invokerEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO);
+        if (filterStartTime != null && filterEndTime != null && invokerStartTime != null && invokerEndTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
+                filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime));
+        }
     }
 
     @Override
