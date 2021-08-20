@@ -40,6 +40,8 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -132,16 +134,11 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      * invoke
      */
     @Before
-    public void invokeOnce() {
-
-        if (serverConfig != null) {
-            LOGGER.info("has execute once");
-            return;
-        }
+    public void before() {
 
         serverConfig = new ServerConfig()
             .setPort(12201)
-            .setCoreThreads(60)
+            .setCoreThreads(30)
             .setMaxThreads(500)
             .setQueues(600)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
@@ -197,41 +194,29 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             .setApplication(new ApplicationConfig().setAppName("TestLookOutClient"));
         lookoutService = consumerConfig.refer();
 
-        //sync
-        for (int i = 0; i < 3; i++) {
-            try {
-                lookoutService.saySync("lookout_sync");
-            } catch (Exception e) {
-                LOGGER.error("sync error", e);
-            }
+    }
+
+    @After
+    public void after() {
+
+        final Registry currentRegistry = Lookout.registry();
+        //clear all metrics now
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
+
         }
 
-        //future
-        for (int i = 0; i < 4; i++) {
-            try {
-                lookoutService.sayFuture("lookout_future");
-                SofaResponseFuture.getResponse(3000, true);
-            } catch (Exception e) {
-                LOGGER.error("future error", e);
-            }
+        if (serverConfig != null) {
+            serverConfig.destroy();
         }
-
-        //callback
-        for (int i = 0; i < 5; i++) {
-            try {
-                lookoutService.sayCallback("lookout_callback");
-            } catch (Exception e) {
-                LOGGER.error("callback error", e);
-            }
+        if (providerConfig != null) {
+            providerConfig.unExport();
         }
-
-        //oneway
-        for (int i = 0; i < 6; i++) {
-            try {
-                lookoutService.sayOneway("lookout_oneway");
-            } catch (Exception e) {
-                LOGGER.error("oneway error", e);
-            }
+        if (consumerConfig != null) {
+            consumerConfig.unRefer();
         }
     }
 
@@ -281,12 +266,27 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     @Test
     public void testThreadPoolIdleCount() {
 
+        //sync invoke some time
+        for (int i = 0; i < 3; i++) {
+            try {
+                lookoutService.saySync("lookout_sync");
+            } catch (Exception e) {
+                LOGGER.error("sync error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         Metric metric = fetchWithName("rpc.bolt.threadpool.idle.count");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
         for (Measurement measurement : measurements) {
-            assertEquals(3 + 4 + 5 + 6, ((Number) measurement.value()).intValue());
+            assertEquals(3, ((Number) measurement.value()).intValue());
         }
     }
 
@@ -309,7 +309,142 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      * test provider service stats
      */
     @Test
-    public void testProviderServiceStats() {
+    public void testFutureServiceStats() {
+
+        //future
+        for (int i = 0; i < 4; i++) {
+            try {
+                lookoutService.sayFuture("lookout_future");
+                SofaResponseFuture.getResponse(3000, true);
+            } catch (Exception e) {
+                LOGGER.error("future error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Metric metric = fetchWithName("rpc.provider.service.stats");
+        String methodName = "sayFuture";
+        Tag testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 4, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+
+        testTag = findTagFromMetrics(consumerMetric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(consumerMetric, false, 4, methodName, 1620, 534);
+
+    }
+
+    /**
+     * test provider service stats
+     */
+    @Test
+    public void testCallbackServiceStats() {
+
+        //callback
+        for (int i = 0; i < 5; i++) {
+            try {
+                lookoutService.sayCallback("lookout_callback");
+            } catch (Exception e) {
+                LOGGER.error("callback error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Metric metric = fetchWithName("rpc.provider.service.stats");
+
+        String methodName = "sayCallback";
+        Tag testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 5, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+
+        testTag = findTagFromMetrics(consumerMetric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(consumerMetric, false, 5, methodName, 2045, 720);
+
+    }
+
+    /**
+     * test provider service stats
+     */
+    @Test
+    public void testOnewayServiceStats() {
+
+        //oneway
+        for (int i = 0; i < 6; i++) {
+            try {
+                lookoutService.sayOneway("lookout_oneway");
+            } catch (Exception e) {
+                LOGGER.error("oneway error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Metric metric = fetchWithName("rpc.provider.service.stats");
+
+        String methodName = "sayOneway";
+        Tag testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 6, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+
+        testTag = findTagFromMetrics(consumerMetric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(consumerMetric, false, 6, methodName, 2430, 0);
+
+    }
+
+    /**
+     * test provider service stats
+     */
+    @Test
+    public void testSyncServiceStats() {
+
+        //sync
+        for (int i = 0; i < 3; i++) {
+            try {
+                lookoutService.saySync("lookout_sync");
+            } catch (Exception e) {
+                LOGGER.error("sync error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
@@ -320,26 +455,13 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         }
         assertMethod(metric, true, 3, methodName, 0, 0);
 
-        methodName = "sayFuture";
-        testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
-        assertMethod(metric, true, 4, methodName, 0, 0);
+        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
 
-        methodName = "sayCallback";
-        testTag = findTagFromMetrics(metric, methodName);
+        testTag = findTagFromMetrics(consumerMetric, methodName);
         if (testTag == null) {
             Assert.fail("no method was found " + methodName);
         }
-        assertMethod(metric, true, 5, methodName, 0, 0);
-
-        methodName = "sayOneway";
-        testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
-        assertMethod(metric, true, 6, methodName, 0, 0);
+        assertMethod(consumerMetric, false, 3, methodName, 1203, 352);
 
     }
 
@@ -360,44 +482,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             }
         }
         return null;
-    }
-
-    /**
-     * test consumer service stats
-     */
-    @Test
-    public void testConsumerServiceStats() {
-
-        Metric metric = fetchWithName("rpc.consumer.service.stats");
-
-        String methodName = "saySync";
-        Tag testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
-        assertMethod(metric, false, 3, methodName, 1203, 352);
-
-        methodName = "sayFuture";
-        testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
-        assertMethod(metric, false, 4, methodName, 1620, 534);
-
-        methodName = "sayCallback";
-        testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
-        assertMethod(metric, false, 5, methodName, 2045, 720);
-
-        methodName = "sayOneway";
-        testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
-        assertMethod(metric, false, 6, methodName, 2430, 0);
-
     }
 
     /**
