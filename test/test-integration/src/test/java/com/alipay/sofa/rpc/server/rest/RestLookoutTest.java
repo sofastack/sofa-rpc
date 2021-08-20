@@ -25,6 +25,7 @@ import com.alipay.lookout.api.Registry;
 import com.alipay.lookout.api.Tag;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -177,30 +178,22 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
-        for (Tag tag : metric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-                if (methodName.equals("query")) {
-                    assertMethod(metric, true, 1, "query", 0, 0);
-                } else {
-                    System.out.println("provider do not fix,methodName=" + methodName);
-                }
-            }
+        String methodName = "query";
+        Tag testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
         }
+        assertMethod(metric, true, 1, methodName, 0, 0);
 
         //metrics for consumer
         Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
 
-        for (Tag tag : consumerMetric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-                if (methodName.equals("query")) {
-                    assertMethod(consumerMetric, false, 1, "query", 1203, 352);
-                } else {
-                    System.out.println("consumer do not fix");
-                }
-            }
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
         }
+        assertMethod(consumerMetric, false, 1, methodName, 1203, 352);
+
     }
 
     /**
@@ -320,5 +313,24 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         if (!invokeInfoAssert) {
             Assert.fail();
         }
+    }
+
+    /**
+     * 通过methodName获取
+     *
+     * @param metric
+     * @param methodName
+     * @return
+     */
+    private Tag findTagFromMetrics(Metric metric, String methodName) {
+        for (Tag tag : metric.id().tags()) {
+            if (tag.key().equalsIgnoreCase("method")) {
+                String value = tag.value();
+                if (StringUtils.equals(methodName, value)) {
+                    return tag;
+                }
+            }
+        }
+        return null;
     }
 }

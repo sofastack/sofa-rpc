@@ -26,6 +26,7 @@ import com.alipay.lookout.api.Tag;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.MethodConfig;
@@ -112,9 +113,10 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
         try {
             invoke();
+            //wait invoke oneway or callback done
             Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            LOGGER.error("", e);
+        } catch (Exception e) {
+            LOGGER.error("invoke error", e);
         }
     }
 
@@ -201,7 +203,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             try {
                 lookoutService.saySync("lookout_sync");
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("sync error", e);
             }
         }
 
@@ -211,7 +213,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 lookoutService.sayFuture("lookout_future");
                 SofaResponseFuture.getResponse(3000, true);
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("future error", e);
             }
         }
 
@@ -220,7 +222,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             try {
                 lookoutService.sayCallback("lookout_callback");
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("callback error", e);
             }
         }
 
@@ -229,7 +231,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             try {
                 lookoutService.sayOneway("lookout_oneway");
             } catch (Exception e) {
-                LOGGER.error("", e);
+                LOGGER.error("oneway error", e);
             }
         }
     }
@@ -312,25 +314,53 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
+        String methodName = "saySync";
+        Tag testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 3, methodName, 0, 0);
+
+        methodName = "sayFuture";
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 4, methodName, 0, 0);
+
+        methodName = "sayCallback";
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 5, methodName, 0, 0);
+
+        methodName = "sayOneway";
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, true, 6, methodName, 0, 0);
+
+    }
+
+    /**
+     * 通过methodName获取
+     *
+     * @param metric
+     * @param methodName
+     * @return
+     */
+    private Tag findTagFromMetrics(Metric metric, String methodName) {
         for (Tag tag : metric.id().tags()) {
             if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-
-                if (methodName.equals("saySync")) {
-                    assertMethod(metric, true, 3, "saySync", 0, 0);
-
-                } else if (methodName.equals("sayFuture")) {
-                    assertMethod(metric, true, 4, "sayFuture", 0, 0);
-
-                } else if (methodName.equals("sayCallback")) {
-                    assertMethod(metric, true, 5, "sayCallback", 0, 0);
-
-                } else if (methodName.equals("sayOneway")) {
-                    assertMethod(metric, true, 6, "sayOneway", 0, 0);
-
+                String value = tag.value();
+                if (StringUtils.equals(methodName, value)) {
+                    return tag;
                 }
             }
         }
+        return null;
     }
 
     /**
@@ -341,25 +371,34 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
         Metric metric = fetchWithName("rpc.consumer.service.stats");
 
-        for (Tag tag : metric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-
-                if (methodName.equals("saySync")) {
-                    assertMethod(metric, false, 3, "saySync", 1203, 352);
-
-                } else if (methodName.equals("sayFuture")) {
-                    assertMethod(metric, false, 4, "sayFuture", 1620, 534);
-
-                } else if (methodName.equals("sayCallback")) {
-                    assertMethod(metric, false, 5, "sayCallback", 2045, 720);
-
-                } else if (methodName.equals("sayOneway")) {
-                    assertMethod(metric, false, 6, "sayOneway", 2430, 0);
-
-                }
-            }
+        String methodName = "saySync";
+        Tag testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
         }
+        assertMethod(metric, false, 3, methodName, 1203, 352);
+
+        methodName = "sayFuture";
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, false, 4, methodName, 1620, 534);
+
+        methodName = "sayCallback";
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, false, 5, methodName, 2045, 720);
+
+        methodName = "sayOneway";
+        testTag = findTagFromMetrics(metric, methodName);
+        if (testTag == null) {
+            Assert.fail("no method was found " + methodName);
+        }
+        assertMethod(metric, false, 6, methodName, 2430, 0);
+
     }
 
     /**
