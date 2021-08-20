@@ -42,6 +42,7 @@ import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -58,19 +59,19 @@ import static org.junit.Assert.assertTrue;
  */
 public class RpcLookoutTest extends ActivelyDestroyTest {
 
-    private final static Logger                   LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
+    private final static Logger            LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
 
-    static Field                                  corePoolSize;
-    static Field                                  maxPoolSize;
-    static Field                                  queueSize;
+    static Field                           corePoolSize;
+    static Field                           maxPoolSize;
+    static Field                           queueSize;
 
-    private static ServerConfig                   serverConfig;
+    private ServerConfig                   serverConfig;
 
-    private static ProviderConfig<LookoutService> providerConfig;
+    private ProviderConfig<LookoutService> providerConfig;
 
-    private static ConsumerConfig<LookoutService> consumerConfig;
+    private ConsumerConfig<LookoutService> consumerConfig;
 
-    private static LookoutService                 lookoutService;
+    private LookoutService                 lookoutService;
 
     @BeforeClass
     public static void beforeClass() {
@@ -110,14 +111,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
             }
         }
-
-        try {
-            invoke();
-            //wait invoke oneway or callback done
-            Thread.sleep(5000);
-        } catch (Exception e) {
-            LOGGER.error("invoke error", e);
-        }
     }
 
     @AfterClass
@@ -138,11 +131,17 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     /**
      * invoke
      */
-    private static void invoke() {
+    @Before
+    public void invokeOnce() {
+
+        if (serverConfig != null) {
+            LOGGER.info("has execute once");
+            return;
+        }
 
         serverConfig = new ServerConfig()
             .setPort(12201)
-            .setCoreThreads(30)
+            .setCoreThreads(60)
             .setMaxThreads(500)
             .setQueues(600)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
