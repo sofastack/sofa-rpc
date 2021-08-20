@@ -497,6 +497,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     private void assertMethod(Metric metric, boolean isProvider, int totalCount, String method, int requestSize,
                               int responseSize) {
         // tag
+        LOGGER.error("assertMethod");
         boolean tagAssert = false;
         for (Tag tag : metric.id().tags()) {
             LOGGER.error("rpclook" + tag.key() + tag.value());
