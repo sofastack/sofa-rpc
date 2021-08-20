@@ -444,8 +444,8 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         }
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
-
         System.out.println("where is the log" + metric);
+        Assert.assertNotEquals("metrics is null", null, metric);
         String methodName = "saySync";
         Tag testTag = findTagFromMetrics(metric, methodName);
         if (testTag == null) {
