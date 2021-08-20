@@ -439,7 +439,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         try {
             TimeUnit.SECONDS.sleep(10);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            LOGGER.error("InterruptedException", e);
         }
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
@@ -447,8 +447,11 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         String methodName = "saySync";
         Tag testTag = findTagFromMetrics(metric, methodName);
         if (testTag == null) {
+            System.out.println("no method was found ");
             Assert.fail("no method was found " + methodName);
         }
+
+        LOGGER.info("xxxxxxyyyyyy");
         assertMethod(metric, true, 3, methodName, 0, 0);
 
         Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
