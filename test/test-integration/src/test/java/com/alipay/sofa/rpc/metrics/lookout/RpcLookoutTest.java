@@ -499,7 +499,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         // tag
         boolean tagAssert = false;
         for (Tag tag : metric.id().tags()) {
-
+            LOGGER.error("rpclook" + tag.key() + tag.value());
             String key = tag.key();
             String value = tag.value();
             if (key.equals("service")) {
@@ -556,6 +556,8 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
         boolean invokeInfoAssert = false;
         for (Measurement measurement : measurements) {
+            LOGGER.error("rpcfun" + measurement.name() + measurement.value().toString());
+
             String name = measurement.name();
             int value = ((Long) measurement.value()).intValue();
 
