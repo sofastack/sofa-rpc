@@ -36,8 +36,6 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -60,8 +58,6 @@ import static org.junit.Assert.assertTrue;
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RpcLookoutTest extends ActivelyDestroyTest {
-
-    private final static Logger            LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
 
     static Field                           corePoolSize;
     static Field                           maxPoolSize;

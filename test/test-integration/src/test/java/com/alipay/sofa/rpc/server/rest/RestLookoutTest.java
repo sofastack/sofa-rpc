@@ -31,8 +31,6 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
 import org.junit.After;
@@ -52,8 +50,6 @@ import static org.junit.Assert.assertTrue;
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
 public class RestLookoutTest extends ActivelyDestroyTest {
-
-    private final static Logger         LOGGER = LoggerFactory.getLogger(RestLookoutTest.class);
 
     private ServerConfig                serverConfig;
 
