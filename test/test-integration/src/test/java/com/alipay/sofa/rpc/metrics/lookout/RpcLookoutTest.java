@@ -426,6 +426,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      */
     @Test
     public void testSyncServiceStats() {
+        System.out.println("start where is the log");
 
         //sync
         for (int i = 0; i < 3; i++) {
@@ -444,6 +445,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
+        System.out.println("where is the log" + metric);
         String methodName = "saySync";
         Tag testTag = findTagFromMetrics(metric, methodName);
         if (testTag == null) {
