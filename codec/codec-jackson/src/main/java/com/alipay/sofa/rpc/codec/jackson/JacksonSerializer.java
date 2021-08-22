@@ -310,12 +310,21 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaResponse.setErrorMsg(errorMessage);
         } else {
             // according interface and method name to find paramter types
-            JavaType respType = jacksonHelper.getResClass(targetService, methodName);
+
             Object result;
-            try {
-                result = mapper.readValue(data.array(), respType);
-            } catch (IOException e) {
-                throw buildDeserializeError(e.getMessage());
+            try{
+                JavaType respType = jacksonHelper.getResClass(targetService, methodName);
+                try {
+                    result = mapper.readValue(data.array(), respType);
+                } catch (IOException e1) {
+                    throw buildDeserializeError(e1.getMessage());
+                }
+            }catch (Exception e){
+                try{
+                    result = mapper.readValue(data.array(), Object.class);
+                }catch (IOException e2){
+                    throw buildDeserializeError(e2.getMessage());
+                }
             }
             sofaResponse.setAppResponse(result);
         }
