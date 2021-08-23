@@ -493,44 +493,43 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     private void assertMethod(Metric metric, boolean isProvider, int totalCount, String method, int requestSize,
                               int responseSize) {
         // tag
-        LOGGER.error("assertMethod");
         boolean tagAssert = false;
         for (Tag tag : metric.id().tags()) {
-            LOGGER.error("rpclook" + tag.key() + tag.value());
             String key = tag.key();
             String value = tag.value();
+            LOGGER.info(this.getClass().getName() + ",key=" + key + ",value=" + value);
             if (key.equals("service")) {
-                assertEquals(LookoutService.class.getCanonicalName() + ":1.0", value);
+                assertEquals("service not equal", LookoutService.class.getCanonicalName() + ":1.0", value);
                 tagAssert = true;
             }
             if (key.equals("protocol")) {
-                assertEquals("bolt", value);
+                assertEquals("protocol not equal", "bolt", value);
                 tagAssert = true;
             }
             if (key.equals("method")) {
-                assertEquals(method, value);
+                assertEquals("method not equal", method, value);
                 tagAssert = true;
             }
             if (isProvider) {
                 if (key.equals("app")) {
-                    assertEquals("TestLookOutServer", value);
+                    assertEquals("app not equal in provider", "TestLookOutServer", value);
                     tagAssert = true;
                 }
                 if (key.equals("caller_app")) {
-                    assertEquals("TestLookOutClient", value);
+                    assertEquals("caller_app not equal in provider", "TestLookOutClient", value);
                     tagAssert = true;
                 }
             } else {
                 if (key.equals("app")) {
-                    assertEquals("TestLookOutClient", value);
+                    assertEquals("app not equal in consumer", "TestLookOutClient", value);
                     tagAssert = true;
                 }
                 if (key.equals("target_app")) {
-                    assertEquals("TestLookOutServer", value);
+                    assertEquals("target_app not equal in consumer", "TestLookOutServer", value);
                     tagAssert = true;
                 }
                 if (key.equals("invoke_type")) {
-                    assertEquals(method.substring(3).toLowerCase(), value);
+                    assertEquals("invoke_type not equal in consumer", method.substring(3).toLowerCase(), value);
 
                 }
             }
@@ -542,61 +541,62 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         // invoke info
         Collection<Measurement> measurements = metric.measure().measurements();
         if (isProvider) {
-            assertEquals(6, measurements.size());
+            assertEquals("measurements size is not equal", 6, measurements.size());
         } else {
             if (method.equals("sayOneway")) {
-                assertEquals(5, measurements.size());
+                assertEquals("measurements is not equal in sayOneway", 5, measurements.size());
             } else {
-                assertEquals(10, measurements.size());
+                assertEquals("measurements is not equal in others", 10, measurements.size());
             }
         }
 
         boolean invokeInfoAssert = false;
         for (Measurement measurement : measurements) {
-            LOGGER.error("rpcfun" + measurement.name() + measurement.value().toString());
 
             String name = measurement.name();
             int value = ((Long) measurement.value()).intValue();
 
+            LOGGER.info(this.getClass().getName() + ",name=" + name + ",value=" + value);
+
             if (name.equals("total_count")) {
-                assertEquals(totalCount, value);
+                assertEquals("total_count is not equal", totalCount, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.totalTime")) {
                 if (method.equals("sayOneway") && !isProvider) {
-                    assertTrue(value < 3000);
+                    assertTrue("totalTime is not equal in consumer", value < 3000);
                 } else {
-                    assertTrue(value > 3000);
+                    assertTrue("totalTime is not equal in provider", value > 3000);
                 }
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.count")) {
-                assertEquals(totalCount, value);
+                assertEquals("count is not equal", totalCount, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_count")) {
-                assertEquals(1, value);
+                assertEquals("fail_count is not equal", 1, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_time.totalTime")) {
-                assertTrue(value > 3000);
+                assertTrue("fail_time.totalTime is not equal", value > 3000);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_time.count")) {
-                assertEquals(1, value);
+                assertEquals("fail_time.count is not equal", 1, value);
                 invokeInfoAssert = true;
             }
             if (!isProvider) {
                 if (name.equals("request_size.count")) {
                     LOGGER.info("request_size.count,value={},requestSize={},totalCount={}", value, requestSize,
                         totalCount);
-                    assertTrue(requestSize > 0);
+                    assertTrue("request_size.count is smaller than 0", requestSize > 0);
                     invokeInfoAssert = true;
                 }
                 if (name.equals("response_size.count")) {
                     LOGGER.info("response_size.count,value={},responseSize={},totalCount={}", value, responseSize,
                         totalCount);
-                    assertTrue(requestSize > 0);
+                    assertTrue("response_size.count is smaller than 0", responseSize > 0);
                     invokeInfoAssert = true;
                 }
             }
