@@ -154,23 +154,6 @@ public class RpcLookout {
     }
 
     /**
-     * remove the rpc provider and consumer info
-     *
-     */
-    public void removeProviderMetrics() {
-        rpcLookoutId.removeProviderStatId();
-        rpcLookoutId.removeProviderPubId();
-    }
-
-    /**
-     * remove the rpc provider and consumer info
-     **/
-    public void removeConsumerMetrics() {
-        rpcLookoutId.removeConsumerStatId();
-        rpcLookoutId.removeConsumerSubId();
-    }
-
-    /**
      * Record the number of calls and time consuming.
      *
      * @param mixinMetric MixinMetric
@@ -237,7 +220,7 @@ public class RpcLookout {
         tags.put("invoke_type", StringUtils.defaultString(model.getInvokeType()));
         tags.put("target_app", StringUtils.defaultString(model.getTargetApp()));
 
-        return rpcLookoutId.fetchConsumerStatId().withTags(tags);
+        return rpcLookoutId.fetchConsumerStatId(tags);
     }
 
     /**
@@ -248,14 +231,13 @@ public class RpcLookout {
      */
     public Id createMethodProviderId(RpcServerLookoutModel model) {
         Map<String, String> tags = new HashMap<String, String>(5);
-
         tags.put("app", StringUtils.defaultString(model.getApp()));
         tags.put("service", StringUtils.defaultString(model.getService()));
         tags.put("method", StringUtils.defaultString(model.getMethod()));
         tags.put("protocol", StringUtils.defaultString(model.getProtocol()));
         tags.put("caller_app", StringUtils.defaultString(model.getCallerApp()));
 
-        return rpcLookoutId.fetchProviderStatId().withTags(tags);
+        return rpcLookoutId.fetchProviderStatId(tags);
     }
 
     /**

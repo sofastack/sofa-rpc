@@ -34,6 +34,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import java.util.Iterator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -109,6 +110,14 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
             Lookout.setRegistry(registry);
+        } else {
+            //clear all metrics now
+            Iterator<Metric> itar = currentRegistry.iterator();
+            while (itar.hasNext()) {
+                Metric metric = itar.next();
+                Id id = metric.id();
+                currentRegistry.removeMetric(id);
+            }
         }
     }
 
@@ -170,6 +179,15 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     @After
     public void afterMethod() {
+
+        //clear all metrics now
+        Registry currentRegistry = Lookout.registry();
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
+        }
 
         if (providerConfig != null) {
             providerConfig.unExport();

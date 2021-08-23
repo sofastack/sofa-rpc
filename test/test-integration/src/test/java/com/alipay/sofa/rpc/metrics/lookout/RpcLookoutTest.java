@@ -141,6 +141,15 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     @Before
     public void before() {
 
+        final Registry currentRegistry = Lookout.registry();
+        //clear all metrics now
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
+        }
+
         serverConfig = new ServerConfig()
             .setPort(12201)
             .setCoreThreads(30)
