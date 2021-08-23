@@ -85,6 +85,10 @@ public class LookoutSubscriber extends Subscriber {
             ServerStoppedEvent serverStartedEvent = (ServerStoppedEvent) event;
 
             rpcMetrics.removeThreadPool(serverStartedEvent.getServerConfig());
+
+            //stop provider and consumer metrics
+            rpcMetrics.removeConsumerMetrics();
+            rpcMetrics.removeProviderMetrics();
         } else if (eventClass == ProviderPubEvent.class) {
             ProviderPubEvent providerPubEvent = (ProviderPubEvent) event;
             rpcMetrics.collectProvderPubInfo(providerPubEvent.getProviderConfig());

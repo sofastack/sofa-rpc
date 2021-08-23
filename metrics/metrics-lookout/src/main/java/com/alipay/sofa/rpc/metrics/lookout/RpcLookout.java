@@ -154,6 +154,23 @@ public class RpcLookout {
     }
 
     /**
+     * remove the rpc provider and consumer info
+     *
+     */
+    public void removeProviderMetrics() {
+        rpcLookoutId.removeProviderStatId();
+        rpcLookoutId.removeProviderPubId();
+    }
+
+    /**
+     * remove the rpc provider and consumer info
+     **/
+    public void removeConsumerMetrics() {
+        rpcLookoutId.removeConsumerStatId();
+        rpcLookoutId.removeConsumerSubId();
+    }
+
+    /**
      * Record the number of calls and time consuming.
      *
      * @param mixinMetric MixinMetric

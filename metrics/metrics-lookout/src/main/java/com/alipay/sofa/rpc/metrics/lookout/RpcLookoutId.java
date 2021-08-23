@@ -60,6 +60,16 @@ public class RpcLookoutId {
         return consumerId;
     }
 
+    public boolean removeConsumerStatId() {
+        synchronized (consumerIdLock) {
+            if (consumerId != null) {
+                Lookout.registry().removeMetric(consumerId);
+                consumerId = null;
+            }
+        }
+        return true;
+    }
+
     /**
      * Create ProviderId
      *
@@ -78,6 +88,21 @@ public class RpcLookoutId {
         return providerId;
     }
 
+    /**
+     * remove ProviderId
+     *
+     * @return boolean
+     */
+    public boolean removeProviderStatId() {
+        synchronized (providerIdLock) {
+            if (providerId != null) {
+                Lookout.registry().removeMetric(providerId);
+                providerId = null;
+            }
+        }
+        return true;
+    }
+
     public Id fetchConsumerSubId() {
         if (consumerConfigId == null) {
             synchronized (consumerConfigIdLock) {
@@ -89,6 +114,16 @@ public class RpcLookoutId {
         return consumerConfigId;
     }
 
+    public boolean removeConsumerSubId() {
+        synchronized (consumerConfigIdLock) {
+            if (consumerConfigId != null) {
+                Lookout.registry().removeMetric(consumerConfigId);
+                consumerConfigId = null;
+            }
+        }
+        return true;
+    }
+
     public Id fetchProviderPubId() {
         if (providerConfigId == null) {
             synchronized (providerConfigIdLock) {
@@ -98,6 +133,16 @@ public class RpcLookoutId {
             }
         }
         return providerConfigId;
+    }
+
+    public boolean removeProviderPubId() {
+        synchronized (providerConfigIdLock) {
+            if (providerConfigId != null) {
+                Lookout.registry().removeMetric(providerConfigId);
+                providerConfigId = null;
+            }
+        }
+        return true;
     }
 
     public synchronized Id fetchServerThreadConfigId(ServerConfig serverConfig) {
