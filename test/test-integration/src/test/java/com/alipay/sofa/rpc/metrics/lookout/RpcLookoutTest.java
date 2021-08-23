@@ -121,15 +121,12 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     private Metric fetchWithNameAndMethod(String name, String methodName) {
         Registry registry = Lookout.registry();
-        System.out.println("current registry is " + registry + ",name=" + name);
         for (Metric metric : registry) {
-            System.out.println("metrics name is " + metric.id().name());
+            LOGGER.info("metrics name is " + metric.id() + ",name=" + name + ",methodName=" + methodName);
             if (metric.id().name().equalsIgnoreCase(name)) {
-
                 if (StringUtils.isEmpty(methodName)) {
                     return metric;
                 }
-
                 if (matchTagFromMetrics(metric, methodName)) {
                     return metric;
                 }
@@ -322,14 +319,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         String methodName = "sayFuture";
         Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
         if (metric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no provider metric was found null");
         }
         assertMethod(metric, true, 4, methodName, 0, 0);
 
         Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
 
         if (consumerMetric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no consumer metric was found null");
         }
 
         assertMethod(consumerMetric, false, 4, methodName, 1620, 534);
@@ -365,7 +362,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
 
         if (metric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no provider metric was found null");
         }
 
         assertMethod(metric, true, 5, methodName, 0, 0);
@@ -373,7 +370,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
 
         if (consumerMetric == null) {
-            Assert.fail("no consumerMetric was found null");
+            Assert.fail("no consumer eetric was found null");
         }
 
         assertMethod(consumerMetric, false, 5, methodName, 2045, 720);
@@ -405,7 +402,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
 
         if (metric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no provider metric was found null");
         }
 
         assertMethod(metric, true, 6, methodName, 0, 0);
@@ -413,7 +410,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
 
         if (consumerMetric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no consumer metric was found null");
         }
 
         assertMethod(consumerMetric, false, 6, methodName, 2430, 0);
@@ -444,17 +441,16 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         }
         String methodName = "saySync";
         Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
-        System.out.println("where is the log" + metric);
         Assert.assertNotEquals("metrics is null", null, metric);
 
-        assertMethod(metric, true, 3, methodName, 0, 0);
         if (metric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no provider metric was found null");
         }
+        assertMethod(metric, true, 3, methodName, 0, 0);
 
         Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
         if (consumerMetric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no consumer metric was found null");
         }
 
         assertMethod(consumerMetric, false, 3, methodName, 1203, 352);

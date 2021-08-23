@@ -33,9 +33,7 @@ import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
-import java.util.Iterator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -64,15 +62,13 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     private Metric fetchWithNameAndMethod(String name, String methodName) {
         Registry registry = Lookout.registry();
-        System.out.println("current registry is " + registry + ",name=" + name);
         for (Metric metric : registry) {
-            System.out.println("metrics name is " + metric.id().name());
+            LOGGER.info("metrics name is " + metric.id() + ",name=" + name + ",methodName=" + methodName);
             if (metric.id().name().equalsIgnoreCase(name)) {
 
                 if (StringUtils.isEmpty(methodName)) {
                     return metric;
                 }
-
                 if (matchTagFromMetrics(metric, methodName)) {
                     return metric;
                 }
@@ -113,16 +109,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
             Lookout.setRegistry(registry);
-        } else {
-            //clear all metrics now
-            Iterator<Metric> itar = currentRegistry.iterator();
-            while (itar.hasNext()) {
-                Metric metric = itar.next();
-                Id id = metric.id();
-                currentRegistry.removeMetric(id);
-            }
         }
-
     }
 
     @AfterClass
@@ -184,15 +171,6 @@ public class RestLookoutTest extends ActivelyDestroyTest {
     @After
     public void afterMethod() {
 
-        final Registry currentRegistry = Lookout.registry();
-        //clear all metrics now
-        Iterator<Metric> itar = currentRegistry.iterator();
-        while (itar.hasNext()) {
-            Metric metric = itar.next();
-            Id id = metric.id();
-            currentRegistry.removeMetric(id);
-        }
-
         if (providerConfig != null) {
             providerConfig.unExport();
         }
@@ -223,7 +201,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
         Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
         if (metric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no provider metric was found null");
         }
 
         assertMethod(metric, true, 1, methodName, 0, 0);
@@ -231,7 +209,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         //metrics for consumer
         Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
         if (consumerMetric == null) {
-            Assert.fail("no metric was found null");
+            Assert.fail("no consumer metric was found null");
         }
 
         assertMethod(consumerMetric, false, 1, methodName, 1203, 352);
@@ -354,24 +332,5 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         if (!invokeInfoAssert) {
             Assert.fail("no invoke info assert");
         }
-    }
-
-    /**
-     * 通过methodName获取
-     *
-     * @param metric
-     * @param methodName
-     * @return
-     */
-    private Tag findTagFromMetrics(Metric metric, String methodName) {
-        for (Tag tag : metric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String value = tag.value();
-                if (StringUtils.equals(methodName, value)) {
-                    return tag;
-                }
-            }
-        }
-        return null;
     }
 }
