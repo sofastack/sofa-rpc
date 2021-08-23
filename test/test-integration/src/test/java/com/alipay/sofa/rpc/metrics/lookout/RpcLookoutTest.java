@@ -36,7 +36,6 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
-import com.alipay.sofa.rpc.module.ModuleFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -120,13 +119,20 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         ActivelyDestroyTest.adAfterClass();
     }
 
-    private Metric fetchWithName(String name) {
+    private Metric fetchWithNameAndMethod(String name, String methodName) {
         Registry registry = Lookout.registry();
         System.out.println("current registry is " + registry + ",name=" + name);
         for (Metric metric : registry) {
             System.out.println("metrics name is " + metric.id().name());
             if (metric.id().name().equalsIgnoreCase(name)) {
-                return metric;
+
+                if (StringUtils.isEmpty(methodName)) {
+                    return metric;
+                }
+
+                if (matchTagFromMetrics(metric, methodName)) {
+                    return metric;
+                }
             }
         }
         return null;
@@ -214,7 +220,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     @Test
     public void testThreadPoolConfig() throws Exception {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.config");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.config", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -237,7 +243,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     @Test
     public void testThreadPoolActiveCount() throws Exception {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.active.count");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.active.count", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -267,7 +273,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             e.printStackTrace();
         }
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.idle.count");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.idle.count", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -282,7 +288,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     @Test
     public void testThreadPoolQueueSize() {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.queue.size");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.queue.size", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -313,20 +319,19 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             e.printStackTrace();
         }
 
-        Metric metric = fetchWithName("rpc.provider.service.stats");
         String methodName = "sayFuture";
-        Tag testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+        if (metric == null) {
+            Assert.fail("no metric was found null");
         }
         assertMethod(metric, true, 4, methodName, 0, 0);
 
-        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
 
-        testTag = findTagFromMetrics(consumerMetric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
+        if (consumerMetric == null) {
+            Assert.fail("no metric was found null");
         }
+
         assertMethod(consumerMetric, false, 4, methodName, 1620, 534);
 
     }
@@ -355,30 +360,22 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
                 break;
             }
         }
+        String methodName = "sayCallback";
 
-        Metric metric = fetchWithName("rpc.provider.service.stats");
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
 
         if (metric == null) {
             Assert.fail("no metric was found null");
         }
 
-        String methodName = "sayCallback";
-        Tag testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
         assertMethod(metric, true, 5, methodName, 0, 0);
 
-        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
 
         if (consumerMetric == null) {
             Assert.fail("no consumerMetric was found null");
         }
 
-        testTag = findTagFromMetrics(consumerMetric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
         assertMethod(consumerMetric, false, 5, methodName, 2045, 720);
 
     }
@@ -404,21 +401,21 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             e.printStackTrace();
         }
 
-        Metric metric = fetchWithName("rpc.provider.service.stats");
-
         String methodName = "sayOneway";
-        Tag testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+
+        if (metric == null) {
+            Assert.fail("no metric was found null");
         }
+
         assertMethod(metric, true, 6, methodName, 0, 0);
 
-        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
 
-        testTag = findTagFromMetrics(consumerMetric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
+        if (consumerMetric == null) {
+            Assert.fail("no metric was found null");
         }
+
         assertMethod(consumerMetric, false, 6, methodName, 2430, 0);
 
     }
@@ -445,26 +442,21 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         } catch (InterruptedException e) {
             LOGGER.error("wait InterruptedException", e);
         }
-
-        Metric metric = fetchWithName("rpc.provider.service.stats");
+        String methodName = "saySync";
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
         System.out.println("where is the log" + metric);
         Assert.assertNotEquals("metrics is null", null, metric);
-        String methodName = "saySync";
-        Tag testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            System.out.println("no method was found ");
-            Assert.fail("no method was found " + methodName);
-        }
 
-        System.out.println("xxxxxxyyyyyy");
         assertMethod(metric, true, 3, methodName, 0, 0);
-
-        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
-
-        testTag = findTagFromMetrics(consumerMetric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
+        if (metric == null) {
+            Assert.fail("no metric was found null");
         }
+
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
+        if (consumerMetric == null) {
+            Assert.fail("no metric was found null");
+        }
+
         assertMethod(consumerMetric, false, 3, methodName, 1203, 352);
 
     }
@@ -476,16 +468,16 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
      * @param methodName
      * @return
      */
-    private Tag findTagFromMetrics(Metric metric, String methodName) {
+    private boolean matchTagFromMetrics(Metric metric, String methodName) {
         for (Tag tag : metric.id().tags()) {
             if (tag.key().equalsIgnoreCase("method")) {
                 String value = tag.value();
                 if (StringUtils.equals(methodName, value)) {
-                    return tag;
+                    return true;
                 }
             }
         }
-        return null;
+        return false;
     }
 
     /**

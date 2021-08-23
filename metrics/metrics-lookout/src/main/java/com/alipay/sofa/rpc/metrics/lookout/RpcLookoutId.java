@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
+import com.alipay.lookout.api.Metric;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -64,6 +65,10 @@ public class RpcLookoutId {
         synchronized (consumerIdLock) {
             if (consumerId != null) {
                 Lookout.registry().removeMetric(consumerId);
+                for (Metric metric : Lookout.registry()) {
+                    if (metric.id().name().equals(consumerId.name()))
+                        Lookout.registry().removeMetric(metric.id());
+                }
                 consumerId = null;
             }
         }
@@ -97,6 +102,10 @@ public class RpcLookoutId {
         synchronized (providerIdLock) {
             if (providerId != null) {
                 Lookout.registry().removeMetric(providerId);
+                for (Metric metric : Lookout.registry()) {
+                    if (metric.id().name().equals(providerId.name()))
+                        Lookout.registry().removeMetric(metric.id());
+                }
                 providerId = null;
             }
         }

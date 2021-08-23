@@ -62,13 +62,42 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     private RestService                 helloService;
 
-    private Metric fetchWithName(String name) {
-        for (Metric metric : Lookout.registry()) {
+    private Metric fetchWithNameAndMethod(String name, String methodName) {
+        Registry registry = Lookout.registry();
+        System.out.println("current registry is " + registry + ",name=" + name);
+        for (Metric metric : registry) {
+            System.out.println("metrics name is " + metric.id().name());
             if (metric.id().name().equalsIgnoreCase(name)) {
-                return metric;
+
+                if (StringUtils.isEmpty(methodName)) {
+                    return metric;
+                }
+
+                if (matchTagFromMetrics(metric, methodName)) {
+                    return metric;
+                }
             }
         }
         return null;
+    }
+
+    /**
+     * 通过methodName获取
+     *
+     * @param metric
+     * @param methodName
+     * @return
+     */
+    private boolean matchTagFromMetrics(Metric metric, String methodName) {
+        for (Tag tag : metric.id().tags()) {
+            if (tag.key().equalsIgnoreCase("method")) {
+                String value = tag.value();
+                if (StringUtils.equals(methodName, value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @BeforeClass
@@ -190,27 +219,21 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        String methodName = "query";
 
-        Metric metric = fetchWithName("rpc.provider.service.stats");
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
         if (metric == null) {
             Assert.fail("no metric was found null");
         }
-        String methodName = "query";
-        Tag testTag = findTagFromMetrics(metric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
+
         assertMethod(metric, true, 1, methodName, 0, 0);
 
         //metrics for consumer
-        Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
         if (consumerMetric == null) {
             Assert.fail("no metric was found null");
         }
-        testTag = findTagFromMetrics(consumerMetric, methodName);
-        if (testTag == null) {
-            Assert.fail("no method was found " + methodName);
-        }
+
         assertMethod(consumerMetric, false, 1, methodName, 1203, 352);
 
     }
