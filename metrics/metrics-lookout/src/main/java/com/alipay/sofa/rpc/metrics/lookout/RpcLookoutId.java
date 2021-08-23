@@ -139,7 +139,6 @@ public class RpcLookoutId {
         return lookoutId;
     }
 
-
     public Id removeServerThreadConfigId(ServerConfig serverConfig) {
         String key = "rpc." + serverConfig.getProtocol() + ".threadpool.config";
         return serverConfigIds.remove(key);
