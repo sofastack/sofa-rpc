@@ -36,6 +36,7 @@ import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.module.ModuleFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
@@ -205,7 +206,6 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             Metric metric = itar.next();
             Id id = metric.id();
             currentRegistry.removeMetric(id);
-
         }
 
         if (serverConfig != null) {
