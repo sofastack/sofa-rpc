@@ -28,9 +28,11 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.JAXRSProviderManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import java.util.Iterator;
 import org.junit.After;
@@ -73,6 +75,10 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
         RpcRunningState.setUnitTestMode(false);
 
+        JAXRSProviderManager.registerInternalProviderClass(LookoutRequestFilter.class);
+
+        RpcRuntimeContext.putIfAbsent(RpcRuntimeContext.KEY_APPNAME, "TestLookOutServer");
+
         Registry registry = new DefaultRegistry();
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
@@ -91,6 +97,9 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     @AfterClass
     public static void afterCurrentClass() {
+
+        JAXRSProviderManager.removeInternalProviderClass(LookoutRequestFilter.class);
+
         RpcRunningState.setUnitTestMode(true);
         ActivelyDestroyTest.adAfterClass();
     }
@@ -144,6 +153,15 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
     @After
     public void afterMethod() {
+
+        final Registry currentRegistry = Lookout.registry();
+        //clear all metrics now
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
+        }
 
         if (providerConfig != null) {
             providerConfig.unExport();
@@ -253,7 +271,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         // invoke info
         Collection<Measurement> measurements = metric.measure().measurements();
         if (isProvider) {
-            assertEquals(6, measurements.size());
+            assertEquals(3, measurements.size());
         } else {
             assertEquals(4, measurements.size());
         }
@@ -268,11 +286,7 @@ public class RestLookoutTest extends ActivelyDestroyTest {
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.totalTime")) {
-                if (!isProvider) {
-                    assertTrue(value < 3000);
-                } else {
-                    assertTrue(value > 3000);
-                }
+                assertTrue(value < 3000);
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.count")) {

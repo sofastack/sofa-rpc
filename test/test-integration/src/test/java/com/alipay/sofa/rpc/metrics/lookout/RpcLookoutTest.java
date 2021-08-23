@@ -72,6 +72,8 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
     private LookoutService                 lookoutService;
 
+    private CountSofaResponseCallback      onReturn;
+
     @BeforeClass
     public static void beforeClass() {
 
@@ -155,26 +157,11 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         MethodConfig methodConfigFuture = new MethodConfig()
             .setName("sayFuture")
             .setInvokeType("future");
+        onReturn = new CountSofaResponseCallback();
         MethodConfig methodConfigCallback = new MethodConfig()
             .setName("sayCallback")
             .setInvokeType("callback")
-            .setOnReturn(new SofaResponseCallback() {
-                @Override
-                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-
-                }
-
-                @Override
-                public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-
-                }
-
-                @Override
-                public void onSofaException(SofaRpcException sofaException, String methodName,
-                                            RequestBase request) {
-
-                }
-            });
+            .setOnReturn(onReturn);
         MethodConfig methodConfigOneway = new MethodConfig()
             .setName("sayOneway")
             .setInvokeType("oneway");
@@ -359,10 +346,14 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             }
         }
 
-        try {
-            TimeUnit.SECONDS.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        for (int i = 0; i < 10; i++) {
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+            }
+            if (onReturn.getSize() == 5) {
+                break;
+            }
         }
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
@@ -612,6 +603,30 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         }
         if (!invokeInfoAssert) {
             Assert.fail("invoke assert not executed");
+        }
+    }
+
+    public static class CountSofaResponseCallback implements SofaResponseCallback {
+        private int size = 0;
+
+        @Override
+        public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+            size++;
+        }
+
+        @Override
+        public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+            size++;
+        }
+
+        @Override
+        public void onSofaException(SofaRpcException sofaException, String methodName,
+                                    RequestBase request) {
+            size++;
+        }
+
+        public int getSize() {
+            return size;
         }
     }
 }
