@@ -139,19 +139,6 @@ public class RpcLookoutId {
         return lookoutId;
     }
 
-    private Id fetchConsumerStatId(String key) {
-        Id lookoutId = consumerIds.get(key);
-        if (lookoutId == null) {
-            synchronized (RpcLookout.class) {
-                lookoutId = consumerIds.get(key);
-                if (lookoutId == null) {
-                    lookoutId = Lookout.registry().createId(key);
-                    consumerIds.put(key, lookoutId);
-                }
-            }
-        }
-        return lookoutId;
-    }
 
     public Id removeServerThreadConfigId(ServerConfig serverConfig) {
         String key = "rpc." + serverConfig.getProtocol() + ".threadpool.config";
