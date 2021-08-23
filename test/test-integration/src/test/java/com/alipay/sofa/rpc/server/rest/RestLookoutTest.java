@@ -192,7 +192,9 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         }
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
-
+        if (metric == null) {
+            Assert.fail("no metric was found null");
+        }
         String methodName = "query";
         Tag testTag = findTagFromMetrics(metric, methodName);
         if (testTag == null) {
@@ -202,8 +204,10 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
         //metrics for consumer
         Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
-
-        testTag = findTagFromMetrics(metric, methodName);
+        if (consumerMetric == null) {
+            Assert.fail("no metric was found null");
+        }
+        testTag = findTagFromMetrics(consumerMetric, methodName);
         if (testTag == null) {
             Assert.fail("no method was found " + methodName);
         }

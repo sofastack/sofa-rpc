@@ -358,6 +358,10 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
 
+        if (metric == null) {
+            Assert.fail("no metric was found null");
+        }
+
         String methodName = "sayCallback";
         Tag testTag = findTagFromMetrics(metric, methodName);
         if (testTag == null) {
@@ -366,6 +370,10 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         assertMethod(metric, true, 5, methodName, 0, 0);
 
         Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
+
+        if (consumerMetric == null) {
+            Assert.fail("no consumerMetric was found null");
+        }
 
         testTag = findTagFromMetrics(consumerMetric, methodName);
         if (testTag == null) {
