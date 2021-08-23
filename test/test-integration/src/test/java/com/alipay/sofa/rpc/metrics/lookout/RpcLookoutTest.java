@@ -118,7 +118,10 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
     }
 
     private Metric fetchWithName(String name) {
-        for (Metric metric : Lookout.registry()) {
+        Registry registry = Lookout.registry();
+        System.out.println("current registry is " + registry + ",name=" + name);
+        for (Metric metric : registry) {
+            System.out.println("metrics name is " + metric.id().name());
             if (metric.id().name().equalsIgnoreCase(name)) {
                 return metric;
             }
@@ -432,6 +435,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         for (int i = 0; i < 3; i++) {
             try {
                 lookoutService.saySync("lookout_sync");
+                System.out.println("lookout_sync invoke success");
             } catch (Exception e) {
                 LOGGER.error("sync error", e);
             }
@@ -440,7 +444,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
         try {
             TimeUnit.SECONDS.sleep(10);
         } catch (InterruptedException e) {
-            LOGGER.error("InterruptedException", e);
+            LOGGER.error("wait InterruptedException", e);
         }
 
         Metric metric = fetchWithName("rpc.provider.service.stats");
@@ -453,7 +457,7 @@ public class RpcLookoutTest extends ActivelyDestroyTest {
             Assert.fail("no method was found " + methodName);
         }
 
-        LOGGER.info("xxxxxxyyyyyy");
+        System.out.println("xxxxxxyyyyyy");
         assertMethod(metric, true, 3, methodName, 0, 0);
 
         Metric consumerMetric = fetchWithName("rpc.consumer.service.stats");
