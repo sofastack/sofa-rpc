@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.rest;
 
+import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Measurement;
 import com.alipay.lookout.api.Metric;
@@ -24,14 +25,16 @@ import com.alipay.lookout.api.Registry;
 import com.alipay.lookout.api.Tag;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.JAXRSProviderManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import java.util.Iterator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -50,21 +53,48 @@ import static org.junit.Assert.assertTrue;
  */
 public class RestLookoutTest extends ActivelyDestroyTest {
 
-    private final static Logger         LOGGER = LoggerFactory.getLogger(RestLookoutTest.class);
-
-    private static ServerConfig         serverConfig;
+    private ServerConfig                serverConfig;
 
     private ProviderConfig<RestService> providerConfig;
 
     private ConsumerConfig<RestService> consumerConfig;
 
-    private Metric fetchWithName(String name) {
-        for (Metric metric : Lookout.registry()) {
+    private RestService                 helloService;
+
+    private Metric fetchWithNameAndMethod(String name, String methodName) {
+        Registry registry = Lookout.registry();
+        for (Metric metric : registry) {
+            LOGGER.info("metrics name is " + metric.id() + ",name=" + name + ",methodName=" + methodName);
             if (metric.id().name().equalsIgnoreCase(name)) {
-                return metric;
+
+                if (StringUtils.isEmpty(methodName)) {
+                    return metric;
+                }
+                if (matchTagFromMetrics(metric, methodName)) {
+                    return metric;
+                }
             }
         }
         return null;
+    }
+
+    /**
+     * 通过methodName获取
+     *
+     * @param metric
+     * @param methodName
+     * @return
+     */
+    private boolean matchTagFromMetrics(Metric metric, String methodName) {
+        for (Tag tag : metric.id().tags()) {
+            if (tag.key().equalsIgnoreCase("method")) {
+                String value = tag.value();
+                if (StringUtils.equals(methodName, value)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     @BeforeClass
@@ -72,23 +102,30 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
         RpcRunningState.setUnitTestMode(false);
 
+        JAXRSProviderManager.registerInternalProviderClass(LookoutRequestFilter.class);
+
+        RpcRuntimeContext.putIfAbsent(RpcRuntimeContext.KEY_APPNAME, "TestLookOutServer");
+
         Registry registry = new DefaultRegistry();
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
             Lookout.setRegistry(registry);
+        } else {
+            //clear all metrics now
+            Iterator<Metric> itar = currentRegistry.iterator();
+            while (itar.hasNext()) {
+                Metric metric = itar.next();
+                Id id = metric.id();
+                currentRegistry.removeMetric(id);
+            }
         }
-        // 只有1个线程 执行
-        serverConfig = new ServerConfig()
-            .setStopTimeout(1000)
-            .setPort(8802)
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_REST)
-            .setContextPath("/xyz");
-        //.setQueues(100).setCoreThreads(1).setMaxThreads(2);
-
     }
 
     @AfterClass
     public static void afterCurrentClass() {
+
+        JAXRSProviderManager.removeInternalProviderClass(LookoutRequestFilter.class);
+
         RpcRunningState.setUnitTestMode(true);
         ActivelyDestroyTest.adAfterClass();
     }
@@ -98,6 +135,14 @@ public class RestLookoutTest extends ActivelyDestroyTest {
      */
     @Before
     public void beforeMethod() {
+
+        // 只有1个线程 执行
+        serverConfig = new ServerConfig()
+            .setStopTimeout(1000)
+            .setPort(8802)
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_REST)
+            .setContextPath("/xyz");
+        //.setQueues(100).setCoreThreads(1).setMaxThreads(2);
 
         // 发布一个服务，每个请求要执行1秒
         ApplicationConfig serverApplication = new ApplicationConfig();
@@ -117,7 +162,10 @@ public class RestLookoutTest extends ActivelyDestroyTest {
         consumerConfig = new ConsumerConfig<RestService>()
             .setInterfaceId(RestService.class.getName())
             .setDirectUrl(
-                "rest://127.0.0.1:8802/xyz?uniqueId=&version=1.0&timeout=0&delay=-1&id=rpc-cfg-0&dynamic=true&weight=100&accepts=100000&startTime=1523240755024&appName=" +
+                "rest://127.0.0.1:8802/xyz?uniqueId=&version=1"
+                    + ".0&timeout=0&delay=-1&id=rpc-cfg-0&dynamic=true&weight=100&accepts=100000"
+                    + "&startTime=1523240755024&appName="
+                    +
                     serverApplication.getAppName() + "&pid=22385&language=java&rpcVer=50300")
             .setProtocol("rest")
             .setBootstrap("rest")
@@ -125,19 +173,30 @@ public class RestLookoutTest extends ActivelyDestroyTest {
             .setConnectionNum(5)
             .setRegister(false)
             .setApplication(clientApplication);
-        final RestService helloService = consumerConfig.refer();
+        helloService = consumerConfig.refer();
 
-        Assert.assertEquals(helloService.query(11), "hello world !null");
     }
 
     @After
     public void afterMethod() {
+
+        //clear all metrics now
+        Registry currentRegistry = Lookout.registry();
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
+        }
 
         if (providerConfig != null) {
             providerConfig.unExport();
         }
         if (consumerConfig != null) {
             consumerConfig.unRefer();
+        }
+        if (serverConfig != null) {
+            serverConfig.destroy();
         }
 
     }
@@ -146,57 +205,33 @@ public class RestLookoutTest extends ActivelyDestroyTest {
      * test provider service stats
      */
     @Test
-    public void testProviderServiceStats() {
+    public void testServiceStats() {
 
+        Assert.assertEquals(helloService.query(11), "hello world !null");
+
+        //wait metrics info
         try {
             TimeUnit.SECONDS.sleep(5);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        String methodName = "query";
 
-        Metric metric = fetchWithName("rpc.provider.service.stats");
-
-        for (Tag tag : metric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-
-                if (methodName.equals("query")) {
-                    assertMethod(metric, true, 2, "query", 0, 0);
-
-                } else {
-                    System.out.println("provider do not fix,methodName=" + methodName);
-                }
-            }
-        }
-    }
-
-    /**
-     * test consumer service stats
-     */
-    @Test
-    public void testConsumerServiceStats() {
-
-        try {
-            TimeUnit.SECONDS.sleep(5);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+        if (metric == null) {
+            Assert.fail("no provider metric was found null");
         }
 
-        Metric metric = fetchWithName("rpc.consumer.service.stats");
+        assertMethod(metric, true, 1, methodName, 0, 0);
 
-        for (Tag tag : metric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-
-                if (methodName.equals("query")) {
-                    assertMethod(metric, false, 2, "query", 1203, 352);
-
-                } else {
-                    System.out.println("consumer do not fix");
-
-                }
-            }
+        //metrics for consumer
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
+        if (consumerMetric == null) {
+            Assert.fail("no consumer metric was found null");
         }
+
+        assertMethod(consumerMetric, false, 1, methodName, 1203, 352);
+
     }
 
     /**
@@ -217,52 +252,53 @@ public class RestLookoutTest extends ActivelyDestroyTest {
 
             String key = tag.key();
             String value = tag.value();
+            LOGGER.info(this.getClass().getName() + ",key=" + key + ",value=" + value);
             if (key.equals("service")) {
-                assertEquals(RestService.class.getCanonicalName() + ":1.0", value);
+                assertEquals("service not equal", RestService.class.getCanonicalName() + ":1.0", value);
                 tagAssert = true;
             }
             if (key.equals("protocol")) {
-                assertEquals("rest", value);
+                assertEquals("protocol not equal", "rest", value);
                 tagAssert = true;
             }
             if (key.equals("method")) {
-                assertEquals(method, value);
+                assertEquals("method not equal", method, value);
                 tagAssert = true;
             }
             if (isProvider) {
                 if (key.equals("app")) {
-                    assertEquals("TestLookOutServer", value);
+                    assertEquals("app not equal in provider", "TestLookOutServer", value);
                     tagAssert = true;
                 }
                 if (key.equals("caller_app")) {
-                    assertEquals("TestLookOutClient", value);
+                    assertEquals("caller_app not equal in provider", "TestLookOutClient", value);
                     tagAssert = true;
                 }
             } else {
                 if (key.equals("app")) {
-                    assertEquals("TestLookOutClient", value);
+                    assertEquals("app not equal in consumer", "TestLookOutClient", value);
                     tagAssert = true;
                 }
                 if (key.equals("target_app")) {
-                    assertEquals("TestLookOutServer", value);
+                    assertEquals("target_app not equal in consumer", "TestLookOutServer", value);
                     tagAssert = true;
                 }
                 if (key.equals("invoke_type")) {
-                    assertEquals("sync", value);
+                    assertEquals("invoke_type not equal in consumer", "sync", value);
 
                 }
             }
         }
         if (!tagAssert) {
-            Assert.fail();
+            Assert.fail("no tag assert");
         }
 
         // invoke info
         Collection<Measurement> measurements = metric.measure().measurements();
         if (isProvider) {
-            assertEquals(6, measurements.size());
+            assertEquals("measurements is not equals in provider", 3, measurements.size());
         } else {
-            assertEquals(4, measurements.size());
+            assertEquals("measurements is not equals in consumer", 4, measurements.size());
         }
 
         boolean invokeInfoAssert = false;
@@ -270,51 +306,49 @@ public class RestLookoutTest extends ActivelyDestroyTest {
             String name = measurement.name();
             int value = ((Long) measurement.value()).intValue();
 
+            LOGGER.info(this.getClass().getName() + ",name=" + name + ",value=" + value);
+
             if (name.equals("total_count")) {
-                assertEquals(totalCount, value);
+                assertEquals("total_count is not equal", totalCount, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.totalTime")) {
-                if (!isProvider) {
-                    assertTrue(value < 3000);
-                } else {
-                    assertTrue(value > 3000);
-                }
+                assertTrue("totalTime is not equal", value < 3000);
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.count")) {
-                assertEquals(totalCount, value);
+                assertEquals("count is not equal", totalCount, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_count")) {
-                assertEquals(1, value);
+                assertEquals("fail_count is not equal", 1, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_time.totalTime")) {
-                assertTrue(value > 3000);
+                assertTrue("fail_time.totalTime is not equal", value > 3000);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_time.count")) {
-                assertEquals(1, value);
+                assertEquals("fail_time.count is not equal", 1, value);
                 invokeInfoAssert = true;
             }
             if (!isProvider) {
                 if (name.equals("request_size.count")) {
                     LOGGER.info("request_size.count,value={},requestSize={},totalCount={}", value, requestSize,
                         totalCount);
-                    assertTrue(requestSize > 0);
+                    assertTrue("request_size.count is smaller than 0", requestSize > 0);
                     invokeInfoAssert = true;
                 }
                 if (name.equals("response_size.count")) {
                     LOGGER.info("response_size.count,value={},responseSize={},totalCount={}", value, responseSize,
                         totalCount);
-                    assertTrue(requestSize > 0);
+                    assertTrue("response_size.count is smaller than 0", requestSize > 0);
                     invokeInfoAssert = true;
                 }
             }
         }
         if (!invokeInfoAssert) {
-            Assert.fail();
+            Assert.fail("no invoke info assert");
         }
     }
 }

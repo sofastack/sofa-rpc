@@ -60,10 +60,10 @@ public class LookoutRequestFilter implements ContainerRequestFilter {
             String methodName = resourceMethodInvoker.getMethod().getName();
 
             RpcInternalContext context = RpcInternalContext.getContext();
-            context.setAttachment(INTERNAL_KEY_PREFIX + RestConstants.REST_SERVICE_KEY, serviceName);
+            context.setAttachment(INTERNAL_KEY_PREFIX + RestConstants.REST_SERVICE_KEY, serviceName + ":1.0");
             context.setAttachment(INTERNAL_KEY_PREFIX + RestConstants.REST_METHODNAME_KEY, methodName);
 
-            context.setAttachment(RemotingConstants.HEAD_APP_NAME, appName);
+            context.setAttachment(INTERNAL_KEY_PREFIX + RemotingConstants.HEAD_APP_NAME, appName);
         } catch (Exception e) {
             logger.error(LogCodes.getLog(LogCodes.ERROR_LOOKOUT_PROCESS), e);
         }
