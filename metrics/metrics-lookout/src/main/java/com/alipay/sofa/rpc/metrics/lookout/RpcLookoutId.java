@@ -18,8 +18,10 @@ package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
+import com.alipay.lookout.api.Metric;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -28,11 +30,9 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class RpcLookoutId {
 
-    private volatile Id                     consumerId;
-    private final Object                    consumerIdLock       = new Object();
+    private final ConcurrentMap<String, Id> consumerIds          = new ConcurrentHashMap<String, Id>();
 
-    private volatile Id                     providerId;
-    private final Object                    providerIdLock       = new Object();
+    private final ConcurrentMap<String, Id> providerIds          = new ConcurrentHashMap<String, Id>();
 
     private final ConcurrentMap<String, Id> serverConfigIds      = new ConcurrentHashMap<String, Id>();
 
@@ -47,17 +47,20 @@ public class RpcLookoutId {
      *
      * @return consumerId
      */
-    public Id fetchConsumerStatId() {
+    public Id fetchConsumerStatId(Map<String, String> tags) {
 
-        if (consumerId == null) {
-            synchronized (consumerIdLock) {
-                if (consumerId == null) {
-                    consumerId = Lookout.registry().createId("rpc.consumer.service.stats");
+        String key = tags.toString();
+        Id lookoutId = consumerIds.get(key);
+        if (lookoutId == null) {
+            synchronized (RpcLookoutId.class) {
+                lookoutId = consumerIds.get(key);
+                if (lookoutId == null) {
+                    lookoutId = Lookout.registry().createId("rpc.consumer.service.stats", tags);
+                    consumerIds.put(key, lookoutId);
                 }
             }
         }
-
-        return consumerId;
+        return lookoutId;
     }
 
     /**
@@ -65,17 +68,19 @@ public class RpcLookoutId {
      *
      * @return ProviderId
      */
-    public Id fetchProviderStatId() {
-
-        if (providerId == null) {
-            synchronized (providerIdLock) {
-                if (providerId == null) {
-                    providerId = Lookout.registry().createId("rpc.provider.service.stats");
+    public Id fetchProviderStatId(Map<String, String> tags) {
+        String key = tags.toString();
+        Id lookoutId = providerIds.get(key);
+        if (lookoutId == null) {
+            synchronized (RpcLookoutId.class) {
+                lookoutId = providerIds.get(key);
+                if (lookoutId == null) {
+                    lookoutId = Lookout.registry().createId("rpc.provider.service.stats", tags);
+                    providerIds.put(key, lookoutId);
                 }
             }
         }
-
-        return providerId;
+        return lookoutId;
     }
 
     public Id fetchConsumerSubId() {
