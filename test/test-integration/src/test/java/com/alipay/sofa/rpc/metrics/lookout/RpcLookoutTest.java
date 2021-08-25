@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.metrics.lookout;
 
+import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
 import com.alipay.lookout.api.Measurement;
 import com.alipay.lookout.api.Metric;
@@ -25,22 +26,23 @@ import com.alipay.lookout.api.Tag;
 import com.alipay.lookout.core.DefaultRegistry;
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.context.RpcInternalContext;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -55,16 +57,27 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  */
-public class RpcLookoutTest {
+public class RpcLookoutTest extends ActivelyDestroyTest {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(RpcLookoutTest.class);
+    static Field                           corePoolSize;
+    static Field                           maxPoolSize;
+    static Field                           queueSize;
 
-    static Field                corePoolSize;
-    static Field                maxPoolSize;
-    static Field                queueSize;
+    private ServerConfig                   serverConfig;
+
+    private ProviderConfig<LookoutService> providerConfig;
+
+    private ConsumerConfig<LookoutService> consumerConfig;
+
+    private LookoutService                 lookoutService;
+
+    private CountSofaResponseCallback      onReturn;
 
     @BeforeClass
     public static void beforeClass() {
+
+        RpcRunningState.setUnitTestMode(false);
+
         try {
             Class clazz = RpcLookout.class;
             Class[] innerClazzs = clazz.getDeclaredClasses();
@@ -88,30 +101,35 @@ public class RpcLookoutTest {
         final Registry currentRegistry = Lookout.registry();
         if (currentRegistry == NoopRegistry.INSTANCE) {
             Lookout.setRegistry(registry);
-        }
-        RpcRunningState.setUnitTestMode(false);
+        } else {
+            //clear all metrics now
+            Iterator<Metric> itar = currentRegistry.iterator();
+            while (itar.hasNext()) {
+                Metric metric = itar.next();
+                Id id = metric.id();
+                currentRegistry.removeMetric(id);
 
-        try {
-            invoke();
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            LOGGER.error("", e);
+            }
         }
-
     }
 
     @AfterClass
     public static void adAfterClass() {
         RpcRunningState.setUnitTestMode(true);
-        RpcRuntimeContext.destroy();
-        RpcInternalContext.removeContext();
-        RpcInvokeContext.removeContext();
+        ActivelyDestroyTest.adAfterClass();
     }
 
-    private Metric fetchWithName(String name) {
-        for (Metric metric : Lookout.registry()) {
+    private Metric fetchWithNameAndMethod(String name, String methodName) {
+        Registry registry = Lookout.registry();
+        for (Metric metric : registry) {
+            LOGGER.info("metrics name is " + metric.id() + ",name=" + name + ",methodName=" + methodName);
             if (metric.id().name().equalsIgnoreCase(name)) {
-                return metric;
+                if (StringUtils.isEmpty(methodName)) {
+                    return metric;
+                }
+                if (matchTagFromMetrics(metric, methodName)) {
+                    return metric;
+                }
             }
         }
         return null;
@@ -120,16 +138,26 @@ public class RpcLookoutTest {
     /**
      * invoke
      */
-    private static void invoke() {
+    @Before
+    public void before() {
 
-        ServerConfig serverConfig = new ServerConfig()
-            .setPort(12200)
+        final Registry currentRegistry = Lookout.registry();
+        //clear all metrics now
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
+        }
+
+        serverConfig = new ServerConfig()
+            .setPort(12201)
             .setCoreThreads(30)
             .setMaxThreads(500)
             .setQueues(600)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
 
-        ProviderConfig<LookoutService> providerConfig = new ProviderConfig<LookoutService>()
+        providerConfig = new ProviderConfig<LookoutService>()
             .setInterfaceId(LookoutService.class.getName())
             .setRef(new LookoutServiceImpl())
             .setServer(serverConfig)
@@ -141,25 +169,11 @@ public class RpcLookoutTest {
         MethodConfig methodConfigFuture = new MethodConfig()
             .setName("sayFuture")
             .setInvokeType("future");
+        onReturn = new CountSofaResponseCallback();
         MethodConfig methodConfigCallback = new MethodConfig()
             .setName("sayCallback")
             .setInvokeType("callback")
-            .setOnReturn(new SofaResponseCallback() {
-                @Override
-                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-
-                }
-
-                @Override
-                public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-
-                }
-
-                @Override
-                public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-
-                }
-            });
+            .setOnReturn(onReturn);
         MethodConfig methodConfigOneway = new MethodConfig()
             .setName("sayOneway")
             .setInvokeType("oneway");
@@ -168,52 +182,39 @@ public class RpcLookoutTest {
         methodConfigs.add(methodConfigCallback);
         methodConfigs.add(methodConfigOneway);
 
-        ConsumerConfig<LookoutService> consumerConfig = new ConsumerConfig<LookoutService>()
+        consumerConfig = new ConsumerConfig<LookoutService>()
             .setInterfaceId(LookoutService.class.getName())
             .setProtocol("bolt")
             .setBootstrap("bolt")
             .setMethods(methodConfigs)
             .setTimeout(3000)
             .setRegister(false)
-            .setDirectUrl("bolt://127.0.0.1:12200?appName=TestLookOutServer")
+            .setDirectUrl("bolt://127.0.0.1:12201?appName=TestLookOutServer")
             .setApplication(new ApplicationConfig().setAppName("TestLookOutClient"));
-        LookoutService lookoutService = consumerConfig.refer();
+        lookoutService = consumerConfig.refer();
 
-        //sync
-        for (int i = 0; i < 3; i++) {
-            try {
-                lookoutService.saySync("lookout_sync");
-            } catch (Exception e) {
-                LOGGER.error("", e);
-            }
+    }
+
+    @After
+    public void after() {
+
+        final Registry currentRegistry = Lookout.registry();
+        //clear all metrics now
+        Iterator<Metric> itar = currentRegistry.iterator();
+        while (itar.hasNext()) {
+            Metric metric = itar.next();
+            Id id = metric.id();
+            currentRegistry.removeMetric(id);
         }
 
-        //future
-        for (int i = 0; i < 4; i++) {
-            try {
-                lookoutService.sayFuture("lookout_future");
-                SofaResponseFuture.getResponse(3000, true);
-            } catch (Exception e) {
-                LOGGER.error("", e);
-            }
+        if (serverConfig != null) {
+            serverConfig.destroy();
         }
-
-        //callback
-        for (int i = 0; i < 5; i++) {
-            try {
-                lookoutService.sayCallback("lookout_callback");
-            } catch (Exception e) {
-                LOGGER.error("", e);
-            }
+        if (providerConfig != null) {
+            providerConfig.unExport();
         }
-
-        //oneway
-        for (int i = 0; i < 6; i++) {
-            try {
-                lookoutService.sayOneway("lookout_oneway");
-            } catch (Exception e) {
-                LOGGER.error("", e);
-            }
+        if (consumerConfig != null) {
+            consumerConfig.unRefer();
         }
     }
 
@@ -225,7 +226,7 @@ public class RpcLookoutTest {
     @Test
     public void testThreadPoolConfig() throws Exception {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.config");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.config", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -248,7 +249,7 @@ public class RpcLookoutTest {
     @Test
     public void testThreadPoolActiveCount() throws Exception {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.active.count");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.active.count", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -263,12 +264,27 @@ public class RpcLookoutTest {
     @Test
     public void testThreadPoolIdleCount() {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.idle.count");
+        //sync invoke some time
+        for (int i = 0; i < 3; i++) {
+            try {
+                lookoutService.saySync("lookout_sync");
+            } catch (Exception e) {
+                LOGGER.error("sync error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.idle.count", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
         for (Measurement measurement : measurements) {
-            assertEquals(3 + 4 + 5 + 6, ((Number) measurement.value()).intValue());
+            assertEquals(3, ((Number) measurement.value()).intValue());
         }
     }
 
@@ -278,7 +294,7 @@ public class RpcLookoutTest {
     @Test
     public void testThreadPoolQueueSize() {
 
-        Metric metric = fetchWithName("rpc.bolt.threadpool.queue.size");
+        Metric metric = fetchWithNameAndMethod("rpc.bolt.threadpool.queue.size", "");
 
         Collection<Measurement> measurements = metric.measure().measurements();
         assertTrue(measurements.size() == 1);
@@ -291,58 +307,182 @@ public class RpcLookoutTest {
      * test provider service stats
      */
     @Test
-    public void testProviderServiceStats() {
+    public void testFutureServiceStats() {
 
-        Metric metric = fetchWithName("rpc.provider.service.stats");
-
-        for (Tag tag : metric.id().tags()) {
-            if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-
-                if (methodName.equals("saySync")) {
-                    assertMethod(metric, true, 3, "saySync", 0, 0);
-
-                } else if (methodName.equals("sayFuture")) {
-                    assertMethod(metric, true, 4, "sayFuture", 0, 0);
-
-                } else if (methodName.equals("sayCallback")) {
-                    assertMethod(metric, true, 5, "sayCallback", 0, 0);
-
-                } else if (methodName.equals("sayOneway")) {
-                    assertMethod(metric, true, 6, "sayOneway", 0, 0);
-
-                }
+        //future
+        for (int i = 0; i < 4; i++) {
+            try {
+                lookoutService.sayFuture("lookout_future");
+                SofaResponseFuture.getResponse(3000, true);
+            } catch (Exception e) {
+                LOGGER.error("future error", e);
             }
         }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String methodName = "sayFuture";
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+        if (metric == null) {
+            Assert.fail("no provider metric was found null");
+        }
+        assertMethod(metric, true, 4, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
+
+        if (consumerMetric == null) {
+            Assert.fail("no consumer metric was found null");
+        }
+
+        assertMethod(consumerMetric, false, 4, methodName, 1620, 534);
+
     }
 
     /**
-     * test consumer service stats
+     * test provider service stats
      */
     @Test
-    public void testConsumerServiceStats() {
+    public void testCallbackServiceStats() {
 
-        Metric metric = fetchWithName("rpc.consumer.service.stats");
+        //callback
+        for (int i = 0; i < 5; i++) {
+            try {
+                lookoutService.sayCallback("lookout_callback");
+            } catch (Exception e) {
+                LOGGER.error("callback error", e);
+            }
+        }
 
+        for (int i = 0; i < 10; i++) {
+            try {
+                TimeUnit.SECONDS.sleep(3);
+            } catch (InterruptedException e) {
+            }
+            if (onReturn.getSize() == 5) {
+                break;
+            }
+        }
+        String methodName = "sayCallback";
+
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+
+        if (metric == null) {
+            Assert.fail("no provider metric was found null");
+        }
+
+        assertMethod(metric, true, 5, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
+
+        if (consumerMetric == null) {
+            Assert.fail("no consumer eetric was found null");
+        }
+
+        assertMethod(consumerMetric, false, 5, methodName, 2045, 720);
+
+    }
+
+    /**
+     * test provider service stats
+     */
+    @Test
+    public void testOnewayServiceStats() {
+
+        //oneway
+        for (int i = 0; i < 6; i++) {
+            try {
+                lookoutService.sayOneway("lookout_oneway");
+            } catch (Exception e) {
+                LOGGER.error("oneway error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        String methodName = "sayOneway";
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+
+        if (metric == null) {
+            Assert.fail("no provider metric was found null");
+        }
+
+        assertMethod(metric, true, 6, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
+
+        if (consumerMetric == null) {
+            Assert.fail("no consumer metric was found null");
+        }
+
+        assertMethod(consumerMetric, false, 6, methodName, 2430, 0);
+
+    }
+
+    /**
+     * test provider service stats
+     */
+    @Test
+    public void testSyncServiceStats() {
+        System.out.println("start where is the log");
+
+        //sync
+        for (int i = 0; i < 3; i++) {
+            try {
+                lookoutService.saySync("lookout_sync");
+                System.out.println("lookout_sync invoke success");
+            } catch (Exception e) {
+                LOGGER.error("sync error", e);
+            }
+        }
+
+        try {
+            TimeUnit.SECONDS.sleep(10);
+        } catch (InterruptedException e) {
+            LOGGER.error("wait InterruptedException", e);
+        }
+        String methodName = "saySync";
+        Metric metric = fetchWithNameAndMethod("rpc.provider.service.stats", methodName);
+        Assert.assertNotEquals("metrics is null", null, metric);
+
+        if (metric == null) {
+            Assert.fail("no provider metric was found null");
+        }
+        assertMethod(metric, true, 3, methodName, 0, 0);
+
+        Metric consumerMetric = fetchWithNameAndMethod("rpc.consumer.service.stats", methodName);
+        if (consumerMetric == null) {
+            Assert.fail("no consumer metric was found null");
+        }
+
+        assertMethod(consumerMetric, false, 3, methodName, 1203, 352);
+
+    }
+
+    /**
+     * 通过methodName获取
+     *
+     * @param metric
+     * @param methodName
+     * @return
+     */
+    private boolean matchTagFromMetrics(Metric metric, String methodName) {
         for (Tag tag : metric.id().tags()) {
             if (tag.key().equalsIgnoreCase("method")) {
-                String methodName = tag.value();
-
-                if (methodName.equals("saySync")) {
-                    assertMethod(metric, false, 3, "saySync", 1203, 352);
-
-                } else if (methodName.equals("sayFuture")) {
-                    assertMethod(metric, false, 4, "sayFuture", 1620, 534);
-
-                } else if (methodName.equals("sayCallback")) {
-                    assertMethod(metric, false, 5, "sayCallback", 2045, 720);
-
-                } else if (methodName.equals("sayOneway")) {
-                    assertMethod(metric, false, 6, "sayOneway", 2430, 0);
-
+                String value = tag.value();
+                if (StringUtils.equals(methodName, value)) {
+                    return true;
                 }
             }
         }
+        return false;
     }
 
     /**
@@ -360,111 +500,138 @@ public class RpcLookoutTest {
         // tag
         boolean tagAssert = false;
         for (Tag tag : metric.id().tags()) {
-
             String key = tag.key();
             String value = tag.value();
+            LOGGER.info(this.getClass().getName() + ",key=" + key + ",value=" + value);
             if (key.equals("service")) {
-                assertEquals(LookoutService.class.getCanonicalName() + ":1.0", value);
+                assertEquals("service not equal", LookoutService.class.getCanonicalName() + ":1.0", value);
                 tagAssert = true;
             }
             if (key.equals("protocol")) {
-                assertEquals("bolt", value);
+                assertEquals("protocol not equal", "bolt", value);
                 tagAssert = true;
             }
             if (key.equals("method")) {
-                assertEquals(method, value);
+                assertEquals("method not equal", method, value);
                 tagAssert = true;
             }
             if (isProvider) {
                 if (key.equals("app")) {
-                    assertEquals("TestLookOutServer", value);
+                    assertEquals("app not equal in provider", "TestLookOutServer", value);
                     tagAssert = true;
                 }
                 if (key.equals("caller_app")) {
-                    assertEquals("TestLookOutClient", value);
+                    assertEquals("caller_app not equal in provider", "TestLookOutClient", value);
                     tagAssert = true;
                 }
             } else {
                 if (key.equals("app")) {
-                    assertEquals("TestLookOutClient", value);
+                    assertEquals("app not equal in consumer", "TestLookOutClient", value);
                     tagAssert = true;
                 }
                 if (key.equals("target_app")) {
-                    assertEquals("TestLookOutServer", value);
+                    assertEquals("target_app not equal in consumer", "TestLookOutServer", value);
                     tagAssert = true;
                 }
                 if (key.equals("invoke_type")) {
-                    assertEquals(method.substring(3).toLowerCase(), value);
+                    assertEquals("invoke_type not equal in consumer", method.substring(3).toLowerCase(), value);
 
                 }
             }
         }
         if (!tagAssert) {
-            Assert.fail();
+            Assert.fail("tag assert not executed");
         }
 
         // invoke info
         Collection<Measurement> measurements = metric.measure().measurements();
         if (isProvider) {
-            assertEquals(6, measurements.size());
+            assertEquals("measurements size is not equal", 6, measurements.size());
         } else {
             if (method.equals("sayOneway")) {
-                assertEquals(5, measurements.size());
+                assertEquals("measurements is not equal in sayOneway", 5, measurements.size());
             } else {
-                assertEquals(10, measurements.size());
+                assertEquals("measurements is not equal in others", 10, measurements.size());
             }
         }
 
         boolean invokeInfoAssert = false;
         for (Measurement measurement : measurements) {
+
             String name = measurement.name();
             int value = ((Long) measurement.value()).intValue();
 
+            LOGGER.info(this.getClass().getName() + ",name=" + name + ",value=" + value);
+
             if (name.equals("total_count")) {
-                assertEquals(totalCount, value);
+                assertEquals("total_count is not equal", totalCount, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.totalTime")) {
                 if (method.equals("sayOneway") && !isProvider) {
-                    assertTrue(value < 3000);
+                    assertTrue("totalTime is not equal in consumer", value < 3000);
                 } else {
-                    assertTrue(value > 3000);
+                    assertTrue("totalTime is not equal in provider", value > 3000);
                 }
                 invokeInfoAssert = true;
             }
             if (name.equals("total_time.count")) {
-                assertEquals(totalCount, value);
+                assertEquals("count is not equal", totalCount, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_count")) {
-                assertEquals(1, value);
+                assertEquals("fail_count is not equal", 1, value);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_time.totalTime")) {
-                assertTrue(value > 3000);
+                assertTrue("fail_time.totalTime is not equal", value > 3000);
                 invokeInfoAssert = true;
             }
             if (name.equals("fail_time.count")) {
-                assertEquals(1, value);
+                assertEquals("fail_time.count is not equal", 1, value);
                 invokeInfoAssert = true;
             }
             if (!isProvider) {
                 if (name.equals("request_size.count")) {
                     LOGGER.info("request_size.count,value={},requestSize={},totalCount={}", value, requestSize,
                         totalCount);
-                    assertTrue(requestSize > 0);
+                    assertTrue("request_size.count is smaller than 0", requestSize > 0);
                     invokeInfoAssert = true;
                 }
                 if (name.equals("response_size.count")) {
                     LOGGER.info("response_size.count,value={},responseSize={},totalCount={}", value, responseSize,
                         totalCount);
-                    assertTrue(requestSize > 0);
+                    assertTrue("response_size.count is smaller than 0", responseSize > 0);
                     invokeInfoAssert = true;
                 }
             }
         }
         if (!invokeInfoAssert) {
-            Assert.fail();
+            Assert.fail("invoke assert not executed");
+        }
+    }
+
+    public static class CountSofaResponseCallback implements SofaResponseCallback {
+        private int size = 0;
+
+        @Override
+        public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+            size++;
+        }
+
+        @Override
+        public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+            size++;
+        }
+
+        @Override
+        public void onSofaException(SofaRpcException sofaException, String methodName,
+                                    RequestBase request) {
+            size++;
+        }
+
+        public int getSize() {
+            return size;
         }
     }
 }
