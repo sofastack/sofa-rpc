@@ -684,7 +684,7 @@ public abstract class AbstractCluster extends Cluster {
             timeout = consumerConfig.getMethodTimeout(request.getMethodName());
             if (timeout == null || timeout <= 0) {
                 // 再取服务端配置
-                timeout = parseInt(providerInfo.getAttr(ATTR_TIMEOUT));
+                timeout = StringUtils.parseInteger(providerInfo.getAttr(ATTR_TIMEOUT));
                 if (timeout == null || timeout <= 0) {
                     // 取框架默认值
                     timeout = getIntValue(CONSUMER_INVOKE_TIMEOUT);
@@ -692,23 +692,6 @@ public abstract class AbstractCluster extends Cluster {
             }
         }
         return timeout;
-    }
-
-    /**
-     * 工具方法, 解析int型数字.
-     *
-     * @param str
-     * @return
-     */
-    private int parseInt(String str) {
-        try {
-            if (StringUtils.isNotBlank(str)) {
-                return Integer.parseInt(str);
-            }
-        } catch (NumberFormatException e) {
-
-        }
-        return -1;
     }
 
     @Override
