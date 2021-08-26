@@ -16,8 +16,6 @@
  */
 package com.alipay.sofa.rpc.context;
 
-import com.alibaba.ttl.TransmittableThreadLocal;
-import com.alibaba.ttl.threadpool.TtlExecutors;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.message.ResponseFuture;
@@ -29,6 +27,11 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  *
@@ -153,7 +156,7 @@ public class RpcInternalContextTest {
 
             @Override
             public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
-                TimeoutException {
+                    TimeoutException {
                 return null;
             }
 
