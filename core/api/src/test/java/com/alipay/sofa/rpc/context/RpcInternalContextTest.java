@@ -156,7 +156,7 @@ public class RpcInternalContextTest {
 
             @Override
             public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
-                    TimeoutException {
+                TimeoutException {
                 return null;
             }
 
