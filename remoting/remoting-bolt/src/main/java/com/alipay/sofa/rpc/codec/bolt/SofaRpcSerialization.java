@@ -34,7 +34,6 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
-import com.alipay.sofa.rpc.common.struct.ContextMapConverter;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -293,7 +292,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
     private void parseRequestHeader(String key, Map<String, String> headerMap,
                                     SofaRequest sofaRequest) {
         Map<String, String> traceMap = new HashMap<String, String>();
-        ContextMapConverter.treeCopyTo(key + ".", headerMap, traceMap, true);
+        CodecUtils.treeCopyTo(key + ".", headerMap, traceMap, true);
         Object traceCtx = sofaRequest.getRequestProp(key);
         if (traceCtx == null) {
             sofaRequest.addRequestProp(key, traceMap);
