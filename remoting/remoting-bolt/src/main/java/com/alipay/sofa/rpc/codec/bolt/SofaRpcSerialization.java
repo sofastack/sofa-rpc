@@ -302,7 +302,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         if (headerMap == null) {
             return;
         }
-        if(requestProps == null){
+        if (requestProps == null) {
             requestProps = new HashMap<String, Object>();
         }
         // 1. 如果 key 已经在requestProps存在，value 为 String 时进行覆盖
