@@ -261,9 +261,6 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                     //for service mesh or other scene, we need to add more info from header
                     if (sofaRequest instanceof SofaRequest) {
-                        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-                            ((SofaRequest) sofaRequest).addRequestProp(entry.getKey(), entry.getValue());
-                        }
                         setRequestPropertiesWithHeaderInfo(headerMap, (SofaRequest) sofaRequest);
                         parseRequestHeader(headerMap, (SofaRequest) sofaRequest);
                     }
