@@ -457,4 +457,29 @@ public class StringUtils {
         }
         return str.substring(0, pos);
     }
+
+    public static boolean isNumeric(String str) {
+        if (str == null) {
+            return false;
+        } else {
+            int length = str.length();
+
+            for (int i = 0; i < length; ++i) {
+                if (!Character.isDigit(str.charAt(i))) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+    }
+
+    public static Integer parseInteger(String str) {
+        if (isNotBlank(str) && isNumeric(str)) {
+            return Integer.valueOf(str);
+        } else {
+            return null;
+        }
+    }
+
 }
