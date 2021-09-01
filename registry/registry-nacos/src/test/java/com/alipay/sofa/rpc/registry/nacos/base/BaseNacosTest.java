@@ -55,7 +55,9 @@ public abstract class BaseNacosTest {
 
     @Before
     public void setup() {
-        nacosProcess = NacosStarterBuilder.nacosStarter().withNacosVersion("2.0.3").build().start();
+        //see https://nacos.io/zh-cn/docs/2.0.0-compatibility.html
+        nacosProcess = NacosStarterBuilder.nacosStarter().withServerPort(8848).withNacosVersion("2.0.3").build()
+            .start();
     }
 
     @After
