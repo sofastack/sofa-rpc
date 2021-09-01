@@ -27,7 +27,9 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -199,5 +201,31 @@ public class RpcInternalContextTest {
         Assert.assertFalse(RpcInternalContext.isHiddenParamKey("_"));
         Assert.assertFalse(RpcInternalContext.isHiddenParamKey("_xx"));
         Assert.assertFalse(RpcInternalContext.isHiddenParamKey("aaaa"));
+    }
+
+    @Test
+    public void testCheckContext() throws ExecutionException, InterruptedException {
+
+        RpcInternalContext.getContext().setAttachment("_testKey", "TransmittableThreadLocal-value-set-in-parent");
+
+        ThreadLocal<String> threadLocalContext = new ThreadLocal<String>();
+        threadLocalContext.set("ThreadLocal-value-set-in-parent");
+
+        FutureTask<String[]> task1 = new FutureTask<String[]>(new Callable() {
+            @Override
+            public Object call() throws Exception {
+                String[] result = new String[2];
+                result[0] = threadLocalContext.get();
+                result[1] = (String) RpcInternalContext.getContext().getAttachment("_testKey");
+                return result;
+            }
+        });
+        new Thread(task1).start();
+
+        while (!task1.isDone()) {
+            Assert.assertEquals(null, task1.get()[0]);
+            Assert.assertEquals("TransmittableThreadLocal-value-set-in-parent", task1.get()[1]);
+        }
+
     }
 }
