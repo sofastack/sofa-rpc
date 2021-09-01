@@ -475,7 +475,7 @@ public class StringUtils {
     }
 
     public static Integer parseInteger(String str) {
-        if (isNumeric(str)) {
+        if (isNotBlank(str) && isNumeric(str)) {
             return Integer.valueOf(str);
         } else {
             return null;
