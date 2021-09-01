@@ -85,7 +85,6 @@ public class NacosRegistryTest extends BaseNacosTest {
      */
     @Test
     public void testProviderObserver() throws Exception {
-
         int timeoutPerSub = 2000;
 
         serverConfig = new ServerConfig()
@@ -162,10 +161,15 @@ public class NacosRegistryTest extends BaseNacosTest {
             .setProtocol("bolt")
             .setHost("0.0.0.0")
             .setPort(12201));
+        provider.getServer().add(new ServerConfig()
+                .setProtocol("bolt")
+                .setHost("0.0.0.0")
+                .setPort(12202));
         registry.register(provider);
+
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
         ps = providerInfoListener.getData();
-        Assert.assertEquals("after register two servers: 2", 2, ps.size());
+        Assert.assertEquals("after register two servers: 2", 1, ps.size());
 
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
