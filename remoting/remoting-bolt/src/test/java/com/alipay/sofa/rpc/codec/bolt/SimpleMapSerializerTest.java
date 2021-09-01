@@ -17,11 +17,17 @@
 package com.alipay.sofa.rpc.codec.bolt;
 
 import com.alipay.sofa.rpc.common.struct.UnsafeByteArrayOutputStream;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import static com.alipay.sofa.rpc.common.RemotingConstants.RPC_TRACE_NAME;
+import static com.alipay.sofa.rpc.common.RemotingConstants.RPC_ID_KEY;
+import static com.alipay.sofa.rpc.common.RemotingConstants.TRACE_ID_KEY;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -134,5 +140,56 @@ public class SimpleMapSerializerTest {
         readMap = simpleMapSerializer.decode(out.toByteArray());
         Assert.assertEquals(1, readMap.size());
         Assert.assertEquals("value", readMap.get("key"));
+    }
+
+    @Test
+    public void testParseRequestHeader() {
+        String headerRpcId = RPC_TRACE_NAME + "." + RPC_ID_KEY;
+        SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
+        SofaRequest sofaRequest = new SofaRequest();
+        Map<String, String> headerMap = new HashMap<>();
+        Map<String, String> tracerCtx = new HashMap<String, String>();
+        tracerCtx.put(TRACE_ID_KEY, "MOCK_traceId");
+        tracerCtx.put(RPC_ID_KEY, "MOCK_rpcId");
+        sofaRequest.addRequestProp(RPC_TRACE_NAME, tracerCtx);
+        sofaRequest.addRequestProp("exist", "exist");
+        headerMap.put(headerRpcId, "changedRpcId");
+        headerMap.put("X-Tldc-Target-Tenant", "fia");
+        headerMap.put("exist", "");
+        sofaRpcSerialization.parseRequestHeader(headerMap, sofaRequest);
+        Map<String, Object> requestProps = sofaRequest.getRequestProps();
+        Assert.assertEquals("MOCK_traceId", ((Map) requestProps.get(RPC_TRACE_NAME)).get(TRACE_ID_KEY));
+        Assert.assertEquals("changedRpcId", ((Map) requestProps.get(RPC_TRACE_NAME)).get(RPC_ID_KEY));
+        Assert.assertEquals("fia", requestProps.get("X-Tldc-Target-Tenant"));
+        Assert.assertEquals("exist", requestProps.get("exist"));
+        sofaRequest.getRequestProps().clear();
+        headerMap.put(headerRpcId, "changedRpcId");
+        headerMap.put("X-Tldc-Target-Tenant", "fia");
+        headerMap.put("exist", "");
+        sofaRpcSerialization.parseRequestHeader(headerMap, sofaRequest);
+        Assert.assertNull(((Map) requestProps.get(RPC_TRACE_NAME)).get(TRACE_ID_KEY));
+        Assert.assertEquals("changedRpcId", ((Map) requestProps.get(RPC_TRACE_NAME)).get(RPC_ID_KEY));
+        Assert.assertEquals("fia", requestProps.get("X-Tldc-Target-Tenant"));
+        Assert.assertEquals("", requestProps.get("exist"));
+    }
+
+    @Test
+    public void testParseResponseHeader() {
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("X-Tldc-Target-Tenant", "fia");
+        headerMap.put("exist", "");
+        SofaResponse sofaResponse = new SofaResponse();
+        sofaResponse.addResponseProp("exist", "exist");
+        SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
+        sofaRpcSerialization.parseResponseHeader(headerMap, sofaResponse);
+        Map<String, String> responseProps = sofaResponse.getResponseProps();
+        Assert.assertEquals("fia", responseProps.get("X-Tldc-Target-Tenant"));
+        Assert.assertEquals("exist", responseProps.get("exist"));
+        sofaResponse.getResponseProps().clear();
+        headerMap.put("X-Tldc-Target-Tenant", "fia");
+        headerMap.put("exist", "");
+        sofaRpcSerialization.parseResponseHeader(headerMap, sofaResponse);
+        Assert.assertEquals("fia", responseProps.get("X-Tldc-Target-Tenant"));
+        Assert.assertEquals("", responseProps.get("exist"));
     }
 }
