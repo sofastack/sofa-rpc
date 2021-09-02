@@ -138,8 +138,14 @@ public class GenericJsonTest {
     }
 
     @Test
-    public void testVoid(){
-        Object result = testService.$invoke("testVoid", new String[]{}, new Object[] {});
-        System.out.println(result);
+    public void testVoidParam(){
+        Object result = testService.$invoke("testVoidParam", new String[]{}, new Object[] {});
+        LOGGER.warn("generic return :{}", result);
+    }
+
+    @Test
+    public void testVoidResp(){
+        testService.$invoke("testVoidResp", new String[]{}, new Object[] {});
+        LOGGER.warn("client test void resp success!!!!!");
     }
 }

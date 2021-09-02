@@ -12,5 +12,7 @@ public interface IGenericService {
 
     Date echoDate(Date birth);
 
-    String testVoid();
+    String testVoidParam();
+
+    void testVoidResp();
 }

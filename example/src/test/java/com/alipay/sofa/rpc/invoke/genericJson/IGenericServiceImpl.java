@@ -34,7 +34,13 @@ public class IGenericServiceImpl implements IGenericService {
     }
 
     @Override
-    public String testVoid() {
+    public String testVoidParam() {
+        LOGGER.info("receive void param");
         return "testVoid success!";
+    }
+
+    @Override
+    public void testVoidResp(){
+        LOGGER.info("server test void resp success!!!");
     }
 }

@@ -101,9 +101,7 @@ public class JacksonSerializer extends AbstractSerializer {
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
-        if (object == null) {
-            throw buildSerializeError("Unsupported null message!");
-        } else if (object instanceof SofaRequest) {
+        if (object instanceof SofaRequest) {
             return encodeSofaRequest((SofaRequest) object, context);
         } else if (object instanceof SofaResponse) {
             return encodeSofaResponse((SofaResponse) object, context);
