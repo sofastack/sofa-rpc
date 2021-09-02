@@ -109,6 +109,7 @@ public class NacosRegistryTest extends BaseNacosTest {
             registry.register(provider);
         } catch (Throwable e) {
             Assert.fail("register provider fail");
+            e.printStackTrace();
             LOGGER.error("register provider fail", e);
         }
         Thread.sleep(1000);
