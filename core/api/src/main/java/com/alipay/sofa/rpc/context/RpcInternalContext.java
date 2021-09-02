@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.context;
 
+import com.alibaba.ttl.TransmittableThreadLocal;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -48,12 +49,12 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The constant LOCAL.
      */
-    private static final ThreadLocal<RpcInternalContext>        LOCAL             = new ThreadLocal<RpcInternalContext>();
+    private static final ThreadLocal<RpcInternalContext>        LOCAL             = new TransmittableThreadLocal<RpcInternalContext>();
 
     /**
      * The constant DEQUE_LOCAL.
      */
-    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new ThreadLocal<Deque<RpcInternalContext>>();
+    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new TransmittableThreadLocal<Deque<RpcInternalContext>>();
 
     /**
      * 设置上下文

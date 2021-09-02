@@ -14,35 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.proxy;
-
-import java.util.HashMap;
-import java.util.List;
+package com.alipay.sofa.rpc.test;
 
 /**
- *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @Author: BaoYi
+ * @Date: 2021/8/1 5:09 下午
  */
-public interface TestInterface {
+public class SampleServiceImpl implements SampleService {
 
-    public String sayHello(String s);
+    @Override
+    public String testTimeout(long mills) {
+        try {
+            Thread.sleep(mills);
+        } catch (Exception e) {
 
-    public void sayNoting();
-
-    public int sayNum(boolean s);
-
-    public int[] sayNums(List list, HashMap map);
-
-    public Float sayNum2(Double list);
-
-    public String throwbiz1();
-
-    public String throwbiz2() throws Throwable;
-
-    public String throwRPC();
-
-    static void doNothing() {
-
+        }
+        return "sleep " + mills + " ms";
     }
 }
