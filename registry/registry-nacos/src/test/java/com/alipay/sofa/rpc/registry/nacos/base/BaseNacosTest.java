@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import name.jervyshi.nacos.NacosProcess;
 import name.jervyshi.nacos.NacosStarterBuilder;
 import org.junit.After;
@@ -32,6 +34,8 @@ import org.junit.BeforeClass;
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
  */
 public abstract class BaseNacosTest {
+
+    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
     protected NacosProcess nacosProcess;
 

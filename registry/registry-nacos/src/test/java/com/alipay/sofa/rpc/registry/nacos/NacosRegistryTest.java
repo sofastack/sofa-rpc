@@ -105,7 +105,12 @@ public class NacosRegistryTest extends BaseNacosTest {
             .setTimeout(3000);
 
         // 注册
-        registry.register(provider);
+        try {
+            registry.register(provider);
+        } catch (Throwable e) {
+            Assert.fail("register provider fail");
+            LOGGER.error("register provider fail", e);
+        }
         Thread.sleep(1000);
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
@@ -129,6 +134,8 @@ public class NacosRegistryTest extends BaseNacosTest {
         Map<String, ProviderInfo> ps = providerInfoListener.getData();
         Assert.assertEquals("after register: 1", 1, ps.size());
 
+        LOGGER.info("after register success {}", ps);
+
         // 订阅 错误的uniqueId
         ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
         consumerNoUniqueId.setInterfaceId("com.alipay.xxx.NacosTestService")
@@ -147,12 +154,16 @@ public class NacosRegistryTest extends BaseNacosTest {
         ps = wrongProviderInfoListener.getData();
         Assert.assertEquals("wrong uniqueId: 0", 0, ps.size());
 
+        LOGGER.info("wrong uniqueId {}", ps);
+
         // 反注册
         latch = new CountDownLatch(1);
         providerInfoListener.setCountDownLatch(latch);
         registry.unRegister(provider);
         latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
         Assert.assertEquals("after unregister: 0", 0, ps.size());
+
+        LOGGER.info("after unregister {}", ps);
 
         // 一次发2个端口的再次注册
         latch = new CountDownLatch(2);
@@ -167,6 +178,8 @@ public class NacosRegistryTest extends BaseNacosTest {
         ps = providerInfoListener.getData();
         //nacos has bug now
         Assert.assertEquals("after register two servers: 1", 1, ps.size());
+
+        LOGGER.info("after register two servers {}", ps);
 
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
@@ -188,6 +201,8 @@ public class NacosRegistryTest extends BaseNacosTest {
         Map<String, ProviderInfo> ps2 = providerInfoListener2.getData();
         Assert.assertEquals("after register duplicate: 1", 1, ps2.size());
 
+        LOGGER.info("after register duplicate {}", ps);
+
         // 取消订阅者1
         registry.unSubscribe(consumer);
 
@@ -200,6 +215,8 @@ public class NacosRegistryTest extends BaseNacosTest {
 
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
         Assert.assertEquals("after unregister: 1", 1, ps2.size());
+
+        LOGGER.info("after unregister consumer, and consumer2 {}", ps);
 
         // 批量取消订阅
         List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
