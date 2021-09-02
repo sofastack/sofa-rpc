@@ -71,6 +71,7 @@
         <httpcore.version>4.4.13</httpcore.version>
         <grpc.version>1.28.0</grpc.version>
         <guava.version>27.0-jre</guava.version>
+        <transmittable.version>2.2.0</transmittable.version>
     </properties>
 
     <dependencies>
@@ -396,6 +397,11 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>${guava.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alibaba</groupId>
+            <artifactId>transmittable-thread-local</artifactId>
+            <version>${transmittable.version}</version>
         </dependency>
 
     </dependencies>
