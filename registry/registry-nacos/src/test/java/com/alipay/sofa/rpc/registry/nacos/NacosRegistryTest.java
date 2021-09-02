@@ -87,6 +87,9 @@ public class NacosRegistryTest extends BaseNacosTest {
     public void testProviderObserver() throws Exception {
         int timeoutPerSub = 2000;
 
+        //wait nacos startup ok
+        TimeUnit.SECONDS.sleep(10);
+
         serverConfig = new ServerConfig()
             .setProtocol("bolt")
             .setHost("0.0.0.0")
@@ -110,8 +113,8 @@ public class NacosRegistryTest extends BaseNacosTest {
         } catch (Throwable e) {
             System.out.println("start to print exception");
             e.printStackTrace();
-            Assert.fail("register provider fail");
             LOGGER.error("register provider fail", e);
+            Assert.fail("register provider fail");
         }
         Thread.sleep(1000);
 

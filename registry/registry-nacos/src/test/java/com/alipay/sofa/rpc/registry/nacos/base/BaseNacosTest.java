@@ -35,9 +35,9 @@ import org.junit.BeforeClass;
  */
 public abstract class BaseNacosTest {
 
-    protected final Logger LOGGER = LoggerFactory.getLogger(getClass());
+    protected final static Logger LOGGER = LoggerFactory.getLogger(BaseNacosTest.class);
 
-    protected NacosProcess nacosProcess;
+    protected NacosProcess        nacosProcess;
 
     /**
      * Ad before class.
