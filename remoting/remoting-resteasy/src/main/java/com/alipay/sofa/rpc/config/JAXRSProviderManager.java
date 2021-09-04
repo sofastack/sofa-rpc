@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.config;
 
 import java.util.Collections;
-import java.util.LinkedHashSet;
+import java.util.HashSet;
 import java.util.Set;
 
 /**
@@ -31,12 +31,12 @@ public class JAXRSProviderManager {
     /**
      * 内置的jaxrs Provider类
      */
-    private static Set<Class>  internalProviderClasses = Collections.synchronizedSet(new LinkedHashSet<Class>());
+    private static Set<Class>  internalProviderClasses = Collections.synchronizedSet(new HashSet<Class>());
 
     /**
      * 自定义jaxrs Provider实例
      */
-    private static Set<Object> customProviderInstances = Collections.synchronizedSet(new LinkedHashSet<Object>());
+    private static Set<Object> customProviderInstances = Collections.synchronizedSet(new HashSet<Object>());
 
     /**
      * 注册内置的jaxrs Provider类
