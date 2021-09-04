@@ -790,7 +790,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     public Map<String, Set<ProviderInfo>> currentProviderMap() {
         providerLock.lock();
         try {
-            Map<String, Set<ProviderInfo>> tmp = new LinkedHashMap<String, Set<ProviderInfo>>();
+            Map<String, Set<ProviderInfo>> tmp = new HashMap<String, Set<ProviderInfo>>();
             tmp.put("alive", new HashSet<ProviderInfo>(aliveConnections.keySet()));
             tmp.put("subHealth", new HashSet<ProviderInfo>(subHealthConnections.keySet()));
             tmp.put("retry", new HashSet<ProviderInfo>(retryConnections.keySet()));
