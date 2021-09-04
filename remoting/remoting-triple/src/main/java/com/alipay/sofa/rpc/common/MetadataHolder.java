@@ -30,7 +30,7 @@ public class MetadataHolder {
     public static Map<String, String> getMetaHolder() {
         Map<String, String> stringStringMap = localContext.get();
         if(stringStringMap == null){
-            LinkedHashMap<String, String> value = new HashMap<>();
+            HashMap<String, String> value = new HashMap<>();
             localContext.set(value);
             return value;
         }
