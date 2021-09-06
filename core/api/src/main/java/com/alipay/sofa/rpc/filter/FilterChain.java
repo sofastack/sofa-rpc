@@ -190,7 +190,7 @@ public class FilterChain implements Invoker {
         HashSet<String> excludes = parseExcludeFilter(customFilters);
 
         // 准备数据：用户通过别名的方式注入的filter，需要解析
-        List<ExtensionClass<Filter>> extensionFilters = new ArrayList<ExtensionClass<Filter>>();
+        List<ExtensionClass<Filter>> extensionFilters = new LinkedList<ExtensionClass<Filter>>();
         List<String> filterAliases = config.getFilter(); //
         if (CommonUtils.isNotEmpty(filterAliases)) {
             for (String filterAlias : filterAliases) {
