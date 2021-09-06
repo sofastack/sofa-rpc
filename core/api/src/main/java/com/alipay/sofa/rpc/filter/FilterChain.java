@@ -36,6 +36,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -121,7 +122,7 @@ public class FilterChain implements Invoker {
         // 前面的过滤器在最外层
         invokerChain = lastInvoker;
         if (CommonUtils.isNotEmpty(filters)) {
-            loadedFilters = new ArrayList<Filter>();
+            loadedFilters = new LinkedList<Filter>();
             for (int i = filters.size() - 1; i >= 0; i--) {
                 try {
                     Filter filter = filters.get(i);
