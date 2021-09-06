@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +101,7 @@ public class RouterChain {
     private final List<Router> routers;
 
     public RouterChain(List<Router> actualRouters, ConsumerBootstrap consumerBootstrap) {
-        this.routers = new ArrayList<Router>();
+        this.routers = new LinkedList<Router>();
         if (CommonUtils.isNotEmpty(actualRouters)) {
             for (Router router : actualRouters) {
                 if (router.needToLoad(consumerBootstrap)) {
