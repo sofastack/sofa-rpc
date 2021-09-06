@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import static com.alipay.sofa.rpc.common.utils.IOUtils.closeQuietly;
@@ -104,7 +105,7 @@ public class BlackListFileLoader {
      * @param overrideStr The override string
      */
     static void overrideBlackList(List<String> originList, String overrideStr) {
-        List<String> adds = new ArrayList<String>();
+        List<String> adds = new LinkedList<String>();
         String[] overrideItems = StringUtils.splitWithCommaOrSemicolon(overrideStr);
         for (String overrideItem : overrideItems) {
             if (StringUtils.isNotBlank(overrideItem)) {
