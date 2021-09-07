@@ -16,8 +16,12 @@
  */
 package com.alipay.sofa.rpc.context;
 
+import com.sun.javafx.geom.ConcentricShapePair;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.HashMap;
+import java.util.concurrent.CountDownLatch;
 
 /**
  *
@@ -65,6 +69,42 @@ public class RpcInvokeContextTest {
 
     @Test
     public void peekContext() throws Exception {
+    }
+
+    @Test
+    public void testThreadSafe(){
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                countDownLatch.countDown();
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                long start = System.currentTimeMillis();
+                RpcInvokeContext.setContext(context);
+                long now = System.currentTimeMillis();
+                int i = 0;
+                while (now - start < 100) {
+                    now = System.currentTimeMillis();
+                    i++;
+                    RpcInvokeContext.getContext().addCustomHeader(i + "", i + "");
+                    try{
+                        new HashMap<>().putAll(RpcInvokeContext.getContext().getCustomHeader());
+                    }catch (Exception e){
+                        System.out.println(i);
+                        throw  e ;
+                    }
+                }
+
+            }
+        };
+
+        new Thread(runnable).start();
+        runnable.run();
     }
 
 }

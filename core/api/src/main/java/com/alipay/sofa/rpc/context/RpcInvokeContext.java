@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.context;
 
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
@@ -25,6 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * 基于ThreadLocal的面向业务开发者使用的上下文传递对象
@@ -37,13 +42,54 @@ public class RpcInvokeContext {
      * 线程上下文变量
      */
     protected static final ThreadLocal<RpcInvokeContext> LOCAL = new ThreadLocal<RpcInvokeContext>();
-
+    /**
+     * 是否开启上下文透传功能
+     *
+     * @since 5.1.2
+     */
+    private static final boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
     /**
      * 自定义 header ，用完一次即删
      */
     protected HashMap<String, String> customHeader = new HashMap<>();
+    /**
+     * 用户自定义超时时间，单次调用生效
+     */
+    protected Integer timeout;
+    /**
+     * 用户自定义对方地址，单次调用生效
+     */
+    protected String targetURL;
+    /**
+     * 用户自定义对方分组
+     */
+    protected String targetGroup;
+    /**
+     * 用户自定义Callback，单次调用生效
+     */
+    protected SofaResponseCallback responseCallback;
+    /**
+     * The Future.
+     */
+    protected ResponseFuture<?> future;
+    /**
+     * 自定义属性
+     */
+    protected ConcurrentMap<String, Object> map = new ConcurrentHashMap<String, Object>();
+    /**
+     * 请求上的透传数据
+     *
+     * @since 5.1.2
+     */
+    protected Map<String, String> requestBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
+    /**
+     * 响应上的透传数据
+     *
+     * @since 5.1.2
+     */
+    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
 
-
+    protected ReadWriteLock rwlock = new ReentrantReadWriteLock(true);
 
     /**
      * 得到上下文，没有则初始化
@@ -57,6 +103,54 @@ public class RpcInvokeContext {
             LOCAL.set(context);
         }
         return context;
+    }
+
+    /**
+     * 设置上下文
+     *
+     * @param context 调用上下文
+     */
+    public static void setContext(RpcInvokeContext context) {
+        LOCAL.set(RpcInvokeContext.clone(context));
+    }
+
+    private static RpcInvokeContext clone(RpcInvokeContext parent) {
+        RpcInvokeContext child = new RpcInvokeContext();
+        //timeout
+        child.setTimeout(parent.getTimeout());
+        //targetURL
+        child.setTargetURL(parent.getTargetURL());
+        //targetGroup
+        child.setTargetGroup(parent.getTargetGroup());
+        //responseCallback
+        child.setResponseCallback(parent.getResponseCallback());
+        //future
+        child.setFuture(parent.getFuture());
+
+        Lock lock = parent.rwlock.writeLock();
+        try {
+            boolean locked = lock.tryLock(5, TimeUnit.SECONDS);
+            if (locked) {
+                //map
+                child.map.putAll(parent.map);
+                if(BAGGAGE_ENABLE){
+                    //requestBaggage
+                    child.requestBaggage.putAll(parent.requestBaggage);
+                    //responseBaggage
+                    child.responseBaggage.putAll(parent.responseBaggage);
+                }
+                //customHeader
+                child.customHeader.putAll(parent.customHeader);
+            } else {
+                throw new SofaRpcRuntimeException("Acquire RpcInvokeContext write lock failed.");
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        } finally {
+            lock.unlock();
+        }
+
+        return child;
     }
 
     /**
@@ -76,22 +170,6 @@ public class RpcInvokeContext {
     }
 
     /**
-     * 设置上下文
-     *
-     * @param context 调用上下文
-     */
-    public static void setContext(RpcInvokeContext context) {
-        LOCAL.set(context);
-    }
-
-    /**
-     * 是否开启上下文透传功能
-     *
-     * @since 5.1.2
-     */
-    private static final boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
-
-    /**
      * 是否启用RPC透传功能
      *
      * @return 是否
@@ -99,50 +177,6 @@ public class RpcInvokeContext {
     public static boolean isBaggageEnable() {
         return BAGGAGE_ENABLE;
     }
-
-    /**
-     * 用户自定义超时时间，单次调用生效
-     */
-    protected Integer                       timeout;
-
-    /**
-     * 用户自定义对方地址，单次调用生效
-     */
-    protected String                        targetURL;
-
-    /**
-     * 用户自定义对方分组
-     */
-    protected String                        targetGroup;
-
-    /**
-     * 用户自定义Callback，单次调用生效
-     */
-    protected SofaResponseCallback          responseCallback;
-
-    /**
-     * The Future.
-     */
-    protected ResponseFuture<?>             future;
-
-    /**
-     * 自定义属性
-     */
-    protected ConcurrentMap<String, Object> map             = new ConcurrentHashMap<String, Object>();
-
-    /**
-     * 请求上的透传数据
-     *
-     * @since 5.1.2
-     */
-    protected Map<String, String>           requestBaggage  = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
-
-    /**
-     * 响应上的透传数据
-     *
-     * @since 5.1.2
-     */
-    protected Map<String, String>           responseBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
 
     /**
      * 得到调用级别超时时间
@@ -172,7 +206,13 @@ public class RpcInvokeContext {
      */
     public void put(String key, Object value) {
         if (key != null && value != null) {
-            map.put(key, value);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                map.put(key, value);
+            }finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -197,7 +237,13 @@ public class RpcInvokeContext {
      */
     public Object remove(String key) {
         if (key != null) {
-            return map.remove(key);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                return map.remove(key);
+            }finally {
+                lock.unlock();
+            }
         }
         return null;
     }
@@ -210,7 +256,13 @@ public class RpcInvokeContext {
      */
     public void putRequestBaggage(String key, String value) {
         if (BAGGAGE_ENABLE && key != null && value != null) {
-            requestBaggage.put(key, value);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                requestBaggage.put(key, value);
+            }finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -235,7 +287,13 @@ public class RpcInvokeContext {
      */
     public String removeRequestBaggage(String key) {
         if (BAGGAGE_ENABLE && key != null) {
-            return requestBaggage.remove(key);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                return requestBaggage.remove(key);
+            }finally {
+                lock.unlock();
+            }
         }
         return null;
     }
@@ -246,17 +304,29 @@ public class RpcInvokeContext {
      * @return 全部响应透传数据
      */
     public Map<String, String> getAllRequestBaggage() {
-        return requestBaggage;
+        Lock lock = rwlock.readLock();
+        lock.lock();
+        try{
+            return requestBaggage;
+        }finally {
+            lock.unlock();
+        }
     }
 
     /**
      * 设置全部请求透传数据
-     * 
+     *
      * @param requestBaggage 请求透传数据
      */
     public void putAllRequestBaggage(Map<String, String> requestBaggage) {
         if (BAGGAGE_ENABLE && requestBaggage != null) {
-            this.requestBaggage.putAll(requestBaggage);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                this.requestBaggage.putAll(requestBaggage);
+            }finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -268,7 +338,13 @@ public class RpcInvokeContext {
      */
     public void putResponseBaggage(String key, String value) {
         if (BAGGAGE_ENABLE && key != null && value != null) {
-            responseBaggage.put(key, value);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                responseBaggage.put(key, value);
+            }finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -293,7 +369,13 @@ public class RpcInvokeContext {
      */
     public String removeResponseBaggage(String key) {
         if (BAGGAGE_ENABLE && key != null) {
-            return responseBaggage.remove(key);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                return responseBaggage.remove(key);
+            }finally {
+                lock.unlock();
+            }
         }
         return null;
     }
@@ -304,17 +386,29 @@ public class RpcInvokeContext {
      * @return 全部响应透传数据
      */
     public Map<String, String> getAllResponseBaggage() {
-        return responseBaggage;
+        Lock lock = rwlock.readLock();
+        lock.lock();
+        try{
+            return responseBaggage;
+        }finally {
+            lock.unlock();
+        }
     }
 
     /**
      * 设置全部响应透传数据
-     * 
+     *
      * @param responseBaggage 响应透传数据
      */
     public void putAllResponseBaggage(Map<String, String> responseBaggage) {
         if (BAGGAGE_ENABLE && responseBaggage != null) {
-            this.responseBaggage.putAll(responseBaggage);
+            Lock lock = rwlock.readLock();
+            lock.lock();
+            try{
+                this.responseBaggage.putAll(responseBaggage);
+            }finally {
+                lock.unlock();
+            }
         }
     }
 
@@ -402,7 +496,13 @@ public class RpcInvokeContext {
 
 
     public Map<String, String> getCustomHeader() {
-        return new HashMap<>(customHeader);
+        Lock lock = rwlock.readLock();
+        lock.lock();
+        try{
+            return customHeader;
+        }finally {
+            lock.unlock();
+        }
     }
 
     /**
@@ -410,15 +510,27 @@ public class RpcInvokeContext {
      * 1. 不受 enable baggage 开关影响，始终生效
      * 2. 仅对一次调用生效，调用完成之会被清空
      *
-     * @param key header key
+     * @param key   header key
      * @param value header value
      */
     public void addCustomHeader(String key, String value) {
-        customHeader.put(key, value);
+        Lock lock = rwlock.readLock();
+        lock.lock();
+        try{
+            customHeader.put(key, value);
+        }finally {
+            lock.unlock();
+        }
     }
 
     public void clearCustomHeader() {
-        customHeader.clear();
+        Lock lock = rwlock.readLock();
+        lock.lock();
+        try{
+            customHeader.clear();
+        }finally {
+            lock.unlock();
+        }
     }
 
     @Override
