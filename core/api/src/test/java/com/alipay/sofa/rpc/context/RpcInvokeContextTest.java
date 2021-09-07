@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.context;
 
-import com.sun.javafx.geom.ConcentricShapePair;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -106,5 +105,4 @@ public class RpcInvokeContextTest {
         new Thread(runnable).start();
         runnable.run();
     }
-
 }
