@@ -53,7 +53,7 @@ public class RpcInvokeContextTest {
             context = new RpcInvokeContext();
             RpcInvokeContext.setContext(context);
             Assert.assertTrue(RpcInvokeContext.getContext() != null);
-            Assert.assertEquals(RpcInvokeContext.getContext(), context);
+            Assert.assertNotEquals(RpcInvokeContext.getContext(), context);
 
             RpcInvokeContext.removeContext();
             Assert.assertTrue(RpcInvokeContext.peekContext() == null);
@@ -104,5 +104,23 @@ public class RpcInvokeContextTest {
 
         new Thread(runnable).start();
         runnable.run();
+    }
+
+    @Test
+    public void testSetContext() {
+        RpcInvokeContext context = new RpcInvokeContext();
+        context.setTargetGroup("target");
+        context.setTargetURL("url");
+        context.setTimeout(111);
+        context.addCustomHeader("A", "B");
+        context.put("C", "D");
+        RpcInvokeContext.setContext(context);
+        Assert.assertEquals(context.getTargetGroup(), RpcInvokeContext.getContext().getTargetGroup());
+        Assert.assertEquals(context.getTargetURL(), RpcInvokeContext.getContext().getTargetURL());
+        Assert.assertEquals(context.getTimeout(), RpcInvokeContext.getContext().getTimeout());
+        Assert.assertEquals("B", RpcInvokeContext.getContext().getCustomHeader().get("A"));
+        Assert.assertEquals("D", RpcInvokeContext.getContext().get("C"));
+        Assert.assertTrue(context != RpcInvokeContext.getContext());
+        RpcInvokeContext.removeContext();
     }
 }

@@ -115,6 +115,9 @@ public class RpcInvokeContext {
     }
 
     private static RpcInvokeContext clone(RpcInvokeContext parent) {
+        if( parent == null ){
+            return null;
+        }
         RpcInvokeContext child = new RpcInvokeContext();
         //timeout
         child.setTimeout(parent.getTimeout());
