@@ -43,24 +43,24 @@ public class GenericJsonTest {
         ApplicationConfig applicationClientConfig = new ApplicationConfig().setAppName("generic-client");
 
         ServerConfig serverConfig = new ServerConfig()
-                .setPort(22222)
-                .setDaemon(false);
+            .setPort(22222)
+            .setDaemon(false);
 
         ProviderConfig<IGenericService> providerConfig = new ProviderConfig<IGenericService>()
-                .setSerialization("json")
-                .setApplication(applicationServerConfig)
-                .setInterfaceId(IGenericService.class.getName())
-                .setRef(new IGenericServiceImpl())
-                .setServer(serverConfig);
+            .setSerialization("json")
+            .setApplication(applicationServerConfig)
+            .setInterfaceId(IGenericService.class.getName())
+            .setRef(new IGenericServiceImpl())
+            .setServer(serverConfig);
         providerConfig.export();
 
         ConsumerConfig<GenericService> consumerConfig = new ConsumerConfig<GenericService>()
-                .setSerialization("json")
-                .setApplication(applicationClientConfig)
-                .setInterfaceId(IGenericService.class.getName())
-                .setGeneric(true)
-                .setTimeout(50000)
-                .setDirectUrl("bolt://127.0.0.1:22222?appName=generic-server");
+            .setSerialization("json")
+            .setApplication(applicationClientConfig)
+            .setInterfaceId(IGenericService.class.getName())
+            .setGeneric(true)
+            .setTimeout(50000)
+            .setDirectUrl("bolt://127.0.0.1:22222?appName=generic-server");
         testService = consumerConfig.refer();
 
         LOGGER.warn("started at pid {}", RpcRuntimeContext.PID);
@@ -70,18 +70,18 @@ public class GenericJsonTest {
     @Test
     public void testInvoke() {
         try {
-            String name = (String) testService.$invoke("echoStr", new String[]{"java.lang.String"},
-                    new Object[]{"zhangsan"});
+            String name = (String) testService.$invoke("echoStr", new String[] { "java.lang.String" },
+                new Object[] { "zhangsan" });
             LOGGER.warn("generic return name:{}", name);
 
-            Integer age = (Integer) testService.$invoke("echoInt", new String[]{"java.lang.Integer"},
-                    new Object[]{"23"});
+            Integer age = (Integer) testService.$invoke("echoInt", new String[] { "java.lang.Integer" },
+                new Object[] { "23" });
             LOGGER.warn("generic return age:{}", age);
 
             Date date = new Date();
 
-            Date birth = (Date) testService.$invoke("echoDate", new String[]{"java.util.Date"},
-                    new Object[]{date});
+            Date birth = (Date) testService.$invoke("echoDate", new String[] { "java.util.Date" },
+                new Object[] { date });
             LOGGER.warn("generic return birth:{}", birth);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -125,8 +125,8 @@ public class GenericJsonTest {
             testEntity.setInner(inner);
 
             Object o = testService.$genericInvoke("echoEntity",
-                    new String[]{"com.alipay.sofa.rpc.invoke.genericJson.TestEntity"},
-                    new Object[]{testEntity});
+                new String[] { "com.alipay.sofa.rpc.invoke.genericJson.TestEntity" },
+                new Object[] { testEntity });
             LOGGER.warn("generic return :{}", o);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
@@ -135,22 +135,22 @@ public class GenericJsonTest {
 
     //测试空的入参调用
     @Test
-    public void testVoidParam(){
+    public void testVoidParam() {
         try {
-            Object result = testService.$invoke("testVoidParam", new String[]{}, new Object[] {});
+            Object result = testService.$invoke("testVoidParam", new String[] {}, new Object[] {});
             LOGGER.warn("generic return :{}", result);
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }
 
     //测试空的返回调用
     @Test
-    public void testVoidResp(){
+    public void testVoidResp() {
         try {
-            testService.$invoke("testVoidResp", new String[]{}, new Object[] {});
+            testService.$invoke("testVoidResp", new String[] {}, new Object[] {});
             LOGGER.warn("client test void resp success!!!!!");
-        }catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
         }
     }
