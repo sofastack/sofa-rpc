@@ -124,7 +124,7 @@ public class GenericJsonTest {
             testEntity.setBirth(new Date());
             testEntity.setInner(inner);
 
-            Object o = testService.$genericInvoke("echoEntity",
+            Object o = testService.$invoke("echoEntity",
                 new String[] { "com.alipay.sofa.rpc.invoke.genericJson.TestEntity" },
                 new Object[] { testEntity });
             LOGGER.warn("generic return :{}", o);
