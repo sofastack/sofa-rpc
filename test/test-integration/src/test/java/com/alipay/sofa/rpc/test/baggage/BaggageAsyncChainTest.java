@@ -115,7 +115,7 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         methodConfigA.setOnReturn(new SofaResponseCallback() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-//                Assert.assertEquals(RpcInvokeContext.getContext(), contexts[0]); // 必须和调用线程一致
+                Assert.assertNotSame(RpcInvokeContext.getContext(), contexts[0]); // 主线程和子线程中的 Context 必须不是同一个，否则有并发问题
                 str[0] = (String) appResponse;
                 latch[0].countDown();
             }
