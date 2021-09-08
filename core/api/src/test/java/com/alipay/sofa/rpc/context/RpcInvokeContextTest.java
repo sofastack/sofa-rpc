@@ -25,8 +25,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicReference;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RpcInvokeContextTest {
@@ -73,7 +71,7 @@ public class RpcInvokeContextTest {
     }
 
     @Test
-    public void testThreadSafe(){
+    public void testThreadSafe() {
         RpcInvokeContext context = RpcInvokeContext.getContext();
         CountDownLatch countDownLatch = new CountDownLatch(2);
         Runnable runnable = new Runnable() {
@@ -93,11 +91,11 @@ public class RpcInvokeContextTest {
                     now = System.currentTimeMillis();
                     i++;
                     RpcInvokeContext.getContext().addCustomHeader(i + "", i + "");
-                    try{
+                    try {
                         new HashMap<>().putAll(RpcInvokeContext.getContext().getCustomHeader());
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         System.out.println(i);
-                        throw  e ;
+                        throw e;
                     }
                 }
 
@@ -129,13 +127,13 @@ public class RpcInvokeContextTest {
     @Test
     public void testConcurrentModify() throws InterruptedException {
         for (int i = 0; i < 10; i++) {
-            RpcInvokeContext.getContext().put(""+i,""+i);
+            RpcInvokeContext.getContext().put("" + i, "" + i);
         }
 
         CountDownLatch countDownLatch = new CountDownLatch(2);
         RpcInvokeContext mainContext = RpcInvokeContext.getContext();
         AtomicReference<RuntimeException> exceptionHolder = new AtomicReference<>();
-        new Thread(()->{
+        new Thread(() -> {
             countDownLatch.countDown();
             try {
                 countDownLatch.await();
@@ -143,11 +141,11 @@ public class RpcInvokeContextTest {
                 e.printStackTrace();
             }
             long start = System.currentTimeMillis();
-            try{
-                while(System.currentTimeMillis() - start < 100){
+            try {
+                while (System.currentTimeMillis() - start < 100) {
                     RpcInvokeContext.setContext(mainContext);
                 }
-            }catch (RuntimeException e){
+            } catch (RuntimeException e) {
                 exceptionHolder.set(e);
                 throw e;
             }
@@ -159,15 +157,12 @@ public class RpcInvokeContextTest {
         countDownLatch.await();
         long start = System.currentTimeMillis();
         int i = 0;
-        while(System.currentTimeMillis()-start < 100){
-            if(exceptionHolder.get()!=null){
+        while (System.currentTimeMillis() - start < 100) {
+            if (exceptionHolder.get() != null) {
                 throw exceptionHolder.get();
             }
-            headers.put(""+i,""+i);
+            headers.put("" + i, "" + i);
             i++;
         }
     }
-
-
-
 }
