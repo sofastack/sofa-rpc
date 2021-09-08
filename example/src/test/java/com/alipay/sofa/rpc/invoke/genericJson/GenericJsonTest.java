@@ -24,7 +24,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
@@ -35,10 +35,10 @@ public class GenericJsonTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericJsonTest.class);
 
-    private GenericService      testService;
+    private static GenericService testService;
 
-    @Before
-    public void init() {
+    @BeforeClass
+    public static void init() {
         ApplicationConfig applicationServerConfig = new ApplicationConfig().setAppName("generic-server");
         ApplicationConfig applicationClientConfig = new ApplicationConfig().setAppName("generic-client");
 
