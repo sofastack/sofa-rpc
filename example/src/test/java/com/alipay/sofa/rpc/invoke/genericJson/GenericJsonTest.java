@@ -35,7 +35,7 @@ public class GenericJsonTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericJsonTest.class);
 
-    private GenericService testService;
+    private GenericService      testService;
 
     @Before
     public void init() {

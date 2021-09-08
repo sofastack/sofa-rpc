@@ -310,19 +310,19 @@ public class JacksonSerializer extends AbstractSerializer {
             // according interface and method name to find paramter types
             Object result;
             //正常调用
-            if(head.isEmpty()){
+            if (head.isEmpty()) {
                 JavaType respType = jacksonHelper.getResClass(targetService, methodName);
-                try{
+                try {
                     result = mapper.readValue(data.array(), respType);
-                }catch (IOException e){
+                } catch (IOException e) {
                     throw buildDeserializeError(e.getMessage());
                 }
             }
             //泛化调用
-            else{
-                try{
+            else {
+                try {
                     result = mapper.readValue(data.array(), Object.class);
-                }catch (IOException e){
+                } catch (IOException e) {
                     throw buildDeserializeError(e.getMessage());
                 }
             }

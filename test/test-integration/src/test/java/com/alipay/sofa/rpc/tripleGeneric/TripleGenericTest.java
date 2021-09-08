@@ -25,7 +25,7 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Date;
@@ -33,12 +33,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TripleGenericTest {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripleGenericTest.class);
+    private static final Logger   LOGGER = LoggerFactory.getLogger(TripleGenericTest.class);
 
-    private GenericService      helloService;
+    private static GenericService helloService;
 
-    @Before
-    public void init() {
+    @BeforeClass
+    public static void init() {
         RpcRunningState.setDebugMode(true);
 
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
