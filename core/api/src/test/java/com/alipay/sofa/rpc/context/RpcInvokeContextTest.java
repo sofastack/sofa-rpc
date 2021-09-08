@@ -20,7 +20,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *
@@ -123,4 +125,49 @@ public class RpcInvokeContextTest {
         Assert.assertTrue(context != RpcInvokeContext.getContext());
         RpcInvokeContext.removeContext();
     }
+
+    @Test
+    public void testConcurrentModify() throws InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            RpcInvokeContext.getContext().put(""+i,""+i);
+        }
+
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        RpcInvokeContext mainContext = RpcInvokeContext.getContext();
+        AtomicReference<RuntimeException> exceptionHolder = new AtomicReference<>();
+        new Thread(()->{
+            countDownLatch.countDown();
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            long start = System.currentTimeMillis();
+            try{
+                while(System.currentTimeMillis() - start < 100){
+                    RpcInvokeContext.setContext(mainContext);
+                }
+            }catch (RuntimeException e){
+                exceptionHolder.set(e);
+                throw e;
+            }
+
+        }).start();
+
+        Map<String, String> headers = RpcInvokeContext.getContext().getCustomHeader();
+        countDownLatch.countDown();
+        countDownLatch.await();
+        long start = System.currentTimeMillis();
+        int i = 0;
+        while(System.currentTimeMillis()-start < 100){
+            if(exceptionHolder.get()!=null){
+                throw exceptionHolder.get();
+            }
+            headers.put(""+i,""+i);
+            i++;
+        }
+    }
+
+
+
 }
