@@ -68,7 +68,7 @@ public class RpcInvokeContext {
     /**
      * 自定义属性
      */
-    protected Map<String, Object> map = new ConcurrentHashMap<String, Object>();
+    protected Map<String, Object> map = new ConcurrentHashMap<>();
     /**
      * 请求上的透传数据
      *
@@ -80,7 +80,7 @@ public class RpcInvokeContext {
      *
      * @since 5.1.2
      */
-    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new ConcurrentHashMap<String, String>() : null;
+    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new ConcurrentHashMap<>() : null;
 
     /**
      * 得到上下文，没有则初始化
@@ -449,6 +449,7 @@ public class RpcInvokeContext {
         sb.append(", map=").append(map);
         sb.append(", requestBaggage=").append(requestBaggage);
         sb.append(", responseBaggage=").append(responseBaggage);
+        sb.append(", customHeader=").append(customHeader);
         sb.append('}');
         return sb.toString();
     }
