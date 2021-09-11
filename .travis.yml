@@ -12,7 +12,7 @@ cache:
 
 install:
   - ./mvnw clean install -Pci-install -B -U -e
-  - sh ./tools/check_format.sh
+  - bash ./tools/check_format.sh
 
 script:
   - ./mvnw package -Pci-test

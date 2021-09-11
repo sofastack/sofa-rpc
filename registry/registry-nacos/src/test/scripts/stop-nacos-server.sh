@@ -1,6 +1,7 @@
 #!/bin/bash
 
-if [ -f "$PWD/nacos/bin/shutdown.sh" ]
-then
-    bash $PWD/nacos/bin/shutdown.sh
+readonly shutdown_script="$PWD/nacos/bin/shutdown.sh"
+
+if [ -f "$shutdown_script" ]; then
+    bash "$shutdown_script"
 fi
