@@ -1,1 +1,4 @@
 help=com.alipay.sofa.rpc.protocol.telnet.HelpTelnetHandler
+list=com.alipay.sofa.rpc.protocol.telnet.ListTelnetHandler
+service=com.alipay.sofa.rpc.protocol.telnet.ServiceTelnetHandler
+reference=com.alipay.sofa.rpc.protocol.telnet.ReferenceTelnetHandler

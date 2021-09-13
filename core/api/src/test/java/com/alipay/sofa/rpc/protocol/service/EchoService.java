@@ -14,45 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol;
-
-import com.alipay.sofa.rpc.common.annotation.Unstable;
-import com.alipay.sofa.rpc.ext.Extensible;
+package com.alipay.sofa.rpc.protocol.service;
 
 /**
- * Handler of telnet command
+ *
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-@Extensible(singleton = false)
-//@Unstable
-public interface TelnetHandler {
+public interface EchoService {
 
-    /**
-     * The constant LINE.
-     */
-    String LINE = "\r\n";
-    String TAP  = "\t\t\t";
-
-    /**
-     * Gets command.
-     *
-     * @return the command
-     */
-    String getCommand();
-
-    /**
-     * Gets description.
-     *
-     * @return the description
-     */
-    String getDescription();
-
-    /**
-     * Do telnet and return string result.
-     *
-     * @param message the message
-     * @return the string
-     */
-    String telnet(String message);
+    public String echoStr(String arg);
 }

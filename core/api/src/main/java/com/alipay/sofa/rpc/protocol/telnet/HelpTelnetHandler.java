@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.protocol.TelnetHandler;
 import com.alipay.sofa.rpc.protocol.TelnetHandlerFactory;
-import com.alipay.sofa.rpc.transport.AbstractChannel;
 
 import java.util.Map;
 
@@ -37,9 +36,10 @@ public class HelpTelnetHandler implements TelnetHandler {
     }
 
     @Override
-    public String telnet(AbstractChannel channel, String message) {
+    public String telnet(String message) {
         StringBuffer result = new StringBuffer();
         if (StringUtils.isNotBlank(message)) {
+            System.out.println("helpfactory");
             TelnetHandler handler = TelnetHandlerFactory.getHandler(message);
             if (handler != null) {
                 result.append(handler.getCommand()).append(LINE)
@@ -51,7 +51,6 @@ public class HelpTelnetHandler implements TelnetHandler {
             result.append("The supported command include:").append(LINE);
             for (Map.Entry<String, TelnetHandler> entry : TelnetHandlerFactory.getAllHandlers().entrySet()) {
                 result.append(entry.getKey()).append(" ");
-                //result.append(entry.fetchKey() + "\t : " + entry.getValue().getDescription() + "\r\n");
             }
             result.append(LINE);
         }
@@ -60,7 +59,14 @@ public class HelpTelnetHandler implements TelnetHandler {
 
     @Override
     public String getDescription() {
-        return "show all support commands!" + LINE + "Usage:\thelp" + LINE + "\thelp [cmd]";
+        StringBuilder description = new StringBuilder();
+        description.append("show all support commands!" + LINE + "Usage:\thelp" + LINE + "\thelp [cmd]");
+        description.append(LINE + "\tlist" + "\t\tshow all Services");
+        description.append(LINE + "\tlist -p" + "\t\tshow Provided Services");
+        description.append(LINE + "\tlist -c" + "\t\tshow Referred Services");
+        description.append(LINE + "\tservice" + "\t\t[<app>]" + "\tshow ProviderConfig");
+        description.append(LINE + "\treference" + "\t[<app>]" + "\tshow ConsumerConfig");
+        return description.toString();
     }
 
 }
