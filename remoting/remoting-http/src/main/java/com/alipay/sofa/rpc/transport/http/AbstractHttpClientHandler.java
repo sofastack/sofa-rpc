@@ -103,6 +103,7 @@ public abstract class AbstractHttpClientHandler implements ClientHandler {
                 invokeCtx = RpcInvokeContext.getContext();
             } else {
                 RpcInvokeContext.setContext(invokeCtx);
+                invokeCtx = RpcInvokeContext.getContext();
             }
             BaggageResolver.pickupFromResponse(invokeCtx, response);
         }
