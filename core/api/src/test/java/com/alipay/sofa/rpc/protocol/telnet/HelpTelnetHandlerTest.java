@@ -32,9 +32,6 @@ public class HelpTelnetHandlerTest {
 
     @Test
     public void telnet() throws Exception {
-        //        Assert.assertNotNull(new HelpTelnetHandler().telnet(null, ""));
-        //        Assert.assertNotNull(new HelpTelnetHandler().telnet(null, null));
-        //        Assert.assertNotNull(new HelpTelnetHandler().telnet(null, "xx"));
         Assert.assertNotNull(new HelpTelnetHandler().telnet("help"));
         Assert.assertNotNull(new HelpTelnetHandler().telnet(null));
         Assert.assertNotNull(new HelpTelnetHandler().telnet("xx"));
