@@ -112,12 +112,18 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         MethodConfig methodConfigA = new MethodConfig()
             .setName("hello")
             .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK);
+        final Exception[] exp = new Exception[1];
         methodConfigA.setOnReturn(new SofaResponseCallback() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                Assert.assertEquals(RpcInvokeContext.getContext(), contexts[0]); // 必须和调用线程一致
-                str[0] = (String) appResponse;
-                latch[0].countDown();
+                try {
+                    Assert.assertNotSame(RpcInvokeContext.getContext(), contexts[0]); // 主线程和子线程中的 Context 必须不是同一个，否则有并发问题
+                    str[0] = (String) appResponse;
+                    latch[0].countDown();
+                } catch (Exception e) {
+                    exp[0] = e;
+                }
+
             }
 
             @Override
@@ -148,6 +154,9 @@ public class BaggageAsyncChainTest extends BaggageBaseTest {
         String ret = service.hello(); // 测试传递数据
         Assert.assertEquals(ret, null);
         latch[0].await(5000, TimeUnit.MILLISECONDS);
+        if (exp[0] != null) {
+            throw exp[0];
+        }
         ret = str[0];
         Assert.assertEquals(ret, "hello world chello world d");
         Assert.assertEquals(refB.getReqBaggage(), "a2bbb");
