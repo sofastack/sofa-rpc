@@ -83,7 +83,7 @@ public class BAsyncChainSampleServiceImpl implements SampleService {
             LOGGER.info("--b2---:" + RpcInvokeContext.getContext());
             latch.await(5000, TimeUnit.MILLISECONDS); // 模拟Callback更早回来的行为
             context.putResponseBaggage("respBaggageB_useless2", "在返A之前写后没用"); // 返回写在这里可能没用
-            LOGGER.info("--b3---:" + RpcInvokeContext.getContext());
+            LOGGER.info("--b5---:" + RpcInvokeContext.getContext());
         } catch (Exception e) {
             e.printStackTrace();
         }
