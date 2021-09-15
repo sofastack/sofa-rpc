@@ -175,16 +175,21 @@ public class SimpleMapSerializerTest {
 
     @Test
     public void testParseResponseHeader() {
+        SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
         Map<String, String> headerMap = new HashMap<>();
         headerMap.put("X-Tldc-Target-Tenant", "fia");
-        headerMap.put("exist", "");
         SofaResponse sofaResponse = new SofaResponse();
+        sofaRpcSerialization.parseResponseHeader(headerMap,sofaResponse);
+        Assert.assertEquals("fia", sofaResponse.getResponseProps().get("X-Tldc-Target-Tenant"));
+        sofaResponse.getResponseProps().clear();
+
+        headerMap.put("exist", "");
         sofaResponse.addResponseProp("exist", "exist");
-        SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
         sofaRpcSerialization.parseResponseHeader(headerMap, sofaResponse);
         Map<String, String> responseProps = sofaResponse.getResponseProps();
         Assert.assertEquals("fia", responseProps.get("X-Tldc-Target-Tenant"));
         Assert.assertEquals("exist", responseProps.get("exist"));
+
         sofaResponse.getResponseProps().clear();
         headerMap.put("X-Tldc-Target-Tenant", "fia");
         headerMap.put("exist", "");

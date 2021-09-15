@@ -283,7 +283,14 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
     protected void parseRequestHeader(Map<String, String> headerMap, SofaRequest sofaRequest) {
         // 处理 tracer
         parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, headerMap, sofaRequest);
-        replaceWithHeaderMap(headerMap, sofaRequest.getRequestProps());
+        Map<String, Object> requestProps = sofaRequest.getRequestProps();
+        if (requestProps == null) {
+            for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
+            }
+        } else {
+            replaceWithHeaderMap(headerMap, requestProps);
+        }
     }
 
     private void parseRequestHeader(String key, Map<String, String> headerMap,
@@ -298,23 +305,20 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
     }
 
-    private void replaceWithHeaderMap(Map<String, String> headerMap, Map requestProps) {
-        if (headerMap == null) {
+    private void replaceWithHeaderMap(Map<String, String> headerMap, Map props) {
+        if (headerMap == null || props == null) {
             return;
-        }
-        if (requestProps == null) {
-            requestProps = new HashMap<String, Object>();
         }
         // 1. 如果 key 已经在requestProps存在，value 为 String 时进行覆盖
         // 2. header 中的 value 为 Blank 时不进行覆盖
         for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-            Object o = requestProps.get(entry.getKey());
+            Object o = props.get(entry.getKey());
             if (o == null) {
-                requestProps.put(entry.getKey(), entry.getValue());
+                props.put(entry.getKey(), entry.getValue());
             } else if (o instanceof String) {
                 if (StringUtils.isBlank((CharSequence) o)
                     || StringUtils.isNotBlank(entry.getValue())) {
-                    requestProps.put(entry.getKey(), entry.getValue());
+                    props.put(entry.getKey(), entry.getValue());
                 }
             }
         }
@@ -425,7 +429,13 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
     protected void parseResponseHeader(Map<String, String> headerMap, SofaResponse sofaResponse) {
         // 处理 tracer
         Map<String, String> responseProps = sofaResponse.getResponseProps();
-        replaceWithHeaderMap(headerMap, responseProps);
+        if (responseProps == null) {
+            for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                sofaResponse.addResponseProp(entry.getKey(), entry.getValue());
+            }
+        } else {
+            replaceWithHeaderMap(headerMap, responseProps);
+        }
     }
 
     protected void putKV(Map<String, String> map, String key, String value) {
