@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.bootstrap.dubbo;
 
 import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.utils.ConfigUtils;
+import org.apache.dubbo.config.ConfigKeys;
+import org.apache.dubbo.config.context.ConfigMode;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.service.GenericService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
@@ -53,9 +55,12 @@ public class DubooServerTest {
     ConsumerConfig<DemoService> consumerConfig;
 
     //dubbo close wait time
-    @AfterClass
+    @BeforeClass
     public static void before() {
-        ConfigUtils.getProperties().put(CommonConstants.SHUTDOWN_WAIT_KEY, "1");
+        RpcRunningState.setUnitTestMode(true);
+        System.setProperty(CommonConstants.SHUTDOWN_WAIT_KEY, "1");
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE, "true");
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_MODE, ConfigMode.IGNORE.name());
     }
 
     @Test
@@ -323,11 +328,6 @@ public class DubooServerTest {
         String result = demoService.sayHello("xxx");
         Assert.assertTrue(result.equalsIgnoreCase("hello xxx"));
 
-    }
-
-    @BeforeClass
-    public static void adBeforeClass() {
-        RpcRunningState.setUnitTestMode(true);
     }
 
     @After
