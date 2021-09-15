@@ -33,7 +33,7 @@ import java.util.Map;
 
 public class GenericJsonTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GenericJsonTest.class);
+    private static final Logger   LOGGER = LoggerFactory.getLogger(GenericJsonTest.class);
 
     private static GenericService testService;
 

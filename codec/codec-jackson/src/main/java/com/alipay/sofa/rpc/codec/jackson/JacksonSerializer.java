@@ -313,7 +313,7 @@ public class JacksonSerializer extends AbstractSerializer {
             if (head.containsKey("sofa_head_generic_type")) {
                 try {
                     result = mapper.readValue(data.array(),
-                            Object.class);
+                        Object.class);
                 } catch (IOException exception) {
                     exception.printStackTrace();
                 }
