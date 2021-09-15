@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import org.apache.dubbo.common.Constants;
+import org.apache.dubbo.common.constants.CommonConstants;
 import org.apache.dubbo.common.utils.ConfigUtils;
 import org.apache.dubbo.rpc.RpcContext;
 import org.apache.dubbo.rpc.service.GenericService;
@@ -55,7 +55,7 @@ public class DubooServerTest {
     //dubbo close wait time
     @AfterClass
     public static void before() {
-        ConfigUtils.getProperties().put(Constants.SHUTDOWN_WAIT_KEY, "1");
+        ConfigUtils.getProperties().put(CommonConstants.SHUTDOWN_WAIT_KEY, "1");
     }
 
     @Test
