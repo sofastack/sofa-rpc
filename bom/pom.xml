@@ -20,7 +20,8 @@
         <jaxrs.api.version>1.0.2.Final</jaxrs.api.version>
         <cxf.version>3.0.14</cxf.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
-        <curator.version>4.0.1</curator.version>
+        <zookeeper.version>3.6.3</zookeeper.version>
+        <curator.version>5.2.0</curator.version>
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo.version>3.0.2.1</dubbo.version>
         <nacos.version>1.0.0</nacos.version>
@@ -298,18 +299,34 @@
             <!-- zk client -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
-                <artifactId>curator-recipes</artifactId>
+                <artifactId>curator-framework</artifactId>
                 <version>${curator.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.apache.curator</groupId>
-                <artifactId>curator-test</artifactId>
+                <artifactId>curator-x-discovery</artifactId>
                 <version>${curator.version}</version>
-                <scope>test</scope>
                 <exclusions>
                     <exclusion>
-                        <artifactId>zookeeper</artifactId>
                         <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.zookeeper</groupId>
+                <artifactId>zookeeper</artifactId>
+                <version>${zookeeper.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>io.netty</groupId>
+                        <artifactId>netty</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -485,6 +502,18 @@
             </dependency>
 
             <!-- Test libs -->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-test</artifactId>
+                <version>${curator.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.zookeeper</groupId>
+                        <artifactId>zookeeper</artifactId>
+                    </exclusion>
+                </exclusions>
+                <scope>test</scope>
+            </dependency>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>

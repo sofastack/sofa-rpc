@@ -28,6 +28,8 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.registry.base.BaseZkTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import org.apache.dubbo.config.ConfigKeys;
+import org.apache.dubbo.config.context.ConfigMode;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -42,6 +44,9 @@ public class DubboServerTest extends BaseZkTest {
     @Test
     //同步调用,走服务注册中心
     public void testRegistrySync() {
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE, "true");
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_MODE, ConfigMode.IGNORE.name());
+
         // 只有1个线程 执行
         ServerConfig serverConfig = new ServerConfig()
             .setStopTimeout(10)
