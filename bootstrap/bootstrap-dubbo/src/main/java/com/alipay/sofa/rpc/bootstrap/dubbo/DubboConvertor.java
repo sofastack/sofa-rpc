@@ -29,19 +29,19 @@ import java.util.List;
 public class DubboConvertor {
 
     public static void copyRegistries(com.alipay.sofa.rpc.config.AbstractInterfaceConfig sofaConfig,
-                                      com.alibaba.dubbo.config.AbstractInterfaceConfig dubboConfig) {
+                                      org.apache.dubbo.config.AbstractInterfaceConfig dubboConfig) {
         List<RegistryConfig> registryConfigs = sofaConfig.getRegistry();
         if (CommonUtils.isNotEmpty(registryConfigs)) {
-            List<com.alibaba.dubbo.config.RegistryConfig> dubboRegistryConfigs =
-                    new ArrayList<com.alibaba.dubbo.config.RegistryConfig>();
+            List<org.apache.dubbo.config.RegistryConfig> dubboRegistryConfigs =
+                    new ArrayList<org.apache.dubbo.config.RegistryConfig>();
             for (RegistryConfig registryConfig : registryConfigs) {
                 // 生成并丢到缓存里
-                com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
+                org.apache.dubbo.config.RegistryConfig dubboRegistryConfig = DubboSingleton.REGISTRY_MAP
                     .get(registryConfig);
                 if (dubboRegistryConfig == null) {
-                    dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
+                    dubboRegistryConfig = new org.apache.dubbo.config.RegistryConfig();
                     copyRegistryFields(registryConfig, dubboRegistryConfig);
-                    com.alibaba.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
+                    org.apache.dubbo.config.RegistryConfig old = DubboSingleton.REGISTRY_MAP.putIfAbsent(
                         registryConfig, dubboRegistryConfig);
                     if (old != null) {
                         dubboRegistryConfig = old;
@@ -51,14 +51,14 @@ public class DubboConvertor {
             }
             dubboConfig.setRegistries(dubboRegistryConfigs);
         } else {
-            com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig = new com.alibaba.dubbo.config.RegistryConfig();
-            dubboRegistryConfig.setAddress(com.alibaba.dubbo.config.RegistryConfig.NO_AVAILABLE);
+            org.apache.dubbo.config.RegistryConfig dubboRegistryConfig = new org.apache.dubbo.config.RegistryConfig();
+            dubboRegistryConfig.setAddress(org.apache.dubbo.config.RegistryConfig.NO_AVAILABLE);
             dubboConfig.setRegistry(dubboRegistryConfig);
         }
     }
 
     public static void copyRegistryFields(com.alipay.sofa.rpc.config.RegistryConfig sofaRegistryConfig,
-                                          com.alibaba.dubbo.config.RegistryConfig dubboRegistryConfig) {
+                                          org.apache.dubbo.config.RegistryConfig dubboRegistryConfig) {
         dubboRegistryConfig.setAddress(sofaRegistryConfig.getAddress());
         dubboRegistryConfig.setProtocol(sofaRegistryConfig.getProtocol());
         dubboRegistryConfig.setRegister(sofaRegistryConfig.isRegister());

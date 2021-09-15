@@ -16,8 +16,8 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import com.alibaba.dubbo.config.ProtocolConfig;
-import com.alibaba.dubbo.config.ServiceConfig;
+import org.apache.dubbo.config.ProtocolConfig;
+import org.apache.dubbo.config.ServiceConfig;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.Version;
@@ -87,7 +87,7 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     private void copyApplication(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
         ApplicationConfig applicationConfig = providerConfig.getApplication();
-        com.alibaba.dubbo.config.ApplicationConfig dubboConfig = new com.alibaba.dubbo.config.ApplicationConfig();
+        org.apache.dubbo.config.ApplicationConfig dubboConfig = new org.apache.dubbo.config.ApplicationConfig();
         dubboConfig.setName(applicationConfig.getAppName());
         serviceConfig.setApplication(dubboConfig);
     }
@@ -157,11 +157,11 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     private void copyMethods(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
         Map<String, MethodConfig> methodConfigs = providerConfig.getMethods();
         if (CommonUtils.isNotEmpty(methodConfigs)) {
-            List<com.alibaba.dubbo.config.MethodConfig> dubboMethodConfigs =
-                    new ArrayList<com.alibaba.dubbo.config.MethodConfig>();
+            List<org.apache.dubbo.config.MethodConfig> dubboMethodConfigs =
+                    new ArrayList<org.apache.dubbo.config.MethodConfig>();
             for (Map.Entry<String, MethodConfig> entry : methodConfigs.entrySet()) {
                 MethodConfig methodConfig = entry.getValue();
-                com.alibaba.dubbo.config.MethodConfig dubboMethodConfig = new com.alibaba.dubbo.config.MethodConfig();
+                org.apache.dubbo.config.MethodConfig dubboMethodConfig = new org.apache.dubbo.config.MethodConfig();
                 dubboMethodConfig.setName(methodConfig.getName());
                 dubboMethodConfig.setParameters(methodConfig.getParameters());
                 dubboMethodConfigs.add(dubboMethodConfig);

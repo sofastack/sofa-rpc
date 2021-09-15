@@ -16,10 +16,10 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import com.alibaba.dubbo.common.Constants;
-import com.alibaba.dubbo.common.utils.ConfigUtils;
-import com.alibaba.dubbo.rpc.RpcContext;
-import com.alibaba.dubbo.rpc.service.GenericService;
+import org.apache.dubbo.common.Constants;
+import org.apache.dubbo.common.utils.ConfigUtils;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.service.GenericService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoServiceImpl;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -288,7 +288,7 @@ public class DubooServerTest {
         }
     }
 
-    @Test(expected = com.alibaba.dubbo.rpc.RpcException.class)
+    @Test(expected = org.apache.dubbo.rpc.RpcException.class)
     //同步调用,直连,dubbo 消费没有指定dubbo服务版本version
     public void testConsumerWithNoDubboServiceVersion() {
         // 只有1个线程 执行
