@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.client;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -504,7 +505,7 @@ public class ProviderInfo implements Serializable {
      * @return 属性值
      */
     public String getAttr(String key) {
-        String val = (String) dynamicAttrs.get(key);
+        String val = StringUtils.toString(dynamicAttrs.get(key));
         return val == null ? staticAttrs.get(key) : val;
     }
 }
