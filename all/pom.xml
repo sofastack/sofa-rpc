@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.7.10-SNAPSHOT</version>
+    <version>5.7.10</version>
 
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -555,6 +555,48 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>alipay-snapshot</id>
+            <repositories>
+                <repository>
+                    <id>central</id>
+                    <url>http://mvn.test.alipay.net:8080/artifactory/repo</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>central_prod</id>
+                    <url>http://mvn.dev.alipay.net:8080/artifactory/repo</url>
+                    <snapshots>
+                        <enabled>true</enabled>
+                    </snapshots>
+                </repository>
+                <repository>
+                    <id>snapshots</id>
+                    <url>http://mvn.dev.alipay.net:8080/artifactory/repo</url>
+                    <releases>
+                        <enabled>true</enabled>
+                    </releases>
+                </repository>
+            </repositories>
+            <pluginRepositories>
+                <pluginRepository>
+                    <id>central</id>
+                    <url>http://mvn.test.alipay.net:8080/artifactory/repo</url>
+                    <snapshots>
+                        <enabled>false</enabled>
+                    </snapshots>
+                </pluginRepository>
+            </pluginRepositories>
+            <distributionManagement>
+                <snapshotRepository>
+                    <id>nexus-server@alipay-test</id>
+                    <name>alipay test Repository</name>
+                    <url>http://mvn.test.alipay.net/artifactory/content/repositories/Alipay-Snapshot</url>
+                </snapshotRepository>
+            </distributionManagement>
+        </profile>
         <profile>
             <id>release</id>
             <build>
