@@ -14,29 +14,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.common;
+package com.alipay.sofa.rpc.test;
 
 /**
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
- * @since 5.1.0
- * //FIXME 每次发布修改
+ * @Author: BaoYi
+ * @Date: 2021/8/1 5:09 下午
  */
-public final class Version {
+public class SampleServiceImpl implements SampleService {
 
-    /**
-     * 当前RPC版本，例如：5.6.7
-     */
-    public static final String VERSION       = "5.7.10";
+    @Override
+    public String testTimeout(long mills) {
+        try {
+            Thread.sleep(mills);
+        } catch (Exception e) {
 
-    /**
-     * 当前RPC版本，例如： 5.6.7 对应 50607
-     */
-    public static final int    RPC_VERSION   = 50710;
-
-    /**
-     * 当前Build版本，每次发布修改
-     */
-    public static final String BUILD_VERSION = "5.7.10_20210916230751";
-
+        }
+        return "sleep " + mills + " ms";
+    }
 }

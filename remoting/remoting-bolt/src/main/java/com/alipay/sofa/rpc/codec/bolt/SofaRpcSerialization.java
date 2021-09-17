@@ -32,6 +32,7 @@ import com.alipay.remoting.rpc.protocol.RpcResponseCommand;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -260,10 +261,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                     //for service mesh or other scene, we need to add more info from header
                     if (sofaRequest instanceof SofaRequest) {
-                        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
-                            ((SofaRequest) sofaRequest).addRequestProp(entry.getKey(), entry.getValue());
-                        }
-                        setRequestPropertiesWithHeaderInfo(headerMap, ((SofaRequest) sofaRequest));
+                        setRequestPropertiesWithHeaderInfo(headerMap, (SofaRequest) sofaRequest);
+                        parseRequestHeader(headerMap, (SofaRequest) sofaRequest);
                     }
                     requestCommand.setRequestObject(sofaRequest);
                 } finally {
@@ -278,6 +277,51 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             }
         }
         return false;
+    }
+
+    @VisibleForTesting
+    protected void parseRequestHeader(Map<String, String> headerMap, SofaRequest sofaRequest) {
+        // 处理 tracer
+        parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, headerMap, sofaRequest);
+        Map<String, Object> requestProps = sofaRequest.getRequestProps();
+        if (requestProps == null) {
+            for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
+            }
+        } else {
+            replaceWithHeaderMap(headerMap, requestProps);
+        }
+    }
+
+    private void parseRequestHeader(String key, Map<String, String> headerMap,
+                                    SofaRequest sofaRequest) {
+        Map<String, String> traceMap = new HashMap<String, String>();
+        CodecUtils.treeCopyTo(key + ".", headerMap, traceMap, true);
+        Object traceCtx = sofaRequest.getRequestProp(key);
+        if (traceCtx == null) {
+            sofaRequest.addRequestProp(key, traceMap);
+        } else if (traceCtx instanceof Map) {
+            ((Map<String, String>) traceCtx).putAll(traceMap);
+        }
+    }
+
+    private void replaceWithHeaderMap(Map<String, String> headerMap, Map props) {
+        if (headerMap == null || props == null) {
+            return;
+        }
+        // 1. 如果 key 已经在requestProps存在，value 为 String 时进行覆盖
+        // 2. header 中的 value 为 Blank 时不进行覆盖
+        for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+            Object o = props.get(entry.getKey());
+            if (o == null) {
+                props.put(entry.getKey(), entry.getValue());
+            } else if (o instanceof String) {
+                if (StringUtils.isBlank((CharSequence) o)
+                    || StringUtils.isNotBlank(entry.getValue())) {
+                    props.put(entry.getKey(), entry.getValue());
+                }
+            }
+        }
     }
 
     /**
@@ -366,7 +410,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                 Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory.getSerializer(serializer);
                 rpcSerializer.decode(new ByteArrayWrapperByteBuf(responseCommand.getContent()), sofaResponse, header);
-
+                if (sofaResponse instanceof SofaResponse) {
+                    parseResponseHeader(header, (SofaResponse) sofaResponse);
+                }
                 responseCommand.setResponseObject(sofaResponse);
                 return true;
             } catch (Exception ex) {
@@ -377,6 +423,19 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
 
         return false;
+    }
+
+    @VisibleForTesting
+    protected void parseResponseHeader(Map<String, String> headerMap, SofaResponse sofaResponse) {
+        // 处理 tracer
+        Map<String, String> responseProps = sofaResponse.getResponseProps();
+        if (responseProps == null) {
+            for (Map.Entry<String, String> entry : headerMap.entrySet()) {
+                sofaResponse.addResponseProp(entry.getKey(), entry.getValue());
+            }
+        } else {
+            replaceWithHeaderMap(headerMap, responseProps);
+        }
     }
 
     protected void putKV(Map<String, String> map, String key, String value) {

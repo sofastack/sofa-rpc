@@ -19,9 +19,12 @@ package com.alipay.sofa.rpc.context;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
+
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RpcInvokeContextTest {
@@ -50,7 +53,7 @@ public class RpcInvokeContextTest {
             context = new RpcInvokeContext();
             RpcInvokeContext.setContext(context);
             Assert.assertTrue(RpcInvokeContext.getContext() != null);
-            Assert.assertEquals(RpcInvokeContext.getContext(), context);
+            Assert.assertNotEquals(RpcInvokeContext.getContext(), context);
 
             RpcInvokeContext.removeContext();
             Assert.assertTrue(RpcInvokeContext.peekContext() == null);
@@ -67,4 +70,99 @@ public class RpcInvokeContextTest {
     public void peekContext() throws Exception {
     }
 
+    @Test
+    public void testThreadSafe() {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                countDownLatch.countDown();
+                try {
+                    countDownLatch.await();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                long start = System.currentTimeMillis();
+                RpcInvokeContext.setContext(context);
+                long now = System.currentTimeMillis();
+                int i = 0;
+                while (now - start < 100) {
+                    now = System.currentTimeMillis();
+                    i++;
+                    RpcInvokeContext.getContext().addCustomHeader(i + "", i + "");
+                    try {
+                        new HashMap<>().putAll(RpcInvokeContext.getContext().getCustomHeader());
+                    } catch (Exception e) {
+                        System.out.println(i);
+                        throw e;
+                    }
+                }
+
+            }
+        };
+
+        new Thread(runnable).start();
+        runnable.run();
+    }
+
+    @Test
+    public void testSetContext() {
+        RpcInvokeContext context = new RpcInvokeContext();
+        context.setTargetGroup("target");
+        context.setTargetURL("url");
+        context.setTimeout(111);
+        context.addCustomHeader("A", "B");
+        context.put("C", "D");
+        RpcInvokeContext.setContext(context);
+        Assert.assertEquals(context.getTargetGroup(), RpcInvokeContext.getContext().getTargetGroup());
+        Assert.assertEquals(context.getTargetURL(), RpcInvokeContext.getContext().getTargetURL());
+        Assert.assertEquals(context.getTimeout(), RpcInvokeContext.getContext().getTimeout());
+        Assert.assertEquals("B", RpcInvokeContext.getContext().getCustomHeader().get("A"));
+        Assert.assertEquals("D", RpcInvokeContext.getContext().get("C"));
+        Assert.assertTrue(context != RpcInvokeContext.getContext());
+        RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testConcurrentModify() throws InterruptedException {
+        for (int i = 0; i < 10; i++) {
+            RpcInvokeContext.getContext().put("" + i, "" + i);
+        }
+
+        CountDownLatch countDownLatch = new CountDownLatch(2);
+        RpcInvokeContext mainContext = RpcInvokeContext.getContext();
+        AtomicReference<RuntimeException> exceptionHolder = new AtomicReference<>();
+        new Thread(() -> {
+            countDownLatch.countDown();
+            try {
+                countDownLatch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            long start = System.currentTimeMillis();
+            try {
+                while (System.currentTimeMillis() - start < 100) {
+                    RpcInvokeContext.setContext(mainContext);
+                }
+            } catch (RuntimeException e) {
+                exceptionHolder.set(e);
+                throw e;
+            }
+
+        }).start();
+
+        Map<String, String> headers = RpcInvokeContext.getContext().getCustomHeader();
+        countDownLatch.countDown();
+        countDownLatch.await();
+        long start = System.currentTimeMillis();
+        int i = 0;
+        while (System.currentTimeMillis() - start < 100) {
+            if (exceptionHolder.get() != null) {
+                throw exceptionHolder.get();
+            }
+            headers.put("" + i, "" + i);
+            i++;
+        }
+    }
 }

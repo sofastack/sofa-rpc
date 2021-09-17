@@ -73,16 +73,24 @@ public abstract class AbstractInvokeCallback implements InvokeCallback {
 
     protected void pickupBaggage(SofaResponse response) {
         if (RpcInvokeContext.isBaggageEnable()) {
-            RpcInvokeContext invokeCtx = null;
+            RpcInvokeContext old = null;
+            RpcInvokeContext newContext = null;
             if (context != null) {
-                invokeCtx = (RpcInvokeContext) context.getAttachment(RpcConstants.HIDDEN_KEY_INVOKE_CONTEXT);
+                old = (RpcInvokeContext) context.getAttachment(RpcConstants.HIDDEN_KEY_INVOKE_CONTEXT);
             }
-            if (invokeCtx == null) {
-                invokeCtx = RpcInvokeContext.getContext();
+            if (old == null) {
+                newContext = RpcInvokeContext.getContext();
             } else {
-                RpcInvokeContext.setContext(invokeCtx);
+                RpcInvokeContext.setContext(old);
+                newContext = RpcInvokeContext.getContext();
             }
-            BaggageResolver.pickupFromResponse(invokeCtx, response);
+            BaggageResolver.pickupFromResponse(newContext, response);
+
+            if (old != null) {
+                old.getAllResponseBaggage().putAll(newContext.getAllResponseBaggage());
+                old.getAllRequestBaggage().putAll(newContext.getAllRequestBaggage());
+            }
+
         }
     }
 }
