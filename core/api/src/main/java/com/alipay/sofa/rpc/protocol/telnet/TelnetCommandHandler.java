@@ -1,20 +1,5 @@
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 package com.alipay.sofa.rpc.protocol.telnet;
+
 
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.protocol.TelnetHandler;
@@ -24,14 +9,11 @@ import com.alipay.sofa.rpc.protocol.TelnetHandlerFactory;
  *
  */
 public class TelnetCommandHandler {
-    public final static String TELNET_STRING_END = new String(new byte[] { (byte) 13, (byte) 10 });
+    public final static String TELNET_STRING_END = new String(new byte[]{(byte) 13, (byte) 10});
+
 
     public static String handleCommand(String cmdLine) {
         StringBuffer handleResult = new StringBuffer();
-        if (StringUtils.isEmpty(cmdLine)) {
-            handleResult.append("Please type something");
-            return handleResult.toString();
-        }
         String[] command = cmdLine.split("\\s");
         if (TelnetHandlerFactory.getAllHandlers().containsKey(command[0])) {
             TelnetHandler handler = TelnetHandlerFactory.getHandler(command[0]);
@@ -54,16 +36,15 @@ public class TelnetCommandHandler {
     }
 
     public static String responseMessage(String cmd) {
-        System.out.println("response");
         String commandResult = handleCommand(cmd);
         commandResult = commandResult.replace("\n", TELNET_STRING_END);
         if (StringUtils.isEmpty(commandResult)) {
             commandResult = TELNET_STRING_END;
         } else if (!commandResult.endsWith(TELNET_STRING_END)) {
             commandResult = commandResult + TELNET_STRING_END
-                + TELNET_STRING_END;
+                    + TELNET_STRING_END;
         } else if (!commandResult.endsWith(TELNET_STRING_END
-            .concat(TELNET_STRING_END))) {
+                .concat(TELNET_STRING_END))) {
             commandResult = commandResult + TELNET_STRING_END;
         }
         commandResult = commandResult + promptMessage();

@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.protocol;
 
-import com.alibaba.dubbo.remoting.buffer.ChannelBuffers;
 import com.alipay.sofa.rpc.protocol.telnet.TelnetCommandHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -40,6 +39,7 @@ public class NettyTelnetServer {
     private EventLoopGroup workerGroup;
     private Channel channel;
     public static final List<String> CHANNEL_QUIT = new ArrayList<>();
+    public static String EMPTY_BUFFER = new String(new byte[0], 0, 0);
 
     static {
         CHANNEL_QUIT.add("quit");
@@ -107,7 +107,7 @@ public class NettyTelnetServer {
         @Override
         protected void channelRead0(ChannelHandlerContext ctx, String msg) throws Exception {
             if (CHANNEL_QUIT.contains(msg)) {
-                ctx.write(ChannelBuffers.EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
+                ctx.write(EMPTY_BUFFER).addListener(ChannelFutureListener.CLOSE);
                 return;
             }
             ctx.write(telnetCommandHandler.responseMessage(msg));

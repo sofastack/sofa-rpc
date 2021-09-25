@@ -93,6 +93,6 @@ public class ConsumerConfigRepository {
      * @param referredServiceList
      */
     public void setReferredServiceList(ArrayList<ConsumerConfig> referredServiceList) {
-        ConsumerConfigRepository.referredServiceList = referredServiceList;
+        ConsumerConfigRepository.referredServiceList = this.referredServiceList;
     }
 }

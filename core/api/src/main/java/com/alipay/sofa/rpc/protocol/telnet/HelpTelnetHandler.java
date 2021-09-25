@@ -39,11 +39,10 @@ public class HelpTelnetHandler implements TelnetHandler {
     public String telnet(String message) {
         StringBuffer result = new StringBuffer();
         if (StringUtils.isNotBlank(message)) {
-            System.out.println("helpfactory");
             TelnetHandler handler = TelnetHandlerFactory.getHandler(message);
             if (handler != null) {
                 result.append(handler.getCommand()).append(LINE)
-                    .append(handler.getDescription()).append(LINE);
+                        .append(handler.getDescription()).append(LINE);
             } else {
                 result.append("Not found command : " + message);
             }
@@ -51,6 +50,7 @@ public class HelpTelnetHandler implements TelnetHandler {
             result.append("The supported command include:").append(LINE);
             for (Map.Entry<String, TelnetHandler> entry : TelnetHandlerFactory.getAllHandlers().entrySet()) {
                 result.append(entry.getKey()).append(" ");
+                result.append(entry.getKey() + "\t : " + entry.getValue().getDescription() + "\r\n");
             }
             result.append(LINE);
         }
@@ -60,12 +60,13 @@ public class HelpTelnetHandler implements TelnetHandler {
     @Override
     public String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("show all support commands!" + LINE + "Usage:\thelp" + LINE + "\thelp [cmd]");
-        description.append(LINE + "\tlist" + "\t\tshow all Services");
-        description.append(LINE + "\tlist -p" + "\t\tshow Provided Services");
-        description.append(LINE + "\tlist -c" + "\t\tshow Referred Services");
-        description.append(LINE + "\tservice" + "\t\t[<app>]" + "\tshow ProviderConfig");
-        description.append(LINE + "\treference" + "\t[<app>]" + "\tshow ConsumerConfig");
+        description.append("show all support commands!" + LINE + "Usage:\thelp" + LINE + "\thelp "+"\t\t : [<cmd>]");
+        for (Map.Entry<String, TelnetHandler> entry : TelnetHandlerFactory.getAllHandlers().entrySet()) {
+            if(entry.getKey()!= "help") {
+                description.append(LINE + "\t" + entry.getKey()).append(" ");
+                description.append(LINE + "\t" +entry.getKey() + "\t " + entry.getValue().getDescription() + "\r\n");
+            }
+        }
         return description.toString();
     }
 
