@@ -14,14 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol.service;
+package com.alipay.sofa.rpc.telnet.handler;
+
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
  *
  *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public interface HelloService {
+public class HelpTelnetHandlerTest {
+    @Test
+    public void getCommand() throws Exception {
+        Assert.assertEquals(new HelpTelnetHandler().getCommand(), "help");
+    }
 
-    String sayHello(String name, int age);
+    @Test
+    public void telnet() throws Exception {
+        Assert.assertNotNull(new HelpTelnetHandler().telnet("help"));
+        Assert.assertNotNull(new HelpTelnetHandler().telnet(null));
+        Assert.assertNotNull(new HelpTelnetHandler().telnet("xx"));
+    }
+
+    @Test
+    public void getDescription() throws Exception {
+        Assert.assertNotNull(new HelpTelnetHandler().getDescription());
+    }
+
 }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol;
+package com.alipay.sofa.rpc.telnet.cache;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import java.util.ArrayList;

@@ -14,25 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol.service;
-
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
+package com.alipay.sofa.rpc.telnet.service;
 
 /**
  *
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class EchoServiceImpl implements EchoService {
+public interface HelloService {
 
-    /**
-     * slf4j Logger for this class
-     */
-    private static final Logger LOGGER = LoggerFactory.getLogger(EchoServiceImpl.class);
-
-    @Override
-    public String echoStr(String arg) {
-        return arg;
-    }
+    String sayHello(String name, int age);
 }

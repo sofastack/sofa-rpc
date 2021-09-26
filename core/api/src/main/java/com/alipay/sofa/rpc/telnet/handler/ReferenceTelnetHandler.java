@@ -1,9 +1,9 @@
-package com.alipay.sofa.rpc.protocol.telnet;
+package com.alipay.sofa.rpc.telnet.handler;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.protocol.ConsumerConfigRepository;
-import com.alipay.sofa.rpc.protocol.TelnetHandler;
+import com.alipay.sofa.rpc.telnet.cache.ConsumerConfigRepository;
+import com.alipay.sofa.rpc.telnet.TelnetHandler;
 
 @Extension("reference")
 public class ReferenceTelnetHandler implements TelnetHandler{

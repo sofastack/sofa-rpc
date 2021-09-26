@@ -1,9 +1,8 @@
-package com.alipay.sofa.rpc.protocol.telnet;
+package com.alipay.sofa.rpc.telnet;
 
 
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.protocol.TelnetHandler;
-import com.alipay.sofa.rpc.protocol.TelnetHandlerFactory;
+import com.alipay.sofa.rpc.telnet.handler.HelpTelnetHandler;
 
 /**
  *

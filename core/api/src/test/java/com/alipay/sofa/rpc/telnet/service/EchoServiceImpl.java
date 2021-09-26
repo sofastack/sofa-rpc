@@ -14,45 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol;
+package com.alipay.sofa.rpc.telnet.service;
 
-import com.alipay.sofa.rpc.common.annotation.Unstable;
-import com.alipay.sofa.rpc.ext.Extensible;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 
 /**
- * Handler of telnet command
+ *
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-@Extensible(singleton = false)
-//@Unstable
-public interface TelnetHandler {
+public class EchoServiceImpl implements EchoService {
 
     /**
-     * The constant LINE.
+     * slf4j Logger for this class
      */
-    String LINE = "\r\n";
-    String TAP  = "\t\t\t";
+    private static final Logger LOGGER = LoggerFactory.getLogger(EchoServiceImpl.class);
 
-    /**
-     * Gets command.
-     *
-     * @return the command
-     */
-    String getCommand();
-
-    /**
-     * Gets description.
-     *
-     * @return the description
-     */
-    String getDescription();
-
-    /**
-     * Do telnet and return string result.
-     *
-     * @param message the message
-     * @return the string
-     */
-    String telnet(String message);
+    @Override
+    public String echoStr(String arg) {
+        return arg;
+    }
 }

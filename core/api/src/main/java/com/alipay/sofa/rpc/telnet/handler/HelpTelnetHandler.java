@@ -14,12 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol.telnet;
+package com.alipay.sofa.rpc.telnet.handler;
 
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.protocol.TelnetHandler;
-import com.alipay.sofa.rpc.protocol.TelnetHandlerFactory;
+import com.alipay.sofa.rpc.telnet.TelnetHandler;
+import com.alipay.sofa.rpc.telnet.TelnetHandlerFactory;
 
 import java.util.Map;
 

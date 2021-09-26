@@ -14,32 +14,44 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.protocol.telnet;
+package com.alipay.sofa.rpc.telnet;
 
-import org.junit.Assert;
-import org.junit.Test;
+import com.alipay.sofa.rpc.ext.Extensible;
 
 /**
+ * Handler of telnet command
  *
- *
- * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class HelpTelnetHandlerTest {
-    @Test
-    public void getCommand() throws Exception {
-        Assert.assertEquals(new HelpTelnetHandler().getCommand(), "help");
-    }
+@Extensible(singleton = false)
+//@Unstable
+public interface TelnetHandler {
 
-    @Test
-    public void telnet() throws Exception {
-        Assert.assertNotNull(new HelpTelnetHandler().telnet("help"));
-        Assert.assertNotNull(new HelpTelnetHandler().telnet(null));
-        Assert.assertNotNull(new HelpTelnetHandler().telnet("xx"));
-    }
+    /**
+     * The constant LINE.
+     */
+    String LINE = "\r\n";
+    String TAP  = "\t\t\t";
 
-    @Test
-    public void getDescription() throws Exception {
-        Assert.assertNotNull(new HelpTelnetHandler().getDescription());
-    }
+    /**
+     * Gets command.
+     *
+     * @return the command
+     */
+    String getCommand();
 
+    /**
+     * Gets description.
+     *
+     * @return the description
+     */
+    String getDescription();
+
+    /**
+     * Do telnet and return string result.
+     *
+     * @param message the message
+     * @return the string
+     */
+    String telnet(String message);
 }

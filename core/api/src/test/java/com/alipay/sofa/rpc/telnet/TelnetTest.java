@@ -1,30 +1,26 @@
-package com.alipay.sofa.rpc.protocol;
+package com.alipay.sofa.rpc.telnet;
 
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.event.ConsumerSubEvent;
+import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ProviderPubEvent;
-import com.alipay.sofa.rpc.protocol.event.ApplicationEvent;
-import com.alipay.sofa.rpc.protocol.listener.ConsumerSubEventListener;
-import com.alipay.sofa.rpc.protocol.listener.ProviderPubEventListener;
-import com.alipay.sofa.rpc.protocol.service.EchoService;
-import com.alipay.sofa.rpc.protocol.service.EchoServiceImpl;
-import com.alipay.sofa.rpc.protocol.service.HelloService;
-import com.alipay.sofa.rpc.protocol.service.HelloServiceImpl;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.module.Module;
+import com.alipay.sofa.rpc.telnet.module.TelnetModule;
+import com.alipay.sofa.rpc.telnet.service.EchoService;
+import com.alipay.sofa.rpc.telnet.service.EchoServiceImpl;
+import com.alipay.sofa.rpc.telnet.service.HelloService;
+import com.alipay.sofa.rpc.telnet.service.HelloServiceImpl;
+import org.junit.Before;
 import org.junit.Test;
 
-public class TelnetTest {
-
-    @Test
-    public void telnet() {
-        ProviderPubEventListener providerPubEventListener = new ProviderPubEventListener();
-        ConsumerSubEventListener consumerSubEventListener = new ConsumerSubEventListener();
-        ApplicationEvent applicationEvent = new ApplicationEvent();
-        applicationEvent.addProviderPubEventListener(providerPubEventListener);
-        applicationEvent.addConsumerSubEventListener(consumerSubEventListener);
-
+public class statusTelnetTest {
+    @Before
+    public void init(){
+        //发布服务，publishHelloService，发布Hello服务的方法
         ApplicationConfig application = new ApplicationConfig().setAppName("test-server");
 
         ServerConfig serverConfig = new ServerConfig()
@@ -59,18 +55,26 @@ public class TelnetTest {
                 .setTimeout(3000);
         HelloService helloService = consumerConfig.refer();
 
-        applicationEvent.notifyProviderPubEvent(new ProviderPubEvent(providerConfig));
-        applicationEvent.notifyProviderPubEvent(new ProviderPubEvent(providerConfig2));
-        applicationEvent.notifyConsumerSubEvent(new ConsumerSubEvent(consumerConfig));
+        TelnetModule module = (TelnetModule) ExtensionLoaderFactory.getExtensionLoader(Module.class)
+                .getExtension("telnet");
 
+        ProviderPubEvent providerPubEvent = new ProviderPubEvent(providerConfig);
+        ProviderPubEvent providerPubEvent2 = new ProviderPubEvent(providerConfig2);
+        ConsumerSubEvent consumerSubEvent = new ConsumerSubEvent(consumerConfig);
+        EventBus.post(providerPubEvent);
+        EventBus.post(providerPubEvent2);
+        EventBus.post(consumerSubEvent);
+    }
+
+    @Test
+    public void telnet() {
+        //启动telnet服务端
         NettyTelnetServer nettyTelnetServer = new NettyTelnetServer(1234);
         try {
             nettyTelnetServer.open();
-
-        } catch (InterruptedException e) {
+        } catch (InterruptedException interruptedException) {
             nettyTelnetServer.close();
         }
-
     }
 
 }
