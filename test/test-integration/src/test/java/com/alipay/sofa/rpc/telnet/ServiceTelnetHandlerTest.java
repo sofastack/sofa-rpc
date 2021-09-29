@@ -14,16 +14,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.telnet.handler;
+package com.alipay.sofa.rpc.telnet;
 
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.telnet.service.EchoService;
-import com.alipay.sofa.rpc.telnet.service.EchoServiceImpl;
-import com.alipay.sofa.rpc.telnet.service.HelloService;
-import com.alipay.sofa.rpc.telnet.service.HelloServiceImpl;
+import com.alipay.sofa.rpc.telnet.handler.ServiceTelnetHandler;
+import com.alipay.sofa.rpc.test.EchoService;
+import com.alipay.sofa.rpc.test.EchoServiceImpl;
+import com.alipay.sofa.rpc.test.HelloService;
+import com.alipay.sofa.rpc.test.HelloServiceImpl;
 import com.alipay.sofa.rpc.telnet.cache.ConsumerConfigRepository;
 import com.alipay.sofa.rpc.telnet.cache.ProviderConfigRepository;
 import org.junit.Assert;
