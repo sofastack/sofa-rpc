@@ -53,7 +53,7 @@ public class ModuleFactoryTest {
     public void testAll() throws Exception {
         String old = RpcConfigs.getStringValue(RpcOptions.MODULE_LOAD_LIST);
         try {
-            RpcConfigs.putValue(RpcOptions.MODULE_LOAD_LIST, "*,-test3");
+            RpcConfigs.putValue(RpcOptions.MODULE_LOAD_LIST, "*,-test3,-telnet");
 
             ModuleFactory.installModules();
             Assert.assertFalse(ModuleFactory.INSTALLED_MODULES.isEmpty());

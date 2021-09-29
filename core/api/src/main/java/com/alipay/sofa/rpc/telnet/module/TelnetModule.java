@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.telnet.listener.ProviderPubEventListener;
 public class TelnetModule implements Module {
     private ProviderPubEventListener providerPubEventListener;
     private ConsumerSubEventListener consumerSubEventListener;
+    private NettyTelnetServer        nettyTelnetServer = new NettyTelnetServer(1234);
 
     @Override
     public boolean needLoad() {
@@ -37,7 +38,6 @@ public class TelnetModule implements Module {
 
     @Override
     public void install() {
-        NettyTelnetServer nettyTelnetServer = new NettyTelnetServer(1234);
         try {
             nettyTelnetServer.open();
             providerPubEventListener = new ProviderPubEventListener();
@@ -51,6 +51,7 @@ public class TelnetModule implements Module {
 
     @Override
     public void uninstall() {
+        nettyTelnetServer.close();
         if (providerPubEventListener != null) {
             EventBus.unRegister(ProviderPubEvent.class, providerPubEventListener);
         }
