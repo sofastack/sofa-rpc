@@ -17,7 +17,7 @@ import com.alipay.sofa.rpc.telnet.service.HelloServiceImpl;
 import org.junit.Before;
 import org.junit.Test;
 
-public class statusTelnetTest {
+public class TelnetTest {
     @Before
     public void init(){
         //发布服务，publishHelloService，发布Hello服务的方法
