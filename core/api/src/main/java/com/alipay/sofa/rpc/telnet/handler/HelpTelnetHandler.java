@@ -42,7 +42,7 @@ public class HelpTelnetHandler implements TelnetHandler {
             TelnetHandler handler = TelnetHandlerFactory.getHandler(message);
             if (handler != null) {
                 result.append(handler.getCommand()).append(LINE)
-                        .append(handler.getDescription()).append(LINE);
+                    .append(handler.getDescription()).append(LINE);
             } else {
                 result.append("Not found command : " + message);
             }
@@ -60,11 +60,11 @@ public class HelpTelnetHandler implements TelnetHandler {
     @Override
     public String getDescription() {
         StringBuilder description = new StringBuilder();
-        description.append("show all support commands!" + LINE + "Usage:\thelp" + LINE + "\thelp "+"\t\t : [<cmd>]");
+        description.append("show all support commands!" + LINE + "Usage:\thelp" + LINE + "\thelp " + "\t\t : [<cmd>]");
         for (Map.Entry<String, TelnetHandler> entry : TelnetHandlerFactory.getAllHandlers().entrySet()) {
-            if(entry.getKey()!= "help") {
+            if (entry.getKey() != "help") {
                 description.append(LINE + "\t" + entry.getKey()).append(" ");
-                description.append(LINE + "\t" +entry.getKey() + "\t " + entry.getValue().getDescription() + "\r\n");
+                description.append(LINE + "\t" + entry.getKey() + "\t " + entry.getValue().getDescription() + "\r\n");
             }
         }
         return description.toString();

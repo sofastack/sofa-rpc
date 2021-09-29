@@ -1,1 +1,1 @@
-telnet=com.alipay.sofa.rpc.telnet.TelnetModule
+telnet=com.alipay.sofa.rpc.telnet.module.TelnetModule
