@@ -50,14 +50,6 @@ public class JacksonSerializerTest {
 
     @Test
     public void encodeAndDecode() {
-        boolean error = false;
-        try {
-            serializer.encode(null, null);
-        } catch (Exception e) {
-            error = true;
-        }
-        Assert.assertTrue(error);
-
         DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("a");
         AbstractByteBuf byteBuf = serializer.encode(demoRequest, null);
@@ -68,7 +60,7 @@ public class JacksonSerializerTest {
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
 
-        error = false;
+        Boolean error = false;
         try {
             serializer.encode(new Date(), null);
         } catch (Exception e) {

@@ -126,9 +126,7 @@ public class JacksonHelper {
 
         // parse response types
         Type resType = jsonMethod.getGenericReturnType();
-        if (resType == void.class) {
-            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_VOID_RETURN, "jackson", clazz.getName()));
-        }
+
         JavaType resJavaType = mapper.getTypeFactory().constructType(resType);
         responseClassCache.put(key, resJavaType);
     }

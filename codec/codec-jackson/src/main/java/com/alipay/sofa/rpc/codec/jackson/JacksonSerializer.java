@@ -101,9 +101,7 @@ public class JacksonSerializer extends AbstractSerializer {
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
-        if (object == null) {
-            throw buildSerializeError("Unsupported null message!");
-        } else if (object instanceof SofaRequest) {
+        if (object instanceof SofaRequest) {
             return encodeSofaRequest((SofaRequest) object, context);
         } else if (object instanceof SofaResponse) {
             return encodeSofaResponse((SofaResponse) object, context);
@@ -310,12 +308,24 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaResponse.setErrorMsg(errorMessage);
         } else {
             // according interface and method name to find paramter types
-            JavaType respType = jacksonHelper.getResClass(targetService, methodName);
-            Object result;
-            try {
-                result = mapper.readValue(data.array(), respType);
-            } catch (IOException e) {
-                throw buildDeserializeError(e.getMessage());
+            Object result = new Object();
+            //泛化调用
+            if (head.containsKey("sofa_head_generic_type")) {
+                try {
+                    result = mapper.readValue(data.array(),
+                        Object.class);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+            }
+            //正常调用
+            else {
+                JavaType respType = jacksonHelper.getResClass(targetService, methodName);
+                try {
+                    result = mapper.readValue(data.array(), respType);
+                } catch (IOException exception1) {
+                    throw buildDeserializeError(exception1.getMessage());
+                }
             }
             sofaResponse.setAppResponse(result);
         }

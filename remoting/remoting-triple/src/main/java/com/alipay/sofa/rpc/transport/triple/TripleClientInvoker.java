@@ -109,7 +109,7 @@ public class TripleClientInvoker implements TripleInvoker {
             sofaResponse.setAppResponse(appResponse);
             return sofaResponse;
         } else {
-            String serviceName = sofaRequest.getInterfaceName();
+            String serviceName = consumerConfig.getInterfaceId();
             String methodName = sofaRequest.getMethodName();
             MethodDescriptor.Marshaller<?> requestMarshaller = null;
             MethodDescriptor.Marshaller<?> responseMarshaller = null;
