@@ -24,10 +24,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * 默认配置带ID
  *
- * @param <S> the sub class of AbstractIdConfig
+ * @param <S> the subclass of AbstractIdConfig
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public abstract class AbstractIdConfig<S extends AbstractIdConfig> implements Serializable {
+public abstract class AbstractIdConfig<S extends AbstractIdConfig<S>> implements Serializable {
 
     private static final long          serialVersionUID = -1932911135229369183L;
 
