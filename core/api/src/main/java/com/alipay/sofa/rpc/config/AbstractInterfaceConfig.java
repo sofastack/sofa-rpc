@@ -57,13 +57,13 @@ import static com.alipay.sofa.rpc.config.ConfigValueHelper.checkNormalWithCommaC
  * <p>
  *
  * @param <T> the interface
- * @param <S> the sub class of AbstractInterfaceConfig
+ * @param <S> the subclass of AbstractInterfaceConfig
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConfig>
-                                                                                    extends AbstractIdConfig<S>
-                                                                                                               implements
-                                                                                                               Serializable {
+public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConfig<T, S>>
+                                                                                          extends AbstractIdConfig<S>
+                                                                                                                     implements
+                                                                                                                     Serializable {
 
     /**
      * The constant serialVersionUID.
