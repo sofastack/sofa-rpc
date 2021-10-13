@@ -49,7 +49,7 @@ Runtime requirement: JDK 8 or above.
 
 - **DingTalk Group**
 
-  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*am-XQKObyJ8AAAAAAAAAAABkARQnAQ" height="250" width="250">
+  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*1DklS7SZFNMAAAAAAAAAAAAAARQnAQ" height="250" width="250">
 
 ## License
 

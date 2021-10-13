@@ -20,7 +20,7 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      run: ./mvnw clean install -Pci-install -B -U -e && sh ./tools/check_format.sh
+      run: ./mvnw clean install -Pci-install -B -U -e && bash ./tools/check_format.sh
     - name: Test with Maven
       run: ./mvnw package -Pci-test
     - name: Codecov

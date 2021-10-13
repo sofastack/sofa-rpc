@@ -12,10 +12,10 @@ cache:
 
 install:
   - ./mvnw clean install -Pci-install -B -U -e
-  - sh ./tools/check_format.sh
+  - bash ./tools/check_format.sh
 
 script:
-  - travis_retry ./mvnw package -Pci-test
+  - ./mvnw package -Pci-test
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
