@@ -68,4 +68,33 @@ public class RouterChainTest {
         Assert.assertEquals("r0>r7>r2>r4",
             RpcInternalContext.getContext().getAttachment(RpcConstants.INTERNAL_KEY_ROUTER_RECORD));
     }
+
+    @Test
+    public void testBuildConsumerChain() {
+        ConsumerConfig<Object> config = new ConsumerConfig<>();
+        config.setBootstrap("test");
+        config.setRouter(Arrays.asList("testChainRouter0", "-testChainRouter8"));
+
+        ArrayList<Router> routerList = new ArrayList<>();
+        routerList.add(new TestChainRouter1());
+        routerList.add(new TestChainRouter2());
+        routerList.add(new TestChainRouter3());
+        routerList.add(new TestChainRouter4());
+        routerList.add(new ExcludeRouter("-testChainRouter5"));
+        config.setRouterRef(routerList);
+
+        ConsumerBootstrap<Object> consumerBootstrap = Bootstraps.from(config);
+        RouterChain chain = RouterChain.buildConsumerChain(consumerBootstrap);
+
+        SofaRequest request = new SofaRequest();
+        request.setMethodArgs(new String[]{"xxx"});
+        request.setInvokeType("sync");
+        List<ProviderInfo> providerInfos = new ArrayList<>();
+        ProviderInfo providerInfo = new ProviderInfo("127.0.0.1", 12200);
+        providerInfos.add(providerInfo);
+
+        chain.route(request, providerInfos);
+        Assert.assertEquals("r0>r7>r2>r4",
+                RpcInternalContext.getContext().getAttachment(RpcConstants.INTERNAL_KEY_ROUTER_RECORD));
+    }
 }
