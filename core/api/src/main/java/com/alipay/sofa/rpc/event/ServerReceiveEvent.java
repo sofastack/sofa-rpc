@@ -32,8 +32,7 @@ public class ServerReceiveEvent implements Event {
     public ServerReceiveEvent(SofaRequest request) {
         this.request = request;
         // S1:The time when the server receives the first packet, in microseconds
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
-            RpcRuntimeContext.now());
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO, RpcRuntimeContext.now());
     }
 
     public SofaRequest getRequest() {

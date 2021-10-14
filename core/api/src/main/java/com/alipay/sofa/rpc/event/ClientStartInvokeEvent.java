@@ -31,10 +31,9 @@ public class ClientStartInvokeEvent implements Event {
     private final SofaRequest request;
 
     public ClientStartInvokeEvent(SofaRequest request) {
-        // C1:Client start invoke time
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO,
-            RpcRuntimeContext.now());
         this.request = request;
+        // C1:Client start invoke time
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO, RpcRuntimeContext.now());
     }
 
     public SofaRequest getRequest() {

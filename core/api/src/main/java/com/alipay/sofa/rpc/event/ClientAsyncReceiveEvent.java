@@ -45,8 +45,7 @@ public class ClientAsyncReceiveEvent implements Event {
         this.response = response;
         this.throwable = throwable;
         // C2:The time when the client receives the request.
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO,
-            RpcRuntimeContext.now());
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO, RpcRuntimeContext.now());
     }
 
     public ConsumerConfig getConsumerConfig() {

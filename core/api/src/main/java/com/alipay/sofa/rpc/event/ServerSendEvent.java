@@ -37,8 +37,7 @@ public class ServerSendEvent implements Event {
         this.response = response;
         this.throwable = throwable;
         // S2:Record server processing completion time
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
-            RpcRuntimeContext.now());
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO, RpcRuntimeContext.now());
     }
 
     public SofaRequest getRequest() {

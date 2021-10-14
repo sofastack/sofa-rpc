@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.common.utils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 /**
  * TODO 不要用 simpleDateFormat，有更快的
