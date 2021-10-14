@@ -50,19 +50,19 @@ public class RouterChain {
      * LOGGER
      */
     private static final Logger                              LOGGER                = LoggerFactory
-            .getLogger(RouterChain.class);
+                                                                                       .getLogger(RouterChain.class);
 
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = Collections
-            .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
     private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = Collections
-            .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
 
     /**
      * 扩展加载器
@@ -87,7 +87,7 @@ public class RouterChain {
                     }
                     if (LOGGER.isDebugEnabled()) {
                         LOGGER.debug("Extension of interface " + Router.class + ", " + implClass + "(" + alias +
-                                ") will auto active");
+                            ") will auto active");
                     }
                 }
             }
@@ -135,7 +135,7 @@ public class RouterChain {
     public static RouterChain buildConsumerChain(ConsumerBootstrap consumerBootstrap) {
         ConsumerConfig<?> consumerConfig = consumerBootstrap.getConsumerConfig();
         List<Router> customRouters = consumerConfig.getRouterRef() == null ? new ArrayList<Router>()
-                : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
+            : new CopyOnWriteArrayList<Router>(consumerConfig.getRouterRef());
         // 先解析是否有特殊处理
         HashSet<String> excludes = parseExcludeRouter(customRouters);
 
