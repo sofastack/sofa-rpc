@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -37,6 +38,11 @@ import java.util.List;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RouterChainTest {
+
+    @After
+    public void teardown() {
+        RpcInternalContext.getContext().clear();
+    }
 
     @Test
     public void buildProviderChain() {

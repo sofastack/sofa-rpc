@@ -197,7 +197,7 @@ public class RouterChain {
                             excludeKeys.add(excludeRouterName);
                         }
                     }
-                    routerIterator.remove();
+                    customRouters.remove(router);
                 }
             }
         }
