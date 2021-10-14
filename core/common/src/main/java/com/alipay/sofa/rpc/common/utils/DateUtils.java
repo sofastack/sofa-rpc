@@ -33,10 +33,6 @@ public class DateUtils {
      */
     public static final int    MILLISECONDS_PER_SECONDE = 1000;
     /**
-     * 每秒微秒数
-     */
-    public static final int    MICROSECONDS_PER_SECOND  = 1000000;
-    /**
      * 每分毫秒数 60*1000
      */
     public static final int    MILLISECONDS_PER_MINUTE  = 60000;
@@ -151,29 +147,5 @@ public class DateUtils {
      */
     public static Date millisStrToDate(String millisDateStr) throws ParseException {
         return strToDate(millisDateStr, DATE_FORMAT_MILLS_TIME);
-    }
-
-    /**
-     * 获取当前时间，单位微秒
-     *
-     * @return 时间戳
-     */
-    public static long currentMicroseconds() {
-        long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-        long nanoTime = System.nanoTime();
-        return currentTime + TimeUnit.MICROSECONDS.convert(nanoTime % MICROSECONDS_PER_SECOND, TimeUnit.NANOSECONDS);
-    }
-
-    /**
-     * 根据nanoTime获取当时时间，微秒
-     *
-     * @return 时间戳
-     */
-    public static long getMicrosecondsByNano(long nanoTime) {
-        long currentTime = TimeUnit.MICROSECONDS.convert(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
-        long currentNanoTime = System.nanoTime();
-        return currentTime +
-            TimeUnit.MICROSECONDS.convert(currentNanoTime % MICROSECONDS_PER_SECOND, TimeUnit.NANOSECONDS)
-            - TimeUnit.MICROSECONDS.convert(currentNanoTime - nanoTime, TimeUnit.NANOSECONDS);
     }
 }

@@ -195,9 +195,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     try { // 这个try-catch 保证一定要记录tracer
                         asyncCtx.sendResponse(response);
                     } finally {
-                        // S2:Record server processing completion time
-                        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO,
-                            DateUtils.currentMicroseconds());
                         if (EventBus.isEnable(ServerSendEvent.class)) {
                             EventBus.post(new ServerSendEvent(request, response, throwable));
                         }
@@ -243,13 +240,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
     }
 
     private void putToContext(InvokeContext invokeContext) {
-        // S1:The time when the server receives the first packet, in microseconds
-        Long arriveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_HEADER_IN_NANO);
-        if (arriveTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
-                DateUtils.getMicrosecondsByNano(arriveTime));
-        }
-
         // R7：Thread waiting time
         Long enterQueueTime = invokeContext.get(InvokeContext.BOLT_PROCESS_BEFORE_DISPATCH_IN_NANO);
         Long processStartTime = invokeContext.get(InvokeContext.BOLT_PROCESS_START_PROCESS_IN_NANO);

@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.event;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 
 /**
@@ -28,6 +31,9 @@ public class ServerReceiveEvent implements Event {
 
     public ServerReceiveEvent(SofaRequest request) {
         this.request = request;
+        // S1:The time when the server receives the first packet, in microseconds
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO,
+            RpcRuntimeContext.now());
     }
 
     public SofaRequest getRequest() {

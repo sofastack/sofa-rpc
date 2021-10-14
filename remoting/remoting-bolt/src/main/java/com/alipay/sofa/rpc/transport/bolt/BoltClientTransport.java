@@ -36,9 +36,9 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
-import com.alipay.sofa.rpc.common.utils.DateUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -459,20 +459,6 @@ public class BoltClientTransport extends ClientTransport {
         if (connStartTime != null && connEndTime != null) {
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO,
                 connEndTime - connStartTime);
-        }
-
-        // C1:Client sending completion time, in microseconds
-        Long sendTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_AFTER_SEND);
-        if (sendTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO,
-                DateUtils.getMicrosecondsByNano(sendTime));
-        }
-
-        // C2:The time when the client receives the request, in microseconds
-        Long receiveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_CLIENT_RECEIVED);
-        if (receiveTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO,
-                DateUtils.getMicrosecondsByNano(receiveTime));
         }
     }
 
