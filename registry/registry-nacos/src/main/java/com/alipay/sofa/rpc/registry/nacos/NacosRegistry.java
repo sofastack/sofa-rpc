@@ -214,8 +214,7 @@ public class NacosRegistry extends Registry {
                 if (CommonUtils.isNotEmpty(instances)) {
                     for (Instance instance : instances) {
                         String serviceName = instance.getServiceName();
-                        namingService.deregisterInstance(serviceName, instance.getIp(), instance.getPort(),
-                            instance.getClusterName());
+                        namingService.deregisterInstance(serviceName, instance);
                         if (LOGGER.isInfoEnabled(appName)) {
                             LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_UNPUB,
                                 serviceName, instances.size()));
@@ -284,6 +283,7 @@ public class NacosRegistry extends Registry {
                             if (null == instances) {
                                 instances = new ArrayList<Instance>();
                             }
+                            instances.removeIf(i -> !i.isEnabled());
                             providerObserver.updateProviders(config, instances);
                         }
                     }
