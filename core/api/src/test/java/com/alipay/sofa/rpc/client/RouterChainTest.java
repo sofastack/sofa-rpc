@@ -43,7 +43,7 @@ public class RouterChainTest {
         ConsumerConfig config = new ConsumerConfig();
         config.setBootstrap("test");
         ArrayList<Router> list = new ArrayList<Router>();
-        config.setRouter(Arrays.asList("testChainRouter0", "-testChainRouter8"));
+        config.setRouter(Arrays.asList("testChainRouter0", "-testChainRouter8", "notExistChainRouter"));
         list.add(new TestChainRouter1());
         list.add(new TestChainRouter2());
         list.add(new TestChainRouter3());
