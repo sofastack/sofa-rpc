@@ -88,7 +88,7 @@ public class ConsulRegistryTest {
         ProviderConfig<?> providerConfig = providerConfig("consul-test-1", 12200, 12201, 12202);
         registry.register(providerConfig);
 
-        ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
+        ConsulClient consulClient = new ConsulClient("localhost", consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
         assertUntil(() -> {
             Response<List<HealthService>> healthServices = consulClient.getHealthServices(INTERFACE_ID, request);
@@ -109,7 +109,7 @@ public class ConsulRegistryTest {
         providerConfig.setParameter(ConsulConstants.CONSUL_SERVICE_NAME_KEY, CONSUL_SERVICE_NAME);
         registry.register(providerConfig);
 
-        ConsulClient consulClient = new ConsulClient("localhost:" + consul.getHttpPort());
+        ConsulClient consulClient = new ConsulClient("localhost", consul.getHttpPort());
         HealthServicesRequest request = HealthServicesRequest.newBuilder().setPassing(true).build();
         assertUntil(() -> {
             Response<List<HealthService>> healthServices = consulClient.getHealthServices(CONSUL_SERVICE_NAME, request);
