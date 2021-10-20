@@ -269,26 +269,10 @@ public class RpcConstants {
      * 内部使用的key：_req_serialize_time， int
      */
     public static final String  INTERNAL_KEY_REQ_SERIALIZE_TIME              = INTERNAL_KEY_PREFIX + "req_ser_time";
-
-    /**
-     * 内部使用的key：_req_serialize_time， long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO         = INTERNAL_KEY_PREFIX +
-                                                                                 "req_ser_time_nano";
     /**
      * 内部使用的key：_req_deserialize_time， int
      */
     public static final String  INTERNAL_KEY_REQ_DESERIALIZE_TIME            = INTERNAL_KEY_PREFIX + "req_des_time";
-
-    /**
-     * 内部使用的key：_req_deserialize_time， long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO       = INTERNAL_KEY_PREFIX +
-                                                                                 "req_des_time_nano";
     /**
      * 内部使用的key：_resp_size， int
      */
@@ -297,26 +281,10 @@ public class RpcConstants {
      * 内部使用的key：_resp_serialized_time， int
      */
     public static final String  INTERNAL_KEY_RESP_SERIALIZE_TIME             = INTERNAL_KEY_PREFIX + "resp_ser_time";
-
-    /**
-     * 内部使用的key：_resp_serialized_time_nano， long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO        = INTERNAL_KEY_PREFIX +
-                                                                                 "resp_ser_time_nano";
     /**
      * 内部使用的key：_resp_deserialize_time， int
      */
     public static final String  INTERNAL_KEY_RESP_DESERIALIZE_TIME           = INTERNAL_KEY_PREFIX + "resp_des_time";
-
-    /**
-     * 内部使用的key：_resp_deserialize_time_nano， long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO      = INTERNAL_KEY_PREFIX +
-                                                                                 "resp_des_time_nano";
     /**
      * 内部使用的key：_process_wait_time 在业务线程池里等待时间，long
      */
@@ -324,150 +292,23 @@ public class RpcConstants {
                                                                                  "process_wait_time";
 
     /**
-     * 内部使用的key：_process_wait_time_nano 在业务线程池里等待时间，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_PROCESS_WAIT_TIME_NANO          = INTERNAL_KEY_PREFIX +
-                                                                                 "process_wait_time_nano";
-    /**
      * 内部使用的key：_conn_create_time 长连接建立时间，long
      */
     public static final String  INTERNAL_KEY_CONN_CREATE_TIME                = INTERNAL_KEY_PREFIX + "conn_create_time";
-
-    /**
-     * 内部使用的key：_conn_create_time_nano 长连接建立时间，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_CONN_CREATE_TIME_NANO           = INTERNAL_KEY_PREFIX +
-                                                                                 "conn_create_time_nano";
     /**
      * 内部使用的key：_impl_elapse 业务代码执行耗时，long
      */
     public static final String  INTERNAL_KEY_IMPL_ELAPSE                     = INTERNAL_KEY_PREFIX + "impl_elapse";
-
-    /**
-     * 内部使用的key：_impl_elapse_nano 业务代码执行耗时，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_IMPL_ELAPSE_NANO                = INTERNAL_KEY_PREFIX + "impl_elapse_nano";
-
-    /**
-     * 内部使用的key：_client_router_time_nano 路由寻址耗时，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO         = INTERNAL_KEY_PREFIX +
-                                                                                 "client_router_time_nano";
-
-    /**
-     * 内部使用的key：_client_balance_time_nano 负载均衡耗时，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO       = INTERNAL_KEY_PREFIX +
-                                                                                 "client_balance_time_nano";
-
-    /**
-     * 内部使用的key：_consumer_filter_start_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO = INTERNAL_KEY_PREFIX +
-                                                                                 "consumer_filter_start_time_nano";
-
-    /**
-     * 内部使用的key：_consumer_filter_end_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
-                                                                                 "consumer_filter_end_time_nano";
-
-    /**
-     * 内部使用的key：_consumer_invoke_start_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO = INTERNAL_KEY_PREFIX +
-                                                                                 "consumer_invoke_start_time_nano";
-
-    /**
-     * 内部使用的key：_consumer_invoke_end_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
-                                                                                 "consumer_invoke_end_time_nano";
-
-    /**
-     * 内部使用的key：_provider_filter_start_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO = INTERNAL_KEY_PREFIX +
-                                                                                 "provider_filter_start_time_nano";
-
-    /**
-     * 内部使用的key：_provider_filter_end_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_PROVIDER_FILTER_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
-                                                                                 "provider_filter_end_time_nano";
-
-    /**
-     * 内部使用的key：_provider_invoke_start_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO = INTERNAL_KEY_PREFIX +
-                                                                                 "provider_invoke_start_time_nano";
-
-    /**
-     * 内部使用的key：_provider_invoke_end_time_nano， long
-     */
-    public static final String  INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
-                                                                                 "provider_invoke_end_time_nano";
-
-    /**
-     * 内部使用的key：_client_filter_time_nano 客户端过滤器耗时，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_CLIENT_FILTER_TIME_NANO         = INTERNAL_KEY_PREFIX +
-                                                                                 "client_filter_time_nano";
-
-    /**
-     * 内部使用的key：_server_filter_time_nano 服务端过滤器耗时，long，纳秒级别
-     */
-    public static final String  INTERNAL_KEY_SERVER_FILTER_TIME_NANO         = INTERNAL_KEY_PREFIX +
-                                                                                 "server_filter_time_nano";
-    /**
-     * 内部使用的key：server_ambush_time_nano 服务端过滤器耗时，long，纳秒级别
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_SERVER_AMBUSH_TIME_NANO         = INTERNAL_KEY_PREFIX +
-                                                                                 "server_ambush_time_nano";
     /**
      * 内部使用的key：_client_elapse 客户端总耗时，long
      */
     public static final String  INTERNAL_KEY_CLIENT_ELAPSE                   = INTERNAL_KEY_PREFIX + "client_elapse";
-
-    public static final String  INTERNAL_KEY_CLIENT_ELAPSE_NANO              = INTERNAL_KEY_PREFIX +
-                                                                                 "client_elapse_nano";
     /**
      * 内部使用的key：_client_send_time 客户端发送时间戳，long
      * 
      * @since 5.4.0
      */
     public static final String  INTERNAL_KEY_CLIENT_SEND_TIME                = INTERNAL_KEY_PREFIX + "client_send_time";
-
-    /**
-     * 内部使用的key：_client_send_time_micro 客户端发送时间戳微妙，long
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_CLIENT_SEND_TIME_MICRO          = INTERNAL_KEY_PREFIX +
-                                                                                 "client_send_time_micro";
-
-    /**
-     * 内部使用的key：_client_receive_time_micro 客户端接收时间戳微妙，long
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO       = INTERNAL_KEY_PREFIX +
-                                                                                 "_client_receive_time_micro";
-
     /**
      * 内部使用的key：_server_receive_time 服务端接收时间戳，long
      *
@@ -475,22 +316,6 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_SERVER_RECEIVE_TIME             = INTERNAL_KEY_PREFIX +
                                                                                  "server_receive_time";
-
-    /**
-     * 内部使用的key：_server_receive_time_micro 服务端接收时间戳，long
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO       = INTERNAL_KEY_PREFIX +
-                                                                                 "server_receive_time_micro";
-
-    /**
-     * 内部使用的key：_server_send_time_micro 服务端接收时间戳，long
-     *
-     * @since 5.7.10
-     */
-    public static final String  INTERNAL_KEY_SERVER_SEND_TIME_MICRO          = INTERNAL_KEY_PREFIX +
-                                                                                 "server_send_time_micro";
 
     /**
      * 内部使用的key：_router_record 路由记录，string
@@ -683,4 +508,183 @@ public class RpcConstants {
     /* --------系统参数相关结束---------*/
 
     public static final String  SOFA_REQUEST_HEADER_KEY                      = "request_header_key";
+
+    /**
+     * R1：_client_router_time_nano 路由寻址耗时，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO         = INTERNAL_KEY_PREFIX +
+                                                                                 "client_router_time_nano";
+
+    /**
+     * R2：_conn_create_time_nano 长链接建立时间，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_CONN_CREATE_TIME_NANO           = INTERNAL_KEY_PREFIX +
+                                                                                 "conn_create_time_nano";
+
+    /**
+     * R3：_client_filter_time_nano 客户端过滤器耗时，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_CLIENT_FILTER_TIME_NANO         = INTERNAL_KEY_PREFIX +
+                                                                                 "client_filter_time_nano";
+
+    /**
+     * R3-1：_consumer_filter_start_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_filter_start_time_nano";
+
+    /**
+     * R3-2：_consumer_filter_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_filter_end_time_nano";
+
+    /**
+     * R3-3：_consumer_invoke_start_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_invoke_start_time_nano";
+
+    /**
+     * R3-4：_consumer_invoke_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "consumer_invoke_end_time_nano";
+
+    /**
+     * R4：_client_balance_time_nano 负载均衡耗时，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO       = INTERNAL_KEY_PREFIX +
+                                                                                 "client_balance_time_nano";
+
+    /**
+     * R5-1：_req_serialize_time， long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO         = INTERNAL_KEY_PREFIX +
+                                                                                 "req_ser_time_nano";
+
+    /**
+     * R5-2：_req_deserialize_time， long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO       = INTERNAL_KEY_PREFIX +
+                                                                                 "req_des_time_nano";
+
+    /**
+     * R6-1：_resp_serialized_time_nano， long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO        = INTERNAL_KEY_PREFIX +
+                                                                                 "resp_ser_time_nano";
+
+    /**
+     * R6-2：_resp_deserialize_time_nano， long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO      = INTERNAL_KEY_PREFIX +
+                                                                                 "resp_des_time_nano";
+
+    /**
+     * R7：_process_wait_time_nano 在业务线程池里等待时间，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_PROCESS_WAIT_TIME_NANO          = INTERNAL_KEY_PREFIX +
+                                                                                 "process_wait_time_nano";
+
+    /**
+     * R8：_impl_elapse_nano 业务代码执行耗时，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_IMPL_ELAPSE_NANO                = INTERNAL_KEY_PREFIX + "impl_elapse_nano";
+
+    /**
+     * R9：server_ambush_time_nano 服务端过滤器耗时，long，纳秒级别
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_SERVER_AMBUSH_TIME_NANO         = INTERNAL_KEY_PREFIX +
+                                                                                 "server_ambush_time_nano";
+
+    /**
+     * R10：_server_filter_time_nano 服务端过滤器耗时，long，纳秒级别
+     */
+    public static final String  INTERNAL_KEY_SERVER_FILTER_TIME_NANO         = INTERNAL_KEY_PREFIX +
+                                                                                 "server_filter_time_nano";
+
+    /**
+     * R10-1：_provider_filter_start_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_FILTER_START_TIME_NANO = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_filter_start_time_nano";
+
+    /**
+     * R10-2：_provider_filter_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_FILTER_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_filter_end_time_nano";
+
+    /**
+     * R10-3：_provider_invoke_start_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_invoke_start_time_nano";
+
+    /**
+     * R10-4：_provider_invoke_end_time_nano， long
+     */
+    public static final String  INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "provider_invoke_end_time_nano";
+
+    /**
+     * 内部使用的key：_client_elapse_micro 客户端总耗时，long，微秒级别
+     */
+    public static final String  INTERNAL_KEY_CLIENT_ELAPSE_MICRO             = INTERNAL_KEY_PREFIX +
+                                                                                 "client_elapse_micro";
+
+    /**
+     * C1：_client_send_time_micro 客户端发送时间戳，long
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_CLIENT_SEND_TIME_MICRO          = INTERNAL_KEY_PREFIX +
+                                                                                 "client_send_time_micro";
+
+    /**
+     * C2：_client_receive_time_micro 客户端接收响应时间戳，long
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_CLIENT_RECEIVE_TIME_MICRO       = INTERNAL_KEY_PREFIX +
+                                                                                 "_client_receive_time_micro";
+
+    /**
+     * S1：_server_receive_time_micro 服务端接收时间戳，long
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_SERVER_RECEIVE_TIME_MICRO       = INTERNAL_KEY_PREFIX +
+                                                                                 "server_receive_time_micro";
+
+    /**
+     * S2：_server_send_time_micro 服务端请求响应完成时间戳，long
+     *
+     * @since 5.8.0
+     */
+    public static final String  INTERNAL_KEY_SERVER_SEND_TIME_MICRO          = INTERNAL_KEY_PREFIX +
+                                                                                 "server_send_time_micro";
 }
