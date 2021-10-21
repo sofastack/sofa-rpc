@@ -638,13 +638,14 @@ public class RpcSofaTracer extends Tracer {
         Long bizProcessTime = (Long) context.get(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO);
         Long ambushTime = (Long) context.get(RpcConstants.INTERNAL_KEY_SERVER_AMBUSH_TIME_NANO);
         Long filterTime = (Long) context.get(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO);
+        Long netWaitTime = (Long) context.get(RpcConstants.INTERNAL_KEY_SERVER_NET_WAIT_NANO);
 
         resultMap.put(TracerRecord.R6.toString(),appendResult(calculateNanoTime(reqDeSerializeTime).toString(), calculateNanoTime(respSerializeTime).toString()));
         resultMap.put(TracerRecord.R7.toString(), calculateNanoTime(bizWaitTime).toString());
         resultMap.put(TracerRecord.R8.toString(), calculateNanoTime(bizProcessTime).toString());
         resultMap.put(TracerRecord.R9.toString(), calculateNanoTime(ambushTime).toString());
         resultMap.put(TracerRecord.R10.toString(), calculateNanoTime(filterTime).toString());
-
+        resultMap.put(TracerRecord.R11.toString(), calculateNanoTime(netWaitTime).toString());
         StringBuilder sb = new StringBuilder();
 
         for (Map.Entry<String, String> entry : resultMap.entrySet()) {

@@ -649,6 +649,11 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO   = INTERNAL_KEY_PREFIX +
                                                                                  "provider_invoke_end_time_nano";
+    /**
+     * R11：_server_net_wait_nano，网络等待时间，head到达到body接收完成，long
+     */
+    public static final String  INTERNAL_KEY_SERVER_NET_WAIT_NANO            = INTERNAL_KEY_PREFIX +
+                                                                                 "server_net_wait_nano";
 
     /**
      * 内部使用的key：_client_elapse_micro 客户端总耗时，long，微秒级别
