@@ -280,11 +280,93 @@ public class ProviderHelperTest {
         List<ProviderInfo> add = new ArrayList<>();
         List<ProviderInfo> remove = new ArrayList<>();
 
-        oldGroup.setProviderInfos(oldList);
-        newGroup.setProviderInfos(newList);
+        {
+            oldGroup.setProviderInfos(oldList);
+            newGroup.setProviderInfos(newList);
 
-        ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
-        Assert.assertEquals(add.size(), 0);
-        Assert.assertEquals(remove.size(), 0);
+            ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
+            Assert.assertEquals(add.size(), 0);
+            Assert.assertEquals(remove.size(), 0);
+        }
+
+        // empty oldGroup and newGroup
+        {
+            // release data
+            oldList.clear();
+            newList.clear();
+            add.clear();
+            remove.clear();
+
+            oldGroup.setProviderInfos(null);
+            newGroup.setProviderInfos(null);
+
+            ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
+            Assert.assertEquals(add.size(), 0);
+            Assert.assertEquals(remove.size(), 0);
+        }
+
+        // empty newGroup and oldGroup has some items
+        {
+            // release data
+            oldList.clear();
+            newList.clear();
+            add.clear();
+            remove.clear();
+
+            oldList.add(ProviderHelper.toProviderInfo("127.0.0.1:12200?p=11&v=4.0"));
+            oldList.add(ProviderHelper.toProviderInfo("127.0.0.2:12200?p=11&v=4.0"));
+            oldList.add(ProviderHelper.toProviderInfo("127.0.0.3:12200?p=11&v=4.0"));
+
+            oldGroup.setProviderInfos(oldList);
+            newGroup.setProviderInfos(newList);
+
+            ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
+            Assert.assertEquals(add.size(), 0);
+            Assert.assertEquals(remove.size(), 3);
+        }
+
+        // empty oldGroup and newGroup has some items
+        {
+            // release data
+            oldList.clear();
+            newList.clear();
+            add.clear();
+            remove.clear();
+
+            newList.add(ProviderHelper.toProviderInfo("127.0.0.1:12200?p=11&v=4.0"));
+            newList.add(ProviderHelper.toProviderInfo("127.0.0.2:12200?p=11&v=4.0"));
+            newList.add(ProviderHelper.toProviderInfo("127.0.0.3:12200?p=11&v=4.0"));
+
+            oldGroup.setProviderInfos(oldList);
+            newGroup.setProviderInfos(newList);
+
+            ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
+            Assert.assertEquals(add.size(), 3);
+            Assert.assertEquals(remove.size(), 0);
+        }
+
+        // oldGroup and newGroup has some items
+        {
+            // release data
+            oldList.clear();
+            newList.clear();
+            add.clear();
+            remove.clear();
+
+            oldList.add(ProviderHelper.toProviderInfo("127.0.0.1:12200?p=11&v=4.0"));
+            oldList.add(ProviderHelper.toProviderInfo("127.0.0.2:12200?p=11&v=4.0"));
+            oldList.add(ProviderHelper.toProviderInfo("127.0.0.3:12200?p=11&v=4.0"));
+
+            newList.add(ProviderHelper.toProviderInfo("127.0.0.1:12200?p=11&v=4.0"));
+            newList.add(ProviderHelper.toProviderInfo("127.0.0.4:12200?p=11&v=4.0"));
+            newList.add(ProviderHelper.toProviderInfo("127.0.0.5:12200?p=11&v=4.0"));
+
+            oldGroup.setProviderInfos(oldList);
+            newGroup.setProviderInfos(newList);
+
+            ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
+            Assert.assertEquals(add.size(), 2);
+            Assert.assertEquals(remove.size(), 2);
+        }
     }
 }
