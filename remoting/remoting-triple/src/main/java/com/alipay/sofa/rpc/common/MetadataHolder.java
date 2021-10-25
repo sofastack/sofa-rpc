@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.common;
 
 
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -30,7 +30,7 @@ public class MetadataHolder {
     public static Map<String, String> getMetaHolder() {
         Map<String, String> stringStringMap = localContext.get();
         if(stringStringMap == null){
-            LinkedHashMap<String, String> value = new LinkedHashMap<>();
+            HashMap<String, String> value = new HashMap<>();
             localContext.set(value);
             return value;
         }
