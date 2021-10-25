@@ -26,11 +26,13 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.nacos.base.BaseNacosTest;
+import com.alipay.sofa.rpc.server.ServerFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -204,6 +206,73 @@ public class NacosRegistryTest extends BaseNacosTest {
         List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
         consumerConfigList.add(consumer2);
         registry.batchUnSubscribe(consumerConfigList);
+    }
+
+    /**
+     * 测试NacosRegistry 对 serverconfig中 VirtualHost 和 VirtualPort 参数的支持情况
+     *
+     * @throws Exception the exception
+     */
+    @Test
+    public void testVirtualHostAndVirtualPort() throws Exception {
+        // 模拟的场景 client -> proxy:127.7.7.7:8888 -> netty:0.0.0.0:12200
+        String virtualHost = "127.7.7.7";
+        int virtualPort = 8888;
+        serverConfig = new ServerConfig()
+            .setProtocol("bolt")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setAdaptivePort(false) // Turn off adaptive port
+            .setVirtualHost(virtualHost)
+            .setVirtualPort(virtualPort);
+
+        // Verify the influence of virtualHost and virtualPort on the parameters when creating rpcserver
+        Method m_resolveServerConfig = ServerFactory.class.getDeclaredMethod("resolveServerConfig", ServerConfig.class);
+        m_resolveServerConfig.setAccessible(true);
+        m_resolveServerConfig.invoke(new ServerFactory(), serverConfig);
+        Assert
+            .assertNotEquals("boundhost should not be equal to virtualHost", serverConfig.getBoundHost(), virtualHost);
+        Assert.assertEquals("boundPort should be oriPort", serverConfig.getPort(), 12200);
+
+        ProviderConfig<?> provider = new ProviderConfig();
+        provider.setInterfaceId("com.alipay.xxx.NacosTestService")
+            .setApplication(new ApplicationConfig().setAppName("test-server"))
+            .setUniqueId("nacos-test")
+            .setProxy("javassist")
+            .setRegister(true)
+            .setRegistry(registryConfig)
+            .setServer(serverConfig);
+
+        // 注册
+        registry.register(provider);
+        Thread.sleep(1000);
+
+        ConsumerConfig<?> consumer = new ConsumerConfig();
+        consumer.setInterfaceId("com.alipay.xxx.NacosTestService")
+            .setApplication(new ApplicationConfig().setAppName("test-consumer"))
+            .setUniqueId("nacos-test")
+            .setProxy("javassist")
+            .setSubscribe(true)
+            .setSerialization("java")
+            .setInvokeType("sync")
+            .setTimeout(4444);
+
+        // 订阅
+        CountDownLatch latch = new CountDownLatch(1);
+        MockProviderInfoListener providerInfoListener = new MockProviderInfoListener();
+        providerInfoListener.setCountDownLatch(latch);
+        consumer.setProviderInfoListener(providerInfoListener);
+        List<ProviderGroup> all = registry.subscribe(consumer);
+        providerInfoListener.updateAllProviders(all);
+
+        Map<String, ProviderInfo> ps = providerInfoListener.getData();
+        Assert.assertEquals("after register: 1", 1, ps.size());
+        Map.Entry<String, ProviderInfo> psEntry = (Map.Entry) ps.entrySet().toArray()[0];
+        ProviderInfo pri = psEntry.getValue();
+        Assert.assertEquals("The provider's key should consist of virtualHost and virtualPort", psEntry.getKey(),
+            virtualHost + ":" + virtualPort);
+        Assert.assertEquals("The provider's host should be virtualHost", virtualHost, pri.getHost());
+        Assert.assertEquals("The provider's port should be virtualPort", virtualPort, pri.getPort());
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
