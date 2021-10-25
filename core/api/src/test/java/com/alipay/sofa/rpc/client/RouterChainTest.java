@@ -26,23 +26,22 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RouterChainTest {
-
-    @After
-    public void teardown() {
-        RpcInternalContext.getContext().clear();
-    }
 
     @Test
     public void buildProviderChain() {
@@ -76,31 +75,23 @@ public class RouterChainTest {
     }
 
     @Test
-    public void testBuildConsumerChain() {
-        ConsumerConfig<Object> config = new ConsumerConfig<>();
-        config.setBootstrap("test");
-        config.setRouter(Arrays.asList("testChainRouter0", "-testChainRouter8"));
+    public void testParseExcludeRouter() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        String methodName = "parseExcludeRouter";
 
-        ArrayList<Router> routerList = new ArrayList<>();
-        routerList.add(new TestChainRouter1());
-        routerList.add(new TestChainRouter2());
-        routerList.add(new TestChainRouter3());
-        routerList.add(new TestChainRouter4());
-        routerList.add(new ExcludeRouter("-testChainRouter5"));
-        config.setRouterRef(routerList);
+        List<Router> routers = new CopyOnWriteArrayList<>();
+        routers.add(new TestChainRouter1());
+        routers.add(new TestChainRouter2());
+        routers.add(new TestChainRouter3());
+        routers.add(new TestChainRouter4());
+        routers.add(new ExcludeRouter("-testChainRouter5"));
 
-        ConsumerBootstrap<Object> consumerBootstrap = Bootstraps.from(config);
-        RouterChain chain = RouterChain.buildConsumerChain(consumerBootstrap);
+        Method parseExcludeRouter = RouterChain.class.getDeclaredMethod(methodName, List.class);
+        parseExcludeRouter.setAccessible(true);
+        Object invokeResult = parseExcludeRouter.invoke(Router.class, routers);
+        Set<String> result = new HashSet<>();
+        result.add(invokeResult.toString());
 
-        SofaRequest request = new SofaRequest();
-        request.setMethodArgs(new String[]{"xxx"});
-        request.setInvokeType("sync");
-        List<ProviderInfo> providerInfos = new ArrayList<>();
-        ProviderInfo providerInfo = new ProviderInfo("127.0.0.1", 12200);
-        providerInfos.add(providerInfo);
-
-        chain.route(request, providerInfos);
-        Assert.assertEquals("r0>r7>r2>r4",
-                RpcInternalContext.getContext().getAttachment(RpcConstants.INTERNAL_KEY_ROUTER_RECORD));
+        Assert.assertEquals(1, result.size());
+        Assert.assertNotNull(invokeResult);
     }
 }
