@@ -270,4 +270,21 @@ public class ProviderHelperTest {
         }
     }
 
+    @Test
+    public void testCompareGroup() {
+        ProviderGroup oldGroup = new ProviderGroup("group1");
+        ProviderGroup newGroup = new ProviderGroup("group2");
+
+        List<ProviderInfo> oldList = new ArrayList<>();
+        List<ProviderInfo> newList = new ArrayList<>();
+        List<ProviderInfo> add = new ArrayList<>();
+        List<ProviderInfo> remove = new ArrayList<>();
+
+        oldGroup.setProviderInfos(oldList);
+        newGroup.setProviderInfos(newList);
+
+        ProviderHelper.compareGroup(oldGroup, newGroup, add, remove);
+        Assert.assertEquals(add.size(), 0);
+        Assert.assertEquals(remove.size(), 0);
+    }
 }

@@ -41,8 +41,10 @@ public class ProviderHelper {
      */
     public static void compareGroup(ProviderGroup oldGroup, ProviderGroup newGroup,
                                     List<ProviderInfo> add, List<ProviderInfo> remove) {
-        final List<ProviderInfo> oldProviders = oldGroup == null ? null : oldGroup.getProviderInfos();
-        final List<ProviderInfo> newProviders = newGroup == null ? null : newGroup.getProviderInfos();
+        final List<ProviderInfo> oldProviders = oldGroup == null ?
+            null : CommonUtils.isEmpty(oldGroup.getProviderInfos()) ? null : oldGroup.getProviderInfos();
+        final List<ProviderInfo> newProviders = newGroup == null ?
+            null : CommonUtils.isEmpty(newGroup.getProviderInfos()) ? null : newGroup.getProviderInfos();
         compareProviders(oldProviders, newProviders, add, remove);
     }
 
