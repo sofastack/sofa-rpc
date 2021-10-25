@@ -115,7 +115,7 @@ public class ProviderHelperTest {
     }
 
     @Test
-    public void compareAddressMap() throws Exception {
+    public void compareAddressMap() {
 
         List<ProviderGroup> oldMap = new ArrayList<ProviderGroup>();
         List<ProviderGroup> newMap = new ArrayList<ProviderGroup>();
@@ -211,7 +211,7 @@ public class ProviderHelperTest {
     }
 
     @Test
-    public void toUrl() throws Exception {
+    public void toUrl() {
         {
             String src = "10.15.233.114:12200";
             ProviderInfo providerInfo = ProviderHelper.toProviderInfo(src);
