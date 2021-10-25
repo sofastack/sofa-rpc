@@ -33,7 +33,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -181,18 +180,16 @@ public class RouterChain {
      * @return 是否排除
      */
     private static HashSet<String> parseExcludeRouter(List<Router> customRouters) {
-        HashSet<String> excludeKeys = new HashSet<>();
+        HashSet<String> excludeKeys = new HashSet<String>();
         if (CommonUtils.isNotEmpty(customRouters)) {
-            Iterator<Router> routerIterator = customRouters.iterator();
-            while (routerIterator.hasNext()) {
-                Router router = routerIterator.next();
+            for (Router router : customRouters) {
                 if (router instanceof ExcludeRouter) {
                     // 存在需要排除的过滤器
                     ExcludeRouter excludeRouter = (ExcludeRouter) router;
                     String excludeName = excludeRouter.getExcludeName();
                     if (StringUtils.isNotEmpty(excludeName)) {
                         String excludeRouterName = startsWithExcludePrefix(excludeName) ? excludeName.substring(1)
-                                : excludeName;
+                            : excludeName;
                         if (StringUtils.isNotEmpty(excludeRouterName)) {
                             excludeKeys.add(excludeRouterName);
                         }
@@ -201,7 +198,7 @@ public class RouterChain {
                 }
             }
         }
-        if (CommonUtils.isNotEmpty(excludeKeys)) {
+        if (!excludeKeys.isEmpty()) {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Find exclude routers: {}", excludeKeys);
             }
