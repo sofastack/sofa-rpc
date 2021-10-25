@@ -235,9 +235,9 @@ public class NacosRegistryTest extends BaseNacosTest {
         Assert.assertEquals("boundPort should be oriPort", serverConfig.getPort(), 12200);
 
         ProviderConfig<?> provider = new ProviderConfig();
-        provider.setInterfaceId("com.alipay.xxx.NacosTestService")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setUniqueId("nacos-test")
+        provider.setInterfaceId("com.alipay.xxx.NacosTestService2")
+            .setApplication(new ApplicationConfig().setAppName("test-server2"))
+            .setUniqueId("nacos-test2")
             .setProxy("javassist")
             .setRegister(true)
             .setRegistry(registryConfig)
@@ -248,9 +248,9 @@ public class NacosRegistryTest extends BaseNacosTest {
         Thread.sleep(1000);
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
-        consumer.setInterfaceId("com.alipay.xxx.NacosTestService")
-            .setApplication(new ApplicationConfig().setAppName("test-consumer"))
-            .setUniqueId("nacos-test")
+        consumer.setInterfaceId("com.alipay.xxx.NacosTestService2")
+            .setApplication(new ApplicationConfig().setAppName("test-consumer2"))
+            .setUniqueId("nacos-test2")
             .setProxy("javassist")
             .setSubscribe(true)
             .setSerialization("java")
