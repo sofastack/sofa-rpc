@@ -338,7 +338,7 @@ public class RestTracerAdapter {
                 return;
             }
 
-            Map<String, String> baggageItems = new LinkedHashMap<String, String>();
+            Map<String, String> baggageItems = new HashMap<String, String>();
             for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
                 if (!entry.getKey().startsWith(RPC_RESPONSE_BAGGAGE_PREFIX) ||
                     entry.getValue() == null ||

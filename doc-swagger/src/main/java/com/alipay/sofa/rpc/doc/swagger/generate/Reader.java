@@ -109,7 +109,7 @@ public class Reader {
                 return o1.getName().compareTo(o2.getName());
             }
         });
-        Map<Method, Method> serviceMethods = new LinkedHashMap<Method, Method>();
+        Map<Method, Method> serviceMethods = new HashMap<Method, Method>();
         for (Method method : interfaceMethodList) {
             if (!ReflectionUtils.isOverriddenMethod(method, context.getCls())) {
                 serviceMethods.put(method, getRefMethod(context, method));
