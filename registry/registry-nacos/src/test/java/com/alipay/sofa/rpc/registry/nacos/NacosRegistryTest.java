@@ -215,6 +215,8 @@ public class NacosRegistryTest extends BaseNacosTest {
      */
     @Test
     public void testVirtualHostAndVirtualPort() throws Exception {
+        //wait nacos startup ok
+        TimeUnit.SECONDS.sleep(10);
         // 模拟的场景 client -> proxy:127.7.7.7:8888 -> netty:0.0.0.0:12200
         String virtualHost = "127.7.7.7";
         int virtualPort = 8888;
