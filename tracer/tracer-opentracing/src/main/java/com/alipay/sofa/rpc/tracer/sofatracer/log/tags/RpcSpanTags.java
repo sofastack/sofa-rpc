@@ -149,4 +149,44 @@ public class RpcSpanTags {
      */
     public static final String SERVER_THREAD_POOL_WAIT_TIME = "server.pool.wait.time";
 
+    /**
+     * 客户端转发请求耗时
+     */
+    public static final String SEND_TIME_COST               = "send.time.cost";
+
+    /**
+     * 服务端转发请求耗时
+     */
+    public static final String SERVER_SEND_TIME_COST        = "server.send.time.cost";
+
+    /**
+     * 客户端各阶段耗时统计
+     */
+    public static final String PHASE_TIME_COST              = "phase.time.cost";
+
+    /**
+     * 客户端特殊时间点标记
+     */
+    public static final String SPECIAL_TIME_MARK            = "special.time.mark";
+
+    /**
+     * 客户端路由转发链路详情
+     */
+    public static final String ROUTER_FORWARD_DETAIL        = "router.forward.detail";
+
+    /**
+     * 服务端各阶段耗时统计
+     */
+    public static final String SERVER_PHASE_TIME_COST       = "server.phase.time.cost";
+
+    /**
+     * 服务端特殊时间点标记
+     */
+    public static final String SERVER_SPECIAL_TIME_MARK     = "server.special.time.mark";
+
+    /**
+     * 服务端路由转发链路详情
+     */
+    public static final String SERVER_ROUTER_FORWARD_DETAIL = "server.router.forward.detail";
+
 }

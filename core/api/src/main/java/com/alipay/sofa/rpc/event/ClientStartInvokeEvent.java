@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.event;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 
 /**
@@ -29,6 +32,8 @@ public class ClientStartInvokeEvent implements Event {
 
     public ClientStartInvokeEvent(SofaRequest request) {
         this.request = request;
+        // C1:Client start invoke time
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME_MICRO, RpcRuntimeContext.now());
     }
 
     public SofaRequest getRequest() {
