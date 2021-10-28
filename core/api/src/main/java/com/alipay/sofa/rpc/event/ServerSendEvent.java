@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.event;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 
@@ -33,6 +36,8 @@ public class ServerSendEvent implements Event {
         this.request = request;
         this.response = response;
         this.throwable = throwable;
+        // S2:Record server processing completion time
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_SEND_TIME_MICRO, RpcRuntimeContext.now());
     }
 
     public SofaRequest getRequest() {

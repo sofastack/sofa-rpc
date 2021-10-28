@@ -19,8 +19,10 @@ package com.alipay.sofa.rpc.filter;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -49,6 +51,7 @@ public class ConsumerInvoker extends FilterInvoker {
 
     @Override
     public SofaResponse invoke(SofaRequest sofaRequest) throws SofaRpcException {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO, System.nanoTime());
         // 设置下服务器应用
         ProviderInfo providerInfo = RpcInternalContext.getContext().getProviderInfo();
         String appName = providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_APP_NAME);
@@ -57,7 +60,9 @@ public class ConsumerInvoker extends FilterInvoker {
         }
 
         // 目前只是通过client发送给服务端
-        return consumerBootstrap.getCluster().sendMsg(providerInfo, sofaRequest);
+        SofaResponse sofaResponse = consumerBootstrap.getCluster().sendMsg(providerInfo, sofaRequest);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO, System.nanoTime());
+        return sofaResponse;
     }
 
 }

@@ -37,6 +37,8 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -61,7 +63,6 @@ import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
 
 import java.net.InetSocketAddress;
-import java.security.AlgorithmConstraints;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -404,6 +405,7 @@ public class BoltClientTransport extends ClientTransport {
             putToContextIfNotNull(invokeContext, InvokeContext.CLIENT_CONN_CREATETIME, context,
                 RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME);
         }
+        putToContext(invokeContext);
         if (EventBus.isEnable(ClientAfterSendEvent.class)) {
             EventBus.post(new ClientAfterSendEvent(request));
         }
@@ -447,6 +449,16 @@ public class BoltClientTransport extends ClientTransport {
         Object value = invokeContext.get(oldKey);
         if (value != null) {
             context.setAttachment(key, value);
+        }
+    }
+
+    private void putToContext(InvokeContext invokeContext) {
+        // R2: Connection time
+        Long connStartTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_START_IN_NANO);
+        Long connEndTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_END_IN_NANO);
+        if (connStartTime != null && connEndTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO,
+                connEndTime - connStartTime);
         }
     }
 

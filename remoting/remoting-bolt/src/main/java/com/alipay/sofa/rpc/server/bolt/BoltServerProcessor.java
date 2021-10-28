@@ -112,13 +112,16 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             context.setRemoteAddress(bizCtx.getRemoteHost(), bizCtx.getRemotePort()); // 远程地址
             context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 远程返回的通道
 
+            InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
             if (RpcInternalContext.isAttachmentEnable()) {
-                InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
                 if (boltInvokeCtx != null) {
+                    // rpc线程池等待时间 Long
                     putToContextIfNotNull(boltInvokeCtx, InvokeContext.BOLT_PROCESS_WAIT_TIME,
-                        context, RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME); // rpc线程池等待时间 Long
+                        context, RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME);
                 }
             }
+
+            putToContext(boltInvokeCtx);
             if (EventBus.isEnable(ServerReceiveEvent.class)) {
                 EventBus.post(new ServerReceiveEvent(request));
             }
@@ -166,10 +169,8 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     } else {
                         request.setMethod(serviceMethod);
                     }
-
                     // 真正调用
                     response = doInvoke(serviceName, invoker, request);
-
                     if (bizCtx.isRequestTimeout()) { // 加上丢弃超时的响应的逻辑
                         throwable = clientTimeoutWhenSendResponse(appName, serviceName, bizCtx.getRemoteAddress());
                         break invoke;
@@ -235,6 +236,25 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         if (value != null) {
             context.setAttachment(key, value);
         }
+    }
+
+    private void putToContext(InvokeContext invokeContext) {
+        // R7：Thread waiting time
+        Long enterQueueTime = invokeContext.get(InvokeContext.BOLT_PROCESS_BEFORE_DISPATCH_IN_NANO);
+        Long processStartTime = invokeContext.get(InvokeContext.BOLT_PROCESS_START_PROCESS_IN_NANO);
+        if (enterQueueTime != null && processStartTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO,
+                processStartTime - enterQueueTime);
+        }
+
+        // R11：Server net wait
+        Long headArriveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_HEADER_IN_NANO);
+        Long bodyReceivedTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_BODY_IN_NANO);
+        if (headArriveTime != null && bodyReceivedTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_NET_WAIT_NANO,
+                bodyReceivedTime - headArriveTime);
+        }
+
     }
 
     /**
