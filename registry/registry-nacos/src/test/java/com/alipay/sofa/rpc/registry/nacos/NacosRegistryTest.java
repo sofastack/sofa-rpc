@@ -265,7 +265,8 @@ public class NacosRegistryTest extends BaseNacosTest {
         providerInfoListener.setCountDownLatch(latch);
         consumer.setProviderInfoListener(providerInfoListener);
         List<ProviderGroup> all = registry.subscribe(consumer);
-        providerInfoListener.updateAllProviders(all);
+        //        providerInfoListener.updateAllProviders(all);
+        latch.await(2000, TimeUnit.MILLISECONDS);
 
         Map<String, ProviderInfo> ps = providerInfoListener.getData();
         Assert.assertEquals("after register: 1", 1, ps.size());
