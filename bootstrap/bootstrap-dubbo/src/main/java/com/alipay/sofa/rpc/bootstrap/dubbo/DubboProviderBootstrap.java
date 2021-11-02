@@ -116,7 +116,11 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     private void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
         protocolConfig.setId(serverConfig.getId());
         protocolConfig.setName(serverConfig.getProtocol());
-        protocolConfig.setHost(serverConfig.getHost());
+        String host = serverConfig.getVirtualHost();
+        if (host == null) {
+            host = serverConfig.getHost();
+        }
+        protocolConfig.setHost(host);
         protocolConfig.setPort(serverConfig.getPort());
         protocolConfig.setAccepts(serverConfig.getAccepts());
         protocolConfig.setSerialization(serverConfig.getSerialization());
