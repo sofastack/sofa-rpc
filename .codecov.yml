@@ -4,5 +4,6 @@ coverage:
       default:
         threshold: 0.1%
     patch: off
+
 ignore:
-  - "remoting/remoting-triple/build/generated"
+  - "build/generated/source/proto/main/java/triple"  # ignore folders and all its contents
