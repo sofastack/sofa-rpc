@@ -4,3 +4,5 @@ coverage:
       default:
         threshold: 0.1%
     patch: off
+ignore:
+  - "remoting/remoting-triple/build/generated"
