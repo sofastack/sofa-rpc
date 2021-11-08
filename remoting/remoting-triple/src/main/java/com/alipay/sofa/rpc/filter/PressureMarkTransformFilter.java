@@ -20,7 +20,6 @@ import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.common.tracer.core.utils.TracerUtils;
 import com.alipay.sofa.rpc.common.MetadataHolder;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;

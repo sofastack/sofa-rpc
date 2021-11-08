@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.bootstrap.DefaultClientProxyInvoker;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN;
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;

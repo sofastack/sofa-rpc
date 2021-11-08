@@ -21,7 +21,6 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.listener.ChannelListener;
 
 import java.util.List;
-import java.util.Objects;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;

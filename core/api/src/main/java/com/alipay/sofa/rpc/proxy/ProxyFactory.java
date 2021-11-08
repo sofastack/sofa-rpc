@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.proxy;
 
-import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.ext.ExtensionClass;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
