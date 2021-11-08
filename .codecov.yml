@@ -6,4 +6,4 @@ coverage:
     patch: off
 
 ignore:
-  - "build/generated/source/proto/main/java/triple"  # ignore folders and all its contents
+  - "remoting/remoting-triple/build/generated/source/proto/main/java/triple"  # ignore folders and all its contents
