@@ -304,6 +304,36 @@
                     </execution>
                 </executions>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.13.0</version>
+                <configuration>
+                    <printFailingErrors>true</printFailingErrors>
+                    <linkXRef>false</linkXRef>
+                    <includeTests>false</includeTests>
+                    <rulesets>
+                        <ruleset>${user.dir}/tools/pmd-ruleset.xml</ruleset>
+                    </rulesets>
+                    <excludes>
+                        <exclude>**/triple/*.java</exclude>
+                    </excludes>
+                    <excludeRoots>
+                        <excludeRoot>${user.dir}/test</excludeRoot>
+                        <excludeRoot>${user.dir}/example</excludeRoot>
+                    </excludeRoots>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>check</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 
