@@ -42,7 +42,15 @@ import java.util.Map;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.*;
 import static com.alipay.sofa.rpc.common.RpcConstants.*;
-import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.*;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.APP_NAME;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.HOST_MACHINE_KEY;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.KEY_TIMEOUT;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.RPC_REMOTING_PROTOCOL;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.RPC_SERVICE_VERSION;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.SERIALIZE_TYPE_KEY;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.SOFA4_RPC_SERVICE_VERSION;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.TIMEOUT;
+import static com.alipay.sofa.rpc.registry.mesh.SofaRegistryConstants.WEIGHT_KEY;
 
 /**
  * Created by zhanggeng on 2017/7/5.

@@ -485,6 +485,5 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
      * @param providerConfig
      */
     protected void preProcessProviderTarget(ProviderConfig providerConfig, ProviderProxyInvoker providerProxyInvoker) {
-        return;
     }
 }

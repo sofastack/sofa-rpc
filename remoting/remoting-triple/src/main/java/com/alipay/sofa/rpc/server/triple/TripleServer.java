@@ -51,7 +51,6 @@ import io.grpc.netty.shaded.io.netty.channel.nio.NioEventLoopGroup;
 import io.grpc.netty.shaded.io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.grpc.protobuf.ProtoUtils;
 import io.grpc.util.MutableHandlerRegistry;
-import org.omg.PortableServer.ThreadPolicy;
 import triple.Request;
 import triple.Response;
 

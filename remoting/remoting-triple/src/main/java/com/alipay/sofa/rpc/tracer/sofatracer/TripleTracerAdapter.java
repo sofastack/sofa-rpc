@@ -198,10 +198,6 @@ public class TripleTracerAdapter {
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
             }
 
-            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
-                //   traceMap.put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(GrpcHeadKeys.HEAD_KEY_RPC_ID));
-            }
-
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SAMP_TYPE)) {
                 traceMap.put(TracerCompatibleConstants.SAMPLING_MARK,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_SAMP_TYPE));

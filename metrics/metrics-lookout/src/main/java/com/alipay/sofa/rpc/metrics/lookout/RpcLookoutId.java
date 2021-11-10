@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.metrics.lookout;
 
 import com.alipay.lookout.api.Id;
 import com.alipay.lookout.api.Lookout;
-import com.alipay.lookout.api.Metric;
 import com.alipay.sofa.rpc.config.ServerConfig;
 
 import java.util.Map;
