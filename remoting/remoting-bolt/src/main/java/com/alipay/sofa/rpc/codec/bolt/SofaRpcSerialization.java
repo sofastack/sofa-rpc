@@ -182,6 +182,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             RpcRequestCommand requestCommand = (RpcRequestCommand) request;
             Object requestObject = requestCommand.getRequestObject();
             byte serializerCode = requestCommand.getSerializer();
+            long serializeStartTime = System.nanoTime();
             try {
                 Map<String, String> header = (Map<String, String>) requestCommand.getRequestHeader();
                 if (header == null) {
@@ -198,7 +199,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new SerializationException(ex.getMessage(), ex);
             } finally {
-                recordSerializeRequest(requestCommand, invokeContext);
+                // R5：record request serialization time
+                recordSerializeRequest(requestCommand, invokeContext, serializeStartTime);
             }
         }
         return false;
@@ -209,7 +211,10 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      *
      * @param requestCommand 请求对象
      */
-    protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext) {
+    protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext,
+                                          long serializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO,
+            System.nanoTime() - serializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -245,6 +250,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             if (content == null || content.length == 0) {
                 throw new DeserializationException("Content of request is null");
             }
+            long deserializeStartTime = System.nanoTime();
             try {
                 String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -273,7 +279,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new DeserializationException(ex.getMessage(), ex);
             } finally {
-                recordDeserializeRequest(requestCommand);
+                // R6：Record request deserialization time
+                recordDeserializeRequest(requestCommand, deserializeStartTime);
             }
         }
         return false;
@@ -329,7 +336,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      *
      * @param requestCommand 请求对象
      */
-    private void recordDeserializeRequest(RequestCommand requestCommand) {
+    private void recordDeserializeRequest(RequestCommand requestCommand, long deserializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, System.nanoTime() -
+            deserializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -350,6 +359,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         if (response instanceof RpcResponseCommand) {
             RpcResponseCommand responseCommand = (RpcResponseCommand) response;
             byte serializerCode = response.getSerializer();
+            long serializeStartTime = System.nanoTime();
             try {
                 Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory.getSerializer(serializerCode);
                 AbstractByteBuf byteBuf = rpcSerializer.encode(responseCommand.getResponseObject(), null);
@@ -358,7 +368,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new SerializationException(ex.getMessage(), ex);
             } finally {
-                recordSerializeResponse(responseCommand);
+                // R6：Record response serialization time
+                recordSerializeResponse(responseCommand, serializeStartTime);
             }
         }
         return false;
@@ -369,7 +380,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      *
      * @param responseCommand 响应体
      */
-    private void recordSerializeResponse(RpcResponseCommand responseCommand) {
+    private void recordSerializeResponse(RpcResponseCommand responseCommand, long serializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, System.nanoTime() -
+            serializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
@@ -394,6 +407,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             if (content == null || content.length == 0) {
                 return false;
             }
+            long deserializeStartTime = System.nanoTime();
+
             try {
                 Object sofaResponse = ClassUtils.forName(responseCommand.getResponseClass()).newInstance();
 
@@ -418,7 +433,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 throw new DeserializationException(ex.getMessage(), ex);
             } finally {
-                recordDeserializeResponse(responseCommand, invokeContext);
+                //R5：Record response deserialization time
+                recordDeserializeResponse(responseCommand, invokeContext, deserializeStartTime);
             }
         }
 
@@ -449,7 +465,10 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      *
      * @param responseCommand 响应体
      */
-    private void recordDeserializeResponse(RpcResponseCommand responseCommand, InvokeContext invokeContext) {
+    private void recordDeserializeResponse(RpcResponseCommand responseCommand, InvokeContext invokeContext,
+                                           long deserializeStartTime) {
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO, System.nanoTime() -
+            deserializeStartTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }

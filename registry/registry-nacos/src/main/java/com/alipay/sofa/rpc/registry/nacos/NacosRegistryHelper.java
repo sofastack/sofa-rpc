@@ -90,7 +90,12 @@ class NacosRegistryHelper {
                     }
                 }
                 instance.setIp(host);
-                instance.setPort(server.getPort());
+
+                Integer port = server.getVirtualPort(); // 虚拟port
+                if (port == null) {
+                    port = server.getPort();
+                }
+                instance.setPort(port);
 
                 // set meta data
                 Map<String, String> metaData = RegistryUtils.convertProviderToMap(providerConfig, server);

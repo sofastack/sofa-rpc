@@ -46,7 +46,6 @@ import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -338,7 +337,7 @@ public class RestTracerAdapter {
                 return;
             }
 
-            Map<String, String> baggageItems = new LinkedHashMap<String, String>();
+            Map<String, String> baggageItems = new HashMap<String, String>();
             for (Map.Entry<String, List<String>> entry : headers.entrySet()) {
                 if (!entry.getKey().startsWith(RPC_RESPONSE_BAGGAGE_PREFIX) ||
                     entry.getValue() == null ||

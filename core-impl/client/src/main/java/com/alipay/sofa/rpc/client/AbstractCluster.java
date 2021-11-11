@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRouteException;
@@ -393,9 +394,13 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         }
+        // R1：Record routing address time
         // 原始服务列表数据 --> 路由结果
+        long routerStartTime = System.nanoTime();
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
-
+        RpcInternalContext context = RpcInternalContext.peekContext();
+        RpcInvokeContext rpcInvokeContext = RpcInvokeContext.getContext();
+        rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, System.nanoTime()-routerStartTime);
         //保存一下原始地址,为了打印
         List<ProviderInfo> originalProviderInfos;
 
@@ -406,7 +411,6 @@ public abstract class AbstractCluster extends Cluster {
              * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
              * 1. RpcInvokeContext.getContext().getTargetUrl()
              */
-            RpcInternalContext context = RpcInternalContext.peekContext();
             if (context != null) {
                 String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
                 if (StringUtils.isNotBlank(targetIP)) {
@@ -431,7 +435,6 @@ public abstract class AbstractCluster extends Cluster {
 
         String targetIP = null;
         ProviderInfo providerInfo;
-        RpcInternalContext context = RpcInternalContext.peekContext();
         if (context != null) {
             targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
@@ -446,8 +449,12 @@ public abstract class AbstractCluster extends Cluster {
             return providerInfo;
         } else {
             do {
+                // R4：Record load balancing time
                 // 再进行负载均衡筛选
+                long loadBalanceStartTime = System.nanoTime();
                 providerInfo = loadBalancer.select(message, providerInfos);
+                rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, System.nanoTime()-loadBalanceStartTime);
+
                 ClientTransport transport = selectByProvider(message, providerInfo);
                 if (transport != null) {
                     return providerInfo;
@@ -547,7 +554,27 @@ public abstract class AbstractCluster extends Cluster {
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
         context.setProviderInfo(providerInfo);
-        return filterChain.invoke(request);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO, System.nanoTime());
+        SofaResponse sofaResponse = filterChain.invoke(request);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO, System.nanoTime());
+        calculateConsumerFilterTime();
+        return sofaResponse;
+    }
+
+    private void calculateConsumerFilterTime() {
+        // R3: Record consumer filter execution time
+        Long filterStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
+        Long filterEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO);
+        Long invokerStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO);
+        Long invokerEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO);
+        if (filterStartTime != null && filterEndTime != null && invokerStartTime != null && invokerEndTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
+                filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime));
+        }
     }
 
     @Override

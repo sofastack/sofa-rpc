@@ -44,7 +44,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -790,7 +789,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
     public Map<String, Set<ProviderInfo>> currentProviderMap() {
         providerLock.lock();
         try {
-            Map<String, Set<ProviderInfo>> tmp = new LinkedHashMap<String, Set<ProviderInfo>>();
+            Map<String, Set<ProviderInfo>> tmp = new HashMap<String, Set<ProviderInfo>>();
             tmp.put("alive", new HashSet<ProviderInfo>(aliveConnections.keySet()));
             tmp.put("subHealth", new HashSet<ProviderInfo>(subHealthConnections.keySet()));
             tmp.put("retry", new HashSet<ProviderInfo>(retryConnections.keySet()));

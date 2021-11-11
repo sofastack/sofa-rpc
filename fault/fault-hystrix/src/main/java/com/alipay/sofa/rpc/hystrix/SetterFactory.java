@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.hystrix;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.filter.FilterInvoker;
 import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixObservableCommand;
 
 /**
  * Control the properties of a hystrix command, such as group key, command key...

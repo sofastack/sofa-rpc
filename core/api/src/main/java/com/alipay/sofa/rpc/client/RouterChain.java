@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -100,7 +101,7 @@ public class RouterChain {
     private final List<Router> routers;
 
     public RouterChain(List<Router> actualRouters, ConsumerBootstrap consumerBootstrap) {
-        this.routers = new ArrayList<Router>();
+        this.routers = new LinkedList<Router>();
         if (CommonUtils.isNotEmpty(actualRouters)) {
             for (Router router : actualRouters) {
                 if (router.needToLoad(consumerBootstrap)) {
@@ -146,7 +147,10 @@ public class RouterChain {
                 if (startsWithExcludePrefix(routerAlias)) { // 排除用的特殊字符
                     excludes.add(routerAlias.substring(1));
                 } else {
-                    extensionRouters.add(EXTENSION_LOADER.getExtensionClass(routerAlias));
+                    ExtensionClass<Router> extensionRouter = EXTENSION_LOADER.getExtensionClass(routerAlias);
+                    if (extensionRouter != null) {
+                        extensionRouters.add(extensionRouter);
+                    }
                 }
             }
         }

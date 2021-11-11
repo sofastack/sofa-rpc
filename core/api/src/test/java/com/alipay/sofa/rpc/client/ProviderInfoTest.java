@@ -42,6 +42,13 @@ public class ProviderInfoTest {
     }
 
     @Test
+    public void testGetDynamicAttr() {
+        ProviderInfo providerInfo = new ProviderInfo();
+        providerInfo.setDynamicAttr("timeout", 1);
+        Assert.assertEquals("1", providerInfo.getAttr("timeout"));
+    }
+
+    @Test
     public void testGetWeight() {
         //1s
         ProviderInfo provider = ProviderHelper

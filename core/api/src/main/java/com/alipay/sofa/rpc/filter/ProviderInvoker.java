@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.filter;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -75,7 +76,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
     @Override
     public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
 
-        /*// 将接口的<sofa:param />的配置复制到RpcInternalContext TODO
+        /*// 将接口的<sofa:param />的配置复制到RpcInternalContext
         RpcInternalContext context = RpcInternalContext.getContext();
         Map params = providerConfig.getParameters();
         if (params != null) {
@@ -90,6 +91,8 @@ public class ProviderInvoker<T> extends FilterInvoker {
 
         SofaResponse sofaResponse = new SofaResponse();
         long startTime = RpcRuntimeContext.now();
+        long bizStartTime = System.nanoTime();
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO, System.nanoTime());
         try {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
@@ -112,11 +115,17 @@ public class ProviderInvoker<T> extends FilterInvoker {
             cutCause(e.getCause());
             sofaResponse.setAppResponse(e.getCause());
         } finally {
+            // R8: Record business processing execution time
             if (RpcInternalContext.isAttachmentEnable()) {
                 long endTime = RpcRuntimeContext.now();
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);
             }
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
+                System.nanoTime() - bizStartTime);
+
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO,
+                System.nanoTime());
         }
 
         return sofaResponse;

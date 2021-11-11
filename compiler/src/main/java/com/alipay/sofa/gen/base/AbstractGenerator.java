@@ -31,6 +31,7 @@ import com.salesforce.jprotoc.GeneratorException;
 import com.salesforce.jprotoc.ProtoTypeMap;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -122,7 +123,7 @@ public abstract class AbstractGenerator extends Generator {
         serviceContext.setServiceName(serviceProto.getName());
         serviceContext.setDeprecated(serviceProto.getOptions() != null && serviceProto.getOptions().getDeprecated());
 
-        List<Location> allLocationsForService = new ArrayList<>();
+        List<Location> allLocationsForService = new LinkedList<>();
         for (Location location : locations) {
             if (location.getPathCount() >= 2 &&
                     location.getPath(0) == FileDescriptorProto.SERVICE_FIELD_NUMBER &&
