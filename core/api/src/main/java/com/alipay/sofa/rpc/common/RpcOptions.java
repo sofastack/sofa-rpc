@@ -369,6 +369,12 @@ public class RpcOptions {
      * @since 5.5.0
      */
     public static final String CONCUMER_CONNECT_ELASTIC_SIZE            = "consumer.connect.elastic.size";
+    /**
+     * 默认回调线程池满时的默认拒绝策略
+     *
+     * @since 5.8.1
+     */
+    public static final String CONSUMER_REJECTED_EXECUTION_POLICY       = "consumer.rejected.execution.policy";
 
     /**
      * 默认回调线程池最小
