@@ -261,7 +261,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testCallbackCallerHandleException() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22223)
             .setDaemon(false);
 
         // RpcServer for C
@@ -279,7 +279,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(3000)
             .setFilterRef(Arrays.asList(filter))
             .setRejectedExecutionPolicy(RejectedExecutionPolicy.CALLER_HANDLE_EXCEPTION.name())
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22223");
         HelloService helloService = BConsumer.refer();
 
         int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
@@ -335,7 +335,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testCallbackCallerRuns() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22224)
             .setDaemon(false);
 
         // RpcServer for C
@@ -353,7 +353,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(3000)
             .setFilterRef(Arrays.asList(filter))
             .setRejectedExecutionPolicy(RejectedExecutionPolicy.CALLER_RUNS.name())
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22224");
         HelloService helloService = BConsumer.refer();
 
         int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
@@ -408,7 +408,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testCallbackDiscard() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22225)
             .setDaemon(false);
 
         // RpcServer For C
@@ -426,7 +426,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(3000)
             .setFilterRef(Arrays.asList(filter))
             .setRejectedExecutionPolicy(RejectedExecutionPolicy.DISCARD.name())
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22225");
         HelloService helloService = BConsumer.refer();
 
         int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
@@ -479,7 +479,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testRejectedExecutionPolicyIllegal() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22226)
             .setDaemon(false);
 
         // RpcServer For C
@@ -497,7 +497,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(3000)
             .setFilterRef(Arrays.asList(filter))
             .setRejectedExecutionPolicy("WRONG_POLICY")
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22226");
         HelloService helloService = BConsumer.refer();
 
         // Calling when setting the wrong rejected execution policy will throw an exception
