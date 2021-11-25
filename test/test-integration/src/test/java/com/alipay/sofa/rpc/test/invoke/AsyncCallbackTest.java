@@ -19,6 +19,15 @@ package com.alipay.sofa.rpc.test.invoke;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+
 import com.alipay.remoting.RejectedExecutionPolicy;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -38,15 +47,6 @@ import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
 
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -62,7 +62,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testAll() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22220)
             .setDaemon(false);
 
         // C服务的服务端
@@ -80,7 +80,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(50000)
             .setFilterRef(Arrays.asList(filter))
             // .setOnReturn() // 不设置 调用级别设置
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22220");
         HelloService helloService = BConsumer.refer();
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -127,7 +127,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testTimeoutException() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22221)
             .setDaemon(false);
 
         // C服务的服务端
@@ -145,7 +145,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(1)
             .setFilterRef(Arrays.asList(filter))
             // .setOnReturn() // 不设置 调用级别设置
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22221");
         HelloService helloService = BConsumer.refer();
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -293,7 +293,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
                 LOGGER.info("B get result: {}", appResponse);
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(100);
                 } catch (Exception e) {
                 }
                 latch.countDown();
@@ -320,7 +320,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         }
 
         try {
-            latch.await(2000, TimeUnit.MILLISECONDS);
+            latch.await(100L * invokeCount, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
         }
 
@@ -394,7 +394,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         }
 
         try {
-            latch.await(100L * (invokeCount / maxsize + 1), TimeUnit.MILLISECONDS);
+            latch.await(100L * invokeCount, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
         }
 
@@ -465,7 +465,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         }
 
         try {
-            latch.await(100L * (invokeCount / maxsize + 1), TimeUnit.MILLISECONDS);
+            latch.await(100L * invokeCount, TimeUnit.MILLISECONDS);
         } catch (InterruptedException ignore) {
         }
 
