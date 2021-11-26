@@ -16,7 +16,22 @@
  */
 package com.alipay.sofa.rpc.test.invoke;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.alipay.remoting.RejectedExecutionPolicy;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -31,13 +46,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Test;
-
-import java.util.Arrays;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -54,7 +62,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testAll() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22220)
             .setDaemon(false);
 
         // C服务的服务端
@@ -72,7 +80,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(50000)
             .setFilterRef(Arrays.asList(filter))
             // .setOnReturn() // 不设置 调用级别设置
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22220");
         HelloService helloService = BConsumer.refer();
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -110,7 +118,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
 
         Assert.assertNotNull(ret[0]);
         // 过滤器生效
-        Assert.assertTrue(ret[0].endsWith("append by async filter"));
+        assertTrue(ret[0].endsWith("append by async filter"));
 
         RpcInvokeContext.removeContext();
     }
@@ -119,7 +127,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
     public void testTimeoutException() {
 
         serverConfig = new ServerConfig()
-            .setPort(22222)
+            .setPort(22221)
             .setDaemon(false);
 
         // C服务的服务端
@@ -137,7 +145,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
             .setTimeout(1)
             .setFilterRef(Arrays.asList(filter))
             // .setOnReturn() // 不设置 调用级别设置
-            .setDirectUrl("bolt://127.0.0.1:22222");
+            .setDirectUrl("bolt://127.0.0.1:22221");
         HelloService helloService = BConsumer.refer();
 
         final CountDownLatch latch = new CountDownLatch(1);
@@ -178,7 +186,7 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         } catch (InterruptedException ignore) {
         }
         // 一定是一个超时异常
-        Assert.assertTrue(hasExp[0]);
+        assertTrue(hasExp[0]);
 
         RpcInvokeContext.removeContext();
     }
@@ -244,9 +252,256 @@ public class AsyncCallbackTest extends ActivelyDestroyTest {
         } catch (InterruptedException ignore) {
         }
         // 一定是一个超时异常
-        Assert.assertTrue(hasExp[0]);
+        assertTrue(hasExp[0]);
 
         RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testCallbackCallerHandleException() {
+
+        serverConfig = new ServerConfig()
+            .setPort(22223)
+            .setDaemon(false);
+
+        // RpcServer for C
+        CProvider = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(0))
+            .setServer(serverConfig);
+        CProvider.export();
+
+        // RpcClient For B invoke C
+        Filter filter = new TestAsyncFilter();
+        BConsumer = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+            .setTimeout(3000)
+            .setFilterRef(Arrays.asList(filter))
+            .setRejectedExecutionPolicy(RejectedExecutionPolicy.CALLER_HANDLE_EXCEPTION.name())
+            .setDirectUrl("bolt://127.0.0.1:22223");
+        HelloService helloService = BConsumer.refer();
+
+        int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
+        int queuesize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_QUEUE);
+        int invokeCount = (maxsize + queuesize) * 2;
+        final CountDownLatch latch = new CountDownLatch(invokeCount);
+        AtomicInteger sofaExceptionCount = new AtomicInteger(0);
+
+        SofaResponseCallback callback = new SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                LOGGER.info("B get result: {}", appResponse);
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                LOGGER.info("B get app exception: {}", throwable);
+                latch.countDown();
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        RequestBase request) {
+                LOGGER.info("B get sofa exception: {}", sofaException);
+                latch.countDown();
+                sofaExceptionCount.addAndGet(1);
+            }
+        };
+
+        for (int i = 0; i < invokeCount; i++) {
+            RpcInvokeContext.getContext().setResponseCallback(callback);
+            helloService.sayHello("" + i, 33);
+        }
+
+        try {
+            latch.await(100L * invokeCount, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+
+        // Exception callbacks are triggered by IO threads after the thread pool is full, so the total number of responses received is equal to the total number of calls
+        assertEquals(0, latch.getCount());
+        // The number of exception callbacks triggered by IO threads must exist 
+        assertTrue(sofaExceptionCount.get() > 0);
+        RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testCallbackCallerRuns() {
+
+        serverConfig = new ServerConfig()
+            .setPort(22224)
+            .setDaemon(false);
+
+        // RpcServer for C
+        CProvider = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(0))
+            .setServer(serverConfig);
+        CProvider.export();
+
+        // RpcClient For B invoke C
+        Filter filter = new TestAsyncFilter();
+        BConsumer = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+            .setTimeout(3000)
+            .setFilterRef(Arrays.asList(filter))
+            .setRejectedExecutionPolicy(RejectedExecutionPolicy.CALLER_RUNS.name())
+            .setDirectUrl("bolt://127.0.0.1:22224");
+        HelloService helloService = BConsumer.refer();
+
+        int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
+        int queuesize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_QUEUE);
+        int invokeCount = (maxsize + queuesize) * 2;
+        final CountDownLatch latch = new CountDownLatch(invokeCount);
+        AtomicInteger runCount = new AtomicInteger(0);
+
+        SofaResponseCallback callback = new SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                LOGGER.info("B get result: {}", appResponse);
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+                runCount.addAndGet(1);
+                latch.countDown();
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                LOGGER.info("B get app exception: {}", throwable);
+                latch.countDown();
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        RequestBase request) {
+                LOGGER.info("B get sofa exception: {}", sofaException);
+                latch.countDown();
+            }
+        };
+
+        for (int i = 0; i < invokeCount; i++) {
+            RpcInvokeContext.getContext().setResponseCallback(callback);
+            helloService.sayHello("" + i, 33);
+        }
+
+        try {
+            latch.await(100L * invokeCount, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+
+        assertEquals(0, latch.getCount());
+        // Invoke callbacks are triggered by IO threads after the thread pool is full, so the total number of normal responses received is equal to the total number of calls
+        assertEquals(invokeCount, runCount.get());
+        RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testCallbackDiscard() {
+
+        serverConfig = new ServerConfig()
+            .setPort(22225)
+            .setDaemon(false);
+
+        // RpcServer For C
+        CProvider = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(0))
+            .setServer(serverConfig);
+        CProvider.export();
+
+        // RpcClient For B invoke C
+        Filter filter = new TestAsyncFilter();
+        BConsumer = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+            .setTimeout(3000)
+            .setFilterRef(Arrays.asList(filter))
+            .setRejectedExecutionPolicy(RejectedExecutionPolicy.DISCARD.name())
+            .setDirectUrl("bolt://127.0.0.1:22225");
+        HelloService helloService = BConsumer.refer();
+
+        int maxsize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_MAX);
+        int queuesize = RpcConfigs.getIntValue(RpcOptions.ASYNC_POOL_QUEUE);
+        int invokeCount = (maxsize + queuesize) * 2;
+        final CountDownLatch latch = new CountDownLatch(invokeCount);
+
+        SofaResponseCallback callback = new SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                LOGGER.info("B get result: {}", appResponse);
+                try {
+                    Thread.sleep(100);
+                } catch (Exception e) {
+                }
+                latch.countDown();
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                LOGGER.info("B get app exception: {}", throwable);
+                latch.countDown();
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        RequestBase request) {
+                LOGGER.info("B get sofa exception: {}", sofaException);
+                latch.countDown();
+            }
+        };
+
+        for (int i = 0; i < invokeCount; i++) {
+            RpcInvokeContext.getContext().setResponseCallback(callback);
+            helloService.sayHello("" + i, 33);
+        }
+
+        try {
+            latch.await(100L * invokeCount, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException ignore) {
+        }
+
+        LOGGER.info("Discard response callback: " + (invokeCount - latch.getCount()));
+        // The total number of callbacks received in discard mode must be less than the total number of requests
+        assertTrue(latch.getCount() > 0);
+        RpcInvokeContext.removeContext();
+    }
+
+    @Test(expected = SofaRpcException.class)
+    public void testRejectedExecutionPolicyIllegal() {
+
+        serverConfig = new ServerConfig()
+            .setPort(22226)
+            .setDaemon(false);
+
+        // RpcServer For C
+        CProvider = new ProviderConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(new HelloServiceImpl(0))
+            .setServer(serverConfig);
+        CProvider.export();
+
+        // RpcClient For B invoke C
+        Filter filter = new TestAsyncFilter();
+        BConsumer = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
+            .setTimeout(3000)
+            .setFilterRef(Arrays.asList(filter))
+            .setRejectedExecutionPolicy("WRONG_POLICY")
+            .setDirectUrl("bolt://127.0.0.1:22226");
+        HelloService helloService = BConsumer.refer();
+
+        // Calling when setting the wrong rejected execution policy will throw an exception
+        helloService.sayHello("test", 33);
     }
 
     @After
