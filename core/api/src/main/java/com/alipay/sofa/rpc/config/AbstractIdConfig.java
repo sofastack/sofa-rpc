@@ -43,7 +43,7 @@ public abstract class AbstractIdConfig<S extends AbstractIdConfig<S>> implements
     /**
      * config id 
      */
-    private String                     id;
+    private volatile String            id;
 
     /**
      * Gets id.
