@@ -1,0 +1,8 @@
+ignore:
+  - "remoting/remoting-triple/build/generated/source/proto/main/java/triple/.*"
+coverage:
+  status:
+    project:
+      default:
+        threshold: 0.1%
+    patch: off
