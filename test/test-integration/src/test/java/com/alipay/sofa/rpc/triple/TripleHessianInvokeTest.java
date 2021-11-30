@@ -16,6 +16,10 @@
  */
 package com.alipay.sofa.rpc.triple;
 
+import com.alipay.common.tracer.core.SofaTracer;
+import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
+import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.common.tracer.core.utils.TracerUtils;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -27,7 +31,10 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.apache.commons.lang.math.RandomUtils;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * @author zhaowang
@@ -35,7 +42,14 @@ import org.junit.Test;
  */
 public class TripleHessianInvokeTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TripleHessianInvokeTest.class);
+    private static final Logger    LOGGER = LoggerFactory.getLogger(TripleHessianInvokeTest.class);
+    public static final SofaTracer tracer = new SofaTracer.Builder("TEST").build();
+
+    @Before
+    public void before() {
+        SofaTracerSpan span = (SofaTracerSpan) tracer.buildSpan("test").start();
+        SofaTraceContextHolder.getSofaTraceContext().push(span);
+    }
 
     @Test
     public void testInvoke() throws InterruptedException {
@@ -71,10 +85,20 @@ public class TripleHessianInvokeTest {
 
         TripleHessianInterface helloService = consumerConfig.refer();
 
-        Thread.sleep(10 * 1000);
         LOGGER.info("Grpc stub bean successful: {}", helloService.getClass().getName());
         helloService.call();
         Assert.assertEquals("call", ref.getFlag());
+
+        // test Pressure Mark
+        boolean isLoadTest = helloService.testPressureMark("name");
+        Assert.assertFalse(isLoadTest);
+
+        SofaTracerSpan currentSpan = SofaTraceContextHolder.getSofaTraceContext().getCurrentSpan();
+        Map<String, String> bizBaggage = currentSpan.getSofaTracerSpanContext().getBizBaggage();
+        bizBaggage.put("mark", "T");
+        Assert.assertTrue(TracerUtils.isLoadTest(currentSpan));
+        isLoadTest = helloService.testPressureMark("name");
+        Assert.assertTrue(isLoadTest);
 
         String s = helloService.call1();
         Assert.assertEquals("call1", ref.getFlag());
@@ -136,7 +160,6 @@ public class TripleHessianInvokeTest {
 
         TripleHessianInterface helloService = consumerConfig.refer();
 
-        Thread.sleep(10 * 1000);
         LOGGER.info("Grpc stub bean successful: {}", helloService.getClass().getName());
         helloService.call();
         Assert.assertEquals("call", ref.getFlag());
@@ -167,7 +190,6 @@ public class TripleHessianInvokeTest {
 
         helloService = consumerConfig.refer();
 
-        Thread.sleep(10 * 1000);
         LOGGER.info("Grpc stub bean successful: {}", helloService.getClass().getName());
         helloService.call();
         Assert.assertEquals("call", ref.getFlag());

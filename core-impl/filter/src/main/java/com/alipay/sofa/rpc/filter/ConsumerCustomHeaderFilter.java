@@ -38,16 +38,16 @@ public class ConsumerCustomHeaderFilter extends Filter {
 
     @Override
     public SofaResponse invoke(FilterInvoker invoker, SofaRequest request) throws SofaRpcException {
-        setCustomHeader(request);
-        return invoker.invoke(request);
-    }
-
-    private void setCustomHeader(SofaRequest sofaRequest) {
         RpcInvokeContext context = RpcInvokeContext.getContext();
-        Map customHeader = context.getCustomHeader();
-        if (CommonUtils.isNotEmpty(customHeader)) {
-            sofaRequest.addRequestProps(customHeader);
+        try {
+            Map customHeader = context.getCustomHeader();
+            if (CommonUtils.isNotEmpty(customHeader)) {
+                request.addRequestProps(customHeader);
+            }
+            return invoker.invoke(request);
+        } finally {
+            context.clearCustomHeader();
         }
-        context.clearCustomHeader();
+
     }
 }

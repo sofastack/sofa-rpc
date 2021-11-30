@@ -24,6 +24,7 @@ import java.util.Map;
  * @author zhaowang
  * @version : MetadataHolder.java, v 0.1 2020年09月09日 4:09 下午 zhaowang Exp $
  */
+@Deprecated
 public class MetadataHolder {
     static final ThreadLocal<Map<String,String>> localContext = new ThreadLocal<>();
 
