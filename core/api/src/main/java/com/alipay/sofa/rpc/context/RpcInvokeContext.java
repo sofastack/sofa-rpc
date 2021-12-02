@@ -226,7 +226,6 @@ public class RpcInvokeContext {
      */
     public void putRequestBaggage(String key, String value) {
         if (BAGGAGE_ENABLE && key != null && value != null) {
-
             requestBaggage.put(key, value);
         }
     }
