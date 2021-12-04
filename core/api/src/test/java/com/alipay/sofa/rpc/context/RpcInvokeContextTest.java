@@ -16,9 +16,12 @@
  */
 package com.alipay.sofa.rpc.context;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -28,6 +31,38 @@ import java.util.concurrent.atomic.AtomicReference;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class RpcInvokeContextTest {
+
+    private static boolean oldEnableBaggage;
+    private static Field   enableBaggageField;
+
+    static {
+        try {
+            enableBaggageField = RpcInvokeContext.class.getDeclaredField("BAGGAGE_ENABLE");
+            enableBaggageField.setAccessible(true);
+            oldEnableBaggage = (boolean) enableBaggageField.get(null);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Before
+    public void before() {
+        try {
+            enableBaggageField.set(null, true);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @After
+    public void after() {
+        try {
+            enableBaggageField.set(null, oldEnableBaggage);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+    }
+
     @Test
     public void removeContext() throws Exception {
     }
@@ -165,4 +200,42 @@ public class RpcInvokeContextTest {
             i++;
         }
     }
+
+    @Test
+    public void testBaggageNotNull() {
+        RpcInvokeContext ctx = new RpcInvokeContext();
+        ctx.putRequestBaggage(null, "value");
+        Assert.assertTrue(isEmpty(ctx.getAllRequestBaggage()));
+        ctx.putRequestBaggage("key", null);
+        Assert.assertTrue(isEmpty(ctx.getAllRequestBaggage()));
+        Map<String, String> map = new HashMap<>();
+        map.put(null, "value");
+        map.put("key", null);
+        map.put("key1", "value");
+        ctx.putAllRequestBaggage(map);
+        Assert.assertNotNull(ctx.getAllRequestBaggage());
+        Assert.assertEquals(1, ctx.getAllRequestBaggage().size());
+        ctx.putResponseBaggage(null, "value");
+        Assert.assertTrue(isEmpty(ctx.getAllResponseBaggage()));
+        ctx.putResponseBaggage("key", null);
+        Assert.assertTrue(isEmpty(ctx.getAllResponseBaggage()));
+        ctx.putAllResponseBaggage(map);
+        Assert.assertNotNull(ctx.getAllResponseBaggage());
+        Assert.assertEquals(1, ctx.getAllResponseBaggage().size());
+    }
+
+    private boolean isEmpty(Map<String, String> allResponseBaggage) {
+        return allResponseBaggage == null || allResponseBaggage.size() == 0;
+    }
+
+    @Test
+    public void testPutCustomHeader() {
+        RpcInvokeContext ctx = new RpcInvokeContext();
+        ctx.addCustomHeader(null, "value");
+        ctx.addCustomHeader("key", null);
+        ctx.addCustomHeader("key1", "value");
+        Assert.assertEquals(1, ctx.getCustomHeader().size());
+        Assert.assertEquals("value", ctx.getCustomHeader().get("key1"));
+    }
+
 }
