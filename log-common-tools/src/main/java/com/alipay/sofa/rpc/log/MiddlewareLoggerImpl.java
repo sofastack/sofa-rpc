@@ -44,9 +44,6 @@ public class MiddlewareLoggerImpl implements Logger {
     }
 
     private org.slf4j.Logger getLogger(String appName) {
-        if (appName == null) {
-            return DEFAULT_LOGGER;
-        }
         return DEFAULT_LOGGER;
     }
 
