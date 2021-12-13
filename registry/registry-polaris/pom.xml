@@ -2,19 +2,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
+
     <parent>
         <groupId>com.alipay.sofa</groupId>
         <artifactId>sofa-rpc-registry</artifactId>
-        <version>5.8.2-SNAPSHOT</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>sofa-rpc-registry-polaris</artifactId>
+
     <dependencies>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-api</artifactId>
+            <artifactId>sofa-rpc-log</artifactId>
         </dependency>
 
         <dependency>
@@ -26,13 +27,12 @@
                     <groupId>io.grpc</groupId>
                     <artifactId>grpc-core</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>io.grpc</groupId>
+                    <artifactId>grpc-api</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
-<!--        <dependency>
-            <groupId>com.tencent.polaris</groupId>
-            <artifactId>polaris-test-mock-discovery</artifactId>
-            <version>1.2.1</version>
-        </dependency>-->
     </dependencies>
 
     <build>
@@ -96,5 +96,17 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>jdk6</id>
+            <activation>
+                <jdk>1.6</jdk>
+            </activation>
+            <properties>
+                <skipTests>true</skipTests>
+            </properties>
+        </profile>
+    </profiles>
 
 </project>

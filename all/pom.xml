@@ -234,6 +234,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-registry-polaris</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-remoting-bolt</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -505,6 +510,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-mesh</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-multicast</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-sofa</include>
+                                    <include>com.alipay.sofa:sofa-rpc-registry-polaris</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>

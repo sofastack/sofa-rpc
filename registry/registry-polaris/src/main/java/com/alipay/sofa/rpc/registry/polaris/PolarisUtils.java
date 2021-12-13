@@ -38,9 +38,6 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
 public class PolarisUtils {
 
-
-
-
     static public List<InstanceDeregisterRequest> buildPolarisDeregister(ProviderConfig config) {
 
         List<ServerConfig> servers = config.getServer();

@@ -48,8 +48,6 @@ public class PolarisRegistryProperties {
         return getInt(WATCH_TIMEOUT_KEY, DEFAULT_WATCH_TIMEOUT);
     }
 
-
-
     public String getHealthCheckHost(String host) {
         return getString(HEALTH_CHECK_HOST_KEY, host);
     }
