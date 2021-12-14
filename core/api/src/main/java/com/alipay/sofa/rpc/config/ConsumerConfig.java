@@ -477,7 +477,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * @param addressHolder the address holder
      * @return the address holder
      */
-    public ConsumerConfig setAddressHolder(String addressHolder) {
+    public ConsumerConfig<T> setAddressHolder(String addressHolder) {
         this.addressHolder = addressHolder;
         return this;
     }
@@ -677,7 +677,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * @param router the router
      * @return the router
      */
-    public ConsumerConfig setRouter(List<String> router) {
+    public ConsumerConfig<T> setRouter(List<String> router) {
         this.router = router;
         return this;
     }

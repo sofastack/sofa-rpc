@@ -446,7 +446,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      * @param timeout the client timeout
      * @return the client timeout
      */
-    public ProviderConfig setTimeout(int timeout) {
+    public ProviderConfig<T> setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
