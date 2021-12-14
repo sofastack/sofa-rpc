@@ -19,10 +19,8 @@ package com.alipay.sofa.rpc.registry.polaris;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
-
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRunningState;
@@ -35,50 +33,51 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
-import com.tencent.polaris.api.config.Configuration;
-import com.tencent.polaris.api.config.global.APIConfig;
-import com.tencent.polaris.api.config.global.GlobalConfig;
-import com.tencent.polaris.api.config.global.ServerConnectorConfig;
-import com.tencent.polaris.api.config.global.SystemConfig;
 import com.tencent.polaris.api.core.ConsumerAPI;
 import com.tencent.polaris.api.core.ProviderAPI;
-import com.tencent.polaris.api.pojo.Instance;
-import com.tencent.polaris.api.rpc.*;
-import com.tencent.polaris.client.api.SDKContext;
-import com.tencent.polaris.discovery.client.api.DefaultProviderAPI;
+import com.tencent.polaris.api.rpc.InstanceDeregisterRequest;
+import com.tencent.polaris.api.rpc.InstanceHeartbeatRequest;
+import com.tencent.polaris.api.rpc.InstanceRegisterRequest;
+import com.tencent.polaris.api.rpc.InstanceRegisterResponse;
 import com.tencent.polaris.factory.api.DiscoveryAPIFactory;
 import com.tencent.polaris.factory.config.ConfigurationImpl;
-import com.tencent.polaris.factory.config.global.APIConfigImpl;
-import com.tencent.polaris.factory.config.global.GlobalConfigImpl;
 import com.tencent.polaris.factory.config.global.ServerConnectorConfigImpl;
-import com.tencent.polaris.factory.config.global.SystemConfigImpl;
-
-import java.util.*;
-import java.util.concurrent.*;
-
-import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildUniqueName;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertProviderToMap;
+import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
 
 @Extension("polaris")
 public class PolarisRegistry extends Registry {
+
     public static final String EXT_NAME = "PolarisRegistry";
 
     private static final Logger LOGGER = LoggerFactory
             .getLogger(PolarisRegistry.class);
 
-    ProviderAPI providerAPI;
-    ConsumerAPI consumerAPI;
-    private ScheduledExecutorService heartbeatExecutor;
-    private Map<String, ScheduledFuture> heartbeatFutures = new ConcurrentHashMap<>();
     private final PolarisRegistryProperties properties;
+
+    ProviderAPI providerAPI;
+
+    ConsumerAPI consumerAPI;
+
+    private ScheduledExecutorService heartbeatExecutor;
+
+    private Map<String, ScheduledFuture> heartbeatFutures = new ConcurrentHashMap<>();
+
     private Map<String, PolarisWatcher> polarisWatchers = new ConcurrentHashMap<>();
 
 
-    /**
-     * 注册中心配置
-     *
-     * @param registryConfig 注册中心配置
-     */
     protected PolarisRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
         this.properties = new PolarisRegistryProperties(registryConfig.getParameters());
@@ -91,15 +90,11 @@ public class PolarisRegistry extends Registry {
         //init configuration
         configuration.setDefault();
         ServerConnectorConfigImpl serverConnector = configuration.getGlobal().getServerConnector();
-        SystemConfigImpl system = configuration.getGlobal().getSystem();
-        APIConfigImpl api = configuration.getGlobal().getAPI();
-
-        //host:port
         serverConnector.setAddresses(Arrays.asList(registryConfig.getAddress()));
         serverConnector.setConnectTimeout((long) registryConfig.getConnectTimeout());
-        //TODO: more config
+        serverConnector.setProtocol(properties.getConnectorProtocol());
 
-        providerAPI = DiscoveryAPIFactory.createProviderAPI();
+        providerAPI = DiscoveryAPIFactory.createProviderAPIByConfig(configuration);
         consumerAPI = DiscoveryAPIFactory.createConsumerAPI();
 
         int coreSize = properties.getHeartbeatCoreSize();
@@ -117,7 +112,6 @@ public class PolarisRegistry extends Registry {
         String appName = config.getAppName();
 
         if (!registryConfig.isRegister()) {
-            // 只订阅不注册
             if (LOGGER.isInfoEnabled(appName)) {
                 LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
@@ -149,7 +143,7 @@ public class PolarisRegistry extends Registry {
                 SofaRpcRuntimeException e) {
             throw e;
         } catch (Exception e) {
-            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "consulRegistry", config.buildKey()), e);
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "polarisRegistry", config.buildKey()), e);
         }
         if (EventBus.isEnable(ProviderPubEvent.class)) {
             ProviderPubEvent event = new ProviderPubEvent(config);
@@ -169,7 +163,7 @@ public class PolarisRegistry extends Registry {
         List<InstanceRegisterRequest> res = new ArrayList<>();
         for (ServerConfig server : servers) {
             InstanceRegisterRequest service = new InstanceRegisterRequest();
-            service.setNamespace(config.getAppName());
+            service.setNamespace(buildNameSpace(config.getAppName()));
             service.setService(config.getInterfaceId());
             service.setHost(getServerHost(server));
             service.setPort(server.getPort());
@@ -177,14 +171,21 @@ public class PolarisRegistry extends Registry {
             service.setProtocol(server.getProtocol());
             service.setWeight(config.getWeight());
             service.setTimeoutMs(config.getTimeout());
-            // service.setTtl(properties.getHealthCheckTTL());
-            //service.setToken();
+            service.setVersion(config.getVersion());
             Map<String, String> metaData = convertProviderToMap(config, server);
+            checkAndDelNull(metaData);
             service.setMetadata(metaData);
             res.add(service);
         }
-
         return res;
+    }
+
+    private String buildNameSpace(String appName) {
+        return null == appName ? "sofa-default" : appName;
+    }
+
+    private void checkAndDelNull(Map<String, String> metaData){
+        metaData.entrySet().removeIf((e)->e.getValue()==null);
     }
 
     private void registerPolarisService(ProviderConfig config, InstanceRegisterRequest service) {
@@ -195,8 +196,6 @@ public class PolarisRegistry extends Registry {
                     heartbeatExecutor.scheduleAtFixedRate(
                             () -> heartbeatPolaris(service),
                             0, properties.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
-
-            // multiple heartbeat use the same service id, remove and cancel the old one, or still use it?
             ScheduledFuture oldFuture = heartbeatFutures.remove(buildUniqueName(config, service.getProtocol()));
             if (oldFuture != null) {
                 oldFuture.cancel(true);
@@ -224,13 +223,11 @@ public class PolarisRegistry extends Registry {
         String appName = config.getAppName();
 
         if (!registryConfig.isRegister()) {
-            // 注册中心不注册
             if (LOGGER.isInfoEnabled(appName)) {
                 LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
             return;
         }
-        // 反注册服务端节点
         if (!config.isRegister()) {
             return;
         }
@@ -279,7 +276,6 @@ public class PolarisRegistry extends Registry {
     public List<ProviderGroup> subscribe(ConsumerConfig config) {
         String appName = config.getAppName();
         if (!registryConfig.isSubscribe()) {
-            // 注册中心不订阅
             if (LOGGER.isInfoEnabled(appName)) {
                 LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
@@ -310,7 +306,7 @@ public class PolarisRegistry extends Registry {
         String uniqueName = buildUniqueName(config, config.getProtocol());
         PolarisWatcher watcher = polarisWatchers.get(uniqueName);
         if (watcher == null) {
-            watcher = new PolarisWatcher(config.getAppName(), config.getProtocol(), config.getInterfaceId(), consumerAPI, properties);
+            watcher = new PolarisWatcher(buildNameSpace(config.getAppName()), config.getInterfaceId(), config.getProtocol(), consumerAPI, properties);
             watcher.init();
             polarisWatchers.put(uniqueName, watcher);
         }
@@ -322,7 +318,6 @@ public class PolarisRegistry extends Registry {
     public void unSubscribe(ConsumerConfig config) {
         String appName = config.getAppName();
         if (!registryConfig.isSubscribe()) {
-            // 注册中心不订阅
             if (LOGGER.isInfoEnabled(appName)) {
                 LOGGER.infoWithApp(config.getAppName(), LogCodes.getLog(LogCodes.INFO_REGISTRY_IGNORE));
             }
@@ -360,12 +355,9 @@ public class PolarisRegistry extends Registry {
         }
         if (providerAPI != null) {
             providerAPI.destroy();
-
         }
         if (consumerAPI != null) {
             consumerAPI.destroy();
         }
     }
-
-
 }

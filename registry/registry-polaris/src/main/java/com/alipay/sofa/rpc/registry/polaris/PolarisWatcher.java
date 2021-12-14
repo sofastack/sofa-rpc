@@ -27,16 +27,14 @@ import com.tencent.polaris.api.core.ConsumerAPI;
 import com.tencent.polaris.api.pojo.Instance;
 import com.tencent.polaris.api.rpc.GetAllInstancesRequest;
 import com.tencent.polaris.api.rpc.InstancesResponse;
-import org.checkerframework.checker.units.qual.A;
-
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertInstanceToUrl;
 
 public class PolarisWatcher {
@@ -71,7 +69,9 @@ public class PolarisWatcher {
             GetAllInstancesRequest getAllInstancesRequest = new GetAllInstancesRequest();
             getAllInstancesRequest.setNamespace(nameSpace);
             getAllInstancesRequest.setService(serviceName);
-            getAllInstancesRequest.getMetadata().put("protocol", protocol);
+            Map<String,String> map=new HashMap<>();
+            map.put("protocol",protocol);
+            getAllInstancesRequest.setMetadata(map);
             InstancesResponse response = consumerAPI.getAllInstance(getAllInstancesRequest);
             this.currentData = response;
             ProviderGroup providerGroup = new ProviderGroup(currentProviders());

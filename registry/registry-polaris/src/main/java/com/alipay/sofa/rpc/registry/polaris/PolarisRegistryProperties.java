@@ -19,8 +19,14 @@ package com.alipay.sofa.rpc.registry.polaris;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
-
-import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.*;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_HEARTBEAT_CORE_SIZE;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_HEARTBEAT_INTERVAL;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_LOOKUP_INTERVAL;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.HEARTBEAT_CORE_SIZE_KEY;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.HEARTBEAT_INTERVAL_KEY;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.LOOKUP_INTERVAL_KEY;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.POLARIS_SERVER_CONNECTOR_PROTOCOL;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.POLARIS_SERVER_CONNECTOR_PROTOCOL_KEY;
 
 public class PolarisRegistryProperties {
     private final Map<String, String> registryParameters;
@@ -30,6 +36,10 @@ public class PolarisRegistryProperties {
             registryParameters = Collections.emptyMap();
         }
         this.registryParameters = registryParameters;
+    }
+
+    public String getConnectorProtocol() {
+        return getString(POLARIS_SERVER_CONNECTOR_PROTOCOL_KEY, POLARIS_SERVER_CONNECTOR_PROTOCOL);
     }
 
     public int getHeartbeatInterval() {
@@ -42,38 +52,6 @@ public class PolarisRegistryProperties {
 
     public int getLookupInterval() {
         return getInt(LOOKUP_INTERVAL_KEY, DEFAULT_LOOKUP_INTERVAL);
-    }
-
-    public int getWatchTimeout() {
-        return getInt(WATCH_TIMEOUT_KEY, DEFAULT_WATCH_TIMEOUT);
-    }
-
-    public String getHealthCheckHost(String host) {
-        return getString(HEALTH_CHECK_HOST_KEY, host);
-    }
-
-    public int getHealthCheckPort(int port) {
-        return getInt(HEALTH_CHECK_PORT_KEY, port);
-    }
-
-    public String getHealthCheckTimeout() {
-        return getString(HEALTH_CHECK_TIMEOUT_KEY, DEFAULT_HEALTH_CHECK_TIMEOUT);
-    }
-
-    public String getHealthCheckInterval() {
-        return getString(HEALTH_CHECK_INTERVAL_KEY, DEFAULT_HEALTH_CHECK_INTERVAL);
-    }
-
-    public String getHealthCheckProtocol() {
-        return getString(HEALTH_CHECK_PROTOCOL_KEY, DEFAULT_HEALTH_CHECK_PROTOCOL);
-    }
-
-    public String getHealthCheckPath() {
-        return getString(HEALTH_CHECK_PATH_KEY, DEFAULT_HEALTH_CHECK_PATH);
-    }
-
-    public String getHealthCheckMethod() {
-        return getString(HEALTH_CHECK_METHOD_KEY, DEFAULT_HEALTH_CHECK_METHOD);
     }
 
     private int getInt(String key, int defaultValue) {
@@ -92,7 +70,4 @@ public class PolarisRegistryProperties {
         return defaultValue;
     }
 
-    public enum HealthCheckType {
-        TTL, TCP, HTTP
-    }
 }
