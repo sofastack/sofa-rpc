@@ -95,7 +95,7 @@ public class PolarisRegistry extends Registry {
         serverConnector.setProtocol(properties.getConnectorProtocol());
 
         providerAPI = DiscoveryAPIFactory.createProviderAPIByConfig(configuration);
-        consumerAPI = DiscoveryAPIFactory.createConsumerAPI();
+        consumerAPI = DiscoveryAPIFactory.createConsumerAPIByConfig(configuration);
 
         int coreSize = properties.getHeartbeatCoreSize();
         heartbeatExecutor = Executors.newScheduledThreadPool(coreSize);
@@ -257,8 +257,8 @@ public class PolarisRegistry extends Registry {
         instanceDeregisterRequest.setService(request.getService());
         instanceDeregisterRequest.setHost(request.getHost());
         instanceDeregisterRequest.setPort(request.getPort());
-
         providerAPI.deRegister(instanceDeregisterRequest);
+
         ScheduledFuture future = heartbeatFutures.remove(buildUniqueName(config, request.getProtocol()));
         if (future != null) {
             future.cancel(true);
