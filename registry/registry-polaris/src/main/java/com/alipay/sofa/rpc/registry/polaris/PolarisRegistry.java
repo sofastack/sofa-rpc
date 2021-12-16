@@ -19,6 +19,8 @@ package com.alipay.sofa.rpc.registry.polaris;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -42,6 +44,7 @@ import com.tencent.polaris.api.rpc.InstanceRegisterResponse;
 import com.tencent.polaris.factory.api.DiscoveryAPIFactory;
 import com.tencent.polaris.factory.config.ConfigurationImpl;
 import com.tencent.polaris.factory.config.global.ServerConnectorConfigImpl;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -52,6 +55,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildUniqueName;
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertProviderToMap;
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
@@ -67,9 +71,9 @@ public class PolarisRegistry extends Registry {
 
     private final PolarisRegistryProperties properties;
 
-    ProviderAPI providerAPI;
+    public ProviderAPI providerAPI;
 
-    ConsumerAPI consumerAPI;
+    public ConsumerAPI consumerAPI;
 
     private ScheduledExecutorService heartbeatExecutor;
 
@@ -81,6 +85,10 @@ public class PolarisRegistry extends Registry {
     protected PolarisRegistry(RegistryConfig registryConfig) {
         super(registryConfig);
         this.properties = new PolarisRegistryProperties(registryConfig.getParameters());
+    }
+
+    public static String buildServiceName(AbstractInterfaceConfig config) {
+        return ConfigUniqueNameGenerator.getUniqueName(config);
     }
 
     @Override
@@ -155,52 +163,52 @@ public class PolarisRegistry extends Registry {
     //convert ProviderConfig to polaris registerRequest
     public List<InstanceRegisterRequest> buildPolarisRegister(ProviderConfig config) {
 
-        List<ServerConfig> servers = config.getServer();
-        if (CommonUtils.isEmpty(servers)) {
+        List<ServerConfig> serverConfigs = config.getServer();
+        if (CommonUtils.isEmpty(serverConfigs)) {
             return Collections.emptyList();
         }
 
-        List<InstanceRegisterRequest> res = new ArrayList<>();
-        for (ServerConfig server : servers) {
-            InstanceRegisterRequest service = new InstanceRegisterRequest();
-            service.setNamespace(buildNameSpace(config.getAppName()));
-            service.setService(config.getInterfaceId());
-            service.setHost(getServerHost(server));
-            service.setPort(server.getPort());
-            service.setPriority(config.getPriority());
-            service.setProtocol(server.getProtocol());
-            service.setWeight(config.getWeight());
-            service.setTimeoutMs(config.getTimeout());
-            service.setVersion(config.getVersion());
-            Map<String, String> metaData = convertProviderToMap(config, server);
+        List<InstanceRegisterRequest> requestList = new ArrayList<>();
+        for (ServerConfig serverConfig : serverConfigs) {
+            InstanceRegisterRequest request = new InstanceRegisterRequest();
+            request.setNamespace(buildNameSpace(config.getAppName()));
+            request.setService(buildServiceName(config));
+            request.setHost(getServerHost(serverConfig));
+            request.setPort(serverConfig.getPort());
+            request.setPriority(config.getPriority());
+            request.setProtocol(serverConfig.getProtocol());
+            request.setWeight(config.getWeight());
+            request.setTimeoutMs(config.getTimeout());
+            request.setVersion(config.getVersion());
+            request.setTtl(properties.getHealthCheckTTL());
+            Map<String, String> metaData = convertProviderToMap(config, serverConfig);
             checkAndDelNull(metaData);
-            service.setMetadata(metaData);
-            res.add(service);
+            request.setMetadata(metaData);
+            requestList.add(request);
         }
-        return res;
+        return requestList;
     }
 
     private String buildNameSpace(String appName) {
         return null == appName ? "sofa-default" : appName;
     }
 
-    private void checkAndDelNull(Map<String, String> metaData){
-        metaData.entrySet().removeIf((e)->e.getValue()==null);
+    private void checkAndDelNull(Map<String, String> metaData) {
+        metaData.entrySet().removeIf((e) -> e.getValue() == null);
     }
 
     private void registerPolarisService(ProviderConfig config, InstanceRegisterRequest service) {
-
         InstanceRegisterResponse response = providerAPI.register(service);
         if (service.getTtl() != null) {
             ScheduledFuture<?> scheduledFuture =
                     heartbeatExecutor.scheduleAtFixedRate(
                             () -> heartbeatPolaris(service),
                             0, properties.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
-            ScheduledFuture oldFuture = heartbeatFutures.remove(buildUniqueName(config, service.getProtocol()));
+            ScheduledFuture oldFuture = heartbeatFutures.remove(buildUniqueName(config,service.getProtocol()));
             if (oldFuture != null) {
                 oldFuture.cancel(true);
             }
-            heartbeatFutures.put(response.getInstanceId(), scheduledFuture);
+            heartbeatFutures.put(buildUniqueName(config,service.getProtocol()), scheduledFuture);
         }
     }
 
@@ -259,7 +267,7 @@ public class PolarisRegistry extends Registry {
         instanceDeregisterRequest.setPort(request.getPort());
         providerAPI.deRegister(instanceDeregisterRequest);
 
-        ScheduledFuture future = heartbeatFutures.remove(buildUniqueName(config, request.getProtocol()));
+        ScheduledFuture future = heartbeatFutures.remove(buildUniqueName(config,request.getProtocol()));
         if (future != null) {
             future.cancel(true);
         }
@@ -306,7 +314,7 @@ public class PolarisRegistry extends Registry {
         String uniqueName = buildUniqueName(config, config.getProtocol());
         PolarisWatcher watcher = polarisWatchers.get(uniqueName);
         if (watcher == null) {
-            watcher = new PolarisWatcher(buildNameSpace(config.getAppName()), config.getInterfaceId(), config.getProtocol(), consumerAPI, properties);
+            watcher = new PolarisWatcher(buildNameSpace(config.getAppName()), buildServiceName(config), config.getProtocol(), consumerAPI, properties);
             watcher.init();
             polarisWatchers.put(uniqueName, watcher);
         }

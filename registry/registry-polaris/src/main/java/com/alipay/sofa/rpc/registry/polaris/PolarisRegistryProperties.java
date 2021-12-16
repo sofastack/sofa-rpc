@@ -19,9 +19,12 @@ package com.alipay.sofa.rpc.registry.polaris;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Function;
+
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_HEALTH_CHECK_TTL;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_HEARTBEAT_CORE_SIZE;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_HEARTBEAT_INTERVAL;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.DEFAULT_LOOKUP_INTERVAL;
+import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.HEALTH_CHECK_TTL_KEY;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.HEARTBEAT_CORE_SIZE_KEY;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.HEARTBEAT_INTERVAL_KEY;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.LOOKUP_INTERVAL_KEY;
@@ -40,6 +43,10 @@ public class PolarisRegistryProperties {
 
     public String getConnectorProtocol() {
         return getString(POLARIS_SERVER_CONNECTOR_PROTOCOL_KEY, POLARIS_SERVER_CONNECTOR_PROTOCOL);
+    }
+
+    public int getHealthCheckTTL() {
+        return getInt(HEALTH_CHECK_TTL_KEY, DEFAULT_HEALTH_CHECK_TTL);
     }
 
     public int getHeartbeatInterval() {
