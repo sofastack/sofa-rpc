@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -47,7 +48,8 @@ public class BaggageResolver {
         if (context != null) {
             Map<String, String> requestBaggage = context.getAllRequestBaggage();
             if (CommonUtils.isNotEmpty(requestBaggage)) { // 需要透传
-                request.addRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE, requestBaggage);
+                HashMap<String, String> tmp = new HashMap<>(requestBaggage);
+                request.addRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE, tmp);
             }
         }
     }

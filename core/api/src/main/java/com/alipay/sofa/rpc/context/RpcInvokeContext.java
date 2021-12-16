@@ -19,10 +19,10 @@ package com.alipay.sofa.rpc.context;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.core.util.SafeConcurrentHashMap;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于ThreadLocal的面向业务开发者使用的上下文传递对象
@@ -44,7 +44,7 @@ public class RpcInvokeContext {
     /**
      * 自定义 header ，用完一次即删
      */
-    protected Map<String, String> customHeader = new ConcurrentHashMap<>();
+    protected Map<String, String> customHeader = new SafeConcurrentHashMap<>();
     /**
      * 用户自定义超时时间，单次调用生效
      */
@@ -68,19 +68,19 @@ public class RpcInvokeContext {
     /**
      * 自定义属性
      */
-    protected Map<String, Object> map = new ConcurrentHashMap<>();
+    protected Map<String, Object> map = new SafeConcurrentHashMap<>();
     /**
      * 请求上的透传数据
      *
      * @since 5.1.2
      */
-    protected Map<String, String> requestBaggage = BAGGAGE_ENABLE ? new ConcurrentHashMap<>() : null;
+    protected Map<String, String> requestBaggage = BAGGAGE_ENABLE ? new SafeConcurrentHashMap<>() : null;
     /**
      * 响应上的透传数据
      *
      * @since 5.1.2
      */
-    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new ConcurrentHashMap<>() : null;
+    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new SafeConcurrentHashMap<>() : null;
 
     /**
      * 得到上下文，没有则初始化
@@ -272,7 +272,7 @@ public class RpcInvokeContext {
      */
     public void putAllRequestBaggage(Map<String, String> requestBaggage) {
         if (BAGGAGE_ENABLE && requestBaggage != null) {
-            putAllToBaggage(requestBaggage,this.requestBaggage);
+            putAllToBaggage(requestBaggage, this.requestBaggage);
         }
     }
 
@@ -341,7 +341,7 @@ public class RpcInvokeContext {
      */
     public void putAllResponseBaggage(Map<String, String> responseBaggage) {
         if (BAGGAGE_ENABLE && responseBaggage != null) {
-            putAllToBaggage(responseBaggage,this.responseBaggage);
+            putAllToBaggage(responseBaggage, this.responseBaggage);
         }
     }
 
@@ -441,7 +441,7 @@ public class RpcInvokeContext {
      * @param value header value
      */
     public void addCustomHeader(String key, String value) {
-        if(key!=null&& value !=null){
+        if (key != null && value != null) {
             customHeader.put(key, value);
         }
     }
