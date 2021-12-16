@@ -40,7 +40,7 @@ public class RpcInvokeContext {
      *
      * @since 5.1.2
      */
-    private static final boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
+    private static boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
     /**
      * 自定义 header ，用完一次即删
      */
@@ -272,7 +272,18 @@ public class RpcInvokeContext {
      */
     public void putAllRequestBaggage(Map<String, String> requestBaggage) {
         if (BAGGAGE_ENABLE && requestBaggage != null) {
-            this.requestBaggage.putAll(requestBaggage);
+            putAllToBaggage(requestBaggage,this.requestBaggage);
+        }
+    }
+
+
+    private void putAllToBaggage(Map<String, String> src, Map<String, String> dst) {
+        for (Map.Entry<String, String> entry : src.entrySet()) {
+            String value = entry.getValue();
+            String key = entry.getKey();
+            if (value != null && key != null) {
+                dst.put(key, value);
+            }
         }
     }
 
@@ -330,7 +341,7 @@ public class RpcInvokeContext {
      */
     public void putAllResponseBaggage(Map<String, String> responseBaggage) {
         if (BAGGAGE_ENABLE && responseBaggage != null) {
-            this.responseBaggage.putAll(responseBaggage);
+            putAllToBaggage(responseBaggage,this.responseBaggage);
         }
     }
 
@@ -430,7 +441,9 @@ public class RpcInvokeContext {
      * @param value header value
      */
     public void addCustomHeader(String key, String value) {
-        customHeader.put(key, value);
+        if(key!=null&& value !=null){
+            customHeader.put(key, value);
+        }
     }
 
     public void clearCustomHeader() {
