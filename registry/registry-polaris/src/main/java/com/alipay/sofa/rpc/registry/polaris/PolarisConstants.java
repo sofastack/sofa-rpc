@@ -16,6 +16,11 @@
  */
 package com.alipay.sofa.rpc.registry.polaris;
 
+/**
+ * constants of the consul registry
+ *
+ * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
+ */
 public class PolarisConstants {
 
     public static final String POLARIS_SERVER_CONNECTOR_PROTOCOL_KEY = "connector.protocol";

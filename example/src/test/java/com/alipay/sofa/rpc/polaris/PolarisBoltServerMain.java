@@ -32,7 +32,7 @@ import com.alipay.sofa.rpc.test.HelloServiceImpl;
  * <p>
  *
  *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
  */
 public class PolarisBoltServerMain {
 

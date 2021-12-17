@@ -31,6 +31,12 @@ import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.LOOKUP_INTER
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.POLARIS_SERVER_CONNECTOR_PROTOCOL;
 import static com.alipay.sofa.rpc.registry.polaris.PolarisConstants.POLARIS_SERVER_CONNECTOR_PROTOCOL_KEY;
 
+
+/**
+ * the properties of consul registry
+ *
+ * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
+ */
 public class PolarisRegistryProperties {
     private final Map<String, String> registryParameters;
 

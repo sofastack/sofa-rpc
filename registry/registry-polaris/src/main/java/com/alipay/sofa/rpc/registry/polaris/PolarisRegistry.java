@@ -60,7 +60,10 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.buildUniqueName;
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertProviderToMap;
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
-
+/**
+ * the main logic of polaris registry, similar to consul
+ * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
+ */
 @Extension("polaris")
 public class PolarisRegistry extends Registry {
 

@@ -39,6 +39,12 @@ import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertInstanceToUrl;
 
+
+/**
+ * observe the providers from polaris and notify the consumers
+ *
+ * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
+ */
 public class PolarisWatcher {
     private static final Logger LOGGER = LoggerFactory
             .getLogger(PolarisWatcher.class);
