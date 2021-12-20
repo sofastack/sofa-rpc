@@ -40,7 +40,6 @@ import com.tencent.polaris.api.core.ProviderAPI;
 import com.tencent.polaris.api.rpc.InstanceDeregisterRequest;
 import com.tencent.polaris.api.rpc.InstanceHeartbeatRequest;
 import com.tencent.polaris.api.rpc.InstanceRegisterRequest;
-import com.tencent.polaris.api.rpc.InstanceRegisterResponse;
 import com.tencent.polaris.factory.api.DiscoveryAPIFactory;
 import com.tencent.polaris.factory.config.ConfigurationImpl;
 import com.tencent.polaris.factory.config.global.ServerConnectorConfigImpl;
@@ -201,7 +200,7 @@ public class PolarisRegistry extends Registry {
     }
 
     private void registerPolarisService(ProviderConfig config, InstanceRegisterRequest service) {
-        InstanceRegisterResponse response = providerAPI.register(service);
+        providerAPI.register(service);
         if (service.getTtl() != null) {
             ScheduledFuture<?> scheduledFuture =
                     heartbeatExecutor.scheduleAtFixedRate(
