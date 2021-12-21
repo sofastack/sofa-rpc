@@ -27,6 +27,7 @@ import java.util.Comparator;
  * @param <T> the type parameter
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
+@Deprecated
 public class OrderedComparator<T extends Sortable> implements Comparator<T>, Serializable {
 
     /**
@@ -53,7 +54,10 @@ public class OrderedComparator<T extends Sortable> implements Comparator<T>, Ser
     @Override
     public int compare(T o1, T o2) {
         // order一样的情况下，顺序不变
-        return order ? o1.getOrder() - o2.getOrder() :
-            o2.getOrder() - o1.getOrder();
+        Comparator<Sortable> comparator = Comparator.comparingInt(Sortable::getOrder);
+        if (!order) {
+            comparator = comparator.reversed();
+        }
+        return comparator.compare(o1, o2);
     }
 }

@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.common;
 import com.alipay.sofa.rpc.base.Sortable;
 import com.alipay.sofa.rpc.common.annotation.JustForTest;
 import com.alipay.sofa.rpc.common.json.JSON;
-import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.CompatibleTypeUtils;
@@ -32,7 +31,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -116,7 +115,7 @@ public class RpcConfigs {
                     }
                 }
             }
-            Collections.sort(allFile, new OrderedComparator<CfgFile>()); // 从小到大排下序
+            allFile.sort(Comparator.comparingInt(CfgFile::getOrder));
             for (CfgFile file : allFile) {
                 CFG.putAll(file.getMap()); // 顺序加载，越大越后加载
             }
