@@ -39,29 +39,28 @@ import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertInstanceToUrl;
 
-
 /**
  * observe the providers from polaris and notify the consumers
  *
  * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
  */
 public class PolarisWatcher {
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(PolarisWatcher.class);
+    private static final Logger        LOGGER = LoggerFactory
+                                                  .getLogger(PolarisWatcher.class);
 
-    private String nameSpace;
-    private String serviceName;
-    private String protocol;
+    private String                     nameSpace;
+    private String                     serviceName;
+    private String                     protocol;
 
-    private InstancesResponse currentData;
+    private InstancesResponse          currentData;
 
-    private ConsumerAPI consumerAPI;
+    private ConsumerAPI                consumerAPI;
 
-    private PolarisRegistryProperties properties;
+    private PolarisRegistryProperties  properties;
 
     private List<ProviderInfoListener> listeners;
 
-    private ScheduledExecutorService watchExecutor;
+    private ScheduledExecutorService   watchExecutor;
 
     public PolarisWatcher(String nameSpace, String serviceName, String protocol, ConsumerAPI consumerAPI, PolarisRegistryProperties properties) {
         this.nameSpace = nameSpace;
