@@ -17,13 +17,12 @@
 package com.alipay.sofa.rpc.common;
 
 import com.alipay.sofa.rpc.base.Sortable;
-import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.locks.Lock;
@@ -198,7 +197,7 @@ public final class SofaConfigs {
         wLock.lock();
         try {
             CONFIG_LOADERS.add(configLoader);
-            Collections.sort(CONFIG_LOADERS, new OrderedComparator<ExternalConfigLoader>());
+            CONFIG_LOADERS.sort(Comparator.comparingInt(ExternalConfigLoader::getOrder));
         } finally {
             wLock.unlock();
         }
@@ -213,7 +212,7 @@ public final class SofaConfigs {
         wLock.lock();
         try {
             CONFIG_LOADERS.remove(configLoader);
-            Collections.sort(CONFIG_LOADERS, new OrderedComparator<ExternalConfigLoader>());
+            CONFIG_LOADERS.sort(Comparator.comparingInt(ExternalConfigLoader::getOrder));
         } finally {
             wLock.unlock();
         }

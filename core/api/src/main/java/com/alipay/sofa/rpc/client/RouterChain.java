@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -31,6 +30,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -165,7 +165,7 @@ public class RouterChain {
         excludes = null; // 不需要了
         // 按order从小到大排序
         if (extensionRouters.size() > 1) {
-            Collections.sort(extensionRouters, new OrderedComparator<ExtensionClass>());
+            extensionRouters.sort(Comparator.comparingInt(ExtensionClass::getOrder));
         }
         List<Router> actualRouters = new ArrayList<Router>();
         for (ExtensionClass<Router> extensionRouter : extensionRouters) {
