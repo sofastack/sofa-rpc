@@ -16,6 +16,10 @@
  */
 package com.alipay.sofa.rpc.triple;
 
+import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
+import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.common.tracer.core.utils.TracerUtils;
+
 /**
  * @author zhaowang
  * @version : TripleHessianInterfaceImpl.java, v 0.1 2020年06月11日 11:29 上午 zhaowang Exp $
@@ -52,5 +56,11 @@ public class TripleHessianInterfaceImpl implements TripleHessianInterface {
 
     public String getFlag() {
         return flag;
+    }
+
+    @Override
+    public boolean testPressureMark(String name) {
+        SofaTracerSpan currentSpan = SofaTraceContextHolder.getSofaTraceContext().getCurrentSpan();
+        return TracerUtils.isLoadTest(currentSpan);
     }
 }

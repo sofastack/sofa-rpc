@@ -20,8 +20,8 @@ import com.alipay.common.tracer.core.SofaTracer;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.common.tracer.core.utils.TracerUtils;
-import com.alipay.sofa.rpc.common.MetadataHolder;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -33,6 +33,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.alipay.sofa.rpc.filter.PressureMarkTransformFilter.PRESSURE;
@@ -55,6 +56,9 @@ public class PressureMarkTransformFilterTest {
 
     @After
     public void after() {
+        invoker.getMetaHolder().clear();
+        // mock ConsumerCustomHeaderFilter
+        RpcInvokeContext.getContext().clearCustomHeader();
         SofaTraceContextHolder.getSofaTraceContext().clear();
     }
 
@@ -124,7 +128,7 @@ public class PressureMarkTransformFilterTest {
 
         @Override
         public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
-            this.metaHolder = MetadataHolder.getMetaHolder();
+            this.metaHolder = new HashMap<>(RpcInvokeContext.getContext().getCustomHeader());
             return null;
         }
     }
