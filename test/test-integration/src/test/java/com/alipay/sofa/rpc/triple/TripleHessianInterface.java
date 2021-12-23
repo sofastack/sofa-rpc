@@ -28,4 +28,5 @@ public interface TripleHessianInterface {
 
     Response call2(Request request);
 
+    boolean testPressureMark(String name);
 }

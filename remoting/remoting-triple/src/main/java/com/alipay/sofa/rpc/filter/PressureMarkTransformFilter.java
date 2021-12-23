@@ -19,15 +19,13 @@ package com.alipay.sofa.rpc.filter;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.common.tracer.core.utils.TracerUtils;
-import com.alipay.sofa.rpc.common.MetadataHolder;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import io.grpc.Metadata;
-
-import java.util.Map;
 
 import static com.alipay.sofa.rpc.server.triple.TripleHeadKeys.HEAD_KEY_TRAFFIC_TYPE;
 
@@ -51,8 +49,7 @@ public class PressureMarkTransformFilter extends Filter {
         SofaTracerSpan currentSpan = SofaTraceContextHolder.getSofaTraceContext().getCurrentSpan();
         boolean loadTest = TracerUtils.isLoadTest(currentSpan);
         if (loadTest) {
-            Map<String, String> metaHolder = MetadataHolder.getMetaHolder();
-            metaHolder.put(HEAD_KEY_TRAFFIC_TYPE.name(), PRESSURE);
+            RpcInvokeContext.getContext().addCustomHeader(HEAD_KEY_TRAFFIC_TYPE.name(), PRESSURE);
         }
 
         // provider side ,if in consumer side, metadata == null
@@ -63,10 +60,6 @@ public class PressureMarkTransformFilter extends Filter {
                 currentSpan.getSofaTracerSpanContext().setBizBaggageItem(MARK, T);
             }
         }
-        try {
-            return invoker.invoke(request);
-        } finally {
-            MetadataHolder.clear();
-        }
+        return invoker.invoke(request);
     }
 }
