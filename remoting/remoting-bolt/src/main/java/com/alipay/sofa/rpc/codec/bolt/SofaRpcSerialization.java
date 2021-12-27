@@ -86,13 +86,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 try {
                     header = mapSerializer.encode(sofaResponse.getResponseProps());
                 } catch (Exception e) {
-                    String traceId = "";
-                    String rpcId = "";
-                    try {
-                        traceId = (String)RpcInternalContext.getContext().getAttachment("_trace_id");
-                        rpcId = (String)RpcInternalContext.getContext().getAttachment("_span_id");
-                        LOGGER.error("traceId={}, rpcId={} Response serializeHeader exception, msg={}", traceId, rpcId, e.getMessage(), e);
-                    } catch (Throwable ignore) {}
+                    String traceId = (String) RpcInternalContext.getContext().getAttachment("_trace_id");
+                    String rpcId = (String) RpcInternalContext.getContext().getAttachment("_span_id");
+                    LOGGER.error("traceId={}, rpcId={}, Response serializeHeader exception, msg={}", traceId, rpcId, e.getMessage(), e);
                     throw new SerializationException(e.getMessage() + ", traceId=" + traceId + ", rpcId=" + rpcId, e);
                 }
                 response.setHeader(header);
@@ -263,7 +259,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 throw new DeserializationException("Head of request is null or is not map");
             }
             Map<String, String> headerMap = (Map<String, String>) header;
-
+            String traceId = headerMap.get("rpc_trace_context.sofaTraceId");
+            String rpcId = headerMap.get("rpc_trace_context.sofaRpcId");
             byte[] content = requestCommand.getContent();
             if (content == null || content.length == 0) {
                 throw new DeserializationException("Content of request is null");
@@ -295,14 +292,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                 return true;
             } catch (Exception ex) {
-                String traceId = "";
-                String rpcId = "";
-                try {
-                    traceId = headerMap.get("rpc_trace_context.sofaTraceId");
-                    rpcId = headerMap.get("rpc_trace_context.sofaRpcId");
-                    LOGGER.error("traceId={}, rpcId={} Request deserializeContent exception, msg={}", traceId, rpcId, ex.getMessage(), ex);
-                } catch (Throwable t) {}
-                throw new DeserializationException(ex.getMessage() + ", traceid=" + traceId + ", rpcId=" + rpcId,, ex);
+                LOGGER.error("traceId={}, rpcId={}, Request deserializeContent exception, msg={}", traceId, rpcId, ex.getMessage(), ex);
+                throw new DeserializationException(ex.getMessage() + ", traceId=" + traceId + ", rpcId=" + rpcId, ex);
             } finally {
                 // R6：Record request deserialization time
                 recordDeserializeRequest(requestCommand, deserializeStartTime);
@@ -391,14 +382,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 responseCommand.setContent(byteBuf.array());
                 return true;
             } catch (Exception ex) {
-                String traceId = "";
-                String rpcId = "";
-                try {
-                    traceId = (String)RpcInternalContext.getContext().getAttachment("_trace_id");
-                    rpcId = (String)RpcInternalContext.getContext().getAttachment("_span_id");
-                    LOGGER.error("traceId = {}, rpcId = {} Response serializeContent exception, msg = {}", traceId, rpcId, ex.getMessage(), ex);
-                } catch (Throwable t) {}
-
+                String traceId = (String) RpcInternalContext.getContext().getAttachment("_trace_id");
+                String rpcId = (String) RpcInternalContext.getContext().getAttachment("_span_id");
+                LOGGER.error("traceId={}, rpcId={}, Response serializeContent exception, msg = {}", traceId, rpcId, ex.getMessage(), ex);
                 throw new SerializationException(ex.getMessage() + ", traceId=" + traceId + ", rpcId=" + rpcId, ex);
             } finally {
                 // R6：Record response serialization time
