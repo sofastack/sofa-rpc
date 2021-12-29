@@ -261,12 +261,12 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             Map<String, String> headerMap = (Map<String, String>) header;
             String traceId = headerMap.get("rpc_trace_context.sofaTraceId");
             String rpcId = headerMap.get("rpc_trace_context.sofaRpcId");
-            byte[] content = requestCommand.getContent();
-            if (content == null || content.length == 0) {
-                throw new DeserializationException("Content of request is null");
-            }
             long deserializeStartTime = System.nanoTime();
             try {
+                byte[] content = requestCommand.getContent();
+                if (content == null || content.length == 0) {
+                    throw new DeserializationException("Content of request is null");
+                }
                 String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
 
