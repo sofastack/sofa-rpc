@@ -18,7 +18,7 @@ import static org.junit.Assert.*;
 public class SofaRpcSerializationTest {
 
     @Test
-    public void deserializeContent() {
+    public void deserializeRequestContent() {
         String traceId = "traceId";
         String rpcId = "rpcId";
         Map<String, String> headerMap = new HashMap<>();
@@ -39,7 +39,7 @@ public class SofaRpcSerializationTest {
     }
 
     @Test
-    public void serializeContent() {
+    public void serializeResponseContent() {
         String traceId = "traceId";
         String rpcId = "rpcId";
         RpcInternalContext.getContext().setAttachment("_trace_id", traceId);
