@@ -34,8 +34,4 @@ public class HelloServiceFallback implements HelloService{
         return "fallback msg from server!: " + msg;
     }
 
-    public Object $invoke(String msg, Integer waitTime) {
-        return "fallback from server! error: ";
-    }
-
 }
