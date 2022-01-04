@@ -55,4 +55,17 @@ public class HelloServiceImpl implements HelloService {
         }
         return result != null ? result : "hello " + name + " from server! age: " + age;
     }
+
+    @Override
+    public String sendMsg(String msg, Integer waitTime) {
+        LOGGER.info("msg receive:" + msg);
+        if (waitTime > 0) {
+            try {
+                Thread.sleep(waitTime);
+            } catch (Exception ignore) {
+            }
+        }
+        LOGGER.info("msg send:" + msg);
+        return "Rpc server receive msg: " + msg;
+    }
 }

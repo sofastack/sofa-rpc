@@ -14,16 +14,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test;
+package com.alipay.sofa.rpc.hystrix;
+
+import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.filter.FilterInvoker;
+import com.alipay.sofa.rpc.test.HelloService;
+import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixCommandKey;
 
 /**
- *
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author BaoYi
+ * @date 2021/12/26 3:26 PM
  */
-public interface HelloService {
+public class CustomSetterFactory implements SetterFactory {
 
-    String sayHello(String name, int age);
-
-    String sendMsg(String msg, Integer waitTime);
+    @Override
+    public HystrixCommand.Setter createSetter(FilterInvoker invoker, SofaRequest request) {
+        return HystrixCommand.Setter
+            .withGroupKey(HystrixCommandGroupKey.Factory.asKey(HelloService.class.getSimpleName()))
+            .andCommandKey(HystrixCommandKey.Factory.asKey("sendMsg"));
+    }
 }
