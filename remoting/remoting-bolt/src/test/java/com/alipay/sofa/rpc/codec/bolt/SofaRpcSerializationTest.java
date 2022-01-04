@@ -5,15 +5,10 @@ import com.alipay.remoting.exception.SerializationException;
 import com.alipay.remoting.rpc.protocol.RpcRequestCommand;
 import com.alipay.remoting.rpc.protocol.RpcResponseCommand;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
-import javafx.collections.ObservableMap;
 import org.junit.Assert;
 import org.junit.Test;
-
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.junit.Assert.*;
 
 public class SofaRpcSerializationTest {
 
