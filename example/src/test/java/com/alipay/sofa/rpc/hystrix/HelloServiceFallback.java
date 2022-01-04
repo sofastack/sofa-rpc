@@ -16,15 +16,13 @@
  */
 package com.alipay.sofa.rpc.hystrix;
 
-import com.alipay.sofa.rpc.api.GenericContext;
-import com.alipay.sofa.rpc.api.GenericService;
 import com.alipay.sofa.rpc.test.HelloService;
 
 /**
  * @author BaoYi
  * @date 2021/12/26 1:19 PM
  */
-public class HelloServiceFallback implements HelloService, GenericService {
+public class HelloServiceFallback implements HelloService{
 
     @Override
     public String sayHello(String name, int age) {
@@ -40,29 +38,4 @@ public class HelloServiceFallback implements HelloService, GenericService {
         return "fallback from server! error: ";
     }
 
-    @Override
-    public Object $invoke(String methodName, String[] argTypes, Object[] args) {
-        return "fallback from server! error: ";
-    }
-
-    @Override
-    public Object $genericInvoke(String methodName, String[] argTypes, Object[] args) {
-        return null;
-    }
-
-    @Override
-    public <T> T $genericInvoke(String methodName, String[] argTypes, Object[] args, Class<T> clazz) {
-        return null;
-    }
-
-    @Override
-    public Object $genericInvoke(String methodName, String[] argTypes, Object[] args, GenericContext context) {
-        return null;
-    }
-
-    @Override
-    public <T> T $genericInvoke(String methodName, String[] argTypes, Object[] args, Class<T> clazz,
-                                GenericContext context) {
-        return null;
-    }
 }
