@@ -64,8 +64,7 @@ public class SofaRpcSerializationTest {
             sofaRpcSerialization.serializeContent(command);
         } catch (SerializationException e) {
             exp = true;
-            Assert.assertEquals("RPC-020050008: 未找到 Serializer,type:[1]. , traceId=" + traceId + ", rpcId=" + rpcId,
-                e.getMessage());
+            Assert.assertTrue(e.getMessage().contains("traceId=" + traceId + ", rpcId=" + rpcId));
         }
         Assert.assertTrue(exp);
     }
