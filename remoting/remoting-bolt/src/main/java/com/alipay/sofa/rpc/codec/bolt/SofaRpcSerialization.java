@@ -55,7 +55,7 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
  */
 public class SofaRpcSerialization extends DefaultCustomSerializer {
 
-    private static final Logger LOGGER     = LoggerFactory.getLogger(SofaRpcSerialization.class);
+    private static final Logger   LOGGER = LoggerFactory.getLogger(SofaRpcSerialization.class);
 
     protected SimpleMapSerializer mapSerializer;
 
@@ -88,7 +88,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                 } catch (Exception e) {
                     String traceId = (String) RpcInternalContext.getContext().getAttachment("_trace_id");
                     String rpcId = (String) RpcInternalContext.getContext().getAttachment("_span_id");
-                    LOGGER.error("traceId={}, rpcId={}, Response serializeHeader exception, msg={}", traceId, rpcId, e.getMessage(), e);
+                    LOGGER.error("traceId={}, rpcId={}, Response serializeHeader exception, msg={}", traceId, rpcId,
+                        e.getMessage(), e);
                     throw new SerializationException(e.getMessage() + ", traceId=" + traceId + ", rpcId=" + rpcId, e);
                 }
                 response.setHeader(header);
@@ -292,7 +293,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
 
                 return true;
             } catch (Exception ex) {
-                LOGGER.error("traceId={}, rpcId={}, Request deserializeContent exception, msg={}", traceId, rpcId, ex.getMessage(), ex);
+                LOGGER.error("traceId={}, rpcId={}, Request deserializeContent exception, msg={}", traceId, rpcId,
+                    ex.getMessage(), ex);
                 throw new DeserializationException(ex.getMessage() + ", traceId=" + traceId + ", rpcId=" + rpcId, ex);
             } finally {
                 // R6：Record request deserialization time
@@ -384,7 +386,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } catch (Exception ex) {
                 String traceId = (String) RpcInternalContext.getContext().getAttachment("_trace_id");
                 String rpcId = (String) RpcInternalContext.getContext().getAttachment("_span_id");
-                LOGGER.error("traceId={}, rpcId={}, Response serializeContent exception, msg = {}", traceId, rpcId, ex.getMessage(), ex);
+                LOGGER.error("traceId={}, rpcId={}, Response serializeContent exception, msg = {}", traceId, rpcId,
+                    ex.getMessage(), ex);
                 throw new SerializationException(ex.getMessage() + ", traceId=" + traceId + ", rpcId=" + rpcId, ex);
             } finally {
                 // R6：Record response serialization time
