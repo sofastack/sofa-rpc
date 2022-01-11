@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.server.UserThreadPool;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -76,4 +78,13 @@ public class UserThreadPoolManager {
         return userThreadMap == null ? null : userThreadMap.get(service);
     }
 
+    public static Map<String, UserThreadPool> getUserThreadPoolMap() {
+        Map<String, UserThreadPool> userThreadPoolMap = new HashMap<>();
+        if (hasUserThread()) {
+            for (UserThreadPool userThreadPool : userThreadMap.values()) {
+                userThreadPoolMap.put(userThreadPool.getThreadPoolName(), userThreadPool);
+            }
+        }
+        return userThreadPoolMap;
+    }
 }
