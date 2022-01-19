@@ -82,9 +82,7 @@ public class UserThreadPoolManager {
         Map<String, UserThreadPool> userThreadPoolMap = new HashMap<>();
         if (hasUserThread()) {
             for (UserThreadPool userThreadPool : userThreadMap.values()) {
-                //appending object hashCode reason：user may not set a unique name, now threadPoolName is always "SofaUserProcessor"
-                String uniqueName = userThreadPool.getThreadPoolName() + "-" + userThreadPool.hashCode();
-                userThreadPoolMap.put(uniqueName, userThreadPool);
+                userThreadPoolMap.put(userThreadPool.getThreadPoolName(), userThreadPool);
             }
         }
         return userThreadPoolMap;

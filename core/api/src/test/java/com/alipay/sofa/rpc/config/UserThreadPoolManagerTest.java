@@ -28,12 +28,19 @@ public class UserThreadPoolManagerTest {
         Map<String, UserThreadPool> userThreadPoolMap = UserThreadPoolManager.getUserThreadPoolMap();
         Assert.assertTrue(userThreadPoolMap.size() == 0);
 
-        UserThreadPoolManager.registerUserThread("service1", new UserThreadPool());
+        UserThreadPool pool1 = new UserThreadPool();
+        Assert.assertEquals(pool1.getThreadPoolName(), UserThreadPool.DEFAUT_POOL_NAME + "-0");
+
+        UserThreadPoolManager.registerUserThread("service1", pool1);
         userThreadPoolMap = UserThreadPoolManager.getUserThreadPoolMap();
         Assert.assertTrue(userThreadPoolMap.size() == 1);
 
-        UserThreadPoolManager.registerUserThread("service2", new UserThreadPool());
+        UserThreadPool pool2 = new UserThreadPool();
+        Assert.assertEquals(pool2.getThreadPoolName(), UserThreadPool.DEFAUT_POOL_NAME + "-1");
+
+        UserThreadPoolManager.registerUserThread("service2", pool2);
         userThreadPoolMap = UserThreadPoolManager.getUserThreadPoolMap();
         Assert.assertTrue(userThreadPoolMap.size() == 2);
+
     }
 }

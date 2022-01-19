@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
 
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 给用户配置的自定义业务线程池
@@ -29,6 +30,16 @@ import java.util.concurrent.TimeUnit;
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public class UserThreadPool {
+    public static final String         DEFAUT_POOL_NAME  = "SofaUserProcessor";
+    private static final AtomicInteger POOL_NAME_COUNTER = new AtomicInteger(0);
+
+    public UserThreadPool() {
+        this.threadPoolName = DEFAUT_POOL_NAME + "-" + POOL_NAME_COUNTER.getAndIncrement();
+    }
+
+    public UserThreadPool(String threadPoolName) {
+        this.threadPoolName = threadPoolName;
+    }
 
     /**
      * 核心线程池
@@ -59,7 +70,7 @@ public class UserThreadPool {
      *
      * @see ThreadPoolExecutor#threadFactory#threadPoolName
      */
-    private String                        threadPoolName  = "SofaUserProcessor";
+    private String                        threadPoolName;
     /**
      * 是否关闭核心线程池
      *
