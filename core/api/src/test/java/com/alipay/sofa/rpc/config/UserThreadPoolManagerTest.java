@@ -19,28 +19,34 @@ package com.alipay.sofa.rpc.config;
 import com.alipay.sofa.rpc.server.UserThreadPool;
 import org.junit.Assert;
 import org.junit.Test;
-import java.util.Map;
+import java.util.Set;
 
 public class UserThreadPoolManagerTest {
     @Test
     public void getUserThreadPoolMap() {
 
-        Map<String, UserThreadPool> userThreadPoolMap = UserThreadPoolManager.getUserThreadPoolMap();
-        Assert.assertTrue(userThreadPoolMap.size() == 0);
+        Set<UserThreadPool> userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
+        Assert.assertTrue(userThreadPoolSet.isEmpty());
 
         UserThreadPool pool1 = new UserThreadPool();
         Assert.assertEquals(pool1.getThreadPoolName(), UserThreadPool.DEFAUT_POOL_NAME + "-0");
 
         UserThreadPoolManager.registerUserThread("service1", pool1);
-        userThreadPoolMap = UserThreadPoolManager.getUserThreadPoolMap();
-        Assert.assertTrue(userThreadPoolMap.size() == 1);
+        userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
+        Assert.assertTrue(userThreadPoolSet.size() == 1);
 
         UserThreadPool pool2 = new UserThreadPool();
         Assert.assertEquals(pool2.getThreadPoolName(), UserThreadPool.DEFAUT_POOL_NAME + "-1");
 
         UserThreadPoolManager.registerUserThread("service2", pool2);
-        userThreadPoolMap = UserThreadPoolManager.getUserThreadPoolMap();
-        Assert.assertTrue(userThreadPoolMap.size() == 2);
+        userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
+        Assert.assertTrue(userThreadPoolSet.size() == 2);
 
+        UserThreadPool pool3 = new UserThreadPool("samePoolName");
+        UserThreadPoolManager.registerUserThread("service3", pool3);
+        UserThreadPool pool4 = new UserThreadPool("samePoolName");
+        UserThreadPoolManager.registerUserThread("service4", pool4);
+        userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
+        Assert.assertTrue(userThreadPoolSet.size() == 4);
     }
 }

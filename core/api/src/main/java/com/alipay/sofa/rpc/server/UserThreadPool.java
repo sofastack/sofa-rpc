@@ -37,8 +37,8 @@ public class UserThreadPool {
         this.threadPoolName = DEFAUT_POOL_NAME + "-" + POOL_NAME_COUNTER.getAndIncrement();
     }
 
-    public UserThreadPool(String threadPoolName) {
-        this.threadPoolName = threadPoolName;
+    public UserThreadPool(String uniqueThreadPoolName) {
+        this.threadPoolName = uniqueThreadPoolName;
     }
 
     /**
