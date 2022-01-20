@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.utils;
 
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
@@ -61,15 +60,6 @@ public class SofaProtoUtils {
         }
 
         return true;
-    }
-
-    public static String getFullNameWithUniqueId(String fullMethodName, String uniqueId) {
-        int i = fullMethodName.indexOf("/");
-        if (i > 0 && StringUtils.isNotBlank(uniqueId)) {
-            String[] split = fullMethodName.split("/");
-            fullMethodName = split[0] + "." + uniqueId + "/" + split[1];
-        }
-        return fullMethodName;
     }
 
 }
