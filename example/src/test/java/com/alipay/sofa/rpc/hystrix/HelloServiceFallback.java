@@ -22,7 +22,7 @@ import com.alipay.sofa.rpc.test.HelloService;
  * @author BaoYi
  * @date 2021/12/26 1:19 PM
  */
-public class HelloServiceFallback implements HelloService{
+public class HelloServiceFallback implements HelloService {
 
     @Override
     public String sayHello(String name, int age) {
