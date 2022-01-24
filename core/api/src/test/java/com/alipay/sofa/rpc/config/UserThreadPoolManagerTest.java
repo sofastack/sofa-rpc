@@ -29,14 +29,14 @@ public class UserThreadPoolManagerTest {
         Assert.assertTrue(userThreadPoolSet.isEmpty());
 
         UserThreadPool pool1 = new UserThreadPool();
-        Assert.assertEquals(pool1.getThreadPoolName(), UserThreadPool.DEFAUT_POOL_NAME + "-0");
+        Assert.assertTrue(pool1.getThreadPoolName().startsWith(UserThreadPool.DEFAUT_POOL_NAME + "-"));
 
         UserThreadPoolManager.registerUserThread("service1", pool1);
         userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
         Assert.assertTrue(userThreadPoolSet.size() == 1);
 
         UserThreadPool pool2 = new UserThreadPool();
-        Assert.assertEquals(pool2.getThreadPoolName(), UserThreadPool.DEFAUT_POOL_NAME + "-1");
+        Assert.assertTrue(pool2.getThreadPoolName().startsWith(UserThreadPool.DEFAUT_POOL_NAME + "-"));
 
         UserThreadPoolManager.registerUserThread("service2", pool2);
         userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
