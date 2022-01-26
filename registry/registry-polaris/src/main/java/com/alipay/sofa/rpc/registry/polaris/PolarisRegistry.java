@@ -61,6 +61,7 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.getServerHost;
 
 /**
  * the main logic of polaris registry, similar to consul
+ *
  * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
  */
 @Extension("polaris")
@@ -95,6 +96,9 @@ public class PolarisRegistry extends Registry {
 
     @Override
     public void init() {
+        if (providerAPI != null) {
+            return;
+        }
 
         ConfigurationImpl configuration = new ConfigurationImpl();
         //init configuration
@@ -149,8 +153,7 @@ public class PolarisRegistry extends Registry {
                             LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, config.getInterfaceId()));
                 }
             }
-        } catch (
-                SofaRpcRuntimeException e) {
+        } catch (SofaRpcRuntimeException e) {
             throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_REG_PROVIDER, "polarisRegistry", config.buildKey()), e);
@@ -206,11 +209,10 @@ public class PolarisRegistry extends Registry {
                     heartbeatExecutor.scheduleAtFixedRate(
                             () -> heartbeatPolaris(service),
                             0, properties.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
-            ScheduledFuture oldFuture = heartbeatFutures.remove(buildUniqueName(config,service.getProtocol()));
+            ScheduledFuture oldFuture = heartbeatFutures.put(buildUniqueName(config, service.getProtocol()), scheduledFuture);
             if (oldFuture != null) {
                 oldFuture.cancel(true);
             }
-            heartbeatFutures.put(buildUniqueName(config,service.getProtocol()), scheduledFuture);
         }
     }
 
@@ -269,7 +271,7 @@ public class PolarisRegistry extends Registry {
         instanceDeregisterRequest.setPort(request.getPort());
         providerAPI.deRegister(instanceDeregisterRequest);
 
-        ScheduledFuture future = heartbeatFutures.remove(buildUniqueName(config,request.getProtocol()));
+        ScheduledFuture future = heartbeatFutures.remove(buildUniqueName(config, request.getProtocol()));
         if (future != null) {
             future.cancel(true);
         }

@@ -27,12 +27,10 @@
         <dependency>
             <groupId>com.tencent.polaris</groupId>
             <artifactId>polaris-discovery-factory</artifactId>
-            <version>1.2.2</version>
         </dependency>
         <dependency>
             <groupId>com.tencent.polaris</groupId>
             <artifactId>polaris-test-mock-discovery</artifactId>
-            <version>1.2.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -107,17 +105,5 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>jdk6</id>
-            <activation>
-                <jdk>1.6</jdk>
-            </activation>
-            <properties>
-                <skipTests>true</skipTests>
-            </properties>
-        </profile>
-    </profiles>
 
 </project>
