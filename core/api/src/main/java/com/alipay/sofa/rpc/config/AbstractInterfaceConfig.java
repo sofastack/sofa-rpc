@@ -253,7 +253,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      */
     public ApplicationConfig getApplication() {
         if (application == null) {
-            // TODO codes never reached
             application = new ApplicationConfig();
         }
         return application;
@@ -531,7 +530,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the cache ref
      */
     public Cache getCacheRef() {
-        // todo not used
         return cacheRef;
     }
 
@@ -542,7 +540,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the cache ref
      */
     public S setCacheRef(Cache cacheRef) {
-        // todo not used
         this.cacheRef = cacheRef;
         return castThis();
     }
@@ -625,7 +622,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the boolean
      */
     public boolean isValidation() {
-        // TODO not used
         return validation;
     }
 
@@ -636,7 +632,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the validation
      */
     public S setValidation(boolean validation) {
-        // todo not used
         this.validation = validation;
         return castThis();
     }
@@ -647,7 +642,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the compress
      */
     public String getCompress() {
-        // todo not used
         return compress;
     }
 
@@ -658,7 +652,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the compress
      */
     public S setCompress(String compress) {
-        // todo not used
         this.compress = compress;
         return castThis();
     }
@@ -669,7 +662,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the boolean
      */
     public boolean isCache() {
-        // TODO not used
         return cache;
     }
 
@@ -680,7 +672,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the cache
      */
     public S setCache(boolean cache) {
-        // todo not used
         this.cache = cache;
         return castThis();
     }
@@ -691,7 +682,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the config value cache
      */
     public Map<String, Object> getConfigValueCache() {
-        // TODO not used
         return configValueCache;
     }
 
@@ -735,7 +725,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the validation
      */
     public boolean hasValidation() {
-        // todo not used
         if (validation) {
             return true;
         }
@@ -755,7 +744,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return 是否配置了cache boolean
      */
     public boolean hasCache() {
-        // todo not used
         if (isCache()) {
             return true;
         }
@@ -775,7 +763,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return 是否配置了token boolean
      */
     public boolean hasToken() {
-        // TODO not used
         if (getParameter(RpcConstants.HIDDEN_KEY_TOKEN) != null) {
             return true;
         }
@@ -828,7 +815,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return method config
      */
     private MethodConfig getMethodConfig(String methodName) {
-        // TODO testMethod
         if (methods == null) {
             return null;
         }

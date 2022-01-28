@@ -14,16 +14,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.std;
-
-import org.junit.runner.RunWith;
-import org.mockito.junit.MockitoJUnitRunner;
+package com.alipay.sofa.rpc.std.sample;
 
 /**
  * @author zhaowang
- * @version : AbstractMockitoTest.java, v 0.1 2022年01月25日 4:02 下午 zhaowang
+ * @version : SampleServiceImpl.java, v 0.1 2022年01月28日 2:55 下午 zhaowang
  */
-@RunWith(MockitoJUnitRunner.Strict.class)
-public abstract class AbstractMockitoTest {
-
+public class SampleServiceImpl implements SampleService {
 }
