@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.registry.polaris;
 
 /**
- * constants of the consul registry
+ * constants of the polaris registry
  *
  * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
  */

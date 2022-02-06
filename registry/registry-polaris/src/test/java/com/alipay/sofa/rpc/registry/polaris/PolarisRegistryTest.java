@@ -43,15 +43,15 @@ import static com.tencent.polaris.api.exception.ErrorCode.SERVER_USER_ERROR;
 
 public class PolarisRegistryTest {
 
-    private static final String APPNAME      = "polaris-test";
-    private static final String INTERFACE_ID = "com.alipay.sofa.rpc.registry.polaris.TestService";
-    private static final String NAMESPACE    = APPNAME;
-    private static final String SERVICE      = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-1";
-    private static final String SERVICE_1    = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-2";
+    private static final String    APPNAME      = "polaris-test";
+    private static final String    INTERFACE_ID = "com.alipay.sofa.rpc.registry.polaris.TestService";
+    private static final String    NAMESPACE    = APPNAME;
+    private static final String    SERVICE      = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-1";
+    private static final String    SERVICE_1    = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-2";
 
-    private static NamingServer        polaris;
-    private static RegistryConfig      registryConfig;
-    private static PolarisRegistry     registry;
+    private static NamingServer    polaris;
+    private static RegistryConfig  registryConfig;
+    private static PolarisRegistry registry;
 
     @BeforeClass
     static public void setup() {
@@ -116,7 +116,7 @@ public class PolarisRegistryTest {
     public void testSubscribe() {
         polaris.getNamingService().addService(new ServiceKey(NAMESPACE, SERVICE));
 
-        //regiter
+        //register
         ProviderConfig<?> providerConfig = providerConfig("polaris-test-1", 12200, 12201, 12202);
         registry.register(providerConfig);
         ConsumerConfig<?> consumerConfig = consumerConfig("polaris-test-1");
