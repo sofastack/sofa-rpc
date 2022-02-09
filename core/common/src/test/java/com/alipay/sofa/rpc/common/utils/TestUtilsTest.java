@@ -34,7 +34,7 @@ public class TestUtilsTest {
         for (int i = 0; i < 1000; i++) {
             String s = TestUtils.randomString();
             boolean condition = compile.matcher(s).find();
-            assertTrue(s,condition);
+            assertTrue(s, condition);
         }
     }
 }
