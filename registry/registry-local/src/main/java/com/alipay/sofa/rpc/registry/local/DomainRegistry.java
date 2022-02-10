@@ -158,10 +158,14 @@ public class DomainRegistry extends Registry {
         if (providerInfos != null) {
             return providerInfos;
         }
-        ProviderInfo providerInfo = ProviderHelper.toProviderInfo(directUrl);
+        ProviderInfo providerInfo = convertToProviderInfo(directUrl);
         List<ProviderInfo> result = directUrl2IpUrl(providerInfo, domainCache.get(directUrl));
         domainCache.put(directUrl, result);
         return result;
+    }
+
+    protected ProviderInfo convertToProviderInfo(String providerStr) {
+        return ProviderHelper.toProviderInfo(providerStr);
     }
 
     protected List<ProviderInfo> directUrl2IpUrl(ProviderInfo providerInfo, List<ProviderInfo> originList) {
