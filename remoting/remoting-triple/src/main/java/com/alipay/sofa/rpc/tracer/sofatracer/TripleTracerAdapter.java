@@ -35,6 +35,7 @@ import com.alipay.sofa.rpc.event.ServerReceiveEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
 import io.grpc.Grpc;
 import io.grpc.Metadata;
@@ -201,6 +202,11 @@ public class TripleTracerAdapter {
             } else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
+            }
+
+            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
+                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID,
+                    requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION));
             }
 
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SAMP_TYPE)) {
