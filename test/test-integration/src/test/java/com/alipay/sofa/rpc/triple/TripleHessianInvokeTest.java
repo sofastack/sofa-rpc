@@ -25,7 +25,6 @@ import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.constant.TripleConstant;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -146,8 +145,6 @@ public class TripleHessianInvokeTest {
             .setServer(serverConfig)
             .setRegister(false);
 
-        providerConfig.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
-
         providerConfig.export();
 
         ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
@@ -240,8 +237,6 @@ public class TripleHessianInvokeTest {
             .setServer(serverConfig)
             .setRegister(false);
 
-        providerConfig.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
-
         providerConfig.export();
 
         uniqueId = "uniqueId2";
@@ -266,19 +261,10 @@ public class TripleHessianInvokeTest {
             .setRef(ref)
             .setServer(serverConfig)
             .setRegister(false);
+        providerConfig2.export();
 
-        providerConfig2.setParameter(TripleConstant.TRIPLE_EXPOSE_OLD, "true");
-
-        try {
-            providerConfig2.export();
-            Assert.fail();
-        } catch (Exception e) {
-
-        } finally {
-            providerConfig2.unExport();
-            providerConfig.unExport();
-            serverConfig.destroy();
-
-        }
+        providerConfig2.unExport();
+        providerConfig.unExport();
+        serverConfig.destroy();
     }
 }
