@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.codec.sofahessian.SofaHessianSerializer;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.filter.ProviderInvoker;
 import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
@@ -49,7 +50,8 @@ public class GenericServiceImplTest {
         ProviderConfig<HelloService> providerConfig = new ProviderConfig<>();
         providerConfig.setRef(new HelloServiceImpl());
         providerConfig.setProxyClass(HelloService.class);
-        genericService = new GenericServiceImpl(providerConfig.getRef(),providerConfig.getProxyClass());
+        ProviderInvoker<HelloService> invoker = new ProviderInvoker<>(providerConfig);
+        genericService = new GenericServiceImpl(invoker,providerConfig.getProxyClass());
         responseObserver = new MockStreamObserver<>();
     }
 

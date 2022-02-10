@@ -267,9 +267,7 @@ public class TripleServer implements Server {
                 BindableService bindableService = (BindableService) providerConfig.getRef();
                 serviceDef = bindableService.bindService();
             } else {
-                // normal class
-                Object obj = ProxyFactory.buildProxy(providerConfig.getProxy(), providerConfig.getProxyClass(), uniqueIdInvoker);
-                GenericServiceImpl genericService = new GenericServiceImpl(obj, providerConfig.getProxyClass());
+                GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker, providerConfig.getProxyClass());
                 genericService.setProxiedImpl(genericService);
                 serviceDef = buildSofaServiceDef(genericService, providerConfig);
             }
