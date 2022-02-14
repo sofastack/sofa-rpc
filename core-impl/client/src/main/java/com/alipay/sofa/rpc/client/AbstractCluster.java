@@ -732,7 +732,7 @@ public abstract class AbstractCluster extends Cluster {
             return;
         }
         if (hook != null) {
-            hook.postDestroy();
+            hook.preDestroy();
         }
         if (connectionHolder != null) {
             connectionHolder.destroy(new GracefulDestroyHook());
