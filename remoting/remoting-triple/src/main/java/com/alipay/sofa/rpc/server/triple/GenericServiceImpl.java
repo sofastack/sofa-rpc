@@ -54,6 +54,7 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     protected Invoker           invoker;
     protected Class             proxyClass;
+
     public GenericServiceImpl(Invoker invoker, Class proxyClass) {
         super();
         this.invoker = invoker;
