@@ -267,4 +267,51 @@ public class TripleHessianInvokeTest {
         providerConfig.unExport();
         serverConfig.destroy();
     }
+
+    @Test
+    public void testTripleRpcInvokeContext(){
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
+        ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
+        int port = 50065;
+        ServerConfig serverConfig = new ServerConfig()
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setCoreThreads(1)
+                .setMaxThreads(1)
+                .setPort(port);
+
+        TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
+        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
+                .setApplication(serverApp)
+                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setInterfaceId(TripleHessianInterface.class.getName())
+                .setRef(ref)
+                .setServer(serverConfig)
+                .setRegister(false);
+        providerConfig.export();
+
+        ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
+        consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setDirectUrl("localhost:" + port)
+                .setTimeout(300000)
+                .setRegister(false)
+                .setApplication(clientApp);
+
+        TripleHessianInterface helloService = consumerConfig.refer();
+
+        String threadName = "SOFA-SEV-TRIPLE-BIZ-50065-3-T1";
+
+        // setThreadLocal
+        String key1 = "key1";
+        String value1 = "value1";
+        String value2 = "value2";
+        String threadName1 = helloService.setRpcInvokeContext(key1, value1);
+        String threadName2 = helloService.setRpcInvokeContext(key1, value2);
+        Assert.assertEquals(threadName, threadName1);
+        Assert.assertEquals(threadName, threadName2);
+
+        // getThreadLocal
+        String value = helloService.getRpcInvokeContext(key1);
+        Assert.assertNull(value);
+    }
 }

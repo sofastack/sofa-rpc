@@ -207,6 +207,8 @@ public class TripleTracerAdapter {
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
                 RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION));
+            }else{
+                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID, "");
             }
 
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SAMP_TYPE)) {

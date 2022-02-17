@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.interceptor;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -134,6 +135,14 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
             //客户端发完了
             @Override
             public void onHalfClose() {
+                try {
+                    doOnHalfClose();
+                } finally {
+                    RpcInvokeContext.removeContext();
+                }
+            }
+
+            private void doOnHalfClose() {
                 if (RpcRunningState.isDebugMode()) {
                     LOGGER.info("[2]body received done from client:" + requestHeaders);
                 }
