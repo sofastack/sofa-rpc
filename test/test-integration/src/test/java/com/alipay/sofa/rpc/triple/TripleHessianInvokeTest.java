@@ -269,33 +269,33 @@ public class TripleHessianInvokeTest {
     }
 
     @Test
-    public void testTripleRpcInvokeContext(){
+    public void testTripleRpcInvokeContext() {
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
         int port = 50065;
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setCoreThreads(1)
-                .setMaxThreads(1)
-                .setPort(port);
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setCoreThreads(1)
+            .setMaxThreads(1)
+            .setPort(port);
 
         TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
         ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
-                .setApplication(serverApp)
-                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setInterfaceId(TripleHessianInterface.class.getName())
-                .setRef(ref)
-                .setServer(serverConfig)
-                .setRegister(false);
+            .setApplication(serverApp)
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setInterfaceId(TripleHessianInterface.class.getName())
+            .setRef(ref)
+            .setServer(serverConfig)
+            .setRegister(false);
         providerConfig.export();
 
         ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
         consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setDirectUrl("localhost:" + port)
-                .setTimeout(300000)
-                .setRegister(false)
-                .setApplication(clientApp);
+            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+            .setDirectUrl("localhost:" + port)
+            .setTimeout(300000)
+            .setRegister(false)
+            .setApplication(clientApp);
 
         TripleHessianInterface helloService = consumerConfig.refer();
 

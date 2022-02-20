@@ -67,7 +67,7 @@ public class TripleHessianInterfaceImpl implements TripleHessianInterface {
 
     @Override
     public String setRpcInvokeContext(String key, String value) {
-        RpcInvokeContext.getContext().put(key,value);
+        RpcInvokeContext.getContext().put(key, value);
         return Thread.currentThread().getName();
     }
 

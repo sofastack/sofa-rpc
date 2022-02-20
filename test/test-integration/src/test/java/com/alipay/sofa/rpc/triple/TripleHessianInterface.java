@@ -30,7 +30,7 @@ public interface TripleHessianInterface {
 
     boolean testPressureMark(String name);
 
-    String setRpcInvokeContext(String key,String value);
+    String setRpcInvokeContext(String key, String value);
 
     String getRpcInvokeContext(String key);
 }
