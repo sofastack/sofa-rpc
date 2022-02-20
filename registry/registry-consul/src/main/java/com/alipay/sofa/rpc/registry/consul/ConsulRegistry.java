@@ -308,7 +308,7 @@ public class ConsulRegistry extends Registry {
     }
 
     private void deregisterConsulService(String id) {
-        consulClient.agentServiceDeregister(id);
+        consulClient.agentServiceDeregister(id, properties.getToken());
         ScheduledFuture future = heartbeatFutures.remove(id);
         if (future != null) {
             future.cancel(true);
@@ -316,7 +316,7 @@ public class ConsulRegistry extends Registry {
     }
 
     private void registerConsulService(NewService service) {
-        consulClient.agentServiceRegister(service);
+        consulClient.agentServiceRegister(service, properties.getToken());
         if (service.getCheck().getTtl() != null) {
             ScheduledFuture<?> scheduledFuture =
                     heartbeatExecutor.scheduleAtFixedRate(
@@ -334,7 +334,7 @@ public class ConsulRegistry extends Registry {
 
     private void checkPass(NewService service) {
         try {
-            consulClient.agentCheckPass("service:" + service.getId(), "TTL check passing by SOFA RPC");
+            consulClient.agentCheckPass("service:" + service.getId(), "TTL check passing by SOFA RPC", properties.getToken());
         } catch (Exception e) {
             LOGGER.error(LogCodes.getLog(LogCodes.ERROR_CHECK_PASS ,"Consul"), e);
         }
