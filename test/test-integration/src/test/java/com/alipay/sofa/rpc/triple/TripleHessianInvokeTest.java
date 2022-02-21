@@ -65,7 +65,7 @@ public class TripleHessianInvokeTest {
             .setPort(port);
 
         TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
-        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
+        ProviderConfig<TripleHessianInterface> providerConfig = getProviderConfig()
             .setApplication(serverApp)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setInterfaceId(TripleHessianInterface.class.getName())
@@ -135,13 +135,12 @@ public class TripleHessianInvokeTest {
             .setPort(port);
 
         TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
-        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
+        ProviderConfig<TripleHessianInterface> providerConfig = getProviderConfig()
             .setApplication(serverApp)
             .setUniqueId(uniqueId)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setInterfaceId(TripleHessianInterface.class.getName())
             .setRef(ref)
-            .setRepeatedExportLimit(-1)
             .setServer(serverConfig)
             .setRegister(false);
 
@@ -227,13 +226,12 @@ public class TripleHessianInvokeTest {
             .setPort(port);
 
         TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
-        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
+        ProviderConfig<TripleHessianInterface> providerConfig = getProviderConfig()
             .setApplication(serverApp)
             .setUniqueId(uniqueId)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setInterfaceId(TripleHessianInterface.class.getName())
             .setRef(ref)
-            .setRepeatedExportLimit(-1)
             .setServer(serverConfig)
             .setRegister(false);
 
@@ -253,7 +251,7 @@ public class TripleHessianInvokeTest {
             .setPort(port);
 
         ref = new TripleHessianInterfaceImpl();
-        ProviderConfig<TripleHessianInterface> providerConfig2 = new ProviderConfig<TripleHessianInterface>()
+        ProviderConfig<TripleHessianInterface> providerConfig2 = getProviderConfig()
             .setApplication(serverApp)
             .setUniqueId(uniqueId)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -280,7 +278,7 @@ public class TripleHessianInvokeTest {
             .setPort(port);
 
         TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
-        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<TripleHessianInterface>()
+        ProviderConfig<TripleHessianInterface> providerConfig = getProviderConfig()
             .setApplication(serverApp)
             .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setInterfaceId(TripleHessianInterface.class.getName())
@@ -313,5 +311,11 @@ public class TripleHessianInvokeTest {
         // getThreadLocal
         String value = helloService.getRpcInvokeContext(key1);
         Assert.assertNull(value);
+    }
+
+    private ProviderConfig<TripleHessianInterface> getProviderConfig() {
+        ProviderConfig<TripleHessianInterface> providerConfig = new ProviderConfig<>();
+        providerConfig.setRepeatedExportLimit(-1);
+        return providerConfig;
     }
 }
