@@ -34,6 +34,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.concurrent.locks.Condition;
+import java.util.function.Predicate;
 
 /**
  * @author zhaowang
@@ -297,7 +299,7 @@ public class TripleHessianInvokeTest {
 
         TripleHessianInterface helloService = consumerConfig.refer();
 
-        String threadName = "SOFA-SEV-TRIPLE-BIZ-50065-3-T1";
+        Predicate<String> firstThreadInPool = s -> s.endsWith("T1");
 
         // setThreadLocal
         String key1 = "key1";
@@ -305,8 +307,8 @@ public class TripleHessianInvokeTest {
         String value2 = "value2";
         String threadName1 = helloService.setRpcInvokeContext(key1, value1);
         String threadName2 = helloService.setRpcInvokeContext(key1, value2);
-        Assert.assertEquals(threadName, threadName1);
-        Assert.assertEquals(threadName, threadName2);
+        Assert.assertTrue(firstThreadInPool.test(threadName1));
+        Assert.assertTrue(firstThreadInPool.test(threadName2));
 
         // getThreadLocal
         String value = helloService.getRpcInvokeContext(key1);
