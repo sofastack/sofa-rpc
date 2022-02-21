@@ -34,7 +34,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
-import java.util.concurrent.locks.Condition;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 
 /**
@@ -43,8 +43,9 @@ import java.util.function.Predicate;
  */
 public class TripleHessianInvokeTest {
 
-    private static final Logger    LOGGER = LoggerFactory.getLogger(TripleHessianInvokeTest.class);
-    public static final SofaTracer tracer = new SofaTracer.Builder("TEST").build();
+    private static final Logger        LOGGER = LoggerFactory.getLogger(TripleHessianInvokeTest.class);
+    public static final SofaTracer     tracer = new SofaTracer.Builder("TEST").build();
+    private static final AtomicInteger PORT   = new AtomicInteger(50062);
 
     @Before
     public void before() {
@@ -60,7 +61,7 @@ public class TripleHessianInvokeTest {
 
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
 
-        int port = 50062;
+        int port = getPort();
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -130,7 +131,7 @@ public class TripleHessianInvokeTest {
 
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
 
-        int port = 50063;
+        int port = getPort();
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -221,7 +222,7 @@ public class TripleHessianInvokeTest {
 
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
 
-        int port = 50062;
+        int port = getPort();
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -272,7 +273,7 @@ public class TripleHessianInvokeTest {
     public void testTripleRpcInvokeContext() {
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
-        int port = 50065;
+        int port = getPort();
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setCoreThreads(1)
@@ -313,6 +314,11 @@ public class TripleHessianInvokeTest {
         // getThreadLocal
         String value = helloService.getRpcInvokeContext(key1);
         Assert.assertNull(value);
+    }
+
+    private int getPort() {
+        int andIncrement = PORT.getAndIncrement();
+        return andIncrement;
     }
 
     private ProviderConfig<TripleHessianInterface> getProviderConfig() {
