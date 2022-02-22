@@ -99,13 +99,11 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
         }
     }
 
-
-
     @Test
-    public void catchTestAttrUpdate(){
-        try{
+    public void catchTestAttrUpdate() {
+        try {
             testAttrUpdate();
-        }catch (Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
             throw new RuntimeException(t);
         }

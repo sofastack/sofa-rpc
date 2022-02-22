@@ -269,19 +269,19 @@ public class TripleHessianInvokeTest {
         serverConfig.destroy();
     }
 
-
     @Test
-    public void tryCatchTestTripleRpcInvokeContext(){
+    public void tryCatchTestTripleRpcInvokeContext() {
         System.out.println("testTripleRpcInvokeContext start");
         try {
             testTripleRpcInvokeContext();
-        }catch(Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
             throw new RuntimeException(t);
-        }finally {
+        } finally {
             System.out.println("testTripleRpcInvokeContext end");
         }
     }
+
     public void testTripleRpcInvokeContext() {
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
