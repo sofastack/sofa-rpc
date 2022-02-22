@@ -29,4 +29,8 @@ public interface TripleHessianInterface {
     Response call2(Request request);
 
     boolean testPressureMark(String name);
+
+    String setRpcInvokeContext(String key, String value);
+
+    String getRpcInvokeContext(String key);
 }
