@@ -30,6 +30,7 @@ import com.alipay.sofa.rpc.proxy.jdk.JDKProxy;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import org.apache.commons.io.output.ThresholdingOutputStream;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -98,7 +99,18 @@ public class BoltProviderBootstrapTest extends ActivelyDestroyTest {
         }
     }
 
+
+
     @Test
+    public void catchTestAttrUpdate(){
+        try{
+            testAttrUpdate();
+        }catch (Throwable t){
+            t.printStackTrace();
+            throw new RuntimeException(t);
+        }
+    }
+
     public void testAttrUpdate() {
         // 发布一个服务
         ServerConfig serverConfig0 = new ServerConfig()
