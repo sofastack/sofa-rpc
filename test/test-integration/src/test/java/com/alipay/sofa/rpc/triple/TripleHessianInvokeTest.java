@@ -278,6 +278,7 @@ public class TripleHessianInvokeTest {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setCoreThreads(1)
             .setMaxThreads(1)
+            .setQueues(10)
             .setPort(port);
 
         TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl();
