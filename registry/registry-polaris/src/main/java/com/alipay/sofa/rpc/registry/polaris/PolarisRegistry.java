@@ -69,8 +69,7 @@ public class PolarisRegistry extends Registry {
 
     public static final String EXT_NAME = "PolarisRegistry";
 
-    private static final Logger LOGGER = LoggerFactory
-            .getLogger(PolarisRegistry.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PolarisRegistry.class);
 
     private final PolarisRegistryProperties properties;
 
@@ -139,8 +138,7 @@ public class PolarisRegistry extends Registry {
             List<InstanceRegisterRequest> services = buildPolarisRegister(config);
             if (CommonUtils.isNotEmpty(services)) {
                 if (LOGGER.isInfoEnabled(appName)) {
-                    LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, config.getInterfaceId()));
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_START, config.getInterfaceId()));
                 }
                 for (InstanceRegisterRequest service : services) {
                     registerPolarisService(config, service);
@@ -149,8 +147,7 @@ public class PolarisRegistry extends Registry {
                     }
                 }
                 if (LOGGER.isInfoEnabled(appName)) {
-                    LOGGER.infoWithApp(appName,
-                            LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, config.getInterfaceId()));
+                    LOGGER.infoWithApp(appName, LogCodes.getLog(LogCodes.INFO_ROUTE_REGISTRY_PUB_OVER, config.getInterfaceId()));
                 }
             }
         } catch (SofaRpcRuntimeException e) {
@@ -205,10 +202,7 @@ public class PolarisRegistry extends Registry {
     private void registerPolarisService(ProviderConfig config, InstanceRegisterRequest service) {
         providerAPI.register(service);
         if (service.getTtl() != null) {
-            ScheduledFuture<?> scheduledFuture =
-                    heartbeatExecutor.scheduleAtFixedRate(
-                            () -> heartbeatPolaris(service),
-                            0, properties.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
+            ScheduledFuture<?> scheduledFuture = heartbeatExecutor.scheduleAtFixedRate(() -> heartbeatPolaris(service), 0, properties.getHeartbeatInterval(), TimeUnit.MILLISECONDS);
             ScheduledFuture oldFuture = heartbeatFutures.put(buildUniqueName(config, service.getProtocol()), scheduledFuture);
             if (oldFuture != null) {
                 oldFuture.cancel(true);

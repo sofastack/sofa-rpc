@@ -30,10 +30,11 @@ import com.tencent.polaris.api.rpc.GetAllInstancesRequest;
 import com.tencent.polaris.api.rpc.InstancesResponse;
 import com.tencent.polaris.factory.api.DiscoveryAPIFactory;
 import com.tencent.polaris.test.mock.discovery.NamingServer;
-import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.IntStream;
@@ -42,20 +43,19 @@ import static com.tencent.polaris.api.exception.ErrorCode.SERVER_USER_ERROR;
 
 public class PolarisRegistryTest {
 
-    private static final String APPNAME      = "polaris-test";
-    private static final String INTERFACE_ID = "com.alipay.sofa.rpc.registry.polaris.TestService";
-    private static final String NAMESPACE    = APPNAME;
-    private static final String SERVICE      = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-1";
-    private static final String SERVICE_1    = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-2";
+    private static final String    APPNAME      = "polaris-test";
+    private static final String    INTERFACE_ID = "com.alipay.sofa.rpc.registry.polaris.TestService";
+    private static final String    NAMESPACE    = APPNAME;
+    private static final String    SERVICE      = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-1";
+    private static final String    SERVICE_1    = "com.alipay.sofa.rpc.registry.polaris.TestService:1.0:polaris-test-2";
 
-    private NamingServer        polaris;
-    private RegistryConfig      registryConfig;
-    private PolarisRegistry     registry;
+    private static NamingServer    polaris;
+    private static RegistryConfig  registryConfig;
+    private static PolarisRegistry registry;
 
-    @Before
-    public void setup() {
+    @BeforeClass
+    static public void setup() {
         polaris = new NamingServer(8091);
-        polaris.getNamingService().addService(new ServiceKey(NAMESPACE, SERVICE));
         polaris.getNamingService().addService(new ServiceKey(NAMESPACE, SERVICE_1));
 
         try {
@@ -75,14 +75,15 @@ public class PolarisRegistryTest {
 
     }
 
-    @After
-    public void tearDown() {
+    @AfterClass
+    static public void tearDown() {
         registry.destroy();
         polaris.terminate();
     }
 
     @Test
     public void testRegister() {
+        polaris.getNamingService().addService(new ServiceKey(NAMESPACE, SERVICE));
         //register
         ProviderConfig<?> providerConfig = providerConfig("polaris-test-1", 12200, 12201, 12202);
         registry.register(providerConfig);
@@ -113,7 +114,9 @@ public class PolarisRegistryTest {
 
     @Test
     public void testSubscribe() {
-        //regiter
+        polaris.getNamingService().addService(new ServiceKey(NAMESPACE, SERVICE));
+
+        //register
         ProviderConfig<?> providerConfig = providerConfig("polaris-test-1", 12200, 12201, 12202);
         registry.register(providerConfig);
         ConsumerConfig<?> consumerConfig = consumerConfig("polaris-test-1");

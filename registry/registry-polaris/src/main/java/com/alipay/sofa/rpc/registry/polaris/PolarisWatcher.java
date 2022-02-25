@@ -45,8 +45,7 @@ import static com.alipay.sofa.rpc.registry.utils.RegistryUtils.convertInstanceTo
  * @author <a href=mailto:bner666@gmail.com>ZhangLibin</a>
  */
 public class PolarisWatcher {
-    private static final Logger        LOGGER = LoggerFactory
-                                                  .getLogger(PolarisWatcher.class);
+    private static final Logger        LOGGER = LoggerFactory.getLogger(PolarisWatcher.class);
 
     private String                     nameSpace;
     private String                     serviceName;
@@ -76,9 +75,9 @@ public class PolarisWatcher {
             GetAllInstancesRequest getAllInstancesRequest = new GetAllInstancesRequest();
             getAllInstancesRequest.setNamespace(nameSpace);
             getAllInstancesRequest.setService(serviceName);
-            Map<String, String> paramerters = new HashMap<>();
-            paramerters.put("protocol", protocol);
-            getAllInstancesRequest.setMetadata(paramerters);
+            Map<String, String> parameters = new HashMap<>();
+            parameters.put("protocol", protocol);
+            getAllInstancesRequest.setMetadata(parameters);
             InstancesResponse response = consumerAPI.getAllInstance(getAllInstancesRequest);
             this.currentData = response;
             ProviderGroup providerGroup = new ProviderGroup(currentProviders());

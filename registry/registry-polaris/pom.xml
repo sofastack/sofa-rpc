@@ -20,11 +20,6 @@
             <artifactId>sofa-rpc-api</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
-            <version>1.33.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.tencent.polaris</groupId>
             <artifactId>polaris-discovery-factory</artifactId>
         </dependency>
