@@ -21,7 +21,6 @@ import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
-import com.alipay.sofa.rpc.common.MetadataHolder;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
@@ -36,6 +35,7 @@ import com.alipay.sofa.rpc.event.ServerReceiveEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
 import io.grpc.Grpc;
 import io.grpc.Metadata;
@@ -142,12 +142,18 @@ public class TripleTracerAdapter {
         }
 
         // set custom headers
-        Set<Map.Entry<String, String>> entries = MetadataHolder.getMetaHolder().entrySet();
-        for (Map.Entry<String, String> entry : entries) {
-            if (StringUtils.isNotBlank(entry.getValue())) {
-                requestHeader.put(TripleHeadKeys.getKey(entry.getKey()), entry.getValue());
+        try{
+            Set<Map.Entry<String, String>> customHeader = RpcInvokeContext.getContext().getCustomHeader().entrySet();
+            for (Map.Entry<String, String> entry : customHeader) {
+                if (StringUtils.isNotBlank(entry.getValue())) {
+                    requestHeader.put(TripleHeadKeys.getKey(entry.getKey()), entry.getValue());
+                }
             }
+        }finally {
+            RpcInvokeContext.getContext().clearCustomHeader();
         }
+
+
     }
 
     /**
@@ -196,6 +202,13 @@ public class TripleTracerAdapter {
             } else if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_RPC_ID)) {
                 traceMap
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
+            }
+
+            if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
+                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID,
+                    requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION));
+            } else {
+                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID, "");
             }
 
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SAMP_TYPE)) {

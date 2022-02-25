@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>5.8.2-SNAPSHOT</revision>
+        <revision>5.8.3-SNAPSHOT</revision>
         <javassist.version>3.20.0-GA</javassist.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <netty.version>4.1.44.Final</netty.version>
@@ -31,9 +31,9 @@
         <!-- serialization -->
         <hessian.version>3.3.13</hessian.version>
         <thrift.version>0.9.2</thrift.version>
-        <protobuf.version>3.11.0</protobuf.version>
+        <protobuf.version>3.16.1</protobuf.version>
         <jackson.version>2.9.10</jackson.version>
-        <jackson.databind.version>2.9.10.7</jackson.databind.version>
+        <jackson.databind.version>2.9.10.8</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
         <grpc.version>1.28.0</grpc.version>

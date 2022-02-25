@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -42,16 +43,27 @@ public class CustomHeaderFilterTest {
         Assert.assertEquals("b", request.getRequestProp("a"));
     }
 
-    static class EmptyInvoker extends FilterInvoker {
+    @Test
+    public void testClearAfterInvoke() {
+        RpcInvokeContext.getContext().addCustomHeader("a", "b");
+        ConsumerCustomHeaderFilter filter = new ConsumerCustomHeaderFilter();
+        SofaRequest request = new SofaRequest();
+        RecordInvoker invoker = new RecordInvoker(null);
+        filter.invoke(invoker, request);
+        Assert.assertTrue(RpcInvokeContext.getContext().getCustomHeader().isEmpty());
+        Assert.assertEquals("b", invoker.getMyHeader().get("a"));
+    }
 
-        public Map<String, String> getMetaHolder() {
-            return metaHolder;
-        }
+    static class EmptyInvoker extends FilterInvoker {
 
         private Map<String, String> metaHolder;
 
         protected EmptyInvoker(AbstractInterfaceConfig config) {
             super(config);
+        }
+
+        public Map<String, String> getMetaHolder() {
+            return metaHolder;
         }
 
         @Override
@@ -60,4 +72,23 @@ public class CustomHeaderFilterTest {
         }
     }
 
+    private class RecordInvoker extends FilterInvoker {
+
+        private Map<String, String> myHeader;
+
+        protected RecordInvoker(AbstractInterfaceConfig config) {
+            super(config);
+        }
+
+        public Map<String, String> getMyHeader() {
+            return myHeader;
+        }
+
+        @Override
+        public SofaResponse invoke(SofaRequest request) throws SofaRpcException {
+            Map<String, String> customHeader = RpcInvokeContext.getContext().getCustomHeader();
+            myHeader = new HashMap<>(customHeader);
+            return null;
+        }
+    }
 }

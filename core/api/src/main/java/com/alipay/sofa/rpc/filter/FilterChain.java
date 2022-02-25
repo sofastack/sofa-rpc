@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.filter;
 
-import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
@@ -36,6 +35,7 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -214,7 +214,7 @@ public class FilterChain implements Invoker {
         }
         // 按order从小到大排序
         if (extensionFilters.size() > 1) {
-            Collections.sort(extensionFilters, new OrderedComparator<ExtensionClass<Filter>>());
+            extensionFilters.sort(Comparator.comparingInt(ExtensionClass::getOrder));
         }
         List<Filter> actualFilters = new ArrayList<Filter>();
         for (ExtensionClass<Filter> extensionFilter : extensionFilters) {
