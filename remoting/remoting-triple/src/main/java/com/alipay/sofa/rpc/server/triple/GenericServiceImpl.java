@@ -21,7 +21,6 @@ import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -30,7 +29,6 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.google.protobuf.ByteString;
@@ -52,8 +50,8 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
 
-    protected Invoker           invoker;
-    protected Class             proxyClass;
+    protected Invoker invoker;
+    protected Class proxyClass;
 
     public GenericServiceImpl(Invoker invoker, Class proxyClass) {
         super();
@@ -70,9 +68,10 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         String interfaceName = sofaRequest.getInterfaceName();
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            Class proxyClass = ClassTypeUtils.getClass(interfaceName);
-            ClassLoader interfaceClassLoader = proxyClass.getClassLoader();
+            String uniqueName = sofaRequest.getTargetServiceUniqueName();
+            ClassLoader interfaceClassLoader = ReflectCache.getServiceClassLoader(uniqueName);
             Thread.currentThread().setContextClassLoader(interfaceClassLoader);
+            Class proxyClass = ClassTypeUtils.getClass(interfaceName);
 
             Class[] argTypes = getArgTypes(request);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
@@ -136,7 +135,7 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         for (int i = 0; i < argsList.size(); i++) {
             byte[] data = argsList.get(i).toByteArray();
             args[i] = serializer.decode(new ByteArrayWrapperByteBuf(data), argTypes[i],
-                null);
+                    null);
         }
         return args;
     }
