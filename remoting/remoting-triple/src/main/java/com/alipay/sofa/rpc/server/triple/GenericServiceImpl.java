@@ -50,8 +50,8 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
 
-    protected Invoker invoker;
-    protected Class proxyClass;
+    protected Invoker           invoker;
+    protected Class             proxyClass;
 
     public GenericServiceImpl(Invoker invoker, Class proxyClass) {
         super();
@@ -135,7 +135,7 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         for (int i = 0; i < argsList.size(); i++) {
             byte[] data = argsList.get(i).toByteArray();
             args[i] = serializer.decode(new ByteArrayWrapperByteBuf(data), argTypes[i],
-                    null);
+                null);
         }
         return args;
     }
