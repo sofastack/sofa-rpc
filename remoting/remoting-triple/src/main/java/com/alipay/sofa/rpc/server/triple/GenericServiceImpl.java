@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -69,7 +70,12 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             String uniqueName = sofaRequest.getTargetServiceUniqueName();
-            ClassLoader interfaceClassLoader = ReflectCache.getServiceClassLoader(uniqueName);
+            ClassLoader interfaceClassLoader;
+            if (StringUtils.isBlank(uniqueName)) {
+                interfaceClassLoader = oldClassLoader;
+            } else {
+                interfaceClassLoader = ReflectCache.getServiceClassLoader(uniqueName);
+            }
             Thread.currentThread().setContextClassLoader(interfaceClassLoader);
             Class proxyClass = ClassTypeUtils.getClass(interfaceName);
 
