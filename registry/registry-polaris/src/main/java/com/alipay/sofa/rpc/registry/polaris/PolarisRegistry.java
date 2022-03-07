@@ -310,14 +310,14 @@ public class PolarisRegistry extends Registry {
     private List<ProviderInfo> findService(ConsumerConfig config) {
 
         String uniqueName = buildUniqueName(config, config.getProtocol());
-        PolarisWatcher watcher = polarisWatchers.get(uniqueName);
-        if (watcher == null) {
-            watcher = new PolarisWatcher(buildNameSpace(config.getAppName()), buildServiceName(config), config.getProtocol(), consumerAPI, properties);
+        //computeIfAbsent avoid creating multiple informers and some Listeners failure due to multiple subscribe
+        PolarisWatcher polarisWatcher = polarisWatchers.computeIfAbsent(uniqueName,key->{
+            PolarisWatcher watcher = new PolarisWatcher(buildNameSpace(config.getAppName()), buildServiceName(config), config.getProtocol(), consumerAPI, properties);
             watcher.init();
-            polarisWatchers.put(uniqueName, watcher);
-        }
-        watcher.addListener(config.getProviderInfoListener());
-        return watcher.currentProviders();
+            return watcher;
+        });
+        polarisWatcher.addListener(config.getProviderInfoListener());
+        return polarisWatcher.currentProviders();
     }
 
     @Override
