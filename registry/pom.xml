@@ -21,6 +21,7 @@
         <module>registry-mesh</module>
         <module>registry-multicast</module>
         <module>registry-sofa</module>
+        <module>registry-polaris</module>
     </modules>
 
     <dependencyManagement>

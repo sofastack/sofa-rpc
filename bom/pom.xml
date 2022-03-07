@@ -25,6 +25,7 @@
         <dubbo.version>2.6.7</dubbo.version>
         <nacos.version>2.0.3</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
+        <polaris.version>1.2.2</polaris.version>
         <swagger.version>1.5.18</swagger.version>
         <asm.version>7.0</asm.version>
         <guava.version>27.0-jre</guava.version>
@@ -36,7 +37,7 @@
         <jackson.databind.version>2.9.10.8</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
-        <grpc.version>1.28.0</grpc.version>
+        <grpc.version>1.33.0</grpc.version>
 
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
@@ -520,6 +521,18 @@
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-alpn-openjdk8-client</artifactId>
                 <version>9.4.8.v20171121</version>
+            </dependency>
+            <!-- polaris client -->
+            <dependency>
+                <groupId>com.tencent.polaris</groupId>
+                <artifactId>polaris-discovery-factory</artifactId>
+                <version>${polaris.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.tencent.polaris</groupId>
+                <artifactId>polaris-test-mock-discovery</artifactId>
+                <version>${polaris.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
