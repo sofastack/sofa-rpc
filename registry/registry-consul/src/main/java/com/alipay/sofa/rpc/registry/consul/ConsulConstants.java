@@ -25,6 +25,8 @@ public class ConsulConstants {
 
     public static final String                                   CONSUL_SERVICE_NAME_KEY       = "consulServiceName";
 
+    public static final String                                   TOKEN_KEY                     = "token";
+
     public static final String                                   HEARTBEAT_INTERVAL_KEY        = "heartbeat.interval";
 
     public static final String                                   HEARTBEAT_CORE_SIZE_KEY       = "heartbeat.coreSize";
