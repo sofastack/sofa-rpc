@@ -44,6 +44,7 @@ import static com.alipay.sofa.rpc.registry.consul.ConsulConstants.HEARTBEAT_CORE
 import static com.alipay.sofa.rpc.registry.consul.ConsulConstants.HEARTBEAT_INTERVAL_KEY;
 import static com.alipay.sofa.rpc.registry.consul.ConsulConstants.LOOKUP_INTERVAL_KEY;
 import static com.alipay.sofa.rpc.registry.consul.ConsulConstants.WATCH_TIMEOUT_KEY;
+import static com.alipay.sofa.rpc.registry.consul.ConsulConstants.TOKEN_KEY;
 
 /**
  * All configurations of the consul registry
@@ -111,6 +112,10 @@ public class ConsulRegistryProperties {
 
     public String getHealthCheckMethod() {
         return getString(HEALTH_CHECK_METHOD_KEY, DEFAULT_HEALTH_CHECK_METHOD);
+    }
+
+    public String getToken() {
+        return getString(TOKEN_KEY, "");
     }
 
     private int getInt(String key, int defaultValue) {
