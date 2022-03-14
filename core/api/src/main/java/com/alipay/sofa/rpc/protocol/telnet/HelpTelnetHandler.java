@@ -38,7 +38,7 @@ public class HelpTelnetHandler implements TelnetHandler {
 
     @Override
     public String telnet(AbstractChannel channel, String message) {
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         if (StringUtils.isNotBlank(message)) {
             TelnetHandler handler = TelnetHandlerFactory.getHandler(message);
             if (handler != null) {

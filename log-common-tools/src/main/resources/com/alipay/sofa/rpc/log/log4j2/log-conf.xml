@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="OFF">
+
+    <Properties>
+        <!-- 将系统属性进行一次本地转换 -->
+        <Property name="RPC_LOG_LEVEL">${sys:logging.level.com.alipay.sofa.rpc}</Property>
+        <Property name="RPC_LOG_PATH">${sys:logging.path}</Property>
+        <Property name="RPC_FILE_ENCODING">${sys:file.encoding}</Property>
+        <Property name="APP_NAME">${sys:appname}</Property>
+    </Properties>
+
+    <Appenders>
+
+        <RollingFile name="ERROR-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-error.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-error.log.%d{yyyy-MM-dd}">
+            <!-- only print error log -->
+            <ThresholdFilter level="error" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="ROOT-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-default.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/common-default.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="RPC-CODEC-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-codec.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-codec.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="RPC-REGISTRY-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-registry.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-registry.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="RPC-CLIENT-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-client.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-client.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="RPC-SERVER-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-server.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-server.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+        <RollingFile name="RPC-TRANSPORT-APPENDER" fileName="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-transport.log" append="true"
+                     filePattern="${RPC_LOG_PATH}/rpc/${APP_NAME}/rpc-transport.log.%d{yyyy-MM-dd}">
+            <ThresholdFilter level="${RPC_LOG_LEVEL}" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout charset="${RPC_FILE_ENCODING}">
+                <pattern>%d %-5p %-32t %c - %m%n %throwable</pattern>
+            </PatternLayout>
+            <Policies>
+                <!-- 按天分日志文件:重要的是 filePattern 配置到按照天 -->
+                <TimeBasedTriggeringPolicy interval="1" modulate="true"/>
+            </Policies>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+        <AsyncLogger name="com.alipay.sofa.rpc.registry" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-REGISTRY-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </AsyncLogger>
+
+        <AsyncLogger name="com.alipay.sofa.rpc.codec" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-CODEC-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </AsyncLogger>
+
+        <AsyncLogger name="com.alipay.sofa.rpc.client" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-CLIENT-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </AsyncLogger>
+
+        <AsyncLogger name="com.alipay.sofa.rpc.server" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-SERVER-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </AsyncLogger>
+
+        <AsyncLogger name="com.alipay.sofa.rpc.transport" level="${RPC_LOG_LEVEL}" additivity="false">
+            <appender-ref ref="RPC-TRANSPORT-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </AsyncLogger>
+
+        <AsyncRoot level="${RPC_LOG_LEVEL}">
+            <appender-ref ref="ROOT-APPENDER"/>
+            <appender-ref ref="ERROR-APPENDER"/>
+        </AsyncRoot>
+    </Loggers>
+</configuration>

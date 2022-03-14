@@ -22,11 +22,10 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 /**
- *
- *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class OrderedComparatorTest {
@@ -55,6 +54,52 @@ public class OrderedComparatorTest {
             sb.append(test.getName());
         }
         Assert.assertEquals(sb.toString(), "agcdbef");
+    }
+
+    @Test
+    public void testComparatorInt(){
+        List<Obj> list = new ArrayList<Obj>();
+        list.add(new Obj("a", 10));
+        list.add(new Obj("b", 2));
+        list.add(new Obj("c", 6));
+        list.add(new Obj("d", 6));
+        list.add(new Obj("e", 0));
+        list.add(new Obj("f", -1));
+        list.add(new Obj("g", 10));
+
+        list.sort(Comparator.comparingInt(Obj::getOrder));
+        StringBuilder sb = new StringBuilder();
+        for (Obj test : list) {
+            sb.append(test.getName());
+        }
+        Assert.assertEquals(sb.toString(), "febcdag");
+
+
+        list.sort(Comparator.comparingInt(Obj::getOrder).reversed());
+        sb = new StringBuilder();
+        for (Obj test : list) {
+            sb.append(test.getName());
+        }
+        Assert.assertEquals(sb.toString(), "agcdbef");
+    }
+
+    @Test
+    public void testOverflow() {
+        List<Obj> list = new ArrayList<Obj>();
+        list.add(new Obj("a", Integer.MAX_VALUE));
+        list.add(new Obj("b", -100));
+        list.add(new Obj("c", 6));
+        list.add(new Obj("d", 6));
+        list.add(new Obj("e", 0));
+        list.add(new Obj("f", Integer.MAX_VALUE));
+        list.add(new Obj("g", -10));
+
+        Collections.sort(list, new OrderedComparator<Obj>());
+        StringBuilder sb = new StringBuilder();
+        for (Obj test : list) {
+            sb.append(test.getName());
+        }
+        Assert.assertEquals(sb.toString(), "bgecdaf");
     }
 
     private static class Obj implements Sortable {

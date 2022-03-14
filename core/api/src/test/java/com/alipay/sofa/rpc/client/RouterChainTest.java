@@ -29,9 +29,14 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -43,7 +48,7 @@ public class RouterChainTest {
         ConsumerConfig config = new ConsumerConfig();
         config.setBootstrap("test");
         ArrayList<Router> list = new ArrayList<Router>();
-        config.setRouter(Arrays.asList("testChainRouter0", "-testChainRouter8"));
+        config.setRouter(Arrays.asList("testChainRouter0", "-testChainRouter8", "notExistChainRouter"));
         list.add(new TestChainRouter1());
         list.add(new TestChainRouter2());
         list.add(new TestChainRouter3());
@@ -67,5 +72,26 @@ public class RouterChainTest {
         chain.route(request, providerInfos);
         Assert.assertEquals("r0>r7>r2>r4",
             RpcInternalContext.getContext().getAttachment(RpcConstants.INTERNAL_KEY_ROUTER_RECORD));
+    }
+
+    @Test
+    public void testParseExcludeRouter() throws InvocationTargetException, IllegalAccessException, NoSuchMethodException {
+        String methodName = "parseExcludeRouter";
+
+        List<Router> routers = new CopyOnWriteArrayList<>();
+        routers.add(new TestChainRouter1());
+        routers.add(new TestChainRouter2());
+        routers.add(new TestChainRouter3());
+        routers.add(new TestChainRouter4());
+        routers.add(new ExcludeRouter("-testChainRouter5"));
+
+        Method parseExcludeRouter = RouterChain.class.getDeclaredMethod(methodName, List.class);
+        parseExcludeRouter.setAccessible(true);
+        Object invokeResult = parseExcludeRouter.invoke(Router.class, routers);
+        Set<String> result = new HashSet<>();
+        result.add(invokeResult.toString());
+
+        Assert.assertEquals(1, result.size());
+        Assert.assertNotNull(invokeResult);
     }
 }

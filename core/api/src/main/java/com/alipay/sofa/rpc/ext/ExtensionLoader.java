@@ -34,6 +34,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.lang.reflect.Modifier;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Map;
@@ -49,8 +50,9 @@ public class ExtensionLoader<T> {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                              LOGGER = LoggerFactory
-                                                                        .getLogger(ExtensionLoader.class);
+    private final static Logger                              LOGGER         = LoggerFactory
+                                                                                .getLogger(ExtensionLoader.class);
+    private static final String                              LOAD_FROM_CODE = "DYNAMIC LOAD EXTENSION BY CODE";
 
     /**
      * 当前加载的接口类名
@@ -80,7 +82,7 @@ public class ExtensionLoader<T> {
     /**
      * 加载监听器
      */
-    protected final ExtensionLoaderListener<T>               listener;
+    protected final List<ExtensionLoaderListener<T>>         listeners;
 
     /**
      * 构造函数（自动加载）
@@ -112,7 +114,7 @@ public class ExtensionLoader<T> {
         if (RpcRunningState.isShuttingDown()) {
             this.interfaceClass = null;
             this.interfaceName = null;
-            this.listener = null;
+            this.listeners = null;
             this.factory = null;
             this.extensible = null;
             this.all = null;
@@ -120,16 +122,19 @@ public class ExtensionLoader<T> {
         }
         // 接口为空，既不是接口，也不是抽象类
         if (interfaceClass == null ||
-            !(interfaceClass.isInterface() || Modifier.isAbstract(interfaceClass.getModifiers()))) {
+                !(interfaceClass.isInterface() || Modifier.isAbstract(interfaceClass.getModifiers()))) {
             throw new IllegalArgumentException("Extensible class must be interface or abstract class!");
         }
         this.interfaceClass = interfaceClass;
         this.interfaceName = ClassTypeUtils.getTypeStr(interfaceClass);
-        this.listener = listener;
+        this.listeners = new ArrayList<>();
+        if (listener != null) {
+            listeners.add(listener);
+        }
         Extensible extensible = interfaceClass.getAnnotation(Extensible.class);
         if (extensible == null) {
             throw new IllegalArgumentException(
-                "Error when load extensible interface " + interfaceName + ", must add annotation @Extensible.");
+                    "Error when load extensible interface " + interfaceName + ", must add annotation @Extensible.");
         } else {
             this.extensible = extensible;
         }
@@ -219,23 +224,28 @@ public class ExtensionLoader<T> {
             }
             return;
         }
-        if (!interfaceClass.isAssignableFrom(tmp)) {
+
+        loadExtension(alias, tmp, StringUtils.toString(url), className);
+    }
+
+    private void loadExtension(String alias, Class loadedClazz, String location, String className) {
+        if (!interfaceClass.isAssignableFrom(loadedClazz)) {
             throw new IllegalArgumentException("Error when load extension of extensible " + interfaceName +
-                " from file:" + url + ", " + className + " is not subtype of interface.");
+                " from file:" + location + ", " + className + " is not subtype of interface.");
         }
-        Class<? extends T> implClass = (Class<? extends T>) tmp;
+        Class<? extends T> implClass = (Class<? extends T>) loadedClazz;
 
         // 检查是否有可扩展标识
         Extension extension = implClass.getAnnotation(Extension.class);
         if (extension == null) {
             throw new IllegalArgumentException("Error when load extension of extensible " + interfaceName +
-                " from file:" + url + ", " + className + " must add annotation @Extension.");
+                " from file:" + location + ", " + className + " must add annotation @Extension.");
         } else {
             String aliasInCode = extension.value();
             if (StringUtils.isBlank(aliasInCode)) {
                 // 扩展实现类未配置@Extension 标签
                 throw new IllegalArgumentException("Error when load extension of extensible " + interfaceClass +
-                    " from file:" + url + ", " + className + "'s alias of @Extension is blank");
+                    " from file:" + location + ", " + className + "'s alias of @Extension is blank");
             }
             if (alias == null) {
                 // spi文件里没配置，用代码里的
@@ -244,20 +254,20 @@ public class ExtensionLoader<T> {
                 // spi文件里配置的和代码里的不一致
                 if (!aliasInCode.equals(alias)) {
                     throw new IllegalArgumentException("Error when load extension of extensible " + interfaceName +
-                        " from file:" + url + ", aliases of " + className + " are " +
+                        " from file:" + location + ", aliases of " + className + " are " +
                         "not equal between " + aliasInCode + "(code) and " + alias + "(file).");
                 }
             }
             // 接口需要编号，实现类没设置
             if (extensible.coded() && extension.code() < 0) {
                 throw new IllegalArgumentException("Error when load extension of extensible " + interfaceName +
-                    " from file:" + url + ", code of @Extension must >=0 at " + className + ".");
+                    " from file:" + location + ", code of @Extension must >=0 at " + className + ".");
             }
         }
         // 不可以是default和*
         if (StringUtils.DEFAULT.equals(alias) || StringUtils.ALL.equals(alias)) {
             throw new IllegalArgumentException("Error when load extension of extensible " + interfaceName +
-                " from file:" + url + ", alias of @Extension must not \"default\" and \"*\" at " + className + ".");
+                " from file:" + location + ", alias of @Extension must not \"default\" and \"*\" at " + className + ".");
         }
         // 检查是否有存在同名的
         ExtensionClass old = all.get(alias);
@@ -292,7 +302,7 @@ public class ExtensionLoader<T> {
                 } else {
                     // 如果不能被覆盖，抛出已存在异常
                     throw new IllegalStateException(
-                        "Error when load extension of extensible " + interfaceClass + " from file:" + url +
+                        "Error when load extension of extensible " + interfaceClass + " from file:" + location +
                             ", Duplicate class with same alias: " + alias + ", " + old.getClazz() + " and " + implClass);
                 }
             }
@@ -355,19 +365,20 @@ public class ExtensionLoader<T> {
     }
 
     private void loadSuccess(String alias, ExtensionClass<T> extensionClass) {
-        if (listener != null) {
-            try {
-                listener.onLoad(extensionClass); // 加载完毕，通知监听器
-                all.put(alias, extensionClass);
-            } catch (Exception e) {
-                if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
-                        + alias + ".", e);
+        if (listeners != null) {
+            for (ExtensionLoaderListener<T> listener : listeners) {
+                try {
+                    listener.onLoad(extensionClass);
+                } catch (Exception e) {
+                    if (LOGGER.isDebugEnabled()) {
+                        LOGGER.debug("Error when load extension of extensible " + interfaceClass + " with alias: "
+                            + alias + ".", e);
+                    }
                 }
             }
-        } else {
-            all.put(alias, extensionClass);
+
         }
+        all.put(alias, extensionClass);
     }
 
     protected String[] parseAliasAndClassName(String line) {
@@ -475,5 +486,32 @@ public class ExtensionLoader<T> {
                 return extensionClass.getExtInstance(argTypes, args);
             }
         }
+    }
+
+    public void loadExtension(Class loadedClass) {
+        if (loadedClass == null) {
+            throw new IllegalArgumentException("Can not load extension of null");
+        }
+        loadExtension(null, loadedClass, LOAD_FROM_CODE, loadedClass.getName());
+    }
+
+    public void addListener(ExtensionLoaderListener<T> listener) {
+        synchronized (this) {
+            if (!listeners.contains(listener)) {
+                this.listeners.add(listener);
+                for (ExtensionClass<T> value : all.values()) {
+                    try {
+                        listener.onLoad(value);
+                    } catch (Exception e) {
+                        if (LOGGER.isDebugEnabled()) {
+                            LOGGER.debug("Error when notify listener  of extensible " + interfaceClass +
+                                " with alias: "
+                                + value.getAlias() + ".", e);
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }

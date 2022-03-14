@@ -19,12 +19,10 @@ package com.alipay.sofa.rpc.context;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.core.util.SafeConcurrentHashMap;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * 基于ThreadLocal的面向业务开发者使用的上下文传递对象
@@ -37,6 +35,52 @@ public class RpcInvokeContext {
      * 线程上下文变量
      */
     protected static final ThreadLocal<RpcInvokeContext> LOCAL = new ThreadLocal<RpcInvokeContext>();
+    /**
+     * 是否开启上下文透传功能
+     *
+     * @since 5.1.2
+     */
+    private static boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
+    /**
+     * 自定义 header ，用完一次即删
+     */
+    protected Map<String, String> customHeader = new SafeConcurrentHashMap<>();
+    /**
+     * 用户自定义超时时间，单次调用生效
+     */
+    protected Integer timeout;
+    /**
+     * 用户自定义对方地址，单次调用生效
+     */
+    protected String targetURL;
+    /**
+     * 用户自定义对方分组
+     */
+    protected String targetGroup;
+    /**
+     * 用户自定义Callback，单次调用生效
+     */
+    protected SofaResponseCallback responseCallback;
+    /**
+     * The Future.
+     */
+    protected ResponseFuture<?> future;
+    /**
+     * 自定义属性
+     */
+    protected Map<String, Object> map = new SafeConcurrentHashMap<>();
+    /**
+     * 请求上的透传数据
+     *
+     * @since 5.1.2
+     */
+    protected Map<String, String> requestBaggage = BAGGAGE_ENABLE ? new SafeConcurrentHashMap<>() : null;
+    /**
+     * 响应上的透传数据
+     *
+     * @since 5.1.2
+     */
+    protected Map<String, String> responseBaggage = BAGGAGE_ENABLE ? new SafeConcurrentHashMap<>() : null;
 
     /**
      * 得到上下文，没有则初始化
@@ -50,6 +94,45 @@ public class RpcInvokeContext {
             LOCAL.set(context);
         }
         return context;
+    }
+
+    /**
+     * 设置上下文
+     *
+     * @param context 调用上下文
+     */
+    public static void setContext(RpcInvokeContext context) {
+        LOCAL.set(RpcInvokeContext.clone(context));
+    }
+
+    private static RpcInvokeContext clone(RpcInvokeContext parent) {
+        if (parent == null) {
+            return null;
+        }
+        RpcInvokeContext child = new RpcInvokeContext();
+        //timeout
+        child.setTimeout(parent.getTimeout());
+        //targetURL
+        child.setTargetURL(parent.getTargetURL());
+        //targetGroup
+        child.setTargetGroup(parent.getTargetGroup());
+        //responseCallback
+        child.setResponseCallback(parent.getResponseCallback());
+        //future
+        child.setFuture(parent.getFuture());
+        //map
+        child.map.putAll(parent.map);
+        //customHeader
+        child.customHeader.putAll(parent.customHeader);
+
+        if (BAGGAGE_ENABLE) {
+            //requestBaggage
+            child.requestBaggage.putAll(parent.requestBaggage);
+            //responseBaggage
+            child.responseBaggage.putAll(parent.responseBaggage);
+        }
+
+        return child;
     }
 
     /**
@@ -69,22 +152,6 @@ public class RpcInvokeContext {
     }
 
     /**
-     * 设置上下文
-     *
-     * @param context 调用上下文
-     */
-    public static void setContext(RpcInvokeContext context) {
-        LOCAL.set(context);
-    }
-
-    /**
-     * 是否开启上下文透传功能
-     *
-     * @since 5.1.2
-     */
-    private static final boolean BAGGAGE_ENABLE = RpcConfigs.getBooleanValue(RpcOptions.INVOKE_BAGGAGE_ENABLE);
-
-    /**
      * 是否启用RPC透传功能
      *
      * @return 是否
@@ -92,50 +159,6 @@ public class RpcInvokeContext {
     public static boolean isBaggageEnable() {
         return BAGGAGE_ENABLE;
     }
-
-    /**
-     * 用户自定义超时时间，单次调用生效
-     */
-    protected Integer                       timeout;
-
-    /**
-     * 用户自定义对方地址，单次调用生效
-     */
-    protected String                        targetURL;
-
-    /**
-     * 用户自定义对方分组
-     */
-    protected String                        targetGroup;
-
-    /**
-     * 用户自定义Callback，单次调用生效
-     */
-    protected SofaResponseCallback          responseCallback;
-
-    /**
-     * The Future.
-     */
-    protected ResponseFuture<?>             future;
-
-    /**
-     * 自定义属性
-     */
-    protected ConcurrentMap<String, Object> map             = new ConcurrentHashMap<String, Object>();
-
-    /**
-     * 请求上的透传数据
-     *
-     * @since 5.1.2
-     */
-    protected Map<String, String>           requestBaggage  = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
-
-    /**
-     * 响应上的透传数据
-     *
-     * @since 5.1.2
-     */
-    protected Map<String, String>           responseBaggage = BAGGAGE_ENABLE ? new HashMap<String, String>() : null;
 
     /**
      * 得到调用级别超时时间
@@ -244,12 +267,23 @@ public class RpcInvokeContext {
 
     /**
      * 设置全部请求透传数据
-     * 
+     *
      * @param requestBaggage 请求透传数据
      */
     public void putAllRequestBaggage(Map<String, String> requestBaggage) {
         if (BAGGAGE_ENABLE && requestBaggage != null) {
-            this.requestBaggage.putAll(requestBaggage);
+            putAllToBaggage(requestBaggage, this.requestBaggage);
+        }
+    }
+
+
+    private void putAllToBaggage(Map<String, String> src, Map<String, String> dst) {
+        for (Map.Entry<String, String> entry : src.entrySet()) {
+            String value = entry.getValue();
+            String key = entry.getKey();
+            if (value != null && key != null) {
+                dst.put(key, value);
+            }
         }
     }
 
@@ -302,12 +336,12 @@ public class RpcInvokeContext {
 
     /**
      * 设置全部响应透传数据
-     * 
+     *
      * @param responseBaggage 响应透传数据
      */
     public void putAllResponseBaggage(Map<String, String> responseBaggage) {
         if (BAGGAGE_ENABLE && responseBaggage != null) {
-            this.responseBaggage.putAll(responseBaggage);
+            putAllToBaggage(responseBaggage, this.responseBaggage);
         }
     }
 
@@ -393,6 +427,29 @@ public class RpcInvokeContext {
         return this;
     }
 
+
+    public Map<String, String> getCustomHeader() {
+        return customHeader;
+    }
+
+    /**
+     * 设置请求头，与 RequestBaggage 相比
+     * 1. 不受 enable baggage 开关影响，始终生效
+     * 2. 仅对一次调用生效，调用完成之会被清空
+     *
+     * @param key   header key
+     * @param value header value
+     */
+    public void addCustomHeader(String key, String value) {
+        if (key != null && value != null) {
+            customHeader.put(key, value);
+        }
+    }
+
+    public void clearCustomHeader() {
+        customHeader.clear();
+    }
+
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder(128);
@@ -405,7 +462,10 @@ public class RpcInvokeContext {
         sb.append(", map=").append(map);
         sb.append(", requestBaggage=").append(requestBaggage);
         sb.append(", responseBaggage=").append(responseBaggage);
+        sb.append(", customHeader=").append(customHeader);
         sb.append('}');
         return sb.toString();
     }
+
+
 }

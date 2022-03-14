@@ -20,9 +20,7 @@ import com.alipay.sofa.rpc.api.GenericService;
 import com.alipay.sofa.rpc.bootstrap.Bootstraps;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.Router;
-import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.annotation.Unstable;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -34,11 +32,13 @@ import com.alipay.sofa.rpc.listener.ConsumerStateListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_REJECTED_EXECUTION_POLICY;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ADDRESS_HOLDER;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ADDRESS_WAIT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_CHECK;
@@ -61,7 +61,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROTOCOL;
 
 /**
  * 服务消费者配置
- * 
+ *
  * @param <T> the type parameter
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
@@ -70,12 +70,12 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * The constant serialVersionUID.
      */
-    private static final long                       serialVersionUID   = 4244077707655448146L;
+    private static final long                       serialVersionUID        = 4244077707655448146L;
 
     /**
      * 调用的协议
      */
-    protected String                                protocol           = getStringValue(DEFAULT_PROTOCOL);
+    protected String                                protocol                = getStringValue(DEFAULT_PROTOCOL);
 
     /**
      * 直连调用地址
@@ -90,77 +90,85 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 是否异步调用
      */
-    protected String                                invokeType         = getStringValue(CONSUMER_INVOKE_TYPE);
+    protected String                                invokeType              = getStringValue(CONSUMER_INVOKE_TYPE);
 
     /**
      * 连接超时时间
      */
-    protected int                                   connectTimeout     = getIntValue(CONSUMER_CONNECT_TIMEOUT);
+    protected int                                   connectTimeout          = getIntValue(CONSUMER_CONNECT_TIMEOUT);
 
     /**
      * 关闭超时时间（如果还有请求，会等待请求结束或者超时）
      */
-    protected int                                   disconnectTimeout  = getIntValue(CONSUMER_DISCONNECT_TIMEOUT);
+    protected int                                   disconnectTimeout       = getIntValue(CONSUMER_DISCONNECT_TIMEOUT);
 
     /**
      * 集群处理，默认是failover
      */
-    protected String                                cluster            = getStringValue(CONSUMER_CLUSTER);
+    protected String                                cluster                 = getStringValue(CONSUMER_CLUSTER);
 
     /**
      * The ConnectionHolder 连接管理器
      */
-    protected String                                connectionHolder   = getStringValue(CONSUMER_CONNECTION_HOLDER);
+    protected String                                connectionHolder        = getStringValue(CONSUMER_CONNECTION_HOLDER);
 
     /**
      * 地址管理器
      */
-    protected String                                addressHolder      = getStringValue(CONSUMER_ADDRESS_HOLDER);
+    protected String                                addressHolder           = getStringValue(CONSUMER_ADDRESS_HOLDER);
 
     /**
      * 负载均衡
      */
-    protected String                                loadBalancer       = getStringValue(CONSUMER_LOAD_BALANCER);
+    protected String                                loadBalancer            = getStringValue(CONSUMER_LOAD_BALANCER);
 
     /**
      * 是否延迟建立长连接（第一次调用时新建，注意此参数可能和check冲突，开启check后lazy自动失效）
      *
      * @see ConsumerConfig#check
      */
-    protected boolean                               lazy               = getBooleanValue(CONSUMER_LAZY);
+    protected boolean                               lazy                    = getBooleanValue(CONSUMER_LAZY);
 
     /**
      * 粘滞连接，一个断开才选下一个
      * change transport when current is disconnected
      */
-    protected boolean                               sticky             = getBooleanValue(CONSUMER_STICKY);
+    protected boolean                               sticky                  = getBooleanValue(CONSUMER_STICKY);
 
     /**
      * 是否jvm内部调用（provider和consumer配置在同一个jvm内，则走本地jvm内部，不走远程）
      */
-    protected boolean                               inJVM              = getBooleanValue(CONSUMER_INJVM);
+    protected boolean                               inJVM                   = getBooleanValue(CONSUMER_INJVM);
 
     /**
      * 是否强依赖（即没有服务节点就启动失败，注意此参数可能和lazy冲突，开启check后lazy自动失效)
      *
      * @see ConsumerConfig#lazy
      */
-    protected boolean                               check              = getBooleanValue(CONSUMER_CHECK);
+    protected boolean                               check                   = getBooleanValue(CONSUMER_CHECK);
 
     /**
      * 长连接个数，不是所有的框架都支持一个地址多个长连接
      */
-    protected int                                   connectionNum      = getIntValue(CONSUMER_CONNECTION_NUM);
+    protected int                                   connectionNum           = getIntValue(CONSUMER_CONNECTION_NUM);
 
     /**
      * Consumer给Provider发心跳的间隔
      */
-    protected int                                   heartbeatPeriod    = getIntValue(CONSUMER_HEARTBEAT_PERIOD);
+    protected int                                   heartbeatPeriod         = getIntValue(CONSUMER_HEARTBEAT_PERIOD);
 
     /**
      * Consumer给Provider重连的间隔
      */
-    protected int                                   reconnectPeriod    = getIntValue(CONSUMER_RECONNECT_PERIOD);
+    protected int                                   reconnectPeriod         = getIntValue(CONSUMER_RECONNECT_PERIOD);
+
+    /**
+     * 默认回调线程池满时的拒绝策略，可用值：
+     *  DISCARD：默认丢弃 
+     *  CALLER_RUNS：IO 线程继续执行任务
+     *  CALLER_HANDLE_EXCEPTION：IO 线程执行异常回调任务
+     */
+    protected String                                rejectedExecutionPolicy = getStringValue(CONSUMER_REJECTED_EXECUTION_POLICY);
 
     /**
      * 路由配置别名
@@ -197,30 +205,30 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 等待地址获取时间(毫秒)，-1表示等到拿到地址位置
      */
-    protected int                                   addressWait        = getIntValue(CONSUMER_ADDRESS_WAIT);
+    protected int                                   addressWait             = getIntValue(CONSUMER_ADDRESS_WAIT);
 
     /**
      * 同一个服务（接口协议uniqueId相同）的最大引用次数，防止由于代码bug导致重复引用，每次引用都会生成一个代理类对象，-1表示不检查
      *
      * @since 5.2.0
      */
-    protected int                                   repeatedReferLimit = getIntValue(CONSUMER_REPEATED_REFERENCE_LIMIT);
+    protected int                                   repeatedReferLimit      = getIntValue(CONSUMER_REPEATED_REFERENCE_LIMIT);
 
     /*-------- 下面是方法级可覆盖配置 --------*/
     /**
      * 客户端调用超时时间(毫秒)
      */
-    protected int                                   timeout            = -1;
+    protected int                                   timeout                 = -1;
 
     /**
      * The Retries. 失败后重试次数
      */
-    protected int                                   retries            = getIntValue(CONSUMER_RETRIES);
+    protected int                                   retries                 = getIntValue(CONSUMER_RETRIES);
 
     /**
      * 接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
      */
-    protected int                                   concurrents        = getIntValue(CONSUMER_CONCURRENTS);
+    protected int                                   concurrents             = getIntValue(CONSUMER_CONCURRENTS);
 
     /*---------- 参数配置项结束 ------------*/
 
@@ -241,7 +249,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     @Override
     public String buildKey() {
-        return protocol + "://" + interfaceId + ":" + uniqueId;
+        return protocol + "://" + this.getInterfaceId() + ":" + uniqueId;
     }
 
     /**
@@ -260,7 +268,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         try {
             if (StringUtils.isNotBlank(interfaceId)) {
                 this.proxyClass = ClassUtils.forName(interfaceId);
-                if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(protocol) && !proxyClass.isInterface()) {
+                if (!RpcConstants.PROTOCOL_TYPE_TRIPLE.equals(protocol) && !proxyClass.isInterface()) {
                     throw ExceptionUtils.buildRuntime("consumer.interface",
                         interfaceId, "interfaceId must set interface class, not implement class");
                 }
@@ -469,7 +477,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * @param addressHolder the address holder
      * @return the address holder
      */
-    public ConsumerConfig setAddressHolder(String addressHolder) {
+    public ConsumerConfig<T> setAddressHolder(String addressHolder) {
         this.addressHolder = addressHolder;
         return this;
     }
@@ -635,6 +643,26 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     }
 
     /**
+     * Gets rejected execution policy.
+     *
+     * @return the rejected execution policy
+     */
+    public String getRejectedExecutionPolicy() {
+        return rejectedExecutionPolicy;
+    }
+
+    /**
+     * Sets rejected execution policy.
+     *
+     * @param rejectedExecutionPolicy the rejected execution policy 
+     * @return the rejected execution policy
+     */
+    public ConsumerConfig<T> setRejectedExecutionPolicy(String rejectedExecutionPolicy) {
+        this.rejectedExecutionPolicy = rejectedExecutionPolicy;
+        return this;
+    }
+
+    /**
      * Gets router.
      *
      * @return the router
@@ -649,7 +677,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * @param router the router
      * @return the router
      */
-    public ConsumerConfig setRouter(List<String> router) {
+    public ConsumerConfig<T> setRouter(List<String> router) {
         this.router = router;
         return this;
     }
@@ -975,5 +1003,23 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public ConsumerConfig<T> setProviderInfoListener(ProviderInfoListener providerInfoListener) {
         this.providerInfoListener = providerInfoListener;
         return this;
+    }
+
+    @Override
+    public String getInterfaceId() {
+        if (StringUtils.equals(RpcConstants.PROTOCOL_TYPE_TRIPLE, this.getProtocol())) {
+            Class enclosingClass = this.getProxyClass().getEnclosingClass();
+            Method sofaStub = null;
+            String serviceName = interfaceId;
+            try {
+                sofaStub = enclosingClass.getDeclaredMethod("getServiceName");
+                serviceName = (String) sofaStub.invoke(null);
+            } catch (Throwable e) {
+                //ignore
+            }
+            return serviceName;
+        } else {
+            return interfaceId;
+        }
     }
 }

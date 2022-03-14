@@ -162,7 +162,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
                 if (!proxyClass.isInterface()) {
                     if ((getServer() != null) && getServer().size() != 0) {
                         for (int i = 0; i < getServer().size(); i++) {
-                            if (!RpcConstants.PROTOCOL_TYPE_GRPC.equals(getServer().get(i).getProtocol())) {
+                            if (!RpcConstants.PROTOCOL_TYPE_TRIPLE.equals(getServer().get(i).getProtocol())) {
                                 throw ExceptionUtils.buildRuntime("service.interfaceId",
                                     interfaceId, "interfaceId must set interface class, not implement class");
                             }
@@ -446,7 +446,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      * @param timeout the client timeout
      * @return the client timeout
      */
-    public ProviderConfig setTimeout(int timeout) {
+    public ProviderConfig<T> setTimeout(int timeout) {
         this.timeout = timeout;
         return this;
     }
@@ -552,6 +552,7 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
 
     /**
      * set provider bootstrap
+     *
      * @param providerBootstrap
      */
     public void setProviderBootstrap(ProviderBootstrap providerBootstrap) {

@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
+import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,9 +42,17 @@ public class ProviderInfoTest {
     }
 
     @Test
+    public void testGetDynamicAttr() {
+        ProviderInfo providerInfo = new ProviderInfo();
+        providerInfo.setDynamicAttr("timeout", 1);
+        Assert.assertEquals("1", providerInfo.getAttr("timeout"));
+    }
+
+    @Test
     public void testGetWeight() {
+        //1s
         ProviderInfo provider = ProviderHelper
-            .toProviderInfo("bolt://10.15.232.229:12222?timeout=3333&serialization=hessian2&connections=1&warmupTime=6&warmupWeight=5&appName=test-server&weight=2000");
+            .toProviderInfo("bolt://10.15.232.229:12222?timeout=3333&serialization=hessian2&connections=1&warmupTime=1000&warmupWeight=5&appName=test-server&weight=2000");
 
         long warmupTime = Long.parseLong(provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         provider.setDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT,
@@ -62,12 +71,12 @@ public class ProviderInfoTest {
         Assert.assertEquals(5, provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
         Assert.assertTrue(provider.getDynamicAttr(ProviderInfoAttrs.ATTR_WARM_UP_END_TIME) != null);
         Assert.assertEquals("5", provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_WEIGHT));
-        Assert.assertEquals("6", provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
+        Assert.assertEquals("1000", provider.getStaticAttr(ProviderInfoAttrs.ATTR_WARMUP_TIME));
         Assert.assertEquals(ProviderStatus.WARMING_UP, provider.getStatus());
         Assert.assertEquals(5, provider.getWeight());
         try {
-            Thread.sleep(10);
-        } catch (Exception e) {
+            TimeUnit.SECONDS.sleep(2);
+        } catch (Exception ignored) {
         }
         Assert.assertTrue(provider.getWeight() == 2000);
         Assert.assertTrue(provider.getStatus() == ProviderStatus.AVAILABLE);

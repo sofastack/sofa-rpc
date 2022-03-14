@@ -15,7 +15,6 @@
     
     <modules>
         <module>client</module>
-        <module>codec</module>
         <module>filter</module>
         <module>log</module>
         <module>proxy</module>

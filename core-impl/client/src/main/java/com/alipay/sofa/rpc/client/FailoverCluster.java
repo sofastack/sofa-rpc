@@ -58,12 +58,13 @@ public class FailoverCluster extends AbstractCluster {
         String methodName = request.getMethodName();
         int retries = consumerConfig.getMethodRetries(methodName);
         int time = 0;
-        SofaRpcException throwable = null;// 异常日志
+        // 异常日志
+        SofaRpcException throwable = null;
         List<ProviderInfo> invokedProviderInfos = new ArrayList<ProviderInfo>(retries + 1);
         do {
-
-            ProviderInfo providerInfo = select(request, invokedProviderInfos);
+            ProviderInfo providerInfo = null;
             try {
+                providerInfo = select(request, invokedProviderInfos);
                 SofaResponse response = filterChain(providerInfo, request);
                 if (response != null) {
                     if (throwable != null) {
@@ -87,7 +88,12 @@ public class FailoverCluster extends AbstractCluster {
                     throwable = e;
                     time++;
                 } else {
-                    throw e;
+                    // throw the exception that caused the retry
+                    if (throwable != null) {
+                        throw throwable;
+                    } else {
+                        throw e;
+                    }
                 }
             } catch (Exception e) { // 其它异常不重试
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
@@ -100,7 +106,9 @@ public class FailoverCluster extends AbstractCluster {
                         time + 1); // 重试次数
                 }
             }
-            invokedProviderInfos.add(providerInfo);
+            if (providerInfo != null) {
+                invokedProviderInfos.add(providerInfo);
+            }
         } while (time <= retries);
 
         throw throwable;

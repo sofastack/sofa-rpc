@@ -13,11 +13,14 @@
     <artifactId>sofa-rpc-common</artifactId>
     
     <dependencies>
+        <dependency>
+            <groupId>com.alipay.sofa.common</groupId>
+            <artifactId>sofa-common-tools</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-exception</artifactId>
-            <version>${project.parent.version}</version>
         </dependency>
 
         <dependency>

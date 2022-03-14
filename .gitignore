@@ -18,3 +18,7 @@ bin
 # log
 logs/
 *.log
+
+#protobuf
+example/build/*
+test/test-integration/build/*

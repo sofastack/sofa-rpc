@@ -57,13 +57,13 @@ import static com.alipay.sofa.rpc.config.ConfigValueHelper.checkNormalWithCommaC
  * <p>
  *
  * @param <T> the interface
- * @param <S> the sub class of AbstractInterfaceConfig
+ * @param <S> the subclass of AbstractInterfaceConfig
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConfig>
-                                                                                    extends AbstractIdConfig<S>
-                                                                                                               implements
-                                                                                                               Serializable {
+public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConfig<T, S>>
+                                                                                          extends AbstractIdConfig<S>
+                                                                                                                     implements
+                                                                                                                     Serializable {
 
     /**
      * The constant serialVersionUID.
@@ -199,6 +199,11 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      */
     protected String                                 compress;
 
+    /**
+     * 虚拟 interfaceid
+     */
+    protected String                                 virtualInterfaceId;
+
     /*-------------配置项结束----------------*/
 
     /**
@@ -273,7 +278,12 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return the interface id
      */
     public String getInterfaceId() {
-        return interfaceId;
+
+        if (StringUtils.isNotBlank(virtualInterfaceId)) {
+            return virtualInterfaceId;
+        } else {
+            return interfaceId;
+        }
     }
 
     /**
@@ -1042,5 +1052,13 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      */
     public String getAppName() {
         return application.getAppName();
+    }
+
+    public String getVirtualInterfaceId() {
+        return virtualInterfaceId;
+    }
+
+    public void setVirtualInterfaceId(String virtualInterfaceId) {
+        this.virtualInterfaceId = virtualInterfaceId;
     }
 }

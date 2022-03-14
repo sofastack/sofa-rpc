@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
-import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -31,6 +30,8 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -69,7 +70,8 @@ public class RouterChain {
     private final static ExtensionLoader<Router>             EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Router> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Router.class, new ExtensionLoaderListener<Router>() {
+        ExtensionLoader<Router> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Router.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Router>() {
             @Override
             public void onLoad(ExtensionClass<Router> extensionClass) {
                 Class<? extends Router> implClass = extensionClass.getClazz();
@@ -90,6 +92,7 @@ public class RouterChain {
                 }
             }
         });
+        return extensionLoader;
     }
 
     /**
@@ -98,7 +101,7 @@ public class RouterChain {
     private final List<Router> routers;
 
     public RouterChain(List<Router> actualRouters, ConsumerBootstrap consumerBootstrap) {
-        this.routers = new ArrayList<Router>();
+        this.routers = new LinkedList<Router>();
         if (CommonUtils.isNotEmpty(actualRouters)) {
             for (Router router : actualRouters) {
                 if (router.needToLoad(consumerBootstrap)) {
@@ -144,7 +147,10 @@ public class RouterChain {
                 if (startsWithExcludePrefix(routerAlias)) { // 排除用的特殊字符
                     excludes.add(routerAlias.substring(1));
                 } else {
-                    extensionRouters.add(EXTENSION_LOADER.getExtensionClass(routerAlias));
+                    ExtensionClass<Router> extensionRouter = EXTENSION_LOADER.getExtensionClass(routerAlias);
+                    if (extensionRouter != null) {
+                        extensionRouters.add(extensionRouter);
+                    }
                 }
             }
         }
@@ -159,7 +165,7 @@ public class RouterChain {
         excludes = null; // 不需要了
         // 按order从小到大排序
         if (extensionRouters.size() > 1) {
-            Collections.sort(extensionRouters, new OrderedComparator<ExtensionClass>());
+            extensionRouters.sort(Comparator.comparingInt(ExtensionClass::getOrder));
         }
         List<Router> actualRouters = new ArrayList<Router>();
         for (ExtensionClass<Router> extensionRouter : extensionRouters) {

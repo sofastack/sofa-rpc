@@ -1,9 +1,10 @@
 # SOFARPC
 
-[![Build Status](https://travis-ci.com/sofastack/sofa-rpc.svg?branch=master)](https://travis-ci.com/sofastack/sofa-rpc)
+![Build Status](https://github.com/sofastack/sofa-rpc/workflows/build/badge.svg)
 [![Coverage Status](https://codecov.io/gh/sofastack/sofa-rpc/branch/master/graph/badge.svg)](https://codecov.io/gh/sofastack/sofa-rpc)
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
 [![Maven](https://img.shields.io/github/release/sofastack/sofa-rpc.svg)](https://github.com/sofastack/sofa-rpc/releases)
+[![Percentage of issues still open](https://isitmaintained.com/badge/open/sofastack/sofa-rpc.svg)](https://isitmaintained.com/project/sofastack/sofa-rpc "Percentage of issues still open")
 
 ## Overview
 
@@ -34,21 +35,21 @@ Runtime requirement: JDK 8 or above.
 
 ## Documents
 
-- [Getting Started](http://www.sofastack.tech/sofa-rpc/docs/Getting-Started-With-SOFA-Boot?lang=en)
-- [User Guide](http://www.sofastack.tech/sofa-rpc/docs/Programming?lang=en)
-- [Developer Guide](http://www.sofastack.tech/sofa-rpc/docs/How-To-Build?lang=en)
-- [Release Notes](http://www.sofastack.tech/sofa-rpc/docs/ReleaseNotes?lang=en)
-- [Road Map](http://www.sofastack.tech/sofa-rpc/docs/RoadMap?lang=en)
+- [Getting Started](https://www.sofastack.tech/sofa-rpc/docs/Getting-Started-With-SOFA-Boot?lang=en)
+- [User Guide](https://www.sofastack.tech/sofa-rpc/docs/Programming?lang=en)
+- [Developer Guide](https://www.sofastack.tech/sofa-rpc/docs/How-To-Build?lang=en)
+- [Release Notes](https://www.sofastack.tech/sofa-rpc/docs/ReleaseNotes?lang=en)
+- [Road Map](https://www.sofastack.tech/sofa-rpc/docs/RoadMap?lang=en)
 
 ## Contribution 
 
-[How to Contributing](http://www.sofastack.tech/sofa-rpc/docs/Contributing?lang=en)
+[How to Contributing](https://www.sofastack.tech/sofa-rpc/docs/Contributing?lang=en)
 
 ## Contact Us
 
 - **DingTalk Group**
 
-  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*QkNdTrDjk_8AAAAAAAAAAABkARQnAQ" height="250" width="250">
+  <img alt="DingTalk" src="https://gw.alipayobjects.com/mdn/sofastack/afts/img/A*1DklS7SZFNMAAAAAAAAAAAAAARQnAQ" height="250" width="250">
 
 ## License
 

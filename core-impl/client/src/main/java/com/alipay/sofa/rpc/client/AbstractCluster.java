@@ -27,6 +27,7 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.AsyncRuntime;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRouteException;
@@ -185,8 +186,8 @@ public abstract class AbstractCluster extends Cluster {
     @Override
     public void addProvider(ProviderGroup providerGroup) {
         // 包装了各个组件的操作
-        addressHolder.addProvider(providerGroup);
         connectionHolder.addProvider(providerGroup);
+        addressHolder.addProvider(providerGroup);
         if (EventBus.isEnable(ProviderInfoAddEvent.class)) {
             ProviderInfoAddEvent event = new ProviderInfoAddEvent(consumerConfig, providerGroup);
             EventBus.post(event);
@@ -393,9 +394,13 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         }
+        // R1：Record routing address time
         // 原始服务列表数据 --> 路由结果
+        long routerStartTime = System.nanoTime();
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
-
+        RpcInternalContext context = RpcInternalContext.peekContext();
+        RpcInvokeContext rpcInvokeContext = RpcInvokeContext.getContext();
+        rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, System.nanoTime()-routerStartTime);
         //保存一下原始地址,为了打印
         List<ProviderInfo> originalProviderInfos;
 
@@ -406,7 +411,6 @@ public abstract class AbstractCluster extends Cluster {
              * 注册中心如果没有provider可用列表，需要识别上下文中是否存在直连Provider:
              * 1. RpcInvokeContext.getContext().getTargetUrl()
              */
-            RpcInternalContext context = RpcInternalContext.peekContext();
             if (context != null) {
                 String targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
                 if (StringUtils.isNotBlank(targetIP)) {
@@ -420,13 +424,17 @@ public abstract class AbstractCluster extends Cluster {
         } else {
             originalProviderInfos = new ArrayList<>(providerInfos);
         }
-        if (CommonUtils.isNotEmpty(invokedProviderInfos) && providerInfos.size() > invokedProviderInfos.size()) { // 总数大于已调用数
-            providerInfos.removeAll(invokedProviderInfos);// 已经调用异常的本次不再重试
+        if (CommonUtils.isNotEmpty(invokedProviderInfos)) {
+            // 已经调用异常的本次不再重试
+            providerInfos.removeAll(invokedProviderInfos);
+            // If all providers have retried once, then select by loadBalancer without filter.
+            if(CommonUtils.isEmpty(providerInfos)){
+                providerInfos = originalProviderInfos;
+            }
         }
 
         String targetIP = null;
         ProviderInfo providerInfo;
-        RpcInternalContext context = RpcInternalContext.peekContext();
         if (context != null) {
             targetIP = (String) context.getAttachment(RpcConstants.HIDDEN_KEY_PINPOINT);
         }
@@ -441,8 +449,12 @@ public abstract class AbstractCluster extends Cluster {
             return providerInfo;
         } else {
             do {
+                // R4：Record load balancing time
                 // 再进行负载均衡筛选
+                long loadBalanceStartTime = System.nanoTime();
                 providerInfo = loadBalancer.select(message, providerInfos);
+                rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, System.nanoTime()-loadBalanceStartTime);
+
                 ClientTransport transport = selectByProvider(message, providerInfo);
                 if (transport != null) {
                     return providerInfo;
@@ -461,7 +473,7 @@ public abstract class AbstractCluster extends Cluster {
      * @return the provider
      */
     protected ProviderInfo selectPinpointProvider(String targetIP, List<ProviderInfo> providerInfos) {
-        ProviderInfo tp = ProviderHelper.toProviderInfo(targetIP);
+        ProviderInfo tp = convertToProviderInfo(targetIP);
         // 存在注册中心provider才会遍历
         if (CommonUtils.isNotEmpty(providerInfos)) {
             for (ProviderInfo providerInfo : providerInfos) {
@@ -474,6 +486,10 @@ public abstract class AbstractCluster extends Cluster {
         }
         // support direct target url
         return tp;
+    }
+
+    protected ProviderInfo convertToProviderInfo(String targetIP) {
+        return ProviderHelper.toProviderInfo(targetIP);
     }
 
     /**
@@ -538,7 +554,27 @@ public abstract class AbstractCluster extends Cluster {
     protected SofaResponse filterChain(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         RpcInternalContext context = RpcInternalContext.getContext();
         context.setProviderInfo(providerInfo);
-        return filterChain.invoke(request);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO, System.nanoTime());
+        SofaResponse sofaResponse = filterChain.invoke(request);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO, System.nanoTime());
+        calculateConsumerFilterTime();
+        return sofaResponse;
+    }
+
+    private void calculateConsumerFilterTime() {
+        // R3: Record consumer filter execution time
+        Long filterStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_START_TIME_NANO);
+        Long filterEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_FILTER_END_TIME_NANO);
+        Long invokerStartTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_START_TIME_NANO);
+        Long invokerEndTime = (Long) RpcInvokeContext.getContext().get(
+            RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO);
+        if (filterStartTime != null && filterEndTime != null && invokerStartTime != null && invokerEndTime != null) {
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
+                filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime));
+        }
     }
 
     @Override
@@ -670,13 +706,13 @@ public abstract class AbstractCluster extends Cluster {
         }
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
-        if (timeout == null) {
+        if (timeout == null || timeout <= 0) {
             // 取客户端配置（先方法级别再接口级别）
             timeout = consumerConfig.getMethodTimeout(request.getMethodName());
-            if (timeout == null || timeout < 0) {
+            if (timeout == null || timeout <= 0) {
                 // 再取服务端配置
-                timeout = (Integer) providerInfo.getDynamicAttr(ATTR_TIMEOUT);
-                if (timeout == null) {
+                timeout = StringUtils.parseInteger(providerInfo.getAttr(ATTR_TIMEOUT));
+                if (timeout == null || timeout <= 0) {
                     // 取框架默认值
                     timeout = getIntValue(CONSUMER_INVOKE_TIMEOUT);
                 }
@@ -696,7 +732,7 @@ public abstract class AbstractCluster extends Cluster {
             return;
         }
         if (hook != null) {
-            hook.postDestroy();
+            hook.preDestroy();
         }
         if (connectionHolder != null) {
             connectionHolder.destroy(new GracefulDestroyHook());

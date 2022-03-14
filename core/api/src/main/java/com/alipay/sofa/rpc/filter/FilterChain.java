@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.filter;
 
-import com.alipay.sofa.rpc.common.struct.OrderedComparator;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
@@ -36,6 +35,8 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -74,7 +75,8 @@ public class FilterChain implements Invoker {
     private final static ExtensionLoader<Filter>             EXTENSION_LOADER      = buildLoader();
 
     private static ExtensionLoader<Filter> buildLoader() {
-        return ExtensionLoaderFactory.getExtensionLoader(Filter.class, new ExtensionLoaderListener<Filter>() {
+        ExtensionLoader<Filter> extensionLoader = ExtensionLoaderFactory.getExtensionLoader(Filter.class);
+        extensionLoader.addListener(new ExtensionLoaderListener<Filter>() {
             @Override
             public void onLoad(ExtensionClass<Filter> extensionClass) {
                 Class<? extends Filter> implClass = extensionClass.getClazz();
@@ -95,6 +97,7 @@ public class FilterChain implements Invoker {
                 }
             }
         });
+        return extensionLoader;
     }
 
     /**
@@ -119,7 +122,7 @@ public class FilterChain implements Invoker {
         // 前面的过滤器在最外层
         invokerChain = lastInvoker;
         if (CommonUtils.isNotEmpty(filters)) {
-            loadedFilters = new ArrayList<Filter>();
+            loadedFilters = new LinkedList<Filter>();
             for (int i = filters.size() - 1; i >= 0; i--) {
                 try {
                     Filter filter = filters.get(i);
@@ -187,7 +190,7 @@ public class FilterChain implements Invoker {
         HashSet<String> excludes = parseExcludeFilter(customFilters);
 
         // 准备数据：用户通过别名的方式注入的filter，需要解析
-        List<ExtensionClass<Filter>> extensionFilters = new ArrayList<ExtensionClass<Filter>>();
+        List<ExtensionClass<Filter>> extensionFilters = new LinkedList<ExtensionClass<Filter>>();
         List<String> filterAliases = config.getFilter(); //
         if (CommonUtils.isNotEmpty(filterAliases)) {
             for (String filterAlias : filterAliases) {
@@ -211,7 +214,7 @@ public class FilterChain implements Invoker {
         }
         // 按order从小到大排序
         if (extensionFilters.size() > 1) {
-            Collections.sort(extensionFilters, new OrderedComparator<ExtensionClass<Filter>>());
+            extensionFilters.sort(Comparator.comparingInt(ExtensionClass::getOrder));
         }
         List<Filter> actualFilters = new ArrayList<Filter>();
         for (ExtensionClass<Filter> extensionFilter : extensionFilters) {
