@@ -16,7 +16,7 @@
         <netty.version>4.1.44.Final</netty.version>
         <!-- 3rd extends libs -->
         <servlet.version>2.5</servlet.version>
-        <resteasy.version>3.6.3.Final</resteasy.version>
+        <resteasy.version>3.14.0.Final</resteasy.version>
         <jaxrs.api.version>1.0.2.Final</jaxrs.api.version>
         <cxf.version>3.0.14</cxf.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
