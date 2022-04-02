@@ -225,11 +225,15 @@ public class MeshRegistry extends Registry {
      * @param providerInfo 服务提供者数据
      */
     protected void doUnRegister(String serviceName, ProviderInfo providerInfo) {
+        UnPublishServiceRequest unPublishServiceRequest = buildUnPublishServiceRequest(serviceName, providerInfo);
+        client.unPublishService(unPublishServiceRequest);
+    }
 
+    protected UnPublishServiceRequest buildUnPublishServiceRequest(String serviceName, ProviderInfo providerInfo) {
         UnPublishServiceRequest unPublishServiceRequest = new UnPublishServiceRequest();
         unPublishServiceRequest.setServiceName(serviceName);
-        client.unPublishService(unPublishServiceRequest);
-
+        unPublishServiceRequest.setProtocolType(providerInfo.getProtocolType());
+        return unPublishServiceRequest;
     }
 
     @Override
@@ -239,7 +243,7 @@ public class MeshRegistry extends Registry {
             try {
                 unRegister(config);
             } catch (Exception e) {
-                LOGGER.errorWithApp(appName, "Error when batch unregistry", e);
+                LOGGER.errorWithApp(appName, "Error when batch unRegister", e);
             }
         }
     }
@@ -260,7 +264,7 @@ public class MeshRegistry extends Registry {
                 SubscribeServiceResult subscribeServiceResult = client.subscribeService(subscribeRequest);
 
                 if (subscribeServiceResult == null || !subscribeServiceResult.isSuccess()) {
-                    throw new RuntimeException("regist consumer occors error," + subscribeRequest);
+                    throw new RuntimeException("register consumer occurs error," + subscribeRequest);
 
                 }
 
@@ -298,6 +302,7 @@ public class MeshRegistry extends Registry {
         String key = MeshRegistryHelper.buildMeshKey(consumerConfig, consumerConfig.getProtocol());
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
         subscribeRequest.setServiceName(key);
+        subscribeRequest.setProtocolType(consumerConfig.getProtocol());
         return subscribeRequest;
     }
 
@@ -307,7 +312,7 @@ public class MeshRegistry extends Registry {
                 ApplicationInfoRequest applicationInfoRequest = buildApplicationRequest(appName);
                 boolean registed = client.registeApplication(applicationInfoRequest);
                 if (!registed) {
-                    throw new RuntimeException("registe application occors error," + applicationInfoRequest);
+                    throw new RuntimeException("register application occurs error," + applicationInfoRequest);
                 } else {
                     registedApp = true;
                 }
@@ -362,6 +367,7 @@ public class MeshRegistry extends Registry {
         UnSubscribeServiceRequest unsubscribeRequest = new UnSubscribeServiceRequest();
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
         unsubscribeRequest.setServiceName(key);
+        unsubscribeRequest.setProtocolType(config.getProtocol());
         return unsubscribeRequest;
     }
 
