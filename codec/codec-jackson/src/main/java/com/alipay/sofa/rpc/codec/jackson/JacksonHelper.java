@@ -105,7 +105,7 @@ public class JacksonHelper {
         Method jsonMethod = null;
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
-            if (methodName.equals(method.getName())) {
+            if (methodName.equals(method.getName()) && !method.isBridge()) {
                 jsonMethod = method;
                 break;
             }
