@@ -76,6 +76,7 @@ public class HealthServiceInformer {
             HealthServicesRequest request = HealthServicesRequest.newBuilder()
                     .setTag(tag)
                     .setQueryParams(new QueryParams(properties.getWatchTimeout(), currentData.getConsulIndex()))
+                    .setToken(properties.getToken())
                     .setPassing(true)
                     .build();
             Response<List<HealthService>> response = consulClient.getHealthServices(serviceName, request);
@@ -94,6 +95,7 @@ public class HealthServiceInformer {
         HealthServicesRequest request = HealthServicesRequest.newBuilder()
                 .setTag(tag)
                 .setQueryParams(QueryParams.DEFAULT)
+                .setToken(properties.getToken())
                 .setPassing(true)
                 .build();
         this.currentData = consulClient.getHealthServices(serviceName, request);

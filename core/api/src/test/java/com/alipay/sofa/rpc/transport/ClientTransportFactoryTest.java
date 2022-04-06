@@ -47,14 +47,14 @@ public class ClientTransportFactoryTest {
         TestClientTransport clientTransport3 = (TestClientTransport) ClientTransportFactory.getClientTransport(config3);
         Assert.assertFalse(clientTransport == clientTransport3);
 
-        ClientTransportFactory.releaseTransport(null, 500);
+        ClientTransportFactory.releaseTransport(null, 300);
 
         clientTransport.setRequest(4);
-        ClientTransportFactory.releaseTransport(clientTransport, 500);
+        ClientTransportFactory.releaseTransport(clientTransport, 300);
         Assert.assertEquals(2, ClientTransportFactory.getClientTransportHolder().size());
 
         clientTransport2.setRequest(0);
-        ClientTransportFactory.releaseTransport(clientTransport2, 500);
+        ClientTransportFactory.releaseTransport(clientTransport2, 300);
         Assert.assertEquals(1, ClientTransportFactory.getClientTransportHolder().size());
 
         ClientTransportFactory.closeAll();

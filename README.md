@@ -10,7 +10,7 @@
 
 SOFARPC is a high-performance, high-extensibility, production-level Java RPC framework. In Ant Financial, SOFARPC has been used for more than ten years and developing for five generations. SOFARPC is dedicated to simplify RPC calls between applications, and provide convenient, no code intrusion, stable, and efficient point-to-point remote service invocation solutions for applications. For user and developer easy to improve features, SOFARPC provides a wealth of model abstraction and extensible interfaces, including filter, routing, load balancing, and so on. At the same time, it provides a rich MicroService governance solution around the SOFARPC framework and its surrounding components.
 
-![SOFARPC Architecture](https://gw.alipayobjects.com/zos/nemopainter_prod/ceceffa8-d0bf-4a2a-a57a-2998544b3d8a/sofastack-sofa-rpc-en_US/resources-home_1.png)
+![SOFARPC Architecture](./resource/sofa-rpc-architecture.png)
 
 ## Features
 
