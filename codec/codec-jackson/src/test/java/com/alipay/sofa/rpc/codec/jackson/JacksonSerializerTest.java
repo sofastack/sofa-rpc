@@ -424,7 +424,7 @@ public class JacksonSerializerTest {
     }
 
     private SofaRequest buildGenericRequest() throws NoSuchMethodException {
-        final MyReq myReq= new MyReq();
+        final MyReq myReq = new MyReq();
         myReq.setName("hello");
 
         return buildRequest("hello", new Object[] { myReq }, GenericService.class);
@@ -513,7 +513,8 @@ public class JacksonSerializerTest {
 
     @Test(expected = ClassCastException.class)
     public void testGenericSofaRequestFail() throws Exception {
-        JacksonSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0", GenericService.class.getName());
+        JacksonSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
+            GenericService.class.getName());
 
         SofaRequest request = buildGenericRequest();
         AbstractByteBuf data = serializer.encode(request, null);
@@ -534,7 +535,8 @@ public class JacksonSerializerTest {
 
     @Test
     public void testGenericSofaRequestSuccess() throws Exception {
-        JacksonSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0", GenericServiceImpl.class.getName());
+        JacksonSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
+            GenericServiceImpl.class.getName());
 
         SofaRequest request = buildGenericRequest();
         AbstractByteBuf data = serializer.encode(request, null);
@@ -554,7 +556,5 @@ public class JacksonSerializerTest {
         Assert.assertNotNull(req);
         Assert.assertEquals(req.getName(), "hello");
     }
-
-
 
 }
