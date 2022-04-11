@@ -513,8 +513,7 @@ public class JacksonSerializerTest {
 
     @Test(expected = ClassCastException.class)
     public void testGenericSofaRequestFail() throws Exception {
-        JacksonSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
-            GenericService.class.getName());
+        JacksonSerializer.clear();
 
         SofaRequest request = buildGenericRequest();
         AbstractByteBuf data = serializer.encode(request, null);
@@ -555,6 +554,8 @@ public class JacksonSerializerTest {
         MyReq req = (MyReq) methodArgs[0];
         Assert.assertNotNull(req);
         Assert.assertEquals(req.getName(), "hello");
+
+        JacksonSerializer.clear();
     }
 
 }

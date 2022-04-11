@@ -25,6 +25,7 @@ import java.util.Properties;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -184,6 +185,11 @@ public class JacksonSerializer extends AbstractSerializer {
         } else {
             throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
         }
+    }
+
+    @VisibleForTesting
+    public static void clear() {
+        genericServiceMap.clear();
     }
 
     private void decodeSofaRequest(AbstractByteBuf data, SofaRequest sofaRequest, Map<String, String> head) {
