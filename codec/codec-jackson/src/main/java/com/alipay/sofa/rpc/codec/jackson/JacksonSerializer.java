@@ -22,6 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
@@ -73,7 +74,7 @@ public class JacksonSerializer extends AbstractSerializer {
 
     private static final String SERIALIZATIONFEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
 
-    private static Map<String, String> genericServiceMap = new HashMap<>();
+    private static Map<String, String> genericServiceMap = new ConcurrentHashMap<>();
 
     public JacksonSerializer() {
 
@@ -188,7 +189,7 @@ public class JacksonSerializer extends AbstractSerializer {
     }
 
     @VisibleForTesting
-    public static void clear() {
+    static void clear() {
         genericServiceMap.clear();
     }
 
