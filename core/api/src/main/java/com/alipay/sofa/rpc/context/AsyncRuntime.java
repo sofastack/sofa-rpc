@@ -104,9 +104,9 @@ public class AsyncRuntime {
     /**
      * 设置callback用的线程池
      *
-     * @param threadPoolExecutor callback用的线程池
+     * @param asyncThreadPool callback用的线程池
      */
-    public static void setAsyncThreadPool(ThreadPoolExecutor threadPoolExecutor) {
-        AsyncRuntime.asyncThreadPool = threadPoolExecutor;
+    public static void setAsyncThreadPool(ThreadPoolExecutor asyncThreadPool) {
+        AsyncRuntime.asyncThreadPool = asyncThreadPool;
     }
 }
