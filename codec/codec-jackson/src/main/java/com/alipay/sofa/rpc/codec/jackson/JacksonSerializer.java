@@ -97,7 +97,6 @@ public class JacksonSerializer extends AbstractSerializer {
                 }
             }
         }
-
     }
 
     @Override
