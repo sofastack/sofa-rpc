@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.codec.jackson.generic.GenericService;
 import com.alipay.sofa.rpc.codec.jackson.generic.GenericServiceImpl;
 import com.alipay.sofa.rpc.codec.jackson.generic.MyReq;
@@ -513,7 +514,7 @@ public class JacksonSerializerTest {
 
     @Test(expected = ClassCastException.class)
     public void testGenericSofaRequestFail() throws Exception {
-        JacksonSerializer.clear();
+        AbstractSerializer.clear();
 
         SofaRequest request = buildGenericRequest();
         AbstractByteBuf data = serializer.encode(request, null);
@@ -534,7 +535,7 @@ public class JacksonSerializerTest {
 
     @Test
     public void testGenericSofaRequestSuccess() throws Exception {
-        JacksonSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
+        AbstractSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
             GenericServiceImpl.class.getName());
 
         SofaRequest request = buildGenericRequest();
@@ -555,7 +556,7 @@ public class JacksonSerializerTest {
         Assert.assertNotNull(req);
         Assert.assertEquals(req.getName(), "hello");
 
-        JacksonSerializer.clear();
+        AbstractSerializer.clear();
     }
 
 }

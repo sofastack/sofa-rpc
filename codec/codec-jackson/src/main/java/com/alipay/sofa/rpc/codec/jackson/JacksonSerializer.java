@@ -22,11 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ConcurrentHashMap;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -74,8 +72,6 @@ public class JacksonSerializer extends AbstractSerializer {
 
     private static final String SERIALIZATIONFEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
 
-    private static Map<String, String> genericServiceMap = new ConcurrentHashMap<>();
-
     public JacksonSerializer() {
 
         Properties properties = System.getProperties();
@@ -102,13 +98,6 @@ public class JacksonSerializer extends AbstractSerializer {
             }
         }
 
-    }
-
-    //注册泛化接口对应的实际实现类型
-    public static void registerGenericService(String serviceName, String className) {
-        if (StringUtils.isNotBlank(serviceName) && StringUtils.isNotBlank(className)) {
-            genericServiceMap.put(serviceName, className);
-        }
     }
 
     @Override
@@ -188,11 +177,6 @@ public class JacksonSerializer extends AbstractSerializer {
         }
     }
 
-    @VisibleForTesting
-    static void clear() {
-        genericServiceMap.clear();
-    }
-
     private void decodeSofaRequest(AbstractByteBuf data, SofaRequest sofaRequest, Map<String, String> head) {
         if (head == null) {
             throw buildDeserializeError("head is null!");
@@ -230,7 +214,8 @@ public class JacksonSerializer extends AbstractSerializer {
         JavaType[] requestClassList = jacksonHelper.getReqClass(targetService, sofaRequest.getMethodName());
         JavaType[] requestClassListDecode = requestClassList;
         if (genericServiceMap.containsKey(targetService)) {
-            requestClassListDecode = jacksonHelper.getReqClass(genericServiceMap.get(targetService), sofaRequest.getMethodName());
+            requestClassListDecode = jacksonHelper.getReqClass(genericServiceMap.get(targetService),
+                sofaRequest.getMethodName());
         }
         Object[] reqList = decode(data, requestClassListDecode);
         sofaRequest.setMethodArgs(reqList);
