@@ -24,6 +24,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.jackson.generic.GenericService;
+import com.alipay.sofa.rpc.codec.jackson.generic.GenericServiceImpl;
+import com.alipay.sofa.rpc.codec.jackson.generic.MyReq;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest2;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoResponse;
@@ -397,7 +401,7 @@ public class JacksonSerializerTest {
     private SofaRequest buildSayRequest() throws NoSuchMethodException {
         final DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("name");
-        return buildRequest("say", new Object[] { demoRequest });
+        return buildRequest("say", new Object[] { demoRequest }, DemoService.class);
     }
 
     private SofaRequest buildSay2Request() throws NoSuchMethodException {
@@ -407,7 +411,7 @@ public class JacksonSerializerTest {
         Map<String, String> ctx = new HashMap<String, String>();
         ctx.put("abc", "123");
 
-        return buildRequest("say2", new Object[] { demoRequest, ctx, 123 });
+        return buildRequest("say2", new Object[] { demoRequest, ctx, 123 }, DemoService.class);
     }
 
     private SofaRequest buildSay3Request() throws NoSuchMethodException {
@@ -417,15 +421,22 @@ public class JacksonSerializerTest {
         List<DemoRequest> list = new ArrayList<DemoRequest>();
         list.add(demoRequest);
 
-        return buildRequest("say3", new Object[] { list });
+        return buildRequest("say3", new Object[] { list }, DemoService.class);
     }
 
-    private SofaRequest buildRequest(String methodName, Object[] args) throws NoSuchMethodException {
+    private SofaRequest buildGenericRequest() throws NoSuchMethodException {
+        final MyReq myReq = new MyReq();
+        myReq.setName("hello");
+
+        return buildRequest("hello", new Object[] { myReq }, GenericService.class);
+    }
+
+    private SofaRequest buildRequest(String methodName, Object[] args, Class clazz) throws NoSuchMethodException {
         SofaRequest request = new SofaRequest();
-        request.setInterfaceName(DemoService.class.getName());
+        request.setInterfaceName(clazz.getName());
         request.setMethodName(methodName);
         Method method = null;
-        for (Method m : DemoService.class.getMethods()) {
+        for (Method m : clazz.getMethods()) {
             if (m.getName().equals(methodName)) {
                 method = m;
             }
@@ -437,7 +448,7 @@ public class JacksonSerializerTest {
             argSigs.add(req.getClass().getName());
         }
         request.setMethodArgSigs(argSigs.toArray(new String[argSigs.size()]));
-        request.setTargetServiceUniqueName(DemoService.class.getName() + ":1.0");
+        request.setTargetServiceUniqueName(clazz.getName() + ":1.0");
         request.setTargetAppName("targetApp");
         request.setSerializeType((byte) 12);
         request.setTimeout(1024);
@@ -499,6 +510,53 @@ public class JacksonSerializerTest {
         System.setProperty("sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES", "true");
         System.setProperty("sofa.rpc.codec.jackson.SerializationFeature.FAIL_ON_EMPTY_BEANS", "true");
 
+    }
+
+    @Test(expected = ClassCastException.class)
+    public void testGenericSofaRequestFail() throws Exception {
+        AbstractSerializer.clear();
+
+        SofaRequest request = buildGenericRequest();
+        AbstractByteBuf data = serializer.encode(request, null);
+
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, GenericService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "hello");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put("unkown", "yes");
+
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
+        Object[] methodArgs = newRequest.getMethodArgs();
+        MyReq req = (MyReq) methodArgs[0];
+    }
+
+    @Test
+    public void testGenericSofaRequestSuccess() throws Exception {
+        AbstractSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
+            GenericServiceImpl.class.getName());
+
+        SofaRequest request = buildGenericRequest();
+        AbstractByteBuf data = serializer.encode(request, null);
+
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, GenericService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "hello");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put("unkown", "yes");
+
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
+        Object[] methodArgs = newRequest.getMethodArgs();
+        MyReq req = (MyReq) methodArgs[0];
+        Assert.assertNotNull(req);
+        Assert.assertEquals(req.getName(), "hello");
+
+        AbstractSerializer.clear();
     }
 
 }
