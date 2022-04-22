@@ -22,6 +22,9 @@ package com.alipay.sofa.rpc.codec.jackson.generic;
  */
 public interface GenericService<T, R> {
 
-    public R hello(T t);
+    //Now, we don't support method overload
+    //that means if add a method named hello with different param type
+    //the JacksonSerializerTest test case will fail
+    R hello(T t);
 
 }
