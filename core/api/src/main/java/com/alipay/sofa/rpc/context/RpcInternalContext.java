@@ -54,7 +54,7 @@ public class RpcInternalContext implements Cloneable {
     /**
      * The constant DEQUE_LOCAL.
      */
-    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new TransmittableThreadLocal<Deque<RpcInternalContext>>();
+    private static final ThreadLocal<Deque<RpcInternalContext>> DEQUE_LOCAL       = new ThreadLocal<Deque<RpcInternalContext>>();
 
     /**
      * 设置上下文
