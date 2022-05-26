@@ -47,7 +47,7 @@ import java.util.concurrent.TimeUnit;
  * @author zhaowang
  * @version : DomainRegistry.java, v 0.1 2022年05月24日 5:15 下午 zhaowang
  */
-@Extension("local")
+@Extension("domain")
 public class DomainRegistry extends Registry {
 
     /**
@@ -218,7 +218,7 @@ public class DomainRegistry extends Registry {
 
     @Override
     public void batchUnRegister(List<ProviderConfig> configs) {
-        throw new UnsupportedOperationException("DomainRegistry not support batchUnRegister providerConfigs");
+        // do nothing
     }
 
     @Override

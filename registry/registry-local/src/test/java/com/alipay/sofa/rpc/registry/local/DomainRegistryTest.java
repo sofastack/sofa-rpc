@@ -100,11 +100,6 @@ public class DomainRegistryTest {
         domainRegistry.unRegister(new ProviderConfig<>());
     }
 
-    @Test(expected = UnsupportedOperationException.class)
-    public void testBatchUnRegister() {
-        domainRegistry.batchUnRegister(Collections.singletonList(new ProviderConfig<>()));
-    }
-
     @Test
     public void testSubscribe() {
         ConsumerConfig<Object> consumerConfig = new ConsumerConfig<>();
