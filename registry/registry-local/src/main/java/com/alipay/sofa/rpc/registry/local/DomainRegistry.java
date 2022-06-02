@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.Registry;
@@ -131,7 +132,10 @@ public class DomainRegistry extends Registry {
             List<ConsumerConfig> configs = entry.getValue();
             for (ConsumerConfig config : configs) {
                 ProviderGroup providerGroup = new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, result);
-                config.getProviderInfoListener().updateProviders(providerGroup);
+                ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
+                if(config.getProviderInfoListener()!=null){
+                    providerInfoListener.updateProviders(providerGroup);
+                }
             }
         }
     }
@@ -243,7 +247,7 @@ public class DomainRegistry extends Registry {
     @Override
     public void unSubscribe(ConsumerConfig consumerConfig) {
         String directUrl = consumerConfig.getDirectUrl();
-        notifyListeners.remove(directUrl);
+        notifyListeners.get(directUrl).remove(consumerConfig);
     }
 
     @Override

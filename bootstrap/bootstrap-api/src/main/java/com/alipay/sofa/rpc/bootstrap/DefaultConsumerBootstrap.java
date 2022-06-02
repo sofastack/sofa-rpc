@@ -356,7 +356,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * 取消订阅服务列表
      */
     public void unSubscribe() {
-        if (StringUtils.isEmpty(consumerConfig.getDirectUrl()) && consumerConfig.isSubscribe()) {
+        if (consumerConfig.isSubscribe()) {
             List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
             if (registryConfigs != null) {
                 for (RegistryConfig registryConfig : registryConfigs) {
