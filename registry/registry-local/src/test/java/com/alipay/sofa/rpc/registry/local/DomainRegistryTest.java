@@ -30,7 +30,6 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -141,9 +140,36 @@ public class DomainRegistryTest {
         List<ProviderGroup> providerGroups = domainRegistry.subscribe(consumerConfig);
         assertTrue(domainRegistry.notifyListeners.containsKey(directUrl));
         assertSame(consumerConfig, domainRegistry.notifyListeners.get(directUrl).get(0));
+        assertEquals(1, domainRegistry.notifyListeners.get(directUrl).size());
 
         domainRegistry.unSubscribe(consumerConfig);
-        assertFalse(domainRegistry.notifyListeners.containsKey(directUrl));
+        assertTrue(domainRegistry.notifyListeners.containsKey(directUrl));
+        assertEquals(0, domainRegistry.notifyListeners.get(directUrl).size());
+    }
+
+    @Test
+    public void testUnSubscribe2() {
+        ConsumerConfig<Object> consumerConfig1 = new ConsumerConfig<>();
+        String directUrl = "bolt://alipay.com";
+        consumerConfig1.setDirectUrl(directUrl);
+
+        ConsumerConfig<Object> consumerConfig2 = new ConsumerConfig<>();
+        consumerConfig2.setDirectUrl(directUrl);
+
+        domainRegistry.subscribe(consumerConfig1);
+        domainRegistry.subscribe(consumerConfig2);
+
+        assertTrue(domainRegistry.notifyListeners.containsKey(directUrl));
+        assertTrue(domainRegistry.notifyListeners.get(directUrl).contains(consumerConfig1));
+        assertTrue(domainRegistry.notifyListeners.get(directUrl).contains(consumerConfig2));
+        assertEquals(2, domainRegistry.notifyListeners.get(directUrl).size());
+
+        domainRegistry.unSubscribe(consumerConfig1);
+        assertTrue(domainRegistry.notifyListeners.containsKey(directUrl));
+        assertEquals(1, domainRegistry.notifyListeners.get(directUrl).size());
+
+        domainRegistry.unSubscribe(consumerConfig2);
+        assertEquals(0, domainRegistry.notifyListeners.get(directUrl).size());
     }
 
     @Test
@@ -160,12 +186,18 @@ public class DomainRegistryTest {
         domainRegistry.subscribe(config2);
 
         assertTrue(domainRegistry.notifyListeners.containsKey(direct1));
+        assertEquals(1, domainRegistry.notifyListeners.get(direct1).size());
         assertTrue(domainRegistry.notifyListeners.containsKey(direct2));
+        assertEquals(1, domainRegistry.notifyListeners.get(direct2).size());
+
 
         List<ConsumerConfig> consumerConfigs = Arrays.asList(config1, config2);
         domainRegistry.batchUnSubscribe(consumerConfigs);
-        assertFalse(domainRegistry.notifyListeners.containsKey(direct1));
-        assertFalse(domainRegistry.notifyListeners.containsKey(direct2));
+        assertTrue(domainRegistry.notifyListeners.containsKey(direct1));
+        assertEquals(0, domainRegistry.notifyListeners.get(direct1).size());
+        assertTrue(domainRegistry.notifyListeners.containsKey(direct2));
+        assertEquals(0, domainRegistry.notifyListeners.get(direct2).size());
+
     }
 
     @Test
