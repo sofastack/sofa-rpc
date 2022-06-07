@@ -161,7 +161,7 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     protected Map<String, String>             parameters;
 
     /**
-     * 镜像ip，例如监听地址是1.2.3.4，告诉注册中心的确是3.4.5.6
+     * 镜像ip，例如监听地址是1.2.3.4，告诉注册中心的却是3.4.5.6
      */
     protected String                          virtualHost;
 
