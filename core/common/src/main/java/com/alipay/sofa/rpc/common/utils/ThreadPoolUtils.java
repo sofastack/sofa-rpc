@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.common.utils;
 
+import com.alipay.sofa.rpc.common.threadpool.MemorySafeLinkedBlockingQueue;
+
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
@@ -248,7 +250,7 @@ public class ThreadPoolUtils {
                 queue = size < 0 ? new PriorityBlockingQueue<Runnable>()
                     : new PriorityBlockingQueue<Runnable>(size);
             } else {
-                queue = size < 0 ? new LinkedBlockingQueue<Runnable>()
+                queue = size < 0 ? new MemorySafeLinkedBlockingQueue<Runnable>()
                     : new LinkedBlockingQueue<Runnable>(size);
             }
         }
