@@ -692,4 +692,10 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_SERVER_SEND_TIME_MICRO          = INTERNAL_KEY_PREFIX +
                                                                                  "server_send_time_micro";
+
+    /**
+     * RpcInvokeContext 中自定义 caller app 的 Key
+     */
+    public static final String  CUSTOM_CALLER_APP                            = "custom_caller_app";
+
 }
