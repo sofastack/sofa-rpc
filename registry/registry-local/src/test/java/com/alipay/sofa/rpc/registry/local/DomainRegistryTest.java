@@ -70,20 +70,20 @@ public class DomainRegistryTest {
     @Test
     public void testDirectUrl2IpUrl() {
         ProviderInfo providerInfo = ProviderHelper.toProviderInfo("bolt://alipay.com:12200");
-        List<ProviderInfo> providerInfos = domainRegistry.directUrl2IpUrl(providerInfo);
+        List<ProviderInfo> providerInfos = domainRegistry.directUrl2IpUrl(providerInfo, null);
         assertTrue(providerInfos.size() > 0);
         String host = providerInfos.get(0).getHost();
         assertNotEquals("alipay.net", host);
         assertFalse(DomainRegistryHelper.isDomain(host));
 
         ProviderInfo notExist = ProviderHelper.toProviderInfo("bolt://notexist:12200");
-        providerInfos = domainRegistry.directUrl2IpUrl(notExist);
+        providerInfos = domainRegistry.directUrl2IpUrl(notExist, null);
         assertEquals(1, providerInfos.size());
         host = providerInfos.get(0).getHost();
         assertEquals("notexist", host);
 
         ProviderInfo ipProviderInfo = ProviderHelper.toProviderInfo("bolt://127.0.0.1:12200");
-        providerInfos = domainRegistry.directUrl2IpUrl(ipProviderInfo);
+        providerInfos = domainRegistry.directUrl2IpUrl(ipProviderInfo, null);
         assertEquals(1, providerInfos.size());
         host = providerInfos.get(0).getHost();
         assertEquals("127.0.0.1", host);

@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.registry.local;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -36,6 +35,7 @@ import com.alipay.sofa.rpc.registry.Registry;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +43,8 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * @author zhaowang
@@ -54,20 +56,21 @@ public class DomainRegistry extends Registry {
     /**
      * Logger
      */
-    private static final Logger                 LOGGER          = LoggerFactory.getLogger(DomainRegistry.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DomainRegistry.class);
+    private static final Map<ProviderInfo, ProviderInfo> EMPTY_MAP = new HashMap<>(0);
 
     protected Map<String, List<ConsumerConfig>> notifyListeners = new ConcurrentHashMap<String, List<ConsumerConfig>>();
 
-    protected Map<String, List<ProviderInfo>>   domainCache     = new ConcurrentHashMap<String, List<ProviderInfo>>();
+    protected Map<String, List<ProviderInfo>> domainCache = new ConcurrentHashMap<String, List<ProviderInfo>>();
     /**
      * 扫描周期，毫秒
      */
-    protected int                               scanPeriod      = 10000;
+    protected int scanPeriod = 10000;
 
     /**
      * 定时加载
      */
-    protected ScheduledService                  scheduledExecutorService;
+    protected ScheduledService scheduledExecutorService;
 
     /**
      * 注册中心配置
@@ -81,7 +84,7 @@ public class DomainRegistry extends Registry {
     @Override
     public void init() {
         this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.domain.scan.period"),
-            scanPeriod);
+                scanPeriod);
 
         Runnable task = new Runnable() {
             @Override
@@ -96,12 +99,12 @@ public class DomainRegistry extends Registry {
         };
 
         scheduledExecutorService = new ScheduledService("DomainRegistry-Back-Load",
-            ScheduledService.MODE_FIXEDDELAY,
-            task, //定时load任务
-            scanPeriod, // 延迟一个周期
-            scanPeriod, // 一个周期循环
-            TimeUnit.MILLISECONDS
-                ).start();
+                ScheduledService.MODE_FIXEDDELAY,
+                task, //定时load任务
+                scanPeriod, // 延迟一个周期
+                scanPeriod, // 一个周期循环
+                TimeUnit.MILLISECONDS
+        ).start();
 
     }
 
@@ -115,7 +118,7 @@ public class DomainRegistry extends Registry {
 
         for (String directUrl : keySet) {
             ProviderInfo providerInfo = ProviderHelper.toProviderInfo(directUrl);
-            List<ProviderInfo> result = directUrl2IpUrl(providerInfo);
+            List<ProviderInfo> result = directUrl2IpUrl(providerInfo, domainCache.get(directUrl));
             domainCache.put(directUrl, result);
         }
     }
@@ -133,7 +136,7 @@ public class DomainRegistry extends Registry {
             for (ConsumerConfig config : configs) {
                 ProviderGroup providerGroup = new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, result);
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
-                if(config.getProviderInfoListener()!=null){
+                if (config.getProviderInfoListener() != null) {
                     providerInfoListener.updateProviders(providerGroup);
                 }
             }
@@ -144,18 +147,9 @@ public class DomainRegistry extends Registry {
         List<ProviderInfo> tmpProviderInfoList = new ArrayList<ProviderInfo>();
         String[] providerStrs = StringUtils.splitWithCommaOrSemicolon(directUrl);
         for (String providerStr : providerStrs) {
-            if (DomainRegistryHelper.isDomain(providerStr)) {
-                List<ProviderInfo> providerInfos = resolveDomain(providerStr);
-                tmpProviderInfoList.addAll(providerInfos);
-            } else {
-                ProviderInfo providerInfo = ProviderHelper.toProviderInfo(providerStr);
-                if (providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_SOURCE) == null) {
-                    providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_SOURCE, "direct");
-                }
-                tmpProviderInfoList.add(providerInfo);
-            }
+            List<ProviderInfo> providerInfos = resolveDomain(providerStr);
+            tmpProviderInfoList.addAll(providerInfos);
         }
-
         return new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, tmpProviderInfoList);
     }
 
@@ -165,21 +159,22 @@ public class DomainRegistry extends Registry {
             return providerInfos;
         }
         ProviderInfo providerInfo = ProviderHelper.toProviderInfo(directUrl);
-        List<ProviderInfo> result = directUrl2IpUrl(providerInfo);
+        List<ProviderInfo> result = directUrl2IpUrl(providerInfo, domainCache.get(directUrl));
         domainCache.put(directUrl, result);
         return result;
     }
 
-    protected List<ProviderInfo> directUrl2IpUrl(ProviderInfo providerInfo) {
+    protected List<ProviderInfo> directUrl2IpUrl(ProviderInfo providerInfo, List<ProviderInfo> originList) {
+        List<ProviderInfo> result = new ArrayList<>();
         try {
-            List<ProviderInfo> result = new ArrayList<>();
             String originHost = providerInfo.getHost();
             String originUrl = providerInfo.getOriginUrl();
             InetAddress[] addresses = InetAddress.getAllByName(originHost);
             if (addresses != null && addresses.length > 0) {
+                Map<ProviderInfo, ProviderInfo> originMap = originList == null ? EMPTY_MAP : originList.stream().collect(Collectors.toMap(Function.identity(), Function.identity()));
                 String firstHost = addresses[0].getHostAddress();
                 if (firstHost == null || firstHost.equals(providerInfo.getHost())) {
-                    result.add(providerInfo);
+                    addProviderInfo(result, originMap, providerInfo);
                     return result;
                 } else if (StringUtils.isNotBlank(originUrl)) {
                     for (InetAddress address : addresses) {
@@ -188,7 +183,7 @@ public class DomainRegistry extends Registry {
                         String newUrl = originUrl.replace(originHost, newHost);
                         tmp.setOriginUrl(newUrl);
                         tmp.setHost(newHost);
-                        result.add(tmp);
+                        addProviderInfo(result, originMap, tmp);
                     }
                     return result;
                 }
@@ -203,6 +198,15 @@ public class DomainRegistry extends Registry {
 
     }
 
+    protected void addProviderInfo(List<ProviderInfo> target, Map<ProviderInfo, ProviderInfo> originMap, ProviderInfo providerInfo) {
+        ProviderInfo originProviderInfo = originMap.get(providerInfo);
+        if (originProviderInfo != null) {
+            target.add(originProviderInfo);
+        } else {
+            target.add(providerInfo);
+        }
+    }
+
     @Override
     public boolean start() {
         return false;
@@ -211,13 +215,13 @@ public class DomainRegistry extends Registry {
     @Override
     public void register(ProviderConfig config) {
         throw new UnsupportedOperationException("DomainRegistry not support register providerConfig:" +
-            config.getInterfaceId());
+                config.getInterfaceId());
     }
 
     @Override
     public void unRegister(ProviderConfig config) {
         throw new UnsupportedOperationException("DomainRegistry not support unRegister providerConfig:" +
-            config.getInterfaceId());
+                config.getInterfaceId());
     }
 
     @Override
