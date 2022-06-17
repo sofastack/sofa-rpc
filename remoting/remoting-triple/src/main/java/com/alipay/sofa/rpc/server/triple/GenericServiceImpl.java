@@ -55,10 +55,10 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
     protected Invoker           invoker;
     protected ProviderConfig    providerConfig;
 
-    public GenericServiceImpl(Invoker invoker, ProviderConfig proxyClass) {
+    public GenericServiceImpl(Invoker invoker, ProviderConfig providerConfig) {
         super();
         this.invoker = invoker;
-        this.providerConfig = proxyClass; // todo use reflect to get Class
+        this.providerConfig = providerConfig; // todo use reflect to get Class
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         ReflectCache.registerServiceClassLoader(key, providerConfig.getProxyClass().getClassLoader());
         // 缓存接口的方法
