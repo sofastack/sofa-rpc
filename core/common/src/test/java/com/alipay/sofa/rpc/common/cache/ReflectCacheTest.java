@@ -37,10 +37,10 @@ public class ReflectCacheTest {
         Method hashCode1 = String.class.getMethod("hashCode");
         Method hashCode2 = Object.class.getMethod("hashCode");
         ReflectCache.putOverloadMethodCache("service", hashCode1);
-        Assert.assertSame(hashCode1, ReflectCache.getOverloadMethodCache("service", "hashCode", new String[]{}));
+        Assert.assertSame(hashCode1, ReflectCache.getOverloadMethodCache("service", "hashCode", new String[] {}));
 
         ReflectCache.putOverloadMethodCache("service", hashCode2);
-        Assert.assertSame(hashCode2, ReflectCache.getOverloadMethodCache("service", "hashCode", new String[]{}));
+        Assert.assertSame(hashCode2, ReflectCache.getOverloadMethodCache("service", "hashCode", new String[] {}));
     }
 
     @Test
@@ -56,8 +56,8 @@ public class ReflectCacheTest {
 
     @Test
     public void putMethodSigsCache() throws NoSuchMethodException {
-        String[] sign1 = {"a"};
-        String[] sign2 = {"b"};
+        String[] sign1 = { "a" };
+        String[] sign2 = { "b" };
         ReflectCache.putMethodSigsCache("service", "hashCode", sign1);
         Assert.assertSame(sign1, ReflectCache.getMethodSigsCache("service", "hashCode"));
 
