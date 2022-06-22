@@ -60,7 +60,6 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         this.invoker = invoker;
         this.providerConfig = providerConfig;
         String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-        ReflectCache.registerServiceClassLoader(key, providerConfig.getProxyClass().getClassLoader());
         // 缓存接口的方法
         for (Method m : providerConfig.getProxyClass().getMethods()) {
             ReflectCache.putOverloadMethodCache(key, m);
@@ -76,7 +75,7 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         String methodName = sofaRequest.getMethodName();
         try {
             String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-            ClassLoader interfaceClassLoader = ReflectCache.getServiceClassLoader(key);
+            ClassLoader interfaceClassLoader = providerConfig.getProxyClass().getClassLoader();
             Thread.currentThread().setContextClassLoader(interfaceClassLoader);
 
             Class[] argTypes = getArgTypes(request);
