@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alipay.sofa.rpc.common.threadpool;
 
 import java.lang.instrument.Instrumentation;
@@ -30,17 +29,17 @@ public class MemoryLimiter {
 
     private final Instrumentation inst;
 
-    private long memoryLimit;
+    private long                  memoryLimit;
 
-    private final LongAdder memory = new LongAdder();
+    private final LongAdder       memory      = new LongAdder();
 
-    private final ReentrantLock acquireLock = new ReentrantLock();
+    private final ReentrantLock   acquireLock = new ReentrantLock();
 
-    private final Condition notLimited = acquireLock.newCondition();
+    private final Condition       notLimited  = acquireLock.newCondition();
 
-    private final ReentrantLock releaseLock = new ReentrantLock();
+    private final ReentrantLock   releaseLock = new ReentrantLock();
 
-    private final Condition notEmpty = releaseLock.newCondition();
+    private final Condition       notEmpty    = releaseLock.newCondition();
 
     public MemoryLimiter(Instrumentation inst) {
         this(Integer.MAX_VALUE, inst);

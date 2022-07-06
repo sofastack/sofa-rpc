@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.alipay.sofa.rpc.common.threadpool;
 
 import java.util.Collection;
@@ -31,9 +30,9 @@ public class MemorySafeLinkedBlockingQueue<E> extends LinkedBlockingQueue<E> {
 
     private static final long serialVersionUID = 8032578371739960142L;
 
-    public static int THE_256_MB = 256 * 1024 * 1024;
+    public static int         THE_256_MB       = 256 * 1024 * 1024;
 
-    private int maxFreeMemory;
+    private int               maxFreeMemory;
 
     public MemorySafeLinkedBlockingQueue() {
         this(THE_256_MB);
