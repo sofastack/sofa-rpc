@@ -259,8 +259,10 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         List<ProviderGroup> result = null;
         String directUrl = consumerConfig.getDirectUrl();
         if (StringUtils.isNotEmpty(directUrl)) {
-            // 如果走直连
-            consumerConfig.setRegistry(new RegistryConfig().setProtocol(REGISTRY_PROTOCOL_DOMAIN));
+            // 如果走直连,只保留直连注册中心
+            List<RegistryConfig> registryConfigs = new ArrayList<>();
+            registryConfigs.add(new RegistryConfig().setProtocol(REGISTRY_PROTOCOL_DOMAIN));
+            consumerConfig.setRegistry(registryConfigs);
         }
         List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
         if (CommonUtils.isNotEmpty(registryConfigs)) {
