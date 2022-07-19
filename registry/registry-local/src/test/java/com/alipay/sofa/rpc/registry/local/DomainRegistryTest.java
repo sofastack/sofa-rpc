@@ -73,7 +73,7 @@ public class DomainRegistryTest {
         List<ProviderInfo> providerInfos = domainRegistry.directUrl2IpUrl(providerInfo, null);
         assertTrue(providerInfos.size() > 0);
         String host = providerInfos.get(0).getHost();
-        assertNotEquals("alipay.net", host);
+        assertNotEquals("alipay.com", host);
         assertFalse(DomainRegistryHelper.isDomain(host));
 
         ProviderInfo notExist = ProviderHelper.toProviderInfo("bolt://notexist:12200");
