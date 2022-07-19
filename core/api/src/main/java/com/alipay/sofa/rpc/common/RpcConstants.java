@@ -49,6 +49,11 @@ public class RpcConstants {
     public static final String  REGISTRY_PROTOCOL_LOCAL                      = "local";
 
     /**
+     * 域名注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_DOMAIN                     = "domain";
+
+    /**
      * 线程池类型：固定线程池
      */
     public static final String  THREADPOOL_TYPE_FIXED                        = "fixed";
