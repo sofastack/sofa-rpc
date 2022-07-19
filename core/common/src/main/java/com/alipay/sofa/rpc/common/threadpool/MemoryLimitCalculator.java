@@ -21,12 +21,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 /**
- * {@link java.lang.Runtime#freeMemory()} technology is used to calculate the
- * memory limit by using the percentage of the current maximum available memory,
- * which can be used with {@link MemoryLimiter}.
+ * Can completely solve the OOM problem caused by {@link java.util.concurrent.LinkedBlockingQueue},
+ * does not depend on {@link java.lang.instrument.Instrumentation}
  *
- * @see MemoryLimiter
- * @see <a href="https://github.com/apache/incubator-shenyu/blob/master/shenyu-common/src/main/java/org/apache/shenyu/common/concurrent/MemoryLimitCalculator.java">MemoryLimitCalculator</a>
+ * @see <a href="https://github.com/apache/incubator-shenyu/blob/master/shenyu-common/src/main/java/org/apache/shenyu/common/concurrent/MemorySafeLinkedBlockingQueue.java">MemorySafeLinkedBlockingQueue</a>
  */
 public class MemoryLimitCalculator {
 
