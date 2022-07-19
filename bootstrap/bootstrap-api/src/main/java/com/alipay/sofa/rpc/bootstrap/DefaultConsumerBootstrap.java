@@ -20,10 +20,6 @@ import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ClusterFactory;
 import com.alipay.sofa.rpc.client.ProviderGroup;
-import com.alipay.sofa.rpc.client.ProviderHelper;
-import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.client.ProviderInfoAttrs;
-import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SofaConfigs;
 import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -56,6 +52,8 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.alipay.sofa.rpc.common.RpcConstants.REGISTRY_PROTOCOL_DOMAIN;
 
 /**
  * Default consumer bootstrap.
@@ -261,15 +259,15 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         List<ProviderGroup> result = null;
         String directUrl = consumerConfig.getDirectUrl();
         if (StringUtils.isNotEmpty(directUrl)) {
-            // 如果走直连
-            result = subscribeFromDirectUrl(directUrl);
-        } else {
-            // 没有配置url直连
-            List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
-            if (CommonUtils.isNotEmpty(registryConfigs)) {
-                // 从多个注册中心订阅服务列表
-                result = subscribeFromRegistries();
-            }
+            // 如果走直连,只保留直连注册中心
+            List<RegistryConfig> registryConfigs = new ArrayList<>();
+            registryConfigs.add(new RegistryConfig().setProtocol(REGISTRY_PROTOCOL_DOMAIN));
+            consumerConfig.setRegistry(registryConfigs);
+        }
+        List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
+        if (CommonUtils.isNotEmpty(registryConfigs)) {
+            // 从多个注册中心订阅服务列表
+            result = subscribeFromRegistries();
         }
         return result;
     }
@@ -277,38 +275,6 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     @Override
     public boolean isSubscribed() {
         return respondRegistries == null || respondRegistries.getCount() <= 0;
-    }
-
-    /**
-     * Subscribe provider list from direct url
-     *
-     * @param directUrl direct url of consume config
-     * @return Provider group list
-     */
-    protected List<ProviderGroup> subscribeFromDirectUrl(String directUrl) {
-        List<ProviderGroup> result = new ArrayList<ProviderGroup>();
-        List<ProviderInfo> tmpProviderInfoList = new ArrayList<ProviderInfo>();
-        String[] providerStrs = StringUtils.splitWithCommaOrSemicolon(directUrl);
-        for (String providerStr : providerStrs) {
-            ProviderInfo providerInfo = convertToProviderInfo(providerStr);
-            if (providerInfo.getStaticAttr(ProviderInfoAttrs.ATTR_SOURCE) == null) {
-                providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_SOURCE, "direct");
-            }
-            tmpProviderInfoList.add(providerInfo);
-        }
-
-        result.add(new ProviderGroup(RpcConstants.ADDRESS_DIRECT_GROUP, tmpProviderInfoList));
-        return result;
-    }
-
-    /**
-     * Convert provider string to provider info
-     *
-     * @param providerStr provider url
-     * @return ProviderInfo
-     */
-    protected ProviderInfo convertToProviderInfo(String providerStr) {
-        return ProviderHelper.toProviderInfo(providerStr);
     }
 
     /**
@@ -392,7 +358,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      * 取消订阅服务列表
      */
     public void unSubscribe() {
-        if (StringUtils.isEmpty(consumerConfig.getDirectUrl()) && consumerConfig.isSubscribe()) {
+        if (consumerConfig.isSubscribe()) {
             List<RegistryConfig> registryConfigs = consumerConfig.getRegistry();
             if (registryConfigs != null) {
                 for (RegistryConfig registryConfig : registryConfigs) {
