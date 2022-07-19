@@ -242,12 +242,6 @@ public class TripleServerTest {
         Assert.assertTrue(exp);
     }
 
-    public interface SampleService {
-
-        String hello(String name);
-
-    }
-
     @BeforeClass
     public static void adBeforeClass() {
         RpcRunningState.setUnitTestMode(true);

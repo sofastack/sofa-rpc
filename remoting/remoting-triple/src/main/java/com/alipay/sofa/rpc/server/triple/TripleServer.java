@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -267,7 +269,7 @@ public class TripleServer implements Server {
                 BindableService bindableService = (BindableService) providerConfig.getRef();
                 serviceDef = bindableService.bindService();
             } else {
-                GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker, providerConfig.getProxyClass());
+                GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker, providerConfig);
                 genericService.setProxiedImpl(genericService);
                 serviceDef = buildSofaServiceDef(genericService, providerConfig);
             }
@@ -380,6 +382,7 @@ public class TripleServer implements Server {
     @Override
     public void unRegisterProcessor(ProviderConfig providerConfig, boolean closeIfNoEntry) {
         this.lock.lock();
+        cleanReflectCache(providerConfig);
         try {
             ServerServiceDefinition serverServiceDefinition = this.serviceInfo.get(providerConfig);
             UniqueIdInvoker uniqueIdInvoker = this.invokerMap.get(providerConfig.getInterfaceId());
@@ -401,6 +404,14 @@ public class TripleServer implements Server {
         if (closeIfNoEntry && invokerCnt.get() == 0) {
             stop();
         }
+    }
+
+    public void cleanReflectCache(ProviderConfig providerConfig) {
+        String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
+        ReflectCache.unRegisterServiceClassLoader(key);
+        ReflectCache.invalidateMethodCache(key);
+        ReflectCache.invalidateMethodSigsCache(key);
+        ReflectCache.invalidateOverloadMethodCache(key);
     }
 
     @Override

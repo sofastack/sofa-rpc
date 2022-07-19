@@ -195,7 +195,7 @@ public final class ReflectCache {
                 cache = old;
             }
         }
-        cache.putIfAbsent(method.getName(), method);
+        cache.put(method.getName(), method);
     }
 
     /**
@@ -236,7 +236,7 @@ public final class ReflectCache {
                 cacheSigs = old;
             }
         }
-        cacheSigs.putIfAbsent(methodName, argSigs);
+        cacheSigs.put(methodName, argSigs);
     }
 
     /**
@@ -289,7 +289,7 @@ public final class ReflectCache {
         for (Class<?> paramType : method.getParameterTypes()) {
             mSigs.append(paramType.getName());
         }
-        cache.putIfAbsent(mSigs.toString(), method);
+        cache.put(mSigs.toString(), method);
     }
 
     /**
