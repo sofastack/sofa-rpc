@@ -30,10 +30,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -244,14 +246,17 @@ public class RpcInternalContextTest {
     private void testMultiThreadCall() throws ExecutionException, InterruptedException {
         RpcInternalContext.getContext();
         RpcInternalContext.pushContext();
-        ExecutorService newThreadPool = new ThreadPoolExecutor(5, 10,
-                10L, TimeUnit.MILLISECONDS,
-                new SynchronousQueue<Runnable>());
+        ExecutorService newThreadPool = new ThreadPoolExecutor(10, 10,
+                10L, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(10));
+        CountDownLatch countDownLatch = new CountDownLatch(10);
         List<Future<String>> futureList = new ArrayList<>();
         for(int i=0; i<20 ;i++){
             Future<String> future = newThreadPool.submit(new Callable() {
                 @Override
                 public Object call() throws Exception {
+                    countDownLatch.countDown();
+                    countDownLatch.await();
                     try {
                         RpcInternalContext.getContext();
                         RpcInternalContext.pushContext();
