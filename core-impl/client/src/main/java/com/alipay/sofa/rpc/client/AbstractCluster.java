@@ -604,7 +604,6 @@ public abstract class AbstractCluster extends Cluster {
             checkProviderVersion(providerInfo, request); // 根据服务端版本特殊处理
             String invokeType = request.getInvokeType();
             int timeout = resolveTimeout(request, consumerConfig, providerInfo);
-
             SofaResponse response = null;
             // 同步调用
             if (RpcConstants.INVOKER_TYPE_SYNC.equals(invokeType)) {
@@ -701,7 +700,9 @@ public abstract class AbstractCluster extends Cluster {
             }
 
             if (DynamicHelper.isNotDefault(dynamicTimeout) && StringUtils.isNotBlank(dynamicTimeout)) {
-                return Integer.parseInt(dynamicTimeout);
+                int timeout = Integer.parseInt(dynamicTimeout);
+                request.setTimeout(timeout);
+                return timeout;
             }
         }
         // 先去调用级别配置
@@ -718,6 +719,7 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         }
+        request.setTimeout(timeout);
         return timeout;
     }
 
