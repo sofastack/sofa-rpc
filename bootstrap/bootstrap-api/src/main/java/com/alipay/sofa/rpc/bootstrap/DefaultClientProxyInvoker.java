@@ -134,15 +134,18 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
         request.addRequestProp(RemotingConstants.HEAD_APP_NAME, consumerConfig.getAppName());
         request.addRequestProp(RemotingConstants.HEAD_PROTOCOL, consumerConfig.getProtocol());
 
-        customRequest(request);
+        customRequest(request, internalContext);
 
     }
 
-    protected void customRequest(SofaRequest request) {
+    protected void customRequest(SofaRequest request, RpcInternalContext internalContext) {
         RpcInvokeContext context = RpcInvokeContext.getContext();
         Object customCallerApp = context.get(CUSTOM_CALLER_APP);
         if (customCallerApp instanceof String && StringUtils.isNotBlank((String) customCallerApp)) {
             context.remove(CUSTOM_CALLER_APP);
+            if (RpcInternalContext.isAttachmentEnable()) {
+                internalContext.setAttachment(INTERNAL_KEY_APP_NAME, customCallerApp);
+            }
             request.addRequestProp(RemotingConstants.HEAD_APP_NAME, customCallerApp);
         }
     }
