@@ -103,37 +103,31 @@ public class AbstractClusterTest {
 
     @Test
     public void testResolveTimeout() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+        Method resolveTimeoutMethod = AbstractCluster.class.getDeclaredMethod("resolveTimeout", SofaRequest.class,
+            ConsumerConfig.class, ProviderInfo.class);
+        resolveTimeoutMethod.setAccessible(true);
+
         SofaRequest sofaRequest = new SofaRequest();
         ConsumerConfig consumerConfig = new ConsumerConfig();
         ProviderInfo providerInfo = new ProviderInfo();
-        Method resolveTimeout = AbstractCluster.class.getDeclaredMethod("resolveTimeout", SofaRequest.class,
-            ConsumerConfig.class, ProviderInfo.class);
-        resolveTimeout.setAccessible(true);
-
-        Integer defaultTimeout = (Integer) resolveTimeout.invoke(abstractCluster, sofaRequest, consumerConfig,
+        Integer defaultTimeout = (Integer) resolveTimeoutMethod.invoke(abstractCluster, sofaRequest, consumerConfig,
             providerInfo);
         Assert.assertTrue(defaultTimeout == 3000);
-        Assert.assertEquals(sofaRequest.getTimeout(), defaultTimeout);
-        sofaRequest.setTimeout(null);
 
         providerInfo.setStaticAttr(ProviderInfoAttrs.ATTR_TIMEOUT, "5000");
-        Integer providerTimeout = (Integer) resolveTimeout.invoke(abstractCluster, sofaRequest, consumerConfig,
+        Integer providerTimeout = (Integer) resolveTimeoutMethod.invoke(abstractCluster, sofaRequest, consumerConfig,
             providerInfo);
         Assert.assertTrue(providerTimeout == 5000);
-        Assert.assertEquals(sofaRequest.getTimeout(), providerTimeout);
-        sofaRequest.setTimeout(null);
 
         consumerConfig.setTimeout(2000);
-        Integer consumerTimeout = (Integer) resolveTimeout.invoke(abstractCluster, sofaRequest, consumerConfig,
+        Integer consumerTimeout = (Integer) resolveTimeoutMethod.invoke(abstractCluster, sofaRequest, consumerConfig,
             providerInfo);
         Assert.assertTrue(consumerTimeout == 2000);
-        Assert.assertEquals(sofaRequest.getTimeout(), consumerTimeout);
 
         sofaRequest.setTimeout(1000);
-        Integer invokeTimeout = (Integer) resolveTimeout.invoke(abstractCluster, sofaRequest, consumerConfig,
+        Integer invokeTimeout = (Integer) resolveTimeoutMethod.invoke(abstractCluster, sofaRequest, consumerConfig,
             providerInfo);
         Assert.assertTrue(invokeTimeout == 1000);
-        Assert.assertEquals(sofaRequest.getTimeout(), invokeTimeout);
 
     }
 }
