@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.bootstrap;
 
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import org.junit.Assert;
@@ -27,6 +28,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.CUSTOM_CALLER_APP;
+import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doCallRealMethod;
 
@@ -44,39 +46,46 @@ public class DefaultClientProxyInvokerTest {
 
     @Before
     public void before() {
-        doCallRealMethod().when(invoker).customRequest(any());
+        doCallRealMethod().when(invoker).customRequest(any(), any());
     }
 
     @Test
     public void testCustomCtx() {
+        RpcInternalContext internalContext = RpcInternalContext.getContext();
         SofaRequest request = getRequest();
-        invoker.customRequest(request);
+        invoker.customRequest(request, internalContext);
         Assert.assertEquals(originCallerApp, request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
+        Assert.assertEquals(originCallerApp, internalContext.getAttachment(INTERNAL_KEY_APP_NAME));
 
         request = getRequest();
         RpcInvokeContext.getContext().put(CUSTOM_CALLER_APP, customCallerApp);
-        invoker.customRequest(request);
+        invoker.customRequest(request, internalContext);
         Assert.assertEquals(customCallerApp, request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
+        Assert.assertEquals(customCallerApp, internalContext.getAttachment(INTERNAL_KEY_APP_NAME));
 
         request = getRequest();
         RpcInvokeContext.getContext().put(CUSTOM_CALLER_APP, new Object());
-        invoker.customRequest(request);
+        invoker.customRequest(request, internalContext);
         Assert.assertEquals(originCallerApp, request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
+        Assert.assertEquals(originCallerApp, internalContext.getAttachment(INTERNAL_KEY_APP_NAME));
 
         request = getRequest();
         RpcInvokeContext.getContext().put(CUSTOM_CALLER_APP, "");
-        invoker.customRequest(request);
+        invoker.customRequest(request, internalContext);
         Assert.assertEquals(originCallerApp, request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
+        Assert.assertEquals(originCallerApp, internalContext.getAttachment(INTERNAL_KEY_APP_NAME));
 
         request = getRequest();
         RpcInvokeContext.getContext().put(CUSTOM_CALLER_APP, null);
-        invoker.customRequest(request);
+        invoker.customRequest(request, internalContext);
         Assert.assertEquals(originCallerApp, request.getRequestProp(RemotingConstants.HEAD_APP_NAME));
+        Assert.assertEquals(originCallerApp, internalContext.getAttachment(INTERNAL_KEY_APP_NAME));
     }
 
     private SofaRequest getRequest() {
         SofaRequest sofaRequest = new SofaRequest();
         sofaRequest.addRequestProp(RemotingConstants.HEAD_APP_NAME, originCallerApp);
+        RpcInternalContext.getContext().setAttachment(INTERNAL_KEY_APP_NAME, originCallerApp);
         return sofaRequest;
     }
 }
