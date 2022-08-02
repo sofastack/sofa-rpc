@@ -238,4 +238,14 @@ public class FileUtils {
         }
         return dir.delete();
     }
+
+    public static String appendFilePath(String base, String... left) {
+        StringBuilder sb = new StringBuilder(base);
+        for (String s : left) {
+            sb.append("/");
+            sb.append(s);
+        }
+        return sb.toString();
+    }
+
 }

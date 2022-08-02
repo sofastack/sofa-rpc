@@ -70,4 +70,13 @@ public class FileUtilsTest {
         Assert.assertFalse(new File(filePath).exists());
     }
 
+    @Test
+    public void testAppendFilePath() {
+        String appendFilePath = FileUtils.appendFilePath("/home", "test");
+        Assert.assertEquals("/home/test", appendFilePath);
+
+        appendFilePath = FileUtils.appendFilePath("/home", "test", "test2");
+        Assert.assertEquals("/home/test/test2", appendFilePath);
+    }
+
 }
