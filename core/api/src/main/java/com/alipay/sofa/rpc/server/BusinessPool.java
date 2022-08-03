@@ -16,16 +16,18 @@
  */
 package com.alipay.sofa.rpc.server;
 
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.ext.ExtensionClass;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
+import com.alipay.sofa.rpc.thread.ThreadPoolSupplier;
 
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+
+import static com.alipay.sofa.rpc.common.config.RpcConfigKeys.THREAD_POOL_TYPE;
 
 /**
- * Business pool 
+ * Business pool
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
@@ -37,10 +39,11 @@ public class BusinessPool {
         int queueSize = serverConfig.getQueues();
         int aliveTime = serverConfig.getAliveTime();
 
-        BlockingQueue<Runnable> poolQueue = queueSize > 0 ? new LinkedBlockingQueue<Runnable>(
-            queueSize) : new SynchronousQueue<Runnable>();
-
-        return new ThreadPoolExecutor(minPoolSize, maxPoolSize, aliveTime, TimeUnit.MILLISECONDS, poolQueue);
+        String threadPoolType = SofaConfigs.getOrDefault(THREAD_POOL_TYPE);
+        ExtensionClass<ThreadPoolSupplier> fixed = ExtensionLoaderFactory.getExtensionLoader(ThreadPoolSupplier.class)
+            .getExtensionClass(threadPoolType);
+        ThreadPoolSupplier threadPoolSupplier = fixed.getExtInstance();
+        return threadPoolSupplier.newThreadPool(minPoolSize, maxPoolSize, queueSize, aliveTime);
     }
 
 }

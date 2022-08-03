@@ -71,4 +71,8 @@ public class RpcConfigKeys {
                                                                                  "If expose old uniqueId mode. In old mode ,uniqueId will not exist in path; while in new mode, uniqueId will be added to path.",
                                                                                  new String[] { "triple_expose_old_unique_id_service" });
 
+    public static ConfigKey<String>  THREAD_POOL_TYPE                    = ConfigKey.build("sofa.rpc.thread.pool.type",
+                                                                             "fixed", false,
+                                                                             "Thread pool type of business pool.");
+
 }

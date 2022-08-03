@@ -1,0 +1,2 @@
+fixed=com.alipay.sofa.rpc.thread.FixedThreadPoolSupplier
+eager=com.alipay.sofa.rpc.thread.EagerThreadPoolSupplier
