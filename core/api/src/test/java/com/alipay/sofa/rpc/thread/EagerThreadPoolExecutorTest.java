@@ -151,5 +151,4 @@ public class EagerThreadPoolExecutorTest {
         Assert.assertThrows(RejectedExecutionException.class, () -> executor.execute(runnable));
         countDownLatch.countDown();
     }
-
 }
