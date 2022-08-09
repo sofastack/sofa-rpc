@@ -604,7 +604,7 @@ public abstract class AbstractCluster extends Cluster {
             checkProviderVersion(providerInfo, request); // 根据服务端版本特殊处理
             String invokeType = request.getInvokeType();
             int timeout = resolveTimeout(request, consumerConfig, providerInfo);
-
+            request.setTimeout(timeout);
             SofaResponse response = null;
             // 同步调用
             if (RpcConstants.INVOKER_TYPE_SYNC.equals(invokeType)) {
