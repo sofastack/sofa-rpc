@@ -61,6 +61,14 @@ public class JavassistProxy implements Proxy {
     private static final Logger            LOGGER          = LoggerFactory.getLogger(JavassistProxy.class);
 
     private static AtomicInteger           counter         = new AtomicInteger();
+    private boolean                        disableCache    = false;
+
+    {
+        String disableCacheStr = System.getProperty("sofa.rpc.proxy.disableCache");
+        if (disableCacheStr != null) {
+            disableCache = Boolean.parseBoolean(disableCacheStr);
+        }
+    }
 
     /**
      * 原始类和代理类的映射
@@ -75,7 +83,10 @@ public class JavassistProxy implements Proxy {
             debug = new StringBuilder();
         }
         try {
-            Class clazz = PROXY_CLASS_MAP.get(interfaceClass);
+            Class clazz = null;
+            if (!disableCache) {
+                clazz = PROXY_CLASS_MAP.get(interfaceClass);
+            }
             if (clazz == null) {
                 //生成代理类
                 String interfaceName = ClassTypeUtils.getTypeStr(interfaceClass);
