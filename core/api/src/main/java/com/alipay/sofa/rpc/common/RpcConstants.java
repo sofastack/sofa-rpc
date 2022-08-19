@@ -703,4 +703,10 @@ public class RpcConstants {
      */
     public static final String  CUSTOM_CALLER_APP                            = "custom_caller_app";
 
+    /**
+     * RpcRequestCommand 对象
+     */
+    public static final String  INTERNAL_KEY_RPC_REQUEST_COMMAND             = INTERNAL_KEY_PREFIX +
+                                                                                 "rpc_request_command";
+
 }
