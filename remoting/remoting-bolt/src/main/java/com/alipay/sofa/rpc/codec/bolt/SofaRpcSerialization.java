@@ -218,6 +218,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } finally {
                 // R5：record request serialization time
                 recordSerializeRequest(requestCommand, invokeContext, serializeStartTime);
+                RpcInvokeContext.getContext().remove(INTERNAL_KEY_RPC_REQUEST_COMMAND);
             }
         }
         return false;

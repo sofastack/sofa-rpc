@@ -72,11 +72,19 @@ public class FileUtilsTest {
 
     @Test
     public void testAppendFilePath() {
-        String appendFilePath = FileUtils.appendFilePath("/home", "test");
-        Assert.assertEquals("/home/test", appendFilePath);
+        Assert.assertEquals("baseFilePath" + File.separator + "test",
+            FileUtils.appendFilePath("baseFilePath", "test"));
 
-        appendFilePath = FileUtils.appendFilePath("/home", "test", "test2");
-        Assert.assertEquals("/home/test/test2", appendFilePath);
+        Assert.assertEquals("baseFilePath" + File.separator + "test" + File.separator + "test2",
+            FileUtils.appendFilePath("baseFilePath", "test", "test2"));
+
+        Assert.assertEquals("baseFilePath" + File.separator + "null" + File.separator + "test",
+            FileUtils.appendFilePath("baseFilePath", null, "test"));
+
+        Assert.assertEquals("baseFilePath" + File.separator + "test" + File.separator + "null",
+            FileUtils.appendFilePath("baseFilePath", "test", null));
+
+        Assert.assertEquals("baseFilePath", FileUtils.appendFilePath("baseFilePath", null));
     }
 
 }
