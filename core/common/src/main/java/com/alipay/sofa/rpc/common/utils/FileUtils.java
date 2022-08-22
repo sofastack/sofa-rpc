@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -238,17 +239,4 @@ public class FileUtils {
         }
         return dir.delete();
     }
-
-    public static String appendFilePath(String baseFilePath, String... subFilePathNames) {
-        if (subFilePathNames == null) {
-            return baseFilePath;
-        }
-        StringBuilder sb = new StringBuilder(baseFilePath);
-        for (String subFileName : subFilePathNames) {
-            sb.append(File.separatorChar);
-            sb.append(subFileName);
-        }
-        return sb.toString();
-    }
-
 }

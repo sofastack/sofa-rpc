@@ -70,21 +70,4 @@ public class FileUtilsTest {
         Assert.assertFalse(new File(filePath).exists());
     }
 
-    @Test
-    public void testAppendFilePath() {
-        Assert.assertEquals("baseFilePath" + File.separator + "test",
-            FileUtils.appendFilePath("baseFilePath", "test"));
-
-        Assert.assertEquals("baseFilePath" + File.separator + "test" + File.separator + "test2",
-            FileUtils.appendFilePath("baseFilePath", "test", "test2"));
-
-        Assert.assertEquals("baseFilePath" + File.separator + "null" + File.separator + "test",
-            FileUtils.appendFilePath("baseFilePath", null, "test"));
-
-        Assert.assertEquals("baseFilePath" + File.separator + "test" + File.separator + "null",
-            FileUtils.appendFilePath("baseFilePath", "test", null));
-
-        Assert.assertEquals("baseFilePath", FileUtils.appendFilePath("baseFilePath", null));
-    }
-
 }
