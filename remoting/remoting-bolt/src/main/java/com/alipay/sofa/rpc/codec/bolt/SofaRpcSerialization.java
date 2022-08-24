@@ -47,6 +47,8 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
+import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_RPC_REQUEST_COMMAND;
+
 /**
  * Sofa RPC BOLT 协议的对象序列化/反序列化自定义类
  *
@@ -194,6 +196,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         throws SerializationException {
         if (request instanceof RpcRequestCommand) {
             RpcRequestCommand requestCommand = (RpcRequestCommand) request;
+            RpcInvokeContext.getContext().put(INTERNAL_KEY_RPC_REQUEST_COMMAND, requestCommand);
             Object requestObject = requestCommand.getRequestObject();
             byte serializerCode = requestCommand.getSerializer();
             long serializeStartTime = System.nanoTime();
@@ -215,6 +218,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             } finally {
                 // R5：record request serialization time
                 recordSerializeRequest(requestCommand, invokeContext, serializeStartTime);
+                RpcInvokeContext.getContext().remove(INTERNAL_KEY_RPC_REQUEST_COMMAND);
             }
         }
         return false;

@@ -235,7 +235,7 @@ public class MeshApiClient {
         return result;
     }
 
-    private String httpPost(String path, String json) {
+    protected String httpPost(String path, String json) {
         HttpURLConnection con = null;
         String result = null;
         try {
