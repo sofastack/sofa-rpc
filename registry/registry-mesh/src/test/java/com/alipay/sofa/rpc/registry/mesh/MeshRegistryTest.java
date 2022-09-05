@@ -17,21 +17,25 @@
 package com.alipay.sofa.rpc.registry.mesh;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 import com.alipay.sofa.rpc.registry.mesh.mock.HttpMockServer;
 import com.alipay.sofa.rpc.registry.mesh.model.ApplicationInfoResult;
 import com.alipay.sofa.rpc.registry.mesh.model.MeshEndpoint;
+import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.PublishServiceResult;
+import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.SubscribeServiceResult;
+import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceResult;
+import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceResult;
 import org.junit.After;
 import org.junit.Assert;
@@ -197,6 +201,10 @@ public class MeshRegistryTest extends BaseMeshTest {
         String tag0 = MeshRegistryHelper.buildMeshKey(provider, serverConfig.getProtocol());
         String tag1 = MeshRegistryHelper.buildMeshKey(consumer, consumer.getProtocol());
         Assert.assertEquals(tag1, tag0);
+        ProviderInfo providerInfo = MeshRegistryHelper.convertProviderToProviderInfo(provider, serverConfig);
+        PublishServiceRequest publishServiceRequest = registry.buildPublishServiceRequest(tag0,
+            serverConfig.getProtocol(), providerInfo, "test-server");
+        Assert.assertEquals(serverConfig.getProtocol(), publishServiceRequest.getProtocolType());
 
         // 订阅
         MeshRegistryTest.MockProviderInfoListener providerInfoListener = new MeshRegistryTest.MockProviderInfoListener();
@@ -206,6 +214,8 @@ public class MeshRegistryTest extends BaseMeshTest {
         Thread.sleep(3000);
         Map<String, ProviderGroup> ps = providerInfoListener.getData();
         Assert.assertTrue(ps.toString(), ps.size() == 1);
+        SubscribeServiceRequest subscribeServiceRequest = registry.buildSubscribeServiceRequest(consumer);
+        Assert.assertEquals(consumer.getProtocol(), subscribeServiceRequest.getProtocolType());
 
         // 反注册
         CountDownLatch latch = new CountDownLatch(1);
@@ -214,6 +224,8 @@ public class MeshRegistryTest extends BaseMeshTest {
         latch.await(timeoutPerSub, TimeUnit.MILLISECONDS);
         //mesh 并不直接感知.
         Assert.assertTrue(ps.size() == 1);
+        UnPublishServiceRequest unPublishServiceRequest = registry.buildUnPublishServiceRequest(tag0, providerInfo);
+        Assert.assertEquals(serverConfig.getProtocol(), unPublishServiceRequest.getProtocolType());
 
         // 一次发2个端口的再次注册
         latch = new CountDownLatch(1);
@@ -247,6 +259,8 @@ public class MeshRegistryTest extends BaseMeshTest {
 
         // 取消订阅者1
         registry.unSubscribe(consumer);
+        UnSubscribeServiceRequest unSubscribeServiceRequest = registry.buildUnSubscribeServiceRequest(consumer);
+        Assert.assertEquals(consumer.getProtocol(), unSubscribeServiceRequest.getProtocolType());
 
         // 批量反注册，判断订阅者2的数据
         latch = new CountDownLatch(1);

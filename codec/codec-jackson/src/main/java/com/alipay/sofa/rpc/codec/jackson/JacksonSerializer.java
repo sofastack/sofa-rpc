@@ -211,7 +211,12 @@ public class JacksonSerializer extends AbstractSerializer {
 
         // according interface and method name to find parameter types
         JavaType[] requestClassList = jacksonHelper.getReqClass(targetService, sofaRequest.getMethodName());
-        Object[] reqList = decode(data, requestClassList);
+        JavaType[] requestClassListDecode = requestClassList;
+        if (genericServiceMap.containsKey(targetService)) {
+            requestClassListDecode = jacksonHelper.getReqClass(genericServiceMap.get(targetService),
+                sofaRequest.getMethodName());
+        }
+        Object[] reqList = decode(data, requestClassListDecode);
         sofaRequest.setMethodArgs(reqList);
         sofaRequest.setMethodArgSigs(parseArgSigs(requestClassList));
     }
@@ -262,7 +267,7 @@ public class JacksonSerializer extends AbstractSerializer {
         } catch (SofaRpcException e) {
             throw e;
         } catch (IOException e) {
-            throw buildDeserializeError(e.getMessage());
+            throw buildDeserializeError(e.getMessage(), e);
         }
 
     }

@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.context.BaggageResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -32,6 +33,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
+import static com.alipay.sofa.rpc.common.RpcConstants.CUSTOM_CALLER_APP;
 import static com.alipay.sofa.rpc.common.RpcConstants.HIDDEN_KEY_INVOKE_CONTEXT;
 import static com.alipay.sofa.rpc.common.RpcConstants.HIDDEN_KEY_PINPOINT;
 import static com.alipay.sofa.rpc.common.RpcConstants.INTERNAL_KEY_APP_NAME;
@@ -131,6 +133,21 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
         // 额外属性通过HEAD传递给服务端
         request.addRequestProp(RemotingConstants.HEAD_APP_NAME, consumerConfig.getAppName());
         request.addRequestProp(RemotingConstants.HEAD_PROTOCOL, consumerConfig.getProtocol());
+
+        customRequest(request, internalContext);
+
+    }
+
+    protected void customRequest(SofaRequest request, RpcInternalContext internalContext) {
+        RpcInvokeContext context = RpcInvokeContext.getContext();
+        Object customCallerApp = context.get(CUSTOM_CALLER_APP);
+        if (customCallerApp instanceof String && StringUtils.isNotBlank((String) customCallerApp)) {
+            context.remove(CUSTOM_CALLER_APP);
+            if (RpcInternalContext.isAttachmentEnable()) {
+                internalContext.setAttachment(INTERNAL_KEY_APP_NAME, customCallerApp);
+            }
+            request.addRequestProp(RemotingConstants.HEAD_APP_NAME, customCallerApp);
+        }
     }
 
     @Override

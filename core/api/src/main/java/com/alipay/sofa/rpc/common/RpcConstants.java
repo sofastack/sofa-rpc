@@ -49,6 +49,11 @@ public class RpcConstants {
     public static final String  REGISTRY_PROTOCOL_LOCAL                      = "local";
 
     /**
+     * 域名注册中心
+     */
+    public static final String  REGISTRY_PROTOCOL_DOMAIN                     = "domain";
+
+    /**
      * 线程池类型：固定线程池
      */
     public static final String  THREADPOOL_TYPE_FIXED                        = "fixed";
@@ -692,4 +697,16 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_SERVER_SEND_TIME_MICRO          = INTERNAL_KEY_PREFIX +
                                                                                  "server_send_time_micro";
+
+    /**
+     * RpcInvokeContext 中自定义 caller app 的 Key
+     */
+    public static final String  CUSTOM_CALLER_APP                            = "custom_caller_app";
+
+    /**
+     * RpcRequestCommand 对象
+     */
+    public static final String  INTERNAL_KEY_RPC_REQUEST_COMMAND             = INTERNAL_KEY_PREFIX +
+                                                                                 "rpc_request_command";
+
 }

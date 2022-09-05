@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentMap;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public class ProviderInfo implements Serializable {
+public class ProviderInfo implements Serializable, Cloneable {
 
     private static final long                             serialVersionUID = -6438690329875954051L;
 
@@ -507,5 +507,22 @@ public class ProviderInfo implements Serializable {
     public String getAttr(String key) {
         String val = StringUtils.toString(dynamicAttrs.get(key));
         return val == null ? staticAttrs.get(key) : val;
+    }
+
+    @Override
+    public ProviderInfo clone() {
+        ProviderInfo providerInfo = new ProviderInfo();
+        providerInfo.originUrl = this.originUrl;
+        providerInfo.protocolType = this.protocolType;
+        providerInfo.host = this.host;
+        providerInfo.port = this.port;
+        providerInfo.path = this.path;
+        providerInfo.serializationType = this.serializationType;
+        providerInfo.rpcVersion = this.rpcVersion;
+        providerInfo.weight = this.weight;
+        providerInfo.status = this.status;
+        providerInfo.staticAttrs.putAll(this.staticAttrs);
+        providerInfo.dynamicAttrs.putAll(this.dynamicAttrs);
+        return providerInfo;
     }
 }

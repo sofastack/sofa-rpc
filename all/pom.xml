@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.8.3-SNAPSHOT</version>
+    <version>5.8.7</version>
 
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -69,7 +69,7 @@
         <bolt.swagger.version>1.5.18</bolt.swagger.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
-        <grpc.version>1.28.0</grpc.version>
+        <grpc.version>1.33.0</grpc.version>
         <guava.version>27.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
     </properties>
@@ -230,6 +230,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-registry-sofa</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-registry-polaris</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -505,6 +510,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-registry-mesh</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-multicast</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-sofa</include>
+                                    <include>com.alipay.sofa:sofa-rpc-registry-polaris</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-bolt</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-http</include>
                                     <include>com.alipay.sofa:sofa-rpc-remoting-resteasy</include>
