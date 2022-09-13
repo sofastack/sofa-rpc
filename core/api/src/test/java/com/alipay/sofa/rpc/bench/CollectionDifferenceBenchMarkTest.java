@@ -64,7 +64,7 @@ public class CollectionDifferenceBenchMarkTest {
 
     private static final String TO_BE_REMOVE =  String.format(URL_PATTERN, getRandomIp());
 
-    @Param(value = {"1000", "5000", "10000", "20000", "50000"})
+    @Param(value = {"1000", "5000", "10000", "20000"})
     private int LENGTH;
 
     public static void main(String[] args) throws RunnerException {
