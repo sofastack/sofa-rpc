@@ -20,6 +20,9 @@ import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
@@ -29,11 +32,15 @@ import com.google.protobuf.ByteString;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
+import io.grpc.Status;
 import io.grpc.stub.ClientCalls;
+import io.grpc.stub.StreamObserver;
 import triple.Request;
 import triple.Response;
 
 import java.lang.reflect.Method;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
@@ -141,6 +148,54 @@ public class TripleClientInvoker implements TripleInvoker {
             return sofaResponse;
         }
 
+    }
+
+    private Map<String, Method> methodMap = new ConcurrentHashMap<>();
+
+    @Override
+    public void asyncInvoke(SofaRequest sofaRequest, int timeout) throws Exception {
+        SofaResponseCallback sofaResponseCallback = sofaRequest.getSofaResponseCallback();
+
+        Method m = methodMap.get(sofaRequest.getMethodName());
+        if (m == null) {
+            synchronized (sofaRequest.getInterfaceName()) {
+                m = methodMap.get(sofaRequest.getMethodName());
+                if (m == null) {
+                    Class<?> clazz = Class.forName(sofaRequest.getInterfaceName());
+                    Method[] declaredMethods = clazz.getDeclaredMethods();
+                    for (Method tempM : declaredMethods) {
+                        if (tempM.getParameterCount() == 2 && tempM.getParameterTypes()[1].getCanonicalName() == StreamObserver.class.getCanonicalName()) {
+                            m = tempM;
+                            methodMap.put(sofaRequest.getMethodName(), m);
+                        }
+                    }
+                }
+            }
+        }
+
+        Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout),
+                null, consumerConfig, timeout);
+        m.invoke(stub, sofaRequest.getMethodArgs()[0], new StreamObserver<Object>() {
+            @Override
+            public void onNext(Object o) {
+                sofaResponseCallback.onAppResponse(o, sofaRequest.getMethodName(), sofaRequest);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Status status = Status.fromThrowable(throwable);
+                if (status.getCode() == Status.Code.UNKNOWN) {
+                    sofaResponseCallback.onAppException(throwable, sofaRequest.getMethodName(), sofaRequest);
+                }else {
+                    sofaResponseCallback.onSofaException(new SofaRpcException(RpcErrorType.UNKNOWN, status.getCause()), sofaRequest.getMethodName(), sofaRequest);
+                }
+            }
+
+            @Override
+            public void onCompleted() {
+
+            }
+        });
     }
 
     public static Request getRequest(SofaRequest sofaRequest, String serialization, Serializer serializer) {

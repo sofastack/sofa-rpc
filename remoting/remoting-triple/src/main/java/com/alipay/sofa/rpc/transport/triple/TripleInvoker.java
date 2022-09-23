@@ -22,4 +22,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 public interface TripleInvoker {
 
     public SofaResponse invoke(SofaRequest sofaRequest, int timeout) throws Exception;
+
+    public void asyncInvoke(SofaRequest sofaRequest, int timeout) throws Exception;
+
 }
