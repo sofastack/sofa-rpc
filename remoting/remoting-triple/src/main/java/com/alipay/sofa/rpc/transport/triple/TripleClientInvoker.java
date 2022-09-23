@@ -164,9 +164,10 @@ public class TripleClientInvoker implements TripleInvoker {
                     Class<?> clazz = Class.forName(sofaRequest.getInterfaceName());
                     Method[] declaredMethods = clazz.getDeclaredMethods();
                     for (Method tempM : declaredMethods) {
-                        if (tempM.getParameterCount() == 2 && tempM.getParameterTypes()[1].getCanonicalName() == StreamObserver.class.getCanonicalName()) {
+                        if (StringUtils.equals(tempM.getName(), sofaRequest.getMethodName()) && tempM.getParameterCount() == 2 && tempM.getParameterTypes()[1].getCanonicalName() == StreamObserver.class.getCanonicalName()) {
                             m = tempM;
                             methodMap.put(sofaRequest.getMethodName(), m);
+                            break;
                         }
                     }
                 }
