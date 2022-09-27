@@ -18,11 +18,12 @@ package com.alipay.sofa.rpc.transport.triple;
 
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.message.ResponseFuture;
 
 public interface TripleInvoker {
 
     public SofaResponse invoke(SofaRequest sofaRequest, int timeout) throws Exception;
 
-    public void asyncInvoke(SofaRequest sofaRequest, int timeout) throws Exception;
+    public ResponseFuture asyncInvoke(SofaRequest sofaRequest, int timeout) throws Exception;
 
 }

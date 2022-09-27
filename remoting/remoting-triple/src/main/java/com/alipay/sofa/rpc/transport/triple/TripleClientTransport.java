@@ -163,30 +163,28 @@ public class TripleClientTransport extends ClientTransport {
     public ResponseFuture asyncSend(SofaRequest request, int timeout) throws SofaRpcException {
         SofaResponse sofaResponse = null;
         SofaRpcException throwable = null;
-        SofaResponseCallback listener = request.getSofaResponseCallback();
-        if (listener != null) {
-            // callback调用
-            try {
-                RpcInternalContext context = RpcInternalContext.getContext();
-                beforeSend(context, request);
-                RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
-                invokeContext.put(TripleContants.SOFA_REQUEST_KEY, request);
-                invokeContext.put(TripleContants.SOFA_CONSUMER_CONFIG_KEY, transportConfig.getConsumerConfig());
-                tripleClientInvoker.asyncInvoke(request, timeout);
-            } catch (Exception e) {
-                throwable = convertToRpcException(e);
-                throw throwable;
-            } finally {
-                if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                    EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                            transportConfig.getProviderInfo(), request, sofaResponse, throwable));
-                }
-            }
 
-            return null;
-        } else {
-            throw new UnsupportedOperationException("Not supported");
+        try {
+            RpcInternalContext context = RpcInternalContext.getContext();
+            beforeSend(context, request);
+            RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+            invokeContext.put(TripleContants.SOFA_REQUEST_KEY, request);
+            invokeContext.put(TripleContants.SOFA_CONSUMER_CONFIG_KEY, transportConfig.getConsumerConfig());
+            ResponseFuture responseFuture = tripleClientInvoker.asyncInvoke(request, timeout);
+            if (request.getSofaResponseCallback() == null) {
+                return responseFuture;
+            }
+        } catch (Exception e) {
+            throwable = convertToRpcException(e);
+            throw throwable;
+        } finally {
+            if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
+                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
+                        transportConfig.getProviderInfo(), request, sofaResponse, throwable));
+            }
         }
+
+        return null;
     }
 
     @Override
