@@ -44,6 +44,7 @@ import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -139,6 +140,11 @@ public class NacosRegistry extends Registry {
 
         nacosConfig.put(PropertyKeyConst.SERVER_ADDR, address);
         nacosConfig.put(PropertyKeyConst.NAMESPACE, namespace);
+
+        Map<String, String> parameters = registryConfig.getParameters();
+        if (parameters != null) {
+            nacosConfig.putAll(parameters);
+        }
 
         try {
             namingService = NamingFactory.createNamingService(nacosConfig);
