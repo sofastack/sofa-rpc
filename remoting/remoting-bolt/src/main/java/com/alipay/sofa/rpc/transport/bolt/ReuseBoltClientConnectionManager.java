@@ -97,7 +97,7 @@ class ReuseBoltClientConnectionManager extends BoltClientConnectionManager {
             try {
                 connection = rpcClient.getConnection(url, url.getConnectTimeout());
             } catch (Exception e) {
-                LOGGER.warn("get connection failed in url," + url);
+                LOGGER.warn("get connection failed in url," + url, e);
             }
             if (connection == null) {
                 return null;
