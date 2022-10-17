@@ -77,7 +77,7 @@ public class FailoverCluster extends AbstractCluster {
                                     invokedProviderInfos));
                         }
                     }
-                    if(response.getAppResponse() instanceof SofaBizRetryException){
+                    if (response.getAppResponse() instanceof SofaBizRetryException) {
                         throw (SofaBizRetryException) response.getAppResponse();
                     }
                     return response;
