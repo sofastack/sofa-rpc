@@ -113,31 +113,4 @@ public class BizThrowExceptionTest extends ActivelyDestroyTest {
         }
     }
 
-    @Test
-    public void testRetry(){
-        // 只有2个线程 执行
-        ServerConfig serverConfig = new ServerConfig()
-                .setStopTimeout(0)
-                .setPort(22226)
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
-                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
-
-        // 发布一个服务，每个请求要执行1秒
-        ProviderConfig<TestExceptionService> providerConfig = new ProviderConfig<TestExceptionService>()
-                .setInterfaceId(TestExceptionService.class.getName())
-                .setRef(new TestExceptionServiceImpl())
-                .setServer(serverConfig)
-                .setRegister(false);
-        providerConfig.export();
-
-        ConsumerConfig<TestExceptionService> consumerConfig = new ConsumerConfig<TestExceptionService>()
-                .setInterfaceId(TestExceptionService.class.getName())
-                .setDirectUrl("bolt://127.0.0.1:22226")
-                .setTimeout(10000)
-                .setProxy("jdk")
-                .setRepeatedReferLimit(-1)
-                .setRetries(2)
-                .setRegister(false);
-        TestExceptionService service = consumerConfig.refer();
-    }
 }
