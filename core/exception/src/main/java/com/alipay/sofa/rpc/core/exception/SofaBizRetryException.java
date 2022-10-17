@@ -14,27 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.exception;
-
-import com.alipay.sofa.rpc.core.exception.SofaBizRetryException;
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+package com.alipay.sofa.rpc.core.exception;
 
 /**
- *
- *
- * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
+ * @author Even
+ * @date 2022/10/16 7:51 PM
  */
-public interface TestExceptionService {
+public class SofaBizRetryException extends SofaRpcException {
 
-    public String throwRuntimeException();
+    public SofaBizRetryException(String message) {
+        super(RpcErrorType.SERVER_BIZ_RETRY, message);
+    }
 
-    public String throwException() throws Exception;
+    public SofaBizRetryException(Throwable cause) {
+        super(RpcErrorType.SERVER_BIZ_RETRY, cause);
+    }
 
-    public String throwSofaException() throws SofaRpcException;
-
-    public String throwDeclaredException() throws TestException;
-
-    public void throwDeclaredExceptionWithoutReturn() throws TestException;
-
-    public void throwSofaBizRetryException() throws SofaBizRetryException;
+    public SofaBizRetryException(String message, Throwable cause) {
+        super(RpcErrorType.SERVER_BIZ_RETRY, message, cause);
+    }
 }

@@ -58,6 +58,8 @@ public class RpcErrorType {
      */
     public static final int SERVER_BIZ               = 160;
 
+    public static final int SERVER_BIZ_RETRY         = 161;
+
     /**
      * 服务端过滤器异常
      */

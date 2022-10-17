@@ -19,7 +19,9 @@ package com.alipay.sofa.rpc.client;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaBizRetryException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -75,6 +77,9 @@ public class FailoverCluster extends AbstractCluster {
                                     invokedProviderInfos));
                         }
                     }
+                    if(response.getAppResponse() instanceof SofaBizRetryException){
+                        throw (SofaBizRetryException) response.getAppResponse();
+                    }
                     return response;
                 } else {
                     throwable = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
@@ -84,7 +89,8 @@ public class FailoverCluster extends AbstractCluster {
                 }
             } catch (SofaRpcException e) { // 服务端异常+ 超时异常 才发起rpc异常重试
                 if (e.getErrorType() == RpcErrorType.SERVER_BUSY
-                    || e.getErrorType() == RpcErrorType.CLIENT_TIMEOUT) {
+                    || e.getErrorType() == RpcErrorType.CLIENT_TIMEOUT
+                    || e.getErrorType() == RpcErrorType.SERVER_BIZ_RETRY) {
                     throwable = e;
                     time++;
                 } else {
@@ -102,9 +108,9 @@ public class FailoverCluster extends AbstractCluster {
                         + e.getClass().getName() + ", message is: " + e.getMessage(), e);
             } finally {
                 if (RpcInternalContext.isAttachmentEnable()) {
-                    RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_INVOKE_TIMES,
-                        time + 1); // 重试次数
+                    RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_INVOKE_TIMES, time); // 重试次数
                 }
+                RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_INVOKE_TIMES, time);
             }
             if (providerInfo != null) {
                 invokedProviderInfos.add(providerInfo);

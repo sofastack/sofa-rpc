@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.test.exception;
 
+import com.alipay.sofa.rpc.core.exception.SofaBizRetryException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 
 /**
@@ -47,5 +48,11 @@ public class TestExceptionServiceImpl implements TestExceptionService {
     @Override
     public void throwDeclaredExceptionWithoutReturn() throws TestException {
         throw new TestException("DeclaredExceptionWithoutReturn");
+    }
+
+    @Override
+    public void throwSofaBizRetryException() throws SofaBizRetryException {
+        System.out.println("do sofaBizRetry Service");
+        throw new SofaBizRetryException(new Exception("biz retry"));
     }
 }

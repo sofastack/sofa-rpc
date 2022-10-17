@@ -20,6 +20,8 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.core.exception.SofaBizRetryException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
@@ -59,6 +61,7 @@ public class BizThrowExceptionTest extends ActivelyDestroyTest {
                 .setTimeout(1000)
                 .setProxy(proxy)
                 .setRepeatedReferLimit(-1)
+                .setRetries(2)
                 .setRegister(false);
             final TestExceptionService service = consumerConfig.refer();
 
@@ -98,6 +101,43 @@ public class BizThrowExceptionTest extends ActivelyDestroyTest {
                 Assert.assertTrue(e instanceof TestException);
                 Assert.assertEquals(e.getMessage(), "DeclaredExceptionWithoutReturn");
             }
+
+            try {
+                service.throwSofaBizRetryException();
+                Assert.fail();
+            } catch (Throwable e) {
+                Assert.assertTrue(e instanceof SofaBizRetryException);
+                Assert.assertEquals(e.getMessage(), "java.lang.Exception: biz retry");
+                Assert.assertEquals(3, (int) RpcInvokeContext.getContext().get(RpcConstants.INTERNAL_KEY_INVOKE_TIMES));
+            }
         }
+    }
+
+    @Test
+    public void testRetry(){
+        // 只有2个线程 执行
+        ServerConfig serverConfig = new ServerConfig()
+                .setStopTimeout(0)
+                .setPort(22226)
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)
+                .setQueues(100).setCoreThreads(5).setMaxThreads(5);
+
+        // 发布一个服务，每个请求要执行1秒
+        ProviderConfig<TestExceptionService> providerConfig = new ProviderConfig<TestExceptionService>()
+                .setInterfaceId(TestExceptionService.class.getName())
+                .setRef(new TestExceptionServiceImpl())
+                .setServer(serverConfig)
+                .setRegister(false);
+        providerConfig.export();
+
+        ConsumerConfig<TestExceptionService> consumerConfig = new ConsumerConfig<TestExceptionService>()
+                .setInterfaceId(TestExceptionService.class.getName())
+                .setDirectUrl("bolt://127.0.0.1:22226")
+                .setTimeout(10000)
+                .setProxy("jdk")
+                .setRepeatedReferLimit(-1)
+                .setRetries(2)
+                .setRegister(false);
+        TestExceptionService service = consumerConfig.refer();
     }
 }
