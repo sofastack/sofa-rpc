@@ -31,6 +31,8 @@ import com.caucho.hessian.io.SerializerFactory;
 import java.io.IOException;
 import java.util.Map;
 
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomThrowableGenericDeserializer.judgeCustomThrowable;
+
 /**
  * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
@@ -54,7 +56,7 @@ public class SofaResponseHessianSerializer extends AbstractCustomHessianSerializ
                 input.setSerializerFactory(genericSerializerFactory);
                 GenericObject genericObject = (GenericObject) input.readObject();
                 template.setErrorMsg((String) genericObject.getField("errorMsg"));
-                template.setAppResponse(genericObject.getField("appResponse"));
+                template.setAppResponse(judgeCustomThrowable(genericObject.getField("appResponse")));
                 template.setResponseProps((Map<String, String>) genericObject.getField("responseProps"));
             } else {
                 input.setSerializerFactory(serializerFactory);
@@ -84,7 +86,7 @@ public class SofaResponseHessianSerializer extends AbstractCustomHessianSerializ
                 GenericObject genericObject = (GenericObject) input.readObject();
                 SofaResponse sofaResponse = new SofaResponse();
                 sofaResponse.setErrorMsg((String) genericObject.getField("errorMsg"));
-                sofaResponse.setAppResponse(genericObject.getField("appResponse"));
+                sofaResponse.setAppResponse(judgeCustomThrowable(genericObject.getField("appResponse")));
                 sofaResponse.setResponseProps((Map<String, String>) genericObject.getField("responseProps"));
                 object = sofaResponse;
             } else {
