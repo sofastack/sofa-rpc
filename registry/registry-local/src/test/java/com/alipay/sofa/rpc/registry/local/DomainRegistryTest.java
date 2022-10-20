@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.struct.ScheduledService;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -65,6 +66,15 @@ public class DomainRegistryTest {
         assertNull(domainRegistry.scheduledExecutorService);
         domainRegistry.init();
         assertTrue(domainRegistry.scheduledExecutorService.isStarted());
+    }
+
+    @Test
+    public void testInitOnce() {
+        DomainRegistry domainRegistry = new DomainRegistry(new RegistryConfig());
+        domainRegistry.init();
+        ScheduledService origin = domainRegistry.scheduledExecutorService;
+        domainRegistry.init();
+        assertSame(origin, domainRegistry.scheduledExecutorService);
     }
 
     @Test
@@ -276,7 +286,7 @@ public class DomainRegistryTest {
 
         ConcurrentHashMap<String, List<ProviderInfo>> ps = new ConcurrentHashMap();
 
-        private CountDownLatch                        countDownLatch;
+        private CountDownLatch countDownLatch;
 
         public void setCountDownLatch(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
