@@ -16,14 +16,6 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.codec.jackson.generic.GenericService;
 import com.alipay.sofa.rpc.codec.jackson.generic.GenericServiceImpl;
@@ -45,6 +37,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -54,14 +54,6 @@ public class JacksonSerializerTest {
 
     @Test
     public void encodeAndDecode() {
-        boolean error = false;
-        try {
-            serializer.encode(null, null);
-        } catch (Exception e) {
-            error = true;
-        }
-        Assert.assertTrue(error);
-
         DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("a");
         AbstractByteBuf byteBuf = serializer.encode(demoRequest, null);
@@ -72,7 +64,7 @@ public class JacksonSerializerTest {
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
 
-        error = false;
+        boolean error = false;
         try {
             serializer.encode(new Date(), null);
         } catch (Exception e) {
@@ -559,4 +551,35 @@ public class JacksonSerializerTest {
         AbstractSerializer.clear();
     }
 
+    @Test
+    public void testSerializeNull() {
+        //Object -> null
+        AbstractByteBuf nullByteBuf = serializer.encode(null, null);
+        DemoRequest nullObject = (DemoRequest) serializer.decode(nullByteBuf, DemoRequest.class, null);
+        Assert.assertNull(nullObject);
+
+        //String -> null
+        AbstractByteBuf nullByteBuf2 = serializer.encode(null, null);
+        String nullStr = (String) serializer.decode(nullByteBuf2, String.class, null);
+        Assert.assertNull(nullStr);
+
+        // int (...) -> init
+        AbstractByteBuf nullByteBuf3 = serializer.encode(null, null);
+        int nullInt = (int) serializer.decode(nullByteBuf3, int.class, null);
+        Assert.assertEquals(0, nullInt);
+    }
+
+    @Test
+    public void testDecodeSofaResponse() {
+        AbstractByteBuf nullByteBuf = serializer.encode(null, null);
+        JacksonSerializer jacksonSerializer = new JacksonSerializer();
+        SofaResponse sofaResponse = new SofaResponse();
+        Map<String, String> ctx = new HashMap<>();
+        ctx.put(RemotingConstants.HEAD_TARGET_SERVICE, "xxx");
+        ctx.put(RemotingConstants.HEAD_METHOD_NAME, "xxx");
+        ctx.put(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
+        jacksonSerializer.decode(nullByteBuf, sofaResponse, ctx);
+        Assert.assertTrue(sofaResponse.isError());
+        Assert.assertEquals("", sofaResponse.getErrorMsg());
+    }
 }
