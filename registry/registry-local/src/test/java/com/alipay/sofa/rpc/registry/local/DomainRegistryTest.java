@@ -286,7 +286,7 @@ public class DomainRegistryTest {
 
         ConcurrentHashMap<String, List<ProviderInfo>> ps = new ConcurrentHashMap();
 
-        private CountDownLatch countDownLatch;
+        private CountDownLatch                        countDownLatch;
 
         public void setCountDownLatch(CountDownLatch countDownLatch) {
             this.countDownLatch = countDownLatch;
