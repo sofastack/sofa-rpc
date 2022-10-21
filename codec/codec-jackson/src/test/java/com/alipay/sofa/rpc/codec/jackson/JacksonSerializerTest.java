@@ -563,6 +563,10 @@ public class JacksonSerializerTest {
         String nullStr = (String) serializer.decode(nullByteBuf2, String.class, null);
         Assert.assertNull(nullStr);
 
+        nullByteBuf2 = serializer.encode("xxx", null);
+        nullStr = (String) serializer.decode(nullByteBuf2, String.class, null);
+        Assert.assertEquals("xxx", nullStr);
+
         // int (...) -> init
         AbstractByteBuf nullByteBuf3 = serializer.encode(null, null);
         int nullInt = (int) serializer.decode(nullByteBuf3, int.class, null);
