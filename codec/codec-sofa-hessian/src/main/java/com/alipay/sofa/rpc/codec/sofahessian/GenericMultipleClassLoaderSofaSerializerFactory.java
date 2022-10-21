@@ -86,14 +86,14 @@ public class GenericMultipleClassLoaderSofaSerializerFactory extends MultipleCla
             return super.getDeserializer(type);
         }
 
-        // 查看是否已经包含反序列化器
-        Deserializer deserializer = DESERIALIZER_MAP.get(type);
+        // 自定义Throwable采用JavaDeserializer，反序列化成Throwable而不是GenericObject
+        Deserializer deserializer = getDeserializerForCustomThrowable(type);
         if (deserializer != null) {
             return deserializer;
         }
 
-        // 自定义Throwable采用JavaDeserializer，反序列化成Throwable而不是GenericObject
-        deserializer = getDeserializerForCustomThrowable(type);
+        // 查看是否已经包含反序列化器
+        deserializer = DESERIALIZER_MAP.get(type);
         if (deserializer != null) {
             return deserializer;
         }
