@@ -94,9 +94,11 @@ public class RpcConfigKeys {
     public static final ConfigKey<String[]> GENERIC_THROWABLE_FIELDS            = ConfigKey
                                                                                     .build(
                                                                                         "sofa.rpc.generic.exception.fields",
-                                                                                        new String[] { "cause",
-            "detailMessage", "stackTrace",
-            "suppressedExceptions"                                                     },
+                                                                                        new String[] {
+                                                                                        "cause",
+                                                                                        "detailMessage",
+                                                                                        "stackTrace",
+                                                                                        "suppressedExceptions" },
                                                                                         false,
                                                                                         "judge the generic object exception fields.",
                                                                                         new String[] { "sofa_rpc_generic_exception_fields" });
