@@ -17,21 +17,23 @@
 package com.alipay.sofa.rpc.codec.sofahessian.serialize;
 
 import com.alipay.hessian.generic.model.GenericObject;
+import com.alipay.sofa.common.config.SofaConfigs;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 
 /**
  *
  * @author xingqi
  * @version : CustomThrowableGenericDeserialize.java, v 0.1 2022年10月18日 5:02 PM xingqi Exp $
  */
-public class CustomThrowableGenericDeserializer {
+public class GenericCustomThrowableDeterminer {
 
-    private static boolean        GENERIC_THROW_EXCEPTION = "true".equalsIgnoreCase(System
-                                                              .getProperty("rpc.generic.throw.exception"));
+    private static final boolean  GENERIC_THROW_EXCEPTION = SofaConfigs
+                                                              .getOrDefault(RpcConfigKeys.GENERIC_THROW_EXCEPTION);
 
-    private static final String[] THROWABLE_FIELDS        = new String[] { "cause", "detailMessage", "stackTrace",
-                                                          "suppressedExceptions" };
+    private static final String[] THROWABLE_FIELDS        = SofaConfigs
+                                                              .getOrDefault(RpcConfigKeys.GENERIC_THROWABLE_FIELDS);
 
-    public static Object judgeCustomThrowable(Object appObject) {
+    public static Object judgeCustomThrowableForGenericObject(Object appObject) {
         if (!GENERIC_THROW_EXCEPTION || appObject == null) {
             return appObject;
         }
@@ -46,10 +48,6 @@ public class CustomThrowableGenericDeserializer {
         return new RuntimeException(
             "occur business exception, but type=" + ((GenericObject) appObject).getType() +
                 " class is not found, error: " + appObject);
-    }
-
-    public static void setGenericThrowException(boolean enabled) {
-        GENERIC_THROW_EXCEPTION = enabled;
     }
 
     public static boolean isGenericThrowException() {

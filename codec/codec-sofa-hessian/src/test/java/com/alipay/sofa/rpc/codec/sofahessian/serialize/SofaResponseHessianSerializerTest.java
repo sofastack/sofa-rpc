@@ -30,7 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomThrowableGenericDeserializer.setGenericThrowException;
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.setGenericThrowException;
 
 /**
  *

@@ -20,35 +20,50 @@ import com.alipay.hessian.generic.model.GenericObject;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomThrowableGenericDeserializer.judgeCustomThrowable;
-import static com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomThrowableGenericDeserializer.setGenericThrowException;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminer.judgeCustomThrowableForGenericObject;
 
 /**
  *
  * @author xingqi
  * @version : CustomThrowableGenericDeserializerTest.java, v 0.1 2022年10月20日 4:23 PM xingqi Exp $
  */
-public class CustomThrowableGenericDeserializerTest {
+public class GenericCustomThrowableDeterminerTest {
 
     @Test
     public void testJudgeCustomThrowable() throws Exception {
         setGenericThrowException(true);
         try {
-            Assert.assertNull(judgeCustomThrowable(null));
+            Assert.assertNull(judgeCustomThrowableForGenericObject(null));
             Object o = new Object();
-            Assert.assertEquals(o, judgeCustomThrowable(o));
+            Assert.assertEquals(o, judgeCustomThrowableForGenericObject(o));
             GenericObject genericObject = new GenericObject("");
-            Assert.assertEquals(genericObject, judgeCustomThrowable(genericObject));
+            Assert.assertEquals(genericObject, judgeCustomThrowableForGenericObject(genericObject));
             genericObject.putField("xxx", "yyy");
-            Assert.assertEquals(genericObject, judgeCustomThrowable(genericObject));
+            Assert.assertEquals(genericObject, judgeCustomThrowableForGenericObject(genericObject));
 
             genericObject.putField("cause", "yyy");
             genericObject.putField("detailMessage", "yyy");
             genericObject.putField("stackTrace", "yyy");
             genericObject.putField("suppressedExceptions", "yyy");
-            Assert.assertTrue(judgeCustomThrowable(genericObject) instanceof RuntimeException);
+            Assert.assertTrue(judgeCustomThrowableForGenericObject(genericObject) instanceof RuntimeException);
         } finally {
             setGenericThrowException(false);
+        }
+    }
+
+    public static void setGenericThrowException(boolean enabled) {
+        try {
+            Field field = GenericCustomThrowableDeterminer.class.getDeclaredField("GENERIC_THROW_EXCEPTION");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, enabled);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

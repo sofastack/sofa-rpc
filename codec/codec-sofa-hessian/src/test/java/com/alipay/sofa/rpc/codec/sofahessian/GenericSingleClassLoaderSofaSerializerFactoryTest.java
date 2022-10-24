@@ -39,7 +39,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
-import static com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomThrowableGenericDeserializer.setGenericThrowException;
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.setGenericThrowException;
 
 /**
  *

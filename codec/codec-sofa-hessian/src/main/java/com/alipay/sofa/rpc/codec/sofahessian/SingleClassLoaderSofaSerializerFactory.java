@@ -28,7 +28,7 @@ import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.SerializerFactory;
 
 import static com.alipay.hessian.generic.io.GenericDeserializer.ARRAY_PREFIX;
-import static com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomThrowableGenericDeserializer.isGenericThrowException;
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminer.isGenericThrowException;
 
 /**
  * SofaSerializerFactory used in single class loader.
