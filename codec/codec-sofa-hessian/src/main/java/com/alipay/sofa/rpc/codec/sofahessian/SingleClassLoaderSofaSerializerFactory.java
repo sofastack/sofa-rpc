@@ -27,6 +27,9 @@ import com.caucho.hessian.io.JavaSerializer;
 import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.SerializerFactory;
 
+import static com.alipay.hessian.generic.io.GenericDeserializer.ARRAY_PREFIX;
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminer.isGenericThrowException;
+
 /**
  * SofaSerializerFactory used in single class loader.
  *
@@ -34,7 +37,7 @@ import com.caucho.hessian.io.SerializerFactory;
  */
 public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
 
-    /** 
+    /**
      * logger for this class 
      */
     private static final Logger LOGGER = LoggerFactory
@@ -97,5 +100,31 @@ public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
 
     protected void putDeserializerToCachedType(String type, Deserializer deserializer) {
         _cachedTypeDeserializerMap.put(type, deserializer);
+    }
+
+    protected Deserializer getDeserializerForCustomThrowable(String type) {
+        if (!isGenericThrowException()) {
+            return null;
+        }
+        if (type.charAt(0) == ARRAY_PREFIX) {
+            return null;
+        }
+        try {
+            ClassLoader appClassLoader = Thread.currentThread().getContextClassLoader();
+            Class<?> cl = Class.forName(type, true, appClassLoader);
+            if (Throwable.class.isAssignableFrom(cl)) {
+                return this.getDeserializer(cl);
+            }
+        } catch (Exception e) {
+            if (LOGGER.isDebugEnabled()) {
+                if (e instanceof ClassNotFoundException) {
+                    LOGGER.debugWithApp(null, LogCodes.getLog(LogCodes.ERROR_DECODE_CLASS_NOT_FOUND,
+                        getClass().getName(), type, Thread.currentThread().getContextClassLoader()), e);
+                } else {
+                    LOGGER.debugWithApp(null, e.toString(), e);
+                }
+            }
+        }
+        return null;
     }
 }
