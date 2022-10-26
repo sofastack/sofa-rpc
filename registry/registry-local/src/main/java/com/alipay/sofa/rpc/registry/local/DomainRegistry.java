@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -72,6 +73,8 @@ public class DomainRegistry extends Registry {
      */
     protected ScheduledService scheduledExecutorService;
 
+    protected AtomicBoolean inited = new AtomicBoolean();
+
     /**
      * 注册中心配置
      *
@@ -83,29 +86,27 @@ public class DomainRegistry extends Registry {
 
     @Override
     public void init() {
-        this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.domain.scan.period"),
-                scanPeriod);
+        if (inited.compareAndSet(false, true)) {
+            this.scanPeriod = CommonUtils.parseInt(registryConfig.getParameter("registry.domain.scan.period"),
+                    scanPeriod);
 
-        Runnable task = new Runnable() {
-            @Override
-            public void run() {
+            Runnable task = () -> {
                 try {
                     refreshDomain();
                     notifyListener();
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-            }
-        };
+            };
 
-        scheduledExecutorService = new ScheduledService("DomainRegistry-Back-Load",
-                ScheduledService.MODE_FIXEDDELAY,
-                task, //定时load任务
-                scanPeriod, // 延迟一个周期
-                scanPeriod, // 一个周期循环
-                TimeUnit.MILLISECONDS
-        ).start();
-
+            scheduledExecutorService = new ScheduledService("DomainRegistry-Back-Load",
+                    ScheduledService.MODE_FIXEDDELAY,
+                    task, //定时load任务
+                    scanPeriod, // 延迟一个周期
+                    scanPeriod, // 一个周期循环
+                    TimeUnit.MILLISECONDS
+            ).start();
+        }
     }
 
     protected void refreshDomain() {
