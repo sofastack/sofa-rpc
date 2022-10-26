@@ -21,9 +21,9 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
-import com.alipay.sofa.rpc.common.struct.ListDifference;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.struct.ScheduledService;
+import com.alipay.sofa.rpc.common.struct.SetDifference;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
@@ -379,10 +379,10 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
             } else {
                 Collection<ProviderInfo> nowall = currentProviderList();
                 List<ProviderInfo> oldAllP = providerGroup.getProviderInfos();
-                List<ProviderInfo> nowAllP = new ArrayList<ProviderInfo>(nowall);// 当前全部
+                Set<ProviderInfo> nowAllP = new HashSet<ProviderInfo>(nowall);// 当前全部
 
                 // 比较当前的和最新的
-                ListDifference<ProviderInfo> diff = new ListDifference<ProviderInfo>(oldAllP, nowAllP);
+                SetDifference<ProviderInfo> diff = new SetDifference<ProviderInfo>(new HashSet<>(oldAllP), nowAllP);
                 List<ProviderInfo> needAdd = diff.getOnlyOnLeft(); // 需要新建
                 List<ProviderInfo> needDelete = diff.getOnlyOnRight(); // 需要删掉
                 if (!needAdd.isEmpty()) {
