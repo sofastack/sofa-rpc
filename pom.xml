@@ -77,7 +77,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>5.8.7</revision>
+        <revision>5.8.8</revision>
         <jmh.version>1.33</jmh.version>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
