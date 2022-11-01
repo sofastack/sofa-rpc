@@ -357,7 +357,7 @@ public class AbstractInterfaceConfigTest {
 
     @Test(expected = SofaRpcRuntimeException.class)
     public void testUniqueIdCheck() {
-        System.setProperty(RpcConfigKeys.UNIQUE_ID_VALIDATE.getKey(), "true");
+        System.setProperty(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK.getKey(), "true");
         TestConfig config = new TestConfig();
         config.setProxyClass(SampleService.class);
         String uniqueId = TestUtils.randomString() + "$";
@@ -366,7 +366,7 @@ public class AbstractInterfaceConfigTest {
 
     @Test
     public void testUniqueIdCheckDisabled() {
-        System.setProperty(RpcConfigKeys.UNIQUE_ID_VALIDATE.getKey(), "false");
+        System.setProperty(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK.getKey(), "false");
         TestConfig config = new TestConfig();
         config.setProxyClass(SampleService.class);
         String uniqueId = TestUtils.randomString() + "$";
