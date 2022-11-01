@@ -37,6 +37,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Extension("bytebuddy")
 public class BytebuddyProxy implements Proxy {
 
+    private boolean                        disableCache    = false;
+
+    {
+        String disableCacheStr = System.getProperty("sofa.rpc.proxy.disableCache");
+        if (disableCacheStr != null) {
+            disableCache = Boolean.parseBoolean(disableCacheStr);
+        }
+    }
+
     /**
      * 原始类和代理类的映射
      */
@@ -45,7 +54,10 @@ public class BytebuddyProxy implements Proxy {
     @Override
     public <T> T getProxy(Class<T> interfaceClass, Invoker proxyInvoker) {
 
-        Class<? extends T> cls = PROXY_CLASS_MAP.get(interfaceClass);
+        Class<? extends T> cls = null;
+        if (!disableCache) {
+            cls = PROXY_CLASS_MAP.get(interfaceClass);
+        }
         if (cls == null) {
             cls = new ByteBuddy()
                 .subclass(interfaceClass)
