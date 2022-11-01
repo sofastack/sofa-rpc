@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.std.config;
 
 import com.alipay.sofa.rpc.common.MockMode;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.utils.TestUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -352,6 +353,25 @@ public class AbstractInterfaceConfigTest {
         assertEquals((Integer) 10,methodConfigMap.get(anotherMethodName).getTimeout());;
 
 
+    }
+
+    @Test(expected = SofaRpcRuntimeException.class)
+    public void testUniqueIdCheck() {
+        System.setProperty(RpcConfigKeys.UNIQUE_ID_VALIDATE.getKey(), "true");
+        TestConfig config = new TestConfig();
+        config.setProxyClass(SampleService.class);
+        String uniqueId = TestUtils.randomString() + "$";
+        config.setUniqueId(uniqueId);
+    }
+
+    @Test
+    public void testUniqueIdCheckDisabled() {
+        System.setProperty(RpcConfigKeys.UNIQUE_ID_VALIDATE.getKey(), "false");
+        TestConfig config = new TestConfig();
+        config.setProxyClass(SampleService.class);
+        String uniqueId = TestUtils.randomString() + "$";
+        config.setUniqueId(uniqueId);
+        assertEquals(uniqueId, config.getUniqueId());
     }
 
     static class TestConfig extends AbstractInterfaceConfig {

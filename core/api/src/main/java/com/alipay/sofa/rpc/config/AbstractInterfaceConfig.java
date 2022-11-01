@@ -16,8 +16,10 @@
  */
 package com.alipay.sofa.rpc.config;
 
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.struct.Cache;
 import com.alipay.sofa.rpc.common.utils.BeanUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -222,6 +224,12 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected transient volatile ConfigListener      configListener;
 
     /**
+     * 是否需要对 unique-id 字符进行校验
+     */
+    private static boolean                           uniqueIdCheck    = SofaConfigs
+                                                                          .getOrDefault(RpcConfigKeys.UNIQUE_ID_VALIDATE);
+
+    /**
      * Gets proxy class.
      *
      * @return the proxyClass
@@ -313,7 +321,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return this unique id
      */
     public S setUniqueId(String uniqueId) {
-        checkNormalWithCommaColon("uniqueId", uniqueId);
+        if (uniqueIdCheck) {
+            checkNormalWithCommaColon("uniqueId", uniqueId);
+        }
         this.uniqueId = uniqueId;
         return castThis();
     }
