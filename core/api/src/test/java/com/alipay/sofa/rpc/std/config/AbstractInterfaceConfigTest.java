@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.std.config;
 
 import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
+import com.alipay.sofa.rpc.common.utils.ReflectUtils;
 import com.alipay.sofa.rpc.common.utils.TestUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -29,6 +30,8 @@ import com.alipay.sofa.rpc.std.sample.SampleService;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -356,8 +359,18 @@ public class AbstractInterfaceConfigTest {
     }
 
     @Test(expected = SofaRpcRuntimeException.class)
-    public void testUniqueIdCheck() {
-        System.setProperty(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK.getKey(), "true");
+    public void testUniqueIdCheck() throws NoSuchFieldException, IllegalAccessException {
+        try {
+            Field field = null;
+            field = AbstractInterfaceConfig.class.getDeclaredField("uniqueIdCheck");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, true);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
         TestConfig config = new TestConfig();
         config.setProxyClass(SampleService.class);
         String uniqueId = TestUtils.randomString() + "$";
@@ -366,8 +379,19 @@ public class AbstractInterfaceConfigTest {
 
     @Test
     public void testUniqueIdCheckDisabled() {
-        System.setProperty(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK.getKey(), "false");
         TestConfig config = new TestConfig();
+        try {
+            Field field = null;
+            field = AbstractInterfaceConfig.class.getDeclaredField("uniqueIdCheck");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, false);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
         config.setProxyClass(SampleService.class);
         String uniqueId = TestUtils.randomString() + "$";
         config.setUniqueId(uniqueId);

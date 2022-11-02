@@ -226,7 +226,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 是否需要对 unique-id 字符进行校验
      */
-    private static boolean                           uniqueIdCheck    = SofaConfigs
+    private static final boolean                     uniqueIdCheck    = SofaConfigs
                                                                           .getOrDefault(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK);
 
     /**
