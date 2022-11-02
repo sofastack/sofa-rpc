@@ -14,13 +14,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.client.aft;
-
-/*
+/**
  * Adaptive Fault Tolerance
- * 
- * Collection Data 
+ *
+ * Collection Data
  *     --> Build Measure Model
- *     --> Do Measure (Get Result) 
- *     --> Regulate measure result to do degrade or recover 
+ *     --> Do Measure (Get Result)
+ *     --> Regulate measure result to do degrade or recover
  */
+package com.alipay.sofa.rpc.client.aft;
