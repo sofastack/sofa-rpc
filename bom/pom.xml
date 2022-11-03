@@ -37,7 +37,7 @@
         <jackson.databind.version>2.9.10.8</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
-        <grpc.version>1.33.0</grpc.version>
+        <grpc.version>1.33.1</grpc.version>
 
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
