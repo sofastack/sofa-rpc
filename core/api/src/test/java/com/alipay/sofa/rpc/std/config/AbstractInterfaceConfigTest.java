@@ -362,7 +362,7 @@ public class AbstractInterfaceConfigTest {
     public void testUniqueIdCheck() throws NoSuchFieldException, IllegalAccessException {
         try {
             Field field = null;
-            field = AbstractInterfaceConfig.class.getDeclaredField("uniqueIdCheck");
+            field = AbstractInterfaceConfig.class.getDeclaredField("UNIQUE_ID_PATTERN_CHECK");
             field.setAccessible(true);
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
@@ -382,7 +382,7 @@ public class AbstractInterfaceConfigTest {
         TestConfig config = new TestConfig();
         try {
             Field field = null;
-            field = AbstractInterfaceConfig.class.getDeclaredField("uniqueIdCheck");
+            field = AbstractInterfaceConfig.class.getDeclaredField("UNIQUE_ID_PATTERN_CHECK");
             field.setAccessible(true);
             Field modifiersField = Field.class.getDeclaredField("modifiers");
             modifiersField.setAccessible(true);
