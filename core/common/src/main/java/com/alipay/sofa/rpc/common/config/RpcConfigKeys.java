@@ -102,13 +102,4 @@ public class RpcConfigKeys {
                                                                                         false,
                                                                                         "judge the generic object exception fields.",
                                                                                         new String[] { "sofa_rpc_generic_exception_fields" });
-
-    // config for unique-id check
-    public static final ConfigKey<Boolean>  UNIQUE_ID_PATTERN_CHECK             = ConfigKey
-                                                                                    .build(
-                                                                                        "sofa.rpc.uniqueId.pattern.check",
-                                                                                        true,
-                                                                                        false,
-                                                                                        "default sofa service and reference will check unique-id ,can disable the validation ",
-                                                                                        new String[] { "sofa_rpc_uniqueId_pattern_check" });
 }

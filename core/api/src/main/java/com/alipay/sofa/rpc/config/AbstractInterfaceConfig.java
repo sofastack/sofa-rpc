@@ -16,10 +16,8 @@
  */
 package com.alipay.sofa.rpc.config;
 
-import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.common.MockMode;
 import com.alipay.sofa.rpc.common.RpcConstants;
-import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.struct.Cache;
 import com.alipay.sofa.rpc.common.utils.BeanUtils;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -50,6 +48,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROXY;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_SERIALIZATION;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_UNIQUEID;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_VERSION;
+import static com.alipay.sofa.rpc.common.RpcOptions.RPC_UNIQUEID_PATTERN_CHECK;
 import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_REGISTER;
 import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_SUBSCRIBE;
 import static com.alipay.sofa.rpc.config.ConfigValueHelper.checkNormalWithCommaColon;
@@ -70,19 +69,19 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * The constant serialVersionUID.
      */
-    private static final long                        serialVersionUID        = -8738241729920479618L;
+    private static final long                        serialVersionUID = -8738241729920479618L;
 
     /**
      * slf4j Logger for this class
      */
-    private final static Logger                      LOGGER                  = LoggerFactory
-                                                                                 .getLogger(AbstractInterfaceConfig.class);
+    private final static Logger                      LOGGER           = LoggerFactory
+                                                                          .getLogger(AbstractInterfaceConfig.class);
 
     /*-------------配置项开始----------------*/
     /**
      * 应用信息
      */
-    protected ApplicationConfig                      application             = new ApplicationConfig();
+    protected ApplicationConfig                      application      = new ApplicationConfig();
 
     /**
      * 服务接口：做为服务唯一标识的组成部分<br>
@@ -97,7 +96,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      *
      * @see #interfaceId
      */
-    protected String                                 uniqueId                = getStringValue(DEFAULT_UNIQUEID);
+    protected String                                 uniqueId         = getStringValue(DEFAULT_UNIQUEID);
 
     /**
      * 过滤器配置实例
@@ -122,22 +121,22 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 默认序列化
      */
-    protected String                                 serialization           = getStringValue(DEFAULT_SERIALIZATION);
+    protected String                                 serialization    = getStringValue(DEFAULT_SERIALIZATION);
 
     /**
      * 是否注册，如果是false只订阅不注册
      */
-    protected boolean                                register                = getBooleanValue(SERVICE_REGISTER);
+    protected boolean                                register         = getBooleanValue(SERVICE_REGISTER);
 
     /**
      * 是否订阅服务
      */
-    protected boolean                                subscribe               = getBooleanValue(SERVICE_SUBSCRIBE);
+    protected boolean                                subscribe        = getBooleanValue(SERVICE_SUBSCRIBE);
 
     /**
      * 代理类型
      */
-    protected String                                 proxy                   = getStringValue(DEFAULT_PROXY);
+    protected String                                 proxy            = getStringValue(DEFAULT_PROXY);
 
     /**
      * 服务分组：不做为服务唯一标识的一部分
@@ -145,7 +144,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @deprecated 不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
     @Deprecated
-    protected String                                 group                   = getStringValue(DEFAULT_GROUP);
+    protected String                                 group            = getStringValue(DEFAULT_GROUP);
     /**
      * 服务版本：不做为服务唯一标识的一部分
      *
@@ -153,7 +152,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @see #uniqueId
      * @deprecated 从5.4.0开始，不再作为服务唯一标识，请直接使用 {@link #uniqueId} 代替
      */
-    protected String                                 version                 = getStringValue(DEFAULT_VERSION);
+    protected String                                 version          = getStringValue(DEFAULT_VERSION);
     /**
      * 结果缓存实现类
      */
@@ -211,7 +210,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 方法名称和方法参数配置的map，不需要遍历list
      */
-    protected transient volatile Map<String, Object> configValueCache        = null;
+    protected transient volatile Map<String, Object> configValueCache = null;
 
     /**
      * 代理接口类，和T对应，主要针对泛化调用
@@ -222,12 +221,6 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * 服务配置的listener
      */
     protected transient volatile ConfigListener      configListener;
-
-    /**
-     * 是否需要对 unique-id 字符进行校验
-     */
-    private static final boolean                     UNIQUE_ID_PATTERN_CHECK = SofaConfigs
-                                                                                 .getOrDefault(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK);
 
     /**
      * Gets proxy class.
@@ -321,7 +314,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return this unique id
      */
     public S setUniqueId(String uniqueId) {
-        if (UNIQUE_ID_PATTERN_CHECK) {
+        if (getBooleanValue(RPC_UNIQUEID_PATTERN_CHECK)) {
             checkNormalWithCommaColon("uniqueId", uniqueId);
         }
         this.uniqueId = uniqueId;

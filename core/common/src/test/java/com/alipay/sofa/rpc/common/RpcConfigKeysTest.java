@@ -43,7 +43,5 @@ public class RpcConfigKeysTest {
             SofaConfigs.getOrDefault(RpcConfigKeys.PRIVATE_KEY_PATH));
         Assert.assertEquals(RpcConfigKeys.TRIPLE_EXPOSE_OLD_UNIQUE_ID_SERVICE.getDefaultValue(),
             SofaConfigs.getOrDefault(RpcConfigKeys.TRIPLE_EXPOSE_OLD_UNIQUE_ID_SERVICE));
-        Assert.assertEquals(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK.getDefaultValue(),
-            SofaConfigs.getOrDefault(RpcConfigKeys.UNIQUE_ID_PATTERN_CHECK));
     }
 }

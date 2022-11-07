@@ -17,8 +17,8 @@
 package com.alipay.sofa.rpc.std.config;
 
 import com.alipay.sofa.rpc.common.MockMode;
-import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
-import com.alipay.sofa.rpc.common.utils.ReflectUtils;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.TestUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -30,8 +30,6 @@ import com.alipay.sofa.rpc.std.sample.SampleService;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -346,31 +344,20 @@ public class AbstractInterfaceConfigTest {
         assertEquals(newMethodValue, config.queryAttribute(methodKey));
         assertFalse(config.updateAttribute(methodKey, newMethodValue, true));
 
-
         String timeoutKey = "timeout";
         String anotherMethodName = randomString();
-        String methodTimeout ="." + anotherMethodName + "." + timeoutKey;
+        String methodTimeout = "." + anotherMethodName + "." + timeoutKey;
         assertTrue(config.updateAttribute(methodTimeout, "10", true));
 
         Map<String, MethodConfig> methodConfigMap = config.getMethods();
-        assertEquals((Integer) 10,methodConfigMap.get(anotherMethodName).getTimeout());;
-
+        assertEquals((Integer) 10, methodConfigMap.get(anotherMethodName).getTimeout());
+        ;
 
     }
 
     @Test(expected = SofaRpcRuntimeException.class)
     public void testUniqueIdCheck() throws NoSuchFieldException, IllegalAccessException {
-        try {
-            Field field = null;
-            field = AbstractInterfaceConfig.class.getDeclaredField("uniqueIdCheck");
-            field.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(null, true);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        RpcConfigs.putValue(RpcOptions.RPC_UNIQUEID_PATTERN_CHECK, true);
         TestConfig config = new TestConfig();
         config.setProxyClass(SampleService.class);
         String uniqueId = TestUtils.randomString() + "$";
@@ -379,19 +366,8 @@ public class AbstractInterfaceConfigTest {
 
     @Test
     public void testUniqueIdCheckDisabled() {
+        RpcConfigs.putValue(RpcOptions.RPC_UNIQUEID_PATTERN_CHECK, false);
         TestConfig config = new TestConfig();
-        try {
-            Field field = null;
-            field = AbstractInterfaceConfig.class.getDeclaredField("uniqueIdCheck");
-            field.setAccessible(true);
-            Field modifiersField = Field.class.getDeclaredField("modifiers");
-            modifiersField.setAccessible(true);
-            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
-            field.set(null, false);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
         config.setProxyClass(SampleService.class);
         String uniqueId = TestUtils.randomString() + "$";
         config.setUniqueId(uniqueId);
