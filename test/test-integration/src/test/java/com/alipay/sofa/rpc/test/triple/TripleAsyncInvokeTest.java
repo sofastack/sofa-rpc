@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.invoke;
+package com.alipay.sofa.rpc.test.triple;
 
 import com.alipay.sofa.rpc.api.future.SofaResponseFuture;
 import com.alipay.sofa.rpc.common.RpcConstants;

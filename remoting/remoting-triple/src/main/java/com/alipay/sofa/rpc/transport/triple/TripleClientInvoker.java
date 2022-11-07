@@ -35,6 +35,7 @@ import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
+import io.grpc.protobuf.ProtoUtils;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.StreamObserver;
 import triple.Request;
@@ -113,24 +114,8 @@ public class TripleClientInvoker implements TripleInvoker {
             sofaResponse.setAppResponse(appResponse);
             return sofaResponse;
         } else {
-            String serviceName = sofaRequest.getInterfaceName();
-            String methodName = sofaRequest.getMethodName();
-            MethodDescriptor.Marshaller<?> requestMarshaller = null;
-            MethodDescriptor.Marshaller<?> responseMarshaller = null;
-            requestMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Request.getDefaultInstance());
-            responseMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Response.getDefaultInstance());
-            String fullMethodName = generateFullMethodName(serviceName, methodName);
-            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor
-                .newBuilder()
-                .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-                .setFullMethodName(fullMethodName)
-                .setSampledToLocalTracing(true)
-                .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
-                .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
-                .build();
-
+            MethodDescriptor methodDescriptor = getMethodDescriptor(sofaRequest);
             Request request = getRequest(sofaRequest, serialization, serializer);
-
             Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
                 buildCustomCallOptions(sofaRequest, timeout), request);
 
@@ -140,9 +125,7 @@ public class TripleClientInvoker implements TripleInvoker {
             if (returnType != void.class) {
                 if (responseDate != null && responseDate.length > 0) {
                     Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
-                    Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate),
-                        returnType,
-                        null);
+                    Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
                     sofaResponse.setAppResponse(appResponse);
                 }
             }
@@ -168,7 +151,8 @@ public class TripleClientInvoker implements TripleInvoker {
                         Class<?> clazz = Class.forName(sofaRequest.getInterfaceName());
                         Method[] declaredMethods = clazz.getDeclaredMethods();
                         for (Method tempM : declaredMethods) {
-                            if (StringUtils.equals(tempM.getName(), sofaRequest.getMethodName()) && tempM.getParameterCount() == 2 && StringUtils.equals(tempM.getParameterTypes()[1].getCanonicalName(), StreamObserver.class.getCanonicalName())) {
+                            if (StringUtils.equals(tempM.getName(), sofaRequest.getMethodName()) && tempM.getParameterCount() == 2
+                                    && StringUtils.equals(tempM.getParameterTypes()[1].getCanonicalName(), StreamObserver.class.getCanonicalName())) {
                                 m = tempM;
                                 methodMap.put(sofaRequest.getMethodName(), m);
                                 break;
@@ -209,24 +193,8 @@ public class TripleClientInvoker implements TripleInvoker {
                 }
             });
         } else {
-            String serviceName = sofaRequest.getInterfaceName();
-            String methodName = sofaRequest.getMethodName();
-            MethodDescriptor.Marshaller<?> requestMarshaller = null;
-            MethodDescriptor.Marshaller<?> responseMarshaller = null;
-            requestMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Request.getDefaultInstance());
-            responseMarshaller = io.grpc.protobuf.ProtoUtils.marshaller(Response.getDefaultInstance());
-            String fullMethodName = generateFullMethodName(serviceName, methodName);
-            MethodDescriptor methodDescriptor = io.grpc.MethodDescriptor
-                    .newBuilder()
-                    .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-                    .setFullMethodName(fullMethodName)
-                    .setSampledToLocalTracing(true)
-                    .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
-                    .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
-                    .build();
-
+            MethodDescriptor methodDescriptor = getMethodDescriptor(sofaRequest);
             Request request = getRequest(sofaRequest, serialization, serializer);
-
             ClientCalls.asyncUnaryCall(channel.newCall(methodDescriptor, buildCustomCallOptions(sofaRequest, timeout)), request, new StreamObserver<Object>() {
                 @Override
                 public void onNext(Object o) {
@@ -237,9 +205,7 @@ public class TripleClientInvoker implements TripleInvoker {
                     if (returnType != void.class) {
                         if (responseDate != null && responseDate.length > 0) {
                             Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
-                            appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate),
-                                    returnType,
-                                    null);
+                            appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
                         }
                     }
                     if (sofaResponseCallback != null) {
@@ -270,6 +236,23 @@ public class TripleClientInvoker implements TripleInvoker {
             });
         }
         return future;
+    }
+
+    private MethodDescriptor getMethodDescriptor(SofaRequest sofaRequest) {
+        String serviceName = sofaRequest.getInterfaceName();
+        String methodName = sofaRequest.getMethodName();
+        MethodDescriptor.Marshaller<?> requestMarshaller = ProtoUtils.marshaller(Request.getDefaultInstance());
+        MethodDescriptor.Marshaller<?> responseMarshaller = ProtoUtils.marshaller(Response.getDefaultInstance());
+        String fullMethodName = generateFullMethodName(serviceName, methodName);
+        MethodDescriptor methodDescriptor = MethodDescriptor
+                .newBuilder()
+                .setType(MethodDescriptor.MethodType.UNARY)
+                .setFullMethodName(fullMethodName)
+                .setSampledToLocalTracing(true)
+                .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
+                .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
+                .build();
+        return methodDescriptor;
     }
 
     public static Request getRequest(SofaRequest sofaRequest, String serialization, Serializer serializer) {
