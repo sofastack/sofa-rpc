@@ -48,6 +48,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROXY;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_SERIALIZATION;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_UNIQUEID;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_VERSION;
+import static com.alipay.sofa.rpc.common.RpcOptions.RPC_UNIQUEID_PATTERN_CHECK;
 import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_REGISTER;
 import static com.alipay.sofa.rpc.common.RpcOptions.SERVICE_SUBSCRIBE;
 import static com.alipay.sofa.rpc.config.ConfigValueHelper.checkNormalWithCommaColon;
@@ -313,7 +314,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return this unique id
      */
     public S setUniqueId(String uniqueId) {
-        checkNormalWithCommaColon("uniqueId", uniqueId);
+        if (getBooleanValue(RPC_UNIQUEID_PATTERN_CHECK)) {
+            checkNormalWithCommaColon("uniqueId", uniqueId);
+        }
         this.uniqueId = uniqueId;
         return castThis();
     }
