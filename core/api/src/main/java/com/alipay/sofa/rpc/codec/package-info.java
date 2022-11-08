@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec;
-
 /**
  * 主要包含了序列化和压缩算法。注意：不是数据协议
  */
+package com.alipay.sofa.rpc.codec;
+
