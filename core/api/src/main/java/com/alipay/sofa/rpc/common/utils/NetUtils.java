@@ -68,7 +68,7 @@ public class NetUtils {
     }
 
     /**
-     * 判断端口是否随机端口 小于0表示随机
+     * 判断端口是否随机端口, -1 表示随机
      *
      * @param port 端口
      * @return 是否随机端口
