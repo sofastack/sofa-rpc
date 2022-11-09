@@ -72,6 +72,8 @@ public class TripleClientInvoker implements TripleInvoker {
     private Serializer          serializer;
     private String              serialization;
 
+    private Map<String, Method> methodMap = new ConcurrentHashMap<>();
+
     public TripleClientInvoker(ConsumerConfig consumerConfig, Channel channel) {
         this.channel = channel;
         this.consumerConfig = consumerConfig;
@@ -152,8 +154,6 @@ public class TripleClientInvoker implements TripleInvoker {
 
     }
 
-    private Map<String, Method> methodMap = new ConcurrentHashMap<>();
-
     @Override
     public ResponseFuture asyncInvoke(SofaRequest sofaRequest, int timeout) throws Exception {
         SofaResponseCallback sofaResponseCallback = sofaRequest.getSofaResponseCallback();
@@ -162,7 +162,7 @@ public class TripleClientInvoker implements TripleInvoker {
         if (!useGeneric) {
             Method m = methodMap.get(sofaRequest.getMethodName());
             if (m == null) {
-                synchronized (sofaRequest.getInterfaceName()) {
+                synchronized (this) {
                     m = methodMap.get(sofaRequest.getMethodName());
                     if (m == null) {
                         Class<?> clazz = Class.forName(sofaRequest.getInterfaceName());
