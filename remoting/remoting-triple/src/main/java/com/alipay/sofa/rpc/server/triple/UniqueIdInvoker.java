@@ -39,19 +39,22 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class UniqueIdInvoker implements Invoker {
 
-    private ReadWriteLock        rwLock;
+    private ReadWriteLock               rwLock;
 
-    private Lock                 readLock;
+    private Lock                        readLock;
 
-    private Lock                 writeLook;
+    private Lock                        writeLook;
 
-    private Map<String, Invoker> uniqueIdInvokerMap;
+    private Map<String, Invoker>        uniqueIdInvokerMap;
+
+    private Map<String, ProviderConfig> uniqueIdProviderConfigMap;
 
     public UniqueIdInvoker() {
         this.rwLock = new ReentrantReadWriteLock();
         this.readLock = this.rwLock.readLock();
         this.writeLook = this.rwLock.writeLock();
         this.uniqueIdInvokerMap = new HashMap<>();
+        this.uniqueIdProviderConfigMap = new HashMap<>();
     }
 
     /**
@@ -65,7 +68,8 @@ public class UniqueIdInvoker implements Invoker {
         this.writeLook.lock();
         try {
             String uniqueId = this.getUniqueId(providerConfig);
-            return this.uniqueIdInvokerMap.putIfAbsent(uniqueId, invoker) == null;
+            return this.uniqueIdInvokerMap.putIfAbsent(uniqueId, invoker) == null &&
+                this.uniqueIdProviderConfigMap.putIfAbsent(uniqueId, providerConfig) == null;
         } finally {
             this.writeLook.unlock();
         }
@@ -81,7 +85,8 @@ public class UniqueIdInvoker implements Invoker {
         this.writeLook.lock();
         try {
             String uniqueId = this.getUniqueId(providerConfig);
-            return this.uniqueIdInvokerMap.remove(uniqueId) != null;
+            return this.uniqueIdInvokerMap.remove(uniqueId) != null &&
+                this.uniqueIdProviderConfigMap.remove(uniqueId) != null;
         } finally {
             this.writeLook.unlock();
         }
@@ -94,6 +99,15 @@ public class UniqueIdInvoker implements Invoker {
         this.readLock.lock();
         try {
             return !this.uniqueIdInvokerMap.isEmpty();
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
+    public ProviderConfig getProviderConfigByUniqueId(String uniqueId) {
+        this.readLock.lock();
+        try {
+            return uniqueIdProviderConfigMap.get(uniqueId);
         } finally {
             this.readLock.unlock();
         }

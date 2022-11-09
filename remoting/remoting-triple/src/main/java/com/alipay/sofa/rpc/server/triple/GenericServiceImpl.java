@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -52,18 +53,11 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
 
-    protected Invoker           invoker;
-    protected ProviderConfig    providerConfig;
+    protected UniqueIdInvoker   invoker;
 
-    public GenericServiceImpl(Invoker invoker, ProviderConfig providerConfig) {
+    public GenericServiceImpl(UniqueIdInvoker invoker) {
         super();
         this.invoker = invoker;
-        this.providerConfig = providerConfig;
-        String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-        // 缓存接口的方法
-        for (Method m : providerConfig.getProxyClass().getMethods()) {
-            ReflectCache.putOverloadMethodCache(key, m);
-        }
     }
 
     @Override
@@ -74,8 +68,9 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
         String methodName = sofaRequest.getMethodName();
         try {
+            ProviderConfig providerConfig = invoker.getProviderConfigByUniqueId(getUniqueIdFromInvokeContext());
             String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-            ClassLoader interfaceClassLoader = providerConfig.getProxyClass().getClassLoader();
+            ClassLoader interfaceClassLoader = ReflectCache.getServiceClassLoader(key);
             Thread.currentThread().setContextClassLoader(interfaceClassLoader);
 
             Class[] argTypes = getArgTypes(request);
@@ -144,5 +139,10 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
                 null);
         }
         return args;
+    }
+
+    private String getUniqueIdFromInvokeContext() {
+        String uniqueId = (String) RpcInvokeContext.getContext().get(TripleContants.SOFA_UNIQUE_ID);
+        return uniqueId == null ? "" : uniqueId;
     }
 }
