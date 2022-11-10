@@ -110,7 +110,7 @@ public class BaggageOnewayTest extends BaggageBaseTest {
         String ret = service.hello();
         Assert.assertNull(ret);
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -130,7 +130,7 @@ public class BaggageOnewayTest extends BaggageBaseTest {
         ret = service.hello();
         Assert.assertNull(ret);
         try {
-            Thread.sleep(1000);
+            Thread.sleep(2000);
         } catch (Exception e) {
             e.printStackTrace();
         }
