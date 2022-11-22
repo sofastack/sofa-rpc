@@ -29,6 +29,7 @@
         <swagger.version>1.5.18</swagger.version>
         <asm.version>7.0</asm.version>
         <guava.version>27.0-jre</guava.version>
+        <prometheus.client.version>0.16.0</prometheus.client.version>
         <!-- serialization -->
         <hessian.version>3.3.13</hessian.version>
         <thrift.version>0.9.2</thrift.version>
@@ -542,6 +543,18 @@
                 <groupId>com.tencent.polaris</groupId>
                 <artifactId>polaris-test-mock-discovery</artifactId>
                 <version>${polaris.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- prometheus client -->
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient</artifactId>
+                <version>${prometheus.client.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.prometheus</groupId>
+                <artifactId>simpleclient_httpserver</artifactId>
+                <version>${prometheus.client.version}</version>
                 <scope>test</scope>
             </dependency>
         </dependencies>
