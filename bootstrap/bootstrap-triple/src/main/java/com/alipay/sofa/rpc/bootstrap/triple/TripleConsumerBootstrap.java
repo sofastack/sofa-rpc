@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.bootstrap.triple;
 
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.bootstrap.DefaultConsumerBootstrap;
+import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
@@ -47,5 +49,10 @@ public class TripleConsumerBootstrap<T> extends DefaultConsumerBootstrap<T> {
 
         this.getConsumerConfig().setVirtualInterfaceId(serviceName);
         return super.refer();
+    }
+
+    @Override
+    protected ClientProxyInvoker buildClientProxyInvoker(ConsumerBootstrap bootstrap) {
+        return new TripleClientProxyInvoker(bootstrap);
     }
 }

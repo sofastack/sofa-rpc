@@ -204,9 +204,10 @@ public class TripleTracerAdapter {
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
             }
 
+            String uniqueId = "";
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
-                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID,
-                    requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION));
+                uniqueId = requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION);
+                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID, uniqueId);
             } else {
                 RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID, "");
             }
@@ -262,7 +263,7 @@ public class TripleTracerAdapter {
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 //FIXME modify the dep relation
-                serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
+                serverSpan.setTag("service", buildLogServiceName(sofaRequest.getInterfaceName(), uniqueId));
                 serverSpan.setTag("method", methodName);
                 // 从请求里获取ConsumerTracerFilter额外传递的信息
                 serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
@@ -272,6 +273,11 @@ public class TripleTracerAdapter {
         } catch (Throwable e) {
             LOGGER.warn("triple serverReceived tracer error", e);
         }
+    }
+
+    private static String buildLogServiceName(String interfaceName, String uniqueId) {
+        StringBuffer stringBuffer = new StringBuffer(interfaceName).append(":1.0");
+        return StringUtils.isEmpty(uniqueId) ? stringBuffer.toString() : stringBuffer.append(uniqueId).toString();
     }
 
     /**
