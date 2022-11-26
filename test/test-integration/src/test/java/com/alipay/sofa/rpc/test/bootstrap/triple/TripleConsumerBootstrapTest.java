@@ -38,7 +38,7 @@ public class TripleConsumerBootstrapTest {
     public void test() {
         ConsumerConfig<GenericService> consumerConfig = new ConsumerConfig();
         consumerConfig.setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE);
-        consumerConfig.setInterfaceId("test");
+        consumerConfig.setInterfaceId("testInterfaceId");
         consumerConfig.setUniqueId("uniqueId");
         consumerConfig.setGeneric(true);
         consumerConfig.setMock(true);
@@ -50,7 +50,7 @@ public class TripleConsumerBootstrapTest {
         TripleClientProxyInvoker tripleClientProxyInvoker = new TripleClientProxyInvoker(consumerBootstrap);
         SofaRequest sofaRequest = new SofaRequest();
         tripleClientProxyInvoker.invoke(sofaRequest);
-        Assert.assertEquals("test:1.0:uniqueId", sofaRequest.getTargetServiceUniqueName());
+        Assert.assertEquals("testInterfaceId:1.0:uniqueId", sofaRequest.getTargetServiceUniqueName());
     }
 
 }

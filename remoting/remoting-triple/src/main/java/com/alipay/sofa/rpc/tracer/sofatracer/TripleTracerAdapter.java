@@ -276,8 +276,8 @@ public class TripleTracerAdapter {
     }
 
     private static String buildLogServiceName(String interfaceName, String uniqueId) {
-        StringBuffer stringBuffer = new StringBuffer(interfaceName).append(":1.0");
-        return StringUtils.isEmpty(uniqueId) ? stringBuffer.toString() : stringBuffer.append(uniqueId).toString();
+        StringBuffer buffer = new StringBuffer(interfaceName).append(":1.0");
+        return StringUtils.isEmpty(uniqueId) ? buffer.toString() : buffer.append(":").append(uniqueId).toString();
     }
 
     /**
