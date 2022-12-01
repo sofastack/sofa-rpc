@@ -18,18 +18,13 @@ package com.alipay.sofa.rpc.server.triple;
 
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
-import com.alipay.sofa.rpc.config.ProviderConfig;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
@@ -68,16 +63,14 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
         String methodName = sofaRequest.getMethodName();
         try {
-            ProviderConfig providerConfig = invoker.getProviderConfigByUniqueId(getUniqueIdFromInvokeContext());
-            String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-            ClassLoader interfaceClassLoader = ReflectCache.getServiceClassLoader(key);
-            Thread.currentThread().setContextClassLoader(interfaceClassLoader);
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader();
+            if (serviceClassLoader != null) {
+                Thread.currentThread().setContextClassLoader(serviceClassLoader);
+            }
 
+            Method declaredMethod = invoker.getDeclaredMethod(sofaRequest, request);
             Class[] argTypes = getArgTypes(request);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
-
-            Method declaredMethod = ReflectCache.getOverloadMethodCache(key, methodName, request.getArgTypesList()
-                .toArray(new String[0]));
             Object[] invokeArgs = getInvokeArgs(request, argTypes, serializer);
 
             // fill sofaRequest
@@ -139,10 +132,5 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
                 null);
         }
         return args;
-    }
-
-    private String getUniqueIdFromInvokeContext() {
-        String uniqueId = (String) RpcInvokeContext.getContext().get(TripleContants.SOFA_UNIQUE_ID);
-        return uniqueId == null ? "" : uniqueId;
     }
 }

@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
@@ -24,7 +26,10 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
+import triple.Request;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -39,22 +44,19 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class UniqueIdInvoker implements Invoker {
 
-    private ReadWriteLock               rwLock;
+    private ReadWriteLock        rwLock;
 
-    private Lock                        readLock;
+    private Lock                 readLock;
 
-    private Lock                        writeLook;
+    private Lock                 writeLook;
 
-    private Map<String, Invoker>        uniqueIdInvokerMap;
-
-    private Map<String, ProviderConfig> uniqueIdProviderConfigMap;
+    private Map<String, Invoker> uniqueIdInvokerMap;
 
     public UniqueIdInvoker() {
         this.rwLock = new ReentrantReadWriteLock();
         this.readLock = this.rwLock.readLock();
         this.writeLook = this.rwLock.writeLock();
         this.uniqueIdInvokerMap = new HashMap<>();
-        this.uniqueIdProviderConfigMap = new HashMap<>();
     }
 
     /**
@@ -68,8 +70,7 @@ public class UniqueIdInvoker implements Invoker {
         this.writeLook.lock();
         try {
             String uniqueId = this.getUniqueId(providerConfig);
-            return this.uniqueIdInvokerMap.putIfAbsent(uniqueId, invoker) == null &&
-                this.uniqueIdProviderConfigMap.putIfAbsent(uniqueId, providerConfig) == null;
+            return this.uniqueIdInvokerMap.putIfAbsent(uniqueId, invoker) == null;
         } finally {
             this.writeLook.unlock();
         }
@@ -85,8 +86,7 @@ public class UniqueIdInvoker implements Invoker {
         this.writeLook.lock();
         try {
             String uniqueId = this.getUniqueId(providerConfig);
-            return this.uniqueIdInvokerMap.remove(uniqueId) != null &&
-                this.uniqueIdProviderConfigMap.remove(uniqueId) != null;
+            return this.uniqueIdInvokerMap.remove(uniqueId) != null;
         } finally {
             this.writeLook.unlock();
         }
@@ -99,15 +99,6 @@ public class UniqueIdInvoker implements Invoker {
         this.readLock.lock();
         try {
             return !this.uniqueIdInvokerMap.isEmpty();
-        } finally {
-            this.readLock.unlock();
-        }
-    }
-
-    public ProviderConfig getProviderConfigByUniqueId(String uniqueId) {
-        this.readLock.lock();
-        try {
-            return uniqueIdProviderConfigMap.get(uniqueId);
         } finally {
             this.readLock.unlock();
         }
@@ -173,6 +164,41 @@ public class UniqueIdInvoker implements Invoker {
             }
 
             return invoker;
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
+    public ClassLoader getServiceClassLoader() {
+        String uniqueName = this.getCurrentUniqueName();
+        if (uniqueName == null) {
+            return null;
+        }
+        return ReflectCache.getServiceClassLoader(uniqueName);
+    }
+
+    public Method getDeclaredMethod(SofaRequest sofaRequest, Request request) {
+        String uniqueName = this.getCurrentUniqueName();
+        if (uniqueName == null) {
+            return null;
+        }
+        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), request
+            .getArgTypesList()
+            .toArray(new String[0]));
+    }
+
+    private String getCurrentUniqueName() {
+        this.readLock.lock();
+        try {
+            Invoker invoker = uniqueIdInvokerMap.get(getUniqueIdFromInvokeContext());
+            ProviderConfig providerConfig = null;
+            if (invoker instanceof ProviderProxyInvoker) {
+                providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
+            }
+            if (providerConfig == null) {
+                return null;
+            }
+            return ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         } finally {
             this.readLock.unlock();
         }
