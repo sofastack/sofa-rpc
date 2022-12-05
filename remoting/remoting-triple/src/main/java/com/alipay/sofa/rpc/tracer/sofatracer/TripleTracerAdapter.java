@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -263,7 +264,8 @@ public class TripleTracerAdapter {
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 //FIXME modify the dep relation
-                serverSpan.setTag("service", buildLogServiceName(sofaRequest.getInterfaceName(), uniqueId));
+                serverSpan.setTag("service",
+                    ConfigUniqueNameGenerator.getUniqueName(sofaRequest.getInterfaceName(), null, uniqueId));
                 serverSpan.setTag("method", methodName);
                 // 从请求里获取ConsumerTracerFilter额外传递的信息
                 serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));
@@ -273,11 +275,6 @@ public class TripleTracerAdapter {
         } catch (Throwable e) {
             LOGGER.warn("triple serverReceived tracer error", e);
         }
-    }
-
-    private static String buildLogServiceName(String interfaceName, String uniqueId) {
-        StringBuffer buffer = new StringBuffer(interfaceName).append(":1.0");
-        return StringUtils.isEmpty(uniqueId) ? buffer.toString() : buffer.append(":").append(uniqueId).toString();
     }
 
     /**
