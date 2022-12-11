@@ -14,29 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.common;
+package com.alipay.sofa.rpc.bootstrap.triple;
+
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.bootstrap.DefaultClientProxyInvoker;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 
 /**
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
- * @since 5.1.0
- * //FIXME 每次发布修改
+ * @author Even
+ * @date 2022/11/17 10:08 PM
  */
-public final class Version {
+public class TripleClientProxyInvoker extends DefaultClientProxyInvoker {
 
     /**
-     * 当前RPC版本，例如：5.6.7
+     * 构造执行链
+     *
+     * @param bootstrap 调用端配置
      */
-    public static final String VERSION       = "5.9.1";
+    public TripleClientProxyInvoker(ConsumerBootstrap bootstrap) {
+        super(bootstrap);
+    }
 
-    /**
-     * 当前RPC版本，例如： 5.6.7 对应 50607
-     */
-    public static final int    RPC_VERSION   = 50901;
-
-    /**
-     * 当前Build版本，每次发布修改
-     */
-    public static final String BUILD_VERSION = "5.9.1_20221207115251";
+    @Override
+    protected void cacheCommonData() {
+        // 缓存数据
+        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
+        this.serializeType = parseSerializeType(consumerConfig.getSerialization());
+    }
 
 }
