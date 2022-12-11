@@ -76,6 +76,11 @@ public class ConfigUniqueNameGeneratorTest extends AbstractMockitoTest {
         when(config.getUniqueId()).thenReturn(uniqueId);
         when(config.getVersion()).thenReturn(version);
         Assert.assertEquals("interfaceId:version:uniqueId", ConfigUniqueNameGenerator.getUniqueName(config));
+
+        Assert.assertEquals("interfaceId:version:uniqueId",
+            ConfigUniqueNameGenerator.getUniqueName(interfaceId, version, uniqueId));
+        Assert.assertEquals("interfaceId:1.0:uniqueId",
+            ConfigUniqueNameGenerator.getUniqueName(interfaceId, null, uniqueId));
     }
 
     @Test
