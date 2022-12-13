@@ -18,7 +18,7 @@
         <servlet.version>2.5</servlet.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
         <jaxrs.api.version>1.0.2.Final</jaxrs.api.version>
-        <cxf.version>3.0.14</cxf.version>
+        <cxf.version>3.4.10</cxf.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
         <curator.version>4.0.1</curator.version>
         <opentracing.version>0.22.0</opentracing.version>
