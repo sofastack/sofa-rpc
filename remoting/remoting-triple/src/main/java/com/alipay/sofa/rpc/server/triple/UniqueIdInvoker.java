@@ -169,34 +169,28 @@ public class UniqueIdInvoker implements Invoker {
         }
     }
 
-    public ClassLoader getServiceClassLoader() {
-        String uniqueName = this.getCurrentUniqueName();
-        if (uniqueName == null) {
-            return null;
-        }
+    public ClassLoader getServiceClassLoader(SofaRequest sofaRequest) {
+        String uniqueName = this.getServiceUniqueName(sofaRequest);
         return ReflectCache.getServiceClassLoader(uniqueName);
     }
 
     public Method getDeclaredMethod(SofaRequest sofaRequest, Request request) {
-        String uniqueName = this.getCurrentUniqueName();
-        if (uniqueName == null) {
-            return null;
-        }
+        String uniqueName = this.getServiceUniqueName(sofaRequest);
         return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), request
             .getArgTypesList()
             .toArray(new String[0]));
     }
 
-    private String getCurrentUniqueName() {
+    private String getServiceUniqueName(SofaRequest sofaRequest) {
         this.readLock.lock();
         try {
-            Invoker invoker = uniqueIdInvokerMap.get(getUniqueIdFromInvokeContext());
+            Invoker invoker = this.findInvoker(sofaRequest.getInterfaceName(), getUniqueIdFromInvokeContext());
             ProviderConfig providerConfig = null;
             if (invoker instanceof ProviderProxyInvoker) {
                 providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
             }
             if (providerConfig == null) {
-                return null;
+                throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find providerConfig");
             }
             return ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         } finally {

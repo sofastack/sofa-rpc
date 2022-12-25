@@ -63,12 +63,14 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
         String methodName = sofaRequest.getMethodName();
         try {
-            ClassLoader serviceClassLoader = invoker.getServiceClassLoader();
-            if (serviceClassLoader != null) {
-                Thread.currentThread().setContextClassLoader(serviceClassLoader);
-            }
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
+            Thread.currentThread().setContextClassLoader(serviceClassLoader);
 
             Method declaredMethod = invoker.getDeclaredMethod(sofaRequest, request);
+            if (declaredMethod == null) {
+                throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
+                    methodName);
+            }
             Class[] argTypes = getArgTypes(request);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
             Object[] invokeArgs = getInvokeArgs(request, argTypes, serializer);
