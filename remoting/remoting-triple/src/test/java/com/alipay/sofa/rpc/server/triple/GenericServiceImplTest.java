@@ -23,8 +23,8 @@ import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.filter.ProviderInvoker;
 import com.alipay.sofa.rpc.message.MessageBuilder;
+import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.alipay.sofa.rpc.transport.triple.TripleClientInvoker;
@@ -60,7 +60,7 @@ public class GenericServiceImplTest {
         for (Method m : providerConfig.getProxyClass().getMethods()) {
             ReflectCache.putOverloadMethodCache(key, m);
         }
-        ProviderInvoker<HelloService> invoker = new ProviderInvoker<>(providerConfig);
+        ProviderProxyInvoker invoker = new ProviderProxyInvoker(providerConfig);
         UniqueIdInvoker uniqueIdInvoker = new UniqueIdInvoker();
         uniqueIdInvoker.registerInvoker(providerConfig, invoker);
         genericService = new GenericServiceImpl(uniqueIdInvoker);
