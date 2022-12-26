@@ -1,0 +1,3 @@
+sofaRpcSerializationRegister=com.alipay.sofa.rpc.test.TestSofaRpcSerializationRegister
+rejectSrc=com.alipay.sofa.rpc.test.TestRejectSerializationRegisterSrc
+rejectTarget=com.alipay.sofa.rpc.test.TestRejectSerializationRegisterTarget

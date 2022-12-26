@@ -1,0 +1,1 @@
+sofaRpcSerializationRegister=com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister
