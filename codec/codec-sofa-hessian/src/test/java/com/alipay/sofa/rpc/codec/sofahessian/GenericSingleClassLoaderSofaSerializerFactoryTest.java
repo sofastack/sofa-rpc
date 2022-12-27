@@ -39,6 +39,7 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.clearCacheDeserializerMap;
 import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.setGenericThrowException;
 
 /**
@@ -116,6 +117,7 @@ public class GenericSingleClassLoaderSofaSerializerFactoryTest {
             Assert.assertEquals("MockError", ((MockError) result).getMessage());
         } finally {
             setGenericThrowException(false);
+            clearCacheDeserializerMap();
         }
     }
 }

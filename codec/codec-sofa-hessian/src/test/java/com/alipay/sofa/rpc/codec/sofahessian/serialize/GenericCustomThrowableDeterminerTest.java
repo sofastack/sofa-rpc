@@ -17,11 +17,15 @@
 package com.alipay.sofa.rpc.codec.sofahessian.serialize;
 
 import com.alipay.hessian.generic.model.GenericObject;
+import com.alipay.sofa.rpc.codec.sofahessian.GenericMultipleClassLoaderSofaSerializerFactory;
+import com.alipay.sofa.rpc.codec.sofahessian.GenericSingleClassLoaderSofaSerializerFactory;
+import com.caucho.hessian.io.Deserializer;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminer.judgeCustomThrowableForGenericObject;
 
@@ -62,6 +66,30 @@ public class GenericCustomThrowableDeterminerTest {
             modifiersField.setAccessible(true);
             modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, enabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void clearCacheDeserializerMap() {
+        try {
+            Field field = GenericMultipleClassLoaderSofaSerializerFactory.class.getDeclaredField("DESERIALIZER_MAP");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, new ConcurrentHashMap<String, Deserializer>());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Field field = GenericSingleClassLoaderSofaSerializerFactory.class.getDeclaredField("DESERIALIZER_MAP");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, new ConcurrentHashMap<String, Deserializer>());
         } catch (Exception e) {
             e.printStackTrace();
         }
