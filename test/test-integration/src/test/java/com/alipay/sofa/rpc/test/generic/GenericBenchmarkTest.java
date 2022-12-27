@@ -48,25 +48,25 @@ public class GenericBenchmarkTest extends ActivelyDestroyTest {
         try {
             // 发布服务
             ServerConfig serverConfig2 = new ServerConfig()
-                    .setPort(21234)
-                    .setCoreThreads(500)
-                    .setMaxThreads(500)
-                    .setDaemon(false);
+                .setPort(21234)
+                .setCoreThreads(500)
+                .setMaxThreads(500)
+                .setDaemon(false);
 
             // C服务的服务端
             ProviderConfig<TestInterface> CProvider = new ProviderConfig<TestInterface>()
-                    .setInterfaceId(TestInterface.class.getName())
-                    .setRef(new TestClass())
-                    .setServer(serverConfig2);
+                .setInterfaceId(TestInterface.class.getName())
+                .setRef(new TestClass())
+                .setServer(serverConfig2);
             CProvider.export();
 
             // 引用服务
             ConsumerConfig<GenericService> BConsumer = new ConsumerConfig<GenericService>()
-                    .setInterfaceId(TestInterface.class.getName())
-                    .setGeneric(true)
-                    .setDirectUrl("bolt://127.0.0.1:21234")
-                    .setTimeout(3000)
-                    .setRetries(2);
+                .setInterfaceId(TestInterface.class.getName())
+                .setGeneric(true)
+                .setDirectUrl("bolt://127.0.0.1:21234")
+                .setTimeout(3000)
+                .setRetries(2);
             GenericService proxy = BConsumer.refer();
 
             setGenericThrowException(false);
