@@ -18,6 +18,8 @@ package com.alipay.sofa.rpc.test.generic;
 
 import com.alipay.hessian.generic.model.GenericObject;
 import com.alipay.sofa.rpc.api.GenericService;
+import com.alipay.sofa.rpc.codec.sofahessian.GenericMultipleClassLoaderSofaSerializerFactory;
+import com.alipay.sofa.rpc.codec.sofahessian.GenericSingleClassLoaderSofaSerializerFactory;
 import com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminer;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -26,14 +28,17 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.generic.bean.Job;
 import com.alipay.sofa.rpc.test.generic.bean.People;
+import com.caucho.hessian.io.Deserializer;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
 import static org.junit.Assert.assertEquals;
@@ -70,21 +75,34 @@ public class GenericBenchmarkTest extends ActivelyDestroyTest {
             GenericService proxy = BConsumer.refer();
 
             setGenericThrowException(false);
-            long[] disabledData = benchmark(proxy);
+            clearCacheDeserializerMap();
+            benchmark(proxy, 10, 1000);
+
             setGenericThrowException(true);
-            long[] enabledData = benchmark(proxy);
+            clearCacheDeserializerMap();
+            benchmark(proxy, 10, 1000);
+
+            setGenericThrowException(false);
+            clearCacheDeserializerMap();
+            long[] disabledData = benchmark(proxy, 10, 1000);
+
+            setGenericThrowException(true);
+            clearCacheDeserializerMap();
+            long[] enabledData = benchmark(proxy, 10, 1000);
+
+            System.out.println("disabledData===>" + Arrays.toString(disabledData));
+            System.out.println(" enabledData===>" + Arrays.toString(enabledData));
             Assert.assertEquals(disabledData[0], enabledData[0]); //count
-            Assert.assertTrue(Math.abs(disabledData[1] - enabledData[1]) <= 1); //P50
-            Assert.assertTrue(Math.abs(disabledData[2] - enabledData[2]) <= 1); //P90
-            Assert.assertTrue(Math.abs(disabledData[3] - enabledData[3]) <= 1); //P99
+            Assert.assertTrue(disabledData[1] - enabledData[1] <= 2); //P50
+            Assert.assertTrue(disabledData[2] - enabledData[2] <= 5); //P90
+            Assert.assertTrue(disabledData[3] - enabledData[3] <= 10); //P99
         } finally {
             setGenericThrowException(false);
+            clearCacheDeserializerMap();
         }
     }
 
-    private long[] benchmark(GenericService proxy) throws InterruptedException {
-        int threadNum = 10;
-        int countNum = 1000;
+    private long[] benchmark(GenericService proxy, int threadNum, int countNum) throws InterruptedException {
         CountDownLatch countDownLatch = new CountDownLatch(threadNum);
 
         List<Long> synchronizedList = Collections.synchronizedList(new ArrayList<>(threadNum * countNum / 2));
@@ -150,6 +168,30 @@ public class GenericBenchmarkTest extends ActivelyDestroyTest {
             modifiersField.setAccessible(true);
             modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, enabled);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void clearCacheDeserializerMap() {
+        try {
+            Field field = GenericMultipleClassLoaderSofaSerializerFactory.class.getDeclaredField("DESERIALIZER_MAP");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, new ConcurrentHashMap<String, Deserializer>());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Field field = GenericSingleClassLoaderSofaSerializerFactory.class.getDeclaredField("DESERIALIZER_MAP");
+            field.setAccessible(true);
+            Field modifiersField = Field.class.getDeclaredField("modifiers");
+            modifiersField.setAccessible(true);
+            modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+            field.set(null, new ConcurrentHashMap<String, Deserializer>());
         } catch (Exception e) {
             e.printStackTrace();
         }
