@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension(value = "sofaRpcSerializationRegister")
-public class SofaRpcSerializationRegister extends BoltSerializationRegister {
+public class SofaRpcSerializationRegister extends AbstractSerializationRegister {
 
     private static final SofaRpcSerialization RPC_SERIALIZATION = new SofaRpcSerialization();
 
@@ -37,9 +37,7 @@ public class SofaRpcSerializationRegister extends BoltSerializationRegister {
 
     @Deprecated
     public static void registerCustomSerializer() {
-        //        if (registered.compareAndSet(false, true)) {
-        //            innerRegisterCustomSerializer();
-        //        }
+
     }
 
     @Override

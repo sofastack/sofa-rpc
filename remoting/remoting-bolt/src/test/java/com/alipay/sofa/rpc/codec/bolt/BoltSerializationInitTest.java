@@ -33,9 +33,9 @@ public class BoltSerializationInitTest {
 
     @Test
     public void SerializerRegisterOverrideTest() {
-        BoltSerializationRegister boltSerializationRegister = ExtensionLoaderFactory.getExtensionLoader(
-            BoltSerializationRegister.class).getExtension("sofaRpcSerializationRegister");
-        boltSerializationRegister.doRegisterCustomSerializer();
+        AbstractSerializationRegister abstractSerializationRegister = ExtensionLoaderFactory.getExtensionLoader(
+            AbstractSerializationRegister.class).getExtension("sofaRpcSerializationRegister");
+        abstractSerializationRegister.doRegisterCustomSerializer();
 
         Assert.assertNull("testRegister未能覆盖原版register",
             CustomSerializerManager.getCustomSerializer(SofaResponse.class.getName()));

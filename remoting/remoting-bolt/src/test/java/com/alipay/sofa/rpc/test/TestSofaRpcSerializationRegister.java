@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.test;
 
 import com.alipay.remoting.CustomSerializerManager;
-import com.alipay.sofa.rpc.codec.bolt.BoltSerializationRegister;
+import com.alipay.sofa.rpc.codec.bolt.AbstractSerializationRegister;
 import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerialization;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.ext.Extension;
@@ -30,7 +30,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 @Extension(value = "sofaRpcSerializationRegister", override = true, order = 20)
-public class TestSofaRpcSerializationRegister extends BoltSerializationRegister {
+public class TestSofaRpcSerializationRegister extends AbstractSerializationRegister {
 
     private static final SofaRpcSerialization RPC_SERIALIZATION = new SofaRpcSerialization();
 

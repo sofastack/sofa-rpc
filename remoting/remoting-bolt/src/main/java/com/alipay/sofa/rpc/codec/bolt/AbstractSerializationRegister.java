@@ -21,10 +21,10 @@ import com.alipay.sofa.rpc.ext.Extensible;
 /**
  *
  * @author junyuan
- * @version BoltSerializationRegister.java, v 0.1 2022年12月23日 15:01 junyuan Exp $
+ * @version AbstractSerializationRegister.java, v 0.1 2022年12月23日 15:01 junyuan Exp $
  */
 @Extensible
-public abstract class BoltSerializationRegister {
+public abstract class AbstractSerializationRegister {
 
     public abstract void doRegisterCustomSerializer();
 
