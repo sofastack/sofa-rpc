@@ -37,7 +37,10 @@ public class SofaRpcSerializationRegister extends AbstractSerializationRegister 
 
     @Deprecated
     public static void registerCustomSerializer() {
-
+        // if someone call this method directly, it still works
+        if (registered.compareAndSet(false, true)) {
+            innerRegisterCustomSerializer();
+        }
     }
 
     @Override
