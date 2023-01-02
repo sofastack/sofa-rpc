@@ -23,6 +23,13 @@ import io.grpc.Metadata;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_TARGET_SERVICE;
+
 /**
  * @author Even
  * @date 2022/12/29 1:53 PM
@@ -32,11 +39,20 @@ public class TripleTracerAdapterTest {
     @Test
     public void testBeforeSend() {
         SofaRequest sofaRequest = new SofaRequest();
+        sofaRequest.setTargetServiceUniqueName("targetService1");
         sofaRequest.addRequestProp("triple.header.key", "triple.header.value");
+        Map map = new HashMap<String, String>();
+        map.put("key1", "value1");
+        map.put("key2", "value2");
+        sofaRequest.addRequestProp("triple.header.object", map);
+        sofaRequest.addRequestProp(HEAD_TARGET_SERVICE, "targetService2");
         ConsumerConfig consumerConfig = new ConsumerConfig();
         Metadata metadata = new Metadata();
         TripleTracerAdapter.beforeSend(sofaRequest, consumerConfig, metadata);
-        Assert.assertTrue(metadata.containsKey(TripleHeadKeys.getKey("triple.header.key")));
+        Assert.assertEquals("targetService2", metadata.get(TripleHeadKeys.getKey(HEAD_TARGET_SERVICE)));
+        Assert.assertEquals("triple.header.value", metadata.get(TripleHeadKeys.getKey("triple.header.key")));
+        Assert.assertEquals("value1", metadata.get(TripleHeadKeys.getKey("triple.header.object.key1")));
+        Assert.assertEquals("value2", metadata.get(TripleHeadKeys.getKey("triple.header.object.key2")));
     }
 
 }
