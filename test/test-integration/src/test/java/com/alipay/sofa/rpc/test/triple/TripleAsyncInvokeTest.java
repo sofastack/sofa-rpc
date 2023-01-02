@@ -51,13 +51,14 @@ public class TripleAsyncInvokeTest {
     @BeforeClass
     public static void start() {
         ServerConfig serverConfig2 = new ServerConfig()
-            .setPort(22223)
+            .setPort(50053)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setDaemon(false);
 
         // 服务端
         ProviderConfig<HelloService> CProvider = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
+            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             .setRef(new HelloServiceImpl(1000))
             .setServer(serverConfig2);
         CProvider.export();
@@ -68,7 +69,7 @@ public class TripleAsyncInvokeTest {
             .setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE)
             .setTimeout(5000)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("127.0.0.1:22223");
+            .setDirectUrl("127.0.0.1:50053");
         future = BConsumer.refer();
 
         ConsumerConfig<HelloService> BBConsumer = new ConsumerConfig<HelloService>()
@@ -76,7 +77,7 @@ public class TripleAsyncInvokeTest {
             .setInvokeType(RpcConstants.INVOKER_TYPE_CALLBACK)
             .setTimeout(5000)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("127.0.0.1:22223");
+            .setDirectUrl("127.0.0.1:50053");
         callback = BBConsumer.refer();
     }
 
