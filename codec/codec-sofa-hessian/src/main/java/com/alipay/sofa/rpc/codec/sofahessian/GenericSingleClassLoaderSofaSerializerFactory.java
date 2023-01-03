@@ -86,15 +86,16 @@ public class GenericSingleClassLoaderSofaSerializerFactory extends SingleClassLo
             return super.getDeserializer(type);
         }
 
-        // 自定义Throwable采用JavaDeserializer，反序列化成Throwable而不是GenericObject
-        Deserializer deserializer = getDeserializerForCustomThrowable(type);
+        // 查看是否已经包含反序列化器
+        Deserializer deserializer = DESERIALIZER_MAP.get(type);
         if (deserializer != null) {
             return deserializer;
         }
 
-        // 查看是否已经包含反序列化器
-        deserializer = DESERIALIZER_MAP.get(type);
+        // 自定义Throwable采用JavaDeserializer，反序列化成Throwable而不是GenericObject
+        deserializer = getDeserializerForCustomThrowable(type);
         if (deserializer != null) {
+            DESERIALIZER_MAP.putIfAbsent(type, deserializer);
             return deserializer;
         }
 
