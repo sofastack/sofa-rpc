@@ -26,15 +26,15 @@
         <nacos.version>2.0.3</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <polaris.version>1.2.2</polaris.version>
-        <swagger.version>1.5.18</swagger.version>
+        <swagger.version>1.6.9</swagger.version>
         <asm.version>7.0</asm.version>
         <guava.version>27.0-jre</guava.version>
         <!-- serialization -->
         <hessian.version>3.3.13</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.16.1</protobuf.version>
-        <jackson.version>2.9.10</jackson.version>
-        <jackson.databind.version>2.9.10.8</jackson.databind.version>
+        <jackson.version>2.12.7</jackson.version>
+        <jackson.databind.version>2.12.7.1</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
         <grpc.version>1.33.1</grpc.version>
