@@ -26,7 +26,7 @@
         <nacos.version>2.0.3</nacos.version>
         <sofa.registry.version>5.2.0</sofa.registry.version>
         <polaris.version>1.2.2</polaris.version>
-        <swagger.version>1.5.18</swagger.version>
+        <swagger.version>1.6.9</swagger.version>
         <asm.version>7.0</asm.version>
         <guava.version>27.0-jre</guava.version>
         <!-- serialization -->
