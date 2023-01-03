@@ -24,6 +24,7 @@ import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
+import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -81,6 +82,10 @@ public class TripleTracerAdapter {
         header.put(RemotingConstants.HEAD_METHOD_NAME, sofaRequest.getMethodName());
         header.put(RemotingConstants.HEAD_TARGET_SERVICE, sofaRequest.getTargetServiceUniqueName());
         header.put(RemotingConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
+        Map<String, Object> requestProps = sofaRequest.getRequestProps();
+        if (requestProps != null) {
+            CodecUtils.flatCopyTo("", requestProps, header);
+        }
         //客户端的启动
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         //获取并不弹出
