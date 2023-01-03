@@ -53,6 +53,20 @@ public class ConfigUniqueNameGenerator {
     }
 
     /**
+     * 唯一标识UniqueName的产生方法，主要用于内部找接口等，格式为interface:version[:uniqueId]
+     *
+     * @param interfaceId
+     * @param version
+     * @param uniqueId
+     * @return
+     */
+    public static String getUniqueName(String interfaceId, String version, String uniqueId) {
+        // 加上 1.0 是为了兼容之前的版本
+        return interfaceId + (StringUtils.isEmpty(version) ? ":1.0" : ":" + version) +
+            (StringUtils.isEmpty(uniqueId) ? "" : ":" + uniqueId);
+    }
+
+    /**
      * 唯一标识UniqueName的产生方法，主要用于外部服务发现等，格式为interface:version[:uniqueId]@protocol
      *
      * @param providerConfig 服务端提供者配置

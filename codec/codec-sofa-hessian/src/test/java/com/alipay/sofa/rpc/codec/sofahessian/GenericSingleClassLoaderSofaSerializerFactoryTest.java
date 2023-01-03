@@ -28,8 +28,18 @@ import com.alipay.hessian.generic.model.GenericClass;
 import com.alipay.hessian.generic.model.GenericCollection;
 import com.alipay.hessian.generic.model.GenericMap;
 import com.alipay.hessian.generic.model.GenericObject;
+import com.alipay.sofa.rpc.codec.sofahessian.mock.MockError;
+import com.caucho.hessian.io.Deserializer;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.JavaDeserializer;
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.setGenericThrowException;
 
 /**
  *
@@ -56,5 +66,56 @@ public class GenericSingleClassLoaderSofaSerializerFactoryTest {
             factory.getDeserializer(Class.class.getCanonicalName()).getClass());
         Assert.assertEquals(GenericDeserializer.class,
             factory.getDeserializer(GenericObject.class.getCanonicalName()).getClass());
+    }
+
+    @Test
+    public void testCustomThrowableDeserializer() throws Exception {
+        GenericSingleClassLoaderSofaSerializerFactory factory = new GenericSingleClassLoaderSofaSerializerFactory();
+
+        ByteArrayOutputStream bsOut = new ByteArrayOutputStream();
+        Hessian2Output hessian2Output = new Hessian2Output(bsOut);
+        hessian2Output.setSerializerFactory(factory);
+
+        MockError mockError = new MockError("MockError");
+        hessian2Output.writeObject(mockError);
+        hessian2Output.flush();
+
+        Deserializer genericDeserializer = factory.getDeserializer(MockError.class.getName());
+        Assert.assertTrue(genericDeserializer instanceof GenericDeserializer);
+
+        ByteArrayInputStream bsIn = new ByteArrayInputStream(bsOut.toByteArray());
+        Hessian2Input hessian2Input = new Hessian2Input(bsIn);
+        hessian2Input.setSerializerFactory(factory);
+        Object result = hessian2Input.readObject();
+        Assert.assertTrue(result instanceof GenericObject);
+        Assert.assertEquals("MockError", ((GenericObject) result).getField("detailMessage"));
+    }
+
+    @Test
+    public void testCustomThrowableDeserializerEnabled() throws Exception {
+        setGenericThrowException(true);
+        try {
+            GenericSingleClassLoaderSofaSerializerFactory factory = new GenericSingleClassLoaderSofaSerializerFactory();
+
+            ByteArrayOutputStream bsOut = new ByteArrayOutputStream();
+            Hessian2Output hessian2Output = new Hessian2Output(bsOut);
+            hessian2Output.setSerializerFactory(factory);
+
+            MockError mockError = new MockError("MockError");
+            hessian2Output.writeObject(mockError);
+            hessian2Output.flush();
+
+            Deserializer javaDeserializer = factory.getDeserializer(MockError.class.getName());
+            Assert.assertTrue(javaDeserializer instanceof JavaDeserializer);
+
+            ByteArrayInputStream bsIn = new ByteArrayInputStream(bsOut.toByteArray());
+            Hessian2Input hessian2Input = new Hessian2Input(bsIn);
+            hessian2Input.setSerializerFactory(factory);
+            Object result = hessian2Input.readObject();
+            Assert.assertTrue(result instanceof MockError);
+            Assert.assertEquals("MockError", ((MockError) result).getMessage());
+        } finally {
+            setGenericThrowException(false);
+        }
     }
 }

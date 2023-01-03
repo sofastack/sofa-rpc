@@ -14,8 +14,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 主要包含了序列化和压缩算法。注意：不是数据协议
- */
-package com.alipay.sofa.rpc.codec;
+package com.alipay.sofa.rpc.bootstrap.triple;
 
+import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.bootstrap.DefaultClientProxyInvoker;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
+
+/**
+ * @author Even
+ * @date 2022/11/17 10:08 PM
+ */
+public class TripleClientProxyInvoker extends DefaultClientProxyInvoker {
+
+    /**
+     * 构造执行链
+     *
+     * @param bootstrap 调用端配置
+     */
+    public TripleClientProxyInvoker(ConsumerBootstrap bootstrap) {
+        super(bootstrap);
+    }
+
+    @Override
+    protected void cacheCommonData() {
+        // 缓存数据
+        this.serviceName = ConfigUniqueNameGenerator.getUniqueName(consumerConfig);
+        this.serializeType = parseSerializeType(consumerConfig.getSerialization());
+    }
+
+}

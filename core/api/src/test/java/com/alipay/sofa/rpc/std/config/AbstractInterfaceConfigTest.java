@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.std.config;
 
 import com.alipay.sofa.rpc.common.MockMode;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.TestUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
@@ -342,16 +344,34 @@ public class AbstractInterfaceConfigTest {
         assertEquals(newMethodValue, config.queryAttribute(methodKey));
         assertFalse(config.updateAttribute(methodKey, newMethodValue, true));
 
-
         String timeoutKey = "timeout";
         String anotherMethodName = randomString();
-        String methodTimeout ="." + anotherMethodName + "." + timeoutKey;
+        String methodTimeout = "." + anotherMethodName + "." + timeoutKey;
         assertTrue(config.updateAttribute(methodTimeout, "10", true));
 
         Map<String, MethodConfig> methodConfigMap = config.getMethods();
-        assertEquals((Integer) 10,methodConfigMap.get(anotherMethodName).getTimeout());;
+        assertEquals((Integer) 10, methodConfigMap.get(anotherMethodName).getTimeout());
+        ;
 
+    }
 
+    @Test(expected = SofaRpcRuntimeException.class)
+    public void testUniqueIdCheck() throws NoSuchFieldException, IllegalAccessException {
+        RpcConfigs.putValue(RpcOptions.RPC_UNIQUEID_PATTERN_CHECK, true);
+        TestConfig config = new TestConfig();
+        config.setProxyClass(SampleService.class);
+        String uniqueId = TestUtils.randomString() + "$";
+        config.setUniqueId(uniqueId);
+    }
+
+    @Test
+    public void testUniqueIdCheckDisabled() {
+        RpcConfigs.putValue(RpcOptions.RPC_UNIQUEID_PATTERN_CHECK, false);
+        TestConfig config = new TestConfig();
+        config.setProxyClass(SampleService.class);
+        String uniqueId = TestUtils.randomString() + "$";
+        config.setUniqueId(uniqueId);
+        assertEquals(uniqueId, config.getUniqueId());
     }
 
     static class TestConfig extends AbstractInterfaceConfig {

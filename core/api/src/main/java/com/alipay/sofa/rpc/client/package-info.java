@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.client;
-
 /**
  * 客户端相关的类，例如客户端模式，长连接管理，路由，负载均衡等
  */
+package com.alipay.sofa.rpc.client;
+

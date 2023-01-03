@@ -556,4 +556,10 @@ public class RpcOptions {
      */
     public static final String DISABLE_LOG_TIME_WAIT_CONF               = "sofa.rpc.log.disableTimeWaitLog";
 
+    /**
+     * 是否开启 uniqueId 特殊字符串校验
+     * @since 5.9.0
+     */
+    public static final String RPC_UNIQUEID_PATTERN_CHECK               = "sofa.rpc.uniqueId.pattern.check";
+
 }

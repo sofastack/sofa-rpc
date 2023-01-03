@@ -14,8 +14,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/**
- * 主要包含了序列化和压缩算法。注意：不是数据协议
- */
-package com.alipay.sofa.rpc.codec;
+package com.alipay.sofa.rpc.codec.sofahessian.mock;
 
+/**
+ *
+ * @author xingqi
+ * @version : MocKError.java, v 0.1 2022年10月20日 2:05 PM xingqi Exp $
+ */
+public class MockError extends RuntimeException {
+
+    public MockError() {
+        super();
+    }
+
+    public MockError(String message) {
+        super(message);
+    }
+
+    public MockError(String message, Throwable cause) {
+        super(message, cause);
+    }
+
+    public MockError(Throwable cause) {
+        super(cause);
+    }
+}
