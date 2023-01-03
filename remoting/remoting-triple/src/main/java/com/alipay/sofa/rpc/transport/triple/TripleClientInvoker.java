@@ -19,10 +19,14 @@ package com.alipay.sofa.rpc.transport.triple;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.context.BaggageResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
@@ -31,6 +35,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
 import com.alipay.sofa.rpc.event.ClientEndInvokeEvent;
 import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.filter.FilterChain;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
@@ -152,6 +157,7 @@ public class TripleClientInvoker implements TripleInvoker {
         SofaResponseCallback sofaResponseCallback = sofaRequest.getSofaResponseCallback();
         TripleResponseFuture future = new TripleResponseFuture(sofaRequest, timeout);
 
+        ClassLoader currentClassLoader = ClassLoaderUtils.getCurrentClassLoader();
         RpcInternalContext context = RpcInternalContext.getContext();
 
         if (!useGeneric) {
@@ -178,12 +184,12 @@ public class TripleClientInvoker implements TripleInvoker {
             m.invoke(stub, sofaRequest.getMethodArgs()[0], new StreamObserver<Object>() {
                 @Override
                 public void onNext(Object o) {
-                    processSuccess(false, context, sofaRequest, o, sofaResponseCallback, future);
+                    processSuccess(false, context, sofaRequest, o, sofaResponseCallback, future, currentClassLoader);
                 }
 
                 @Override
                 public void onError(Throwable throwable) {
-                    processError(context, sofaRequest, throwable, sofaResponseCallback, future);
+                    processError(context, sofaRequest, throwable, sofaResponseCallback, future, currentClassLoader);
                 }
 
                 @Override
@@ -197,12 +203,12 @@ public class TripleClientInvoker implements TripleInvoker {
             ClientCalls.asyncUnaryCall(channel.newCall(methodDescriptor, buildCustomCallOptions(sofaRequest, timeout)), request, new StreamObserver<Object>() {
                 @Override
                 public void onNext(Object o) {
-                    processSuccess(true, context, sofaRequest, o, sofaResponseCallback, future);
+                    processSuccess(true, context, sofaRequest, o, sofaResponseCallback, future, currentClassLoader);
                 }
 
                 @Override
                 public void onError(Throwable throwable) {
-                    processError(context, sofaRequest, throwable, sofaResponseCallback, future);
+                    processError(context, sofaRequest, throwable, sofaResponseCallback, future, currentClassLoader);
                 }
 
                 @Override
@@ -214,9 +220,10 @@ public class TripleClientInvoker implements TripleInvoker {
         return future;
     }
 
-    private void processSuccess(boolean needDecode, RpcInternalContext context, SofaRequest sofaRequest, Object o, SofaResponseCallback sofaResponseCallback, TripleResponseFuture future) {
+    private void processSuccess(boolean needDecode, RpcInternalContext context, SofaRequest sofaRequest, Object o, SofaResponseCallback sofaResponseCallback, TripleResponseFuture future, ClassLoader classLoader) {
         ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(classLoader);
             RpcInternalContext.setContext(context);
 
             SofaResponse sofaResponse = new SofaResponse();
@@ -225,6 +232,17 @@ public class TripleClientInvoker implements TripleInvoker {
                 EventBus.post(new ClientAsyncReceiveEvent(consumerConfig, providerInfo,
                         sofaRequest, sofaResponse, null));
             }
+
+            pickupBaggage(context, sofaResponse);
+
+            // do async filter after respond server
+            FilterChain chain = consumerConfig.getConsumerBootstrap().getCluster().getFilterChain();
+            if (chain != null) {
+                chain.onAsyncResponse(consumerConfig, sofaRequest, sofaResponse, null);
+            }
+
+            recordClientElapseTime(context);
+
             if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
                 EventBus.post(new ClientEndInvokeEvent(sofaRequest, sofaResponse, null));
             }
@@ -254,15 +272,25 @@ public class TripleClientInvoker implements TripleInvoker {
         }
     }
 
-    private void processError(RpcInternalContext context, SofaRequest sofaRequest, Throwable throwable, SofaResponseCallback sofaResponseCallback, TripleResponseFuture future) {
+    private void processError(RpcInternalContext context, SofaRequest sofaRequest, Throwable throwable, SofaResponseCallback sofaResponseCallback, TripleResponseFuture future, ClassLoader classLoader) {
         ClassLoader oldCl = Thread.currentThread().getContextClassLoader();
         try {
+            Thread.currentThread().setContextClassLoader(classLoader);
             RpcInternalContext.setContext(context);
 
             if (EventBus.isEnable(ClientAsyncReceiveEvent.class)) {
                 EventBus.post(new ClientAsyncReceiveEvent(consumerConfig, providerInfo,
                         sofaRequest, null, throwable));
             }
+
+            // do async filter after respond server
+            FilterChain chain = consumerConfig.getConsumerBootstrap().getCluster().getFilterChain();
+            if (chain != null) {
+                chain.onAsyncResponse(consumerConfig, sofaRequest, null, throwable);
+            }
+
+            recordClientElapseTime(context);
+
             if (EventBus.isEnable(ClientEndInvokeEvent.class)) {
                 EventBus.post(new ClientEndInvokeEvent(sofaRequest, null, throwable));
             }
@@ -281,6 +309,36 @@ public class TripleClientInvoker implements TripleInvoker {
             Thread.currentThread().setContextClassLoader(oldCl);
             RpcInvokeContext.removeContext();
             RpcInternalContext.removeAllContext();
+        }
+    }
+
+    protected void recordClientElapseTime(RpcInternalContext context) {
+        if (context != null) {
+            Long startTime = (Long) context.removeAttachment(RpcConstants.INTERNAL_KEY_CLIENT_SEND_TIME);
+            if (startTime != null) {
+                context.setAttachment(RpcConstants.INTERNAL_KEY_CLIENT_ELAPSE, RpcRuntimeContext.now() - startTime);
+            }
+        }
+    }
+
+    protected void pickupBaggage(RpcInternalContext context, SofaResponse response) {
+        if (RpcInvokeContext.isBaggageEnable()) {
+            RpcInvokeContext old = null;
+            RpcInvokeContext newContext = null;
+            if (context != null) {
+                old = (RpcInvokeContext) context.getAttachment(RpcConstants.HIDDEN_KEY_INVOKE_CONTEXT);
+            }
+            if (old != null) {
+                RpcInvokeContext.setContext(old);
+            }
+            newContext = RpcInvokeContext.getContext();
+            BaggageResolver.pickupFromResponse(newContext, response);
+
+            if (old != null) {
+                old.getAllResponseBaggage().putAll(newContext.getAllResponseBaggage());
+                old.getAllRequestBaggage().putAll(newContext.getAllRequestBaggage());
+            }
+
         }
     }
 
