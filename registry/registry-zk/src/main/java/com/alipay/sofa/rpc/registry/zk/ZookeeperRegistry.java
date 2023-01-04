@@ -292,13 +292,6 @@ public class ZookeeperRegistry extends Registry {
         consumerUrls.clear();
     }
 
-    @Override
-    public void destroy(DestroyHook hook) {
-        hook.preDestroy();
-        destroy();
-        hook.postDestroy();
-    }
-
     /**
      * 接口配置{ConsumerConfig：PathChildrenCache} <br>
      * 例如：{ConsumerConfig ： PathChildrenCache }

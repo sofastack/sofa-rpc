@@ -138,12 +138,6 @@ public class ConsulRegistry extends Registry {
         healthServiceInformers.values().forEach(HealthServiceInformer::shutdown);
     }
 
-    @Override
-    public void destroy(DestroyHook hook) {
-        hook.preDestroy();
-        destroy();
-        hook.postDestroy();
-    }
 
     @Override
     public boolean start() {
