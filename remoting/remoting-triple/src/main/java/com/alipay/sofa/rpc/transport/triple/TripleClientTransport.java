@@ -17,16 +17,15 @@
 package com.alipay.sofa.rpc.transport.triple;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
-import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.event.ClientAfterSendEvent;
 import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
@@ -101,7 +100,7 @@ public class TripleClientTransport extends ClientTransport {
     }
 
     protected TripleClientInvoker buildClientInvoker() {
-        return new TripleClientInvoker(transportConfig.getConsumerConfig(), channel);
+        return new TripleClientInvoker(transportConfig.getConsumerConfig(), providerInfo, channel);
     }
 
     @Override
@@ -161,7 +160,6 @@ public class TripleClientTransport extends ClientTransport {
 
     @Override
     public ResponseFuture asyncSend(SofaRequest request, int timeout) throws SofaRpcException {
-        SofaResponse sofaResponse = null;
         SofaRpcException throwable = null;
 
         try {
@@ -178,9 +176,8 @@ public class TripleClientTransport extends ClientTransport {
             throwable = convertToRpcException(e);
             throw throwable;
         } finally {
-            if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
-                EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
-                        transportConfig.getProviderInfo(), request, sofaResponse, throwable));
+            if (EventBus.isEnable(ClientAfterSendEvent.class)) {
+                EventBus.post(new ClientAfterSendEvent(request));
             }
         }
 
@@ -194,9 +191,7 @@ public class TripleClientTransport extends ClientTransport {
 
         try {
             RpcInternalContext context = RpcInternalContext.getContext();
-
             beforeSend(context, request);
-
             RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
             invokeContext.put(TripleContants.SOFA_REQUEST_KEY, request);
             invokeContext.put(TripleContants.SOFA_CONSUMER_CONFIG_KEY, transportConfig.getConsumerConfig());
@@ -206,6 +201,9 @@ public class TripleClientTransport extends ClientTransport {
             throwable = convertToRpcException(e);
             throw throwable;
         } finally {
+            if (EventBus.isEnable(ClientAfterSendEvent.class)) {
+                EventBus.post(new ClientAfterSendEvent(request));
+            }
             if (EventBus.isEnable(ClientSyncReceiveEvent.class)) {
                 EventBus.post(new ClientSyncReceiveEvent(transportConfig.getConsumerConfig(),
                         transportConfig.getProviderInfo(), request, sofaResponse, throwable));
