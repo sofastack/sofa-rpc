@@ -14,25 +14,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.triple;
+package com.alipay.sofa.rpc.test;
 
 /**
- * @author zhaowang
- * @version : TripleHessianInterface.java, v 0.1 2020年06月11日 11:18 上午 zhaowang Exp $
+ *
+ * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public interface TripleHessianInterface {
+public class AnotherHelloServiceImpl implements HelloService {
 
-    void call();
+    private int    sleep;
 
-    String call1();
+    private String result;
 
-    String findFlag();
+    public AnotherHelloServiceImpl() {
 
-    Response call2(Request request);
+    }
 
-    boolean testPressureMark(String name);
+    public AnotherHelloServiceImpl(String result) {
+        this.result = result;
+    }
 
-    String setRpcInvokeContext(String key, String value);
+    public AnotherHelloServiceImpl(int sleep) {
+        this.sleep = sleep;
+    }
 
-    String getRpcInvokeContext(String key);
+    @Override
+    public String sayHello(String name, int age) {
+        if (sleep > 0) {
+            try {
+                Thread.sleep(sleep);
+            } catch (Exception ignore) {
+            }
+        }
+        return result != null ? result : "hello " + name + " from server! age: " + age;
+    }
 }
