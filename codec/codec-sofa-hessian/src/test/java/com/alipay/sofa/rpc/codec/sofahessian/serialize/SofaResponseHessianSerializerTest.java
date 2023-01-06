@@ -66,31 +66,34 @@ public class SofaResponseHessianSerializerTest {
 
     @Test
     public void testCustomThrowableDeserializerEnabled() throws Exception {
-        setGenericThrowException(true);
-        try {
-            GenericMultipleClassLoaderSofaSerializerFactory factory = new GenericMultipleClassLoaderSofaSerializerFactory();
-            SofaResponseHessianSerializer serializer = new SofaResponseHessianSerializer(null, factory);
+        synchronized (GenericCustomThrowableDeterminer.class) {
+            setGenericThrowException(true);
+            try {
+                GenericMultipleClassLoaderSofaSerializerFactory factory = new GenericMultipleClassLoaderSofaSerializerFactory();
+                SofaResponseHessianSerializer serializer = new SofaResponseHessianSerializer(null,
+                        factory);
 
-            ByteArrayOutputStream bsOut = new ByteArrayOutputStream();
-            Hessian2Output hessian2Output = new Hessian2Output(bsOut);
-            hessian2Output.setSerializerFactory(factory);
+                ByteArrayOutputStream bsOut = new ByteArrayOutputStream();
+                Hessian2Output hessian2Output = new Hessian2Output(bsOut);
+                hessian2Output.setSerializerFactory(factory);
 
-            SofaResponse sofaResponse = new SofaResponse();
-            MockError mockError = new MockError("MockError");
-            sofaResponse.setAppResponse(mockError);
-            hessian2Output.writeObject(sofaResponse);
-            hessian2Output.flush();
+                SofaResponse sofaResponse = new SofaResponse();
+                MockError mockError = new MockError("MockError");
+                sofaResponse.setAppResponse(mockError);
+                hessian2Output.writeObject(sofaResponse);
+                hessian2Output.flush();
 
-            ByteArrayWrapperByteBuf bsIn = new ByteArrayWrapperByteBuf(bsOut.toByteArray());
-            Map<String, String> ctx = new HashMap<>();
-            ctx.put(RemotingConstants.HEAD_GENERIC_TYPE, "2");
-            SofaResponse sofaResponse2 = new SofaResponse();
-            serializer.decodeObjectByTemplate(bsIn, ctx, sofaResponse2);
-            Assert.assertTrue(sofaResponse2.getAppResponse() instanceof MockError);
-            Assert.assertEquals("MockError", ((MockError) sofaResponse2.getAppResponse()).getMessage());
-        } finally {
-            setGenericThrowException(false);
-            clearCacheDeserializerMap();
+                ByteArrayWrapperByteBuf bsIn = new ByteArrayWrapperByteBuf(bsOut.toByteArray());
+                Map<String, String> ctx = new HashMap<>();
+                ctx.put(RemotingConstants.HEAD_GENERIC_TYPE, "2");
+                SofaResponse sofaResponse2 = new SofaResponse();
+                serializer.decodeObjectByTemplate(bsIn, ctx, sofaResponse2);
+                Assert.assertTrue(sofaResponse2.getAppResponse() instanceof MockError);
+                Assert.assertEquals("MockError", ((MockError) sofaResponse2.getAppResponse()).getMessage());
+            } finally {
+                setGenericThrowException(false);
+                clearCacheDeserializerMap();
+            }
         }
     }
 
