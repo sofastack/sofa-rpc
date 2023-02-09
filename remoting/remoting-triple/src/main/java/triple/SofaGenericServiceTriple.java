@@ -1,3 +1,19 @@
+/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
     package triple;
 
 import java.util.concurrent.TimeUnit;
@@ -32,19 +48,19 @@ futureStub = GenericServiceGrpc.newFutureStub(channel).build(channel, callOption
 stub = GenericServiceGrpc.newStub(channel).build(channel, callOptions);
 }
 
-    public triple.Response generic(triple.Request request) {
+    public Response generic(Request request) {
     return blockingStub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .generic(request);
     }
 
-    public com.google.common.util.concurrent.ListenableFuture<triple.Response> genericAsync(triple.Request request) {
+    public com.google.common.util.concurrent.ListenableFuture<Response> genericAsync(Request request) {
     return futureStub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .generic(request);
     }
 
-    public void generic(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver){
+    public void generic(Request request, io.grpc.stub.StreamObserver<Response> responseObserver){
     stub
     .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
     .generic(request, responseObserver);
@@ -57,19 +73,19 @@ return new SofaGenericServiceStub(channel, callOptions, timeout);
 }
 
 public static String getServiceName() {
-  return triple.GenericServiceGrpc.SERVICE_NAME;
+  return GenericServiceGrpc.SERVICE_NAME;
 }
 
 public interface IGenericService {
-    default public triple.Response generic(triple.Request request) {
+    default public Response generic(Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-    default public com.google.common.util.concurrent.ListenableFuture<triple.Response> genericAsync(triple.Request request) {
+    default public com.google.common.util.concurrent.ListenableFuture<Response> genericAsync(Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-    public void generic(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver);
+    public void generic(Request request, io.grpc.stub.StreamObserver<Response> responseObserver);
 
 }
 
@@ -81,29 +97,29 @@ public final void setProxiedImpl(IGenericService proxiedImpl) {
 this.proxiedImpl = proxiedImpl;
 }
 
-    @java.lang.Override
-    public final triple.Response generic(triple.Request request) {
+    @Override
+    public final Response generic(Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-    @java.lang.Override
-    public final com.google.common.util.concurrent.ListenableFuture<triple.Response> genericAsync(triple.Request request) {
+    @Override
+    public final com.google.common.util.concurrent.ListenableFuture<Response> genericAsync(Request request) {
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
-        public void generic(triple.Request request,
-        io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
-        asyncUnimplementedUnaryCall(triple.GenericServiceGrpc.getGenericMethod(), responseObserver);
+        public void generic(Request request,
+                            io.grpc.stub.StreamObserver<Response> responseObserver) {
+        asyncUnimplementedUnaryCall(GenericServiceGrpc.getGenericMethod(), responseObserver);
         }
 
-@java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
+@Override public final io.grpc.ServerServiceDefinition bindService() {
 return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
     .addMethod(
-    triple.GenericServiceGrpc.getGenericMethod(),
+    GenericServiceGrpc.getGenericMethod(),
     asyncUnaryCall(
     new MethodHandlers<
-    triple.Request,
-    triple.Response>(
+    Request,
+    Response>(
     proxiedImpl, METHODID_GENERIC)))
 .build();
 }
@@ -128,28 +144,28 @@ this.serviceImpl = serviceImpl;
 this.methodId = methodId;
 }
 
-@java.lang.Override
-@java.lang.SuppressWarnings("unchecked")
+@Override
+@SuppressWarnings("unchecked")
 public void invoke(Req request, io.grpc.stub.StreamObserver
 <Resp> responseObserver) {
     switch (methodId) {
             case METHODID_GENERIC:
-            serviceImpl.generic((triple.Request) request,
-            (io.grpc.stub.StreamObserver<triple.Response>) responseObserver);
+            serviceImpl.generic((Request) request,
+            (io.grpc.stub.StreamObserver<Response>) responseObserver);
             break;
     default:
-    throw new java.lang.AssertionError();
+    throw new AssertionError();
     }
     }
 
-    @java.lang.Override
-    @java.lang.SuppressWarnings("unchecked")
+    @Override
+    @SuppressWarnings("unchecked")
     public io.grpc.stub.StreamObserver
     <Req> invoke(io.grpc.stub.StreamObserver
         <Resp> responseObserver) {
             switch (methodId) {
             default:
-            throw new java.lang.AssertionError();
+            throw new AssertionError();
            }
       }
   }

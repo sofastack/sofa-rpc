@@ -77,7 +77,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>5.9.1</revision>
+        <revision>5.10.0-SNAPSHOT</revision>
         <jmh.version>1.33</jmh.version>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
@@ -160,37 +160,37 @@
             </extension>
         </extensions>
         <plugins>
-            <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.5.1</version>
-                <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
-                    <pluginId>grpc-java</pluginId>
-                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
-                    <outputDirectory>build/generated/source/proto/main/java</outputDirectory>
-                    <clearOutputDirectory>false</clearOutputDirectory>
-                    <protocPlugins>
-                        <protocPlugin>
-                            <id>sofa-triple</id>
-                            <groupId>com.alipay.sofa</groupId>
-                            <artifactId>sofa-rpc-compiler</artifactId>
-                            <version>${sofa.rpc.compiler.version}</version>
-                            <mainClass>com.alipay.sofa.gen.triple.SofaTripleGenerator</mainClass>
-                        </protocPlugin>
-                    </protocPlugins>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>compile-custom</goal>
-                            <goal>test-compile</goal>
-                            <goal>test-compile-custom</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+<!--            <plugin>-->
+<!--                <groupId>org.xolstice.maven.plugins</groupId>-->
+<!--                <artifactId>protobuf-maven-plugin</artifactId>-->
+<!--                <version>0.5.1</version>-->
+<!--                <configuration>-->
+<!--                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>-->
+<!--                    <pluginId>grpc-java</pluginId>-->
+<!--                    <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>-->
+<!--                    <outputDirectory>build/generated/source/proto/main/java</outputDirectory>-->
+<!--                    <clearOutputDirectory>false</clearOutputDirectory>-->
+<!--                    <protocPlugins>-->
+<!--                        <protocPlugin>-->
+<!--                            <id>sofa-triple</id>-->
+<!--                            <groupId>com.alipay.sofa</groupId>-->
+<!--                            <artifactId>sofa-rpc-compiler</artifactId>-->
+<!--                            <version>${sofa.rpc.compiler.version}</version>-->
+<!--                            <mainClass>com.alipay.sofa.gen.triple.SofaTripleGenerator</mainClass>-->
+<!--                        </protocPlugin>-->
+<!--                    </protocPlugins>-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <goals>-->
+<!--                            <goal>compile</goal>-->
+<!--                            <goal>compile-custom</goal>-->
+<!--                            <goal>test-compile</goal>-->
+<!--                            <goal>test-compile-custom</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
