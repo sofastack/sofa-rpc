@@ -242,9 +242,14 @@ public class TripleServer implements Server {
 
     @Override
     public void registerProcessor(ProviderConfig providerConfig, Invoker instance) {
-        Object ref = providerConfig.getRef();
         this.lock.lock();
         try {
+            String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
+            ReflectCache.registerServiceClassLoader(key, providerConfig.getProxyClass().getClassLoader());
+            // 缓存接口的方法
+            for (Method m : providerConfig.getProxyClass().getMethods()) {
+                ReflectCache.putOverloadMethodCache(key, m);
+            }
             // wrap invoker to support unique id
             UniqueIdInvoker oldInvoker = this.invokerMap.putIfAbsent(providerConfig.getInterfaceId(), new UniqueIdInvoker());
             if (null != oldInvoker) {
@@ -261,22 +266,7 @@ public class TripleServer implements Server {
                 throw new IllegalStateException("Can not expose service with interface:" + providerConfig.getInterfaceId() + " and unique id: " + providerConfig.getUniqueId());
             }
 
-            // create service definition
-            ServerServiceDefinition serviceDef;
-            if (SofaProtoUtils.isProtoClass(ref)) {
-                // refer is BindableService
-                this.setBindableProxiedImpl(providerConfig, uniqueIdInvoker);
-                BindableService bindableService = (BindableService) providerConfig.getRef();
-                serviceDef = bindableService.bindService();
-            } else {
-                GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker, providerConfig);
-                genericService.setProxiedImpl(genericService);
-                serviceDef = buildSofaServiceDef(genericService, providerConfig);
-            }
-
-            List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
-            ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
-                serviceDef, interceptorList);
+            ServerServiceDefinition serviceDefinition = getServerServiceDefinition(providerConfig, uniqueIdInvoker);
             this.serviceInfo.put(providerConfig, serviceDefinition);
             ServerServiceDefinition ssd = this.handlerRegistry.addService(serviceDefinition);
             if (ssd != null) {
@@ -292,6 +282,26 @@ public class TripleServer implements Server {
         } finally {
             this.lock.unlock();
         }
+    }
+
+    private ServerServiceDefinition getServerServiceDefinition(ProviderConfig providerConfig, UniqueIdInvoker uniqueIdInvoker) {
+        // create service definition
+        ServerServiceDefinition serviceDef;
+        if (SofaProtoUtils.isProtoClass(providerConfig.getRef())) {
+            // refer is BindableService
+            this.setBindableProxiedImpl(providerConfig, uniqueIdInvoker);
+            BindableService bindableService = (BindableService) providerConfig.getRef();
+            serviceDef = bindableService.bindService();
+        } else {
+            GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker);
+            genericService.setProxiedImpl(genericService);
+            serviceDef = buildSofaServiceDef(genericService, providerConfig);
+        }
+
+        List<TripleServerInterceptor> interceptorList = buildInterceptorChain(serviceDef);
+        ServerServiceDefinition serviceDefinition = ServerInterceptors.intercept(
+            serviceDef, interceptorList);
+        return serviceDefinition;
     }
 
     private void setBindableProxiedImpl(ProviderConfig providerConfig, Invoker invoker) {

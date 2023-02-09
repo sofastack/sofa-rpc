@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
@@ -24,7 +26,10 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
+import triple.Request;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
@@ -159,6 +164,35 @@ public class UniqueIdInvoker implements Invoker {
             }
 
             return invoker;
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
+    public ClassLoader getServiceClassLoader(SofaRequest sofaRequest) {
+        String uniqueName = this.getServiceUniqueName(sofaRequest);
+        return ReflectCache.getServiceClassLoader(uniqueName);
+    }
+
+    public Method getDeclaredMethod(SofaRequest sofaRequest, Request request) {
+        String uniqueName = this.getServiceUniqueName(sofaRequest);
+        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), request
+            .getArgTypesList()
+            .toArray(new String[0]));
+    }
+
+    private String getServiceUniqueName(SofaRequest sofaRequest) {
+        this.readLock.lock();
+        try {
+            Invoker invoker = this.findInvoker(sofaRequest.getInterfaceName(), getUniqueIdFromInvokeContext());
+            ProviderConfig providerConfig = null;
+            if (invoker instanceof ProviderProxyInvoker) {
+                providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
+            }
+            if (providerConfig == null) {
+                throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find providerConfig");
+            }
+            return ConfigUniqueNameGenerator.getUniqueName(providerConfig);
         } finally {
             this.readLock.unlock();
         }

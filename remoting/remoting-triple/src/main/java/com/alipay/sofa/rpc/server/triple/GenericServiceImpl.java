@@ -18,17 +18,13 @@ package com.alipay.sofa.rpc.server.triple;
 
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
-import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
@@ -52,18 +48,11 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
 
-    protected Invoker           invoker;
-    protected ProviderConfig    providerConfig;
+    protected UniqueIdInvoker   invoker;
 
-    public GenericServiceImpl(Invoker invoker, ProviderConfig providerConfig) {
+    public GenericServiceImpl(UniqueIdInvoker invoker) {
         super();
         this.invoker = invoker;
-        this.providerConfig = providerConfig;
-        String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-        // 缓存接口的方法
-        for (Method m : providerConfig.getProxyClass().getMethods()) {
-            ReflectCache.putOverloadMethodCache(key, m);
-        }
     }
 
     @Override
@@ -74,15 +63,16 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
         String methodName = sofaRequest.getMethodName();
         try {
-            String key = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
-            ClassLoader interfaceClassLoader = providerConfig.getProxyClass().getClassLoader();
-            Thread.currentThread().setContextClassLoader(interfaceClassLoader);
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
+            Thread.currentThread().setContextClassLoader(serviceClassLoader);
 
+            Method declaredMethod = invoker.getDeclaredMethod(sofaRequest, request);
+            if (declaredMethod == null) {
+                throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
+                    methodName);
+            }
             Class[] argTypes = getArgTypes(request);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
-
-            Method declaredMethod = ReflectCache.getOverloadMethodCache(key, methodName, request.getArgTypesList()
-                .toArray(new String[0]));
             Object[] invokeArgs = getInvokeArgs(request, argTypes, serializer);
 
             // fill sofaRequest
