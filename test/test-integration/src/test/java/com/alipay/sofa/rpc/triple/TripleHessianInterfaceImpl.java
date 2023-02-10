@@ -33,6 +33,10 @@ public class TripleHessianInterfaceImpl implements TripleHessianInterface {
         this.flag = "";
     }
 
+    public TripleHessianInterfaceImpl(String flag) {
+        this.flag = flag;
+    }
+
     @Override
     public void call() {
         this.flag = "call";
@@ -42,6 +46,11 @@ public class TripleHessianInterfaceImpl implements TripleHessianInterface {
     public String call1() {
         this.flag = "call1";
         return flag;
+    }
+
+    @Override
+    public String findFlag() {
+        return this.flag;
     }
 
     @Override

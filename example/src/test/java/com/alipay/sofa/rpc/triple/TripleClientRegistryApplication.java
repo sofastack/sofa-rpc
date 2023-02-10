@@ -44,7 +44,7 @@ public class TripleClientRegistryApplication {
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
             //.setRegistry(registryConfig)
             .setApplication(clientApp)
-            .setDirectUrl("tri://10.15.232.18:19544")
+            .setDirectUrl("tri://127.0.0.1:50051")
             .setRegister(false);
 
         SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();

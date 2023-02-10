@@ -30,6 +30,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.clearCacheDeserializerMap;
 import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminerTest.setGenericThrowException;
 
 /**
@@ -89,6 +90,7 @@ public class SofaResponseHessianSerializerTest {
             Assert.assertEquals("MockError", ((MockError) sofaResponse2.getAppResponse()).getMessage());
         } finally {
             setGenericThrowException(false);
+            clearCacheDeserializerMap();
         }
     }
 
@@ -117,6 +119,7 @@ public class SofaResponseHessianSerializerTest {
                             + "found, error: "));
         } finally {
             setGenericThrowException(false);
+            clearCacheDeserializerMap();
         }
     }
 

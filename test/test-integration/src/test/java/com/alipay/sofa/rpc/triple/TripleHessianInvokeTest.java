@@ -270,6 +270,74 @@ public class TripleHessianInvokeTest {
     }
 
     @Test
+    public void testExposeTwoUniqueId() {
+        String uniqueId = "uniqueId";
+        RpcRunningState.setDebugMode(true);
+
+        ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
+
+        ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
+
+        int port = getPort();
+
+        ServerConfig serverConfig = new ServerConfig()
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setPort(port);
+
+        TripleHessianInterfaceImpl ref = new TripleHessianInterfaceImpl("test1");
+        ProviderConfig<TripleHessianInterface> providerConfig = getProviderConfig()
+                .setApplication(serverApp)
+                .setUniqueId(uniqueId)
+                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setInterfaceId(TripleHessianInterface.class.getName())
+                .setRef(ref)
+                .setServer(serverConfig)
+                .setRegister(false);
+
+        providerConfig.export();
+
+        String uniqueId2 = "uniqueId2";
+        RpcRunningState.setDebugMode(true);
+
+        TripleHessianInterfaceImpl ref2 = new TripleHessianInterfaceImpl("test2");
+        ProviderConfig<TripleHessianInterface> providerConfig2 = getProviderConfig()
+                .setApplication(serverApp)
+                .setUniqueId(uniqueId2)
+                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setInterfaceId(TripleHessianInterface.class.getName())
+                .setRef(ref2)
+                .setServer(serverConfig)
+                .setRegister(false);
+        providerConfig2.export();
+
+        ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<>();
+        consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setDirectUrl("localhost:" + port)
+                .setUniqueId(uniqueId)
+                .setRegister(false)
+                .setApplication(clientApp);
+        TripleHessianInterface helloService = consumerConfig.refer();
+        LOGGER.info("Grpc stub bean successful: {}", helloService.getClass().getName());
+        Assert.assertEquals("test1", helloService.findFlag());
+
+        ConsumerConfig<TripleHessianInterface> consumerConfig2 = new ConsumerConfig<>();
+        consumerConfig2.setInterfaceId(TripleHessianInterface.class.getName())
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setDirectUrl("localhost:" + port)
+                .setUniqueId(uniqueId2)
+                .setRegister(false)
+                .setApplication(clientApp);
+        TripleHessianInterface helloService2 = consumerConfig2.refer();
+        LOGGER.info("Grpc stub bean successful: {}", helloService2.getClass().getName());
+        Assert.assertEquals("test2", helloService2.findFlag());
+
+        providerConfig2.unExport();
+        providerConfig.unExport();
+        serverConfig.destroy();
+    }
+
+    @Test
     public void testTripleRpcInvokeContext() {
         ApplicationConfig clientApp = new ApplicationConfig().setAppName("triple-client");
         ApplicationConfig serverApp = new ApplicationConfig().setAppName("triple-server");
