@@ -72,9 +72,10 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      * 提前注册序列化器
      */
     static {
-        String extensionAlias = RpcConfigs.getOrDefaultValue(RpcOptions.BOLT_SERIALIZER_REGISTER_EXTENSION, "sofaRpcSerializationRegister");
+        String extensionAlias = RpcConfigs.getOrDefaultValue(RpcOptions.BOLT_SERIALIZER_REGISTER_EXTENSION,
+            "sofaRpcSerializationRegister");
         ExtensionLoaderFactory.getExtensionLoader(AbstractSerializationRegister.class)
-                .getExtension(extensionAlias).doRegisterCustomSerializer();
+            .getExtension(extensionAlias).doRegisterCustomSerializer();
     }
 
     /**
