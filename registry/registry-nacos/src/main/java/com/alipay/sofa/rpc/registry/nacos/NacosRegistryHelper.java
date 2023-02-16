@@ -83,7 +83,7 @@ class NacosRegistryHelper {
 
                 // set host port
                 String host = server.getVirtualHost();
-                if (host == null) {
+                if (StringUtils.isEmpty(host)) {
                     host = server.getHost();
                     if (NetUtils.isLocalHost(host) || NetUtils.isAnyHost(host)) {
                         host = SystemInfo.getLocalHost();
