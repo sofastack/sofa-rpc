@@ -14,8 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.bootstrap;
-
 /**
  * 启动相关的类，包括发布引用服务的启动类，扩展接口等
  */
+package com.alipay.sofa.rpc.bootstrap;
+

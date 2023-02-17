@@ -16,14 +16,10 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
-import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.jackson.generic.GenericService;
+import com.alipay.sofa.rpc.codec.jackson.generic.GenericServiceImpl;
+import com.alipay.sofa.rpc.codec.jackson.generic.MyReq;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoRequest2;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoResponse;
@@ -41,6 +37,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -50,14 +54,6 @@ public class JacksonSerializerTest {
 
     @Test
     public void encodeAndDecode() {
-        boolean error = false;
-        try {
-            serializer.encode(null, null);
-        } catch (Exception e) {
-            error = true;
-        }
-        Assert.assertTrue(error);
-
         DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("a");
         AbstractByteBuf byteBuf = serializer.encode(demoRequest, null);
@@ -68,7 +64,7 @@ public class JacksonSerializerTest {
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
 
-        error = false;
+        boolean error = false;
         try {
             serializer.encode(new Date(), null);
         } catch (Exception e) {
@@ -397,7 +393,7 @@ public class JacksonSerializerTest {
     private SofaRequest buildSayRequest() throws NoSuchMethodException {
         final DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("name");
-        return buildRequest("say", new Object[] { demoRequest });
+        return buildRequest("say", new Object[] { demoRequest }, DemoService.class);
     }
 
     private SofaRequest buildSay2Request() throws NoSuchMethodException {
@@ -407,7 +403,7 @@ public class JacksonSerializerTest {
         Map<String, String> ctx = new HashMap<String, String>();
         ctx.put("abc", "123");
 
-        return buildRequest("say2", new Object[] { demoRequest, ctx, 123 });
+        return buildRequest("say2", new Object[] { demoRequest, ctx, 123 }, DemoService.class);
     }
 
     private SofaRequest buildSay3Request() throws NoSuchMethodException {
@@ -417,15 +413,22 @@ public class JacksonSerializerTest {
         List<DemoRequest> list = new ArrayList<DemoRequest>();
         list.add(demoRequest);
 
-        return buildRequest("say3", new Object[] { list });
+        return buildRequest("say3", new Object[] { list }, DemoService.class);
     }
 
-    private SofaRequest buildRequest(String methodName, Object[] args) throws NoSuchMethodException {
+    private SofaRequest buildGenericRequest() throws NoSuchMethodException {
+        final MyReq myReq = new MyReq();
+        myReq.setName("hello");
+
+        return buildRequest("hello", new Object[] { myReq }, GenericService.class);
+    }
+
+    private SofaRequest buildRequest(String methodName, Object[] args, Class clazz) throws NoSuchMethodException {
         SofaRequest request = new SofaRequest();
-        request.setInterfaceName(DemoService.class.getName());
+        request.setInterfaceName(clazz.getName());
         request.setMethodName(methodName);
         Method method = null;
-        for (Method m : DemoService.class.getMethods()) {
+        for (Method m : clazz.getMethods()) {
             if (m.getName().equals(methodName)) {
                 method = m;
             }
@@ -437,7 +440,7 @@ public class JacksonSerializerTest {
             argSigs.add(req.getClass().getName());
         }
         request.setMethodArgSigs(argSigs.toArray(new String[argSigs.size()]));
-        request.setTargetServiceUniqueName(DemoService.class.getName() + ":1.0");
+        request.setTargetServiceUniqueName(clazz.getName() + ":1.0");
         request.setTargetAppName("targetApp");
         request.setSerializeType((byte) 12);
         request.setTimeout(1024);
@@ -501,4 +504,86 @@ public class JacksonSerializerTest {
 
     }
 
+    @Test(expected = ClassCastException.class)
+    public void testGenericSofaRequestFail() throws Exception {
+        AbstractSerializer.clear();
+
+        SofaRequest request = buildGenericRequest();
+        AbstractByteBuf data = serializer.encode(request, null);
+
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, GenericService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "hello");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put("unkown", "yes");
+
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
+        Object[] methodArgs = newRequest.getMethodArgs();
+        MyReq req = (MyReq) methodArgs[0];
+    }
+
+    @Test
+    public void testGenericSofaRequestSuccess() throws Exception {
+        AbstractSerializer.registerGenericService(GenericService.class.getCanonicalName() + ":1.0",
+            GenericServiceImpl.class.getName());
+
+        SofaRequest request = buildGenericRequest();
+        AbstractByteBuf data = serializer.encode(request, null);
+
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, GenericService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "hello");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        head.put("unkown", "yes");
+
+        SofaRequest newRequest = new SofaRequest();
+        serializer.decode(data, newRequest, head);
+        Object[] methodArgs = newRequest.getMethodArgs();
+        MyReq req = (MyReq) methodArgs[0];
+        Assert.assertNotNull(req);
+        Assert.assertEquals(req.getName(), "hello");
+
+        AbstractSerializer.clear();
+    }
+
+    @Test
+    public void testSerializeNull() {
+        //Object -> null
+        AbstractByteBuf nullByteBuf = serializer.encode(null, null);
+        DemoRequest nullObject = (DemoRequest) serializer.decode(nullByteBuf, DemoRequest.class, null);
+        Assert.assertNull(nullObject);
+
+        //String -> null
+        AbstractByteBuf nullByteBuf2 = serializer.encode(null, null);
+        String nullStr = (String) serializer.decode(nullByteBuf2, String.class, null);
+        Assert.assertNull(nullStr);
+
+        nullByteBuf2 = serializer.encode("xxx", null);
+        nullStr = (String) serializer.decode(nullByteBuf2, String.class, null);
+        Assert.assertEquals("xxx", nullStr);
+
+        // int (...) -> init
+        AbstractByteBuf nullByteBuf3 = serializer.encode(null, null);
+        int nullInt = (int) serializer.decode(nullByteBuf3, int.class, null);
+        Assert.assertEquals(0, nullInt);
+    }
+
+    @Test
+    public void testDecodeSofaResponse() {
+        AbstractByteBuf nullByteBuf = serializer.encode(null, null);
+        JacksonSerializer jacksonSerializer = new JacksonSerializer();
+        SofaResponse sofaResponse = new SofaResponse();
+        Map<String, String> ctx = new HashMap<>();
+        ctx.put(RemotingConstants.HEAD_TARGET_SERVICE, "xxx");
+        ctx.put(RemotingConstants.HEAD_METHOD_NAME, "xxx");
+        ctx.put(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
+        jacksonSerializer.decode(nullByteBuf, sofaResponse, ctx);
+        Assert.assertTrue(sofaResponse.isError());
+        Assert.assertEquals("", sofaResponse.getErrorMsg());
+    }
 }

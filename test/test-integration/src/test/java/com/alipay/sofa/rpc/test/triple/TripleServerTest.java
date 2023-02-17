@@ -242,10 +242,53 @@ public class TripleServerTest {
         Assert.assertTrue(exp);
     }
 
-    public interface SampleService {
+    @Test
+    public void testExposeTwoUniqueId() {
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
 
-        String hello(String name);
+        int port = 50052;
 
+        ServerConfig serverConfig = new ServerConfig()
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setPort(port);
+
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+                .setApplication(applicationConfig)
+                .setUniqueId("abc")
+                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+                .setRef(new GreeterImpl())
+                .setServer(serverConfig);
+
+        providerConfig.export();
+
+        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig2 = new ProviderConfig<SofaGreeterTriple.IGreeter>()
+                .setApplication(applicationConfig)
+                .setUniqueId("abcd")
+                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+                .setRef(new GreeterImpl2())
+                .setServer(serverConfig);
+        providerConfig2.export();
+
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<>();
+        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setUniqueId("abc")
+                .setDirectUrl("tri://127.0.0.1:" + port);
+        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
+        HelloRequest.DateTime dateTime = HelloRequest.DateTime.newBuilder().setDate("2018-12-28").setTime("11:13:00")
+                .build();
+        HelloRequest request = HelloRequest.newBuilder().setName("world").setDateTime(dateTime).build();
+        Assert.assertEquals("Hello world", greeterBlockingStub.sayHello(request).getMessage());
+
+        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig2 = new ConsumerConfig<>();
+        consumerConfig2.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                .setUniqueId("abcd")
+                .setDirectUrl("tri://127.0.0.1:" + port);
+        SofaGreeterTriple.IGreeter greeterBlockingStub2 = consumerConfig2.refer();
+        Assert.assertEquals("Hello2 world", greeterBlockingStub2.sayHello(request).getMessage());
     }
 
     @BeforeClass

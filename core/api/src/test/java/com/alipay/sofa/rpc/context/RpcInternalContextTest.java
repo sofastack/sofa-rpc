@@ -24,12 +24,20 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
@@ -226,6 +234,49 @@ public class RpcInternalContextTest {
             Assert.assertEquals(null, task1.get()[0]);
             Assert.assertEquals("TransmittableThreadLocal-value-set-in-parent", task1.get()[1]);
         }
+    }
 
+    @Test
+    public void testConcurrentCall() throws ExecutionException, InterruptedException {
+        for (int i = 0; i < 20; i++) {
+            testMultiThreadCall();
+        }
+    }
+
+    private void testMultiThreadCall() throws ExecutionException, InterruptedException {
+        RpcInternalContext.getContext();
+        RpcInternalContext.pushContext();
+        ExecutorService newThreadPool = new ThreadPoolExecutor(10, 10,
+                10L, TimeUnit.SECONDS,
+                new LinkedBlockingDeque<>(10));
+        CountDownLatch countDownLatch = new CountDownLatch(10);
+        List<Future<String>> futureList = new ArrayList<>();
+        for(int i=0; i<20 ;i++){
+            Future<String> future = newThreadPool.submit(new Callable() {
+                @Override
+                public Object call() throws Exception {
+                    countDownLatch.countDown();
+                    countDownLatch.await();
+                    try {
+                        RpcInternalContext.getContext();
+                        RpcInternalContext.pushContext();
+                        RpcInternalContext.removeContext();
+                        RpcInternalContext.popContext();
+                        return null;
+                    } catch (NoSuchElementException e) {
+                        Assert.fail();
+                    }
+                    return null;
+                }
+            });
+            futureList.add(future);
+        }
+
+        for (Future future: futureList){
+            future.get();
+        }
+        RpcInvokeContext.removeContext();
+        RpcInternalContext.popContext();
+        RpcInternalContext.removeAllContext();
     }
 }

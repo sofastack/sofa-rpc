@@ -16,13 +16,6 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
@@ -41,6 +34,13 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 /**
  * Json serializer.
@@ -101,9 +101,7 @@ public class JacksonSerializer extends AbstractSerializer {
 
     @Override
     public AbstractByteBuf encode(Object object, Map<String, String> context) throws SofaRpcException {
-        if (object == null) {
-            throw buildSerializeError("Unsupported null message!");
-        } else if (object instanceof SofaRequest) {
+        if (object instanceof SofaRequest) {
             return encodeSofaRequest((SofaRequest) object, context);
         } else if (object instanceof SofaResponse) {
             return encodeSofaResponse((SofaResponse) object, context);
@@ -211,7 +209,12 @@ public class JacksonSerializer extends AbstractSerializer {
 
         // according interface and method name to find parameter types
         JavaType[] requestClassList = jacksonHelper.getReqClass(targetService, sofaRequest.getMethodName());
-        Object[] reqList = decode(data, requestClassList);
+        JavaType[] requestClassListDecode = requestClassList;
+        if (genericServiceMap.containsKey(targetService)) {
+            requestClassListDecode = jacksonHelper.getReqClass(genericServiceMap.get(targetService),
+                sofaRequest.getMethodName());
+        }
+        Object[] reqList = decode(data, requestClassListDecode);
         sofaRequest.setMethodArgs(reqList);
         sofaRequest.setMethodArgSigs(parseArgSigs(requestClassList));
     }
@@ -262,7 +265,7 @@ public class JacksonSerializer extends AbstractSerializer {
         } catch (SofaRpcException e) {
             throw e;
         } catch (IOException e) {
-            throw buildDeserializeError(e.getMessage());
+            throw buildDeserializeError(e.getMessage(), e);
         }
 
     }
@@ -307,6 +310,9 @@ public class JacksonSerializer extends AbstractSerializer {
         }
         if (isError) {
             String errorMessage = (String) decode(data, String.class, head);
+            if (errorMessage == null) {
+                errorMessage = "";
+            }
             sofaResponse.setErrorMsg(errorMessage);
         } else {
             // according interface and method name to find paramter types

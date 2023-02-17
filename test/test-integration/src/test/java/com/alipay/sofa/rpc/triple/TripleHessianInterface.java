@@ -26,6 +26,8 @@ public interface TripleHessianInterface {
 
     String call1();
 
+    String findFlag();
+
     Response call2(Request request);
 
     boolean testPressureMark(String name);

@@ -16,9 +16,11 @@
  */
 package com.alipay.sofa.rpc.bootstrap;
 
+import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -183,6 +185,12 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     LOGGER.errorWithApp(appName,
                         LogCodes.getLog(LogCodes.ERROR_REGISTER_PROCESSOR_TO_SERVER, serverConfig.getId()), e);
                 }
+            }
+
+            //如果是泛型接口则需要在JSON序列化器中注册跟真实实现类的对应关系，因为反序列化时无法从泛型接口中拿到真实的数据类型
+            if (providerConfig.getProxyClass().getTypeParameters().length > 0) {
+                String serviceName = ConfigUniqueNameGenerator.getUniqueName(providerConfig);
+                AbstractSerializer.registerGenericService(serviceName, providerConfig.getRef().getClass().getName());
             }
 
             // 注册到注册中心

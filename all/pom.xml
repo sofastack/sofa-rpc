@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.8.4-SNAPSHOT</version>
+    <version>5.9.1</version>
 
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -69,7 +69,7 @@
         <bolt.swagger.version>1.5.18</bolt.swagger.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
-        <grpc.version>1.33.0</grpc.version>
+        <grpc.version>1.33.1</grpc.version>
         <guava.version>27.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
     </properties>
@@ -284,6 +284,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-metrics-prometheus</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-doc-swagger</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -382,6 +387,16 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpmime</artifactId>
             <version>${httpclient.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-all</artifactId>
+            <version>${grpc.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-context</artifactId>
+            <version>${grpc.version}</version>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
@@ -503,6 +518,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>
                                     <include>com.alipay.sofa:sofa-rpc-metrics-lookout</include>
                                     <include>com.alipay.sofa:sofa-rpc-metrics-micrometer</include>
+                                    <include>com.alipay.sofa:sofa-rpc-metrics-prometheus</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-consul</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-local</include>
                                     <include>com.alipay.sofa:sofa-rpc-registry-zk</include>
@@ -616,6 +632,12 @@
                                 </goals>
                             </execution>
                         </executions>
+                        <configuration>
+                            <gpgArguments>
+                                <arg>--pinentry-mode</arg>
+                                <arg>loopback</arg>
+                            </gpgArguments>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

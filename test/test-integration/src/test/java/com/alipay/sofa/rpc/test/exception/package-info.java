@@ -14,8 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.exception;
-
-/*
+/**
  * 测试业务的异常捕获
  */
+package com.alipay.sofa.rpc.test.exception;

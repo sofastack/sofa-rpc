@@ -16,15 +16,22 @@
  */
 package com.alipay.sofa.rpc.codec;
 
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.log.LogCodes;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public abstract class AbstractSerializer implements Serializer {
+
+    protected static Map<String, String> genericServiceMap = new ConcurrentHashMap<>();
 
     protected SofaRpcException buildSerializeError(String message) {
         return new SofaRpcException(getErrorCode(true), LogCodes.getLog(LogCodes.ERROR_SERIALIZER, message));
@@ -53,5 +60,17 @@ public abstract class AbstractSerializer implements Serializer {
         } else {
             return RpcErrorType.UNKNOWN;
         }
+    }
+
+    //注册泛化接口对应的实际实现类型
+    public static void registerGenericService(String serviceName, String className) {
+        if (StringUtils.isNotBlank(serviceName) && StringUtils.isNotBlank(className)) {
+            genericServiceMap.put(serviceName, className);
+        }
+    }
+
+    @VisibleForTesting
+    public static void clear() {
+        genericServiceMap.clear();
     }
 }

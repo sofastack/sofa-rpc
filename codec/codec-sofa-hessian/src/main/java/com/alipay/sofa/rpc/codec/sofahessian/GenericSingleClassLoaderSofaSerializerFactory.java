@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
 /**
- * 
+ *
  * @author <a href="mailto:caojie.cj@antfin.com">CaoJie</a>
  */
 public class GenericSingleClassLoaderSofaSerializerFactory extends SingleClassLoaderSofaSerializerFactory {
@@ -89,6 +89,13 @@ public class GenericSingleClassLoaderSofaSerializerFactory extends SingleClassLo
         // 查看是否已经包含反序列化器
         Deserializer deserializer = DESERIALIZER_MAP.get(type);
         if (deserializer != null) {
+            return deserializer;
+        }
+
+        // 自定义Throwable采用JavaDeserializer，反序列化成Throwable而不是GenericObject
+        deserializer = getDeserializerForCustomThrowable(type);
+        if (deserializer != null) {
+            DESERIALIZER_MAP.putIfAbsent(type, deserializer);
             return deserializer;
         }
 

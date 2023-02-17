@@ -24,8 +24,10 @@ import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.TracerCompatibleConstants;
+import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.JSONUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -80,6 +82,10 @@ public class TripleTracerAdapter {
         header.put(RemotingConstants.HEAD_METHOD_NAME, sofaRequest.getMethodName());
         header.put(RemotingConstants.HEAD_TARGET_SERVICE, sofaRequest.getTargetServiceUniqueName());
         header.put(RemotingConstants.HEAD_TARGET_APP, sofaRequest.getTargetAppName());
+        Map<String, Object> requestProps = sofaRequest.getRequestProps();
+        if (requestProps != null) {
+            CodecUtils.flatCopyTo("", requestProps, header);
+        }
         //客户端的启动
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         //获取并不弹出
@@ -204,9 +210,10 @@ public class TripleTracerAdapter {
                     .put(TracerCompatibleConstants.RPC_ID_KEY, requestHeaders.get(TripleHeadKeys.HEAD_KEY_RPC_ID));
             }
 
+            String uniqueId = "";
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION)) {
-                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID,
-                    requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION));
+                uniqueId = requestHeaders.get(TripleHeadKeys.HEAD_KEY_SERVICE_VERSION);
+                RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID, uniqueId);
             } else {
                 RpcInvokeContext.getContext().put(TripleContants.SOFA_UNIQUE_ID, "");
             }
@@ -262,7 +269,8 @@ public class TripleTracerAdapter {
             SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
             if (serverSpan != null) {
                 //FIXME modify the dep relation
-                serverSpan.setTag("service", sofaRequest.getTargetServiceUniqueName());
+                serverSpan.setTag("service",
+                    ConfigUniqueNameGenerator.getUniqueName(sofaRequest.getInterfaceName(), null, uniqueId));
                 serverSpan.setTag("method", methodName);
                 // 从请求里获取ConsumerTracerFilter额外传递的信息
                 serverSpan.setTag("remote.app", (String) sofaRequest.getRequestProp(HEAD_APP_NAME));

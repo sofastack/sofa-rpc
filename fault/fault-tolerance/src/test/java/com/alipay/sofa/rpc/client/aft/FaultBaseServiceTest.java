@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.client.aft;
 
+import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.client.aft.bean.FaultHelloService;
 import com.alipay.sofa.rpc.client.aft.bean.HelloServiceTimeOutImpl;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -37,6 +38,8 @@ public abstract class FaultBaseServiceTest extends FaultBaseTest {
         // test reuse client transport
         consumerConfigNotUse.refer();
         helloService = consumerConfig.refer();
+        ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
+        providerInfo.setWeight(100);
     }
 
     @After

@@ -274,7 +274,7 @@ public class LogCodes {
     public static final String                 ERROR_UNSUPPORT_TYPE                       = "020050016";
 
     // 02006 addressholder
-    public static final String                 ERROR_NO_AVAILBLE_PROVIDER                 = "020060001";
+    public static final String                 ERROR_NO_AVAILABLE_PROVIDER                = "020060001";
     public static final String                 LOCALFILEREGISTRY_FAIL_READURL             = "020060002";
     public static final String                 ERROR_LOAD_ADDRESS_HOLDER                  = "020060003";
     // 02007 cache

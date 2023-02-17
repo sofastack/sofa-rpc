@@ -18,19 +18,15 @@ package com.alipay.sofa.rpc.server.triple;
 
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
-import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
-import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.google.protobuf.ByteString;
@@ -52,32 +48,31 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GenericServiceImpl.class);
 
-    protected Invoker           invoker;
-    protected Class             proxyClass;
+    protected UniqueIdInvoker   invoker;
 
-    public GenericServiceImpl(Invoker invoker, Class proxyClass) {
+    public GenericServiceImpl(UniqueIdInvoker invoker) {
         super();
         this.invoker = invoker;
-        this.proxyClass = proxyClass; // todo use reflect to get Class
     }
 
     @Override
     public void generic(Request request, StreamObserver<Response> responseObserver) {
 
-        SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
-
-        String methodName = sofaRequest.getMethodName();
-        String interfaceName = sofaRequest.getInterfaceName();
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
-        try {
-            Class proxyClass = ClassTypeUtils.getClass(interfaceName);
-            ClassLoader interfaceClassLoader = proxyClass.getClassLoader();
-            Thread.currentThread().setContextClassLoader(interfaceClassLoader);
 
+        SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
+        String methodName = sofaRequest.getMethodName();
+        try {
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
+            Thread.currentThread().setContextClassLoader(serviceClassLoader);
+
+            Method declaredMethod = invoker.getDeclaredMethod(sofaRequest, request);
+            if (declaredMethod == null) {
+                throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
+                    methodName);
+            }
             Class[] argTypes = getArgTypes(request);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
-
-            Method declaredMethod = proxyClass.getDeclaredMethod(methodName, argTypes);
             Object[] invokeArgs = getInvokeArgs(request, argTypes, serializer);
 
             // fill sofaRequest
