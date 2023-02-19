@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.common.json;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -47,6 +48,8 @@ public class TestJsonBean {
     private transient String        transString;
     @JSONIgnore
     private String                  ignoreString;
+
+    private Map<String, Object>     map;
 
     public String getName() {
         return name;
@@ -128,6 +131,10 @@ public class TestJsonBean {
     public void setStatus(Status status) {
         this.status = status;
     }
+
+    public Map<String, Object> getMap() { return map; }
+
+    public void setMap(Map<String, Object> map) { this.map = map; }
 
     public enum Status {
         START(0, "启动"),
