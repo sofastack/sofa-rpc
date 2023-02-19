@@ -84,7 +84,8 @@ public class BeanSerializer {
             }
             return array;
         } else if (bean instanceof Map) {
-            Map map = new LinkedHashMap<>((Map) bean);
+//            Map map = new LinkedHashMap<>((Map) bean);
+            Map map = (Map) bean;
             Iterator itr = map.entrySet().iterator();
             Map.Entry entry = null;
             while (itr.hasNext()) {
@@ -131,11 +132,12 @@ public class BeanSerializer {
                     + "." + field.getName() + " error! ", e);
             }
         }
-        if (map.size() == 0) {
-            addType = true;
-        }
+//        if (map.size() == 0) {
+//            addType = true;
+//        }
         if (addType) {
-            String typeName = beanClass.getName();
+//            String typeName = beanClass.getName();
+            String typeName = beanClass.getCanonicalName();
             if (!typeName.startsWith("java.")
                 && !typeName.startsWith("javax.")
                 && !typeName.startsWith("sun.")) {

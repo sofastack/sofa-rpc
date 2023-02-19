@@ -34,16 +34,30 @@ public class JSONTest {
         TestJsonBean bean = new TestJsonBean();
         bean.setName("xxxx");
         bean.setAge(123);
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("key", new Object());
-        bean.setMap(map);
         String str = JSON.toJSONString(bean);
         Assert.assertTrue(str.contains("\"Name\":\"xxxx\""));
 
         str = JSON.toJSONString(bean, true);
         Assert.assertTrue(str.contains(JSON.CLASS_KEY));
+    }
 
+    @Test
+    public void BeanWithMapOriginalObjectTest() {
+        TestJsonBean bean = new TestJsonBean();
+        bean.setName("xxxx");
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", new Object());
+        bean.setMap(map);
+        String jsonString = JSON.toJSONString(bean, true);
         bean.getMap().values().forEach(value -> Assert.assertEquals(value.getClass(), Object.class));
+    }
+
+    @Test
+    public void BeanWithInnerClassDeserializationTest() {
+        TestJsonBean bean = new TestJsonBean();
+        bean.setName("xxxx");
+        String jsonString = JSON.toJSONString(bean, true);
+        Assert.assertEquals(JSON.parseObject(jsonString, TestJsonBean.class).getInnerBean().getClass(), TestJsonBean.InnerBean.class);
     }
 
 }
