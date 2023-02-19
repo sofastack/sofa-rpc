@@ -131,9 +131,6 @@ public class BeanSerializer {
                     + "." + field.getName() + " error! ", e);
             }
         }
-        if (map.size() == 0) {
-            addType = true;
-        }
         if (addType) {
             String typeName = beanClass.getName();
             if (!typeName.startsWith("java.")
