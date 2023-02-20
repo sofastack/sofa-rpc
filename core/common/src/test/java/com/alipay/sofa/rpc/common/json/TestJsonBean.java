@@ -53,9 +53,12 @@ public class TestJsonBean {
 
     private final InnerBean         innerBean;
 
-    public static class InnerBean {}
+    public static class InnerBean {
+    }
 
-    public TestJsonBean() { this.innerBean = new InnerBean(); }
+    public TestJsonBean() {
+        this.innerBean = new InnerBean();
+    }
 
     public String getName() {
         return name;
@@ -138,11 +141,17 @@ public class TestJsonBean {
         this.status = status;
     }
 
-    public Map<String, Object> getMap() { return map; }
+    public Map<String, Object> getMap() {
+        return map;
+    }
 
-    public void setMap(Map<String, Object> map) { this.map = map; }
+    public void setMap(Map<String, Object> map) {
+        this.map = map;
+    }
 
-    public InnerBean getInnerBean() { return innerBean; }
+    public InnerBean getInnerBean() {
+        return innerBean;
+    }
 
     public enum Status {
         START(0, "启动"),

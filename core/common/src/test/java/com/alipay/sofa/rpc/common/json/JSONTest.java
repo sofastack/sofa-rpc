@@ -57,7 +57,8 @@ public class JSONTest {
         TestJsonBean bean = new TestJsonBean();
         bean.setName("xxxx");
         String jsonString = JSON.toJSONString(bean, true);
-        Assert.assertEquals(JSON.parseObject(jsonString, TestJsonBean.class).getInnerBean().getClass(), TestJsonBean.InnerBean.class);
+        Assert.assertEquals(JSON.parseObject(jsonString, TestJsonBean.class).getInnerBean().getClass(),
+            TestJsonBean.InnerBean.class);
     }
 
 }
