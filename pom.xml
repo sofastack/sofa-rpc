@@ -38,7 +38,7 @@
         <module>fault</module>
         <module>log-common-tools</module>
         <!-- Other Code -->
-        <module>example</module>
+<!--        <module>example</module>-->
         <module>test</module>
     </modules>
 
