@@ -42,7 +42,7 @@ public class JSONTest {
     }
 
     @Test
-    public void BeanWithMapOriginalObjectTest() {
+    public void testBeanWithMapSerialization() {
         TestJsonBean bean = new TestJsonBean();
         bean.setName("xxxx");
         Map<String, Object> map = new HashMap<String, Object>();
@@ -53,7 +53,7 @@ public class JSONTest {
     }
 
     @Test
-    public void BeanWithInnerClassDeserializationTest() {
+    public void testBeanWithInnerClassDeserialization() {
         TestJsonBean bean = new TestJsonBean();
         bean.setName("xxxx");
         String jsonString = JSON.toJSONString(bean, true);
