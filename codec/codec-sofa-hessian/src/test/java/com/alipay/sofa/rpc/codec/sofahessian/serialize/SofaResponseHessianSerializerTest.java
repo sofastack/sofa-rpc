@@ -24,6 +24,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.caucho.hessian.io.Hessian2Output;
 import org.junit.Assert;
+import org.junit.FixMethodOrder;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -38,6 +39,7 @@ import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrow
  * @author xingqi
  * @version : SofaResponseHessianSerializerTest.java, v 0.1 2022年10月20日 4:07 PM xingqi Exp $
  */
+@FixMethodOrder
 public class SofaResponseHessianSerializerTest {
 
     @Test
@@ -94,7 +96,7 @@ public class SofaResponseHessianSerializerTest {
         }
     }
 
-    @Test
+    @Test()
     public void testCustomThrowableDeserializerEnabledForIncompatible() throws Exception {
         setGenericThrowException(true);
         try {

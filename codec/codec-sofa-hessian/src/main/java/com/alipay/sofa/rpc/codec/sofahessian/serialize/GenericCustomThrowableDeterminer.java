@@ -34,7 +34,7 @@ public class GenericCustomThrowableDeterminer {
                                                               .getOrDefault(RpcConfigKeys.GENERIC_THROWABLE_FIELDS);
 
     public static Object judgeCustomThrowableForGenericObject(Object appObject) {
-        if (!GENERIC_THROW_EXCEPTION || appObject == null) {
+        if (!isGenericThrowException() || appObject == null) {
             return appObject;
         }
         if (!(appObject instanceof GenericObject)) {
