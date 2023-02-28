@@ -19,6 +19,9 @@ package com.alipay.sofa.rpc.common.json;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  *
@@ -36,6 +39,26 @@ public class JSONTest {
 
         str = JSON.toJSONString(bean, true);
         Assert.assertTrue(str.contains(JSON.CLASS_KEY));
+    }
+
+    @Test
+    public void testBeanWithMapSerialization() {
+        TestJsonBean bean = new TestJsonBean();
+        bean.setName("xxxx");
+        Map<String, Object> map = new HashMap<String, Object>();
+        map.put("key", new Object());
+        bean.setMap(map);
+        String jsonString = JSON.toJSONString(bean, true);
+        bean.getMap().values().forEach(value -> Assert.assertEquals(value.getClass(), Object.class));
+    }
+
+    @Test
+    public void testBeanWithInnerClassDeserialization() {
+        TestJsonBean bean = new TestJsonBean();
+        bean.setName("xxxx");
+        String jsonString = JSON.toJSONString(bean, true);
+        Assert.assertEquals(JSON.parseObject(jsonString, TestJsonBean.class).getInnerBean().getClass(),
+            TestJsonBean.InnerBean.class);
     }
 
 }
