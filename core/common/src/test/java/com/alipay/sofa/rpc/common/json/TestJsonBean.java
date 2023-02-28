@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.common.json;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -47,6 +48,17 @@ public class TestJsonBean {
     private transient String        transString;
     @JSONIgnore
     private String                  ignoreString;
+
+    private Map<String, Object>     map;
+
+    private final InnerBean         innerBean;
+
+    public static class InnerBean {
+    }
+
+    public TestJsonBean() {
+        this.innerBean = new InnerBean();
+    }
 
     public String getName() {
         return name;
@@ -127,6 +139,18 @@ public class TestJsonBean {
 
     public void setStatus(Status status) {
         this.status = status;
+    }
+
+    public Map<String, Object> getMap() {
+        return map;
+    }
+
+    public void setMap(Map<String, Object> map) {
+        this.map = map;
+    }
+
+    public InnerBean getInnerBean() {
+        return innerBean;
     }
 
     public enum Status {
