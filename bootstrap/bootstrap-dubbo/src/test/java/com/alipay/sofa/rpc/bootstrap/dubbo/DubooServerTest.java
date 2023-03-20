@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
 import com.alibaba.dubbo.common.Constants;
-import com.alibaba.dubbo.common.utils.ConfigUtils;
+import org.apache.dubbo.common.constants.CommonConstants;
 import com.alibaba.dubbo.rpc.RpcContext;
 import com.alibaba.dubbo.rpc.service.GenericService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
@@ -32,6 +32,8 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import org.apache.dubbo.config.ConfigKeys;
+import org.apache.dubbo.config.context.ConfigMode;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -52,10 +54,52 @@ public class DubooServerTest {
 
     ConsumerConfig<DemoService> consumerConfig;
 
+    private static String       OLD_VALUE_SHUTDOWN_WAIT_KEY;
+    private static String       OLD_VALUE_DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE;
+    private static String       OLD_VALUE_DUBBO_CONFIG_MODE;
+
     //dubbo close wait time
-    @AfterClass
+    @BeforeClass
     public static void before() {
-        ConfigUtils.getProperties().put(Constants.SHUTDOWN_WAIT_KEY, "1");
+        RpcRunningState.setUnitTestMode(true);
+        OLD_VALUE_SHUTDOWN_WAIT_KEY = System.getProperty(CommonConstants.SHUTDOWN_WAIT_KEY);
+        OLD_VALUE_DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE = System
+            .getProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE);
+        OLD_VALUE_DUBBO_CONFIG_MODE = System.getProperty(ConfigKeys.DUBBO_CONFIG_MODE);
+
+        System.setProperty(CommonConstants.SHUTDOWN_WAIT_KEY, "1");
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE, "true");
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_MODE, ConfigMode.IGNORE.name());
+    }
+
+    @AfterClass
+    public static void after() {
+        if (OLD_VALUE_SHUTDOWN_WAIT_KEY == null) {
+            System.clearProperty(CommonConstants.SHUTDOWN_WAIT_KEY);
+        } else {
+            System.setProperty(CommonConstants.SHUTDOWN_WAIT_KEY, OLD_VALUE_SHUTDOWN_WAIT_KEY);
+        }
+
+        if (OLD_VALUE_DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE == null) {
+            System.clearProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE);
+        } else {
+            System.setProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE,
+                OLD_VALUE_DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE);
+        }
+
+        if (OLD_VALUE_DUBBO_CONFIG_MODE == null) {
+            System.clearProperty(ConfigKeys.DUBBO_CONFIG_MODE);
+        } else {
+            System.setProperty(ConfigKeys.DUBBO_CONFIG_MODE, OLD_VALUE_DUBBO_CONFIG_MODE);
+        }
+    }
+
+    @After
+    public void afterMethod() {
+        DubboSingleton.destroyAll();
+        RpcRuntimeContext.destroy();
+        RpcInternalContext.removeAllContext();
+        RpcInvokeContext.removeContext();
     }
 
     @Test
@@ -288,7 +332,7 @@ public class DubooServerTest {
         }
     }
 
-    @Test(expected = com.alibaba.dubbo.rpc.RpcException.class)
+    @Test(expected = org.apache.dubbo.rpc.RpcException.class)
     //同步调用,直连,dubbo 消费没有指定dubbo服务版本version
     public void testConsumerWithNoDubboServiceVersion() {
         // 只有1个线程 执行
@@ -323,18 +367,5 @@ public class DubooServerTest {
         String result = demoService.sayHello("xxx");
         Assert.assertTrue(result.equalsIgnoreCase("hello xxx"));
 
-    }
-
-    @BeforeClass
-    public static void adBeforeClass() {
-        RpcRunningState.setUnitTestMode(true);
-    }
-
-    @After
-    public void afterMethod() {
-        DubboSingleton.destroyAll();
-        RpcRuntimeContext.destroy();
-        RpcInternalContext.removeAllContext();
-        RpcInvokeContext.removeContext();
     }
 }
