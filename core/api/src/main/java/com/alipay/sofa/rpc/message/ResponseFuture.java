@@ -20,7 +20,6 @@ import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 /**
  * 响应Future，可以调用get方法进行获取响应，也可以注入监听器，有结果或者都会通知

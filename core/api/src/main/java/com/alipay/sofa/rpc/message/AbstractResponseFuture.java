@@ -34,29 +34,29 @@ public abstract class AbstractResponseFuture<V> extends ResponseFuture<V> {
     /**
      * 返回的结果
      */
-    protected volatile Object                    result;
+    protected volatile Object result;
 
     /**
      * 异常
      */
-    protected volatile Throwable                 cause;
+    protected volatile Throwable cause;
 
     /**
      * 用户设置的超时时间
      */
-    protected final int                          timeout;
+    protected final int timeout;
     /**
      * Future生成时间
      */
-    protected final long                         genTime            = RpcRuntimeContext.now();
+    protected final long genTime = RpcRuntimeContext.now();
     /**
      * Future已发送时间
      */
-    protected volatile long                      sentTime;
+    protected volatile long sentTime;
     /**
      * Future完成的时间
      */
-    protected volatile long                      doneTime;
+    protected volatile long doneTime;
 
     /**
      * 构造函数
@@ -135,7 +135,7 @@ public abstract class AbstractResponseFuture<V> extends ResponseFuture<V> {
                 }
                 incWaiters();
                 try {
-                    for (;;) {
+                    for (; ; ) {
                         try {
                             wait(waitTime / 1000000, (int) (waitTime % 1000000));
                         } catch (InterruptedException e) {
