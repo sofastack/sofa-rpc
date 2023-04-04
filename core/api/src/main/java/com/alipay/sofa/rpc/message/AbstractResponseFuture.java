@@ -111,7 +111,7 @@ public abstract class AbstractResponseFuture<V> extends ResponseFuture<V> {
     protected abstract void releaseIfNeed(Object result);
 
     protected boolean await(long timeout, TimeUnit unit)
-            throws InterruptedException {
+        throws InterruptedException {
         return await0(unit.toNanos(timeout), true);
     }
 
