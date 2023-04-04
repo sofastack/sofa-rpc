@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.message;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 /**
@@ -26,7 +27,7 @@ import java.util.concurrent.Future;
  *
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
-public interface ResponseFuture<V> extends Future<V> {
+public abstract class ResponseFuture<V> extends CompletableFuture<V> {
 
     /**
      * 增加多个响应监听器
@@ -34,7 +35,7 @@ public interface ResponseFuture<V> extends Future<V> {
      * @param sofaResponseCallbacks 多个响应监听器
      * @return 对象本身
      */
-    ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks);
+    public abstract ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks);
 
     /**
      * 增加单个响应监听器
@@ -42,6 +43,6 @@ public interface ResponseFuture<V> extends Future<V> {
      * @param sofaResponseCallback 多个响应监听器
      * @return 对象本身
      */
-    ResponseFuture addListener(SofaResponseCallback sofaResponseCallback);
+    public abstract ResponseFuture addListener(SofaResponseCallback sofaResponseCallback);
 
 }

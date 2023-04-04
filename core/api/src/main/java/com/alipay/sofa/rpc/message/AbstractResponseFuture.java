@@ -27,7 +27,7 @@ import java.util.concurrent.TimeoutException;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
-public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
+public abstract class AbstractResponseFuture<V> extends ResponseFuture<V> {
 
     protected static final CancellationException CANCELLATION_CAUSE = new CancellationException();
 
@@ -97,7 +97,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
 
     /**
      * 解析结果，拿到返回值
-     * 
+     *
      * @return do return self
      * @throws ExecutionException 执行异常
      */
@@ -111,7 +111,7 @@ public abstract class AbstractResponseFuture<V> implements ResponseFuture<V> {
     protected abstract void releaseIfNeed(Object result);
 
     protected boolean await(long timeout, TimeUnit unit)
-        throws InterruptedException {
+            throws InterruptedException {
         return await0(unit.toNanos(timeout), true);
     }
 
