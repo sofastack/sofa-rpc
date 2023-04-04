@@ -34,7 +34,7 @@ public abstract class ResponseFuture<V> extends CompletableFuture<V> {
      * @param sofaResponseCallbacks 多个响应监听器
      * @return 对象本身
      */
-    public abstract ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks);
+    public abstract ResponseFuture<V> addListeners(List<SofaResponseCallback> sofaResponseCallbacks);
 
     /**
      * 增加单个响应监听器
@@ -42,6 +42,6 @@ public abstract class ResponseFuture<V> extends CompletableFuture<V> {
      * @param sofaResponseCallback 多个响应监听器
      * @return 对象本身
      */
-    public abstract ResponseFuture addListener(SofaResponseCallback sofaResponseCallback);
+    public abstract ResponseFuture<V> addListener(SofaResponseCallback sofaResponseCallback);
 
 }

@@ -31,7 +31,7 @@ import java.util.concurrent.TimeoutException;
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class HystrixResponseFuture implements ResponseFuture {
+public class HystrixResponseFuture extends ResponseFuture {
 
     private Future delegate;
 
