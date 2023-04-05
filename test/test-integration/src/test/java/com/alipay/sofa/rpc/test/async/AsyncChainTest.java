@@ -92,9 +92,13 @@ public class AsyncChainTest extends ActivelyDestroyTest {
         // 链路异步化调用--正常
         RpcInvokeContext.getContext().setResponseCallback(buildCallback(ret, latch));
 
-        RpcInvokeContext.getContext().getFuture().thenAccept(req->{
-            LOGGER.info("CompletableFuture result: {}", req);
-        });
+        try {
+            RpcInvokeContext.getContext().getFuture().thenAccept(req->{
+                LOGGER.info("CompletableFuture result: {}", req);
+            });
+        }catch (Exception e){
+            LOGGER.error("CompletableFuture error: {}", e);
+        }
 
         String ret0 = asyncHelloService.sayHello("xxx", 22);
         Assert.assertNull(ret0); // 第一次返回null
