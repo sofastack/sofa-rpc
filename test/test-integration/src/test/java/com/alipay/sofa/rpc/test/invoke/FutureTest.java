@@ -152,6 +152,10 @@ public class FutureTest extends ActivelyDestroyTest {
             String ret = helloService.sayHello("xxx", 22);
             Assert.assertNull(ret); // 第一次返回null
 
+            RpcInvokeContext.getContext().getFuture().thenAccept(req->{
+                LOGGER.info("RpcInvokeContext CompletableFuture result: {}", req);
+            });
+
             Thread.sleep(1500); // 1s 过去，被rpc设置超时了
             Future future = SofaResponseFuture.getFuture();
             ret = (String) future.get();

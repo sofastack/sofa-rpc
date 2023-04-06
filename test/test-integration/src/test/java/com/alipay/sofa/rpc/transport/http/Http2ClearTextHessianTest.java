@@ -116,9 +116,6 @@ public class Http2ClearTextHessianTest extends ActivelyDestroyTest {
             ResponseFuture<ExampleObj> future = RpcInvokeContext.getContext().getFuture();
             try {
                 response = future.get();
-                RpcInvokeContext.getContext().getFuture().thenAccept(req->{
-                    LOGGER.info("CompletableFuture result: {}", req);
-                });
                 Assert.assertEquals(200, response.getId());
                 Assert.assertEquals("yyyxx", response.getName());
             } catch (Exception e) {
