@@ -25,9 +25,12 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.filter.Filter;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import com.alipay.sofa.rpc.test.HelloService;
 import com.alipay.sofa.rpc.test.HelloServiceImpl;
+import com.alipay.sofa.rpc.triple.TripleHessianInvokeTest;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -43,6 +46,8 @@ import java.util.concurrent.TimeoutException;
  * @author <a href=mailto:zhanggeng@howtimeflies.org>GengZhang</a>
  */
 public class FutureTest extends ActivelyDestroyTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ActivelyDestroyTest.class);
 
     @Test
     public void testAll() {
