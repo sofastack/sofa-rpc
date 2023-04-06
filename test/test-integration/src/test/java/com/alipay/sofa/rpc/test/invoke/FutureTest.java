@@ -47,7 +47,7 @@ import java.util.concurrent.TimeoutException;
  */
 public class FutureTest extends ActivelyDestroyTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ActivelyDestroyTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FutureTest.class);
 
     @Test
     public void testAll() {
