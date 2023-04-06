@@ -25,6 +25,8 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.server.bolt.pb.EchoRequest;
 import com.alipay.sofa.rpc.server.bolt.pb.Group;
@@ -42,6 +44,8 @@ import java.util.concurrent.TimeUnit;
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
 public class Http2ClearTextHessianTest extends ActivelyDestroyTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(Http2ClearTextHessianTest.class);
 
     @Test
     public void testHessian() {
@@ -116,6 +120,9 @@ public class Http2ClearTextHessianTest extends ActivelyDestroyTest {
             ResponseFuture<ExampleObj> future = RpcInvokeContext.getContext().getFuture();
             try {
                 response = future.get();
+                RpcInvokeContext.getContext().getFuture().thenAccept(req->{
+                    LOGGER.info("Http2ClearTextHessianTest CompletableFuture result: {}", req);
+                });
                 Assert.assertEquals(200, response.getId());
                 Assert.assertEquals("yyyxx", response.getName());
             } catch (Exception e) {

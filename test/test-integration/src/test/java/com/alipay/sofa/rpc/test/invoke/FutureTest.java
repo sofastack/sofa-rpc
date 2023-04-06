@@ -158,7 +158,7 @@ public class FutureTest extends ActivelyDestroyTest {
             Assert.assertNull(ret); // 第一次返回null
 
             RpcInvokeContext.getContext().getFuture().thenAccept(req->{
-                LOGGER.info("RpcInvokeContext CompletableFuture result: {}", req);
+                LOGGER.info("FutureTest RpcInvokeContext CompletableFuture result: {}", req);
             });
 
             Thread.sleep(1500); // 1s 过去，被rpc设置超时了
