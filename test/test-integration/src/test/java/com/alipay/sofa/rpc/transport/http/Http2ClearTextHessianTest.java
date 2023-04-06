@@ -119,7 +119,6 @@ public class Http2ClearTextHessianTest extends ActivelyDestroyTest {
                 Assert.assertEquals(200, response.getId());
                 Assert.assertEquals("yyyxx", response.getName());
             } catch (Exception e) {
-                LOGGER.error("CompletableFuture error: {}", e);
                 e.printStackTrace();
                 Assert.fail();
             }
