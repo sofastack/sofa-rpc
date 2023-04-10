@@ -128,7 +128,14 @@ public class JavassistProxy implements Proxy {
                     LOGGER.debug("javassist proxy of interface: {} \r\n{}", interfaceClass,
                         debug != null ? debug.toString() : "");
                 }
-                clazz = mCtc.toClass();
+                // Under jdk 11+, `neighbour` param is required to apply LookUp.defineClass
+                // and avoid reflect calling to Classloader.defineClass(), as calling
+                // Classloader.defineClass() from unnamed module is prohibited, which may
+                // provoke InaccessibleObjectException.
+                clazz = mPool.toClass(mCtc, interfaceClass,
+                    // use tccl as former
+                    Thread.currentThread().getContextClassLoader(),
+                    interfaceClass.getProtectionDomain());
                 PROXY_CLASS_MAP.put(interfaceClass, clazz);
             }
             Object instance = clazz.newInstance();
