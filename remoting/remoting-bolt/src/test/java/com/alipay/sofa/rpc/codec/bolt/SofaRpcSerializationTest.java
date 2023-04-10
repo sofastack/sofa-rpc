@@ -20,7 +20,9 @@ import com.alipay.remoting.exception.DeserializationException;
 import com.alipay.remoting.exception.SerializationException;
 import com.alipay.remoting.rpc.protocol.RpcRequestCommand;
 import com.alipay.remoting.rpc.protocol.RpcResponseCommand;
+import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.core.request.SofaRequest;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.HashMap;
@@ -67,5 +69,39 @@ public class SofaRpcSerializationTest {
             Assert.assertTrue(e.getMessage().contains("traceId=" + traceId + ", rpcId=" + rpcId));
         }
         Assert.assertTrue(exp);
+    }
+
+    @Test
+    public void testSetRequestPropertiesWithHeaderInfo() {
+        String service1 = "testService1";
+        String service2 = "testService2";
+        Map<String, String> headerMap = new HashMap();
+        headerMap.put(RemotingConstants.HEAD_TARGET_SERVICE, service1);
+        SofaRequest sofaRequest = new SofaRequest();
+        SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
+        sofaRpcSerialization.setRequestPropertiesWithHeaderInfo(headerMap, sofaRequest);
+        Assert.assertEquals(service1, sofaRequest.getTargetServiceUniqueName());
+        headerMap.put(RemotingConstants.HEAD_SERVICE, service2);
+        sofaRpcSerialization.setRequestPropertiesWithHeaderInfo(headerMap, sofaRequest);
+        Assert.assertEquals(service2, sofaRequest.getTargetServiceUniqueName());
+    }
+
+    @Test
+    public void testParseRequestHeader(){
+        Map<String, String> headerMap = new HashMap<>();
+        headerMap.put("testKey1","testValue1");
+        headerMap.put("rpc_trace_context.sofaTraceId", "traceId");
+        headerMap.put("rpc_trace_context.sofaRpcId", "rpcId");
+        SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
+        SofaRequest sofaRequest = new SofaRequest();
+        sofaRequest.addRequestProp("testKey1", "testValue11");
+        sofaRequest.addRequestProp("testKey2", "testValue2");
+        sofaRpcSerialization.parseRequestHeader(headerMap, sofaRequest);
+        Assert.assertEquals("testValue1", sofaRequest.getRequestProp("testKey1"));
+        Assert.assertEquals("testValue2", sofaRequest.getRequestProp("testKey2"));
+        Object traceMap = sofaRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME);
+        Assert.assertTrue(traceMap instanceof Map);
+        Assert.assertEquals("traceId",((Map)traceMap).get("sofaTraceId"));
+        Assert.assertEquals("rpcId",((Map)traceMap).get("sofaRpcId"));
     }
 }
