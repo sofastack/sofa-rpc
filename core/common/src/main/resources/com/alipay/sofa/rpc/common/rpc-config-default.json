@@ -304,5 +304,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   //是否禁止开启lookout采集信息
   "connection.validate.sleep": false,
   //是否关闭uniqueId 特殊字符的校验
-  "sofa.rpc.uniqueId.pattern.check": true
+  "sofa.rpc.uniqueId.pattern.check": true,
+  // bolt serializer 的注册器
+  "sofa.rpc.bolt.serializer.register.extension": "sofaRpcSerializationRegister"
 }
