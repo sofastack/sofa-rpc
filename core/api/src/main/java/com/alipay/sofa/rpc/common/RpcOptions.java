@@ -564,8 +564,7 @@ public class RpcOptions {
 
     /**
      * bolt serializer register extension
-     * todo: @junyuan fix version
-     * @since 5.9.2
+     * @since 5.10.0
      */
     public static final String BOLT_SERIALIZER_REGISTER_EXTENSION       = "sofa.rpc.bolt.serializer.register.extension";
 

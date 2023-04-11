@@ -32,7 +32,7 @@ import org.junit.Test;
 public class BoltSerializationInitTest {
 
     @Test
-    public void SerializerRegisterOverrideTest() {
+    public void testSerializerRegisterOverride() {
         AbstractSerializationRegister abstractSerializationRegister = ExtensionLoaderFactory.getExtensionLoader(
             AbstractSerializationRegister.class).getExtension("sofaRpcSerializationRegister");
         abstractSerializationRegister.doRegisterCustomSerializer();

@@ -31,17 +31,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Extension(value = "sofaRpcSerializationRegister")
 public class SofaRpcSerializationRegister extends AbstractSerializationRegister {
 
-    private static final SofaRpcSerialization RPC_SERIALIZATION = new SofaRpcSerialization();
+    private final SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
 
-    private static volatile AtomicBoolean     registered        = new AtomicBoolean(false);
-
-    @Deprecated
-    public static void registerCustomSerializer() {
-        // if someone call this method directly, it still works
-        if (registered.compareAndSet(false, true)) {
-            innerRegisterCustomSerializer();
-        }
-    }
+    private volatile AtomicBoolean     registered           = new AtomicBoolean(false);
 
     @Override
     public void doRegisterCustomSerializer() {
@@ -53,15 +45,15 @@ public class SofaRpcSerializationRegister extends AbstractSerializationRegister 
     /**
      * we can override or rewrite the method
      */
-    protected static void innerRegisterCustomSerializer() {
+    protected void innerRegisterCustomSerializer() {
         // 注册序列化器到bolt
         if (CustomSerializerManager.getCustomSerializer(SofaRequest.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaRequest.class.getName(),
-                RPC_SERIALIZATION);
+                sofaRpcSerialization);
         }
         if (CustomSerializerManager.getCustomSerializer(SofaResponse.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaResponse.class.getName(),
-                RPC_SERIALIZATION);
+                sofaRpcSerialization);
         }
     }
 }
