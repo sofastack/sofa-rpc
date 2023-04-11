@@ -84,7 +84,7 @@ public class BeanSerializer {
             }
             return array;
         } else if (bean instanceof Map) {
-            Map map = (Map) bean;
+            Map map = new LinkedHashMap<>((Map) bean);
             Iterator itr = map.entrySet().iterator();
             Map.Entry entry = null;
             while (itr.hasNext()) {
@@ -132,7 +132,7 @@ public class BeanSerializer {
             }
         }
         if (addType) {
-            String typeName = beanClass.getCanonicalName();
+            String typeName = beanClass.getName();
             if (!typeName.startsWith("java.")
                 && !typeName.startsWith("javax.")
                 && !typeName.startsWith("sun.")) {
