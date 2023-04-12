@@ -26,6 +26,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
+import com.alipay.sofa.rpc.message.AbstractResponseFuture;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import org.junit.Assert;
 import org.junit.Before;
@@ -231,6 +232,63 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
 
     }
 
+    private static class MyResponseFuture extends AbstractResponseFuture<String> {
+
+        /**
+         * 构造函数
+         *
+         * @param timeout
+         */
+        public MyResponseFuture(int timeout) {
+            super(timeout);
+        }
+
+        @Override
+        public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
+            return null;
+        }
+
+        @Override
+        public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
+            return null;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public void notifyListeners() {
+
+        }
+
+        @Override
+        public String get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+
+        @Override
+        protected String getNow() throws ExecutionException {
+            return null;
+        }
+
+        @Override
+        protected void releaseIfNeed(Object result) {
+
+        }
+    }
+
     private void prepareInvokeContext() {
         final RpcInvokeContext context = new RpcInvokeContext();
         context.setResponseCallback(new SofaResponseCallback() {
@@ -238,41 +296,10 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             public void onAppResponse(final Object appResponse, String methodName, RequestBase request) {
                 //放到 future 中方便测试.
                 LOGGER.info("回调成功" + appResponse);
-                context.setFuture(new ResponseFuture<String>() {
-                    @Override
-                    public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
-                        return null;
-                    }
-
-                    @Override
-                    public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
-                        return null;
-                    }
-
-                    @Override
-                    public boolean cancel(boolean mayInterruptIfRunning) {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean isCancelled() {
-                        return false;
-                    }
-
-                    @Override
-                    public boolean isDone() {
-                        return false;
-                    }
-
+                context.setFuture(new MyResponseFuture(1){
                     @Override
                     public String get() throws InterruptedException, ExecutionException {
                         return (String) appResponse;
-                    }
-
-                    @Override
-                    public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
-                        TimeoutException {
-                        return null;
                     }
                 });
             }

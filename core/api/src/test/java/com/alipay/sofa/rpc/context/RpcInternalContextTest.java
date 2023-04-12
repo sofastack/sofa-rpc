@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.context;
 
 import com.alipay.sofa.rpc.client.ProviderHelper;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.message.AbstractResponseFuture;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import org.junit.After;
 import org.junit.Assert;
@@ -136,48 +137,69 @@ public class RpcInternalContextTest {
         Assert.assertNull(context.removeAttachment("11"));
     }
 
+    private static class MyResponseFuture extends AbstractResponseFuture<String> {
+
+        /**
+         * 构造函数
+         *
+         * @param timeout
+         */
+        public MyResponseFuture(int timeout) {
+            super(timeout);
+        }
+
+        @Override
+        public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
+            return null;
+        }
+
+        @Override
+        public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
+            return null;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            return false;
+        }
+
+        @Override
+        public boolean isCancelled() {
+            return false;
+        }
+
+        @Override
+        public boolean isDone() {
+            return false;
+        }
+
+        @Override
+        public void notifyListeners() {
+
+        }
+
+        @Override
+        public String get() throws InterruptedException, ExecutionException {
+            return null;
+        }
+
+        @Override
+        protected String getNow() throws ExecutionException {
+            return null;
+        }
+
+        @Override
+        protected void releaseIfNeed(Object result) {
+
+        }
+    }
+
     @Test
     public void testClear() {
         RpcInternalContext context = RpcInternalContext.getContext();
         context.setRemoteAddress("127.0.0.1", 1234);
         context.setLocalAddress("127.0.0.1", 2345);
-        context.setFuture(new ResponseFuture<String>() {
-            @Override
-            public boolean cancel(boolean mayInterruptIfRunning) {
-                return false;
-            }
-
-            @Override
-            public boolean isCancelled() {
-                return false;
-            }
-
-            @Override
-            public boolean isDone() {
-                return false;
-            }
-
-            @Override
-            public String get() throws InterruptedException, ExecutionException {
-                return null;
-            }
-
-            @Override
-            public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
-                TimeoutException {
-                return null;
-            }
-
-            @Override
-            public ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks) {
-                return null;
-            }
-
-            @Override
-            public ResponseFuture addListener(SofaResponseCallback sofaResponseCallback) {
-                return null;
-            }
-        });
+        context.setFuture(new MyResponseFuture(1));
 
         context.setProviderInfo(ProviderHelper.toProviderInfo("127.0.0.1:80"));
         context.setAttachment("_xxxx", "yyyy");
