@@ -562,4 +562,10 @@ public class RpcOptions {
      */
     public static final String RPC_UNIQUEID_PATTERN_CHECK               = "sofa.rpc.uniqueId.pattern.check";
 
+    /**
+     * bolt serializer register extension
+     * @since 5.10.0
+     */
+    public static final String BOLT_SERIALIZER_REGISTER_EXTENSION       = "sofa.rpc.bolt.serializer.register.extension";
+
 }
