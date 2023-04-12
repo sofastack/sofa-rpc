@@ -280,7 +280,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
 
         @Override
         public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
-                TimeoutException {
+            TimeoutException {
             return null;
         }
 
@@ -302,7 +302,7 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
             public void onAppResponse(final Object appResponse, String methodName, RequestBase request) {
                 //放到 future 中方便测试.
                 LOGGER.info("回调成功" + appResponse);
-                context.setFuture(new MyResponseFuture(1){
+                context.setFuture(new MyResponseFuture(1) {
                     @Override
                     public String get() throws InterruptedException, ExecutionException {
                         return (String) appResponse;
