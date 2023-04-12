@@ -279,6 +279,12 @@ public class InvocationStatDimensionStatTest extends FaultBaseServiceTest {
         }
 
         @Override
+        public String get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException,
+                TimeoutException {
+            return null;
+        }
+
+        @Override
         protected String getNow() throws ExecutionException {
             return null;
         }
