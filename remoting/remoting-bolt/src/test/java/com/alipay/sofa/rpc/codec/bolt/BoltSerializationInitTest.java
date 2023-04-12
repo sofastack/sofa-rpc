@@ -31,6 +31,9 @@ import org.junit.Test;
  */
 public class BoltSerializationInitTest {
 
+    /**
+     * add a serializer to override existing serializer
+     */
     @Test
     public void testSerializerRegisterOverride() {
         AbstractSerializationRegister abstractSerializationRegister = ExtensionLoaderFactory.getExtensionLoader(
