@@ -21,17 +21,14 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.netflix.hystrix.HystrixCommand;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * the {@link Future}(from {@link HystrixCommand#queue()}) wrapper that can be used as a {@link ResponseFuture}
  *
  * @author <a href=mailto:scienjus@gmail.com>ScienJus</a>
  */
-public class HystrixResponseFuture extends ResponseFuture {
+public class HystrixResponseFuture extends CompletableFuture implements ResponseFuture {
 
     private Future delegate;
 
