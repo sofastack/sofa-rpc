@@ -18,16 +18,13 @@ package com.alipay.sofa.rpc.message;
 
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  * @since 5.4.0
  */
-public abstract class AbstractResponseFuture<V> extends ResponseFuture<V> {
+public abstract class AbstractResponseFuture<V> extends CompletableFuture<V> implements ResponseFuture<V> {
 
     protected static final CancellationException CANCELLATION_CAUSE = new CancellationException();
 
