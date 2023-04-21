@@ -30,7 +30,7 @@ import com.alipay.remoting.rpc.exception.InvokeServerBusyException;
 import com.alipay.remoting.rpc.exception.InvokeServerException;
 import com.alipay.remoting.rpc.exception.InvokeTimeoutException;
 import com.alipay.sofa.rpc.client.ProviderInfo;
-import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
+import com.alipay.sofa.rpc.codec.bolt.AbstractSerializationRegister;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
@@ -50,6 +50,7 @@ import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
 import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -96,7 +97,10 @@ public class BoltClientTransport extends ClientTransport {
 
     static {
         RPC_CLIENT.init();
-        SofaRpcSerializationRegister.registerCustomSerializer();
+
+        String extensionAlias = RpcConfigs.getStringValue(RpcOptions.BOLT_SERIALIZER_REGISTER_EXTENSION);
+        ExtensionLoaderFactory.getExtensionLoader(AbstractSerializationRegister.class)
+            .getExtension(extensionAlias).doRegisterCustomSerializer();
     }
 
     /**

@@ -21,9 +21,11 @@ import com.alipay.remoting.BizContext;
 import com.alipay.remoting.InvokeContext;
 import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
 import com.alipay.remoting.rpc.protocol.UserProcessor;
-import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
+import com.alipay.sofa.rpc.codec.bolt.AbstractSerializationRegister;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.SystemInfo;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -40,6 +42,7 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerEndHandleEvent;
 import com.alipay.sofa.rpc.event.ServerReceiveEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -69,7 +72,9 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      * 提前注册序列化器
      */
     static {
-        SofaRpcSerializationRegister.registerCustomSerializer();
+        String extensionAlias = RpcConfigs.getStringValue(RpcOptions.BOLT_SERIALIZER_REGISTER_EXTENSION);
+        ExtensionLoaderFactory.getExtensionLoader(AbstractSerializationRegister.class)
+            .getExtension(extensionAlias).doRegisterCustomSerializer();
     }
 
     /**
