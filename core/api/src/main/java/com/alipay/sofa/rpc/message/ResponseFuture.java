@@ -35,7 +35,7 @@ public interface ResponseFuture<V> extends Future<V>, CompletionStage<V> {
      * @param sofaResponseCallbacks 多个响应监听器
      * @return 对象本身
      */
-    ResponseFuture addListeners(List<SofaResponseCallback> sofaResponseCallbacks);
+    ResponseFuture<V> addListeners(List<SofaResponseCallback> sofaResponseCallbacks);
 
     /**
      * 增加单个响应监听器
@@ -43,6 +43,6 @@ public interface ResponseFuture<V> extends Future<V>, CompletionStage<V> {
      * @param sofaResponseCallback 多个响应监听器
      * @return 对象本身
      */
-    ResponseFuture addListener(SofaResponseCallback sofaResponseCallback);
+    ResponseFuture<V> addListener(SofaResponseCallback sofaResponseCallback);
 
 }
