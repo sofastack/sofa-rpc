@@ -214,6 +214,8 @@ public abstract class AbstractResponseFuture<V> extends CompletableFuture<V> imp
             this.releaseIfNeed(result);
         }
         if (setSuccess0(result)) {
+            //塞回future
+            complete(result);
             notifyListeners();
             return;
         }
@@ -251,6 +253,8 @@ public abstract class AbstractResponseFuture<V> extends CompletableFuture<V> imp
             return;
         }
         if (setFailure0(cause)) {
+            //塞回exception
+            completeExceptionally(cause);
             notifyListeners();
             return;
         }
