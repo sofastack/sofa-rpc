@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -27,10 +28,13 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
+import com.alipay.sofa.rpc.transport.StreamHandler;
 import triple.Request;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -174,14 +178,20 @@ public class UniqueIdInvoker implements Invoker {
         return ReflectCache.getServiceClassLoader(uniqueName);
     }
 
-    public Method getDeclaredMethod(SofaRequest sofaRequest, Request request) {
+    public Method getDeclaredMethod(SofaRequest sofaRequest, Request request, String callType) {
         String uniqueName = this.getServiceUniqueName(sofaRequest);
-        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), request
-            .getArgTypesList()
+        List<String> argTypesList = request.getArgTypesList();
+        if(RpcConstants.INVOKER_TYPE_SERVER_STREAMING.equals(callType)){
+            List<String> a = new ArrayList<>(argTypesList.size()+1);
+            a.add(0, StreamHandler.class.getCanonicalName());
+            a.addAll(argTypesList);
+            argTypesList = a;
+        }
+        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), argTypesList
             .toArray(new String[0]));
     }
 
-    private String getServiceUniqueName(SofaRequest sofaRequest) {
+    public String getServiceUniqueName(SofaRequest sofaRequest) {
         this.readLock.lock();
         try {
             Invoker invoker = this.findInvoker(sofaRequest.getInterfaceName(), getUniqueIdFromInvokeContext());

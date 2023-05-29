@@ -63,7 +63,7 @@ public class GenericServiceImplTest {
         ProviderProxyInvoker invoker = new ProviderProxyInvoker(providerConfig);
         UniqueIdInvoker uniqueIdInvoker = new UniqueIdInvoker();
         uniqueIdInvoker.registerInvoker(providerConfig, invoker);
-        genericService = new GenericServiceImpl(uniqueIdInvoker);
+        genericService = new GenericServiceImpl(uniqueIdInvoker,providerConfig);
         responseObserver = new MockStreamObserver<>();
     }
 
@@ -136,7 +136,7 @@ public class GenericServiceImplTest {
     private Request buildRequest(Method method, Object[] args) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(HelloService.class, method, parameterTypes, args);
-        Request request = TripleClientInvoker.getRequest(sofaRequest, serialization, serializer);
+        Request request = TripleClientInvoker.getRequest(sofaRequest, serialization, serializer, 0);
         Context context = Context.current().withValue(TracingContextKey.getKeySofaRequest(), sofaRequest);
         context.attach();
         return request;
