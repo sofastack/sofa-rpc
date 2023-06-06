@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.server.triple;
 
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -138,6 +140,7 @@ public class TripleServer implements Server {
             .workerEventLoopGroup(constructWorkerEventLoopGroup())
             .executor(bizThreadPool)
             .channelType(constructChannel())
+            .maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE))
             .build();
         this.lock = new ReentrantLock();
     }
