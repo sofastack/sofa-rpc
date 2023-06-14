@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.transport.triple;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -275,6 +277,7 @@ public class TripleClientTransport extends ClientTransport {
         builder.usePlaintext();
         builder.disableRetry();
         builder.intercept(clientHeaderClientInterceptor);
+        builder.maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE));
         return builder.build();
     }
 
