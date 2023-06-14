@@ -17,13 +17,27 @@
 package com.alipay.sofa.rpc.test.triple;
 
 /**
- * @author zhaowang
- * @version : SampleService.java, v 0.1 2022年06月17日 3:33 PM zhaowang
+ * @author Even
+ * @date 2023/6/13 11:33 AM
  */
-public interface SampleService {
+public class SampleServiceImpl implements SampleService {
 
-    String hello(String name);
+    @Override
+    public String hello(String name) {
+        return "Hello! " + name;
+    }
 
-    String messageSize(String msg, int responseSize);
+    @Override
+    public String messageSize(String msg, int responseMessageSize) {
+        if (responseMessageSize > 0) {
+            StringBuilder sb = new StringBuilder();
+            /* 1KB */
+            for (int i = 0; i < responseMessageSize * 1024; i++) {
+                sb.append('a');
+            }
+            return sb.toString();
+        }
+        return msg;
+    }
 
 }
