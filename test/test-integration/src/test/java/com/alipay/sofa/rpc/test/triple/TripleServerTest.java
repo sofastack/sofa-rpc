@@ -300,48 +300,57 @@ public class TripleServerTest {
 
     @Test
     public void testDefaultMessageSize() {
-        int originInboundMessageSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE);
-        Assert.assertEquals(4194304, originInboundMessageSize);
-
-        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
-        int port = 50052;
-        ServerConfig serverConfig = new ServerConfig()
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setPort(port);
-        ProviderConfig<SampleService> providerConfig = new ProviderConfig<SampleService>()
-                .setApplication(applicationConfig)
-                .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setInterfaceId(SampleService.class.getName())
-                .setRef(new SampleServiceImpl())
-                .setServer(serverConfig);
-        providerConfig.export();
-
-        ConsumerConfig<SampleService> consumerConfig = new ConsumerConfig<>();
-        consumerConfig.setInterfaceId(SampleService.class.getName())
-                .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setDirectUrl("tri://127.0.0.1:" + port);
-
-        SampleService sampleService = consumerConfig.refer();
-        String msg = buildMsg(1);
+        boolean originDebugMode = RpcRunningState.isDebugMode();
+        RpcRunningState.setDebugMode(false);
         try {
-            sampleService.messageSize(msg, 5*1024);
-            Assert.fail();
-        } catch (Exception e) {
-            Assert.assertTrue(e.getMessage().contains("gRPC message exceeds maximum size 4194304:"));
-        }
-        msg = buildMsg(5*1024);
+            int originInboundMessageSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE);
+            Assert.assertEquals(4194304, originInboundMessageSize);
 
-        try {
-            sampleService.messageSize(msg, 1);
-            Assert.fail();
-        } catch (Exception e) {
-            // The client actively cancelled the request, resulting in the server returning a CANCELLED error.
-            Assert.assertTrue(e.getMessage().contains("CANCELLED: HTTP/2 error code: CANCEL"));
+            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
+            int port = 50052;
+            ServerConfig serverConfig = new ServerConfig()
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setPort(port);
+            ProviderConfig<SampleService> providerConfig = new ProviderConfig<SampleService>()
+                    .setApplication(applicationConfig)
+                    .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setInterfaceId(SampleService.class.getName())
+                    .setRef(new SampleServiceImpl())
+                    .setServer(serverConfig);
+            providerConfig.export();
+
+            ConsumerConfig<SampleService> consumerConfig = new ConsumerConfig<>();
+            consumerConfig.setInterfaceId(SampleService.class.getName())
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setDirectUrl("tri://127.0.0.1:" + port);
+
+            SampleService sampleService = consumerConfig.refer();
+            String msg = buildMsg(1);
+            try {
+                sampleService.messageSize(msg, 5*1024);
+                Assert.fail();
+            } catch (Exception e) {
+                Assert.assertTrue(e.getMessage().contains("gRPC message exceeds maximum size 4194304:"));
+            }
+            msg = buildMsg(5*1024);
+
+            try {
+                sampleService.messageSize(msg, 1);
+                Assert.fail();
+            } catch (Exception e) {
+                // The client actively cancelled the request, resulting in the server returning a CANCELLED error.
+                Assert.assertTrue(e.getMessage().contains("CANCELLED: HTTP/2 error code: CANCEL"));
+            }
+        } finally {
+            RpcRunningState.setDebugMode(originDebugMode);
         }
+
     }
 
     @Test
     public void testSetInboundMessageSize() {
+        boolean originDebugMode = RpcRunningState.isDebugMode();
+        RpcRunningState.setDebugMode(false);
         int originInboundMessageSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE);
         Assert.assertEquals(4194304, originInboundMessageSize);
         RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE, "8388608");
@@ -374,6 +383,7 @@ public class TripleServerTest {
                 Assert.fail();
             }
         } finally {
+            RpcRunningState.setDebugMode(originDebugMode);
             RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE, originInboundMessageSize);
         }
     }
