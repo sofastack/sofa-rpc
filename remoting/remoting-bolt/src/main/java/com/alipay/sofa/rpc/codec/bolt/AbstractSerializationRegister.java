@@ -14,16 +14,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.test.triple;
+package com.alipay.sofa.rpc.codec.bolt;
+
+import com.alipay.sofa.rpc.ext.Extensible;
 
 /**
- * @author zhaowang
- * @version : SampleService.java, v 0.1 2022年06月17日 3:33 PM zhaowang
+ *
+ * @author junyuan
+ * @version AbstractSerializationRegister.java, v 0.1 2022年12月23日 15:01 junyuan Exp $
  */
-public interface SampleService {
+@Extensible
+public abstract class AbstractSerializationRegister {
 
-    String hello(String name);
-
-    String messageSize(String msg, int responseSize);
+    public abstract void doRegisterCustomSerializer();
 
 }

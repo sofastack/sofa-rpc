@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
 
     <properties>
-        <revision>5.10.0-jdk17-SNAPSHOT</revision>
+        <revision>5.11.0-beta1</revision>
         <javassist.version>3.29.2-GA</javassist.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <netty.version>4.1.77.Final</netty.version>
@@ -32,7 +32,7 @@
         <guava.version>27.0-jre</guava.version>
         <prometheus.client.version>0.16.0</prometheus.client.version>
         <!-- serialization -->
-        <hessian.version>3.3.13</hessian.version>
+        <hessian.version>3.5.0-beta1</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.16.3</protobuf.version>
         <jackson.version>2.12.7</jackson.version>

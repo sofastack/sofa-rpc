@@ -14,11 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.bolt;
+package com.alipay.sofa.rpc.test;
 
 import com.alipay.remoting.CustomSerializerManager;
+import com.alipay.sofa.rpc.codec.bolt.AbstractSerializationRegister;
+import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerialization;
+import com.alipay.sofa.rpc.codec.bolt.SofaRpcSerializationRegister;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
-import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -28,32 +30,25 @@ import java.util.concurrent.atomic.AtomicBoolean;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-@Extension(value = "sofaRpcSerializationRegister")
-public class SofaRpcSerializationRegister extends AbstractSerializationRegister {
+@Extension(value = "sofaRpcSerializationRegister", override = true, order = 20)
+public class TestSofaRpcSerializationRegister extends SofaRpcSerializationRegister {
 
-    private final SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
-
-    private volatile AtomicBoolean     registered           = new AtomicBoolean(false);
-
-    @Override
-    public void doRegisterCustomSerializer() {
-        if (registered.compareAndSet(false, true)) {
-            innerRegisterCustomSerializer();
-        }
-    }
+    private final SofaRpcSerialization rpcSerialization = new SofaRpcSerialization();
 
     /**
      * we can override or rewrite the method
      */
+    @Override
     protected void innerRegisterCustomSerializer() {
         // 注册序列化器到bolt
         if (CustomSerializerManager.getCustomSerializer(SofaRequest.class.getName()) == null) {
             CustomSerializerManager.registerCustomSerializer(SofaRequest.class.getName(),
-                sofaRpcSerialization);
+                rpcSerialization);
         }
-        if (CustomSerializerManager.getCustomSerializer(SofaResponse.class.getName()) == null) {
-            CustomSerializerManager.registerCustomSerializer(SofaResponse.class.getName(),
-                sofaRpcSerialization);
+
+        if (CustomSerializerManager.getCustomSerializer(TestSofaRpcSerializationRegister.class.getName()) == null) {
+            CustomSerializerManager.registerCustomSerializer(TestSofaRpcSerializationRegister.class.getName(),
+                rpcSerialization);
         }
     }
 }

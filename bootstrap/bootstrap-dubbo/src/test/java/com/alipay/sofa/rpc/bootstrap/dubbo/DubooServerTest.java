@@ -96,8 +96,6 @@ public class DubooServerTest {
 
     @After
     public void afterMethod() {
-        DubboSingleton.destroyAll();
-        RpcRuntimeContext.destroy();
         RpcInternalContext.removeAllContext();
         RpcInvokeContext.removeContext();
     }
