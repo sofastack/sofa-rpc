@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import org.apache.dubbo.config.bootstrap.DubboBootstrap;
+import org.apache.dubbo.rpc.model.FrameworkModel;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -61,6 +61,6 @@ public class DubboSingleton {
      * Destroy all dubbo resources
      */
     public static void destroyAll() {
-        DubboBootstrap.getInstance().stop();
+        FrameworkModel.defaultModel().destroy();
     }
 }
