@@ -70,7 +70,7 @@
         <asm.version>7.0</asm.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
-        <grpc.version>1.33.1</grpc.version>
+        <grpc.version>1.53.0</grpc.version>
         <guava.version>27.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
     </properties>
