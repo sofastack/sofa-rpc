@@ -405,6 +405,10 @@ public class RpcOptions {
      */
     public static final String TRANSPORT_BUFFER_SIZE                    = "transport.buffer.size";
     /**
+     * 默认 grpc maxInboundMessageSize大小
+     */
+    public static final String TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE  = "transport.grpc.maxInboundMessageSize";
+    /**
      * 最大IO的buffer大小
      */
     public static final String TRANSPORT_BUFFER_MAX                     = "transport.buffer.max";
@@ -561,5 +565,11 @@ public class RpcOptions {
      * @since 5.9.0
      */
     public static final String RPC_UNIQUEID_PATTERN_CHECK               = "sofa.rpc.uniqueId.pattern.check";
+
+    /**
+     * bolt serializer register extension
+     * @since 5.10.0
+     */
+    public static final String BOLT_SERIALIZER_REGISTER_EXTENSION       = "sofa.rpc.bolt.serializer.register.extension";
 
 }
