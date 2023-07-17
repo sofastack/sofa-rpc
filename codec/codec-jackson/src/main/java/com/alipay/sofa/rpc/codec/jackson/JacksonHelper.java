@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.codec.jackson;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -110,13 +111,28 @@ public class JacksonHelper {
                 break;
             }
         }
+
         if (jsonMethod == null) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
                 methodName));
         }
 
-        // parse request types
-        Type[] parameterTypes = jsonMethod.getGenericParameterTypes();
+        Type[] parameterTypes;
+        Type resType;
+        if (jsonMethod.getDeclaringClass() != clazz && !clazz.isInterface()) {
+            parameterTypes = new Type[1];
+            Type type = clazz.getGenericSuperclass();
+            ParameterizedType parameterizedType = (ParameterizedType) type;
+            // parse request types
+            parameterTypes[0] = parameterizedType.getActualTypeArguments()[0];
+            // parse response types
+            resType = parameterizedType.getActualTypeArguments()[1];
+        } else {
+            // parse request types
+            parameterTypes = jsonMethod.getGenericParameterTypes();
+            // parse response types
+            resType = jsonMethod.getGenericReturnType();
+        }
         JavaType[] javaTypes = new JavaType[parameterTypes.length];
         for (int i = 0; i < parameterTypes.length; i++) {
             JavaType javaType = mapper.getTypeFactory().constructType(parameterTypes[i]);
@@ -124,12 +140,11 @@ public class JacksonHelper {
         }
         requestClassCache.put(key, javaTypes);
 
-        // parse response types
-        Type resType = jsonMethod.getGenericReturnType();
         if (resType == void.class) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_VOID_RETURN, "jackson", clazz.getName()));
         }
         JavaType resJavaType = mapper.getTypeFactory().constructType(resType);
         responseClassCache.put(key, resJavaType);
+
     }
 }
