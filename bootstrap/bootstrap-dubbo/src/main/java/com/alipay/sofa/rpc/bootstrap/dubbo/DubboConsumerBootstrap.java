@@ -16,7 +16,7 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import com.alibaba.dubbo.config.ReferenceConfig;
+import org.apache.dubbo.config.ReferenceConfig;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ProviderGroup;
@@ -100,7 +100,7 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
 
     private void copyApplication(ConsumerConfig<T> consumerConfig, ReferenceConfig<T> referenceConfig) {
         ApplicationConfig applicationConfig = consumerConfig.getApplication();
-        com.alibaba.dubbo.config.ApplicationConfig dubboConfig = new com.alibaba.dubbo.config.ApplicationConfig();
+        org.apache.dubbo.config.ApplicationConfig dubboConfig = new org.apache.dubbo.config.ApplicationConfig();
         dubboConfig.setName(applicationConfig.getAppName());
         referenceConfig.setApplication(dubboConfig);
     }
@@ -140,11 +140,10 @@ public class DubboConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     private void copyMethods(ConsumerConfig<T> consumerConfig, ReferenceConfig<T> referenceConfig) {
         Map<String, MethodConfig> methodConfigs = consumerConfig.getMethods();
         if (CommonUtils.isNotEmpty(methodConfigs)) {
-            List<com.alibaba.dubbo.config.MethodConfig> dubboMethodConfigs =
-                    new ArrayList<com.alibaba.dubbo.config.MethodConfig>();
+            List<org.apache.dubbo.config.MethodConfig> dubboMethodConfigs = new ArrayList<>();
             for (Map.Entry<String, MethodConfig> entry : methodConfigs.entrySet()) {
                 MethodConfig methodConfig = entry.getValue();
-                com.alibaba.dubbo.config.MethodConfig dubboMethodConfig = new com.alibaba.dubbo.config.MethodConfig();
+                org.apache.dubbo.config.MethodConfig dubboMethodConfig = new org.apache.dubbo.config.MethodConfig();
                 dubboMethodConfig.setName(methodConfig.getName());
                 dubboMethodConfig.setParameters(methodConfig.getParameters());
                 dubboMethodConfig.setTimeout(methodConfig.getTimeout());

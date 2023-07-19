@@ -14,10 +14,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.sofahessian;
+package com.alipay.sofa.rpc.codec.common;
 
-import com.alipay.sofa.rpc.common.SofaConfigs;
-import com.alipay.sofa.rpc.common.SofaOptions;
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -30,6 +29,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.alipay.sofa.rpc.common.config.RpcConfigKeys.SERIALIZE_BLACKLIST_OVERRIDE;
+import static com.alipay.sofa.rpc.common.config.RpcConfigKeys.SERIALIZE_WHITELIST_OVERRIDE;
 import static com.alipay.sofa.rpc.common.utils.IOUtils.closeQuietly;
 
 /**
@@ -37,21 +38,24 @@ import static com.alipay.sofa.rpc.common.utils.IOUtils.closeQuietly;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class BlackListFileLoader {
+public class BlackAndWhiteListFileLoader {
 
-    private static final Logger      LOGGER                    = LoggerFactory.getLogger(BlackListFileLoader.class);
+    private static final Logger      LOGGER                     = LoggerFactory
+                                                                    .getLogger(BlackAndWhiteListFileLoader.class);
 
-    public static final List<String> SOFA_SERIALIZE_BLACK_LIST = loadFile("/sofa-rpc/serialize_blacklist.txt");
+    public static final List<String> SOFA_SERIALIZE_BLACK_LIST  = loadBlackListFile("/sofa-rpc/serialize_blacklist.txt");
 
-    static List<String> loadFile(String path) {
-        List<String> blackPrefixList = new ArrayList<String>();
+    public static final List<String> SOFA_SERIALIZER_WHITE_LIST = loadWhiteListFile("/sofa-rpc/serialize_whitelist.txt");
+
+    public static List<String> loadBlackListFile(String path) {
+        List<String> blackPrefixList = new ArrayList<>();
         InputStream input = null;
         try {
-            input = BlackListFileLoader.class.getResourceAsStream(path);
+            input = BlackAndWhiteListFileLoader.class.getResourceAsStream(path);
             if (input != null) {
                 readToList(input, "UTF-8", blackPrefixList);
             }
-            String overStr = SofaConfigs.getStringValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, "");
+            String overStr = SofaConfigs.getOrCustomDefault(SERIALIZE_BLACKLIST_OVERRIDE, "");
             if (StringUtils.isNotBlank(overStr)) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Serialize blacklist will override with configuration: {}", overStr);
@@ -66,6 +70,31 @@ public class BlackListFileLoader {
             closeQuietly(input);
         }
         return blackPrefixList;
+    }
+
+    public static List<String> loadWhiteListFile(String path) {
+        List<String> whitePrefixList = new ArrayList<>();
+        InputStream input = null;
+        try {
+            input = BlackAndWhiteListFileLoader.class.getResourceAsStream(path);
+            if (input != null) {
+                readToList(input, "UTF-8", whitePrefixList);
+            }
+            String overStr = SofaConfigs.getOrCustomDefault(SERIALIZE_WHITELIST_OVERRIDE, "");
+            if (StringUtils.isNotBlank(overStr)) {
+                if (LOGGER.isInfoEnabled()) {
+                    LOGGER.info("Serialize whitelist will override with configuration: {}", overStr);
+                }
+                overrideWhiteList(whitePrefixList, overStr);
+            }
+        } catch (Exception e) {
+            if (LOGGER.isErrorEnabled()) {
+                LOGGER.error(e.getMessage(), e);
+            }
+        } finally {
+            closeQuietly(input);
+        }
+        return whitePrefixList;
     }
 
     /**
@@ -100,12 +129,12 @@ public class BlackListFileLoader {
 
     /**
      * Override blacklist with override string.
-     * 
-     * @param originList Origin black list
+     *
+     * @param originList  Origin black list
      * @param overrideStr The override string
      */
-    static void overrideBlackList(List<String> originList, String overrideStr) {
-        List<String> adds = new LinkedList<String>();
+    public static void overrideBlackList(List<String> originList, String overrideStr) {
+        List<String> adds = new LinkedList<>();
         String[] overrideItems = StringUtils.splitWithCommaOrSemicolon(overrideStr);
         for (String overrideItem : overrideItems) {
             if (StringUtils.isNotBlank(overrideItem)) {
@@ -120,6 +149,21 @@ public class BlackListFileLoader {
                     if (!originList.contains(overrideItem)) {
                         adds.add(overrideItem);
                     }
+                }
+            }
+        }
+        if (adds.size() > 0) {
+            originList.addAll(adds);
+        }
+    }
+
+    public static void overrideWhiteList(List<String> originList, String overrideStr) {
+        List<String> adds = new LinkedList<>();
+        String[] overrideItems = StringUtils.splitWithCommaOrSemicolon(overrideStr);
+        for (String overrideItem : overrideItems) {
+            if (StringUtils.isNotBlank(overrideItem)) {
+                if (!originList.contains(overrideItem)) {
+                    adds.add(overrideItem);
                 }
             }
         }

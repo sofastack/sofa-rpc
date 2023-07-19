@@ -16,8 +16,8 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import com.alibaba.dubbo.config.ProtocolConfig;
-import com.alibaba.dubbo.config.ServiceConfig;
+import org.apache.dubbo.config.ProtocolConfig;
+import org.apache.dubbo.config.ServiceConfig;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.Version;

@@ -160,6 +160,10 @@ public class SofaOptions {
      * 序列化覆盖
      */
     public static final String CONFIG_SERIALIZE_BLACKLIST_OVERRIDE = "rpc_serialize_blacklist_override";
+    /**
+     * 序列化覆盖
+     */
+    public static final String CONFIG_SERIALIZE_WHITELIST_OVERRIDE = "rpc_serialize_whitelist_override";
 
     //========= GRPC 相关配置 ==========
     /**

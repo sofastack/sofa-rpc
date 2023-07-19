@@ -16,12 +16,12 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
-import com.alibaba.dubbo.config.DubboShutdownHook;
-import com.alibaba.dubbo.config.ProtocolConfig;
+import org.apache.dubbo.config.ProtocolConfig;
 import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import org.apache.dubbo.rpc.model.FrameworkModel;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -50,17 +50,17 @@ public class DubboSingleton {
     /**
      * sofa.SeverConfig --> dubbo.ProtocolConfig
      */
-    final static ConcurrentMap<ServerConfig, ProtocolConfig>                            SERVER_MAP   = new ConcurrentHashMap<ServerConfig, ProtocolConfig>();
+    final static ConcurrentMap<ServerConfig, ProtocolConfig>                           SERVER_MAP   = new ConcurrentHashMap<>();
 
     /**
      * sofa.RegistryConfig --> dubbo.RegistryConfig
      */
-    final static ConcurrentMap<RegistryConfig, com.alibaba.dubbo.config.RegistryConfig> REGISTRY_MAP = new ConcurrentHashMap<RegistryConfig, com.alibaba.dubbo.config.RegistryConfig>();
+    final static ConcurrentMap<RegistryConfig, org.apache.dubbo.config.RegistryConfig> REGISTRY_MAP = new ConcurrentHashMap<>();
 
     /**
      * Destroy all dubbo resources
      */
     public static void destroyAll() {
-        DubboShutdownHook.getDubboShutdownHook().destroyAll();
+        FrameworkModel.defaultModel().destroy();
     }
 }

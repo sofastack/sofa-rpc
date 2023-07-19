@@ -20,6 +20,7 @@
         <module>codec-protostuff</module>
         <module>codec-sofa-hessian</module>
         <module>codec-msgpack</module>
+        <module>codec-sofa-fury</module>
     </modules>
 
     <dependencyManagement>
