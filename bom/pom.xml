@@ -39,6 +39,7 @@
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
         <grpc.version>1.33.1</grpc.version>
+        <fury.version>0.1.0-alpha.1</fury.version>
 
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
@@ -296,6 +297,11 @@
                 <groupId>org.msgpack</groupId>
                 <artifactId>msgpack</artifactId>
                 <version>${msgpack.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.furyio</groupId>
+                <artifactId>fury-core</artifactId>
+                <version>${fury.version}</version>
             </dependency>
             <!-- zk client -->
             <dependency>
