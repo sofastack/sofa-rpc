@@ -108,7 +108,7 @@ public class FurySerializerTest {
         } catch (Exception e) {
             error = true;
         }
-//        Assert.assertTrue(error);
+        Assert.assertFalse(error);
 
         error = false;
         try {
@@ -163,7 +163,7 @@ public class FurySerializerTest {
         } catch (Exception e) {
             error = true;
         }
-        //        Assert.assertTrue(error);
+        Assert.assertFalse(error);
 
         error = false;
         try {
