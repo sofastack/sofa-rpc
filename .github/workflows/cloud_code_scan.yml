@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: codeScan
-        uses: ayotto/alipay-cloud-devops-codescan@0.1.20230721
+        uses: layotto/alipay-cloud-devops-codescan@0.1.20230721
         with:
           parent_uid: ${{ secrets.ALI_PID }}
           private_key: ${{ secrets.ALI_PK }}
