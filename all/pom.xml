@@ -185,6 +185,11 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-fury</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-fault-tolerance</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -519,6 +524,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-codec-jackson</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-msgpack</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-sofa-fury</include>>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-hystrix</include>
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>

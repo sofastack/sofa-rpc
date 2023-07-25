@@ -36,21 +36,28 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
 import io.fury.Fury;
 import io.fury.Language;
+import io.fury.serializer.CompatibleMode;
 
 /**
  * @author lipan
  */
-@Extension(value = "fury", code = 15)
+@Extension(value = "fury", code = 20)
 public class FurySerializer extends AbstractSerializer {
 
     private final FuryHelper    furyHelper  = new FuryHelper();
     private final Set<Class<?>> registerSet = new ConcurrentHashSet<>();
-    Fury                        fury;
+    private final Fury          fury;
 
     public FurySerializer() {
         fury = Fury.builder()
-            .withLanguage(Language.XLANG)
+            .withLanguage(Language.JAVA)
             .withRefTracking(true)
+            .withCodegen(true)
+            .withNumberCompressed(true)
+            .withCompatibleMode(CompatibleMode.COMPATIBLE)
+            .requireClassRegistration(false)
+            .withClassLoader(getClass().getClassLoader())
+            .withAsyncCompilationEnabled(true)
             .build();
     }
 
@@ -89,13 +96,10 @@ public class FurySerializer extends AbstractSerializer {
         throws SofaRpcException {
         AbstractByteBuf byteBuf;
         if (sofaResponse.isError()) {
-            // 框架异常：错误则body序列化的是错误字符串
             byteBuf = encode(sofaResponse.getErrorMsg(), context);
         } else {
-            // 正确返回则解析序列化的protobuf返回对象
             Object appResponse = sofaResponse.getAppResponse();
             if (appResponse instanceof Throwable) {
-                // 业务异常序列化的是错误字符串
                 byteBuf = encode(((Throwable) appResponse).getMessage(), context);
             } else {
                 byteBuf = encode(appResponse, context);
@@ -142,7 +146,6 @@ public class FurySerializer extends AbstractSerializer {
         if (head == null) {
             throw buildDeserializeError("head is null!");
         }
-        // 解析request信息
         String targetService = head.remove(RemotingConstants.HEAD_TARGET_SERVICE);
         if (targetService != null) {
             sofaRequest.setTargetServiceUniqueName(targetService);
@@ -162,7 +165,6 @@ public class FurySerializer extends AbstractSerializer {
             sofaRequest.setTargetAppName(targetApp);
         }
 
-        // 解析tracer等信息
         parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, head, sofaRequest);
         if (RpcInvokeContext.isBaggageEnable()) {
             parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, head, sofaRequest);
@@ -171,7 +173,6 @@ public class FurySerializer extends AbstractSerializer {
             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
         }
 
-        // 根据接口+方法名找到参数类型 此处要处理byte[]为空的吗
         Class requestClass = furyHelper.getReqClass(targetService,
             sofaRequest.getMethodName());
         Object pbReq = decode(data, requestClass, head);
