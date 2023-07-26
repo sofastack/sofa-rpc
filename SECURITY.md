@@ -10,7 +10,7 @@ PLEASE PAY ATTENTION to report the security issue on the security email before d
 
 ## Solution
 
-SOFARPC uses Hessian serialization by default. Hessian is a binary serialization protocol. For more information, please refer to Hessian's [documentation](](https://github.com/sofastack/sofa-hessian)).
+SOFARPC uses Hessian serialization by default. Hessian is a binary serialization protocol. For more information, please refer to Hessian's [documentation](https://github.com/sofastack/sofa-hessian).
 
 Because of the implement of Hessian, by constructing a specific serialization stream, it may cause arbitrary code execution when doing deserialization. It is recommended that users configure blacklist to solve the problem.
 
