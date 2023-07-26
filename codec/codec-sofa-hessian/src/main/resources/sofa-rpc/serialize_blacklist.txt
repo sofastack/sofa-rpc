@@ -24,6 +24,7 @@ javax.naming.InitialContext
 javax.naming.spi.ObjectFactory
 javax.script.ScriptEngineManager
 javax.sound.sampled.AudioFormat$Encoding
+javax.sound.sampled.AudioFileFormat
 org.apache.carbondata.core.scan.expression.ExpressionResult
 org.apache.commons.dbcp.datasources.SharedPoolDataSource
 org.apache.ibatis.executor.loader.AbstractSerialStateHolder
