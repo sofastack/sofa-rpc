@@ -65,7 +65,7 @@ public class BoltProtobufBaggageSyncTest extends BaggageBaseTest {
         referenceBeanC.setApplication(new ApplicationConfig().setAppName("BBB"));
         referenceBeanC.setInterfaceId(SampleService.class.getName());
         referenceBeanC.setUniqueId("C1");
-        referenceBeanC.setDirectUrl("localhost:12299");
+        referenceBeanC.setDirectUrl("127.0.0.1:12299");
         referenceBeanC.setSerialization("protobuf");
         referenceBeanC.setTimeout(1000);
         SampleService sampleServiceC = (SampleService) referenceBeanC.refer();
@@ -75,7 +75,7 @@ public class BoltProtobufBaggageSyncTest extends BaggageBaseTest {
         referenceBeanD.setApplication(new ApplicationConfig().setAppName("BBB"));
         referenceBeanD.setInterfaceId(SampleService.class.getName());
         referenceBeanD.setUniqueId("D1");
-        referenceBeanD.setDirectUrl("localhost:12299?p=1&v=4.0");
+        referenceBeanD.setDirectUrl("127.0.0.1:12299?p=1&v=4.0");
         referenceBeanD.setSerialization("protobuf");
         referenceBeanD.setTimeout(1000);
         SampleService sampleServiceD = (SampleService) referenceBeanD.refer();
@@ -96,7 +96,7 @@ public class BoltProtobufBaggageSyncTest extends BaggageBaseTest {
         referenceBeanA.setApplication(new ApplicationConfig().setAppName("AAA"));
         referenceBeanA.setUniqueId("B1");
         referenceBeanA.setInterfaceId(SampleService.class.getName());
-        referenceBeanA.setDirectUrl("localhost:12299");
+        referenceBeanA.setDirectUrl("127.0.0.1:12299");
         referenceBeanA.setSerialization("protobuf");
         referenceBeanA.setTimeout(3000);
 

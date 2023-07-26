@@ -57,7 +57,7 @@ public class MeshApiClientTest extends BaseMeshTest {
     public void before() {
 
         httpMockServer = new HttpMockServer();
-        meshApiClient = new MeshApiClient("http://localhost:7654");
+        meshApiClient = new MeshApiClient("http://127.0.0.1:7654");
 
         httpMockServer.initSever(7654);
         ApplicationInfoResult applicationInfoResult = new ApplicationInfoResult();
