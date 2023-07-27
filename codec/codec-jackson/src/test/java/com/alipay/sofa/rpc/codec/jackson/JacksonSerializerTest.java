@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.codec.jackson;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer;
+import com.alipay.sofa.rpc.codec.jackson.generic.Function.DO.FunctionRequest;
 import com.alipay.sofa.rpc.codec.jackson.generic.GenericService;
 import com.alipay.sofa.rpc.codec.jackson.generic.GenericServiceImpl;
 import com.alipay.sofa.rpc.codec.jackson.generic.MyReq;
@@ -26,6 +28,7 @@ import com.alipay.sofa.rpc.codec.jackson.model.DemoResponse;
 import com.alipay.sofa.rpc.codec.jackson.model.DemoService;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
@@ -33,17 +36,21 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.junit.Assert;
 import org.junit.Test;
+import sun.plugin.javascript.navig.Array;
 
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -586,4 +593,61 @@ public class JacksonSerializerTest {
         Assert.assertTrue(sofaResponse.isError());
         Assert.assertEquals("", sofaResponse.getErrorMsg());
     }
+
+    @Test
+    public void testCLassLoader() {
+        URLClassLoader classLoader = null;
+        try {
+//            classLoader = new URLClassLoader(
+//                new URL[] { new URL(
+//                    "file:/Users/linmiaomiao/Desktop/Project/mybkcompute/demo/demo-function/target/demo-function-1.0.0-SNAPSHOT-jar-with-dependencies.jar") });
+//            Class<?> clazz = classLoader.loadClass("com.alipay.faas.mybankcompute.demo.FunctionVersionServerServer");
+            //Object instance = clazz.newInstance();
+            //System.out.println(clazz);
+
+            ChildFunctionServer childFunctionServer = new ChildFunctionServer();
+            Class<?> aClass = JacksonHelper.class;
+            Object obj = aClass.newInstance();
+            Method method = aClass.getDeclaredMethod("loadClassToCache", String.class, Class.class, String.class);
+            method.setAccessible(true);
+            method.invoke(obj, "com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer#apply", childFunctionServer.getClass(), "apply");
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    public void TestRequest(){
+        JacksonHelper jacksonHelper = new JacksonHelper();
+        JavaType[] applies = jacksonHelper.getReqClass("com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer", "apply");
+
+        try {
+            FunctionRequest functionRequest = new FunctionRequest();
+            functionRequest.setUrl("http://www.example.com");
+            ObjectMapper mapper = new ObjectMapper();
+            ByteArrayWrapperByteBuf data = new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(functionRequest));
+
+            Class aClass = serializer.getClass();
+            Method method = aClass.getDeclaredMethod("decode", AbstractByteBuf.class, JavaType[].class);
+            method.setAccessible(true);
+            Object invoke = method.invoke(serializer, data, applies);
+            if (invoke instanceof Object[]){
+                Object[] invokeObj = (Object[]) invoke;
+                FunctionRequest func =  (FunctionRequest)invokeObj[0];
+                Assert.assertEquals(func.getUrl(),"http://www.example.com");
+            }
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 }
