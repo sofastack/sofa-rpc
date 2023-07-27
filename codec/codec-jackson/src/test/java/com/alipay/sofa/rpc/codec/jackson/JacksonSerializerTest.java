@@ -593,31 +593,6 @@ public class JacksonSerializerTest {
         Assert.assertTrue(sofaResponse.isError());
         Assert.assertEquals("", sofaResponse.getErrorMsg());
     }
-
-    @Test
-    public void testCLassLoader() {
-        URLClassLoader classLoader = null;
-        try {
-//            classLoader = new URLClassLoader(
-//                new URL[] { new URL(
-//                    "file:/Users/linmiaomiao/Desktop/Project/mybkcompute/demo/demo-function/target/demo-function-1.0.0-SNAPSHOT-jar-with-dependencies.jar") });
-//            Class<?> clazz = classLoader.loadClass("com.alipay.faas.mybankcompute.demo.FunctionVersionServerServer");
-            //Object instance = clazz.newInstance();
-            //System.out.println(clazz);
-
-            ChildFunctionServer childFunctionServer = new ChildFunctionServer();
-            Class<?> aClass = JacksonHelper.class;
-            Object obj = aClass.newInstance();
-            Method method = aClass.getDeclaredMethod("loadClassToCache", String.class, Class.class, String.class);
-            method.setAccessible(true);
-            method.invoke(obj, "com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer#apply", childFunctionServer.getClass(), "apply");
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-
-    }
-
     @Test
     public void TestRequest(){
         JacksonHelper jacksonHelper = new JacksonHelper();
