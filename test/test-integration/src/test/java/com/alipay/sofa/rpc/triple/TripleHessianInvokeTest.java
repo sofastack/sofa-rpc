@@ -81,7 +81,7 @@ public class TripleHessianInvokeTest {
         ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
         consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("localhost:" + port)
+            .setDirectUrl("127.0.0.1:" + port)
             .setRegister(false)
             .setApplication(clientApp);
 
@@ -152,7 +152,7 @@ public class TripleHessianInvokeTest {
         ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
         consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("localhost:" + port)
+            .setDirectUrl("127.0.0.1:" + port)
             .setUniqueId(uniqueId)
             .setRegister(false)
             .setApplication(clientApp);
@@ -183,7 +183,7 @@ public class TripleHessianInvokeTest {
         consumerConfig = new ConsumerConfig<TripleHessianInterface>();
         consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("localhost:" + port)
+            .setDirectUrl("127.0.0.1:" + port)
             .setRegister(false)
             .setApplication(clientApp);
 
@@ -313,7 +313,7 @@ public class TripleHessianInvokeTest {
         ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<>();
         consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setDirectUrl("localhost:" + port)
+                .setDirectUrl("127.0.0.1:" + port)
                 .setUniqueId(uniqueId)
                 .setRegister(false)
                 .setApplication(clientApp);
@@ -324,7 +324,7 @@ public class TripleHessianInvokeTest {
         ConsumerConfig<TripleHessianInterface> consumerConfig2 = new ConsumerConfig<>();
         consumerConfig2.setInterfaceId(TripleHessianInterface.class.getName())
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setDirectUrl("localhost:" + port)
+                .setDirectUrl("127.0.0.1:" + port)
                 .setUniqueId(uniqueId2)
                 .setRegister(false)
                 .setApplication(clientApp);
@@ -362,7 +362,7 @@ public class TripleHessianInvokeTest {
         ConsumerConfig<TripleHessianInterface> consumerConfig = new ConsumerConfig<TripleHessianInterface>();
         consumerConfig.setInterfaceId(TripleHessianInterface.class.getName())
             .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("localhost:" + port)
+            .setDirectUrl("127.0.0.1:" + port)
             .setTimeout(300000)
             .setRegister(false)
             .setApplication(clientApp);
