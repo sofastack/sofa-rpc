@@ -1,1 +1,1 @@
-protobuf=com.alipay.sofa.rpc.codec.fury.FurySerializer
+fury=com.alipay.sofa.rpc.codec.fury.FurySerializer
