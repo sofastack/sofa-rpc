@@ -48,6 +48,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Date;
+
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
@@ -589,10 +590,12 @@ public class JacksonSerializerTest {
         Assert.assertTrue(sofaResponse.isError());
         Assert.assertEquals("", sofaResponse.getErrorMsg());
     }
+
     @Test
-    public void TestRequest(){
+    public void TestRequest() {
         JacksonHelper jacksonHelper = new JacksonHelper();
-        JavaType[] applies = jacksonHelper.getReqClass("com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer", "apply");
+        JavaType[] applies = jacksonHelper.getReqClass(
+            "com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer", "apply");
 
         try {
             FunctionRequest functionRequest = new FunctionRequest();
@@ -604,10 +607,10 @@ public class JacksonSerializerTest {
             Method method = aClass.getDeclaredMethod("decode", AbstractByteBuf.class, JavaType[].class);
             method.setAccessible(true);
             Object invoke = method.invoke(serializer, data, applies);
-            if (invoke instanceof Object[]){
+            if (invoke instanceof Object[]) {
                 Object[] invokeObj = (Object[]) invoke;
-                FunctionRequest func =  (FunctionRequest)invokeObj[0];
-                Assert.assertEquals(func.getUrl(),"http://www.example.com");
+                FunctionRequest func = (FunctionRequest) invokeObj[0];
+                Assert.assertEquals(func.getUrl(), "http://www.example.com");
             }
         } catch (NoSuchMethodException e) {
             throw new RuntimeException(e);
