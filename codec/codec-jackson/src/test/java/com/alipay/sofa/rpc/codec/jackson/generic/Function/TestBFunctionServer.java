@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.codec.jackson.generic.Function;
 import com.alipay.sofa.rpc.codec.jackson.generic.Function.DO.FunctionRequest;
 import com.alipay.sofa.rpc.codec.jackson.generic.Function.DO.FunctionResponse;
 
-public class TestBFunctionServer extends TestAFunctionServer<FunctionRequest,FunctionResponse>{
+public class TestBFunctionServer extends TestAFunctionServer<FunctionRequest, FunctionResponse> {
 
     @Override
     public FunctionResponse process(FunctionRequest functionRequest) {

@@ -628,7 +628,7 @@ public class JacksonSerializerTest {
     public void TestRequest2() {
         JacksonHelper jacksonHelper = new JacksonHelper();
         JavaType[] applies = jacksonHelper.getReqClass(
-                "com.alipay.sofa.rpc.codec.jackson.generic.Function.TestDFunctionServer", "apply");
+            "com.alipay.sofa.rpc.codec.jackson.generic.Function.TestDFunctionServer", "apply");
 
         try {
             FunctionRequest functionRequest = new FunctionRequest();
