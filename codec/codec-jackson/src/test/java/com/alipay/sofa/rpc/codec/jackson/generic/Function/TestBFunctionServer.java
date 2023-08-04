@@ -16,12 +16,15 @@
  */
 package com.alipay.sofa.rpc.codec.jackson.generic.Function;
 
-public abstract class TestFunctionServer<T, R> extends FunctionService<T, R> {
+import com.alipay.sofa.rpc.codec.jackson.generic.Function.DO.FunctionRequest;
+import com.alipay.sofa.rpc.codec.jackson.generic.Function.DO.FunctionResponse;
+
+public class TestBFunctionServer extends TestAFunctionServer<FunctionRequest,FunctionResponse>{
 
     @Override
-    public R apply(T t) {
-        return this.process(t);
+    public FunctionResponse process(FunctionRequest functionRequest) {
+        FunctionResponse functionResponse = new FunctionResponse();
+        functionResponse.setUrl(functionRequest.getUrl());
+        return functionResponse;
     }
-
-    public abstract R process(T t);
 }

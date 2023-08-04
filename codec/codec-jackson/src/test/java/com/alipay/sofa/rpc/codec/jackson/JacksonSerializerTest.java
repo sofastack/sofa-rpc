@@ -595,7 +595,40 @@ public class JacksonSerializerTest {
     public void TestRequest() {
         JacksonHelper jacksonHelper = new JacksonHelper();
         JavaType[] applies = jacksonHelper.getReqClass(
-            "com.alipay.sofa.rpc.codec.jackson.generic.Function.ChildFunctionServer", "apply");
+            "com.alipay.sofa.rpc.codec.jackson.generic.Function.TestBFunctionServer", "apply");
+
+        try {
+            FunctionRequest functionRequest = new FunctionRequest();
+            functionRequest.setUrl("http://www.example.com");
+            ObjectMapper mapper = new ObjectMapper();
+            ByteArrayWrapperByteBuf data = new ByteArrayWrapperByteBuf(mapper.writeValueAsBytes(functionRequest));
+
+            Class aClass = serializer.getClass();
+            Method method = aClass.getDeclaredMethod("decode", AbstractByteBuf.class, JavaType[].class);
+            method.setAccessible(true);
+            Object invoke = method.invoke(serializer, data, applies);
+            if (invoke instanceof Object[]) {
+                Object[] invokeObj = (Object[]) invoke;
+                FunctionRequest func = (FunctionRequest) invokeObj[0];
+                Assert.assertEquals(func.getUrl(), "http://www.example.com");
+            }
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    @Test
+    public void TestRequest2() {
+        JacksonHelper jacksonHelper = new JacksonHelper();
+        JavaType[] applies = jacksonHelper.getReqClass(
+                "com.alipay.sofa.rpc.codec.jackson.generic.Function.TestDFunctionServer", "apply");
 
         try {
             FunctionRequest functionRequest = new FunctionRequest();
