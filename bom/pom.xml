@@ -28,7 +28,7 @@
         <polaris.version>1.2.2</polaris.version>
         <swagger.version>1.6.9</swagger.version>
         <asm.version>7.0</asm.version>
-        <guava.version>27.0-jre</guava.version>
+        <guava.version>32.0.0-jre</guava.version>
         <prometheus.client.version>0.16.0</prometheus.client.version>
         <!-- serialization -->
         <hessian.version>3.4.0</hessian.version>
