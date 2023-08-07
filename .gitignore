@@ -22,3 +22,5 @@ logs/
 #protobuf
 example/build/*
 test/test-integration/build/*
+
+registry/registry-polaris/polaris/

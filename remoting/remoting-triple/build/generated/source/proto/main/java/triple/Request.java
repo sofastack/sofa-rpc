@@ -6,7 +6,7 @@ package triple;
 /**
  * Protobuf type {@code Request}
  */
-public  final class Request extends
+public final class Request extends
     com.google.protobuf.GeneratedMessageV3 implements
     // @@protoc_insertion_point(message_implements:Request)
     RequestOrBuilder {
@@ -18,81 +18,17 @@ private static final long serialVersionUID = 0L;
   private Request() {
     serializeType_ = "";
     args_ = java.util.Collections.emptyList();
-    argTypes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    argTypes_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
   }
 
   @java.lang.Override
-  public final com.google.protobuf.UnknownFieldSet
-  getUnknownFields() {
-    return this.unknownFields;
+  @SuppressWarnings({"unused"})
+  protected java.lang.Object newInstance(
+      UnusedPrivateParameter unused) {
+    return new Request();
   }
-  private Request(
-      com.google.protobuf.CodedInputStream input,
-      com.google.protobuf.ExtensionRegistryLite extensionRegistry)
-      throws com.google.protobuf.InvalidProtocolBufferException {
-    this();
-    if (extensionRegistry == null) {
-      throw new java.lang.NullPointerException();
-    }
-    int mutable_bitField0_ = 0;
-    com.google.protobuf.UnknownFieldSet.Builder unknownFields =
-        com.google.protobuf.UnknownFieldSet.newBuilder();
-    try {
-      boolean done = false;
-      while (!done) {
-        int tag = input.readTag();
-        switch (tag) {
-          case 0:
-            done = true;
-            break;
-          case 10: {
-            java.lang.String s = input.readStringRequireUtf8();
 
-            serializeType_ = s;
-            break;
-          }
-          case 18: {
-            if (!((mutable_bitField0_ & 0x00000002) != 0)) {
-              args_ = new java.util.ArrayList<com.google.protobuf.ByteString>();
-              mutable_bitField0_ |= 0x00000002;
-            }
-            args_.add(input.readBytes());
-            break;
-          }
-          case 26: {
-            java.lang.String s = input.readStringRequireUtf8();
-            if (!((mutable_bitField0_ & 0x00000004) != 0)) {
-              argTypes_ = new com.google.protobuf.LazyStringArrayList();
-              mutable_bitField0_ |= 0x00000004;
-            }
-            argTypes_.add(s);
-            break;
-          }
-          default: {
-            if (!parseUnknownField(
-                input, unknownFields, extensionRegistry, tag)) {
-              done = true;
-            }
-            break;
-          }
-        }
-      }
-    } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-      throw e.setUnfinishedMessage(this);
-    } catch (java.io.IOException e) {
-      throw new com.google.protobuf.InvalidProtocolBufferException(
-          e).setUnfinishedMessage(this);
-    } finally {
-      if (((mutable_bitField0_ & 0x00000002) != 0)) {
-        args_ = java.util.Collections.unmodifiableList(args_); // C
-      }
-      if (((mutable_bitField0_ & 0x00000004) != 0)) {
-        argTypes_ = argTypes_.getUnmodifiableView();
-      }
-      this.unknownFields = unknownFields.build();
-      makeExtensionsImmutable();
-    }
-  }
   public static final com.google.protobuf.Descriptors.Descriptor
       getDescriptor() {
     return triple.GenericProto.internal_static_Request_descriptor;
@@ -106,12 +42,14 @@ private static final long serialVersionUID = 0L;
             triple.Request.class, triple.Request.Builder.class);
   }
 
-  private int bitField0_;
   public static final int SERIALIZETYPE_FIELD_NUMBER = 1;
-  private volatile java.lang.Object serializeType_;
+  @SuppressWarnings("serial")
+  private volatile java.lang.Object serializeType_ = "";
   /**
    * <code>string serializeType = 1;</code>
+   * @return The serializeType.
    */
+  @java.lang.Override
   public java.lang.String getSerializeType() {
     java.lang.Object ref = serializeType_;
     if (ref instanceof java.lang.String) {
@@ -126,7 +64,9 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <code>string serializeType = 1;</code>
+   * @return The bytes for serializeType.
    */
+  @java.lang.Override
   public com.google.protobuf.ByteString
       getSerializeTypeBytes() {
     java.lang.Object ref = serializeType_;
@@ -142,31 +82,40 @@ private static final long serialVersionUID = 0L;
   }
 
   public static final int ARGS_FIELD_NUMBER = 2;
+  @SuppressWarnings("serial")
   private java.util.List<com.google.protobuf.ByteString> args_;
   /**
    * <code>repeated bytes args = 2;</code>
+   * @return A list containing the args.
    */
+  @java.lang.Override
   public java.util.List<com.google.protobuf.ByteString>
       getArgsList() {
     return args_;
   }
   /**
    * <code>repeated bytes args = 2;</code>
+   * @return The count of args.
    */
   public int getArgsCount() {
     return args_.size();
   }
   /**
    * <code>repeated bytes args = 2;</code>
+   * @param index The index of the element to return.
+   * @return The args at the given index.
    */
   public com.google.protobuf.ByteString getArgs(int index) {
     return args_.get(index);
   }
 
   public static final int ARGTYPES_FIELD_NUMBER = 3;
-  private com.google.protobuf.LazyStringList argTypes_;
+  @SuppressWarnings("serial")
+  private com.google.protobuf.LazyStringArrayList argTypes_ =
+      com.google.protobuf.LazyStringArrayList.emptyList();
   /**
    * <code>repeated string argTypes = 3;</code>
+   * @return A list containing the argTypes.
    */
   public com.google.protobuf.ProtocolStringList
       getArgTypesList() {
@@ -174,18 +123,23 @@ private static final long serialVersionUID = 0L;
   }
   /**
    * <code>repeated string argTypes = 3;</code>
+   * @return The count of argTypes.
    */
   public int getArgTypesCount() {
     return argTypes_.size();
   }
   /**
    * <code>repeated string argTypes = 3;</code>
+   * @param index The index of the element to return.
+   * @return The argTypes at the given index.
    */
   public java.lang.String getArgTypes(int index) {
     return argTypes_.get(index);
   }
   /**
    * <code>repeated string argTypes = 3;</code>
+   * @param index The index of the value to return.
+   * @return The bytes of the argTypes at the given index.
    */
   public com.google.protobuf.ByteString
       getArgTypesBytes(int index) {
@@ -206,7 +160,7 @@ private static final long serialVersionUID = 0L;
   @java.lang.Override
   public void writeTo(com.google.protobuf.CodedOutputStream output)
                       throws java.io.IOException {
-    if (!getSerializeTypeBytes().isEmpty()) {
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serializeType_)) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serializeType_);
     }
     for (int i = 0; i < args_.size(); i++) {
@@ -215,7 +169,7 @@ private static final long serialVersionUID = 0L;
     for (int i = 0; i < argTypes_.size(); i++) {
       com.google.protobuf.GeneratedMessageV3.writeString(output, 3, argTypes_.getRaw(i));
     }
-    unknownFields.writeTo(output);
+    getUnknownFields().writeTo(output);
   }
 
   @java.lang.Override
@@ -224,7 +178,7 @@ private static final long serialVersionUID = 0L;
     if (size != -1) return size;
 
     size = 0;
-    if (!getSerializeTypeBytes().isEmpty()) {
+    if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serializeType_)) {
       size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serializeType_);
     }
     {
@@ -244,7 +198,7 @@ private static final long serialVersionUID = 0L;
       size += dataSize;
       size += 1 * getArgTypesList().size();
     }
-    size += unknownFields.getSerializedSize();
+    size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
     return size;
   }
@@ -265,7 +219,7 @@ private static final long serialVersionUID = 0L;
         .equals(other.getArgsList())) return false;
     if (!getArgTypesList()
         .equals(other.getArgTypesList())) return false;
-    if (!unknownFields.equals(other.unknownFields)) return false;
+    if (!getUnknownFields().equals(other.getUnknownFields())) return false;
     return true;
   }
 
@@ -286,7 +240,7 @@ private static final long serialVersionUID = 0L;
       hash = (37 * hash) + ARGTYPES_FIELD_NUMBER;
       hash = (53 * hash) + getArgTypesList().hashCode();
     }
-    hash = (29 * hash) + unknownFields.hashCode();
+    hash = (29 * hash) + getUnknownFields().hashCode();
     memoizedHashCode = hash;
     return hash;
   }
@@ -403,28 +357,22 @@ private static final long serialVersionUID = 0L;
 
     // Construct using triple.Request.newBuilder()
     private Builder() {
-      maybeForceBuilderInitialization();
+
     }
 
     private Builder(
         com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
       super(parent);
-      maybeForceBuilderInitialization();
-    }
-    private void maybeForceBuilderInitialization() {
-      if (com.google.protobuf.GeneratedMessageV3
-              .alwaysUseFieldBuilders) {
-      }
+
     }
     @java.lang.Override
     public Builder clear() {
       super.clear();
+      bitField0_ = 0;
       serializeType_ = "";
-
       args_ = java.util.Collections.emptyList();
-      bitField0_ = (bitField0_ & ~0x00000002);
-      argTypes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000004);
+      argTypes_ =
+          com.google.protobuf.LazyStringArrayList.emptyList();
       return this;
     }
 
@@ -451,56 +399,31 @@ private static final long serialVersionUID = 0L;
     @java.lang.Override
     public triple.Request buildPartial() {
       triple.Request result = new triple.Request(this);
-      int from_bitField0_ = bitField0_;
-      int to_bitField0_ = 0;
-      result.serializeType_ = serializeType_;
+      buildPartialRepeatedFields(result);
+      if (bitField0_ != 0) { buildPartial0(result); }
+      onBuilt();
+      return result;
+    }
+
+    private void buildPartialRepeatedFields(triple.Request result) {
       if (((bitField0_ & 0x00000002) != 0)) {
         args_ = java.util.Collections.unmodifiableList(args_);
         bitField0_ = (bitField0_ & ~0x00000002);
       }
       result.args_ = args_;
-      if (((bitField0_ & 0x00000004) != 0)) {
-        argTypes_ = argTypes_.getUnmodifiableView();
-        bitField0_ = (bitField0_ & ~0x00000004);
-      }
-      result.argTypes_ = argTypes_;
-      result.bitField0_ = to_bitField0_;
-      onBuilt();
-      return result;
     }
 
-    @java.lang.Override
-    public Builder clone() {
-      return super.clone();
+    private void buildPartial0(triple.Request result) {
+      int from_bitField0_ = bitField0_;
+      if (((from_bitField0_ & 0x00000001) != 0)) {
+        result.serializeType_ = serializeType_;
+      }
+      if (((from_bitField0_ & 0x00000004) != 0)) {
+        argTypes_.makeImmutable();
+        result.argTypes_ = argTypes_;
+      }
     }
-    @java.lang.Override
-    public Builder setField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.setField(field, value);
-    }
-    @java.lang.Override
-    public Builder clearField(
-        com.google.protobuf.Descriptors.FieldDescriptor field) {
-      return super.clearField(field);
-    }
-    @java.lang.Override
-    public Builder clearOneof(
-        com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-      return super.clearOneof(oneof);
-    }
-    @java.lang.Override
-    public Builder setRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        int index, java.lang.Object value) {
-      return super.setRepeatedField(field, index, value);
-    }
-    @java.lang.Override
-    public Builder addRepeatedField(
-        com.google.protobuf.Descriptors.FieldDescriptor field,
-        java.lang.Object value) {
-      return super.addRepeatedField(field, value);
-    }
+
     @java.lang.Override
     public Builder mergeFrom(com.google.protobuf.Message other) {
       if (other instanceof triple.Request) {
@@ -515,6 +438,7 @@ private static final long serialVersionUID = 0L;
       if (other == triple.Request.getDefaultInstance()) return this;
       if (!other.getSerializeType().isEmpty()) {
         serializeType_ = other.serializeType_;
+        bitField0_ |= 0x00000001;
         onChanged();
       }
       if (!other.args_.isEmpty()) {
@@ -530,14 +454,14 @@ private static final long serialVersionUID = 0L;
       if (!other.argTypes_.isEmpty()) {
         if (argTypes_.isEmpty()) {
           argTypes_ = other.argTypes_;
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ |= 0x00000004;
         } else {
           ensureArgTypesIsMutable();
           argTypes_.addAll(other.argTypes_);
         }
         onChanged();
       }
-      this.mergeUnknownFields(other.unknownFields);
+      this.mergeUnknownFields(other.getUnknownFields());
       onChanged();
       return this;
     }
@@ -552,17 +476,47 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws java.io.IOException {
-      triple.Request parsedMessage = null;
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
       try {
-        parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              serializeType_ = input.readStringRequireUtf8();
+              bitField0_ |= 0x00000001;
+              break;
+            } // case 10
+            case 18: {
+              com.google.protobuf.ByteString v = input.readBytes();
+              ensureArgsIsMutable();
+              args_.add(v);
+              break;
+            } // case 18
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+              ensureArgTypesIsMutable();
+              argTypes_.add(s);
+              break;
+            } // case 26
+            default: {
+              if (!super.parseUnknownField(input, extensionRegistry, tag)) {
+                done = true; // was an endgroup tag
+              }
+              break;
+            } // default:
+          } // switch (tag)
+        } // while (!done)
       } catch (com.google.protobuf.InvalidProtocolBufferException e) {
-        parsedMessage = (triple.Request) e.getUnfinishedMessage();
         throw e.unwrapIOException();
       } finally {
-        if (parsedMessage != null) {
-          mergeFrom(parsedMessage);
-        }
-      }
+        onChanged();
+      } // finally
       return this;
     }
     private int bitField0_;
@@ -570,6 +524,7 @@ private static final long serialVersionUID = 0L;
     private java.lang.Object serializeType_ = "";
     /**
      * <code>string serializeType = 1;</code>
+     * @return The serializeType.
      */
     public java.lang.String getSerializeType() {
       java.lang.Object ref = serializeType_;
@@ -585,6 +540,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <code>string serializeType = 1;</code>
+     * @return The bytes for serializeType.
      */
     public com.google.protobuf.ByteString
         getSerializeTypeBytes() {
@@ -601,37 +557,38 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <code>string serializeType = 1;</code>
+     * @param value The serializeType to set.
+     * @return This builder for chaining.
      */
     public Builder setSerializeType(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  
+      if (value == null) { throw new NullPointerException(); }
       serializeType_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
     /**
      * <code>string serializeType = 1;</code>
+     * @return This builder for chaining.
      */
     public Builder clearSerializeType() {
-      
       serializeType_ = getDefaultInstance().getSerializeType();
+      bitField0_ = (bitField0_ & ~0x00000001);
       onChanged();
       return this;
     }
     /**
      * <code>string serializeType = 1;</code>
+     * @param value The bytes for serializeType to set.
+     * @return This builder for chaining.
      */
     public Builder setSerializeTypeBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-      
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       serializeType_ = value;
+      bitField0_ |= 0x00000001;
       onChanged();
       return this;
     }
@@ -641,10 +598,11 @@ private static final long serialVersionUID = 0L;
       if (!((bitField0_ & 0x00000002) != 0)) {
         args_ = new java.util.ArrayList<com.google.protobuf.ByteString>(args_);
         bitField0_ |= 0x00000002;
-       }
+      }
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @return A list containing the args.
      */
     public java.util.List<com.google.protobuf.ByteString>
         getArgsList() {
@@ -653,43 +611,49 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @return The count of args.
      */
     public int getArgsCount() {
       return args_.size();
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @param index The index of the element to return.
+     * @return The args at the given index.
      */
     public com.google.protobuf.ByteString getArgs(int index) {
       return args_.get(index);
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @param index The index to set the value at.
+     * @param value The args to set.
+     * @return This builder for chaining.
      */
     public Builder setArgs(
         int index, com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureArgsIsMutable();
+      if (value == null) { throw new NullPointerException(); }
+      ensureArgsIsMutable();
       args_.set(index, value);
       onChanged();
       return this;
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @param value The args to add.
+     * @return This builder for chaining.
      */
     public Builder addArgs(com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureArgsIsMutable();
+      if (value == null) { throw new NullPointerException(); }
+      ensureArgsIsMutable();
       args_.add(value);
       onChanged();
       return this;
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @param values The args to add.
+     * @return This builder for chaining.
      */
     public Builder addAllArgs(
         java.lang.Iterable<? extends com.google.protobuf.ByteString> values) {
@@ -701,6 +665,7 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <code>repeated bytes args = 2;</code>
+     * @return This builder for chaining.
      */
     public Builder clearArgs() {
       args_ = java.util.Collections.emptyList();
@@ -709,34 +674,42 @@ private static final long serialVersionUID = 0L;
       return this;
     }
 
-    private com.google.protobuf.LazyStringList argTypes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    private com.google.protobuf.LazyStringArrayList argTypes_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
     private void ensureArgTypesIsMutable() {
-      if (!((bitField0_ & 0x00000004) != 0)) {
+      if (!argTypes_.isModifiable()) {
         argTypes_ = new com.google.protobuf.LazyStringArrayList(argTypes_);
-        bitField0_ |= 0x00000004;
-       }
+      }
+      bitField0_ |= 0x00000004;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @return A list containing the argTypes.
      */
     public com.google.protobuf.ProtocolStringList
         getArgTypesList() {
-      return argTypes_.getUnmodifiableView();
+      argTypes_.makeImmutable();
+      return argTypes_;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @return The count of argTypes.
      */
     public int getArgTypesCount() {
       return argTypes_.size();
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @param index The index of the element to return.
+     * @return The argTypes at the given index.
      */
     public java.lang.String getArgTypes(int index) {
       return argTypes_.get(index);
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the argTypes at the given index.
      */
     public com.google.protobuf.ByteString
         getArgTypesBytes(int index) {
@@ -744,61 +717,70 @@ private static final long serialVersionUID = 0L;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @param index The index to set the value at.
+     * @param value The argTypes to set.
+     * @return This builder for chaining.
      */
     public Builder setArgTypes(
         int index, java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureArgTypesIsMutable();
+      if (value == null) { throw new NullPointerException(); }
+      ensureArgTypesIsMutable();
       argTypes_.set(index, value);
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @param value The argTypes to add.
+     * @return This builder for chaining.
      */
     public Builder addArgTypes(
         java.lang.String value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  ensureArgTypesIsMutable();
+      if (value == null) { throw new NullPointerException(); }
+      ensureArgTypesIsMutable();
       argTypes_.add(value);
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @param values The argTypes to add.
+     * @return This builder for chaining.
      */
     public Builder addAllArgTypes(
         java.lang.Iterable<java.lang.String> values) {
       ensureArgTypesIsMutable();
       com.google.protobuf.AbstractMessageLite.Builder.addAll(
           values, argTypes_);
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @return This builder for chaining.
      */
     public Builder clearArgTypes() {
-      argTypes_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      bitField0_ = (bitField0_ & ~0x00000004);
+      argTypes_ =
+        com.google.protobuf.LazyStringArrayList.emptyList();
+      bitField0_ = (bitField0_ & ~0x00000004);;
       onChanged();
       return this;
     }
     /**
      * <code>repeated string argTypes = 3;</code>
+     * @param value The bytes of the argTypes to add.
+     * @return This builder for chaining.
      */
     public Builder addArgTypesBytes(
         com.google.protobuf.ByteString value) {
-      if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
+      if (value == null) { throw new NullPointerException(); }
+      checkByteStringIsUtf8(value);
       ensureArgTypesIsMutable();
       argTypes_.add(value);
+      bitField0_ |= 0x00000004;
       onChanged();
       return this;
     }
@@ -835,7 +817,18 @@ private static final long serialVersionUID = 0L;
         com.google.protobuf.CodedInputStream input,
         com.google.protobuf.ExtensionRegistryLite extensionRegistry)
         throws com.google.protobuf.InvalidProtocolBufferException {
-      return new Request(input, extensionRegistry);
+      Builder builder = newBuilder();
+      try {
+        builder.mergeFrom(input, extensionRegistry);
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(builder.buildPartial());
+      } catch (com.google.protobuf.UninitializedMessageException e) {
+        throw e.asInvalidProtocolBufferException().setUnfinishedMessage(builder.buildPartial());
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(e)
+            .setUnfinishedMessage(builder.buildPartial());
+      }
+      return builder.buildPartial();
     }
   };
 

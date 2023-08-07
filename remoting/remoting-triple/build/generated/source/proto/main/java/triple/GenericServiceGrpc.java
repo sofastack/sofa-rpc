@@ -1,25 +1,13 @@
 package triple;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.27.2)",
+    value = "by gRPC proto compiler (version 1.53.0)",
     comments = "Source: transformer.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class GenericServiceGrpc {
 
   private GenericServiceGrpc() {}
@@ -110,14 +98,14 @@ public final class GenericServiceGrpc {
      */
     public void generic(triple.Request request,
         io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
-      asyncUnimplementedUnaryCall(getGenericMethod(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenericMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
             getGenericMethod(),
-            asyncUnaryCall(
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 triple.Request,
                 triple.Response>(
@@ -144,7 +132,7 @@ public final class GenericServiceGrpc {
      */
     public void generic(triple.Request request,
         io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
-      asyncUnaryCall(
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGenericMethod(), getCallOptions()), request, responseObserver);
     }
   }
@@ -166,7 +154,7 @@ public final class GenericServiceGrpc {
     /**
      */
     public triple.Response generic(triple.Request request) {
-      return blockingUnaryCall(
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGenericMethod(), getCallOptions(), request);
     }
   }
@@ -189,7 +177,7 @@ public final class GenericServiceGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<triple.Response> generic(
         triple.Request request) {
-      return futureUnaryCall(
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGenericMethod(), getCallOptions()), request);
     }
   }

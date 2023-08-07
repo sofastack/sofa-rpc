@@ -13,8 +13,6 @@
     <artifactId>sofa-rpc-tracer-opentracing</artifactId>
 
     <dependencies>
-
-
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>tracer-core</artifactId>
@@ -32,16 +30,6 @@
         </dependency>
 
         <!-- test 依赖 -->
-        <dependency>
-            <groupId>org.jmockit</groupId>
-            <artifactId>jmockit</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>

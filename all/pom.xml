@@ -61,16 +61,16 @@
         <netty.version>4.1.44.Final</netty.version>
         <hessian.version>3.4.0</hessian.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
-        <bolt.version>1.5.10</bolt.version>
+        <bolt.version>1.6.6</bolt.version>
         <tracer.version>3.0.8</tracer.version>
         <lookout.version>1.4.1</lookout.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
-        <sofa.registry.version>5.2.0</sofa.registry.version>
+        <sofa.registry.version>6.3.0</sofa.registry.version>
         <bolt.swagger.version>1.6.9</bolt.swagger.version>
         <asm.version>7.0</asm.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.13</httpcore.version>
-        <grpc.version>1.33.1</grpc.version>
+        <grpc.version>1.53.0</grpc.version>
         <guava.version>27.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
     </properties>
