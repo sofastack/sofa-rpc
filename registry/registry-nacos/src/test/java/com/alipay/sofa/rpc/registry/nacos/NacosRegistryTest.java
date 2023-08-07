@@ -81,7 +81,7 @@ public class NacosRegistryTest extends BaseNacosTest {
     }
 
     /**
-     * 测试Zookeeper Provider Observer
+     * 测试 Nacos Provider Observer
      *
      * @throws Exception the exception
      */
@@ -93,21 +93,21 @@ public class NacosRegistryTest extends BaseNacosTest {
         TimeUnit.SECONDS.sleep(10);
 
         serverConfig = new ServerConfig()
-            .setProtocol("bolt")
-            .setHost("0.0.0.0")
-            .setPort(12200);
+                .setProtocol("bolt")
+                .setHost("0.0.0.0")
+                .setPort(12200);
 
         ProviderConfig<?> provider = new ProviderConfig();
         provider.setInterfaceId("com.alipay.xxx.NacosTestService")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setUniqueId("nacos-test")
-            .setProxy("javassist")
-            .setRegister(true)
-            .setRegistry(registryConfig)
-            .setSerialization("hessian2")
-            .setServer(serverConfig)
-            .setWeight(222)
-            .setTimeout(3000);
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setUniqueId("nacos-test")
+                .setProxy("javassist")
+                .setRegister(true)
+                .setRegistry(registryConfig)
+                .setSerialization("hessian2")
+                .setServer(serverConfig)
+                .setWeight(222)
+                .setTimeout(3000);
 
         // 注册
         try {
@@ -120,13 +120,13 @@ public class NacosRegistryTest extends BaseNacosTest {
 
         ConsumerConfig<?> consumer = new ConsumerConfig();
         consumer.setInterfaceId("com.alipay.xxx.NacosTestService")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setUniqueId("nacos-test")
-            .setProxy("javassist")
-            .setSubscribe(true)
-            .setSerialization("java")
-            .setInvokeType("sync")
-            .setTimeout(4444);
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setUniqueId("nacos-test")
+                .setProxy("javassist")
+                .setSubscribe(true)
+                .setSerialization("java")
+                .setInvokeType("sync")
+                .setTimeout(4444);
 
         // 订阅
         CountDownLatch latch = new CountDownLatch(1);
@@ -144,12 +144,12 @@ public class NacosRegistryTest extends BaseNacosTest {
         // 订阅 错误的uniqueId
         ConsumerConfig<?> consumerNoUniqueId = new ConsumerConfig();
         consumerNoUniqueId.setInterfaceId("com.alipay.xxx.NacosTestService")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setProxy("javassist")
-            .setSubscribe(true)
-            .setSerialization("java")
-            .setInvokeType("sync")
-            .setTimeout(4444);
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setProxy("javassist")
+                .setSubscribe(true)
+                .setSerialization("java")
+                .setInvokeType("sync")
+                .setTimeout(4444);
         latch = new CountDownLatch(1);
         MockProviderInfoListener wrongProviderInfoListener = new MockProviderInfoListener();
         wrongProviderInfoListener.setCountDownLatch(latch);
@@ -174,9 +174,9 @@ public class NacosRegistryTest extends BaseNacosTest {
         latch = new CountDownLatch(2);
         providerInfoListener.setCountDownLatch(latch);
         provider.getServer().add(new ServerConfig()
-            .setProtocol("bolt")
-            .setHost("0.0.0.0")
-            .setPort(12201));
+                .setProtocol("bolt")
+                .setHost("0.0.0.0")
+                .setPort(12201));
         registry.register(provider);
 
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
@@ -189,13 +189,13 @@ public class NacosRegistryTest extends BaseNacosTest {
         // 重复订阅
         ConsumerConfig<?> consumer2 = new ConsumerConfig();
         consumer2.setInterfaceId("com.alipay.xxx.NacosTestService")
-            .setUniqueId("nacos-test")
-            .setApplication(new ApplicationConfig().setAppName("test-server"))
-            .setProxy("javassist")
-            .setSubscribe(true)
-            .setSerialization("java")
-            .setInvokeType("sync")
-            .setTimeout(4444);
+                .setUniqueId("nacos-test")
+                .setApplication(new ApplicationConfig().setAppName("test-server"))
+                .setProxy("javassist")
+                .setSubscribe(true)
+                .setSerialization("java")
+                .setInvokeType("sync")
+                .setTimeout(4444);
         CountDownLatch latch2 = new CountDownLatch(1);
         MockProviderInfoListener providerInfoListener2 = new MockProviderInfoListener();
         providerInfoListener2.setCountDownLatch(latch2);
@@ -214,17 +214,17 @@ public class NacosRegistryTest extends BaseNacosTest {
         // 批量反注册，判断订阅者2的数据
         latch = new CountDownLatch(2);
         providerInfoListener2.setCountDownLatch(latch);
-        List<ProviderConfig> providerConfigList = new ArrayList<ProviderConfig>();
+        List<ProviderConfig> providerConfigList = new ArrayList<>();
         providerConfigList.add(provider);
         registry.batchUnRegister(providerConfigList);
 
         latch.await(timeoutPerSub * 2, TimeUnit.MILLISECONDS);
-        Assert.assertEquals("after unregister: 1", 1, ps2.size());
+        Assert.assertEquals("after unregister: 0", 0, ps2.size()); // 所有的 Provider 都已经反向注册了，应该是 0
 
         LOGGER.info("after unregister consumer, and consumer2 {}", ps);
 
         // 批量取消订阅
-        List<ConsumerConfig> consumerConfigList = new ArrayList<ConsumerConfig>();
+        List<ConsumerConfig> consumerConfigList = new ArrayList<>();
         consumerConfigList.add(consumer2);
         registry.batchUnSubscribe(consumerConfigList);
     }

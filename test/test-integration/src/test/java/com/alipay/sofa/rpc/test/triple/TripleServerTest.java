@@ -28,6 +28,8 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
+import io.grpc.Status;
+import io.grpc.StatusException;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterTriple;
@@ -327,19 +329,19 @@ public class TripleServerTest {
             SampleService sampleService = consumerConfig.refer();
             String msg = buildMsg(1);
             try {
-                sampleService.messageSize(msg, 5*1024);
+                sampleService.messageSize(msg, 5 * 1024);
                 Assert.fail();
             } catch (Exception e) {
                 Assert.assertTrue(e.getMessage().contains("gRPC message exceeds maximum size 4194304:"));
             }
-            msg = buildMsg(5*1024);
+            msg = buildMsg(5 * 1024);
 
             try {
                 sampleService.messageSize(msg, 1);
                 Assert.fail();
             } catch (Exception e) {
                 // The client actively cancelled the request, resulting in the server returning a CANCELLED error.
-                Assert.assertTrue(e.getMessage().contains("CANCELLED: HTTP/2 error code: CANCEL"));
+                Assert.assertTrue(((StatusException) e.getCause()).getStatus().getCode().equals(Status.CANCELLED.getCode()));
             }
         } finally {
             RpcRunningState.setDebugMode(originDebugMode);

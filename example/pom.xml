@@ -11,10 +11,10 @@
     </parent>
 
     <properties>
-        <protoc.version>3.11.0</protoc.version>
-        <protoc-gen-grpc-java.version>1.17.0</protoc-gen-grpc-java.version>
+        <protoc.version>3.22.0</protoc.version>
+        <protoc-gen-grpc-java.version>1.53.0</protoc-gen-grpc-java.version>
         <sofa.rpc.compiler.version>0.0.3</sofa.rpc.compiler.version>
-        <grpc.version>1.33.1</grpc.version>
+        <grpc.version>1.53.0</grpc.version>
         <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
     </properties>
 
@@ -194,7 +194,7 @@
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.5.1</version>
                 <configuration>
-                    <protocArtifact>com.google.protobuf:protoc:3.7.1:exe:${os.detected.classifier}</protocArtifact>
+                    <protocArtifact>com.google.protobuf:protoc:${protoc.version}:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:${grpc.version}:exe:${os.detected.classifier}</pluginArtifact>
                     <outputDirectory>build/generated/source/proto/main/java</outputDirectory>

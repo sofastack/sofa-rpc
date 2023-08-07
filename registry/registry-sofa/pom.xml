@@ -12,7 +12,7 @@
 
     <artifactId>sofa-rpc-registry-sofa</artifactId>
     <properties>
-        <sofa.registry.version>5.2.0</sofa.registry.version>
+        <sofa.registry.version>6.3.0</sofa.registry.version>
         <argLine>-Dnetwork_interface_denylist=docker0</argLine>
     </properties>
     <dependencies>
@@ -66,19 +66,16 @@
                     <artifactId>log4j-jcl</artifactId>
                     <groupId>org.apache.logging.log4j</groupId>
                 </exclusion>
-                <exclusion>
-                    <artifactId>log4j-core</artifactId>
-                    <groupId>org.apache.logging.log4j</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>log4j-api</artifactId>
-                    <groupId>org.apache.logging.log4j</groupId>
-                </exclusion>
             </exclusions>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_hotspot</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
