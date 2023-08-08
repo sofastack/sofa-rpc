@@ -4,9 +4,9 @@
 name: build
 on:
   push:
-    branches: [ master, sofaboot-4.0-support ]
+    branches: [ master ]
   pull_request:
-    branches: [ master, sofaboot-4.0-support ]
+    branches: [ master ]
   # enable manually running the workflow
   workflow_dispatch:
 
