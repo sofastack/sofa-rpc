@@ -1,6 +1,8 @@
 name: Alipay Cloud Devops Codescan
 on:
   push:
+    branches-ignore:
+      - 'dependabot/**'
 
 jobs:
   deployment:
