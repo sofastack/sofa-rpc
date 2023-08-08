@@ -77,7 +77,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>5.11.0-beta1</revision>
+        <revision>5.11.0-SNAPSHOT</revision>
         <jmh.version>1.33</jmh.version>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
@@ -87,8 +87,8 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
         <skipTests>false</skipTests>
-        <protoc.version>3.7.1</protoc.version>
-        <grpc.version>1.27.2</grpc.version>
+        <protoc.version>3.22.0</protoc.version>
+        <grpc.version>1.53.0</grpc.version>
         <sofa.rpc.compiler.version>0.0.2</sofa.rpc.compiler.version>
     </properties>
 

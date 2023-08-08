@@ -95,7 +95,7 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setProtocol("mesh")
             .setSubscribe(true)
             .setRegister(true)
-            .setAddress("http://localhost:7654");
+            .setAddress("http://127.0.0.1:7654");
 
         registry = (MeshRegistry) RegistryFactory.getRegistry(registryConfig);
         registry.init();
