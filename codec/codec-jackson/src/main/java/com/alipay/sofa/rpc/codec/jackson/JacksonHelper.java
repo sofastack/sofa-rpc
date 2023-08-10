@@ -122,13 +122,13 @@ public class JacksonHelper {
         if (jsonMethod.getDeclaringClass() != clazz && !clazz.isInterface()) {
             parameterTypes = new Type[1];
             Type type = clazz.getGenericSuperclass();
-            try {
+            if (type instanceof ParameterizedType){
                 ParameterizedType parameterizedType = (ParameterizedType) type;
                 // parse request types
                 parameterTypes[0] = parameterizedType.getActualTypeArguments()[0];
                 // parse response types
                 resType = parameterizedType.getActualTypeArguments()[1];
-            } catch (ClassCastException e) {
+            }else{
                 // parse request types
                 parameterTypes = jsonMethod.getGenericParameterTypes();
                 // parse response types
