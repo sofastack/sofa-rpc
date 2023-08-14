@@ -32,12 +32,12 @@ public class FuryHelper {
     /**
      * 请求参数类型缓存 {service+method:class}
      */
-    private ConcurrentMap<String, Class> requestClassCache  = new ConcurrentHashMap<String, Class>();
+    private final ConcurrentMap<String, Class> requestClassCache  = new ConcurrentHashMap<String, Class>();
 
     /**
      * 返回结果类型缓存 {service+method:class}
      */
-    private ConcurrentMap<String, Class> responseClassCache = new ConcurrentHashMap<String, Class>();
+    private final ConcurrentMap<String, Class> responseClassCache = new ConcurrentHashMap<String, Class>();
 
     /**
      * 从缓存中获取请求值类
@@ -54,7 +54,7 @@ public class FuryHelper {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
-            loadProtoClassToCache(key, clazz, methodName);
+            loadClassToCache(key, clazz, methodName);
         }
         return requestClassCache.get(key);
     }
@@ -73,7 +73,7 @@ public class FuryHelper {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
-            loadProtoClassToCache(key, clazz, methodName);
+            loadClassToCache(key, clazz, methodName);
         }
         return responseClassCache.get(key);
     }
@@ -96,7 +96,7 @@ public class FuryHelper {
      * @param clazz      接口名
      * @param methodName 方法名
      */
-    private void loadProtoClassToCache(String key, Class clazz, String methodName) {
+    private void loadClassToCache(String key, Class clazz, String methodName) {
         Method pbMethod = null;
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
@@ -111,8 +111,8 @@ public class FuryHelper {
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
         if (parameterTypes == null || parameterTypes.length != 1) {
-            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_ONLY_ONE_PARAM, "protobuf",
-                clazz.getName()));
+            throw new SofaRpcRuntimeException(
+                LogCodes.getLog(LogCodes.ERROR_ONLY_ONE_PARAM, "fury", clazz.getName()));
         }
         Class reqClass = parameterTypes[0];
         requestClassCache.put(key, reqClass);

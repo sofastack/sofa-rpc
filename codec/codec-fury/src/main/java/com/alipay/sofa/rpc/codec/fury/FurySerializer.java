@@ -17,12 +17,11 @@
 package com.alipay.sofa.rpc.codec.fury;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -36,6 +35,7 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
 import io.fury.Fury;
 import io.fury.Language;
+import io.fury.ThreadLocalFury;
 import io.fury.serializer.CompatibleMode;
 
 /**
@@ -44,21 +44,43 @@ import io.fury.serializer.CompatibleMode;
 @Extension(value = "fury", code = 20)
 public class FurySerializer extends AbstractSerializer {
 
-    private final FuryHelper    furyHelper  = new FuryHelper();
-    private final Set<Class<?>> registerSet = new ConcurrentHashSet<>();
-    private final Fury          fury;
+    private final FuryHelper      furyHelper = new FuryHelper();
+
+    private final ThreadLocalFury fury;
 
     public FurySerializer() {
-        fury = Fury.builder()
-            .withLanguage(Language.JAVA)
-            .withRefTracking(true)
-            .withCodegen(true)
-            .withNumberCompressed(true)
-            .withCompatibleMode(CompatibleMode.COMPATIBLE)
-            .requireClassRegistration(false)
-            .withClassLoader(getClass().getClassLoader())
-            .withAsyncCompilationEnabled(true)
-            .build();
+        fury = new ThreadLocalFury(classLoader -> {
+
+            Fury f = Fury.builder().withLanguage(Language.JAVA)
+                .withRefTracking(false)
+                .withCodegen(true)
+                .withNumberCompressed(true)
+                .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                .requireClassRegistration(false)
+                .withClassLoader(classLoader)
+                .withAsyncCompilationEnabled(true)
+                .build();
+            return f;
+        });
+    }
+
+    public FurySerializer(List<Class<?>> classList) {
+        fury = new ThreadLocalFury(classLoader -> {
+
+            Fury f = Fury.builder().withLanguage(Language.JAVA)
+                .withRefTracking(false)
+                .withCodegen(true)
+                .withNumberCompressed(true)
+                .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                .requireClassRegistration(true)
+                .withClassLoader(classLoader)
+                .withAsyncCompilationEnabled(true)
+                .build();
+            for (Class<?> clazz : classList) {
+                f.register(clazz);
+            }
+            return f;
+        });
     }
 
     @Override
@@ -70,26 +92,18 @@ public class FurySerializer extends AbstractSerializer {
         } else if (object instanceof SofaResponse) {
             return encodeSofaResponse((SofaResponse) object, context);
         } else {
-            Class<?> clazz = object.getClass();
-            registerClass(clazz);
             return new ByteArrayWrapperByteBuf(fury.serialize(object));
-        }
-    }
-
-    private void registerClass(Class<?> clazz) {
-        if (!registerSet.contains(clazz)) {
-            fury.register(clazz);
-            registerSet.add(clazz);
         }
     }
 
     private AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
         throws SofaRpcException {
         Object[] args = sofaRequest.getMethodArgs();
-        if (args.length > 1) {
-            throw buildSerializeError("Fury only support one parameter!");
+        if (args.length == 1) {
+            return encode(args[0], context);
+        } else {
+            return encode(args, context);
         }
-        return encode(args[0], context);
     }
 
     private AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
@@ -165,6 +179,7 @@ public class FurySerializer extends AbstractSerializer {
             sofaRequest.setTargetAppName(targetApp);
         }
 
+        // parse tracer and baggage
         parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, head, sofaRequest);
         if (RpcInvokeContext.isBaggageEnable()) {
             parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, head, sofaRequest);
@@ -173,6 +188,7 @@ public class FurySerializer extends AbstractSerializer {
             sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
         }
 
+        // according interface and method name to find parameter types
         Class requestClass = furyHelper.getReqClass(targetService,
             sofaRequest.getMethodName());
         Object pbReq = decode(data, requestClass, head);
@@ -204,7 +220,6 @@ public class FurySerializer extends AbstractSerializer {
             String errorMessage = (String) decode(data, String.class, head);
             sofaResponse.setErrorMsg(errorMessage);
         } else {
-            // 根据接口+方法名找到参数类型
             Class responseClass = furyHelper.getResClass(targetService, methodName);
             Object pbRes = decode(data, responseClass, head);
             sofaResponse.setAppResponse(pbRes);
