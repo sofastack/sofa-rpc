@@ -572,4 +572,10 @@ public class RpcOptions {
      */
     public static final String BOLT_SERIALIZER_REGISTER_EXTENSION       = "sofa.rpc.bolt.serializer.register.extension";
 
+    /**
+     * Whether to use the whitelist
+     * @since 5.11.0
+     */
+    public static final String FURY_SERIALIZER_WHITELIST                = "sofa.rpc.codec.fury.serializer.whitelist";
+
 }

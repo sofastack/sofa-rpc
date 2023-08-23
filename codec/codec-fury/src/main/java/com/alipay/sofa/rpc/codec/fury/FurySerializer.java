@@ -16,13 +16,19 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
+import com.alipay.sofa.rpc.common.utils.FileUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -44,43 +50,71 @@ import io.fury.serializer.CompatibleMode;
 @Extension(value = "fury", code = 20)
 public class FurySerializer extends AbstractSerializer {
 
-    private final FuryHelper      furyHelper = new FuryHelper();
+    private final FuryHelper furyHelper = new FuryHelper();
 
     private final ThreadLocalFury fury;
 
     public FurySerializer() {
-        fury = new ThreadLocalFury(classLoader -> {
-
-            Fury f = Fury.builder().withLanguage(Language.JAVA)
-                .withRefTracking(false)
-                .withCodegen(true)
-                .withNumberCompressed(true)
-                .withCompatibleMode(CompatibleMode.COMPATIBLE)
-                .requireClassRegistration(false)
-                .withClassLoader(classLoader)
-                .withAsyncCompilationEnabled(true)
-                .build();
-            return f;
-        });
-    }
-
-    public FurySerializer(List<Class<?>> classList) {
-        fury = new ThreadLocalFury(classLoader -> {
-
-            Fury f = Fury.builder().withLanguage(Language.JAVA)
-                .withRefTracking(false)
-                .withCodegen(true)
-                .withNumberCompressed(true)
-                .withCompatibleMode(CompatibleMode.COMPATIBLE)
-                .requireClassRegistration(true)
-                .withClassLoader(classLoader)
-                .withAsyncCompilationEnabled(true)
-                .build();
-            for (Class<?> clazz : classList) {
-                f.register(clazz);
+        boolean WHITELIST = RpcConfigs
+            .getBooleanValue(RpcOptions.FURY_SERIALIZER_WHITELIST);
+        if (WHITELIST) {
+            ArrayList<Class<?>> whiteList = new ArrayList<>();
+            String json = null;
+            try {
+                json = FileUtils.file2String(FurySerializer.class, "whiteList.json", "UTF-8");
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
-            return f;
-        });
+            System.out.println(json);
+            Map<String, Boolean> map = JSON.parseObject(json, Map.class);
+            map.forEach((key, value) -> {
+                if (value) {
+                    Class<?> clazz = null;
+                    try {
+                        clazz = Class.forName(key);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                    whiteList.add(clazz);
+                }
+
+            });
+            fury = new ThreadLocalFury(classLoader -> {
+
+                Fury f = Fury.builder().withLanguage(Language.JAVA)
+                    .withRefTracking(false)
+                    .withCodegen(true)
+                    .withNumberCompressed(true)
+                    .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                    .requireClassRegistration(true)
+                    .withClassLoader(classLoader)
+                    .withAsyncCompilationEnabled(true)
+                    .withSecureMode(true)
+                    .build();
+                if (!whiteList.isEmpty()) {
+                    for (Class<?> clazz : whiteList) {
+                        f.register(clazz);
+                    }
+                }
+                return f;
+            });
+
+        } else {
+            fury = new ThreadLocalFury(classLoader -> {
+
+                return Fury.builder().withLanguage(Language.JAVA)
+                    .withRefTracking(false)
+                    .withCodegen(true)
+                    .withNumberCompressed(true)
+                    .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                    .requireClassRegistration(false)
+                    .withClassLoader(classLoader)
+                    .withAsyncCompilationEnabled(true)
+                    .withSecureMode(false)
+                    .build();
+            });
+        }
+
     }
 
     @Override

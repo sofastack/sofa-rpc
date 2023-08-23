@@ -28,7 +28,7 @@ import com.alipay.sofa.rpc.codec.fury.model.DemoService;
  */
 public class FuryHelperTest {
 
-    private FuryHelper furyHelper = new FuryHelper();
+    private final FuryHelper furyHelper = new FuryHelper();
 
     @Test
     public void getReqClass() {

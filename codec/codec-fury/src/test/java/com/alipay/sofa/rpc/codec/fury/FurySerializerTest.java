@@ -16,17 +16,17 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.alipay.sofa.rpc.codec.fury.model.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.alipay.sofa.rpc.codec.fury.model.DemoRequest;
-import com.alipay.sofa.rpc.codec.fury.model.DemoResponse;
-import com.alipay.sofa.rpc.codec.fury.model.DemoService;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -37,6 +37,8 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
+import javax.xml.bind.SchemaOutputResolver;
+
 /**
  * @author lipan
  */
@@ -44,6 +46,13 @@ public class FurySerializerTest {
 
     private final FurySerializer serializer = new FurySerializer();
     private FurySerializer       threadLocalSerializer;
+
+    public FurySerializerTest() {
+    }
+
+    @Test
+    public void create() {
+    }
 
     @Test
     public void encodeAndDecode() {
@@ -99,34 +108,30 @@ public class FurySerializerTest {
         }
         Assert.assertTrue(error);
 
-        //test threadLocalSerializer
-        ArrayList<Class<?>> list = new ArrayList<>();
-        list.add(DemoRequest.class);
+    }
 
-        threadLocalSerializer = new FurySerializer(list);
-        demoRequest.setName("a");
-        AbstractByteBuf byteBuf2 = threadLocalSerializer.encode(demoRequest, null);
-        DemoRequest req3 = (DemoRequest) threadLocalSerializer.decode(byteBuf2, DemoRequest.class, null);
-        Assert.assertEquals(demoRequest.getName(), req3.getName());
-
-        AbstractByteBuf data2 = threadLocalSerializer.encode("xxx", null);
-        String dst2 = (String) threadLocalSerializer.decode(data2, String.class, null);
-        Assert.assertEquals("xxx", dst2);
-
-        //the log no show any WARN,because,we don`t to register
-
-        // and then try to test no registered,but to Serializer
-        SofaRequest request = new SofaRequest();
-        error = false;
+    @Test
+    public void testRegistered() throws Exception {
+        boolean error = false;
+        RegisteredClass registeredClass = new RegisteredClass();
+        System.out.println();
         try {
-            AbstractByteBuf byteBuf3 = threadLocalSerializer.encode(request, null);
+            // registered this class
+            serializer.encode(registeredClass, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+
+        NotRegister notRegister = new NotRegister();
+        System.out.println();
+        try {
+            //Not registered this class
+            serializer.encode(notRegister, null);
         } catch (Exception e) {
             error = true;
         }
         Assert.assertTrue(error);
-
-        //the result show ,we need to registered.
-
     }
 
     @Test
