@@ -17,7 +17,7 @@
 package com.alipay.sofa.rpc.log.factory;
 
 import com.alipay.sofa.common.log.LoggerSpaceManager;
-import com.alipay.sofa.common.log.SpaceId;
+import com.alipay.sofa.common.space.SpaceId;
 
 import java.util.HashMap;
 import java.util.Map;
