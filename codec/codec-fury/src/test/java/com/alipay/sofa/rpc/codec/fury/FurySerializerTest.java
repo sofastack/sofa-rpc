@@ -123,6 +123,7 @@ public class FurySerializerTest {
         }
         Assert.assertFalse(error);
 
+        error = false;
         NotRegister notRegister = new NotRegister();
         System.out.println();
         try {
@@ -132,6 +133,19 @@ public class FurySerializerTest {
             error = true;
         }
         Assert.assertTrue(error);
+    }
+
+    @Test
+    public void testArgs() throws Exception {
+        SofaRequest request = new SofaRequest();
+        // Creates and initializes a String array
+        String[] array = { "element1", "element2", "element3" };
+        request.setMethodArgs(array);
+        AbstractByteBuf byteBuf = serializer.encode(request, null);
+
+        String[] decode = (String[]) serializer.decode(byteBuf, SofaRequest.class, null);
+        // Serialization and deserialization with multiple parameters
+        Assert.assertEquals(request.getMethodArgs(), decode);
     }
 
     @Test

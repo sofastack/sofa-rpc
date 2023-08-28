@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.codec.fury;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
@@ -50,7 +49,7 @@ import io.fury.serializer.CompatibleMode;
 @Extension(value = "fury", code = 20)
 public class FurySerializer extends AbstractSerializer {
 
-    private final FuryHelper furyHelper = new FuryHelper();
+    private final FuryHelper      furyHelper = new FuryHelper();
 
     private final ThreadLocalFury fury;
 
@@ -61,17 +60,17 @@ public class FurySerializer extends AbstractSerializer {
             ArrayList<Class<?>> whiteList = new ArrayList<>();
             String json = null;
             try {
-                json = FileUtils.file2String(FurySerializer.class, "whiteList.json", "UTF-8");
+                json = FileUtils.file2String(FurySerializer.class, "/whiteList.json", "UTF-8");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println(json);
+
             Map<String, Boolean> map = JSON.parseObject(json, Map.class);
-            map.forEach((key, value) -> {
-                if (value) {
+            map.forEach((className, use) -> {
+                if (use) {
                     Class<?> clazz = null;
                     try {
-                        clazz = Class.forName(key);
+                        clazz = Class.forName(className);
                     } catch (ClassNotFoundException e) {
                         throw new RuntimeException(e);
                     }
