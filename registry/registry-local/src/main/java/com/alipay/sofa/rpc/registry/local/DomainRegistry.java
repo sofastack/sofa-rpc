@@ -118,7 +118,7 @@ public class DomainRegistry extends Registry {
         }
 
         for (String directUrl : keySet) {
-            ProviderInfo providerInfo = ProviderHelper.toProviderInfo(directUrl);
+            ProviderInfo providerInfo = convertToProviderInfo(directUrl);
             List<ProviderInfo> result = directUrl2IpUrl(providerInfo, domainCache.get(directUrl));
             domainCache.put(directUrl, result);
         }
