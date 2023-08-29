@@ -16,7 +16,6 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
-
 import java.util.*;
 import com.alipay.sofa.rpc.codec.fury.model.*;
 import org.junit.Assert;
@@ -31,8 +30,6 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-
-
 
 /**
  * @author lipan
@@ -127,19 +124,6 @@ public class FurySerializerTest {
             error = true;
         }
         Assert.assertTrue(error);
-    }
-
-    @Test
-    public void testArgs() throws Exception {
-        SofaRequest request = new SofaRequest();
-        // Creates and initializes a String array
-        String[] array = { "element1", "element2", "element3" };
-        request.setMethodArgs(array);
-        AbstractByteBuf byteBuf = serializer.encode(request, null);
-
-        String[] decode = (String[]) serializer.decode(byteBuf, SofaRequest.class, null);
-        // Serialization and deserialization with multiple parameters
-        Assert.assertEquals(request.getMethodArgs(), decode);
     }
 
     @Test

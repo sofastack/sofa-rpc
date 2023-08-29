@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.codec.fury;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
@@ -222,11 +223,32 @@ public class FurySerializer extends AbstractSerializer {
         }
 
         // according interface and method name to find parameter types
-        Class requestClass = furyHelper.getReqClass(targetService,
+        Class[] requestClass = furyHelper.getReqClass(targetService,
             sofaRequest.getMethodName());
-        Object pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(new Object[] { pbReq });
-        sofaRequest.setMethodArgSigs(new String[] { requestClass.getName() });
+        Object[] pbReq = decode(data, requestClass, head);
+        sofaRequest.setMethodArgs(pbReq);
+        sofaRequest.setMethodArgSigs(parseArgSigs(requestClass));
+    }
+
+    private Object[] decode(final AbstractByteBuf data, final Class[] templateList, final Map<String, String> context)
+        throws SofaRpcException {
+        ArrayList<Object> objectList = new ArrayList<>();
+        for (Class clazz : templateList) {
+            Object result = null;
+            if (clazz == null) {
+                throw buildDeserializeError("class is null!");
+            } else if (data.readableBytes() <= 0) {
+                try {
+                    result = clazz.newInstance();
+                } catch (InstantiationException | IllegalAccessException e) {
+                    throw buildDeserializeError(e.getMessage());
+                }
+            } else {
+                result = fury.deserialize(data.array());
+            }
+            objectList.add(result);
+        }
+        return objectList.toArray(new Object[objectList.size()]);
     }
 
     private void decodeSofaResponse(AbstractByteBuf data, SofaResponse sofaResponse, Map<String, String> head) {
@@ -266,6 +288,15 @@ public class FurySerializer extends AbstractSerializer {
         if (!traceMap.isEmpty()) {
             sofaRequest.addRequestProp(key, traceMap);
         }
+    }
+
+    private String[] parseArgSigs(Class[] reqList) {
+        List<String> argSigs = new ArrayList<String>();
+        for (Class type : reqList) {
+            argSigs.add(type.getCanonicalName());
+        }
+
+        return argSigs.toArray(new String[argSigs.size()]);
     }
 
 }

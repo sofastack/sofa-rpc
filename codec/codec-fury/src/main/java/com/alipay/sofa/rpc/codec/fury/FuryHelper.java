@@ -32,12 +32,12 @@ public class FuryHelper {
     /**
      * 请求参数类型缓存 {service+method:class}
      */
-    private final ConcurrentMap<String, Class> requestClassCache  = new ConcurrentHashMap<String, Class>();
+    private final ConcurrentMap<String, Class[]> requestClassCache  = new ConcurrentHashMap<String, Class[]>();
 
     /**
      * 返回结果类型缓存 {service+method:class}
      */
-    private final ConcurrentMap<String, Class> responseClassCache = new ConcurrentHashMap<String, Class>();
+    private final ConcurrentMap<String, Class>   responseClassCache = new ConcurrentHashMap<String, Class>();
 
     /**
      * 从缓存中获取请求值类
@@ -46,10 +46,10 @@ public class FuryHelper {
      * @param methodName 方法名
      * @return 请求参数类
      */
-    public Class getReqClass(String service, String methodName) {
+    public Class[] getReqClass(String service, String methodName) {
 
         String key = buildMethodKey(service, methodName);
-        Class reqClass = requestClassCache.get(key);
+        Class[] reqClass = requestClassCache.get(key);
         if (reqClass == null) {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
@@ -114,8 +114,8 @@ public class FuryHelper {
             throw new SofaRpcRuntimeException(
                 LogCodes.getLog("fury", clazz.getName()));
         }
-        Class reqClass = parameterTypes[0];
-        requestClassCache.put(key, reqClass);
+
+        requestClassCache.put(key, parameterTypes);
         Class respClass = pbMethod.getReturnType();
         if (respClass == void.class) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOBUF_RETURN, clazz.getName()));

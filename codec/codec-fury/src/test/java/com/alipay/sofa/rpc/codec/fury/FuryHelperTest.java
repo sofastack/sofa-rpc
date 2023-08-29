@@ -32,9 +32,9 @@ public class FuryHelperTest {
 
     @Test
     public void getReqClass() {
-        Class req = furyHelper.getReqClass(
+        Class[] req = furyHelper.getReqClass(
             DemoService.class.getCanonicalName(), "say");
-        Assert.assertTrue(req == DemoRequest.class);
+        Assert.assertTrue(req[0] == DemoRequest.class);
     }
 
     @Test
