@@ -66,7 +66,7 @@ public class FuryHelper {
      * @param methodName 方法名
      * @return 请求参数类
      */
-    public Class getResClass(String service, String methodName) {
+    public Class getRespClass(String service, String methodName) {
         String key = service + "#" + methodName;
         Class reqClass = responseClassCache.get(key);
         if (reqClass == null) {
@@ -110,16 +110,16 @@ public class FuryHelper {
                 methodName));
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
-        if (parameterTypes == null || parameterTypes.length != 1) {
+        if (parameterTypes.length == 0) {
             throw new SofaRpcRuntimeException(
-                LogCodes.getLog(LogCodes.ERROR_ONLY_ONE_PARAM, "fury", clazz.getName()));
+                LogCodes.getLog("fury", clazz.getName()));
         }
         Class reqClass = parameterTypes[0];
         requestClassCache.put(key, reqClass);
-        Class resClass = pbMethod.getReturnType();
-        if (resClass == void.class) {
+        Class respClass = pbMethod.getReturnType();
+        if (respClass == void.class) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOBUF_RETURN, clazz.getName()));
         }
-        responseClassCache.put(key, resClass);
+        responseClassCache.put(key, respClass);
     }
 }

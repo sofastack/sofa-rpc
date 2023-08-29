@@ -39,7 +39,7 @@ public class FuryHelperTest {
 
     @Test
     public void getResClass() {
-        Class res = furyHelper.getResClass(
+        Class res = furyHelper.getRespClass(
             DemoService.class.getCanonicalName(), "say");
         Assert.assertTrue(res == DemoResponse.class);
     }

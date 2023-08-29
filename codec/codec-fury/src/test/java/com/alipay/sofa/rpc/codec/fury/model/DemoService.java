@@ -16,11 +16,18 @@
  */
 package com.alipay.sofa.rpc.codec.fury.model;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author lipan
  */
 public interface DemoService {
 
     public DemoResponse say(DemoRequest demoRequest);
+
+    public DemoResponse say2(DemoRequest demoRequest, Map<String, String> ctx, int id);
+
+    public List<DemoResponse> say3(List<DemoRequest> list);
 
 }

@@ -253,7 +253,7 @@ public class FurySerializer extends AbstractSerializer {
             String errorMessage = (String) decode(data, String.class, head);
             sofaResponse.setErrorMsg(errorMessage);
         } else {
-            Class responseClass = furyHelper.getResClass(targetService, methodName);
+            Class responseClass = furyHelper.getRespClass(targetService, methodName);
             Object pbRes = decode(data, responseClass, head);
             sofaResponse.setAppResponse(pbRes);
         }

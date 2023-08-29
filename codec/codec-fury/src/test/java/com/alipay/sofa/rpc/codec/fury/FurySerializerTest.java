@@ -16,13 +16,8 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
-import java.io.IOException;
-import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
+import java.util.*;
 import com.alipay.sofa.rpc.codec.fury.model.*;
 import org.junit.Assert;
 import org.junit.Test;
@@ -37,7 +32,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
-import javax.xml.bind.SchemaOutputResolver;
+
 
 /**
  * @author lipan
@@ -45,7 +40,6 @@ import javax.xml.bind.SchemaOutputResolver;
 public class FurySerializerTest {
 
     private final FurySerializer serializer = new FurySerializer();
-    private FurySerializer       threadLocalSerializer;
 
     public FurySerializerTest() {
     }
@@ -277,6 +271,33 @@ public class FurySerializerTest {
         Assert.assertEquals(response.getErrorMsg(), newResponse.getErrorMsg());
     }
 
+    @Test
+    public void testListResponse() {
+        // success response
+        Map<String, String> head = new HashMap<String, String>();
+        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
+        head.put(RemotingConstants.HEAD_METHOD_NAME, "say3");
+        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
+        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
+        SofaResponse response = new SofaResponse();
+        final DemoResponse response1 = new DemoResponse();
+        response1.setWord("result");
+
+        List<DemoResponse> listResponse = new ArrayList<DemoResponse>();
+        listResponse.add(response1);
+
+        response.setAppResponse(listResponse);
+
+        AbstractByteBuf data = serializer.encode(response, null);
+        SofaResponse newResponse = new SofaResponse();
+        serializer.decode(data, newResponse, head);
+        Assert.assertFalse(newResponse.isError());
+        Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
+        Assert.assertEquals("result", ((List<DemoResponse>) newResponse.getAppResponse()).get(0).getWord());
+
+    }
+
     private SofaRequest buildRequest() throws NoSuchMethodException {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(DemoService.class.getName());
@@ -288,7 +309,7 @@ public class FurySerializerTest {
         request.setMethodArgSigs(new String[] { DemoRequest.class.getCanonicalName() });
         request.setTargetServiceUniqueName(DemoService.class.getName() + ":1.0");
         request.setTargetAppName("targetApp");
-        request.setSerializeType((byte) 11);
+        request.setSerializeType((byte) 20);
         request.setTimeout(1024);
         request.setInvokeType(RpcConstants.INVOKER_TYPE_SYNC);
         Map<String, String> map = new HashMap<String, String>();
@@ -313,4 +334,5 @@ public class FurySerializerTest {
         });
         return request;
     }
+
 }
