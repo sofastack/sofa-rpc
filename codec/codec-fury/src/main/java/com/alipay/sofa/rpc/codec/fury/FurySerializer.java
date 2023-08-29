@@ -55,8 +55,7 @@ public class FurySerializer extends AbstractSerializer {
     private final ThreadLocalFury fury;
 
     public FurySerializer() {
-        boolean WHITELIST = RpcConfigs
-            .getBooleanValue(RpcOptions.FURY_SERIALIZER_WHITELIST);
+        boolean WHITELIST = RpcConfigs.getBooleanValue(RpcOptions.FURY_SERIALIZER_WHITELIST);
         if (WHITELIST) {
             ArrayList<Class<?>> whiteList = new ArrayList<>();
             String json = null;
