@@ -29,73 +29,47 @@ import com.alipay.sofa.rpc.log.LogCodes;
  * @author lipan
  */
 public class FuryHelper {
-    /**
-     * 请求参数类型缓存 {service+method:class}
-     */
-    private final ConcurrentMap<String, Class[]> requestClassCache  = new ConcurrentHashMap<String, Class[]>();
+    private final ConcurrentMap<String, Class[]> requestClassCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Class> responseClassCache = new ConcurrentHashMap<>();
 
-    /**
-     * 返回结果类型缓存 {service+method:class}
-     */
-    private final ConcurrentMap<String, Class>   responseClassCache = new ConcurrentHashMap<String, Class>();
-
-    /**
-     * 从缓存中获取请求值类
-     *
-     * @param service    接口名
-     * @param methodName 方法名
-     * @return 请求参数类
-     */
     public Class[] getReqClass(String service, String methodName) {
-
         String key = buildMethodKey(service, methodName);
         Class[] reqClass = requestClassCache.get(key);
         if (reqClass == null) {
-            // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
-            Class clazz = ClassUtils.forName(interfaceClass, true);
+            ClassLoader classLoader = getClassLoader(interfaceClass);
+            Class clazz = null;
+            try {
+                clazz = Class.forName(interfaceClass, true, classLoader);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             loadClassToCache(key, clazz, methodName);
         }
         return requestClassCache.get(key);
     }
 
-    /**
-     * 从缓存中获取返回值类
-     *
-     * @param service    接口名
-     * @param methodName 方法名
-     * @return 请求参数类
-     */
     public Class getRespClass(String service, String methodName) {
-        String key = service + "#" + methodName;
-        Class reqClass = responseClassCache.get(key);
-        if (reqClass == null) {
-            // 读取接口里的方法参数和返回值
+        String key = buildMethodKey(service, methodName);
+        Class respClass = responseClassCache.get(key);
+        if (respClass == null) {
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
-            Class clazz = ClassUtils.forName(interfaceClass, true);
+            ClassLoader classLoader = getClassLoader(interfaceClass);
+            Class clazz = null;
+            try {
+                clazz = Class.forName(interfaceClass, true, classLoader);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             loadClassToCache(key, clazz, methodName);
         }
         return responseClassCache.get(key);
     }
 
-    /**
-     * 拼装缓存的key
-     *
-     * @param serviceName 接口名
-     * @param methodName  方法名
-     * @return Key
-     */
     private String buildMethodKey(String serviceName, String methodName) {
         return serviceName + "#" + methodName;
     }
 
-    /**
-     * 加载fury接口里方法的参数和返回值类型到缓存，不需要传递
-     *
-     * @param key        缓存的key
-     * @param clazz      接口名
-     * @param methodName 方法名
-     */
     private void loadClassToCache(String key, Class clazz, String methodName) {
         Method pbMethod = null;
         Method[] methods = clazz.getMethods();
@@ -107,12 +81,11 @@ public class FuryHelper {
         }
         if (pbMethod == null) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_METHOD_NOT_FOUND, clazz.getName(),
-                methodName));
+                    methodName));
         }
         Class[] parameterTypes = pbMethod.getParameterTypes();
         if (parameterTypes.length == 0) {
-            throw new SofaRpcRuntimeException(
-                LogCodes.getLog("fury", clazz.getName()));
+            throw new SofaRpcRuntimeException(LogCodes.getLog("fury", clazz.getName()));
         }
 
         requestClassCache.put(key, parameterTypes);
@@ -121,5 +94,17 @@ public class FuryHelper {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOBUF_RETURN, clazz.getName()));
         }
         responseClassCache.put(key, respClass);
+    }
+
+    private ClassLoader getClassLoader(String className) {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        if (classLoader == null) {
+            classLoader = FuryHelper.class.getClassLoader();
+        }
+        try {
+            return Class.forName(className, true, classLoader).getClassLoader();
+        } catch (ClassNotFoundException e) {
+            throw new SofaRpcRuntimeException("Failed to load class: " + className, e);
+        }
     }
 }

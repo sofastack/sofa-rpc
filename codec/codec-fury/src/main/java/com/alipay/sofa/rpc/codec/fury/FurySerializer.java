@@ -42,6 +42,7 @@ import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import io.fury.Fury;
 import io.fury.Language;
 import io.fury.ThreadLocalFury;
+import io.fury.resolver.AllowListChecker;
 import io.fury.serializer.CompatibleMode;
 
 /**
@@ -56,17 +57,20 @@ public class FurySerializer extends AbstractSerializer {
 
     public FurySerializer() {
         boolean WHITELIST = RpcConfigs.getBooleanValue(RpcOptions.FURY_SERIALIZER_WHITELIST);
+        AllowListChecker checker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
         if (WHITELIST) {
             ArrayList<Class<?>> whiteList = new ArrayList<>();
-            String json = null;
+            String adminClasses = null;
+            String userClasses = null;
             try {
-                json = FileUtils.file2String(FurySerializer.class, "/whiteList.json", "UTF-8");
+                adminClasses = FileUtils.file2String(FurySerializer.class, "/admin.json", "UTF-8");
+                userClasses = FileUtils.file2String(FurySerializer.class, "/user.json", "UTF-8");
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-            Map<String, Boolean> map = JSON.parseObject(json, Map.class);
-            map.forEach((className, use) -> {
+            Map<String, Boolean> commonMap = JSON.parseObject(adminClasses, Map.class);
+            Map<String, Boolean> userMap = JSON.parseObject(userClasses, Map.class);
+            commonMap.forEach((className, use) -> {
                 if (use) {
                     Class<?> clazz = null;
                     try {
@@ -85,15 +89,20 @@ public class FurySerializer extends AbstractSerializer {
                     .withCodegen(true)
                     .withNumberCompressed(true)
                     .withCompatibleMode(CompatibleMode.COMPATIBLE)
-                    .requireClassRegistration(true)
+                    .requireClassRegistration(false)
                     .withClassLoader(classLoader)
-                    .withAsyncCompilationEnabled(true)
-                    .withSecureMode(true)
+                    .withAsyncCompilation(true)
                     .build();
+                f.getClassResolver().setClassChecker(checker);
+                // Admin classes is CanonicalName
                 if (!whiteList.isEmpty()) {
                     for (Class<?> clazz : whiteList) {
                         f.register(clazz);
                     }
+                }
+                // User classes use wildcards
+                for (String key : userMap.keySet()) {
+                    checker.allowClass(key);
                 }
                 return f;
             });
@@ -101,16 +110,16 @@ public class FurySerializer extends AbstractSerializer {
         } else {
             fury = new ThreadLocalFury(classLoader -> {
 
-                return Fury.builder().withLanguage(Language.JAVA)
+                Fury f = Fury.builder().withLanguage(Language.JAVA)
                     .withRefTracking(false)
                     .withCodegen(true)
                     .withNumberCompressed(true)
                     .withCompatibleMode(CompatibleMode.COMPATIBLE)
                     .requireClassRegistration(false)
                     .withClassLoader(classLoader)
-                    .withAsyncCompilationEnabled(true)
-                    .withSecureMode(false)
+                    .withAsyncCompilation(true)
                     .build();
+                return f;
             });
         }
 
