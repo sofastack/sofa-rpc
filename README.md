@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/license-Apache--2.0-green.svg)
 [![Maven](https://img.shields.io/github/release/sofastack/sofa-rpc.svg)](https://github.com/sofastack/sofa-rpc/releases)
 [![Percentage of issues still open](https://isitmaintained.com/badge/open/sofastack/sofa-rpc.svg)](https://isitmaintained.com/project/sofastack/sofa-rpc "Percentage of issues still open")
+[![Open in CodeBlitz](https://img.shields.io/badge/Ant_Codespaces-Open_in_CodeBlitz-1677ff)](https://codeblitz.cloud.alipay.com/github/sofastack/sofa-rpc)
 
 ## Overview
 
