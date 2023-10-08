@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury.model;
+package com.alipay.sofa.rpc.codec.fury.model.Registered;
 
 import java.util.List;
 import java.util.Map;

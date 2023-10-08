@@ -19,9 +19,9 @@ package com.alipay.sofa.rpc.codec.fury;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.alipay.sofa.rpc.codec.fury.model.DemoRequest;
-import com.alipay.sofa.rpc.codec.fury.model.DemoResponse;
-import com.alipay.sofa.rpc.codec.fury.model.DemoService;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoService;
 
 /**
  * @author lipan

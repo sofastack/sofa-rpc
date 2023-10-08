@@ -17,7 +17,12 @@
 package com.alipay.sofa.rpc.codec.fury;
 
 import java.util.*;
-import com.alipay.sofa.rpc.codec.fury.model.*;
+
+import com.alipay.sofa.rpc.codec.fury.model.NotRegister.NotRegister;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoService;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.RegisteredClass;
 import org.junit.Assert;
 import org.junit.Test;
 

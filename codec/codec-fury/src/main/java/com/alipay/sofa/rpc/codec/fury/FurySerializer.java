@@ -63,7 +63,7 @@ public class FurySerializer extends AbstractSerializer {
             String adminClasses = null;
             String userClasses = null;
             try {
-                adminClasses = FileUtils.file2String(FurySerializer.class, "/admin.json", "UTF-8");
+                adminClasses = FileUtils.file2String(FurySerializer.class, "/system.json", "UTF-8");
                 userClasses = FileUtils.file2String(FurySerializer.class, "/user.json", "UTF-8");
             } catch (IOException e) {
                 throw new RuntimeException(e);

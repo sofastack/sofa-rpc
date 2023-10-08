@@ -1,5 +1,0 @@
-{
-  "com.alipay.sofa.rpc.codec.fury.model.DemoRequest": true,
-  "com.alipay.sofa.rpc.codec.fury.model.DemoResponse": true,
-  "com.alipay.sofa.rpc.codec.fury.model.RegisteredClass": true
-}
