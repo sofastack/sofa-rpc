@@ -20,7 +20,6 @@ import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
-import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.log.LogCodes;
@@ -115,7 +114,7 @@ public class FuryHelper {
         }
 
         requestClassCache.put(key, parameterTypes);
-        Class respClass = pbMethod.getReturnType();
+        Class<?> respClass = pbMethod.getReturnType();
         if (respClass == void.class) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOBUF_RETURN, clazz.getName()));
         }

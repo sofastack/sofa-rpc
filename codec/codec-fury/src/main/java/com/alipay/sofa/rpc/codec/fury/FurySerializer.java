@@ -40,10 +40,10 @@ import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
 import io.fury.Fury;
-import io.fury.Language;
 import io.fury.ThreadLocalFury;
+import io.fury.config.Language;
 import io.fury.resolver.AllowListChecker;
-import io.fury.serializer.CompatibleMode;
+import static io.fury.config.CompatibleMode.COMPATIBLE;
 
 /**
  * @author lipan
@@ -88,7 +88,7 @@ public class FurySerializer extends AbstractSerializer {
                     .withRefTracking(false)
                     .withCodegen(true)
                     .withNumberCompressed(true)
-                    .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                    .withCompatibleMode(COMPATIBLE)
                     .requireClassRegistration(false)
                     .withClassLoader(classLoader)
                     .withAsyncCompilation(true)
@@ -114,7 +114,7 @@ public class FurySerializer extends AbstractSerializer {
                     .withRefTracking(false)
                     .withCodegen(true)
                     .withNumberCompressed(true)
-                    .withCompatibleMode(CompatibleMode.COMPATIBLE)
+                    .withCompatibleMode(COMPATIBLE)
                     .requireClassRegistration(false)
                     .withClassLoader(classLoader)
                     .withAsyncCompilation(true)
