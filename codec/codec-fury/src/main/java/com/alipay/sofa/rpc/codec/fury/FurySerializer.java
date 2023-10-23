@@ -16,19 +16,20 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.RpcConfigs;
-import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
-import com.alipay.sofa.rpc.common.utils.FileUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -56,21 +57,15 @@ public class FurySerializer extends AbstractSerializer {
     private final ThreadLocalFury fury;
 
     public FurySerializer() {
-        boolean WHITELIST = RpcConfigs.getBooleanValue(RpcOptions.FURY_SERIALIZER_WHITELIST);
+        boolean WHITELIST = SofaConfigs.getOrDefault(RpcConfigKeys.WHITELIST);
         AllowListChecker checker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
         if (WHITELIST) {
             ArrayList<Class<?>> whiteList = new ArrayList<>();
-            String adminClasses = null;
-            String userClasses = null;
-            try {
-                adminClasses = FileUtils.file2String(FurySerializer.class, "/system.json", "UTF-8");
-                userClasses = FileUtils.file2String(FurySerializer.class, "/user.json", "UTF-8");
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            Map<String, Boolean> commonMap = JSON.parseObject(adminClasses, Map.class);
-            Map<String, Boolean> userMap = JSON.parseObject(userClasses, Map.class);
-            commonMap.forEach((className, use) -> {
+            String registerClasses = LoadFile("Register.json");
+            String WhiteListClasses = LoadFile("WhiteList.json");
+            Map<String, Boolean> registerMap = JSON.parseObject(registerClasses, Map.class);
+            Map<String, Boolean> WhiteListMap = JSON.parseObject(WhiteListClasses, Map.class);
+            registerMap.forEach((className, use) -> {
                 if (use) {
                     Class<?> clazz = null;
                     try {
@@ -85,7 +80,7 @@ public class FurySerializer extends AbstractSerializer {
             fury = new ThreadLocalFury(classLoader -> {
 
                 Fury f = Fury.builder().withLanguage(Language.JAVA)
-                    .withRefTracking(false)
+                    .withRefTracking(true)
                     .withCodegen(true)
                     .withNumberCompressed(true)
                     .withCompatibleMode(COMPATIBLE)
@@ -94,14 +89,14 @@ public class FurySerializer extends AbstractSerializer {
                     .withAsyncCompilation(true)
                     .build();
                 f.getClassResolver().setClassChecker(checker);
-                // Admin classes is CanonicalName
+                // Register classes is CanonicalName
                 if (!whiteList.isEmpty()) {
                     for (Class<?> clazz : whiteList) {
                         f.register(clazz);
                     }
                 }
-                // User classes use wildcards
-                for (String key : userMap.keySet()) {
+                // WhiteList classes use wildcards
+                for (String key : WhiteListMap.keySet()) {
                     checker.allowClass(key);
                 }
                 return f;
@@ -111,7 +106,7 @@ public class FurySerializer extends AbstractSerializer {
             fury = new ThreadLocalFury(classLoader -> {
 
                 Fury f = Fury.builder().withLanguage(Language.JAVA)
-                    .withRefTracking(false)
+                    .withRefTracking(true)
                     .withCodegen(true)
                     .withNumberCompressed(true)
                     .withCompatibleMode(COMPATIBLE)
@@ -123,6 +118,27 @@ public class FurySerializer extends AbstractSerializer {
             });
         }
 
+    }
+
+    private String LoadFile(String resourceName) {
+        StringBuilder json = new StringBuilder();
+        try {
+            Enumeration<URL> urls = ClassLoader.getSystemResources(resourceName);
+            while (urls.hasMoreElements()) {
+                URL url = urls.nextElement();
+                System.out.println(url.getPath());
+                InputStream inputStream = url.openStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    json.append(line);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return json.toString();
     }
 
     @Override

@@ -102,4 +102,12 @@ public class RpcConfigKeys {
                                                                                         false,
                                                                                         "judge the generic object exception fields.",
                                                                                         new String[] { "sofa_rpc_generic_exception_fields" });
+    public static final ConfigKey<Boolean>  WHITELIST                           = ConfigKey
+                                                                                    .build(
+                                                                                            "sofa.rpc.codec.fury.whitelist",
+                                                                                            true,
+                                                                                            true,
+                                                                                            "  The default filtering mode is whitelist.",
+                                                                                            new String[] { "sofa_rpc_codec_fury_whitelist" });
+
 }

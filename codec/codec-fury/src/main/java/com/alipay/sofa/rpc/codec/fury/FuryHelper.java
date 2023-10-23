@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.codec.fury;
 import java.lang.reflect.Method;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-
+import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.log.LogCodes;
@@ -36,25 +36,14 @@ public class FuryHelper {
         Class[] reqClass = requestClassCache.get(key);
         if (reqClass == null) {
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
-            ClassLoader classLoader = getClassLoader(interfaceClass);
-            Class clazz = null;
-            try {
-                clazz = Class.forName(interfaceClass, true, classLoader);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Class clazz = ClassTypeUtils.getClass(interfaceClass);
             loadClassToCache(key, clazz, methodName);
         } else {
             // Check if the class loader has changed due to hot update
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             ClassLoader currentClassLoader = getClassLoader(interfaceClass);
             if (!currentClassLoader.equals(reqClass[0].getClassLoader())) {
-                Class clazz = null;
-                try {
-                    clazz = Class.forName(interfaceClass, true, currentClassLoader);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Class clazz = ClassTypeUtils.getClass(interfaceClass);
                 loadClassToCache(key, clazz, methodName);
             }
         }
@@ -66,25 +55,14 @@ public class FuryHelper {
         Class respClass = responseClassCache.get(key);
         if (respClass == null) {
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
-            ClassLoader classLoader = getClassLoader(interfaceClass);
-            Class clazz = null;
-            try {
-                clazz = Class.forName(interfaceClass, true, classLoader);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            Class clazz = ClassTypeUtils.getClass(interfaceClass);
             loadClassToCache(key, clazz, methodName);
         } else {
             // Check if the class loader has changed due to hot update
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             ClassLoader currentClassLoader = getClassLoader(interfaceClass);
             if (!currentClassLoader.equals(respClass.getClassLoader())) {
-                Class clazz = null;
-                try {
-                    clazz = Class.forName(interfaceClass, true, currentClassLoader);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                Class clazz = ClassTypeUtils.getClass(interfaceClass);
                 loadClassToCache(key, clazz, methodName);
             }
         }
@@ -96,6 +74,9 @@ public class FuryHelper {
     }
 
     private void loadClassToCache(String key, Class clazz, String methodName) {
+        if (clazz == null) {
+            throw new SofaRpcRuntimeException("Failed to load : " + key);
+        }
         Method pbMethod = null;
         Method[] methods = clazz.getMethods();
         for (Method method : methods) {
@@ -121,15 +102,16 @@ public class FuryHelper {
         responseClassCache.put(key, respClass);
     }
 
-    private ClassLoader getClassLoader(String className) {
+    public ClassLoader getClassLoader(String className) {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         if (classLoader == null) {
             classLoader = FuryHelper.class.getClassLoader();
         }
-        try {
-            return Class.forName(className, true, classLoader).getClassLoader();
-        } catch (ClassNotFoundException e) {
-            throw new SofaRpcRuntimeException("Failed to load class: " + className, e);
+        Class clazz = ClassTypeUtils.getClass(className);
+        if (clazz != null) {
+            return clazz.getClassLoader();
+        } else {
+            return classLoader;
         }
     }
 }
