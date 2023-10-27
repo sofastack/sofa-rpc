@@ -40,6 +40,7 @@
         <protostuff.version>1.5.9</protostuff.version>
         <grpc.version>1.53.0</grpc.version>
         <fury.version>0.2.0</fury.version>
+        <snakeyaml.version>1.28</snakeyaml.version>
 
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
@@ -302,6 +303,11 @@
                 <groupId>org.furyio</groupId>
                 <artifactId>fury-core</artifactId>
                 <version>${fury.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>${snakeyaml.version}</version>
             </dependency>
             <!-- zk client -->
             <dependency>

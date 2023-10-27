@@ -16,19 +16,16 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
-import java.io.BufferedReader;
-import java.io.IOException;
+import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
-import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -49,96 +46,106 @@ import static io.fury.config.CompatibleMode.COMPATIBLE;
 /**
  * @author lipan
  */
-@Extension(value = "fury", code = 20)
+@Extension(value = "fury2", code = 22)
 public class FurySerializer extends AbstractSerializer {
 
-    private final FuryHelper      furyHelper = new FuryHelper();
+    private final FuryHelper              furyHelper = new FuryHelper();
 
-    private final ThreadLocalFury fury;
+    private final ThreadLocalFury         fury;
+
+    private static final AllowListChecker checker    = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
 
     public FurySerializer() {
-        boolean WHITELIST = SofaConfigs.getOrDefault(RpcConfigKeys.WHITELIST);
-        AllowListChecker checker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
-        if (WHITELIST) {
-            ArrayList<Class<?>> whiteList = new ArrayList<>();
-            String registerClasses = LoadFile("Register.json");
-            String WhiteListClasses = LoadFile("WhiteList.json");
-            Map<String, Boolean> registerMap = JSON.parseObject(registerClasses, Map.class);
-            Map<String, Boolean> WhiteListMap = JSON.parseObject(WhiteListClasses, Map.class);
-            registerMap.forEach((className, use) -> {
-                if (use) {
-                    Class<?> clazz = null;
-                    try {
-                        clazz = Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                    whiteList.add(clazz);
+        String CHECKER_MODE = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
+
+        ArrayList<Class<?>> RegisterList = new ArrayList<>();
+        Map<String, Boolean> RegisterMap = LoadConf("Register");
+        RegisterMap.forEach((className, use) -> {
+            if (use) {
+                Class<?> clazz = null;
+                try {
+                    clazz = Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
+                RegisterList.add(clazz);
+            }
 
-            });
-            fury = new ThreadLocalFury(classLoader -> {
+        });
 
-                Fury f = Fury.builder().withLanguage(Language.JAVA)
-                    .withRefTracking(true)
-                    .withCodegen(true)
-                    .withNumberCompressed(true)
-                    .withCompatibleMode(COMPATIBLE)
-                    .requireClassRegistration(false)
-                    .withClassLoader(classLoader)
-                    .withAsyncCompilation(true)
-                    .build();
+        fury = new ThreadLocalFury(classLoader -> {
+
+            Fury f = Fury.builder().withLanguage(Language.JAVA)
+                .withRefTracking(true)
+                .withCodegen(true)
+                .withNumberCompressed(true)
+                .withCompatibleMode(COMPATIBLE)
+                .requireClassRegistration(false)
+                .withClassLoader(classLoader)
+                .withAsyncCompilation(true)
+                .build();
+            // Register classes is CanonicalName
+            if (!RegisterList.isEmpty()) {
+                for (Class<?> clazz : RegisterList) {
+                    f.register(clazz);
+                }
+            }
+
+            if (CHECKER_MODE.equals(AccessConfig.WHITELIST_CONFIG.getConfigType())) {
+                Map<String, Boolean> WhiteListMap = LoadConf("WhiteList");
+                List<String> whiteList = WhiteListMap.entrySet().stream()
+                    .filter(Map.Entry::getValue)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
                 f.getClassResolver().setClassChecker(checker);
-                // Register classes is CanonicalName
-                if (!whiteList.isEmpty()) {
-                    for (Class<?> clazz : whiteList) {
-                        f.register(clazz);
-                    }
-                }
+                checker.addListener(f.getClassResolver());
                 // WhiteList classes use wildcards
-                for (String key : WhiteListMap.keySet()) {
+                for (String key : whiteList) {
                     checker.allowClass(key);
                 }
                 return f;
-            });
-
-        } else {
-            fury = new ThreadLocalFury(classLoader -> {
-
-                Fury f = Fury.builder().withLanguage(Language.JAVA)
-                    .withRefTracking(true)
-                    .withCodegen(true)
-                    .withNumberCompressed(true)
-                    .withCompatibleMode(COMPATIBLE)
-                    .requireClassRegistration(false)
-                    .withClassLoader(classLoader)
-                    .withAsyncCompilation(true)
-                    .build();
+            } else if (CHECKER_MODE.equals(AccessConfig.BLACKLIST_CONFIG.getConfigType())) {
+                Map<String, Boolean> BlackListMap = LoadConf("BlackList");
+                List<String> blackList = BlackListMap.entrySet().stream()
+                    .filter(Map.Entry::getValue)
+                    .map(Map.Entry::getKey)
+                    .collect(Collectors.toList());
+                f.getClassResolver().setClassChecker(checker);
+                checker.addListener(f.getClassResolver());
+                // BlackList classes use wildcards
+                for (String key : blackList) {
+                    checker.disallowClass(key);
+                }
                 return f;
-            });
-        }
+            }
 
+            return f;
+        });
     }
 
-    private String LoadFile(String resourceName) {
-        StringBuilder json = new StringBuilder();
+    public void addWhiteList(String address) {
+        checker.allowClass(address);
+    }
+
+    public void addBlackList(String address) {
+        checker.disallowClass(address);
+    }
+
+    private static Map<String, Boolean> LoadConf(String name) {
+        Map<String, Boolean> confMap = null;
         try {
-            Enumeration<URL> urls = ClassLoader.getSystemResources(resourceName);
+            Enumeration<URL> urls = ClassLoader.getSystemResources("conf.yml");
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
-                System.out.println(url.getPath());
                 InputStream inputStream = url.openStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    json.append(line);
-                }
+                Yaml yaml = new Yaml();
+                Map<String, Object> yamlContent = yaml.load(inputStream);
+                confMap = (Map<String, Boolean>) yamlContent.get(name);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return json.toString();
+        return confMap;
     }
 
     @Override
@@ -247,17 +254,17 @@ public class FurySerializer extends AbstractSerializer {
         }
 
         // according interface and method name to find parameter types
-        Class[] requestClass = furyHelper.getReqClass(targetService,
+        Class<?>[] requestClass = furyHelper.getReqClass(targetService,
             sofaRequest.getMethodName());
         Object[] pbReq = decode(data, requestClass, head);
         sofaRequest.setMethodArgs(pbReq);
         sofaRequest.setMethodArgSigs(parseArgSigs(requestClass));
     }
 
-    private Object[] decode(final AbstractByteBuf data, final Class[] templateList, final Map<String, String> context)
+    private Object[] decode(final AbstractByteBuf data, final Class<?>[] templateList, final Map<String, String> context)
         throws SofaRpcException {
         ArrayList<Object> objectList = new ArrayList<>();
-        for (Class clazz : templateList) {
+        for (Class<?> clazz : templateList) {
             Object result = null;
             if (clazz == null) {
                 throw buildDeserializeError("class is null!");
@@ -299,7 +306,7 @@ public class FurySerializer extends AbstractSerializer {
             String errorMessage = (String) decode(data, String.class, head);
             sofaResponse.setErrorMsg(errorMessage);
         } else {
-            Class responseClass = furyHelper.getRespClass(targetService, methodName);
+            Class<?> responseClass = furyHelper.getRespClass(targetService, methodName);
             Object pbRes = decode(data, responseClass, head);
             sofaResponse.setAppResponse(pbRes);
         }
@@ -314,9 +321,9 @@ public class FurySerializer extends AbstractSerializer {
         }
     }
 
-    private String[] parseArgSigs(Class[] reqList) {
+    private String[] parseArgSigs(Class<?>[] reqList) {
         List<String> argSigs = new ArrayList<String>();
-        for (Class type : reqList) {
+        for (Class<?> type : reqList) {
             argSigs.add(type.getCanonicalName());
         }
 

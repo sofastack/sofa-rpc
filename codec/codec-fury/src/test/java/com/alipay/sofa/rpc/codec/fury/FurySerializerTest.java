@@ -18,10 +18,10 @@ package com.alipay.sofa.rpc.codec.fury;
 
 import java.util.*;
 
-import com.alipay.sofa.rpc.codec.fury.model.NotRegister.NotRegister;
+import com.alipay.sofa.rpc.codec.fury.model.blacklist.NotRegister;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
-import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoService;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.DemoService;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.RegisteredClass;
 import org.junit.Assert;
 import org.junit.Test;
@@ -107,7 +107,7 @@ public class FurySerializerTest {
     }
 
     @Test
-    public void testRegistered() throws Exception {
+    public void testChecker() throws Exception {
         boolean error = false;
         RegisteredClass registeredClass = new RegisteredClass();
         System.out.println();
@@ -129,6 +129,29 @@ public class FurySerializerTest {
             error = true;
         }
         Assert.assertTrue(error);
+
+        error = false;
+
+        //  test add or delete
+
+        serializer.addWhiteList("com.alipay.sofa.rpc.codec.fury.model.blacklist.*");
+        try {
+            //Not registered this class
+            serializer.encode(notRegister, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertFalse(error);
+
+        serializer.addBlackList("com.alipay.sofa.rpc.codec.fury.model.blacklist.*");
+        try {
+            //Not registered this class
+            serializer.encode(notRegister, null);
+        } catch (Exception e) {
+            error = true;
+        }
+        Assert.assertTrue(error);
+
     }
 
     @Test

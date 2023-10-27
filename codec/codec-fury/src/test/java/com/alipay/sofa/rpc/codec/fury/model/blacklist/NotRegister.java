@@ -14,30 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury.model.Registered;
+package com.alipay.sofa.rpc.codec.fury.model.blacklist;
 
-public class Person {
-    private String name;
-    private int    age;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.RegisteredClass;
 
-    public Person(String name, int age) {
-        this.name = name;
-        this.age = age;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
+/**
+ * @author lipan
+ */
+public class NotRegister {
+    public RegisteredClass request;
 }

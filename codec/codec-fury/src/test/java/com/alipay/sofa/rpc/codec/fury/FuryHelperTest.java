@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
-import com.alipay.sofa.rpc.codec.fury.model.Registered.*;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.*;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -51,7 +53,7 @@ public class FuryHelperTest {
 
         // 使用类加载器加载更新后的类
         Class<?> updatedInterfaceClass = cl2
-            .loadClass("com.alipay.sofa.rpc.codec.fury.model.Registered.HelloServiceImpl2");
+            .loadClass("com.alipay.sofa.rpc.codec.fury.model.whitelist.HelloServiceImpl2");
         System.out.println(updatedInterfaceClass);
 
         // 更新FuryHelper中的类加载器

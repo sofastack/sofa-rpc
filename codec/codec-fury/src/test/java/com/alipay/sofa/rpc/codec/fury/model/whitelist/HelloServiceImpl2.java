@@ -14,12 +14,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury.model.Registered;
+package com.alipay.sofa.rpc.codec.fury.model.whitelist;
 
-import com.alipay.sofa.rpc.codec.fury.model.whitelist.Person;
+import com.alipay.sofa.rpc.codec.fury.model.Registered.HelloService;
 
-public interface HelloService {
+public class HelloServiceImpl2 implements HelloService {
 
-    String sayHello(Person person);
-
+    @Override
+    public String sayHello(Person person) {
+        return "yes, my name is " + person.getName() + ".  " + person.getAge() + " years old.";
+    }
 }

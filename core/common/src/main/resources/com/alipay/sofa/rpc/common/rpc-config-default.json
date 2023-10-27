@@ -308,7 +308,5 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   //是否关闭uniqueId 特殊字符的校验
   "sofa.rpc.uniqueId.pattern.check": true,
   // bolt serializer 的注册器
-  "sofa.rpc.bolt.serializer.register.extension": "sofaRpcSerializationRegister",
-  //fury 序列化器默认使用白名单
-  "sofa.rpc.codec.fury.serializer.whitelist": true
+  "sofa.rpc.bolt.serializer.register.extension": "sofaRpcSerializationRegister"
 }
