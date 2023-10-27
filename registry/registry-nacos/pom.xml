@@ -37,8 +37,12 @@
         <dependency>
             <groupId>name.jervyshi</groupId>
             <artifactId>nacos-embedded</artifactId>
-            <version>0.2.0</version>
+            <version>0.3.0</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
     </dependencies>
 

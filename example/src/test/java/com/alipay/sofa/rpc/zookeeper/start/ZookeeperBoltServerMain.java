@@ -47,9 +47,14 @@ public class ZookeeperBoltServerMain {
         /**
          * 运行需要pom.xml里增加依赖 
          <dependency>
-             <groupId>org.apache.curator</groupId>
-             <artifactId>curator-recipes</artifactId>
-             <scope>test</scope>
+         <groupId>org.apache.curator</groupId>
+         <artifactId>curator-framework</artifactId>
+         <scope>test</scope>
+         </dependency>
+         <dependency>
+         <groupId>org.apache.curator</groupId>
+         <artifactId>curator-x-discovery</artifactId>
+         <scope>test</scope>
          </dependency>
          */
         RegistryConfig registryConfig = new RegistryConfig()

@@ -66,7 +66,7 @@ public class BaggageFutureTest extends BaggageBaseTest {
         referenceBeanC.setApplication(new ApplicationConfig().setAppName("BBB"));
         referenceBeanC.setInterfaceId(SampleService.class.getName());
         referenceBeanC.setUniqueId("C2");
-        referenceBeanC.setDirectUrl("localhost:12299");
+        referenceBeanC.setDirectUrl("127.0.0.1:12299");
         referenceBeanC.setTimeout(1000);
         MethodConfig methodConfigC = new MethodConfig()
             .setName("hello")
@@ -79,7 +79,7 @@ public class BaggageFutureTest extends BaggageBaseTest {
         referenceBeanD.setApplication(new ApplicationConfig().setAppName("BBB"));
         referenceBeanD.setInterfaceId(SampleService.class.getName());
         referenceBeanD.setUniqueId("D2");
-        referenceBeanD.setDirectUrl("localhost:12299?p=1&v=4.0");
+        referenceBeanD.setDirectUrl("127.0.0.1:12299?p=1&v=4.0");
         referenceBeanD.setTimeout(1000);
         MethodConfig methodConfigD = new MethodConfig()
             .setName("hello")
@@ -103,7 +103,7 @@ public class BaggageFutureTest extends BaggageBaseTest {
         referenceBeanA.setApplication(new ApplicationConfig().setAppName("AAA"));
         referenceBeanA.setUniqueId("B2");
         referenceBeanA.setInterfaceId(SampleService.class.getName());
-        referenceBeanA.setDirectUrl("localhost:12299");
+        referenceBeanA.setDirectUrl("127.0.0.1:12299");
         referenceBeanA.setTimeout(3000);
         MethodConfig methodConfigA = new MethodConfig()
             .setName("hello")
