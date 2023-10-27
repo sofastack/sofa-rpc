@@ -40,13 +40,12 @@
         <protostuff.version>1.5.9</protostuff.version>
         <grpc.version>1.53.0</grpc.version>
         <fury.version>0.2.0</fury.version>
-        <snakeyaml.version>1.28</snakeyaml.version>
-
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
         <httpclient.version>4.5.13</httpclient.version>
         <commons.fileupload.version>1.5</commons.fileupload.version>
         <transmittable.version>2.12.1</transmittable.version>
+        <snakeyaml.version>1.28</snakeyaml.version>
         <!-- Log libs -->
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.2.3</logback.version>
