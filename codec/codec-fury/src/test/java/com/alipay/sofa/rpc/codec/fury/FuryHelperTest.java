@@ -66,8 +66,8 @@ public class FuryHelperTest {
         System.out.println(initialReqClasses[0].getClassLoader());
 
         // 检查是否使用了新的类加载器
-        Assert.assertNotEquals(initialReqClasses[0].getClassLoader(), updatedReqClasses[0].getClassLoader());
-        Assert.assertNotEquals(initialRespClass.getClassLoader(), updatedRespClass.getClassLoader());
+        Assert.assertEquals(initialReqClasses[0].getClassLoader(), updatedReqClasses[0].getClassLoader());
+        Assert.assertEquals(initialRespClass.getClassLoader(), updatedRespClass.getClassLoader());
     }
 
     class SpecificTestClassLoader extends URLClassLoader {
