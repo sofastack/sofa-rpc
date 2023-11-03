@@ -10,7 +10,7 @@ jobs:
         with:
           parent_uid: ${{ secrets.ALI_PID }}
           private_key: ${{ secrets.ALI_PK }}
-          code_type: stc
+          scan_type: stc
   sca:   # 开源合规
     runs-on: ubuntu-latest
     steps:
@@ -19,4 +19,4 @@ jobs:
         with:
           parent_uid: ${{ secrets.ALI_PID }}
           private_key: ${{ secrets.ALI_PK }}
-          code_type: sca
+          scan_type: sca
