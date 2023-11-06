@@ -18,7 +18,8 @@ package com.alipay.sofa.rpc.codec.fury;
 
 import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
-import com.alipay.sofa.rpc.codec.fury.model.whitelist.*;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.DemoService;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.HelloServiceImpl2;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,12 +29,29 @@ import java.net.URLClassLoader;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.Assert.assertSame;
 
 /**
  * @author lipan
  */
 public class FuryHelperTest {
+
+    private final FuryHelper furyHelper = new FuryHelper();
+
+    @Test
+    public void testGetReqClass() {
+        Class[] req = furyHelper.getReqClass(
+                DemoService.class.getCanonicalName(), "say");
+        assertSame(req[0], DemoRequest.class);
+    }
+
+    @Test
+    public void testGetResClass() {
+        Class res = furyHelper.getRespClass(
+                DemoService.class.getCanonicalName(), "say");
+        assertSame(res, DemoResponse.class);
+    }
 
     @Test
     public void testHotUpdate() throws ClassNotFoundException {
@@ -42,7 +60,7 @@ public class FuryHelperTest {
         // 获取初始的请求类和响应类
         Class[] initialReqClasses = furyHelper
             .getReqClass("com.alipay.sofa.rpc.codec.fury.model.Registered.HelloServiceImpl", "sayHello");
-        Class[] initialRespClass = furyHelper.getRespClass(
+        Class initialRespClass = furyHelper.getRespClass(
             "com.alipay.sofa.rpc.codec.fury.model.Registered.HelloServiceImpl",
             "sayHello");
 
@@ -54,20 +72,17 @@ public class FuryHelperTest {
         // 使用类加载器加载更新后的类
         Class<?> updatedInterfaceClass = cl2
             .loadClass("com.alipay.sofa.rpc.codec.fury.model.whitelist.HelloServiceImpl2");
-        System.out.println(updatedInterfaceClass);
 
         // 更新FuryHelper中的类加载器
         ClassLoader loader = furyHelper.getClassLoader(updatedInterfaceClass.getName());
 
         // 获取更新后的请求类和响应类
         Class[] updatedReqClasses = furyHelper.getReqClass(updatedInterfaceClass.getName(), "sayHello");
-        Class[] updatedRespClass = furyHelper.getRespClass(updatedInterfaceClass.getName(), "sayHello");
-
-        System.out.println(initialReqClasses[0].getClassLoader());
+        Class updatedRespClass = furyHelper.getRespClass(updatedInterfaceClass.getName(), "sayHello");
 
         // 检查是否使用了新的类加载器
         Assert.assertEquals(initialReqClasses[0].getClassLoader(), updatedReqClasses[0].getClassLoader());
-        Assert.assertEquals(initialRespClass[0].getClassLoader(), updatedRespClass[0].getClassLoader());
+        Assert.assertEquals(initialRespClass.getClassLoader(), updatedRespClass.getClassLoader());
     }
 
     class SpecificTestClassLoader extends URLClassLoader {
@@ -150,21 +165,5 @@ public class FuryHelperTest {
         public void addWhiteListClass(String className) {
             this.whiteList.add(className);
         }
-    }
-
-    private final FuryHelper furyHelper = new FuryHelper();
-
-    @Test
-    public void getReqClass() {
-        Class[] req = furyHelper.getReqClass(
-            DemoService.class.getCanonicalName(), "say");
-        assertTrue(req[0] == DemoRequest.class);
-    }
-
-    @Test
-    public void getResClass() {
-        Class[] res = furyHelper.getRespClass(
-            DemoService.class.getCanonicalName(), "say");
-        assertTrue(res[0] == DemoResponse.class);
     }
 }

@@ -16,13 +16,13 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
-import java.util.*;
-
+import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.fury.model.blacklist.NotRegister;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
 import com.alipay.sofa.rpc.codec.fury.model.whitelist.DemoService;
 import com.alipay.sofa.rpc.codec.fury.model.Registered.RegisteredClass;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -36,29 +36,28 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author lipan
  */
 public class FurySerializerTest {
 
-    private final FurySerializer serializer = new FurySerializer();
-
-    public FurySerializerTest() {
-    }
-
-    @Test
-    public void create() {
-    }
+    private final FurySerializer serializer = (FurySerializer) ExtensionLoaderFactory.getExtensionLoader(
+                                                Serializer.class).getExtension("fury2");
 
     @Test
     public void encodeAndDecode() {
-        boolean error = false;
         try {
             serializer.encode(null, null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
+
         }
-        Assert.assertTrue(error);
 
         DemoRequest demoRequest = new DemoRequest();
         demoRequest.setName("a");
@@ -70,87 +69,71 @@ public class FurySerializerTest {
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
 
-        error = false;
         Date object = new Date();
         try {
             AbstractByteBuf encode = serializer.encode(object, null);
             Assert.assertEquals(object, serializer.decode(encode, Date.class, null));
         } catch (Exception e) {
-            error = true;
+            Assert.fail();
         }
-        Assert.assertTrue(!error);
 
-        error = false;
         try {
             serializer.encode(1, null);
         } catch (Exception e) {
-            error = true;
+            Assert.fail();
         }
-        Assert.assertTrue(!error);
 
-        error = false;
         try {
             serializer.decode(data, null, null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
         }
-        Assert.assertTrue(error);
 
-        error = false;
         try {
             serializer.decode(data, "", null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
+
         }
-        Assert.assertTrue(error);
 
     }
 
     @Test
     public void testChecker() throws Exception {
-        boolean error = false;
         RegisteredClass registeredClass = new RegisteredClass();
-        System.out.println();
         try {
             // registered this class
             serializer.encode(registeredClass, null);
         } catch (Exception e) {
-            error = true;
+            Assert.fail();
         }
-        Assert.assertFalse(error);
 
-        error = false;
         NotRegister notRegister = new NotRegister();
-        System.out.println();
         try {
             //Not registered this class
             serializer.encode(notRegister, null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
-        }
-        Assert.assertTrue(error);
 
-        error = false;
+        }
 
         //  test add or delete
-
         serializer.addWhiteList("com.alipay.sofa.rpc.codec.fury.model.blacklist.*");
         try {
             //Not registered this class
             serializer.encode(notRegister, null);
         } catch (Exception e) {
-            error = true;
+            Assert.fail();
         }
-        Assert.assertFalse(error);
 
         serializer.addBlackList("com.alipay.sofa.rpc.codec.fury.model.blacklist.*");
         try {
             //Not registered this class
             serializer.encode(notRegister, null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
+
         }
-        Assert.assertTrue(error);
 
     }
 
@@ -158,21 +141,18 @@ public class FurySerializerTest {
     public void testSofaRequest() throws Exception {
         SofaRequest request = buildRequest();
         AbstractByteBuf data = serializer.encode(request, null);
-        boolean error = false;
         try {
             serializer.decode(data, SofaRequest.class, null);
         } catch (Exception e) {
-            error = true;
+            Assert.fail();
         }
-        Assert.assertFalse(error);
 
-        error = false;
         try {
             serializer.decode(data, new SofaRequest(), null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
+
         }
-        Assert.assertTrue(error);
 
         Map<String, String> head = new HashMap<String, String>();
         head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
@@ -213,29 +193,26 @@ public class FurySerializerTest {
         SofaResponse response = new SofaResponse();
         response.setAppResponse("1233");
         AbstractByteBuf data = serializer.encode(response, null);
-        boolean error = false;
+
         try {
             serializer.decode(data, SofaResponse.class, null);
         } catch (Exception e) {
-            error = true;
+            Assert.fail();
         }
-        Assert.assertFalse(error);
 
-        error = false;
         try {
             serializer.decode(data, null, null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
-        }
-        Assert.assertTrue(error);
 
-        error = false;
+        }
+
         try {
             serializer.decode(data, new SofaResponse(), null);
+            Assert.fail();
         } catch (Exception e) {
-            error = true;
+
         }
-        Assert.assertTrue(error);
 
         // success response
         Map<String, String> head = new HashMap<String, String>();
@@ -321,7 +298,7 @@ public class FurySerializerTest {
         request.setMethodArgSigs(new String[] { DemoRequest.class.getCanonicalName() });
         request.setTargetServiceUniqueName(DemoService.class.getName() + ":1.0");
         request.setTargetAppName("targetApp");
-        request.setSerializeType((byte) 20);
+        request.setSerializeType((byte) 22);
         request.setTimeout(1024);
         request.setInvokeType(RpcConstants.INVOKER_TYPE_SYNC);
         Map<String, String> map = new HashMap<String, String>();

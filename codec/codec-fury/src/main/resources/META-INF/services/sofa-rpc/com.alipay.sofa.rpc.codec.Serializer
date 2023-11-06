@@ -1,1 +1,1 @@
-fury=com.alipay.sofa.rpc.codec.fury.FurySerializer
+fury2=com.alipay.sofa.rpc.codec.fury.FurySerializer
