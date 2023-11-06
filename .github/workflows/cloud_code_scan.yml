@@ -2,7 +2,7 @@ name: Alipay Cloud Devops Codescan
 on:
   pull_request_target:
 jobs:
-  stc:   # 安全扫描
+  stc:   #安全扫描
     runs-on: ubuntu-latest
     steps:
       - name: codeScan
