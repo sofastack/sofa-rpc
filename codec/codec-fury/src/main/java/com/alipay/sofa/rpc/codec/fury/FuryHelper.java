@@ -29,30 +29,20 @@ import com.alipay.sofa.rpc.log.LogCodes;
  */
 public class FuryHelper {
     private final ConcurrentMap<String, Class<?>[]> requestClassCache  = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Class<?>>   responseClassCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, Class<?>[]> responseClassCache = new ConcurrentHashMap<>();
 
     public Class<?>[] getReqClass(String service, String methodName) {
-        String key = buildMethodKey(service, methodName);
-        Class<?>[] reqClass = requestClassCache.get(key);
-        if (reqClass == null) {
-            String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
-            Class<?> clazz = ClassTypeUtils.getClass(interfaceClass);
-            loadClassToCache(key, clazz, methodName);
-        } else {
-            // Check if the class loader has changed due to hot update
-            String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
-            ClassLoader currentClassLoader = getClassLoader(interfaceClass);
-            if (!currentClassLoader.equals(reqClass[0].getClassLoader())) {
-                Class<?> clazz = ClassTypeUtils.getClass(interfaceClass);
-                loadClassToCache(key, clazz, methodName);
-            }
-        }
-        return requestClassCache.get(key);
+        return getClasses(service, methodName, requestClassCache);
     }
 
-    public Class<?> getRespClass(String service, String methodName) {
+    public Class<?>[] getRespClass(String service, String methodName) {
+        return getClasses(service, methodName, responseClassCache);
+    }
+
+    private Class<?>[] getClasses(String service, String methodName,
+                                  ConcurrentMap<String, Class<?>[]> responseClassCache) {
         String key = buildMethodKey(service, methodName);
-        Class<?> respClass = responseClassCache.get(key);
+        Class<?>[] respClass = responseClassCache.get(key);
         if (respClass == null) {
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class<?> clazz = ClassTypeUtils.getClass(interfaceClass);
@@ -61,7 +51,7 @@ public class FuryHelper {
             // Check if the class loader has changed due to hot update
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             ClassLoader currentClassLoader = getClassLoader(interfaceClass);
-            if (!currentClassLoader.equals(respClass.getClassLoader())) {
+            if (!currentClassLoader.equals(respClass[0].getClassLoader())) {
                 Class<?> clazz = ClassTypeUtils.getClass(interfaceClass);
                 loadClassToCache(key, clazz, methodName);
             }
@@ -99,7 +89,7 @@ public class FuryHelper {
         if (respClass == void.class) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_PROTOBUF_RETURN, clazz.getName()));
         }
-        responseClassCache.put(key, respClass);
+        responseClassCache.put(key, new Class[] { respClass });
     }
 
     public ClassLoader getClassLoader(String className) {
