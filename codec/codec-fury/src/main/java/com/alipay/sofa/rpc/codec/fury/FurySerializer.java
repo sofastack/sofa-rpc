@@ -19,7 +19,11 @@ package com.alipay.sofa.rpc.codec.fury;
 import org.yaml.snakeyaml.Yaml;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.alipay.sofa.common.config.SofaConfigs;
@@ -49,32 +53,33 @@ import static io.fury.config.CompatibleMode.COMPATIBLE;
 @Extension(value = "fury2", code = 22)
 public class FurySerializer extends AbstractSerializer {
 
-    private final FuryHelper              furyHelper = new FuryHelper();
+    private final FuryHelper              furyHelper   = new FuryHelper();
 
     private final ThreadLocalFury         fury;
 
-    private static final AllowListChecker checker    = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
+    private static final AllowListChecker checker      = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
+
+    private static final String           CHECKER_MODE = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
 
     public FurySerializer() {
-        String CHECKER_MODE = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
-
-        ArrayList<Class<?>> RegisterList = new ArrayList<>();
-        Map<String, Boolean> RegisterMap = LoadConf("Register");
-        RegisterMap.forEach((className, use) -> {
-            if (use) {
-                Class<?> clazz = null;
-                try {
-                    clazz = Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
+        ArrayList<Class<?>> registerList = new ArrayList<>();
+        Map<String, Boolean> registerMap = loadConf("register");
+        if (registerMap != null) {
+            registerMap.forEach((className, use) -> {
+                if (use) {
+                    Class<?> clazz;
+                    try {
+                        clazz = Class.forName(className);
+                    } catch (ClassNotFoundException e) {
+                        throw new RuntimeException(e);
+                    }
+                    registerList.add(clazz);
                 }
-                RegisterList.add(clazz);
-            }
 
-        });
+            });
+        }
 
         fury = new ThreadLocalFury(classLoader -> {
-
             Fury f = Fury.builder().withLanguage(Language.JAVA)
                 .withRefTracking(true)
                 .withCodegen(true)
@@ -85,40 +90,45 @@ public class FurySerializer extends AbstractSerializer {
                 .withAsyncCompilation(true)
                 .build();
             // Register classes is CanonicalName
-            if (!RegisterList.isEmpty()) {
-                for (Class<?> clazz : RegisterList) {
+            if (!registerList.isEmpty()) {
+                for (Class<?> clazz : registerList) {
                     f.register(clazz);
                 }
             }
 
-            if (CHECKER_MODE.equals(AccessConfig.WHITELIST_CONFIG.getConfigType())) {
-                Map<String, Boolean> WhiteListMap = LoadConf("WhiteList");
-                List<String> whiteList = WhiteListMap.entrySet().stream()
-                    .filter(Map.Entry::getValue)
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
-                f.getClassResolver().setClassChecker(checker);
-                checker.addListener(f.getClassResolver());
-                // WhiteList classes use wildcards
-                for (String key : whiteList) {
-                    checker.allowClass(key);
-                }
-                return f;
-            } else if (CHECKER_MODE.equals(AccessConfig.BLACKLIST_CONFIG.getConfigType())) {
-                Map<String, Boolean> BlackListMap = LoadConf("BlackList");
-                List<String> blackList = BlackListMap.entrySet().stream()
-                    .filter(Map.Entry::getValue)
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
-                f.getClassResolver().setClassChecker(checker);
-                checker.addListener(f.getClassResolver());
-                // BlackList classes use wildcards
-                for (String key : blackList) {
-                    checker.disallowClass(key);
-                }
+            if(CHECKER_MODE.equals(AccessConfig.NONE_CONFIG.getConfigType())) {
                 return f;
             }
 
+            if (CHECKER_MODE.equals(AccessConfig.WHITELIST_CONFIG.getConfigType())) {
+                Map<String, Boolean> whiteListMap = loadConf(AccessConfig.WHITELIST_CONFIG.getConfigType());
+                if(whiteListMap != null) {
+                    List<String> whiteList = whiteListMap.entrySet().stream()
+                            .filter(Map.Entry::getValue)
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.toList());
+                    f.getClassResolver().setClassChecker(checker);
+                    checker.addListener(f.getClassResolver());
+                    // WhiteList classes use wildcards
+                    for (String key : whiteList) {
+                        checker.allowClass(key);
+                    }
+                }
+            } else if (CHECKER_MODE.equals(AccessConfig.BLACKLIST_CONFIG.getConfigType())) {
+                Map<String, Boolean> blackListMap = loadConf(AccessConfig.BLACKLIST_CONFIG.getConfigType());
+                if(blackListMap != null) {
+                    List<String> blackList = blackListMap.entrySet().stream()
+                            .filter(Map.Entry::getValue)
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.toList());
+                    f.getClassResolver().setClassChecker(checker);
+                    checker.addListener(f.getClassResolver());
+                    // BlackList classes use wildcards
+                    for (String key : blackList) {
+                        checker.disallowClass(key);
+                    }
+                }
+            }
             return f;
         });
     }
@@ -131,7 +141,7 @@ public class FurySerializer extends AbstractSerializer {
         checker.disallowClass(address);
     }
 
-    private static Map<String, Boolean> LoadConf(String name) {
+    private static Map<String, Boolean> loadConf(String name) {
         Map<String, Boolean> confMap = null;
         try {
             Enumeration<URL> urls = ClassLoader.getSystemResources("conf.yml");
