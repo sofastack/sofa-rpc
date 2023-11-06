@@ -1,11 +1,8 @@
 name: Alipay Cloud Devops Codescan
 on:
-  push:
-    branches-ignore:
-      - 'dependabot/**'
-
+  pull_request_target:
 jobs:
-  deployment:
+  stc:   # 安全扫描
     runs-on: ubuntu-latest
     steps:
       - name: codeScan
@@ -13,3 +10,13 @@ jobs:
         with:
           parent_uid: ${{ secrets.ALI_PID }}
           private_key: ${{ secrets.ALI_PK }}
+          scan_type: stc
+  sca:   # 开源合规
+    runs-on: ubuntu-latest
+    steps:
+      - name: codeScan
+        uses: layotto/alipay-cloud-devops-codescan@main
+        with:
+          parent_uid: ${{ secrets.ALI_PID }}
+          private_key: ${{ secrets.ALI_PK }}
+          scan_type: sca
