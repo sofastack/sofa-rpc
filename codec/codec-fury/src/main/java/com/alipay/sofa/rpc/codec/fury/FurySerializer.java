@@ -24,7 +24,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
@@ -62,21 +61,20 @@ public class FurySerializer extends AbstractSerializer {
     private static final String           CHECKER_MODE = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
 
     public FurySerializer() {
+        // Load the register for higher efficiency
         ArrayList<Class<?>> registerList = new ArrayList<>();
-        Map<String, Boolean> registerMap = loadConf("register");
-        if (registerMap != null) {
-            registerMap.forEach((className, use) -> {
-                if (use) {
-                    Class<?> clazz;
-                    try {
-                        clazz = Class.forName(className);
-                    } catch (ClassNotFoundException e) {
-                        throw new RuntimeException(e);
-                    }
-                    registerList.add(clazz);
+        List<String> classList = loadConf("register");
+        if (classList != null) {
+            for (String className : classList) {
+                Class<?> clazz;
+                try {
+                    clazz = Class.forName(className);
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
                 }
+                registerList.add(clazz);
+            }
 
-            });
         }
 
         fury = new ThreadLocalFury(classLoader -> {
@@ -96,17 +94,15 @@ public class FurySerializer extends AbstractSerializer {
                 }
             }
 
-            if(CHECKER_MODE.equals(AccessConfig.NONE_CONFIG.getConfigType())) {
+            // Do not use any configuration
+            if (CHECKER_MODE.equals(AccessConfig.NONE_CONFIG.getConfigType())) {
                 return f;
             }
 
             if (CHECKER_MODE.equals(AccessConfig.WHITELIST_CONFIG.getConfigType())) {
-                Map<String, Boolean> whiteListMap = loadConf(AccessConfig.WHITELIST_CONFIG.getConfigType());
-                if(whiteListMap != null) {
-                    List<String> whiteList = whiteListMap.entrySet().stream()
-                            .filter(Map.Entry::getValue)
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.toList());
+                List<String> whiteList = loadConf(AccessConfig.WHITELIST_CONFIG.getConfigType());
+                if (whiteList != null) {
+                    // To setting checker
                     f.getClassResolver().setClassChecker(checker);
                     checker.addListener(f.getClassResolver());
                     // WhiteList classes use wildcards
@@ -115,12 +111,9 @@ public class FurySerializer extends AbstractSerializer {
                     }
                 }
             } else if (CHECKER_MODE.equals(AccessConfig.BLACKLIST_CONFIG.getConfigType())) {
-                Map<String, Boolean> blackListMap = loadConf(AccessConfig.BLACKLIST_CONFIG.getConfigType());
-                if(blackListMap != null) {
-                    List<String> blackList = blackListMap.entrySet().stream()
-                            .filter(Map.Entry::getValue)
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.toList());
+                List<String> blackList = loadConf(AccessConfig.BLACKLIST_CONFIG.getConfigType());
+                if (blackList != null) {
+                    // To setting checker
                     f.getClassResolver().setClassChecker(checker);
                     checker.addListener(f.getClassResolver());
                     // BlackList classes use wildcards
@@ -141,21 +134,22 @@ public class FurySerializer extends AbstractSerializer {
         checker.disallowClass(address);
     }
 
-    private static Map<String, Boolean> loadConf(String name) {
-        Map<String, Boolean> confMap = null;
+    private static List<String> loadConf(String name) {
+        List<String> confList = null;
         try {
-            Enumeration<URL> urls = ClassLoader.getSystemResources("conf.yml");
+            // Use the configuration file to obtain the whitelist
+            Enumeration<URL> urls = ClassLoader.getSystemResources("configuration.yml");
             while (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 InputStream inputStream = url.openStream();
                 Yaml yaml = new Yaml();
                 Map<String, Object> yamlContent = yaml.load(inputStream);
-                confMap = (Map<String, Boolean>) yamlContent.get(name);
+                confList = (List<String>) yamlContent.get(name);
             }
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return confMap;
+        return confList;
     }
 
     @Override
@@ -271,7 +265,8 @@ public class FurySerializer extends AbstractSerializer {
         sofaRequest.setMethodArgSigs(parseArgSigs(requestClass));
     }
 
-    private Object[] decode(final AbstractByteBuf data, final Class<?>[] templateList, final Map<String, String> context)
+    private Object[] decode(final AbstractByteBuf data, final Class<?>[] templateList,
+                            final Map<String, String> context)
         throws SofaRpcException {
         ArrayList<Object> objectList = new ArrayList<>();
         for (Class<?> clazz : templateList) {

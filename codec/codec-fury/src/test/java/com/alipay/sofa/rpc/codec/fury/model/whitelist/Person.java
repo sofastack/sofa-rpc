@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.fury.model.whitelist;
 
+/**
+ * @author lipan
+ */
 public class Person {
     private String name;
     private int    age;

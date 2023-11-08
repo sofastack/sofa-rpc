@@ -18,6 +18,9 @@ package com.alipay.sofa.rpc.codec.fury.model.whitelist;
 
 import com.alipay.sofa.rpc.codec.fury.model.Registered.HelloService;
 
+/**
+ * @author lipan
+ */
 public class HelloServiceImpl2 implements HelloService {
 
     @Override

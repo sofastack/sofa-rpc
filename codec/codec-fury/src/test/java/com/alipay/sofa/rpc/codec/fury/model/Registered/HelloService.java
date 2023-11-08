@@ -18,6 +18,9 @@ package com.alipay.sofa.rpc.codec.fury.model.Registered;
 
 import com.alipay.sofa.rpc.codec.fury.model.whitelist.Person;
 
+/**
+ * @author lipan
+ */
 public interface HelloService {
 
     String sayHello(Person person);

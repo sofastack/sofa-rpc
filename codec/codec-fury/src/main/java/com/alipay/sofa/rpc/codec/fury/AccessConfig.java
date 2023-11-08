@@ -16,6 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
+/**
+ * @author lipan
+ */
 public enum AccessConfig {
     WHITELIST_CONFIG("whitelist"), BLACKLIST_CONFIG("blacklist"), NONE_CONFIG("none");
 
