@@ -137,14 +137,12 @@ public class TripleClientInvoker implements TripleInvoker {
                 buildCustomCallOptions(sofaRequest, timeout), request);
 
             SofaResponse sofaResponse = new SofaResponse();
-            byte[] responseDate = response.getData().toByteArray();
+            byte[] responseData = response.getData().toByteArray();
             Class returnType = sofaRequest.getMethod().getReturnType();
             if (returnType != void.class) {
-                if (responseDate != null && responseDate.length > 0) {
-                    Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
-                    Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
-                    sofaResponse.setAppResponse(appResponse);
-                }
+                Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
+                Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
+                sofaResponse.setAppResponse(appResponse);
             }
 
             return sofaResponse;
@@ -250,13 +248,11 @@ public class TripleClientInvoker implements TripleInvoker {
             Object appResponse = o;
             if (needDecode) {
                 Response response = (Response) o;
-                byte[] responseDate = response.getData().toByteArray();
+                byte[] responseData = response.getData().toByteArray();
                 Class returnType = sofaRequest.getMethod().getReturnType();
                 if (returnType != void.class) {
-                    if (responseDate != null && responseDate.length > 0) {
-                        Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
-                        appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
-                    }
+                    Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
+                    appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
                 }
             }
 
