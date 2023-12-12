@@ -17,9 +17,12 @@
 package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.server.UserThreadPool;
+import com.alipay.sofa.rpc.server.UserVirtualThreadPool;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class UserThreadPoolManagerTest {
     @Test
@@ -49,5 +52,30 @@ public class UserThreadPoolManagerTest {
         UserThreadPoolManager.registerUserThread("service4", pool4);
         userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
         Assert.assertEquals(4, userThreadPoolSet.size());
+    }
+
+    @Test
+    public void userThreadPoolBuildTest() {
+        UserThreadPool userThreadPool = new UserVirtualThreadPool();
+        Object result;
+        try {
+             result = userThreadPool.getExecutor();
+        } catch (UnsupportedOperationException e) {
+            // jdk 21 以下, 这里应该抛出 UnsupportedOperationException
+            return;
+        }
+        Assert.assertNull(result);
+    }
+
+    @Test
+    public void userThreadPoolCompatibleTest() {
+        UserThreadPool userThreadPool = new UserThreadPool();
+        Object result;
+        result = userThreadPool.getExecutor();
+        Assert.assertNotNull(result);
+        ExecutorService executorService = userThreadPool.getExecutorService();
+        Assert.assertTrue(executorService instanceof ThreadPoolExecutor);
+
+        Assert.assertEquals(executorService, result);
     }
 }

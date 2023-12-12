@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.server;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
 
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -87,13 +88,23 @@ public class UserThreadPool {
     /**
      * 线程池
      */
+    @Deprecated
     transient volatile ThreadPoolExecutor executor;
+    transient volatile ExecutorService    executorService;
 
     /**
      * 初始化线程池
      */
     public void init() {
-        executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
+        executorService = buildExecutorService();
+        if (executorService instanceof ThreadPoolExecutor) {
+            executor = (ThreadPoolExecutor) executorService;
+        }
+    }
+
+    protected ExecutorService buildExecutorService() {
+        ThreadPoolExecutor executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
+            TimeUnit.MILLISECONDS,
             ThreadPoolUtils.buildQueue(queueSize), new NamedThreadFactory(threadPoolName));
         if (allowCoreThreadTimeOut) {
             executor.allowCoreThreadTimeOut(true);
@@ -101,6 +112,7 @@ public class UserThreadPool {
         if (prestartAllCoreThreads) {
             executor.prestartAllCoreThreads();
         }
+        return executorService;
     }
 
     /**
@@ -257,14 +269,20 @@ public class UserThreadPool {
      *
      * @return the executor
      */
+    @Deprecated
     public ThreadPoolExecutor getExecutor() {
-        if (executor == null) {
+        getExecutorService();
+        return executor;
+    }
+
+    public ExecutorService getExecutorService() {
+        if (executorService == null) {
             synchronized (this) {
-                if (executor == null) {
+                if (executorService == null) {
                     init();
                 }
             }
         }
-        return executor;
+        return executorService;
     }
 }

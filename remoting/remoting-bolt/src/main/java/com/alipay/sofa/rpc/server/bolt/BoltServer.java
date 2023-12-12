@@ -18,8 +18,13 @@ package com.alipay.sofa.rpc.server.bolt;
 
 import com.alipay.remoting.RemotingServer;
 import com.alipay.remoting.rpc.RpcServer;
+import com.alipay.sofa.common.config.SofaConfigs;
+import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
+import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
+import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -29,6 +34,7 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -40,8 +46,11 @@ import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
+
+import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_POOL_TYPE;
 
 /**
  * Bolt server 
@@ -51,7 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Extension("bolt")
 public class BoltServer implements Server {
 
-    private static final Logger    LOGGER     = LoggerFactory.getLogger(BoltServer.class);
+    private static final Logger    LOGGER       = LoggerFactory.getLogger(BoltServer.class);
 
     /**
      * 是否已经启动
@@ -75,30 +84,58 @@ public class BoltServer implements Server {
     /**
      * 业务线程池
      */
+    @Deprecated
     protected ThreadPoolExecutor   bizThreadPool;
+
+    /**
+     * 业务线程池, 也支持非池化的执行器
+     */
+    protected ExecutorService      bizExecutorService;
 
     /**
      * Invoker列表，接口--> Invoker
      */
-    protected Map<String, Invoker> invokerMap = new ConcurrentHashMap<String, Invoker>();
+    protected Map<String, Invoker> invokerMap   = new ConcurrentHashMap<String, Invoker>();
+
+    private final String           executorType = SofaConfigs.getOrCustomDefault(
+                                                    RpcConfigKeys.SERVER_THREAD_POOL_TYPE /* 优先读取环境变量 */
+                                                    , RpcConfigs.getStringValue(SERVER_POOL_TYPE) /* 兜底读json配置文件 */);
 
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        // 启动线程池
-        bizThreadPool = initThreadPool(serverConfig);
+        bizExecutorService = (ExecutorService) ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
+            .getExtension(executorType)
+            .createExecutor(ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig);
+        if (bizExecutorService instanceof ThreadPoolExecutor) {
+            configureThreadPoolExecutor((ThreadPoolExecutor) bizExecutorService, serverConfig);
+        }
         boltServerProcessor = new BoltServerProcessor(this);
     }
 
+    @Deprecated
     protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
         ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
         threadPool.setThreadFactory(new NamedThreadFactory(
-            "SEV-BOLT-BIZ-" + serverConfig.getPort(), serverConfig.isDaemon()));
+            ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig.isDaemon()));
         threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
         if (serverConfig.isPreStartCore()) { // 初始化核心线程池
             threadPool.prestartAllCoreThreads();
         }
         return threadPool;
+    }
+
+    /**
+     * 针对 ThreadPoolExecutor 进行额外配置
+     * @param executor
+     * @param serverConfig
+     */
+    protected void configureThreadPoolExecutor(ThreadPoolExecutor executor, ServerConfig serverConfig) {
+        bizThreadPool = executor;
+        executor.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
+        if (serverConfig.isPreStartCore()) { // 初始化核心线程池
+            executor.prestartAllCoreThreads();
+        }
     }
 
     @Override
@@ -204,28 +241,75 @@ public class BoltServer implements Server {
             return;
         }
         int stopTimeout = serverConfig.getStopTimeout();
-        if (stopTimeout > 0) { // 需要等待结束时间
-            AtomicInteger count = boltServerProcessor.processingCount;
-            // 有正在执行的请求 或者 队列里有请求
-            if (count.get() > 0 || bizThreadPool.getQueue().size() > 0) {
-                long start = RpcRuntimeContext.now();
-                if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("There are {} call in processing and {} call in queue, wait {} ms to end",
-                        count, bizThreadPool.getQueue().size(), stopTimeout);
-                }
-                while ((count.get() > 0 || bizThreadPool.getQueue().size() > 0)
-                    && RpcRuntimeContext.now() - start < stopTimeout) { // 等待返回结果
-                    try {
-                        Thread.sleep(10);
-                    } catch (InterruptedException ignore) {
-                    }
-                }
-            } // 关闭前检查已有请求？
+        destroyThreadPool(bizExecutorService, stopTimeout);
+        stop();
+    }
+
+    /**
+     * 如果未设置有效的 stopWaitTime, 将直接触发 shutdown
+     * @param executorService
+     * @param stopWaitTime
+     */
+    private void destroyThreadPool(ExecutorService executorService, int stopWaitTime) {
+        if (stopWaitTime > 0) {
+            if (executorService instanceof ThreadPoolExecutor) {
+                threadPoolExecutorDestroy((ThreadPoolExecutor) executorService, stopWaitTime);
+            } else {
+                executorServiceDestroy(executorService, stopWaitTime);
+            }
         }
 
-        // 关闭线程池
-        bizThreadPool.shutdown();
-        stop();
+        executorService.shutdown();
+    }
+
+    /**
+     * 将在 stopWaitTime 时限到期时强制 shutdown
+     * @param executor
+     * @param stopWaitTime
+     */
+    private void threadPoolExecutorDestroy(ThreadPoolExecutor executor, int stopWaitTime) {
+        AtomicInteger count = boltServerProcessor.processingCount;
+        // 有正在执行的请求 或者 队列里有请求
+        if (count.get() > 0 || executor.getQueue().size() > 0) {
+            long start = RpcRuntimeContext.now();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("There are {} call in processing and {} call in queue, wait {} ms to end",
+                    count, executor.getQueue().size(), stopWaitTime);
+            }
+            while ((count.get() > 0 || executor.getQueue().size() > 0)
+                && RpcRuntimeContext.now() - start < stopWaitTime) { // 等待返回结果
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignore) {
+                }
+            }
+        }
+        executor.shutdown();
+    }
+
+    /**
+     * 针对 ExecutorService, shutdown 后仍然会处理 queue 内任务, 不用判断 queue
+     * @param executorService
+     * @param stopWaitTime
+     */
+    private void executorServiceDestroy(ExecutorService executorService, int stopWaitTime) {
+        AtomicInteger count = boltServerProcessor.processingCount;
+        // 有正在执行的请求 或者 队列里有请求
+        if (count.get() > 0) {
+            long start = RpcRuntimeContext.now();
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("There are {} call in processing, wait {} ms to end",
+                    count, stopWaitTime);
+            }
+            while ((count.get() > 0)
+                && RpcRuntimeContext.now() - start < stopWaitTime) { // 等待返回结果
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException ignore) {
+                }
+            }
+        }
+        executorService.shutdown();
     }
 
     @Override
@@ -244,8 +328,13 @@ public class BoltServer implements Server {
      *
      * @return 业务线程池
      */
+    @Deprecated
     public ThreadPoolExecutor getBizThreadPool() {
         return bizThreadPool;
+    }
+
+    public ExecutorService getBizExecutorService() {
+        return bizExecutorService;
     }
 
     /**

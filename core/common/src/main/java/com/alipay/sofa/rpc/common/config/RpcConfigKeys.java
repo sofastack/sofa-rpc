@@ -102,4 +102,14 @@ public class RpcConfigKeys {
                                                                                         false,
                                                                                         "judge the generic object exception fields.",
                                                                                         new String[] { "sofa_rpc_generic_exception_fields" });
+    /**
+     * biz thread pool type
+     */
+    public static ConfigKey<String>         SERVER_THREAD_POOL_TYPE             = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.server.threadpool.type",
+                                                                                        "default",
+                                                                                        false,
+                                                                                        "specify biz thread pool implementation type",
+                                                                                        new String[] { "sofa_rpc_server_threadpool_type" });
 }
