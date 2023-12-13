@@ -23,6 +23,8 @@ import com.alipay.sofa.rpc.config.ServerConfig;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
@@ -36,11 +38,12 @@ public class RpcLookoutId {
     private final ConcurrentMap<String, Id> serverConfigIds      = new ConcurrentHashMap<String, Id>();
 
     private volatile Id                     consumerConfigId;
-    private final Object                    consumerConfigIdLock = new Object();
 
     private volatile Id                     providerConfigId;
-    private final Object                    providerConfigIdLock = new Object();
 
+    private static final Lock classLock = new ReentrantLock();
+    private final Lock consumerConfigIdLock = new ReentrantLock();
+    private final Lock providerConfigIdLock = new ReentrantLock();
     /**
      * create consumerId
      *
@@ -51,12 +54,15 @@ public class RpcLookoutId {
         String key = tags.toString();
         Id lookoutId = consumerIds.get(key);
         if (lookoutId == null) {
-            synchronized (RpcLookoutId.class) {
+            classLock.lock();
+            try {
                 lookoutId = consumerIds.get(key);
                 if (lookoutId == null) {
                     lookoutId = Lookout.registry().createId("rpc.consumer.service.stats", tags);
                     consumerIds.put(key, lookoutId);
                 }
+            } finally {
+                classLock.unlock();
             }
         }
         return lookoutId;
@@ -71,12 +77,15 @@ public class RpcLookoutId {
         String key = tags.toString();
         Id lookoutId = providerIds.get(key);
         if (lookoutId == null) {
-            synchronized (RpcLookoutId.class) {
+            classLock.lock();
+            try {
                 lookoutId = providerIds.get(key);
                 if (lookoutId == null) {
                     lookoutId = Lookout.registry().createId("rpc.provider.service.stats", tags);
                     providerIds.put(key, lookoutId);
                 }
+            } finally {
+                classLock.unlock();
             }
         }
         return lookoutId;
@@ -84,10 +93,13 @@ public class RpcLookoutId {
 
     public Id fetchConsumerSubId() {
         if (consumerConfigId == null) {
-            synchronized (consumerConfigIdLock) {
+            consumerConfigIdLock.lock();
+            try {
                 if (consumerConfigId == null) {
                     consumerConfigId = Lookout.registry().createId("rpc.consumer.info.stats");
                 }
+            } finally {
+                consumerConfigIdLock.unlock();
             }
         }
         return consumerConfigId;
@@ -95,10 +107,13 @@ public class RpcLookoutId {
 
     public Id fetchProviderPubId() {
         if (providerConfigId == null) {
-            synchronized (providerConfigIdLock) {
+            providerConfigIdLock.lock();
+            try {
                 if (providerConfigId == null) {
                     providerConfigId = Lookout.registry().createId("rpc.provider.info.stats");
                 }
+            } finally {
+                providerConfigIdLock.unlock();
             }
         }
         return providerConfigId;
@@ -127,12 +142,15 @@ public class RpcLookoutId {
     private Id fetchServerConfigId(String key) {
         Id lookoutId = serverConfigIds.get(key);
         if (lookoutId == null) {
-            synchronized (RpcLookout.class) {
+            classLock.lock();
+            try {
                 lookoutId = serverConfigIds.get(key);
                 if (lookoutId == null) {
                     lookoutId = Lookout.registry().createId(key);
                     serverConfigIds.put(key, lookoutId);
                 }
+            } finally {
+                classLock.unlock();
             }
         }
         return lookoutId;
