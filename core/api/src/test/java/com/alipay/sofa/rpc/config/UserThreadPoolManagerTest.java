@@ -59,7 +59,7 @@ public class UserThreadPoolManagerTest {
         UserThreadPool userThreadPool = new UserVirtualThreadPool();
         Object result;
         try {
-             result = userThreadPool.getExecutor();
+            result = userThreadPool.getExecutor();
         } catch (UnsupportedOperationException e) {
             // jdk 21 以下, 这里应该抛出 UnsupportedOperationException
             return;
