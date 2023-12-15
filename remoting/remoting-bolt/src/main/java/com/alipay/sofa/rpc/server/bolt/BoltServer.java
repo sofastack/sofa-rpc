@@ -98,7 +98,7 @@ public class BoltServer implements Server {
      */
     protected Map<String, Invoker> invokerMap   = new ConcurrentHashMap<String, Invoker>();
 
-    private final String           executorType = SofaConfigs.getOrCustomDefault(
+    protected final String         executorType = SofaConfigs.getOrCustomDefault(
                                                     RpcConfigKeys.SERVER_THREAD_POOL_TYPE /* 优先读取环境变量 */
                                                     , RpcConfigs.getStringValue(SERVER_POOL_TYPE) /* 兜底读json配置文件 */);
 
@@ -132,8 +132,8 @@ public class BoltServer implements Server {
      */
     protected Executor initExecutor(String type, ServerConfig serverConfig) {
         Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
-                .getExtension(type)
-                .createExecutor(ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig);
+            .getExtension(type)
+            .createExecutor(ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig);
         if (executor instanceof ThreadPoolExecutor) {
             configureThreadPoolExecutor((ThreadPoolExecutor) executor, serverConfig);
         }
