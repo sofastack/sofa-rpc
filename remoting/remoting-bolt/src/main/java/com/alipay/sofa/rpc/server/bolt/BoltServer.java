@@ -46,6 +46,7 @@ import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,11 +105,9 @@ public class BoltServer implements Server {
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        bizExecutorService = (ExecutorService) ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
-            .getExtension(executorType)
-            .createExecutor(ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig);
+        bizExecutorService = (ExecutorService) initExecutor(executorType, serverConfig);
         if (bizExecutorService instanceof ThreadPoolExecutor) {
-            configureThreadPoolExecutor((ThreadPoolExecutor) bizExecutorService, serverConfig);
+            bizThreadPool = (ThreadPoolExecutor) bizExecutorService;
         }
         boltServerProcessor = new BoltServerProcessor(this);
     }
@@ -126,12 +125,27 @@ public class BoltServer implements Server {
     }
 
     /**
+     * 指定类型初始化线程池
+     * @param type
+     * @param serverConfig
+     * @return
+     */
+    protected Executor initExecutor(String type, ServerConfig serverConfig) {
+        Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
+                .getExtension(type)
+                .createExecutor(ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig);
+        if (executor instanceof ThreadPoolExecutor) {
+            configureThreadPoolExecutor((ThreadPoolExecutor) executor, serverConfig);
+        }
+        return executor;
+    }
+
+    /**
      * 针对 ThreadPoolExecutor 进行额外配置
      * @param executor
      * @param serverConfig
      */
     protected void configureThreadPoolExecutor(ThreadPoolExecutor executor, ServerConfig serverConfig) {
-        bizThreadPool = executor;
         executor.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
         if (serverConfig.isPreStartCore()) { // 初始化核心线程池
             executor.prestartAllCoreThreads();
