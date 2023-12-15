@@ -41,9 +41,10 @@ public class RpcLookoutId {
 
     private volatile Id                     providerConfigId;
 
-    private static final Lock classLock = new ReentrantLock();
-    private final Lock consumerConfigIdLock = new ReentrantLock();
-    private final Lock providerConfigIdLock = new ReentrantLock();
+    private static final Lock               classLock            = new ReentrantLock();
+    private final Lock                      consumerConfigIdLock = new ReentrantLock();
+    private final Lock                      providerConfigIdLock = new ReentrantLock();
+
     /**
      * create consumerId
      *

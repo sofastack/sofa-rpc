@@ -42,7 +42,7 @@ public class DynamicConfigManagerFactory {
     /**
      * 类锁
      */
-    private final static Lock classLock = new ReentrantLock();
+    private final static Lock                                        classLock    = new ReentrantLock();
 
     /**
      * slf4j Logger for this class
