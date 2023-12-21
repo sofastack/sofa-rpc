@@ -44,7 +44,7 @@ public class VirtualThreadPoolFactory implements SofaExecutorFactory {
 
     @Override
     public Executor createExecutor(String namePrefix, ServerConfig serverConfig) {
-        return SofaVirtualThreadFactory.ofExecutorService(ThreadPoolConstant.BizThreadNamePrefix +
-            serverConfig.getPort());
+        // virtual thread does not support any configs now
+        return SofaVirtualThreadFactory.ofExecutorService(namePrefix);
     }
 }
