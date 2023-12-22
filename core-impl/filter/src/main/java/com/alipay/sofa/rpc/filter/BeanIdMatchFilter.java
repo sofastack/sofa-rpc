@@ -51,7 +51,7 @@ public abstract class BeanIdMatchFilter extends Filter {
     private List<String>        excludeId;
 
     private volatile boolean    formatComplete;
-    protected Lock              lock         = new ReentrantLock();
+    protected final Lock        lock         = new ReentrantLock();
 
     @Override
     public boolean needToLoad(FilterInvoker invoker) {
