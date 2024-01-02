@@ -25,6 +25,8 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * @author bystander
@@ -38,6 +40,11 @@ public class DynamicConfigManagerFactory {
     private final static ConcurrentMap<String, DynamicConfigManager> ALL_DYNAMICS = new ConcurrentHashMap<String, DynamicConfigManager>();
 
     /**
+     * 类锁
+     */
+    private final static Lock                                        classLock    = new ReentrantLock();
+
+    /**
      * slf4j Logger for this class
      */
     private final static Logger                                      LOGGER       = LoggerFactory
@@ -49,12 +56,13 @@ public class DynamicConfigManagerFactory {
      * @param alias 别名
      * @return DynamicManager 实现
      */
-    public static synchronized DynamicConfigManager getDynamicManager(String appName, String alias) {
+    public static DynamicConfigManager getDynamicManager(String appName, String alias) {
         if (ALL_DYNAMICS.size() > 3) { // 超过3次 是不是配错了？
             if (LOGGER.isWarnEnabled()) {
                 LOGGER.warn("Size of dynamic manager is greater than 3, Please check it!");
             }
         }
+        classLock.lock();
         try {
             // 注意：RegistryConfig重写了equals方法，如果多个RegistryConfig属性一样，则认为是一个对象
             DynamicConfigManager registry = ALL_DYNAMICS.get(alias);
@@ -73,6 +81,8 @@ public class DynamicConfigManagerFactory {
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "DynamicConfigManager", alias),
                 e);
+        } finally {
+            classLock.unlock();
         }
     }
 
