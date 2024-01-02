@@ -75,7 +75,6 @@ public class BoltServerTest {
         server.destroy();
     }
 
-
     @Test
     public void threadPoolDestroyTest() {
         String host = "127.0.0.1";
