@@ -75,4 +75,30 @@ public class BoltServerTest {
         server.destroy();
     }
 
+
+    @Test
+    public void threadPoolDestroyTest() {
+        String host = "127.0.0.1";
+        int port = 17702;
+        ServerConfig serverConfig = new ServerConfig();
+        serverConfig.setBoundHost(host);
+        serverConfig.setPort(port);
+        serverConfig.setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+
+        BoltServer server = new BoltServer();
+        server.init(serverConfig);
+        server.start();
+        Assert.assertTrue(server.started);
+        Assert.assertTrue(NetUtils.canTelnet(host, port, 1000));
+
+        server.destroy();
+    }
+
+    @Test
+    public void testDeprecatedInitThreadExecutor() {
+        BoltServer server = new BoltServer();
+        server.initThreadPool(new ServerConfig());
+        server.destroy();
+    }
+
 }
