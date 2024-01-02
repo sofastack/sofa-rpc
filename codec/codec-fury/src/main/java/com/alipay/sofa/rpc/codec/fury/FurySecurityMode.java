@@ -14,33 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury.model.whitelist;
+package com.alipay.sofa.rpc.codec.fury;
 
 /**
  * @author lipan
  */
-public class Person {
-    private String name;
-    private int    age;
+public enum FurySecurityMode {
 
-    public Person(String name, int age) {
-        this.name = name;
-        this.age = age;
+    WHITELIST_MODE("whitelist"), BLACKLIST_MODE("blacklist"), NONE_MODE("none");
+
+    private final String securityMode;
+
+    FurySecurityMode(String securityMode) {
+        this.securityMode = securityMode;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
+    public String getSecurityMode() {
+        return securityMode;
     }
 }

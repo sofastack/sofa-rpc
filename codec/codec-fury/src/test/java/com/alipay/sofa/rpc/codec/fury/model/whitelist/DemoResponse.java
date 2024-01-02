@@ -14,17 +14,37 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury.model.Registered;
-
-import com.alipay.sofa.rpc.codec.fury.model.whitelist.Person;
+package com.alipay.sofa.rpc.codec.fury.model.whitelist;
 
 /**
  * @author lipan
  */
-public class HelloServiceImpl implements HelloService {
+public class DemoResponse {
+
+    private String word;
+
+    public String getWord() {
+        return word;
+    }
+
+    public void setWord(String word) {
+        this.word = word;
+    }
 
     @Override
-    public String sayHello(Person person) {
-        return "Hello, " + person.getName() + ". You are " + person.getAge() + " years old.";
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof DemoResponse))
+            return false;
+
+        DemoResponse that = (DemoResponse) o;
+
+        return word != null ? word.equals(that.word) : that.word == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return word != null ? word.hashCode() : 0;
     }
 }

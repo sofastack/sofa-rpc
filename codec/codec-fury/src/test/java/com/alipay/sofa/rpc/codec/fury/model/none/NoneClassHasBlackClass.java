@@ -14,21 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury;
+package com.alipay.sofa.rpc.codec.fury.model.none;
+
+import com.alipay.sofa.rpc.codec.fury.model.blacklist.BlackListClass;
 
 /**
- * @author lipan
+ * @author Even
+ * @date 2024/1/2 11:33
  */
-public enum AccessConfig {
-    WHITELIST_CONFIG("whitelist"), BLACKLIST_CONFIG("blacklist"), NONE_CONFIG("none");
+public class NoneClassHasBlackClass {
 
-    private final String configType;
+    private BlackListClass blackListClass;
 
-    AccessConfig(String configType) {
-        this.configType = configType;
+    public BlackListClass getBlackListClass() {
+        return blackListClass;
     }
 
-    public String getConfigType() {
-        return configType;
+    public void setBlackListClass(BlackListClass blackListClass) {
+        this.blackListClass = blackListClass;
     }
 }

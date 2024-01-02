@@ -14,14 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury.model.Registered;
-
-import com.alipay.sofa.rpc.codec.fury.model.blacklist.NotRegister;
+package com.alipay.sofa.rpc.codec.fury.model.whitelist;
 
 /**
  * @author lipan
  */
-public class RegisteredClass {
-    public Integer     key;
-    public NotRegister temp;
+public class DemoRequest {
+
+    private String name;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

@@ -17,15 +17,12 @@
 package com.alipay.sofa.rpc.codec.fury;
 
 import com.alipay.sofa.rpc.codec.Serializer;
-import com.alipay.sofa.rpc.codec.fury.model.blacklist.NotRegister;
-import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoRequest;
-import com.alipay.sofa.rpc.codec.fury.model.Registered.DemoResponse;
+import com.alipay.sofa.rpc.codec.fury.model.blacklist.BlackListClass;
+import com.alipay.sofa.rpc.codec.fury.model.none.NoneClassHasBlackClass;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.DemoRequest;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.DemoResponse;
+import com.alipay.sofa.rpc.codec.fury.model.whitelist.WhiteClassHasBlackClass;
 import com.alipay.sofa.rpc.codec.fury.model.whitelist.DemoService;
-import com.alipay.sofa.rpc.codec.fury.model.Registered.RegisteredClass;
-import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -33,13 +30,13 @@ import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import org.junit.Assert;
+import org.junit.Test;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -69,20 +66,6 @@ public class FurySerializerTest {
         String dst = (String) serializer.decode(data, String.class, null);
         Assert.assertEquals("xxx", dst);
 
-        Date object = new Date();
-        try {
-            AbstractByteBuf encode = serializer.encode(object, null);
-            Assert.assertEquals(object, serializer.decode(encode, Date.class, null));
-        } catch (Exception e) {
-            Assert.fail();
-        }
-
-        try {
-            serializer.encode(1, null);
-        } catch (Exception e) {
-            Assert.fail();
-        }
-
         try {
             serializer.decode(data, null, null);
             Assert.fail();
@@ -95,110 +78,37 @@ public class FurySerializerTest {
         } catch (Exception e) {
 
         }
-
-    }
-
-    @Test
-    public void testChecker() throws Exception {
-        RegisteredClass registeredClass = new RegisteredClass();
-        try {
-            // registered this class
-            serializer.encode(registeredClass, null);
-        } catch (Exception e) {
-            Assert.fail();
-        }
-
-        NotRegister notRegister = new NotRegister();
-        try {
-            //Not registered this class
-            serializer.encode(notRegister, null);
-            Assert.fail();
-        } catch (Exception e) {
-
-        }
-
-        //  test add or delete
-        serializer.addWhiteList("com.alipay.sofa.rpc.codec.fury.model.blacklist.*");
-        try {
-            //Not registered this class
-            serializer.encode(notRegister, null);
-        } catch (Exception e) {
-            Assert.fail();
-        }
-
-        serializer.addBlackList("com.alipay.sofa.rpc.codec.fury.model.blacklist.*");
-        try {
-            //Not registered this class
-            serializer.encode(notRegister, null);
-            Assert.fail();
-        } catch (Exception e) {
-
-        }
-
     }
 
     @Test
     public void testSofaRequest() throws Exception {
         SofaRequest request = buildRequest();
         AbstractByteBuf data = serializer.encode(request, null);
-        try {
-            serializer.decode(data, SofaRequest.class, null);
-        } catch (Exception e) {
-            Assert.fail();
-        }
 
-        try {
-            serializer.decode(data, new SofaRequest(), null);
-            Assert.fail();
-        } catch (Exception e) {
-
-        }
-
-        Map<String, String> head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        head.put("unkown", "yes");
+        SofaRequest decode = (SofaRequest) serializer.decode(data, SofaRequest.class, null);
+        assertEqualsSofaRequest(request, decode);
 
         SofaRequest newRequest = new SofaRequest();
-        serializer.decode(data, newRequest, head);
-
-        Assert.assertEquals(newRequest.getInterfaceName(), request.getInterfaceName());
-        Assert.assertEquals(newRequest.getMethodName(), request.getMethodName());
-        Assert.assertArrayEquals(newRequest.getMethodArgSigs(), request.getMethodArgSigs());
-        Assert.assertEquals(newRequest.getMethodArgs().length, request.getMethodArgs().length);
-        Assert.assertEquals("name", ((DemoRequest) newRequest.getMethodArgs()[0]).getName());
-        Assert.assertEquals(newRequest.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
-        Assert.assertEquals(newRequest.getTargetAppName(), request.getTargetAppName());
-        Assert.assertEquals(newRequest.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
-            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+        serializer.decode(data, newRequest, null);
+        assertEqualsSofaRequest(request, newRequest);
 
         // null request
-        head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
         newRequest = new SofaRequest();
-        serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, head);
-        final Object[] methodArgs = newRequest.getMethodArgs();
-        Assert.assertEquals(null, ((DemoRequest) methodArgs[0]).getName());
+        try {
+            serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newRequest, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
     }
 
     @Test
     public void testSofaResponse() throws Exception {
         SofaResponse response = new SofaResponse();
-        response.setAppResponse("1233");
+        final DemoResponse demoAppResponse = new DemoResponse();
+        demoAppResponse.setWord("result");
+        response.setAppResponse(demoAppResponse);
         AbstractByteBuf data = serializer.encode(response, null);
-
-        try {
-            serializer.decode(data, SofaResponse.class, null);
-        } catch (Exception e) {
-            Assert.fail();
-        }
 
         try {
             serializer.decode(data, null, null);
@@ -208,83 +118,40 @@ public class FurySerializerTest {
         }
 
         try {
-            serializer.decode(data, new SofaResponse(), null);
+            serializer.decode(data, new Object(), null);
             Assert.fail();
         } catch (Exception e) {
 
         }
 
+        SofaResponse decode = (SofaResponse) serializer.decode(data, SofaResponse.class, null);
+        Assert.assertFalse(decode.isError());
+        Assert.assertEquals(response.getAppResponse(), decode.getAppResponse());
+        Assert.assertEquals("result", ((DemoResponse) decode.getAppResponse()).getWord());
+
         // success response
-        Map<String, String> head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        response = new SofaResponse();
-        final DemoResponse response1 = new DemoResponse();
-        response1.setWord("result");
-        response.setAppResponse(response1);
-        data = serializer.encode(response, null);
         SofaResponse newResponse = new SofaResponse();
-        serializer.decode(data, newResponse, head);
+        serializer.decode(data, newResponse, null);
         Assert.assertFalse(newResponse.isError());
         Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
         Assert.assertEquals("result", ((DemoResponse) newResponse.getAppResponse()).getWord());
 
         // null response
-        head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
         newResponse = new SofaResponse();
-        serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newResponse, head);
-        Assert.assertFalse(newResponse.isError());
-        Assert.assertNotNull(newResponse.getAppResponse());
-        Assert.assertEquals(null, ((DemoResponse) newResponse.getAppResponse()).getWord());
+        try {
+            serializer.decode(new ByteArrayWrapperByteBuf(new byte[0]), newResponse, null);
+            Assert.fail();
+        } catch (Exception e) {
 
+        }
         // error response
-        head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        head.put(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
         response = new SofaResponse();
         response.setErrorMsg("1233");
         data = serializer.encode(response, null);
         newResponse = new SofaResponse();
-        serializer.decode(data, newResponse, head);
+        serializer.decode(data, newResponse, null);
         Assert.assertTrue(newResponse.isError());
         Assert.assertEquals(response.getErrorMsg(), newResponse.getErrorMsg());
-    }
-
-    @Test
-    public void testListResponse() {
-        // success response
-        Map<String, String> head = new HashMap<String, String>();
-        head.put(RemotingConstants.HEAD_TARGET_SERVICE, DemoService.class.getCanonicalName() + ":1.0");
-        head.put(RemotingConstants.HEAD_METHOD_NAME, "say3");
-        head.put(RemotingConstants.HEAD_TARGET_APP, "targetApp");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".a", "xxx");
-        head.put(RemotingConstants.RPC_TRACE_NAME + ".b", "yyy");
-        SofaResponse response = new SofaResponse();
-        final DemoResponse response1 = new DemoResponse();
-        response1.setWord("result");
-
-        List<DemoResponse> listResponse = new ArrayList<DemoResponse>();
-        listResponse.add(response1);
-
-        response.setAppResponse(listResponse);
-
-        AbstractByteBuf data = serializer.encode(response, null);
-        SofaResponse newResponse = new SofaResponse();
-        serializer.decode(data, newResponse, head);
-        Assert.assertFalse(newResponse.isError());
-        Assert.assertEquals(response.getAppResponse(), newResponse.getAppResponse());
-        Assert.assertEquals("result", ((List<DemoResponse>) newResponse.getAppResponse()).get(0).getWord());
-
     }
 
     private SofaRequest buildRequest() throws NoSuchMethodException {
@@ -322,6 +189,100 @@ public class FurySerializerTest {
             }
         });
         return request;
+    }
+
+    private void assertEqualsSofaRequest(SofaRequest request, SofaRequest decode) {
+        Assert.assertEquals(decode.getInterfaceName(), request.getInterfaceName());
+        Assert.assertEquals(decode.getMethodName(), request.getMethodName());
+        Assert.assertArrayEquals(decode.getMethodArgSigs(), request.getMethodArgSigs());
+        Assert.assertEquals(decode.getMethodArgs().length, request.getMethodArgs().length);
+        Assert.assertEquals("name", ((DemoRequest) decode.getMethodArgs()[0]).getName());
+        Assert.assertEquals(decode.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
+        Assert.assertEquals(decode.getTargetAppName(), request.getTargetAppName());
+        Assert.assertEquals(decode.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
+            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+    }
+
+    @Test
+    public void testChecker() throws Exception {
+        // default fury checkMode is whitelist
+        WhiteClassHasBlackClass whiteClassNullBlackClass = new WhiteClassHasBlackClass();
+        NoneClassHasBlackClass noneClassNullBlackClass = new NoneClassHasBlackClass();
+
+        BlackListClass blackListClass = new BlackListClass();
+        WhiteClassHasBlackClass whiteClassHasBlackClass = new WhiteClassHasBlackClass();
+        whiteClassHasBlackClass.setBlackListClass(blackListClass);
+        NoneClassHasBlackClass noneClassHasBlackClass = new NoneClassHasBlackClass();
+        noneClassHasBlackClass.setBlackListClass(blackListClass);
+
+        try {
+            serializer.encode(noneClassNullBlackClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+
+        try {
+            serializer.encode(noneClassHasBlackClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+
+        try {
+            serializer.encode(blackListClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+
+        serializer.encode(whiteClassNullBlackClass, null);
+        try {
+            serializer.encode(whiteClassHasBlackClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+
+        // test change fury checkMode to blacklist
+        System.getProperties().put("sofa.rpc.codec.fury.checkMode", "blacklist");
+        FurySerializer furySerializer = new FurySerializer();
+
+        furySerializer.encode(noneClassNullBlackClass, null);
+
+        try {
+            furySerializer.encode(noneClassHasBlackClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+
+        try {
+            //Not registered this class
+            furySerializer.encode(blackListClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+
+        furySerializer.encode(whiteClassNullBlackClass, null);
+        try {
+            furySerializer.encode(whiteClassHasBlackClass, null);
+            Assert.fail();
+        } catch (Exception e) {
+
+        }
+        System.getProperties().remove("sofa.rpc.codec.fury.checkMode");
+
+        // test change fury checkMode to none
+        System.getProperties().put("sofa.rpc.codec.fury.checkMode", "none");
+        FurySerializer noneFurySerializer = new FurySerializer();
+        noneFurySerializer.encode(noneClassNullBlackClass, null);
+        noneFurySerializer.encode(noneClassHasBlackClass, null);
+        noneFurySerializer.encode(blackListClass, null);
+        noneFurySerializer.encode(whiteClassNullBlackClass, null);
+        noneFurySerializer.encode(whiteClassHasBlackClass, null);
+        System.getProperties().remove("sofa.rpc.codec.fury.checkMode");
     }
 
 }

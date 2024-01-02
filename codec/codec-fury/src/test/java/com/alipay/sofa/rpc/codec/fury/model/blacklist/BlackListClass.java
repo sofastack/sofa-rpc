@@ -16,11 +16,9 @@
  */
 package com.alipay.sofa.rpc.codec.fury.model.blacklist;
 
-import com.alipay.sofa.rpc.codec.fury.model.Registered.RegisteredClass;
-
 /**
  * @author lipan
  */
-public class NotRegister {
-    public RegisteredClass request;
+public class BlackListClass {
+    private String test;
 }

@@ -16,34 +16,27 @@
  */
 package com.alipay.sofa.rpc.codec.fury;
 
-import org.yaml.snakeyaml.Yaml;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.common.BlackAndWhiteListFileLoader;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
-import com.alipay.sofa.rpc.common.utils.CodecUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
-import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-
 import io.fury.Fury;
 import io.fury.ThreadLocalFury;
 import io.fury.config.Language;
+import io.fury.memory.MemoryBuffer;
 import io.fury.resolver.AllowListChecker;
+
+import java.util.List;
+import java.util.Map;
+
 import static io.fury.config.CompatibleMode.COMPATIBLE;
 
 /**
@@ -52,162 +45,130 @@ import static io.fury.config.CompatibleMode.COMPATIBLE;
 @Extension(value = "fury2", code = 22)
 public class FurySerializer extends AbstractSerializer {
 
-    private final FuryHelper              furyHelper   = new FuryHelper();
+    private final ThreadLocalFury fury;
 
-    private final ThreadLocalFury         fury;
+    private final ThreadLocal<MemoryBuffer> writeBufferLocal = ThreadLocal.withInitial(() -> MemoryBuffer.newHeapBuffer(32));
 
-    private static final AllowListChecker checker      = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
-
-    private static final String           CHECKER_MODE = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
+    private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
 
     public FurySerializer() {
-        // Load the register for higher efficiency
-        ArrayList<Class<?>> registerList = new ArrayList<>();
-        List<String> classList = loadConf("register");
-        if (classList != null) {
-            for (String className : classList) {
-                Class<?> clazz;
-                try {
-                    clazz = Class.forName(className);
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-                registerList.add(clazz);
-            }
-
-        }
-
         fury = new ThreadLocalFury(classLoader -> {
             Fury f = Fury.builder().withLanguage(Language.JAVA)
-                .withRefTracking(true)
-                .withCodegen(true)
-                .withNumberCompressed(true)
-                .withCompatibleMode(COMPATIBLE)
-                .requireClassRegistration(false)
-                .withClassLoader(classLoader)
-                .withAsyncCompilation(true)
-                .build();
-            // Register classes is CanonicalName
-            if (!registerList.isEmpty()) {
-                for (Class<?> clazz : registerList) {
-                    f.register(clazz);
-                }
-            }
+                    .withRefTracking(true)
+                    .withCodegen(true)
+                    .withNumberCompressed(true)
+                    .withCompatibleMode(COMPATIBLE)
+                    .requireClassRegistration(false)
+                    .withClassLoader(classLoader)
+                    .withAsyncCompilation(true)
+                    .build();
+            f.register(SofaRequest.class);
+            f.register(SofaResponse.class);
+            f.register(SofaRpcException.class);
 
             // Do not use any configuration
-            if (CHECKER_MODE.equals(AccessConfig.NONE_CONFIG.getConfigType())) {
+            if (checkerMode.equalsIgnoreCase(FurySecurityMode.NONE_MODE.getSecurityMode())) {
+                AllowListChecker noChecker = new AllowListChecker(AllowListChecker.CheckLevel.DISABLE);
+                f.getClassResolver().setClassChecker(noChecker);
                 return f;
-            }
-
-            if (CHECKER_MODE.equals(AccessConfig.WHITELIST_CONFIG.getConfigType())) {
-                List<String> whiteList = loadConf(AccessConfig.WHITELIST_CONFIG.getConfigType());
-                if (whiteList != null) {
-                    // To setting checker
-                    f.getClassResolver().setClassChecker(checker);
-                    checker.addListener(f.getClassResolver());
-                    // WhiteList classes use wildcards
-                    for (String key : whiteList) {
-                        checker.allowClass(key);
-                    }
+            } else if (checkerMode.equalsIgnoreCase(FurySecurityMode.BLACKLIST_MODE.getSecurityMode())) {
+                AllowListChecker blackListChecker = new AllowListChecker(AllowListChecker.CheckLevel.WARN);
+                List<String> blackList = BlackAndWhiteListFileLoader.SOFA_SERIALIZE_BLACK_LIST;
+                // To setting checker
+                f.getClassResolver().setClassChecker(blackListChecker);
+                blackListChecker.addListener(f.getClassResolver());
+                // BlackList classes use wildcards
+                for (String key : blackList) {
+                    blackListChecker.disallowClass(key + "*");
                 }
-            } else if (CHECKER_MODE.equals(AccessConfig.BLACKLIST_CONFIG.getConfigType())) {
-                List<String> blackList = loadConf(AccessConfig.BLACKLIST_CONFIG.getConfigType());
-                if (blackList != null) {
-                    // To setting checker
-                    f.getClassResolver().setClassChecker(checker);
-                    checker.addListener(f.getClassResolver());
-                    // BlackList classes use wildcards
-                    for (String key : blackList) {
-                        checker.disallowClass(key);
-                    }
+            } else if (checkerMode.equalsIgnoreCase(FurySecurityMode.WHITELIST_MODE.getSecurityMode())) {
+                AllowListChecker blackAndWhiteListChecker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
+                List<String> whiteList = BlackAndWhiteListFileLoader.SOFA_SERIALIZER_WHITE_LIST;
+                // To setting checker
+                f.getClassResolver().setClassChecker(blackAndWhiteListChecker);
+                blackAndWhiteListChecker.addListener(f.getClassResolver());
+                // WhiteList classes use wildcards
+                for (String key : whiteList) {
+                    blackAndWhiteListChecker.allowClass(key + "*");
+                }
+                List<String> blackList = BlackAndWhiteListFileLoader.SOFA_SERIALIZE_BLACK_LIST;
+                // To setting checker
+                f.getClassResolver().setClassChecker(blackAndWhiteListChecker);
+                blackAndWhiteListChecker.addListener(f.getClassResolver());
+                // BlackList classes use wildcards
+                for (String key : blackList) {
+                    blackAndWhiteListChecker.disallowClass(key + "*");
                 }
             }
             return f;
         });
     }
 
-    public void addWhiteList(String address) {
-        checker.allowClass(address);
-    }
-
-    public void addBlackList(String address) {
-        checker.disallowClass(address);
-    }
-
-    private static List<String> loadConf(String name) {
-        List<String> confList = null;
-        try {
-            // Use the configuration file to obtain the whitelist
-            Enumeration<URL> urls = ClassLoader.getSystemResources("configuration.yml");
-            while (urls.hasMoreElements()) {
-                URL url = urls.nextElement();
-                InputStream inputStream = url.openStream();
-                Yaml yaml = new Yaml();
-                Map<String, Object> yamlContent = yaml.load(inputStream);
-                confList = (List<String>) yamlContent.get(name);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-        return confList;
-    }
-
     @Override
     public AbstractByteBuf encode(final Object object, final Map<String, String> context) throws SofaRpcException {
-        if (object == null) {
-            throw buildSerializeError("Unsupported null message!");
-        } else if (object instanceof SofaRequest) {
-            return encodeSofaRequest((SofaRequest) object, context);
-        } else if (object instanceof SofaResponse) {
-            return encodeSofaResponse((SofaResponse) object, context);
-        } else {
-            return new ByteArrayWrapperByteBuf(fury.serialize(object));
-        }
-    }
-
-    private AbstractByteBuf encodeSofaRequest(SofaRequest sofaRequest, Map<String, String> context)
-        throws SofaRpcException {
-        Object[] args = sofaRequest.getMethodArgs();
-        if (args.length == 1) {
-            return encode(args[0], context);
-        } else {
-            return encode(args, context);
-        }
-    }
-
-    private AbstractByteBuf encodeSofaResponse(SofaResponse sofaResponse, Map<String, String> context)
-        throws SofaRpcException {
-        AbstractByteBuf byteBuf;
-        if (sofaResponse.isError()) {
-            byteBuf = encode(sofaResponse.getErrorMsg(), context);
-        } else {
-            Object appResponse = sofaResponse.getAppResponse();
-            if (appResponse instanceof Throwable) {
-                byteBuf = encode(((Throwable) appResponse).getMessage(), context);
+        try {
+            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
+            MemoryBuffer writeBuffer = writeBufferLocal.get();
+            writeBuffer.writerIndex(0);
+            if (object == null) {
+                throw buildSerializeError("Unsupported null message!");
+            } else if (object instanceof SofaRequest) {
+                SofaRequest sofaRequest = (SofaRequest) object;
+                // 根据SerializeType信息决定序列化器
+                boolean genericSerialize = context != null &&
+                        isGenericRequest(context.get(RemotingConstants.HEAD_GENERIC_TYPE));
+                if (genericSerialize) {
+                    // TODO support generic call
+                    throw buildSerializeError("Generic call is not supported for now.");
+                }
+                fury.serialize(writeBuffer, object);
+                final Object[] args = sofaRequest.getMethodArgs();
+                fury.serialize(writeBuffer, args);
+            } else if (object instanceof SofaResponse) {
+                fury.serialize(writeBuffer, object);
             } else {
-                byteBuf = encode(appResponse, context);
+                fury.serialize(writeBuffer, object);
             }
+            return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
+        } catch (Exception e) {
+            throw buildSerializeError(e.getMessage(), e);
         }
-        return byteBuf;
     }
 
     @Override
     public Object decode(final AbstractByteBuf data, final Class clazz, final Map<String, String> context)
-        throws SofaRpcException {
-        Object result = null;
-        if (clazz == null) {
-            throw buildDeserializeError("class is null!");
-        } else if (data.readableBytes() <= 0) {
-            try {
-                result = clazz.newInstance();
-            } catch (InstantiationException | IllegalAccessException e) {
-                throw buildDeserializeError(e.getMessage());
-            }
-            return result;
-        } else {
-            result = fury.deserialize(data.array());
+            throws SofaRpcException {
+        if(data.readableBytes() <= 0) {
+            throw buildDeserializeError("Deserialized array is empty.");
         }
-        return result;
+        MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
+        try {
+            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
+            if (clazz.equals(SofaRequest.class)) {
+                SofaRequest sofaRequest = (SofaRequest) fury.deserialize(readBuffer);
+                String targetServiceName = sofaRequest.getTargetServiceUniqueName();
+                if (targetServiceName == null) {
+                    throw buildDeserializeError("Target service name of request is null!");
+                }
+                String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
+                sofaRequest.setInterfaceName(interfaceName);
+                final Object[] args = (Object[]) fury.deserialize(readBuffer);
+                sofaRequest.setMethodArgs(args);
+                return sofaRequest;
+            } else if (clazz.equals(SofaResponse.class)) {
+                boolean genericSerialize = context != null && isGenericResponse(
+                        context.get(RemotingConstants.HEAD_GENERIC_TYPE));
+                if (genericSerialize) {
+                    // TODO support generic call
+                    throw buildSerializeError("Generic call is not supported for now.");
+                }
+                return fury.deserialize(readBuffer);
+            } else {
+                return fury.deserialize(readBuffer);
+            }
+        } catch (Exception e) {
+            throw buildDeserializeError(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -216,7 +177,7 @@ public class FurySerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         } else if (template instanceof SofaRequest) {
-            decodeSofaRequest(data, (SofaRequest) template, context);
+            decodeSofaRequest(data, (SofaRequest) template);
         } else if (template instanceof SofaResponse) {
             decodeSofaResponse(data, (SofaResponse) template, context);
         } else {
@@ -225,114 +186,64 @@ public class FurySerializer extends AbstractSerializer {
 
     }
 
-    private void decodeSofaRequest(AbstractByteBuf data, SofaRequest sofaRequest, Map<String, String> head) {
-        if (head == null) {
-            throw buildDeserializeError("head is null!");
-        }
-        String targetService = head.remove(RemotingConstants.HEAD_TARGET_SERVICE);
-        if (targetService != null) {
-            sofaRequest.setTargetServiceUniqueName(targetService);
-            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetService);
-            sofaRequest.setInterfaceName(interfaceName);
-        } else {
-            throw buildDeserializeError("HEAD_TARGET_SERVICE is null");
-        }
-        String methodName = head.remove(RemotingConstants.HEAD_METHOD_NAME);
-        if (methodName != null) {
-            sofaRequest.setMethodName(methodName);
-        } else {
-            throw buildDeserializeError("HEAD_METHOD_NAME is null");
-        }
-        String targetApp = head.remove(RemotingConstants.HEAD_TARGET_APP);
-        if (targetApp != null) {
-            sofaRequest.setTargetAppName(targetApp);
-        }
-
-        // parse tracer and baggage
-        parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, head, sofaRequest);
-        if (RpcInvokeContext.isBaggageEnable()) {
-            parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, head, sofaRequest);
-        }
-        for (Map.Entry<String, String> entry : head.entrySet()) {
-            sofaRequest.addRequestProp(entry.getKey(), entry.getValue());
-        }
-
-        // according interface and method name to find parameter types
-        Class<?>[] requestClass = furyHelper.getReqClass(targetService,
-            sofaRequest.getMethodName());
-        Object[] pbReq = decode(data, requestClass, head);
-        sofaRequest.setMethodArgs(pbReq);
-        sofaRequest.setMethodArgSigs(parseArgSigs(requestClass));
-    }
-
-    private Object[] decode(final AbstractByteBuf data, final Class<?>[] templateList,
-                            final Map<String, String> context)
-        throws SofaRpcException {
-        ArrayList<Object> objectList = new ArrayList<>();
-        for (Class<?> clazz : templateList) {
-            Object result = null;
-            if (clazz == null) {
-                throw buildDeserializeError("class is null!");
-            } else if (data.readableBytes() <= 0) {
-                try {
-                    result = clazz.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw buildDeserializeError(e.getMessage());
-                }
-            } else {
-                result = fury.deserialize(data.array());
+    private void decodeSofaRequest(AbstractByteBuf data, SofaRequest template) {
+        try {
+            if(data.readableBytes() <= 0) {
+                throw buildDeserializeError("Deserialized array is empty.");
             }
-            objectList.add(result);
-        }
-        return objectList.toArray(new Object[objectList.size()]);
-    }
-
-    private void decodeSofaResponse(AbstractByteBuf data, SofaResponse sofaResponse, Map<String, String> head) {
-        if (head == null) {
-            throw buildDeserializeError("head is null!");
-        }
-        String targetService = head.remove(RemotingConstants.HEAD_TARGET_SERVICE);
-        if (targetService == null) {
-            throw buildDeserializeError("HEAD_TARGET_SERVICE is null");
-        }
-        String methodName = head.remove(RemotingConstants.HEAD_METHOD_NAME);
-        if (methodName == null) {
-            throw buildDeserializeError("HEAD_METHOD_NAME is null");
-        }
-
-        boolean isError = false;
-        if (StringUtils.TRUE.equals(head.remove(RemotingConstants.HEAD_RESPONSE_ERROR))) {
-            isError = true;
-        }
-        if (!head.isEmpty()) {
-            sofaResponse.setResponseProps(head);
-        }
-        if (isError) {
-            String errorMessage = (String) decode(data, String.class, head);
-            sofaResponse.setErrorMsg(errorMessage);
-        } else {
-            Class<?>[] responseClass = furyHelper.getRespClass(targetService, methodName);
-            Object pbRes = decode(data, responseClass[0], head);
-            sofaResponse.setAppResponse(pbRes);
+            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
+            MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
+            SofaRequest tmp = (SofaRequest) fury.deserialize(readBuffer);
+            String targetServiceName = tmp.getTargetServiceUniqueName();
+            if (targetServiceName == null) {
+                throw buildDeserializeError("Target service name of request is null!");
+            }
+            // copy values to template
+            template.setMethodName(tmp.getMethodName());
+            template.setMethodArgSigs(tmp.getMethodArgSigs());
+            template.setTargetServiceUniqueName(tmp.getTargetServiceUniqueName());
+            template.setTargetAppName(tmp.getTargetAppName());
+            template.addRequestProps(tmp.getRequestProps());
+            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
+            template.setInterfaceName(interfaceName);
+            final Object[] args = (Object[]) fury.deserialize(readBuffer);
+            template.setMethodArgs(args);
+        } catch (Exception e) {
+            throw buildDeserializeError(e.getMessage(), e);
         }
     }
 
-    private void parseRequestHeader(String key, Map<String, String> headerMap,
-                                    SofaRequest sofaRequest) {
-        Map<String, String> traceMap = new HashMap<String, String>(8);
-        CodecUtils.treeCopyTo(key + ".", headerMap, traceMap, true);
-        if (!traceMap.isEmpty()) {
-            sofaRequest.addRequestProp(key, traceMap);
+    private void decodeSofaResponse(AbstractByteBuf data, SofaResponse template, Map<String, String> context) {
+        try {
+            if(data.readableBytes() <= 0) {
+                throw buildDeserializeError("Deserialized array is empty.");
+            }
+            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
+            MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
+            // 根据SerializeType信息决定序列化器
+            boolean genericSerialize = context != null && isGenericResponse(
+                    context.get(RemotingConstants.HEAD_GENERIC_TYPE));
+            if (genericSerialize) {
+                // TODO support generic call
+                throw buildDeserializeError("Generic call is not supported for now.");
+            } else {
+                SofaResponse tmp = (SofaResponse) fury.deserialize(readBuffer);
+                // copy values to template
+                template.setErrorMsg(tmp.getErrorMsg());
+                template.setAppResponse(tmp.getAppResponse());
+                template.setResponseProps(tmp.getResponseProps());
+            }
+        } catch (Exception e) {
+            throw buildDeserializeError(e.getMessage(), e);
         }
     }
 
-    private String[] parseArgSigs(Class<?>[] reqList) {
-        List<String> argSigs = new ArrayList<String>();
-        for (Class<?> type : reqList) {
-            argSigs.add(type.getCanonicalName());
-        }
+    protected boolean isGenericRequest(String serializeType) {
+        return serializeType != null && !serializeType.equals(RemotingConstants.SERIALIZE_FACTORY_NORMAL);
+    }
 
-        return argSigs.toArray(new String[argSigs.size()]);
+    protected boolean isGenericResponse(String serializeType) {
+        return serializeType != null && serializeType.equals(RemotingConstants.SERIALIZE_FACTORY_GENERIC);
     }
 
 }
