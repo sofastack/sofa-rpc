@@ -49,7 +49,7 @@ public class FurySerializer extends AbstractSerializer {
 
     private final ThreadLocal<MemoryBuffer> writeBufferLocal = ThreadLocal.withInitial(() -> MemoryBuffer.newHeapBuffer(32));
 
-    private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.CHECKER_MODE);
+    private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.FURY_CHECKER_MODE);
 
     public FurySerializer() {
         fury = new ThreadLocalFury(classLoader -> {

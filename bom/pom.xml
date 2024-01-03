@@ -47,7 +47,6 @@
         <httpclient.version>4.5.13</httpclient.version>
         <commons.fileupload.version>1.5</commons.fileupload.version>
         <transmittable.version>2.12.1</transmittable.version>
-        <snakeyaml.version>1.28</snakeyaml.version>
         <!-- Log libs -->
         <slf4j.version>1.7.21</slf4j.version>
         <logback.version>1.2.3</logback.version>
@@ -304,11 +303,6 @@
                 <groupId>org.furyio</groupId>
                 <artifactId>fury-core</artifactId>
                 <version>${fury.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
             </dependency>
             <!-- zk client -->
             <dependency>

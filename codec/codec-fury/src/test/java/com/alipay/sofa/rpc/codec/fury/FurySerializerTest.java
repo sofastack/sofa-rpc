@@ -85,6 +85,7 @@ public class FurySerializerTest {
         SofaRequest request = buildRequest();
         AbstractByteBuf data = serializer.encode(request, null);
 
+        serializer.encode("123456", null);
         SofaRequest decode = (SofaRequest) serializer.decode(data, SofaRequest.class, null);
         assertEqualsSofaRequest(request, decode);
 

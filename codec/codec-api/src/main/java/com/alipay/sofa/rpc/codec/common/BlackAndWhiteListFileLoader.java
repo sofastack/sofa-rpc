@@ -16,8 +16,7 @@
  */
 package com.alipay.sofa.rpc.codec.common;
 
-import com.alipay.sofa.rpc.common.SofaConfigs;
-import com.alipay.sofa.rpc.common.SofaOptions;
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -30,6 +29,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.alipay.sofa.rpc.common.config.RpcConfigKeys.SERIALIZE_BLACKLIST_OVERRIDE;
+import static com.alipay.sofa.rpc.common.config.RpcConfigKeys.SERIALIZE_WHITELIST_OVERRIDE;
 import static com.alipay.sofa.rpc.common.utils.IOUtils.closeQuietly;
 
 /**
@@ -54,7 +55,7 @@ public class BlackAndWhiteListFileLoader {
             if (input != null) {
                 readToList(input, "UTF-8", blackPrefixList);
             }
-            String overStr = SofaConfigs.getStringValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, "");
+            String overStr = SofaConfigs.getOrCustomDefault(SERIALIZE_BLACKLIST_OVERRIDE, "");
             if (StringUtils.isNotBlank(overStr)) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Serialize blacklist will override with configuration: {}", overStr);
@@ -79,7 +80,7 @@ public class BlackAndWhiteListFileLoader {
             if (input != null) {
                 readToList(input, "UTF-8", whitePrefixList);
             }
-            String overStr = SofaConfigs.getStringValue(SofaOptions.CONFIG_SERIALIZE_WHITELIST_OVERRIDE, "");
+            String overStr = SofaConfigs.getOrCustomDefault(SERIALIZE_WHITELIST_OVERRIDE, "");
             if (StringUtils.isNotBlank(overStr)) {
                 if (LOGGER.isInfoEnabled()) {
                     LOGGER.info("Serialize whitelist will override with configuration: {}", overStr);
