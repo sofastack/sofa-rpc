@@ -185,7 +185,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-codec-fury</artifactId>
+            <artifactId>sofa-rpc-codec-sofa-fury</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

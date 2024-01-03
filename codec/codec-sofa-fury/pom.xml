@@ -10,7 +10,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>sofa-rpc-codec-fury</artifactId>
+    <artifactId>sofa-rpc-codec-sofa-fury</artifactId>
 
     <dependencies>
         <dependency>
