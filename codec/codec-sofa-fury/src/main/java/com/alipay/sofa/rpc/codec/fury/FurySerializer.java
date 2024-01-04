@@ -18,10 +18,11 @@ package com.alipay.sofa.rpc.codec.fury;
 
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.CustomSerializer;
 import com.alipay.sofa.rpc.codec.common.BlackAndWhiteListFileLoader;
-import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.codec.fury.serialize.SofaRequestFurySerializer;
+import com.alipay.sofa.rpc.codec.fury.serialize.SofaResponseHessianSerializer;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
-import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -47,8 +48,6 @@ public class FurySerializer extends AbstractSerializer {
 
     private final ThreadLocalFury fury;
 
-    private final ThreadLocal<MemoryBuffer> writeBufferLocal = ThreadLocal.withInitial(() -> MemoryBuffer.newHeapBuffer(32));
-
     private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.FURY_CHECKER_MODE);
 
     public FurySerializer() {
@@ -62,9 +61,6 @@ public class FurySerializer extends AbstractSerializer {
                     .withClassLoader(classLoader)
                     .withAsyncCompilation(true)
                     .build();
-            f.register(SofaRequest.class);
-            f.register(SofaResponse.class);
-            f.register(SofaRpcException.class);
 
             // Do not use any configuration
             if (checkerMode.equalsIgnoreCase(FurySecurityMode.NONE_MODE.getSecurityMode())) {
@@ -100,74 +96,59 @@ public class FurySerializer extends AbstractSerializer {
                     blackAndWhiteListChecker.disallowClass(key + "*");
                 }
             }
+            f.register(SofaRequest.class);
+            f.register(SofaResponse.class);
+            f.register(SofaRpcException.class);
             return f;
         });
+        addSerializer(SofaRequest.class, new SofaRequestFurySerializer(fury));
+        addSerializer(SofaResponse.class, new SofaResponseHessianSerializer(fury));
     }
 
     @Override
     public AbstractByteBuf encode(final Object object, final Map<String, String> context) throws SofaRpcException {
+        if (object == null) {
+            throw buildSerializeError("Unsupported null message!");
+        }
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
-            MemoryBuffer writeBuffer = writeBufferLocal.get();
-            writeBuffer.writerIndex(0);
-            if (object == null) {
-                throw buildSerializeError("Unsupported null message!");
-            } else if (object instanceof SofaRequest) {
-                SofaRequest sofaRequest = (SofaRequest) object;
-                // 根据SerializeType信息决定序列化器
-                boolean genericSerialize = context != null &&
-                        isGenericRequest(context.get(RemotingConstants.HEAD_GENERIC_TYPE));
-                if (genericSerialize) {
-                    // TODO support generic call
-                    throw buildSerializeError("Generic call is not supported for now.");
-                }
-                fury.serialize(writeBuffer, object);
-                final Object[] args = sofaRequest.getMethodArgs();
-                fury.serialize(writeBuffer, args);
-            } else if (object instanceof SofaResponse) {
-                fury.serialize(writeBuffer, object);
+            fury.setClassLoader(contextClassLoader);
+            CustomSerializer customSerializer = getObjCustomSerializer(object);
+            if (customSerializer != null) {
+                return customSerializer.encodeObject(object, context);
             } else {
+                MemoryBuffer writeBuffer = MemoryBuffer.newHeapBuffer(32);
+                writeBuffer.writerIndex(0);
                 fury.serialize(writeBuffer, object);
+                return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
             }
-            return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
         } catch (Exception e) {
             throw buildSerializeError(e.getMessage(), e);
+        } finally {
+            fury.clearClassLoader(contextClassLoader);
         }
     }
 
     @Override
     public Object decode(final AbstractByteBuf data, final Class clazz, final Map<String, String> context)
-            throws SofaRpcException {
-        if(data.readableBytes() <= 0) {
+        throws SofaRpcException {
+        if (data.readableBytes() <= 0 || clazz == null) {
             throw buildDeserializeError("Deserialized array is empty.");
         }
-        MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
-            if (clazz.equals(SofaRequest.class)) {
-                SofaRequest sofaRequest = (SofaRequest) fury.deserialize(readBuffer);
-                String targetServiceName = sofaRequest.getTargetServiceUniqueName();
-                if (targetServiceName == null) {
-                    throw buildDeserializeError("Target service name of request is null!");
-                }
-                String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
-                sofaRequest.setInterfaceName(interfaceName);
-                final Object[] args = (Object[]) fury.deserialize(readBuffer);
-                sofaRequest.setMethodArgs(args);
-                return sofaRequest;
-            } else if (clazz.equals(SofaResponse.class)) {
-                boolean genericSerialize = context != null && isGenericResponse(
-                        context.get(RemotingConstants.HEAD_GENERIC_TYPE));
-                if (genericSerialize) {
-                    // TODO support generic call
-                    throw buildSerializeError("Generic call is not supported for now.");
-                }
-                return fury.deserialize(readBuffer);
+            fury.setClassLoader(contextClassLoader);
+            CustomSerializer customSerializer = getSerializer(clazz);
+            if (customSerializer != null) {
+                return customSerializer.decodeObject(data, context);
             } else {
+                MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
                 return fury.deserialize(readBuffer);
             }
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
+        } finally {
+            fury.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -176,74 +157,25 @@ public class FurySerializer extends AbstractSerializer {
         throws SofaRpcException {
         if (template == null) {
             throw buildDeserializeError("template is null!");
-        } else if (template instanceof SofaRequest) {
-            decodeSofaRequest(data, (SofaRequest) template);
-        } else if (template instanceof SofaResponse) {
-            decodeSofaResponse(data, (SofaResponse) template, context);
-        } else {
-            throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
         }
-
-    }
-
-    private void decodeSofaRequest(AbstractByteBuf data, SofaRequest template) {
+        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            if(data.readableBytes() <= 0) {
-                throw buildDeserializeError("Deserialized array is empty.");
-            }
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
-            MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
-            SofaRequest tmp = (SofaRequest) fury.deserialize(readBuffer);
-            String targetServiceName = tmp.getTargetServiceUniqueName();
-            if (targetServiceName == null) {
-                throw buildDeserializeError("Target service name of request is null!");
-            }
-            // copy values to template
-            template.setMethodName(tmp.getMethodName());
-            template.setMethodArgSigs(tmp.getMethodArgSigs());
-            template.setTargetServiceUniqueName(tmp.getTargetServiceUniqueName());
-            template.setTargetAppName(tmp.getTargetAppName());
-            template.addRequestProps(tmp.getRequestProps());
-            String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
-            template.setInterfaceName(interfaceName);
-            final Object[] args = (Object[]) fury.deserialize(readBuffer);
-            template.setMethodArgs(args);
-        } catch (Exception e) {
-            throw buildDeserializeError(e.getMessage(), e);
-        }
-    }
-
-    private void decodeSofaResponse(AbstractByteBuf data, SofaResponse template, Map<String, String> context) {
-        try {
-            if(data.readableBytes() <= 0) {
-                throw buildDeserializeError("Deserialized array is empty.");
-            }
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
-            MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
-            // 根据SerializeType信息决定序列化器
-            boolean genericSerialize = context != null && isGenericResponse(
-                    context.get(RemotingConstants.HEAD_GENERIC_TYPE));
-            if (genericSerialize) {
-                // TODO support generic call
-                throw buildDeserializeError("Generic call is not supported for now.");
+            fury.setClassLoader(contextClassLoader);
+            CustomSerializer customSerializer = getObjCustomSerializer(template);
+            if (customSerializer != null) {
+                customSerializer.decodeObjectByTemplate(data, context, template);
             } else {
-                SofaResponse tmp = (SofaResponse) fury.deserialize(readBuffer);
-                // copy values to template
-                template.setErrorMsg(tmp.getErrorMsg());
-                template.setAppResponse(tmp.getAppResponse());
-                template.setResponseProps(tmp.getResponseProps());
+                throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
             }
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
+        } finally {
+            fury.clearClassLoader(contextClassLoader);
         }
     }
 
-    protected boolean isGenericRequest(String serializeType) {
-        return serializeType != null && !serializeType.equals(RemotingConstants.SERIALIZE_FACTORY_NORMAL);
-    }
-
-    protected boolean isGenericResponse(String serializeType) {
-        return serializeType != null && serializeType.equals(RemotingConstants.SERIALIZE_FACTORY_GENERIC);
+    public ThreadLocalFury getFury() {
+        return fury;
     }
 
 }
