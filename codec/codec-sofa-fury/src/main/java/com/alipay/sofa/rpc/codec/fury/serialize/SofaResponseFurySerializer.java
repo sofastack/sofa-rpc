@@ -31,11 +31,11 @@ import java.util.Map;
  * @author Even
  * @date 2024/1/4 19:30
  */
-public class SofaResponseHessianSerializer implements CustomSerializer<SofaResponse> {
+public class SofaResponseFurySerializer implements CustomSerializer<SofaResponse> {
 
     private final ThreadLocalFury fury;
 
-    public SofaResponseHessianSerializer(ThreadLocalFury fury) {
+    public SofaResponseFurySerializer(ThreadLocalFury fury) {
         this.fury = fury;
     }
 

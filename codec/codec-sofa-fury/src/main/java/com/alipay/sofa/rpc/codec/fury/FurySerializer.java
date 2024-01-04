@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.codec.CustomSerializer;
 import com.alipay.sofa.rpc.codec.common.BlackAndWhiteListFileLoader;
 import com.alipay.sofa.rpc.codec.fury.serialize.SofaRequestFurySerializer;
-import com.alipay.sofa.rpc.codec.fury.serialize.SofaResponseHessianSerializer;
+import com.alipay.sofa.rpc.codec.fury.serialize.SofaResponseFurySerializer;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -102,7 +102,7 @@ public class FurySerializer extends AbstractSerializer {
             return f;
         });
         addSerializer(SofaRequest.class, new SofaRequestFurySerializer(fury));
-        addSerializer(SofaResponse.class, new SofaResponseHessianSerializer(fury));
+        addSerializer(SofaResponse.class, new SofaResponseFurySerializer(fury));
     }
 
     @Override
