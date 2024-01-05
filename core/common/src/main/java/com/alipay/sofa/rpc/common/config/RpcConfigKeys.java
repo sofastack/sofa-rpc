@@ -122,12 +122,12 @@ public class RpcConfigKeys {
                                                                                         "Additional serialization whitelist.",
                                                                                         new String[] { CONFIG_SERIALIZE_WHITELIST_OVERRIDE });
 
-    public static final ConfigKey<String>   FURY_CHECKER_MODE                   = ConfigKey
+    public static final ConfigKey<String>   SERIALIZE_CHECKER_MODE              = ConfigKey
                                                                                     .build(
-                                                                                        "sofa.rpc.codec.fury.checkMode",
-                                                                                        "whitelist",
+                                                                                        "sofa.rpc.codec.serialize.checkMode",
+                                                                                        "STRICT",
                                                                                         true,
-                                                                                        " The default filtering mode is whitelist.",
+                                                                                        " The default filtering mode is STRICT.You can also set WARN or DISABLE",
                                                                                         new String[] { "sofa_rpc_codec_fury_checkMode" });
 
 }

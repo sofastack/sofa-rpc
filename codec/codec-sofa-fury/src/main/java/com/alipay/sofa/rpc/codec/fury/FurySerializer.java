@@ -20,6 +20,7 @@ import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.codec.CustomSerializer;
 import com.alipay.sofa.rpc.codec.common.BlackAndWhiteListFileLoader;
+import com.alipay.sofa.rpc.codec.common.SerializeCheckStatus;
 import com.alipay.sofa.rpc.codec.fury.serialize.SofaRequestFurySerializer;
 import com.alipay.sofa.rpc.codec.fury.serialize.SofaResponseFurySerializer;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
@@ -48,7 +49,7 @@ public class FurySerializer extends AbstractSerializer {
 
     private final ThreadLocalFury fury;
 
-    private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.FURY_CHECKER_MODE);
+    private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.SERIALIZE_CHECKER_MODE);
 
     public FurySerializer() {
         fury = new ThreadLocalFury(classLoader -> {
@@ -63,11 +64,11 @@ public class FurySerializer extends AbstractSerializer {
                     .build();
 
             // Do not use any configuration
-            if (checkerMode.equalsIgnoreCase(FurySecurityMode.NONE_MODE.getSecurityMode())) {
+            if (checkerMode.equalsIgnoreCase(SerializeCheckStatus.DISABLE.name())) {
                 AllowListChecker noChecker = new AllowListChecker(AllowListChecker.CheckLevel.DISABLE);
                 f.getClassResolver().setClassChecker(noChecker);
                 return f;
-            } else if (checkerMode.equalsIgnoreCase(FurySecurityMode.BLACKLIST_MODE.getSecurityMode())) {
+            } else if (checkerMode.equalsIgnoreCase(SerializeCheckStatus.WARN.name())) {
                 AllowListChecker blackListChecker = new AllowListChecker(AllowListChecker.CheckLevel.WARN);
                 List<String> blackList = BlackAndWhiteListFileLoader.SOFA_SERIALIZE_BLACK_LIST;
                 // To setting checker
@@ -77,7 +78,7 @@ public class FurySerializer extends AbstractSerializer {
                 for (String key : blackList) {
                     blackListChecker.disallowClass(key + "*");
                 }
-            } else if (checkerMode.equalsIgnoreCase(FurySecurityMode.WHITELIST_MODE.getSecurityMode())) {
+            } else if (checkerMode.equalsIgnoreCase(SerializeCheckStatus.STRICT.name())) {
                 AllowListChecker blackAndWhiteListChecker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
                 List<String> whiteList = BlackAndWhiteListFileLoader.SOFA_SERIALIZER_WHITE_LIST;
                 // To setting checker

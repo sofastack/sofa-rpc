@@ -206,7 +206,7 @@ public class FurySerializerTest {
 
     @Test
     public void testChecker() throws Exception {
-        // default fury checkMode is whitelist
+        // default fury checkMode is STRICT
         WhiteClassHasBlackClass whiteClassNullBlackClass = new WhiteClassHasBlackClass();
         NoneClassHasBlackClass noneClassNullBlackClass = new NoneClassHasBlackClass();
 
@@ -246,7 +246,7 @@ public class FurySerializerTest {
         }
 
         // test change fury checkMode to blacklist
-        System.getProperties().put("sofa.rpc.codec.fury.checkMode", "blacklist");
+        System.getProperties().put("sofa.rpc.codec.serialize.checkMode", "WARN");
         FurySerializer furySerializer = new FurySerializer();
 
         furySerializer.encode(noneClassNullBlackClass, null);
@@ -273,17 +273,17 @@ public class FurySerializerTest {
         } catch (Exception e) {
 
         }
-        System.getProperties().remove("sofa.rpc.codec.fury.checkMode");
+        System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
 
         // test change fury checkMode to none
-        System.getProperties().put("sofa.rpc.codec.fury.checkMode", "none");
+        System.getProperties().put("sofa.rpc.codec.serialize.checkMode", "DISABLE");
         FurySerializer noneFurySerializer = new FurySerializer();
         noneFurySerializer.encode(noneClassNullBlackClass, null);
         noneFurySerializer.encode(noneClassHasBlackClass, null);
         noneFurySerializer.encode(blackListClass, null);
         noneFurySerializer.encode(whiteClassNullBlackClass, null);
         noneFurySerializer.encode(whiteClassHasBlackClass, null);
-        System.getProperties().remove("sofa.rpc.codec.fury.checkMode");
+        System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
     }
 
 }

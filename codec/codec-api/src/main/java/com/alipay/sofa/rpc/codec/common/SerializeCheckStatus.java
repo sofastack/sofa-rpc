@@ -14,22 +14,35 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.fury;
+package com.alipay.sofa.rpc.codec.common;
 
 /**
- * @author lipan
+ * @author Even
+ * @date 2024/1/5 19:12
  */
-public enum FurySecurityMode {
+public enum SerializeCheckStatus {
+    /**
+     * Disable serialize check for all classes
+     */
+    DISABLE(0),
 
-    WHITELIST_MODE("whitelist"), BLACKLIST_MODE("blacklist"), NONE_MODE("none");
+    /**
+     * Only deny danger classes, warn if other classes are not in allow list
+     */
+    WARN(1),
 
-    private final String securityMode;
+    /**
+     * Only allow classes in allow list, deny if other classes are not in allow list
+     */
+    STRICT(2);
 
-    FurySecurityMode(String securityMode) {
-        this.securityMode = securityMode;
+    private final int mode;
+
+    SerializeCheckStatus(int mode) {
+        this.mode = mode;
     }
 
-    public String getSecurityMode() {
-        return securityMode;
+    public int getSerializeCheckMode() {
+        return mode;
     }
 }
