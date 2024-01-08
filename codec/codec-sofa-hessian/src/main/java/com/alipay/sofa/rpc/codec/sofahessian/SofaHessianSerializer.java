@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.codec.sofahessian;
 import com.alipay.hessian.ClassNameResolver;
 import com.alipay.hessian.NameBlackListFilter;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
+import com.alipay.sofa.rpc.codec.common.BlackAndWhiteListFileLoader;
 import com.alipay.sofa.rpc.codec.sofahessian.serialize.CustomHessianSerializer;
 import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaRequestHessianSerializer;
 import com.alipay.sofa.rpc.codec.sofahessian.serialize.SofaResponseHessianSerializer;
@@ -95,7 +96,7 @@ public class SofaHessianSerializer extends AbstractSerializer {
         if (RpcConfigs.getBooleanValue(RpcOptions.SERIALIZE_BLACKLIST_ENABLE) &&
             SofaConfigs.getBooleanValue(SofaOptions.CONFIG_SERIALIZE_BLACKLIST, true)) {
             ClassNameResolver resolver = new ClassNameResolver();
-            resolver.addFilter(new NameBlackListFilter(BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
+            resolver.addFilter(new NameBlackListFilter(BlackAndWhiteListFileLoader.SOFA_SERIALIZE_BLACK_LIST, 8192));
             serializerFactory.setClassNameResolver(resolver);
             genericSerializerFactory.setClassNameResolver(resolver);
         } else {

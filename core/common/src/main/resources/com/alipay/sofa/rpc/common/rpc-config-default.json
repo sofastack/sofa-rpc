@@ -17,7 +17,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
     "META-INF/services/"
   ],
   // 需要被加载的模块列表，多个用逗号隔开
-  "module.load.list" : "*",
+  "module.load.list": "*",
   /*-------------RPC框架内部使用配置项-------------*/
 
 
