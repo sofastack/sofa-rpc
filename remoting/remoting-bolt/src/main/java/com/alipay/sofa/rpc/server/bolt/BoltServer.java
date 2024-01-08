@@ -20,7 +20,6 @@ import com.alipay.remoting.RemotingServer;
 import com.alipay.remoting.rpc.RpcServer;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
-import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
 import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -31,7 +30,6 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.event.ServerStoppedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
-import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
@@ -103,18 +101,6 @@ public class BoltServer implements Server {
         boltServerProcessor = new BoltServerProcessor(this);
     }
 
-    @Deprecated
-    protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
-        ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
-        threadPool.setThreadFactory(new NamedThreadFactory(
-            ThreadPoolConstant.BIZ_THREAD_NAME_PREFIX + serverConfig.getPort(), serverConfig.isDaemon()));
-        threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
-        if (serverConfig.isPreStartCore()) { // 初始化核心线程池
-            threadPool.prestartAllCoreThreads();
-        }
-        return threadPool;
-    }
-
     /**
      * 指定类型初始化线程池
      * @param type
@@ -122,9 +108,8 @@ public class BoltServer implements Server {
      * @return
      */
     protected Executor initExecutor(ServerConfig serverConfig) {
-        Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
-            .getExtension(serverConfig.getThreadPoolType())
-            .createExecutor(ThreadPoolConstant.BIZ_THREAD_NAME_PREFIX + serverConfig.getPort(), serverConfig);
+        Executor executor = BusinessPool.initExecutor(
+            ThreadPoolConstant.BIZ_THREAD_NAME_PREFIX + serverConfig.getPort(), serverConfig);
         if (executor instanceof ThreadPoolExecutor) {
             configureThreadPoolExecutor((ThreadPoolExecutor) executor, serverConfig);
         }
@@ -362,5 +347,14 @@ public class BoltServer implements Server {
         ReflectCache.invalidateMethodCache(key);
         ReflectCache.invalidateMethodSigsCache(key);
         ReflectCache.invalidateOverloadMethodCache(key);
+    }
+
+    @Deprecated
+    protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
+        ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
+        threadPool.setThreadFactory(new NamedThreadFactory(
+            ThreadPoolConstant.BIZ_THREAD_NAME_PREFIX + serverConfig.getPort(), serverConfig.isDaemon()));
+        configureThreadPoolExecutor(threadPool, serverConfig);
+        return threadPool;
     }
 }

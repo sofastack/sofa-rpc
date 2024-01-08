@@ -16,9 +16,12 @@
  */
 package com.alipay.sofa.rpc.server;
 
+import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -41,6 +44,13 @@ public class BusinessPool {
             queueSize) : new SynchronousQueue<Runnable>();
 
         return new ThreadPoolExecutor(minPoolSize, maxPoolSize, aliveTime, TimeUnit.MILLISECONDS, poolQueue);
+    }
+
+    public static Executor initExecutor(String executorName, ServerConfig serverConfig) {
+        Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
+            .getExtension(serverConfig.getThreadPoolType())
+            .createExecutor(executorName, serverConfig);
+        return executor;
     }
 
 }
