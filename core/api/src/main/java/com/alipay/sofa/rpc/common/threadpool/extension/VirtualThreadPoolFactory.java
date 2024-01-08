@@ -34,7 +34,7 @@ public class VirtualThreadPoolFactory implements SofaExecutorFactory {
 
     @Override
     public Executor createExecutor() {
-        return SofaVirtualThreadFactory.ofExecutorService(ThreadPoolConstant.DefaultThreadNamePrefix);
+        return SofaVirtualThreadFactory.ofExecutorService(ThreadPoolConstant.DEFAULT_THREAD_NAME_PREFIX);
     }
 
     @Override

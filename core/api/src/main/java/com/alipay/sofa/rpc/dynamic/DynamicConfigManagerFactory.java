@@ -57,13 +57,13 @@ public class DynamicConfigManagerFactory {
      * @return DynamicManager 实现
      */
     public static DynamicConfigManager getDynamicManager(String appName, String alias) {
-        if (ALL_DYNAMICS.size() > 3) { // 超过3次 是不是配错了？
-            if (LOGGER.isWarnEnabled()) {
-                LOGGER.warn("Size of dynamic manager is greater than 3, Please check it!");
-            }
-        }
-        classLock.lock();
         try {
+            classLock.lock();
+            if (ALL_DYNAMICS.size() > 3) { // 超过3次 是不是配错了？
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Size of dynamic manager is greater than 3, Please check it!");
+                }
+            }
             // 注意：RegistryConfig重写了equals方法，如果多个RegistryConfig属性一样，则认为是一个对象
             DynamicConfigManager registry = ALL_DYNAMICS.get(alias);
             if (registry == null) {

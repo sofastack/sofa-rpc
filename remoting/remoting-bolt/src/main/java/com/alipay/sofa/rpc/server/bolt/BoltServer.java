@@ -18,10 +18,7 @@ package com.alipay.sofa.rpc.server.bolt;
 
 import com.alipay.remoting.RemotingServer;
 import com.alipay.remoting.rpc.RpcServer;
-import com.alipay.sofa.common.config.SofaConfigs;
-import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
-import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
 import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
@@ -51,8 +48,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_POOL_TYPE;
-
 /**
  * Bolt server 
  *
@@ -61,7 +56,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.SERVER_POOL_TYPE;
 @Extension("bolt")
 public class BoltServer implements Server {
 
-    private static final Logger    LOGGER       = LoggerFactory.getLogger(BoltServer.class);
+    private static final Logger    LOGGER     = LoggerFactory.getLogger(BoltServer.class);
 
     /**
      * 是否已经启动
@@ -96,16 +91,12 @@ public class BoltServer implements Server {
     /**
      * Invoker列表，接口--> Invoker
      */
-    protected Map<String, Invoker> invokerMap   = new ConcurrentHashMap<String, Invoker>();
-
-    protected final String         executorType = SofaConfigs.getOrCustomDefault(
-                                                    RpcConfigKeys.SERVER_THREAD_POOL_TYPE /* 优先读取环境变量 */
-                                                    , RpcConfigs.getStringValue(SERVER_POOL_TYPE) /* 兜底读json配置文件 */);
+    protected Map<String, Invoker> invokerMap = new ConcurrentHashMap<String, Invoker>();
 
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        bizExecutorService = (ExecutorService) initExecutor(executorType, serverConfig);
+        bizExecutorService = (ExecutorService) initExecutor(serverConfig);
         if (bizExecutorService instanceof ThreadPoolExecutor) {
             bizThreadPool = (ThreadPoolExecutor) bizExecutorService;
         }
@@ -116,7 +107,7 @@ public class BoltServer implements Server {
     protected ThreadPoolExecutor initThreadPool(ServerConfig serverConfig) {
         ThreadPoolExecutor threadPool = BusinessPool.initPool(serverConfig);
         threadPool.setThreadFactory(new NamedThreadFactory(
-            ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig.isDaemon()));
+            ThreadPoolConstant.BIZ_THREAD_NAME_PREFIX + serverConfig.getPort(), serverConfig.isDaemon()));
         threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
         if (serverConfig.isPreStartCore()) { // 初始化核心线程池
             threadPool.prestartAllCoreThreads();
@@ -130,10 +121,10 @@ public class BoltServer implements Server {
      * @param serverConfig
      * @return
      */
-    protected Executor initExecutor(String type, ServerConfig serverConfig) {
+    protected Executor initExecutor(ServerConfig serverConfig) {
         Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
-            .getExtension(type)
-            .createExecutor(ThreadPoolConstant.BizThreadNamePrefix + serverConfig.getPort(), serverConfig);
+            .getExtension(serverConfig.getThreadPoolType())
+            .createExecutor(ThreadPoolConstant.BIZ_THREAD_NAME_PREFIX + serverConfig.getPort(), serverConfig);
         if (executor instanceof ThreadPoolExecutor) {
             configureThreadPoolExecutor((ThreadPoolExecutor) executor, serverConfig);
         }

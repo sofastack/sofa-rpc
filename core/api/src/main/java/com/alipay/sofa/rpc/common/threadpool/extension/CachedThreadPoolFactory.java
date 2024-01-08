@@ -37,7 +37,7 @@ public class CachedThreadPoolFactory implements SofaExecutorFactory {
 
     @Override
     public Executor createExecutor() {
-        return createExecutor(ThreadPoolConstant.DefaultThreadNamePrefix);
+        return createExecutor(ThreadPoolConstant.DEFAULT_THREAD_NAME_PREFIX);
     }
 
     @Override

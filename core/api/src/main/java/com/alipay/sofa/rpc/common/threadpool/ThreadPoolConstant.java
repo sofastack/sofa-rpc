@@ -22,8 +22,7 @@ package com.alipay.sofa.rpc.common.threadpool;
  * @version ThreadPoolConstant.java, v 0.1 2023年12月12日 14:01 junyuan Exp $
  */
 public class ThreadPoolConstant {
-    public static final String DefaultThreadNamePrefix = "SOFA-RPC-DEFAULT";
-    public static final String BizThreadNamePrefix     = "SEV-BOLT-BIZ-";
+    public static final String DEFAULT_THREAD_NAME_PREFIX = "SOFA-RPC-DEFAULT";
+    public static final String BIZ_THREAD_NAME_PREFIX     = "SEV-BOLT-BIZ-";
 
-    public static final String ConfigKeyThreadPrefix   = "threadNamePrefix";
 }
