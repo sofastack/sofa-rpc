@@ -39,6 +39,7 @@
         <jackson.databind.version>2.12.7.1</jackson.databind.version>
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
+        <fury.version>0.4.1</fury.version>
         <grpc.version>1.53.0</grpc.version>
 
         <!--common-->
@@ -297,6 +298,11 @@
                 <groupId>org.msgpack</groupId>
                 <artifactId>msgpack</artifactId>
                 <version>${msgpack.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.furyio</groupId>
+                <artifactId>fury-core</artifactId>
+                <version>${fury.version}</version>
             </dependency>
             <!-- zk client -->
             <dependency>

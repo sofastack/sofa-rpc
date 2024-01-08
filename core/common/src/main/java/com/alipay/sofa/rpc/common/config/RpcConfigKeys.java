@@ -18,6 +18,9 @@ package com.alipay.sofa.rpc.common.config;
 
 import com.alipay.sofa.common.config.ConfigKey;
 
+import static com.alipay.sofa.rpc.common.SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE;
+import static com.alipay.sofa.rpc.common.SofaOptions.CONFIG_SERIALIZE_WHITELIST_OVERRIDE;
+
 /**
  * @author zhaowang
  * @version : RpcConfigKeys.java, v 0.1 2020年12月14日 9:56 下午 zhaowang Exp $
@@ -102,6 +105,31 @@ public class RpcConfigKeys {
                                                                                         false,
                                                                                         "judge the generic object exception fields.",
                                                                                         new String[] { "sofa_rpc_generic_exception_fields" });
+
+    public static final ConfigKey<String>   SERIALIZE_BLACKLIST_OVERRIDE        = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.serialize.blacklist.override",
+                                                                                        "",
+                                                                                        false,
+                                                                                        "Additional serialization blacklist.",
+                                                                                        new String[] { CONFIG_SERIALIZE_BLACKLIST_OVERRIDE });
+
+    public static final ConfigKey<String>   SERIALIZE_WHITELIST_OVERRIDE        = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.serialize.whitelist.override",
+                                                                                        "",
+                                                                                        false,
+                                                                                        "Additional serialization whitelist.",
+                                                                                        new String[] { CONFIG_SERIALIZE_WHITELIST_OVERRIDE });
+
+    public static final ConfigKey<String>   SERIALIZE_CHECKER_MODE              = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.codec.serialize.checkMode",
+                                                                                        "STRICT",
+                                                                                        true,
+                                                                                        " The default filtering mode is STRICT.You can also set WARN or DISABLE",
+                                                                                        new String[] { "sofa_rpc_codec_serialize_checkMode" });
+
     /**
      * biz thread pool type
      */

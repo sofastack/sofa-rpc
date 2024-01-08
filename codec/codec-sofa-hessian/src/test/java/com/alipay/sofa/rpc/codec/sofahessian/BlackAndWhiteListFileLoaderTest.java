@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.codec.sofahessian;
 
 import com.alipay.hessian.NameBlackListFilter;
+import com.alipay.sofa.rpc.codec.common.BlackAndWhiteListFileLoader;
 import com.alipay.sofa.rpc.common.SofaOptions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,17 +30,17 @@ import java.util.List;
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class BlackListFileLoaderTest {
+public class BlackAndWhiteListFileLoaderTest {
     @Test
     public void testAll() throws Exception {
 
-        List<String> blacks = BlackListFileLoader.SOFA_SERIALIZE_BLACK_LIST;
+        List<String> blacks = BlackAndWhiteListFileLoader.SOFA_SERIALIZE_BLACK_LIST;
         Assert.assertNotNull(blacks);
 
         String s = System.getProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE);
         try {
             System.setProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, "-java.net.Socket");
-            blacks = BlackListFileLoader.loadFile("/sofa-rpc/serialize_blacklist.txt");
+            blacks = BlackAndWhiteListFileLoader.loadBlackListFile("/sofa-rpc/serialize_blacklist.txt");
         } finally {
             if (s != null) {
                 System.setProperty(SofaOptions.CONFIG_SERIALIZE_BLACKLIST_OVERRIDE, s);
@@ -69,51 +70,51 @@ public class BlackListFileLoaderTest {
     @Test
     public void overrideBlackList() {
         List<String> origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "-*");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "-*");
         Assert.assertTrue(origin.size() == 0);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "!*");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "!*");
         Assert.assertTrue(origin.size() == 0);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "-default");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "-default");
         Assert.assertTrue(origin.size() == 0);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "!default");
-        Assert.assertTrue(origin.size() == 0);
-
-        origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "-*,-com.xxx");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "!default");
         Assert.assertTrue(origin.size() == 0);
 
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "aaa,-*,-com.xxx");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "-*,-com.xxx");
+        Assert.assertTrue(origin.size() == 0);
+
+        origin = buildOriginList();
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "aaa,-*,-com.xxx");
         Assert.assertTrue(origin.size() == 1);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "-*,aaa");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "-*,aaa");
         Assert.assertTrue(origin.size() == 1);
 
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "-com.xxx");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "-com.xxx");
         Assert.assertTrue(origin.size() == 2);
 
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "-com.xxx,-com.yyy");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "-com.xxx,-com.yyy");
         Assert.assertTrue(origin.size() == 1);
 
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "com.xxx,-com.yyy");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "com.xxx,-com.yyy");
         Assert.assertTrue(origin.size() == 2);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "com.aaa,-com.yyy");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "com.aaa,-com.yyy");
         Assert.assertTrue(origin.size() == 3);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "com.aaa");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "com.aaa");
         Assert.assertTrue(origin.size() == 4);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "com.xxx;com.yyy;com.zzz");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "com.xxx;com.yyy;com.zzz");
         Assert.assertTrue(origin.size() == 3);
         origin = buildOriginList();
-        BlackListFileLoader.overrideBlackList(origin, "com.aaa,com.bbb,com.ccc");
+        BlackAndWhiteListFileLoader.overrideBlackList(origin, "com.aaa,com.bbb,com.ccc");
         Assert.assertTrue(origin.size() == 6);
     }
 
