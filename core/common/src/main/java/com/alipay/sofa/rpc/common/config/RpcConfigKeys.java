@@ -128,6 +128,6 @@ public class RpcConfigKeys {
                                                                                         "STRICT",
                                                                                         true,
                                                                                         " The default filtering mode is STRICT.You can also set WARN or DISABLE",
-                                                                                        new String[] { "sofa_rpc_codec_fury_checkMode" });
+                                                                                        new String[] { "sofa_rpc_codec_serialize_checkMode" });
 
 }
