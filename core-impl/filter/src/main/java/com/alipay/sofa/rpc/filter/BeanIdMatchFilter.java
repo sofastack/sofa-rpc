@@ -58,8 +58,8 @@ public abstract class BeanIdMatchFilter extends Filter {
         AbstractInterfaceConfig config = invoker.config;
         String invokerId = config.getId();
         if (!formatComplete) {
+            lock.lock();
             try {
-                lock.lock();
                 if (!formatComplete) {
                     formatId(idRule);
                     formatComplete = true;

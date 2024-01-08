@@ -55,8 +55,8 @@ public class RpcLookoutId {
         String key = tags.toString();
         Id lookoutId = consumerIds.get(key);
         if (lookoutId == null) {
+            classLock.lock();
             try {
-                classLock.lock();
                 lookoutId = consumerIds.get(key);
                 if (lookoutId == null) {
                     lookoutId = Lookout.registry().createId("rpc.consumer.service.stats", tags);
@@ -78,8 +78,8 @@ public class RpcLookoutId {
         String key = tags.toString();
         Id lookoutId = providerIds.get(key);
         if (lookoutId == null) {
+            classLock.lock();
             try {
-                classLock.lock();
                 lookoutId = providerIds.get(key);
                 if (lookoutId == null) {
                     lookoutId = Lookout.registry().createId("rpc.provider.service.stats", tags);
@@ -94,8 +94,8 @@ public class RpcLookoutId {
 
     public Id fetchConsumerSubId() {
         if (consumerConfigId == null) {
+            consumerConfigIdLock.lock();
             try {
-                consumerConfigIdLock.lock();
                 if (consumerConfigId == null) {
                     consumerConfigId = Lookout.registry().createId("rpc.consumer.info.stats");
                 }
@@ -108,8 +108,8 @@ public class RpcLookoutId {
 
     public Id fetchProviderPubId() {
         if (providerConfigId == null) {
+            providerConfigIdLock.lock();
             try {
-                providerConfigIdLock.lock();
                 if (providerConfigId == null) {
                     providerConfigId = Lookout.registry().createId("rpc.provider.info.stats");
                 }
@@ -143,8 +143,8 @@ public class RpcLookoutId {
     private Id fetchServerConfigId(String key) {
         Id lookoutId = serverConfigIds.get(key);
         if (lookoutId == null) {
+            classLock.lock();
             try {
-                classLock.lock();
                 lookoutId = serverConfigIds.get(key);
                 if (lookoutId == null) {
                     lookoutId = Lookout.registry().createId(key);

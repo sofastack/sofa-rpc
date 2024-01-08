@@ -57,8 +57,8 @@ public class DynamicConfigManagerFactory {
      * @return DynamicManager 实现
      */
     public static DynamicConfigManager getDynamicManager(String appName, String alias) {
+        classLock.lock();
         try {
-            classLock.lock();
             if (ALL_DYNAMICS.size() > 3) { // 超过3次 是不是配错了？
                 if (LOGGER.isWarnEnabled()) {
                     LOGGER.warn("Size of dynamic manager is greater than 3, Please check it!");

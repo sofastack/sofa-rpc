@@ -554,8 +554,8 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         transport = uninitializedConnections.get(providerInfo);
         if (transport != null) {
             // 未初始化则初始化
+            providerLock.lock();
             try {
-                providerLock.lock();
                 transport = uninitializedConnections.get(providerInfo);
                 if (transport != null) {
                     initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
