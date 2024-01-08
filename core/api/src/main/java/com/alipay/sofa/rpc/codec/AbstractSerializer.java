@@ -33,6 +33,8 @@ public abstract class AbstractSerializer implements Serializer {
 
     protected static Map<String, String> genericServiceMap = new ConcurrentHashMap<>();
 
+    protected   Map<Class, CustomSerializer> customSerializers = new ConcurrentHashMap<>();
+
     protected SofaRpcException buildSerializeError(String message) {
         return new SofaRpcException(getErrorCode(true), LogCodes.getLog(LogCodes.ERROR_SERIALIZER, message));
     }
@@ -72,5 +74,20 @@ public abstract class AbstractSerializer implements Serializer {
     @VisibleForTesting
     public static void clear() {
         genericServiceMap.clear();
+    }
+
+    protected  CustomSerializer getObjCustomSerializer(Object obj) {
+        if (obj == null) {
+            return null;
+        }
+        return getSerializer(obj.getClass());
+    }
+
+    protected  CustomSerializer getSerializer(Class clazz) {
+        return customSerializers.get(clazz);
+    }
+
+    protected  void addSerializer(Class clazz, CustomSerializer serializerManager) {
+        customSerializers.put(clazz, serializerManager);
     }
 }
