@@ -35,13 +35,11 @@ java.beans.
 java.io.Closeable
 java.io.Serializable
 java.lang.AutoCloseable
-java.lang.Class
 java.lang.Cloneable
 java.lang.Iterable
 java.lang.ProcessBuilder
 java.lang.Readable
 java.lang.Runnable
-java.lang.Runtime
 java.lang.Thread
 java.lang.UNIXProcess
 java.net.InetAddress
