@@ -94,7 +94,7 @@ public class UserThreadPool {
     transient volatile ThreadPoolExecutor executor;
     transient volatile Executor           userExecutor;
 
-    private Lock lock = new ReentrantLock();
+    private Lock                          lock            = new ReentrantLock();
 
     /**
      * 初始化线程池
