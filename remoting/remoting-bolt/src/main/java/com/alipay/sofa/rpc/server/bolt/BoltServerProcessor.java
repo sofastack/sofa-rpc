@@ -332,7 +332,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
     @Override
     public Executor getExecutor() {
-        return boltServer.getBizExecutorService();
+        return boltServer.getBizExecutor();
     }
 
     @Override

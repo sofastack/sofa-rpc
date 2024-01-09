@@ -320,7 +320,7 @@ public class BoltServer implements Server {
         return bizThreadPool;
     }
 
-    public Executor getBizExecutorService() {
+    public Executor getBizExecutor() {
         return bizExecutor;
     }
 
