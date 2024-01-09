@@ -16,7 +16,9 @@
  */
 package com.alipay.sofa.rpc.config;
 
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
@@ -96,7 +98,10 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     /**
      * 线程池类型
      */
-    protected String                          threadPoolType   = getStringValue(SERVER_POOL_TYPE);
+    protected String                          threadPoolType   = SofaConfigs
+                                                                   .getOrCustomDefault(
+                                                                       RpcConfigKeys.SERVER_THREAD_POOL_TYPE /* 优先读取环境变量 */
+                                                                       , getStringValue(SERVER_POOL_TYPE) /* 兜底读json配置文件 */);
 
     /**
      * 业务线程池大小

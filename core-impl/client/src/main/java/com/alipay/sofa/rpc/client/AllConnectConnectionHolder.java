@@ -554,13 +554,16 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
         transport = uninitializedConnections.get(providerInfo);
         if (transport != null) {
             // 未初始化则初始化
-            synchronized (this) {
+            providerLock.lock();
+            try {
                 transport = uninitializedConnections.get(providerInfo);
                 if (transport != null) {
                     initClientTransport(consumerConfig.getInterfaceId(), providerInfo, transport);
                     uninitializedConnections.remove(providerInfo);
                 }
                 return getAvailableClientTransport(providerInfo);
+            } finally {
+                providerLock.unlock();
             }
         }
 

@@ -130,4 +130,14 @@ public class RpcConfigKeys {
                                                                                         " The default filtering mode is STRICT.You can also set WARN or DISABLE",
                                                                                         new String[] { "sofa_rpc_codec_serialize_checkMode" });
 
+    /**
+     * biz thread pool type
+     */
+    public static ConfigKey<String>         SERVER_THREAD_POOL_TYPE             = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.server.thread.pool.type",
+                                                                                        "cached",
+                                                                                        false,
+                                                                                        "specify biz thread pool implementation type",
+                                                                                        new String[] { "sofa_rpc_server_thread_pool_type" });
 }

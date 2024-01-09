@@ -21,6 +21,8 @@ import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  *  规则id的配置形式：a，b，!c，d
@@ -49,18 +51,21 @@ public abstract class BeanIdMatchFilter extends Filter {
     private List<String>        excludeId;
 
     private volatile boolean    formatComplete;
-    private final Object        formatLock   = new Object();
+    protected final Lock        lock         = new ReentrantLock();
 
     @Override
     public boolean needToLoad(FilterInvoker invoker) {
         AbstractInterfaceConfig config = invoker.config;
         String invokerId = config.getId();
         if (!formatComplete) {
-            synchronized (formatLock) {
+            lock.lock();
+            try {
                 if (!formatComplete) {
                     formatId(idRule);
                     formatComplete = true;
                 }
+            } finally {
+                lock.unlock();
             }
         }
 
