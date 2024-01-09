@@ -84,7 +84,7 @@ public class BoltServer implements Server {
     /**
      * 业务线程池, 也支持非池化的执行器
      */
-    protected ExecutorService      bizExecutorService;
+    protected Executor             bizExecutor;
 
     /**
      * Invoker列表，接口--> Invoker
@@ -94,16 +94,15 @@ public class BoltServer implements Server {
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
-        bizExecutorService = (ExecutorService) initExecutor(serverConfig);
-        if (bizExecutorService instanceof ThreadPoolExecutor) {
-            bizThreadPool = (ThreadPoolExecutor) bizExecutorService;
+        bizExecutor = initExecutor(serverConfig);
+        if (bizExecutor instanceof ThreadPoolExecutor) {
+            bizThreadPool = (ThreadPoolExecutor) bizExecutor;
         }
         boltServerProcessor = new BoltServerProcessor(this);
     }
 
     /**
      * 指定类型初始化线程池
-     * @param type
      * @param serverConfig
      * @return
      */
@@ -231,25 +230,23 @@ public class BoltServer implements Server {
             return;
         }
         int stopTimeout = serverConfig.getStopTimeout();
-        destroyThreadPool(bizExecutorService, stopTimeout);
+        destroyThreadPool(bizExecutor, stopTimeout);
         stop();
     }
 
     /**
      * 如果未设置有效的 stopWaitTime, 将直接触发 shutdown
-     * @param executorService
+     * @param executor
      * @param stopWaitTime
      */
-    private void destroyThreadPool(ExecutorService executorService, int stopWaitTime) {
+    private void destroyThreadPool(Executor executor, int stopWaitTime) {
         if (stopWaitTime > 0) {
-            if (executorService instanceof ThreadPoolExecutor) {
-                threadPoolExecutorDestroy((ThreadPoolExecutor) executorService, stopWaitTime);
-            } else {
-                executorServiceDestroy(executorService, stopWaitTime);
+            if (executor instanceof ThreadPoolExecutor) {
+                threadPoolExecutorDestroy((ThreadPoolExecutor) executor, stopWaitTime);
+            } else if (executor instanceof ExecutorService) {
+                executorServiceDestroy((ExecutorService) executor, stopWaitTime);
             }
         }
-
-        executorService.shutdown();
     }
 
     /**
@@ -323,8 +320,8 @@ public class BoltServer implements Server {
         return bizThreadPool;
     }
 
-    public ExecutorService getBizExecutorService() {
-        return bizExecutorService;
+    public Executor getBizExecutorService() {
+        return bizExecutor;
     }
 
     /**

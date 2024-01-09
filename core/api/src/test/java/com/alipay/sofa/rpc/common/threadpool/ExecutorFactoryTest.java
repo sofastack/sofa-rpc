@@ -33,10 +33,11 @@ public class ExecutorFactoryTest {
 
     @Test
     public void testBuildCachedPool() {
-        Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class).getExtension("cached")
-            .createExecutor();
-        Assert.assertTrue(executor instanceof ThreadPoolExecutor);
         ServerConfig serverConfig = new ServerConfig();
+        Executor executor = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class).getExtension("cached")
+            .createExecutor("test", serverConfig);
+        Assert.assertTrue(executor instanceof ThreadPoolExecutor);
+
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) executor;
         Assert.assertEquals(threadPoolExecutor.getCorePoolSize(), serverConfig.getCoreThreads());
     }

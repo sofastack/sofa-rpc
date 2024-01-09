@@ -28,9 +28,6 @@ import java.util.concurrent.Executor;
  */
 @Extensible
 public interface SofaExecutorFactory {
-    Executor createExecutor();
-
-    Executor createExecutor(String namePrefix);
 
     Executor createExecutor(String namePrefix, ServerConfig serverConfig);
 }

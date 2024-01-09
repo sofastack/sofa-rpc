@@ -19,10 +19,12 @@ package com.alipay.sofa.rpc.server;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 给用户配置的自定义业务线程池
@@ -90,29 +92,28 @@ public class UserThreadPool {
      */
     @Deprecated
     transient volatile ThreadPoolExecutor executor;
-    transient volatile ExecutorService    executorService;
+    transient volatile Executor           userExecutor;
+
+    private Lock lock = new ReentrantLock();
 
     /**
      * 初始化线程池
      */
     public void init() {
-        executorService = buildExecutorService();
-        if (executorService instanceof ThreadPoolExecutor) {
-            executor = (ThreadPoolExecutor) executorService;
-        }
+        userExecutor = buildExecutor();
     }
 
-    protected ExecutorService buildExecutorService() {
-        ThreadPoolExecutor executorService = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
+    protected Executor buildExecutor() {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
             TimeUnit.MILLISECONDS,
             ThreadPoolUtils.buildQueue(queueSize), new NamedThreadFactory(threadPoolName));
         if (allowCoreThreadTimeOut) {
-            executor.allowCoreThreadTimeOut(true);
+            threadPoolExecutor.allowCoreThreadTimeOut(true);
         }
         if (prestartAllCoreThreads) {
-            executor.prestartAllCoreThreads();
+            threadPoolExecutor.prestartAllCoreThreads();
         }
-        return executorService;
+        return threadPoolExecutor;
     }
 
     /**
@@ -271,18 +272,26 @@ public class UserThreadPool {
      */
     @Deprecated
     public ThreadPoolExecutor getExecutor() {
-        getExecutorService();
+        if (executor == null) {
+            Executor tmp = getUserExecutor();
+            if (tmp instanceof ThreadPoolExecutor) {
+                executor = (ThreadPoolExecutor) tmp;
+            }
+        }
         return executor;
     }
 
-    public ExecutorService getExecutorService() {
-        if (executorService == null) {
-            synchronized (this) {
-                if (executorService == null) {
+    public Executor getUserExecutor() {
+        if (userExecutor == null) {
+            lock.lock();
+            try {
+                if (userExecutor == null) {
                     init();
                 }
+            } finally {
+                lock.unlock();
             }
         }
-        return executorService;
+        return userExecutor;
     }
 }

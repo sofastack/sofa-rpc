@@ -18,7 +18,6 @@ package com.alipay.sofa.rpc.common.threadpool.extension;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
-import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.server.BusinessPool;
@@ -33,17 +32,6 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Extension(value = "cached")
 public class CachedThreadPoolFactory implements SofaExecutorFactory {
-    protected ServerConfig defaultConfig = new ServerConfig();
-
-    @Override
-    public Executor createExecutor() {
-        return createExecutor(ThreadPoolConstant.DEFAULT_THREAD_NAME_PREFIX);
-    }
-
-    @Override
-    public Executor createExecutor(String namePrefix) {
-        return createExecutor(namePrefix, defaultConfig);
-    }
 
     @Override
     public Executor createExecutor(String namePrefix, ServerConfig serverConfig) {

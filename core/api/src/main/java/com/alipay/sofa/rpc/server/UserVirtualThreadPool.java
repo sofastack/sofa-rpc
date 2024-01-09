@@ -19,7 +19,7 @@ package com.alipay.sofa.rpc.server;
 import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
 import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -41,8 +41,8 @@ public class UserVirtualThreadPool extends UserThreadPool {
     }
 
     @Override
-    protected ExecutorService buildExecutorService() {
-        return (ExecutorService) ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
-            .getExtension("virtual").createExecutor(threadPoolName);
+    protected Executor buildExecutor() {
+        return ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
+            .getExtension("virtual").createExecutor(threadPoolName, null);
     }
 }

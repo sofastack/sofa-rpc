@@ -135,9 +135,9 @@ public class RpcConfigKeys {
      */
     public static ConfigKey<String>         SERVER_THREAD_POOL_TYPE             = ConfigKey
                                                                                     .build(
-                                                                                        "sofa.rpc.server.threadpool.type",
+                                                                                        "sofa.rpc.server.thread.pool.type",
                                                                                         "cached",
                                                                                         false,
                                                                                         "specify biz thread pool implementation type",
-                                                                                        new String[] { "sofa_rpc_server_threadpool_type" });
+                                                                                        new String[] { "sofa_rpc_server_thread_pool_type" });
 }

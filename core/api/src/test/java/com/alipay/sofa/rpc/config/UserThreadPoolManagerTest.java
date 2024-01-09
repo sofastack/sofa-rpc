@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.server.UserVirtualThreadPool;
 import org.junit.Assert;
 import org.junit.Test;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class UserThreadPoolManagerTest {
@@ -73,7 +73,7 @@ public class UserThreadPoolManagerTest {
         Object result;
         result = userThreadPool.getExecutor();
         Assert.assertNotNull(result);
-        ExecutorService executorService = userThreadPool.getExecutorService();
+        Executor executorService = userThreadPool.getUserExecutor();
         Assert.assertTrue(executorService instanceof ThreadPoolExecutor);
 
         Assert.assertEquals(executorService, result);

@@ -17,7 +17,6 @@
 package com.alipay.sofa.rpc.common.threadpool.extension;
 
 import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
-import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
 import com.alipay.sofa.common.thread.virtual.SofaVirtualThreadFactory;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
@@ -31,16 +30,6 @@ import java.util.concurrent.Executor;
  */
 @Extension(value = "virtual")
 public class VirtualThreadPoolFactory implements SofaExecutorFactory {
-
-    @Override
-    public Executor createExecutor() {
-        return SofaVirtualThreadFactory.ofExecutorService(ThreadPoolConstant.DEFAULT_THREAD_NAME_PREFIX);
-    }
-
-    @Override
-    public Executor createExecutor(String namePrefix) {
-        return SofaVirtualThreadFactory.ofExecutorService(namePrefix);
-    }
 
     @Override
     public Executor createExecutor(String namePrefix, ServerConfig serverConfig) {
