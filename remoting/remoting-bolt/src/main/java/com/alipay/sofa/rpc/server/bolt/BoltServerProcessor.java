@@ -332,7 +332,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
     @Override
     public Executor getExecutor() {
-        return boltServer.getBizThreadPool();
+        return boltServer.getBizExecutor();
     }
 
     @Override
@@ -361,7 +361,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     if (service != null) {
                         UserThreadPool threadPool = UserThreadPoolManager.getUserThread(service);
                         if (threadPool != null) {
-                            Executor executor = threadPool.getExecutor();
+                            Executor executor = threadPool.getUserExecutor();
                             if (executor != null) {
                                 // 存在自定义线程池，且不为空
                                 return executor;

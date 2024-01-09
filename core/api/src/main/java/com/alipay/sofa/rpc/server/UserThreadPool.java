@@ -19,9 +19,12 @@ package com.alipay.sofa.rpc.server;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.ThreadPoolUtils;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * 给用户配置的自定义业务线程池
@@ -87,20 +90,30 @@ public class UserThreadPool {
     /**
      * 线程池
      */
+    @Deprecated
     transient volatile ThreadPoolExecutor executor;
+    transient volatile Executor           userExecutor;
+
+    private Lock                          lock            = new ReentrantLock();
 
     /**
      * 初始化线程池
      */
     public void init() {
-        executor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.MILLISECONDS,
+        userExecutor = buildExecutor();
+    }
+
+    protected Executor buildExecutor() {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime,
+            TimeUnit.MILLISECONDS,
             ThreadPoolUtils.buildQueue(queueSize), new NamedThreadFactory(threadPoolName));
         if (allowCoreThreadTimeOut) {
-            executor.allowCoreThreadTimeOut(true);
+            threadPoolExecutor.allowCoreThreadTimeOut(true);
         }
         if (prestartAllCoreThreads) {
-            executor.prestartAllCoreThreads();
+            threadPoolExecutor.prestartAllCoreThreads();
         }
+        return threadPoolExecutor;
     }
 
     /**
@@ -257,14 +270,28 @@ public class UserThreadPool {
      *
      * @return the executor
      */
+    @Deprecated
     public ThreadPoolExecutor getExecutor() {
         if (executor == null) {
-            synchronized (this) {
-                if (executor == null) {
-                    init();
-                }
+            Executor tmp = getUserExecutor();
+            if (tmp instanceof ThreadPoolExecutor) {
+                executor = (ThreadPoolExecutor) tmp;
             }
         }
         return executor;
+    }
+
+    public Executor getUserExecutor() {
+        if (userExecutor == null) {
+            lock.lock();
+            try {
+                if (userExecutor == null) {
+                    init();
+                }
+            } finally {
+                lock.unlock();
+            }
+        }
+        return userExecutor;
     }
 }
