@@ -23,7 +23,7 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-import io.fury.ThreadLocalFury;
+import io.fury.ThreadSafeFury;
 import io.fury.memory.MemoryBuffer;
 
 import java.util.Map;
@@ -34,9 +34,9 @@ import java.util.Map;
  */
 public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> {
 
-    private final ThreadLocalFury fury;
+    private final ThreadSafeFury fury;
 
-    public SofaRequestFurySerializer(ThreadLocalFury fury) {
+    public SofaRequestFurySerializer(ThreadSafeFury fury) {
         this.fury = fury;
     }
 
