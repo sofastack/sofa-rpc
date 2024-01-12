@@ -530,16 +530,16 @@ public class JacksonSerializerTest {
         JacksonSerializer testSer = null;
         try {
             System.setProperty(JacksonSerializer.JACKSON_SER_FEATURE_ENABLE_LIST.getKey(),
-                    SerializationFeature.WRAP_ROOT_VALUE + ","
+                SerializationFeature.WRAP_ROOT_VALUE + ","
                     + SerializationFeature.INDENT_OUTPUT);
             System.setProperty(JacksonSerializer.JACKSON_SER_FEATURE_DISABLE_LIST.getKey(),
-                    SerializationFeature.FAIL_ON_EMPTY_BEANS.name() + ","
+                SerializationFeature.FAIL_ON_EMPTY_BEANS.name() + ","
                     + SerializationFeature.FAIL_ON_SELF_REFERENCES.name());
             System.setProperty(JacksonSerializer.JACKSON_DES_FEATURE_ENABLE_LIST.getKey(),
-                    DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES + ","
+                DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES + ","
                     + DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS);
             System.setProperty(JacksonSerializer.JACKSON_DES_FEATURE_DISABLE_LIST.getKey(),
-                    DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.name() + ","
+                DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.name() + ","
                     + DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS.name());
             // test ser after property set
             testSer = new JacksonSerializer();
