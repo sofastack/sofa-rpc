@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.codec.fury.serialize;
 import com.alipay.sofa.rpc.codec.CustomSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
@@ -51,7 +52,7 @@ public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> 
                 isGenericRequest(context.get(RemotingConstants.HEAD_GENERIC_TYPE));
             if (genericSerialize) {
                 // TODO support generic call
-                throw new SofaRpcException("Generic call is not supported for now.");
+                throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Generic call is not supported for now.");
             }
             fury.serialize(writeBuffer, object);
             final Object[] args = object.getMethodArgs();
@@ -59,7 +60,7 @@ public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> 
 
             return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
         } catch (Exception e) {
-            throw new SofaRpcException(e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e.getMessage(), e);
         }
     }
 
@@ -70,7 +71,7 @@ public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> 
             SofaRequest sofaRequest = (SofaRequest) fury.deserialize(readBuffer);
             String targetServiceName = sofaRequest.getTargetServiceUniqueName();
             if (targetServiceName == null) {
-                throw new SofaRpcException("Target service name of request is null!");
+                throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, "Target service name of request is null!");
             }
             String interfaceName = ConfigUniqueNameGenerator.getInterfaceName(targetServiceName);
             sofaRequest.setInterfaceName(interfaceName);
@@ -78,7 +79,7 @@ public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> 
             sofaRequest.setMethodArgs(args);
             return sofaRequest;
         } catch (Exception e) {
-            throw new SofaRpcException(e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e.getMessage(), e);
         }
     }
 
@@ -86,14 +87,14 @@ public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> 
     public void decodeObjectByTemplate(AbstractByteBuf data, Map<String, String> context, SofaRequest template)
         throws SofaRpcException {
         if (data.readableBytes() <= 0) {
-            throw new SofaRpcException("Deserialized array is empty.");
+            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, "Deserialized array is empty.");
         }
         try {
             MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
             SofaRequest tmp = (SofaRequest) fury.deserialize(readBuffer);
             String targetServiceName = tmp.getTargetServiceUniqueName();
             if (targetServiceName == null) {
-                throw new SofaRpcException("Target service name of request is null!");
+                throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, "Target service name of request is null!");
             }
             // copy values to template
             template.setMethodName(tmp.getMethodName());
@@ -106,7 +107,7 @@ public class SofaRequestFurySerializer implements CustomSerializer<SofaRequest> 
             final Object[] args = (Object[]) fury.deserialize(readBuffer);
             template.setMethodArgs(args);
         } catch (Exception e) {
-            throw new SofaRpcException(e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e.getMessage(), e);
         }
     }
 

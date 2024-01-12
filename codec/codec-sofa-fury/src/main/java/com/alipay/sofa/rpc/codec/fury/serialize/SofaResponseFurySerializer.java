@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.codec.fury.serialize;
 
 import com.alipay.sofa.rpc.codec.CustomSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
@@ -42,13 +43,12 @@ public class SofaResponseFurySerializer implements CustomSerializer<SofaResponse
     @Override
     public AbstractByteBuf encodeObject(SofaResponse object, Map<String, String> context) throws SofaRpcException {
         try {
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
             MemoryBuffer writeBuffer = MemoryBuffer.newHeapBuffer(32);
             writeBuffer.writerIndex(0);
             fury.serialize(writeBuffer, object);
             return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
         } catch (Exception e) {
-            throw new SofaRpcException(e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e.getMessage(), e);
         }
     }
 
@@ -56,16 +56,15 @@ public class SofaResponseFurySerializer implements CustomSerializer<SofaResponse
     public SofaResponse decodeObject(AbstractByteBuf data, Map<String, String> context) throws SofaRpcException {
         MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
         try {
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
             boolean genericSerialize = context != null && isGenericResponse(
                 context.get(RemotingConstants.HEAD_GENERIC_TYPE));
             if (genericSerialize) {
                 // TODO support generic call
-                throw new SofaRpcException("Generic call is not supported for now.");
+                throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Generic call is not supported for now.");
             }
             return (SofaResponse) fury.deserialize(readBuffer);
         } catch (Exception e) {
-            throw new SofaRpcException(e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e.getMessage(), e);
         }
     }
 
@@ -73,17 +72,16 @@ public class SofaResponseFurySerializer implements CustomSerializer<SofaResponse
     public void decodeObjectByTemplate(AbstractByteBuf data, Map<String, String> context, SofaResponse template)
         throws SofaRpcException {
         if (data.readableBytes() <= 0) {
-            throw new SofaRpcException("Deserialized array is empty.");
+            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Deserialized array is empty.");
         }
         try {
-            fury.setClassLoader(Thread.currentThread().getContextClassLoader());
             MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
             // 根据SerializeType信息决定序列化器
             boolean genericSerialize = context != null && isGenericResponse(
                 context.get(RemotingConstants.HEAD_GENERIC_TYPE));
             if (genericSerialize) {
                 // TODO support generic call
-                throw new SofaRpcException("Generic call is not supported for now.");
+                throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Generic call is not supported for now.");
             } else {
                 SofaResponse tmp = (SofaResponse) fury.deserialize(readBuffer);
                 // copy values to template
@@ -92,7 +90,7 @@ public class SofaResponseFurySerializer implements CustomSerializer<SofaResponse
                 template.setResponseProps(tmp.getResponseProps());
             }
         } catch (Exception e) {
-            throw new SofaRpcException(e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e.getMessage(), e);
         }
     }
 
