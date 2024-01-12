@@ -73,6 +73,7 @@
         <grpc.version>1.53.0</grpc.version>
         <guava.version>32.0.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
+        <fury.version>0.4.1</fury.version>
     </properties>
 
     <dependencies>
@@ -433,6 +434,11 @@
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
             <version>${asm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.furyio</groupId>
+            <artifactId>fury-core</artifactId>
+            <version>${fury.version}</version>
         </dependency>
 
     </dependencies>

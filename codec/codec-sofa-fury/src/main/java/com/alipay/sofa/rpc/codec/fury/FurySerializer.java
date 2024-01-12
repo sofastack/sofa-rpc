@@ -32,6 +32,7 @@ import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import io.fury.Fury;
 import io.fury.ThreadLocalFury;
+import io.fury.ThreadSafeFury;
 import io.fury.config.Language;
 import io.fury.memory.MemoryBuffer;
 import io.fury.resolver.AllowListChecker;
@@ -47,9 +48,9 @@ import static io.fury.config.CompatibleMode.COMPATIBLE;
 @Extension(value = "fury2", code = 22)
 public class FurySerializer extends AbstractSerializer {
 
-    private final ThreadLocalFury fury;
+    protected final ThreadSafeFury fury;
 
-    private final String          checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.SERIALIZE_CHECKER_MODE);
+    private final String           checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.SERIALIZE_CHECKER_MODE);
 
     public FurySerializer() {
         fury = new ThreadLocalFury(classLoader -> {
@@ -102,8 +103,8 @@ public class FurySerializer extends AbstractSerializer {
             f.register(SofaRpcException.class);
             return f;
         });
-        addSerializer(SofaRequest.class, new SofaRequestFurySerializer(fury));
-        addSerializer(SofaResponse.class, new SofaResponseFurySerializer(fury));
+        addCustomSerializer(SofaRequest.class, new SofaRequestFurySerializer(fury));
+        addCustomSerializer(SofaResponse.class, new SofaResponseFurySerializer(fury));
     }
 
     @Override
@@ -139,7 +140,7 @@ public class FurySerializer extends AbstractSerializer {
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             fury.setClassLoader(contextClassLoader);
-            CustomSerializer customSerializer = getSerializer(clazz);
+            CustomSerializer customSerializer = getCustomSerializer(clazz);
             if (customSerializer != null) {
                 return customSerializer.decodeObject(data, context);
             } else {
@@ -173,10 +174,6 @@ public class FurySerializer extends AbstractSerializer {
         } finally {
             fury.clearClassLoader(contextClassLoader);
         }
-    }
-
-    public ThreadLocalFury getFury() {
-        return fury;
     }
 
 }
