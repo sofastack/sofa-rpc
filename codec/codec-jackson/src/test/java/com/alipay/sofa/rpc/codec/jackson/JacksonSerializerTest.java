@@ -33,7 +33,9 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -502,6 +504,62 @@ public class JacksonSerializerTest {
         System.setProperty("sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES", "true");
         System.setProperty("sofa.rpc.codec.jackson.SerializationFeature.FAIL_ON_EMPTY_BEANS", "true");
 
+    }
+
+    @Test
+    public void testJacksonFeatureByConfigKey() {
+        // origin, should be FAIL_ON_UNKNOWN_PROPERTIES ture and FAIL_ON_EMPTY_BEANS true
+        JacksonSerializer origin = new JacksonSerializer();
+        ObjectMapper originMapper = origin.getMapper();
+        // originally false
+        Assert.assertFalse(originMapper.isEnabled(SerializationFeature.WRAP_ROOT_VALUE));
+        Assert.assertFalse(originMapper.isEnabled(SerializationFeature.INDENT_OUTPUT));
+
+        // originally true
+        Assert.assertTrue(originMapper.isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS));
+        Assert.assertTrue(originMapper.isEnabled(SerializationFeature.FAIL_ON_SELF_REFERENCES));
+
+        // originally false
+        Assert.assertFalse(originMapper.isEnabled(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES));
+        Assert.assertFalse(originMapper.isEnabled(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS));
+
+        // originally true
+        Assert.assertTrue(originMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        Assert.assertTrue(originMapper.isEnabled(DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS));
+
+        System.setProperty(JacksonSerializer.JACKSON_SER_FEATURE_ENABLE_LIST.getKey(),
+            SerializationFeature.WRAP_ROOT_VALUE + "," + SerializationFeature.INDENT_OUTPUT);
+        System
+            .setProperty(
+                JacksonSerializer.JACKSON_SER_FEATURE_DISABLE_LIST.getKey(),
+                SerializationFeature.FAIL_ON_EMPTY_BEANS.name() + "," +
+                    SerializationFeature.FAIL_ON_SELF_REFERENCES.name());
+        System
+            .setProperty(JacksonSerializer.JACKSON_DES_FEATURE_ENABLE_LIST.getKey(),
+                DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES + "," +
+                    DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS);
+        System.setProperty(JacksonSerializer.JACKSON_DES_FEATURE_DISABLE_LIST.getKey(),
+            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES.name() + "," +
+                DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS.name());
+        // test ser after property set
+        JacksonSerializer testSer = new JacksonSerializer();
+        ObjectMapper testMapper = testSer.getMapper();
+
+        // originally false, but enabled
+        Assert.assertTrue(testMapper.isEnabled(SerializationFeature.WRAP_ROOT_VALUE));
+        Assert.assertTrue(testMapper.isEnabled(SerializationFeature.INDENT_OUTPUT));
+
+        // originally true, but disabled
+        Assert.assertFalse(testMapper.isEnabled(SerializationFeature.FAIL_ON_EMPTY_BEANS));
+        Assert.assertFalse(testMapper.isEnabled(SerializationFeature.FAIL_ON_SELF_REFERENCES));
+
+        // originally false, but enabled
+        Assert.assertTrue(testMapper.isEnabled(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES));
+        Assert.assertTrue(testMapper.isEnabled(DeserializationFeature.FAIL_ON_NUMBERS_FOR_ENUMS));
+
+        // originally true, but disabled
+        Assert.assertFalse(testMapper.isEnabled(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES));
+        Assert.assertFalse(testMapper.isEnabled(DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS));
     }
 
     @Test(expected = ClassCastException.class)
