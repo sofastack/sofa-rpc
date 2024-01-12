@@ -76,18 +76,18 @@ public abstract class AbstractSerializer implements Serializer {
         genericServiceMap.clear();
     }
 
-    protected  CustomSerializer getObjCustomSerializer(Object obj) {
+    protected CustomSerializer getObjCustomSerializer(Object obj) {
         if (obj == null) {
             return null;
         }
-        return getSerializer(obj.getClass());
+        return getCustomSerializer(obj.getClass());
     }
 
-    protected  CustomSerializer getSerializer(Class clazz) {
+    protected CustomSerializer getCustomSerializer(Class clazz) {
         return customSerializers.get(clazz);
     }
 
-    protected  void addSerializer(Class clazz, CustomSerializer serializerManager) {
+    public void addCustomSerializer(Class clazz, CustomSerializer serializerManager) {
         customSerializers.put(clazz, serializerManager);
     }
 }
