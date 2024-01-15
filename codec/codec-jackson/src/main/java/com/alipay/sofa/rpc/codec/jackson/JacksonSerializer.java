@@ -74,10 +74,18 @@ public class JacksonSerializer extends AbstractSerializer {
 
     private JacksonHelper       jacksonHelper                 = new JacksonHelper();
 
+    @Deprecated
     private static final String DESERIALIZATIONFEATURE_PREFIX = "sofa.rpc.codec.jackson.DeserializationFeature.";
 
+    @Deprecated
     private static final String SERIALIZATIONFEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
 
+    /**
+     * 提供两种配置方式
+     * 新环境变量/jvm配置 sofa.rpc.codec.jackson.serialize.feature.enable.list="FAIL_ON_EMPTY_BEANS,FAIL_ON_NULL_FOR_PRIMITIVES"
+     *
+     * 老配置 sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_EMPTY_BEANS=true 不推荐继续使用老配置
+     */
     public JacksonSerializer() {
 
         Set<String> serFeatures = Arrays.stream(SerializationFeature.values()).map(Enum::name).collect(Collectors.toSet());
@@ -112,11 +120,11 @@ public class JacksonSerializer extends AbstractSerializer {
      * @param desFeatures
      */
     protected void processJacksonSerFeature(ObjectMapper objectMapper, Set<String> serFeatures, Set<String> desFeatures) {
-        processSerializeFeatures(objectMapper, JACKSON_SER_FEATURE_ENABLE_LIST, true, serFeatures);
-        processSerializeFeatures(objectMapper, JACKSON_SER_FEATURE_DISABLE_LIST, false, serFeatures);
+        processSerializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_SER_FEATURE_ENABLE_LIST, true, serFeatures);
+        processSerializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_SER_FEATURE_DISABLE_LIST, false, serFeatures);
 
-        processDeserializeFeatures(objectMapper, JACKSON_DES_FEATURE_ENABLE_LIST, true, desFeatures);
-        processDeserializeFeatures(objectMapper, JACKSON_DES_FEATURE_DISABLE_LIST, false, desFeatures);
+        processDeserializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_DES_FEATURE_ENABLE_LIST, true, desFeatures);
+        processDeserializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_DES_FEATURE_DISABLE_LIST, false, desFeatures);
     }
 
     /**
@@ -130,6 +138,9 @@ public class JacksonSerializer extends AbstractSerializer {
      */
     private void processSerializeFeatures(ObjectMapper objectMapper, ConfigKey<String> key, boolean enable, Set<String> featureSet) {
         String serFeatureList = SofaConfigs.getOrDefault(key);
+        if (StringUtils.isBlank(serFeatureList)) {
+            return;
+        }
         Arrays.stream(serFeatureList.split(",")).filter(featureSet::contains).forEach(str -> objectMapper.configure(SerializationFeature.valueOf(str), enable));
     }
 
@@ -143,8 +154,11 @@ public class JacksonSerializer extends AbstractSerializer {
      * @param featureSet
      */
     private void processDeserializeFeatures(ObjectMapper objectMapper,ConfigKey<String> key, boolean enable, Set<String> featureSet) {
-        String serFeatureList = SofaConfigs.getOrDefault(key);
-        Arrays.stream(serFeatureList.split(",")).filter(featureSet::contains).forEach(str -> objectMapper.configure(DeserializationFeature.valueOf(str), enable));
+        String desFeatureList = SofaConfigs.getOrDefault(key);
+        if (StringUtils.isBlank(desFeatureList)) {
+            return;
+        }
+        Arrays.stream(desFeatureList.split(",")).filter(featureSet::contains).forEach(str -> objectMapper.configure(DeserializationFeature.valueOf(str), enable));
     }
 
     @Override
@@ -380,35 +394,4 @@ public class JacksonSerializer extends AbstractSerializer {
         return this.mapper;
     }
 
-    public static ConfigKey<String> JACKSON_SER_FEATURE_ENABLE_LIST  = ConfigKey
-                                                                         .build(
-                                                                             "sofa.rpc.codec.jackson.serialize.feature.enable.list",
-                                                                             "",
-                                                                             false,
-                                                                             "希望被设置为开启的Serialize FEATURE",
-                                                                             new String[] { "sofa_rpc_codec_jackson_serialize_feature_enable_list" });
-
-    public static ConfigKey<String> JACKSON_SER_FEATURE_DISABLE_LIST = ConfigKey
-                                                                         .build(
-                                                                             "sofa.rpc.codec.jackson.serialize.feature.disable.list",
-                                                                             "",
-                                                                             false,
-                                                                             "希望被设置为关闭的Serialize FEATURE",
-                                                                             new String[] { "sofa_rpc_codec_jackson_serialize_feature_disable_list" });
-
-    public static ConfigKey<String> JACKSON_DES_FEATURE_ENABLE_LIST  = ConfigKey
-                                                                         .build(
-                                                                             "sofa.rpc.codec.jackson.deserialize.feature.enable.list",
-                                                                             "",
-                                                                             false,
-                                                                             "希望被设置为开启的Deserialize EATURE",
-                                                                             new String[] { "sofa_rpc_codec_jackson_deserialize_feature_disable_list" });
-
-    public static ConfigKey<String> JACKSON_DES_FEATURE_DISABLE_LIST = ConfigKey
-                                                                         .build(
-                                                                             "sofa.rpc.codec.jackson.deserialize.feature.disable.list",
-                                                                             "",
-                                                                             false,
-                                                                             "希望被设置为关闭的Deserialize FEATURE",
-                                                                             new String[] { "sofa_rpc_codec_jackson_deserialize_feature_disable_list" });
 }
