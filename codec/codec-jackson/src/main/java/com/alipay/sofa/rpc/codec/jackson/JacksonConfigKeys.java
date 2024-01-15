@@ -21,7 +21,7 @@ import com.alipay.sofa.common.config.ConfigKey;
 /**
  *
  * @author junyuan
- * @version JacksonConfigKeys.java, v 0.1 2024年01月15日 15:25 junyuan Exp $
+ * @version JacksonConfigKeys.java, v 0.1 2024-01-15 16:46 junyuan Exp $
  */
 public class JacksonConfigKeys {
     public static ConfigKey<String> JACKSON_SER_FEATURE_ENABLE_LIST  = ConfigKey
@@ -29,7 +29,7 @@ public class JacksonConfigKeys {
                                                                              "sofa.rpc.codec.jackson.serialize.feature.enable.list",
                                                                              "",
                                                                              false,
-                                                                             "希望被设置为开启的Serialize FEATURE",
+                                                                             "serialize feature to enable",
                                                                              new String[] { "sofa_rpc_codec_jackson_serialize_feature_enable_list" });
 
     public static ConfigKey<String> JACKSON_SER_FEATURE_DISABLE_LIST = ConfigKey
@@ -37,7 +37,7 @@ public class JacksonConfigKeys {
                                                                              "sofa.rpc.codec.jackson.serialize.feature.disable.list",
                                                                              "",
                                                                              false,
-                                                                             "希望被设置为关闭的Serialize FEATURE",
+                                                                             "serialize feature to disable",
                                                                              new String[] { "sofa_rpc_codec_jackson_serialize_feature_disable_list" });
 
     public static ConfigKey<String> JACKSON_DES_FEATURE_ENABLE_LIST  = ConfigKey
@@ -45,7 +45,7 @@ public class JacksonConfigKeys {
                                                                              "sofa.rpc.codec.jackson.deserialize.feature.enable.list",
                                                                              "",
                                                                              false,
-                                                                             "希望被设置为开启的Deserialize FEATURE",
+                                                                             "deserialize feature to enable",
                                                                              new String[] { "sofa_rpc_codec_jackson_deserialize_feature_disable_list" });
 
     public static ConfigKey<String> JACKSON_DES_FEATURE_DISABLE_LIST = ConfigKey
@@ -53,6 +53,6 @@ public class JacksonConfigKeys {
                                                                              "sofa.rpc.codec.jackson.deserialize.feature.disable.list",
                                                                              "",
                                                                              false,
-                                                                             "希望被设置为关闭的Deserialize FEATURE",
+                                                                             "deserialize feature to disable",
                                                                              new String[] { "sofa_rpc_codec_jackson_deserialize_feature_disable_list" });
 }

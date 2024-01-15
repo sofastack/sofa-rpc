@@ -70,21 +70,22 @@ import java.util.stream.Collectors;
 @Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper        mapper                        = new ObjectMapper();
+    private ObjectMapper        mapper                         = new ObjectMapper();
 
-    private JacksonHelper       jacksonHelper                 = new JacksonHelper();
-
-    @Deprecated
-    private static final String DESERIALIZATIONFEATURE_PREFIX = "sofa.rpc.codec.jackson.DeserializationFeature.";
+    private JacksonHelper       jacksonHelper                  = new JacksonHelper();
 
     @Deprecated
-    private static final String SERIALIZATIONFEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
+    private static final String DESERIALIZATION_FEATURE_PREFIX = "sofa.rpc.codec.jackson.DeserializationFeature.";
+
+    @Deprecated
+    private static final String SERIALIZATION_FEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
 
     /**
-     * 提供两种配置方式
-     * 新环境变量/jvm配置 sofa.rpc.codec.jackson.serialize.feature.enable.list="FAIL_ON_EMPTY_BEANS,FAIL_ON_NULL_FOR_PRIMITIVES"
-     *
-     * 老配置 sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_EMPTY_BEANS=true 不推荐继续使用老配置
+     * two ways to config:
+     * <ol>
+     * <li>the new config read from env or vm args sofa.rpc.codec.jackson.serialize.feature.enable.list=FAIL_ON_EMPTY_BEANS,FAIL_ON_NULL_FOR_PRIMITIVES</li>
+     * <li>the <b>deprecated</b> config sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_EMPTY_BEANS=true</li>
+     * </ol>
      */
     public JacksonSerializer() {
 
@@ -93,15 +94,15 @@ public class JacksonSerializer extends AbstractSerializer {
 
         Properties properties = System.getProperties();
         for (String key : properties.stringPropertyNames()) {
-            if (key.startsWith(DESERIALIZATIONFEATURE_PREFIX)) {
-                String enumName = StringUtils.substringAfter(key, DESERIALIZATIONFEATURE_PREFIX);
+            if (key.startsWith(DESERIALIZATION_FEATURE_PREFIX)) {
+                String enumName = StringUtils.substringAfter(key, DESERIALIZATION_FEATURE_PREFIX);
                 if (desFeatures.contains(enumName)) {
                     boolean state = Boolean.parseBoolean(properties.getProperty(key));
                     mapper.configure(DeserializationFeature.valueOf(enumName), state);
                 }
             }
-            if (key.startsWith(SERIALIZATIONFEATURE_PREFIX)) {
-                String enumName = StringUtils.substringAfter(key, SERIALIZATIONFEATURE_PREFIX);
+            if (key.startsWith(SERIALIZATION_FEATURE_PREFIX)) {
+                String enumName = StringUtils.substringAfter(key, SERIALIZATION_FEATURE_PREFIX);
                 if (serFeatures.contains(enumName)) {
                     boolean state = Boolean.parseBoolean(properties.getProperty(key));
                     mapper.configure(SerializationFeature.valueOf(enumName), state);
