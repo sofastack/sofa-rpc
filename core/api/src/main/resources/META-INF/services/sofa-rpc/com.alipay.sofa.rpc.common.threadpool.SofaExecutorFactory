@@ -1,2 +1,3 @@
 cached=com.alipay.sofa.rpc.common.threadpool.extension.CachedThreadPoolFactory
 virtual=com.alipay.sofa.rpc.common.threadpool.extension.VirtualThreadPoolFactory
+reuse-scheduled=com.alipay.sofa.rpc.common.threadpool.extension.ReuseScheduledThreadPoolFactory

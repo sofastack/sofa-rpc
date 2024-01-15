@@ -16,9 +16,13 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
+import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -63,5 +67,29 @@ public class ScheduledServiceTest {
         Assert.assertFalse(scheduledService.isStarted());
         scheduledService.stop();
         Assert.assertFalse(scheduledService.isStarted());
+    }
+
+    @Test
+    public void testReuse() {
+        String testPrefix = "prefix-for-schedule-test";
+
+        ScheduledService scheduledService1 = new ScheduledService(testPrefix, ScheduledService.MODE_FIXEDRATE, () -> {}, 0, 100, TimeUnit.MILLISECONDS).start();
+        ScheduledService scheduledService2 = new ScheduledService(testPrefix, ScheduledService.MODE_FIXEDRATE, () -> {}, 0, 100, TimeUnit.MILLISECONDS).start();
+
+        SofaExecutorFactory factory = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class).getExtension("reuse-scheduled");
+        ScheduledThreadPoolExecutor pool = (ScheduledThreadPoolExecutor) factory.createExecutor(testPrefix, null);
+
+        try{
+            Thread.sleep(100);
+        } catch (Exception e) {
+
+        }
+
+        BlockingQueue<Runnable> queue = pool.getQueue();
+        Assert.assertEquals(2, queue.size());
+
+        scheduledService1.shutdown();
+        scheduledService2.shutdown();
+        Assert.assertFalse(pool.isShutdown());
     }
 }

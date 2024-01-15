@@ -849,13 +849,12 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
      * 启动重连+心跳线程
      */
     protected void startReconnectThread() {
-        final String interfaceId = consumerConfig.getInterfaceId();
         // 启动线程池
         // 默认每隔10秒重连
         int reconnect = consumerConfig.getReconnectPeriod();
         if (reconnect > 0) {
             reconnect = Math.max(reconnect, 2000); // 最小2000
-            reconThread = new ScheduledService("CLI-RC-" + interfaceId, ScheduledService.MODE_FIXEDDELAY, new
+            reconThread = new ScheduledService("CLI-RC-CONSUMER", ScheduledService.MODE_FIXEDDELAY, new
                 Runnable() {
                     @Override
                     public void run() {
@@ -863,7 +862,7 @@ public class AllConnectConnectionHolder extends ConnectionHolder {
                             doReconnect();
                         } catch (Throwable e) {
                             LOGGER.warnWithApp(consumerConfig.getAppName(),
-                                "Exception when retry connect to provider", e);
+                                "Exception when retry connect to provider " + consumerConfig.getInterfaceId(), e);
                         }
                     }
                 }, reconnect, reconnect, TimeUnit.MILLISECONDS).start();

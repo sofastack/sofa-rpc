@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.common.struct;
 
+import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -24,7 +26,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -37,62 +38,57 @@ public class ScheduledService {
     /**
      * slf4j Logger for this class
      */
-    private final static Logger               LOGGER          = LoggerFactory.getLogger(ScheduledService.class);
+    private final static Logger      LOGGER          = LoggerFactory.getLogger(ScheduledService.class);
 
     /**
      * 固定频率执行，按执行开始时间计算间隔
      */
-    public static final int                   MODE_FIXEDRATE  = 0;
+    public static final int          MODE_FIXEDRATE  = 0;
     /**
      * 固定间隔执行，执行完成后才计算间隔
      */
-    public static final int                   MODE_FIXEDDELAY = 1;
-
-    /**
-     * The Scheduled executor service.
-     */
-    private volatile ScheduledExecutorService scheduledExecutorService;
+    public static final int          MODE_FIXEDDELAY = 1;
 
     /**
      * The Thread name
      */
-    private String                            threadName;
+    private String                   threadName;
 
     /**
      * The Runnable.
      */
-    private final Runnable                    runnable;
+    private final Runnable           runnable;
 
     /**
      * The Initial delay.
      */
-    private final long                        initialDelay;
+    private final long               initialDelay;
 
     /**
      * The Period.
      */
-    private final long                        period;
+    private final long               period;
 
     /**
      * The Unit.
      */
-    private final TimeUnit                    unit;
+    private final TimeUnit           unit;
 
     /**
      * 0:scheduleAtFixedRate
      * 1:scheduleWithFixedDelay
      */
-    private final int                         mode;
+    private final int                mode;
 
     /**
      * The Future.
      */
-    private volatile ScheduledFuture          future;
+    private volatile ScheduledFuture future;
 
     /**
      * The Started.
      */
-    private volatile boolean                  started;
+    private volatile boolean         started;
 
     /**
      * Instantiates a new Scheduled service.
@@ -129,10 +125,13 @@ public class ScheduledService {
         if (started) {
             return this;
         }
-        if (scheduledExecutorService == null) {
-            scheduledExecutorService = new ScheduledThreadPoolExecutor(1,
-                new NamedThreadFactory(threadName, true));
-        }
+
+        // singleton factory
+        SofaExecutorFactory factory = ExtensionLoaderFactory.getExtensionLoader(SofaExecutorFactory.class)
+            .getExtension("reuse-scheduled");
+        ScheduledExecutorService scheduledExecutorService = (ScheduledExecutorService) factory.createExecutor(
+            threadName, null);
+
         ScheduledFuture future = null;
         switch (mode) {
             case MODE_FIXEDRATE:
@@ -167,12 +166,9 @@ public class ScheduledService {
         }
         try {
             if (future != null) {
+                // will remove task itself from working queue of ScheduledExecutor
                 future.cancel(true);
                 future = null;
-            }
-            if (scheduledExecutorService != null) {
-                scheduledExecutorService.shutdownNow();
-                scheduledExecutorService = null;
             }
         } catch (Throwable t) {
             LOGGER.warn(t.getMessage(), t);
@@ -184,6 +180,7 @@ public class ScheduledService {
 
     /**
      * 停止执行定时任务，还可以重新start
+     * stop task only, won't stop the whole executor
      */
     public void shutdown() {
         stop();
