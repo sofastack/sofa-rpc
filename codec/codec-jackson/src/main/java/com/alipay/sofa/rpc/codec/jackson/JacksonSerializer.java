@@ -16,8 +16,11 @@
  */
 package com.alipay.sofa.rpc.codec.jackson;
 
+import com.alipay.sofa.common.config.ConfigKey;
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.codec.AbstractSerializer;
 import com.alipay.sofa.rpc.common.RemotingConstants;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CodecUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
@@ -37,10 +40,13 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Json serializer.
@@ -64,39 +70,96 @@ import java.util.Properties;
 @Extension(value = "json", code = 12)
 public class JacksonSerializer extends AbstractSerializer {
 
-    private ObjectMapper        mapper                        = new ObjectMapper();
+    private ObjectMapper        mapper                         = new ObjectMapper();
 
-    private JacksonHelper       jacksonHelper                 = new JacksonHelper();
+    private JacksonHelper       jacksonHelper                  = new JacksonHelper();
 
-    private static final String DESERIALIZATIONFEATURE_PREFIX = "sofa.rpc.codec.jackson.DeserializationFeature.";
+    @Deprecated
+    private static final String DESERIALIZATION_FEATURE_PREFIX = "sofa.rpc.codec.jackson.DeserializationFeature.";
 
-    private static final String SERIALIZATIONFEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
+    @Deprecated
+    private static final String SERIALIZATION_FEATURE_PREFIX   = "sofa.rpc.codec.jackson.SerializationFeature.";
 
+    /**
+     * two ways to config:
+     * <ol>
+     * <li>the new config read from env or vm args sofa.rpc.codec.jackson.serialize.feature.enable.list=FAIL_ON_EMPTY_BEANS,FAIL_ON_NULL_FOR_PRIMITIVES</li>
+     * <li>the <b>deprecated</b> config sofa.rpc.codec.jackson.DeserializationFeature.FAIL_ON_EMPTY_BEANS=true</li>
+     * </ol>
+     */
     public JacksonSerializer() {
+
+        Set<String> serFeatures = Arrays.stream(SerializationFeature.values()).map(Enum::name).collect(Collectors.toSet());
+        Set<String> desFeatures = Arrays.stream(DeserializationFeature.values()).map(Enum::name).collect(Collectors.toSet());
 
         Properties properties = System.getProperties();
         for (String key : properties.stringPropertyNames()) {
-            if (key.startsWith(DESERIALIZATIONFEATURE_PREFIX)) {
-                String enumName = StringUtils.substringAfter(key, DESERIALIZATIONFEATURE_PREFIX);
-                for (DeserializationFeature df : DeserializationFeature.values()) {
-                    if (df.name().equals(enumName)) {
-                        boolean state = Boolean.parseBoolean(properties.getProperty(key));
-                        mapper.configure(df, state);
-                        break;
-                    }
+            if (key.startsWith(DESERIALIZATION_FEATURE_PREFIX)) {
+                String enumName = StringUtils.substringAfter(key, DESERIALIZATION_FEATURE_PREFIX);
+                if (desFeatures.contains(enumName)) {
+                    boolean state = Boolean.parseBoolean(properties.getProperty(key));
+                    mapper.configure(DeserializationFeature.valueOf(enumName), state);
                 }
             }
-            if (key.startsWith(SERIALIZATIONFEATURE_PREFIX)) {
-                String enumName = StringUtils.substringAfter(key, SERIALIZATIONFEATURE_PREFIX);
-                for (SerializationFeature sf : SerializationFeature.values()) {
-                    if (sf.name().equals(enumName)) {
-                        boolean state = Boolean.parseBoolean(properties.getProperty(key));
-                        mapper.configure(sf, state);
-                        break;
-                    }
+            if (key.startsWith(SERIALIZATION_FEATURE_PREFIX)) {
+                String enumName = StringUtils.substringAfter(key, SERIALIZATION_FEATURE_PREFIX);
+                if (serFeatures.contains(enumName)) {
+                    boolean state = Boolean.parseBoolean(properties.getProperty(key));
+                    mapper.configure(SerializationFeature.valueOf(enumName), state);
                 }
             }
         }
+
+        // 允许通过 sofa config 获取的配置覆盖上述环境变量配置
+        processJacksonSerFeature(mapper, serFeatures, desFeatures);
+    }
+
+    /**
+     *
+     * @param objectMapper
+     * @param serFeatures
+     * @param desFeatures
+     */
+    protected void processJacksonSerFeature(ObjectMapper objectMapper, Set<String> serFeatures, Set<String> desFeatures) {
+        processSerializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_SER_FEATURE_ENABLE_LIST, true, serFeatures);
+        processSerializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_SER_FEATURE_DISABLE_LIST, false, serFeatures);
+
+        processDeserializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_DES_FEATURE_ENABLE_LIST, true, desFeatures);
+        processDeserializeFeatures(objectMapper, JacksonConfigKeys.JACKSON_DES_FEATURE_DISABLE_LIST, false, desFeatures);
+    }
+
+    /**
+     * 获取用户配置的 feature, 应该是逗号分割的 string
+     * 根据 String 获取对应的 SerializationFeature, 并配置到 object mapper
+     *
+     * @param objectMapper
+     * @param key
+     * @param enable
+     * @param featureSet
+     */
+    private void processSerializeFeatures(ObjectMapper objectMapper, ConfigKey<String> key, boolean enable, Set<String> featureSet) {
+        String serFeatureList = SofaConfigs.getOrDefault(key);
+        if (StringUtils.isBlank(serFeatureList)) {
+            return;
+        }
+        Arrays.stream(serFeatureList.split(",")).filter(featureSet::contains).forEach(str -> objectMapper.configure(SerializationFeature.valueOf(str), enable));
+    }
+
+    /**
+     * 获取用户配置的 feature, 应该是逗号分割的 string
+     * 根据 String 获取对应的 DeserializationFeature, 并配置到 object mapper
+     *
+     * @param objectMapper
+     * @param key
+     * @param enable
+     * @param featureSet
+     */
+    private void processDeserializeFeatures(ObjectMapper objectMapper,ConfigKey<String> key, boolean enable, Set<String> featureSet) {
+        String desFeatureList = SofaConfigs.getOrDefault(key);
+        if (StringUtils.isBlank(desFeatureList)) {
+            return;
+        }
+        Arrays.stream(desFeatureList.split(",")).filter(featureSet::contains).forEach(str -> objectMapper.configure(DeserializationFeature.valueOf(str), enable));
     }
 
     @Override
@@ -326,4 +389,10 @@ public class JacksonSerializer extends AbstractSerializer {
             sofaResponse.setAppResponse(result);
         }
     }
+
+    @VisibleForTesting
+    protected ObjectMapper getMapper() {
+        return this.mapper;
+    }
+
 }
