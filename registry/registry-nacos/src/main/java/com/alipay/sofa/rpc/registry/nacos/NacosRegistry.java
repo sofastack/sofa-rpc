@@ -91,7 +91,7 @@ public class NacosRegistry extends Registry {
 
     private NamingService                                 namingService;
 
-    private static volatile NacosRegistryProviderObserver                 providerObserver;
+    private static volatile NacosRegistryProviderObserver providerObserver;
 
     private List<String>                                  defaultCluster;
 
