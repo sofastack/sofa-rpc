@@ -92,7 +92,7 @@ public class NacosRegistry extends Registry {
 
     private NamingService                                 namingService;
 
-    private NacosRegistryProviderObserver                 providerObserver;
+    private static volatile NacosRegistryProviderObserver                 providerObserver;
 
     private List<String>                                  defaultCluster;
 
@@ -147,6 +147,14 @@ public class NacosRegistry extends Registry {
         }
 
         try {
+            if (providerObserver == null) {
+                synchronized (NacosRegistryProviderObserver.class) {
+                    if (providerObserver == null) {
+                        providerObserver = new NacosRegistryProviderObserver();
+                    }
+                }
+            }
+
             namingService = NamingFactory.createNamingService(nacosConfig);
         } catch (NacosException e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_INIT_NACOS_NAMING_SERVICE, address), e);
@@ -272,26 +280,19 @@ public class NacosRegistry extends Registry {
             }
 
             try {
-                if (providerObserver == null) {
-                    providerObserver = new NacosRegistryProviderObserver();
-                }
-
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
                 providerObserver.addProviderListener(config, providerInfoListener);
 
-                EventListener eventListener = new EventListener() {
-                    @Override
-                    public void onEvent(Event event) {
-                        if (event instanceof NamingEvent) {
-                            NamingEvent namingEvent = (NamingEvent) event;
-                            List<Instance> instances = namingEvent.getInstances();
-                            // avoid npe
-                            if (null == instances) {
-                                instances = new ArrayList<Instance>();
-                            }
-                            instances.removeIf(i -> !i.isEnabled());
-                            providerObserver.updateProviders(config, instances);
+                EventListener eventListener = event -> {
+                    if (event instanceof NamingEvent) {
+                        NamingEvent namingEvent = (NamingEvent) event;
+                        List<Instance> instances = namingEvent.getInstances();
+                        // avoid npe
+                        if (null == instances) {
+                            instances = new ArrayList<>();
                         }
+                        instances.removeIf(i -> !i.isEnabled());
+                        providerObserver.updateProviders(config, instances);
                     }
                 };
                 namingService.subscribe(serviceName, defaultCluster, eventListener);
