@@ -25,4 +25,8 @@ public class ThreadPoolConstant {
     public static final String DEFAULT_THREAD_NAME_PREFIX = "SOFA-RPC-DEFAULT";
     public static final String BIZ_THREAD_NAME_PREFIX     = "SEV-BOLT-BIZ-";
 
+    public static final String TYPE_PREFIX_TREAD          = "T";
+
+    public static final String TYPE_PREFIX_VIRTUAL_TREAD  = "VT";
+
 }
