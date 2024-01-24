@@ -22,6 +22,7 @@
         <module>registry-multicast</module>
         <module>registry-sofa</module>
         <module>registry-polaris</module>
+        <module>registry-kubernetes</module>
     </modules>
 
     <dependencyManagement>
