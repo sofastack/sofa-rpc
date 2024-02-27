@@ -47,6 +47,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 
@@ -91,7 +93,7 @@ public class NacosRegistry extends Registry {
 
     private NamingService                                 namingService;
 
-    private static volatile NacosRegistryProviderObserver providerObserver;
+    private NacosRegistryProviderObserver                 providerObserver;
 
     private List<String>                                  defaultCluster;
 
@@ -100,6 +102,8 @@ public class NacosRegistry extends Registry {
     private ConcurrentMap<ConsumerConfig, EventListener>  consumerListeners = new ConcurrentHashMap<ConsumerConfig, EventListener>();
 
     private Properties                                    nacosConfig       = new Properties();
+
+    private static final Lock                             lock              = new ReentrantLock();
 
     /**
      * Instantiates a new Nacos registry.
@@ -147,10 +151,13 @@ public class NacosRegistry extends Registry {
 
         try {
             if (providerObserver == null) {
-                synchronized (NacosRegistryProviderObserver.class) {
+                lock.lock();
+                try {
                     if (providerObserver == null) {
                         providerObserver = new NacosRegistryProviderObserver();
                     }
+                } finally {
+                    lock.unlock();
                 }
             }
 
@@ -280,7 +287,12 @@ public class NacosRegistry extends Registry {
 
             try {
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
-                providerObserver.addProviderListener(config, providerInfoListener);
+                try {
+                    lock.lock();
+                    providerObserver.addProviderListener(config, providerInfoListener);
+                }finally {
+                    lock.unlock();
+                }
 
                 EventListener eventListener = event -> {
                     if (event instanceof NamingEvent) {
@@ -291,7 +303,12 @@ public class NacosRegistry extends Registry {
                             instances = new ArrayList<>();
                         }
                         instances.removeIf(i -> !i.isEnabled());
-                        providerObserver.updateProviders(config, instances);
+                        try {
+                            lock.lock();
+                            providerObserver.updateProviders(config, instances);
+                        }finally {
+                            lock.unlock();
+                        }
                     }
                 };
                 namingService.subscribe(serviceName, defaultCluster, eventListener);
@@ -332,8 +349,12 @@ public class NacosRegistry extends Registry {
                     }
                 }
             }
-
-            providerObserver.removeProviderListener(config);
+            try {
+                lock.lock();
+                providerObserver.removeProviderListener(config);
+            } finally {
+                lock.unlock();
+            }
         }
     }
 
