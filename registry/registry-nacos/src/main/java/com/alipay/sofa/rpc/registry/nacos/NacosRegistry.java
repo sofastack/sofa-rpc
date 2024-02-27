@@ -68,12 +68,12 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
  *        |--com.alipay.sofa.rpc.example.EchoService (next serviceName):grpc (protocol)
  *        |......
  * </pre>
- *
- *  Remark:
- *  Here we register service name with not only serviceName, but also with 'uniqueId' and 'protocol',
- *  because in Nacos, all service instances(with same service name) are only identified by ip and port,
- *  if there are two service with same service name but different uniqueId, there will be only one instance remained in instance list,
- *  and the consumer can't find the other instance from Nacos
+ * <p>
+ * Remark:
+ * Here we register service name with not only serviceName, but also with 'uniqueId' and 'protocol',
+ * because in Nacos, all service instances(with same service name) are only identified by ip and port,
+ * if there are two service with same service name but different uniqueId, there will be only one instance remained in instance list,
+ * and the consumer can't find the other instance from Nacos
  * </p>
  *
  * @author <a href=mailto:jervyshi@gmail.com>JervyShi</a>
@@ -290,7 +290,7 @@ public class NacosRegistry extends Registry {
                 try {
                     lock.lock();
                     providerObserver.addProviderListener(config, providerInfoListener);
-                }finally {
+                } finally {
                     lock.unlock();
                 }
 
@@ -306,7 +306,7 @@ public class NacosRegistry extends Registry {
                         try {
                             lock.lock();
                             providerObserver.updateProviders(config, instances);
-                        }finally {
+                        } finally {
                             lock.unlock();
                         }
                     }
