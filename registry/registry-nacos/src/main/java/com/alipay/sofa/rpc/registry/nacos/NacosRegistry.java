@@ -158,7 +158,7 @@ public class NacosRegistry extends Registry {
             namingService = NamingFactory.createNamingService(nacosConfig);
         } catch (NacosException e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_INIT_NACOS_NAMING_SERVICE, address), e);
-        }finally {
+        } finally {
             lock.unlock();
         }
     }
