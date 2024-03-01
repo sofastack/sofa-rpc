@@ -98,4 +98,14 @@ public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel
     public boolean isAvailable() {
         return channel.isOpen() && channel.isActive();
     }
+
+    /**
+     * UT only
+     * @param writeQueue
+     */
+    @Deprecated
+    public void setWriteQueue(NettyBatchWriteQueue writeQueue) {
+        this.writeQueue = writeQueue;
+    }
+
 }

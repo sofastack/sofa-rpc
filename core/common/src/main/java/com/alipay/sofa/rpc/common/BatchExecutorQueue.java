@@ -31,8 +31,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class BatchExecutorQueue<T> {
 
     static final int            DEFAULT_QUEUE_SIZE = 128;
+
     private final Queue<T>      queue;
+
     private final AtomicBoolean scheduled;
+
     private final int           chunkSize;
 
     public BatchExecutorQueue() {
@@ -56,7 +59,7 @@ public class BatchExecutorQueue<T> {
         }
     }
 
-    private void run(Executor executor) {
+    void run(Executor executor) {
         try {
             Queue<T> snapshot = new LinkedList<>();
             T item;
@@ -94,5 +97,23 @@ public class BatchExecutorQueue<T> {
     }
 
     protected void flush(T item) {
+    }
+
+    /**
+     * UT only
+     * @return
+     */
+    @Deprecated
+    public AtomicBoolean getScheduled() {
+        return scheduled;
+    }
+
+    /**
+     * UT only
+     * @return
+     */
+    @Deprecated
+    public Queue<T> getQueue() {
+        return queue;
     }
 }
