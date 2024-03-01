@@ -380,4 +380,14 @@ public class NacosRegistry extends Registry {
     public Properties getNacosConfig() {
         return nacosConfig;
     }
+
+    /**
+     * UT only
+     *
+     * @return
+     */
+    @Deprecated
+    public NacosRegistryProviderObserver getProviderObserver() {
+        return providerObserver;
+    }
 }
