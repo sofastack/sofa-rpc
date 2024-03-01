@@ -149,21 +149,17 @@ public class NacosRegistry extends Registry {
             nacosConfig.putAll(parameters);
         }
 
+        lock.lock();
         try {
             if (providerObserver == null) {
-                lock.lock();
-                try {
-                    if (providerObserver == null) {
-                        providerObserver = new NacosRegistryProviderObserver();
-                    }
-                } finally {
-                    lock.unlock();
-                }
+                providerObserver = new NacosRegistryProviderObserver();
             }
 
             namingService = NamingFactory.createNamingService(nacosConfig);
         } catch (NacosException e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_INIT_NACOS_NAMING_SERVICE, address), e);
+        }finally {
+            lock.unlock();
         }
     }
 
