@@ -47,8 +47,6 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 
@@ -103,8 +101,6 @@ public class NacosRegistry extends Registry {
 
     private Properties                                    nacosConfig       = new Properties();
 
-    private static final Lock                             lock              = new ReentrantLock();
-
     /**
      * Instantiates a new Nacos registry.
      *
@@ -149,7 +145,6 @@ public class NacosRegistry extends Registry {
             nacosConfig.putAll(parameters);
         }
 
-        lock.lock();
         try {
             if (providerObserver == null) {
                 providerObserver = new NacosRegistryProviderObserver();
@@ -158,8 +153,6 @@ public class NacosRegistry extends Registry {
             namingService = NamingFactory.createNamingService(nacosConfig);
         } catch (NacosException e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_INIT_NACOS_NAMING_SERVICE, address), e);
-        } finally {
-            lock.unlock();
         }
     }
 
@@ -283,12 +276,7 @@ public class NacosRegistry extends Registry {
 
             try {
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
-                try {
-                    lock.lock();
-                    providerObserver.addProviderListener(config, providerInfoListener);
-                } finally {
-                    lock.unlock();
-                }
+                providerObserver.addProviderListener(config, providerInfoListener);
 
                 EventListener eventListener = event -> {
                     if (event instanceof NamingEvent) {
@@ -299,12 +287,7 @@ public class NacosRegistry extends Registry {
                             instances = new ArrayList<>();
                         }
                         instances.removeIf(i -> !i.isEnabled());
-                        try {
-                            lock.lock();
-                            providerObserver.updateProviders(config, instances);
-                        } finally {
-                            lock.unlock();
-                        }
+                        providerObserver.updateProviders(config, instances);
                     }
                 };
                 namingService.subscribe(serviceName, defaultCluster, eventListener);
@@ -345,12 +328,7 @@ public class NacosRegistry extends Registry {
                     }
                 }
             }
-            try {
-                lock.lock();
-                providerObserver.removeProviderListener(config);
-            } finally {
-                lock.unlock();
-            }
+            providerObserver.removeProviderListener(config);
         }
     }
 
