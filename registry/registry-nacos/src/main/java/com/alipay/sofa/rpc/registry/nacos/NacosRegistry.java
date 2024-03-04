@@ -145,11 +145,11 @@ public class NacosRegistry extends Registry {
             nacosConfig.putAll(parameters);
         }
 
-        try {
-            if (providerObserver == null) {
-                providerObserver = new NacosRegistryProviderObserver();
-            }
+        if (providerObserver == null) {
+            providerObserver = new NacosRegistryProviderObserver();
+        }
 
+        try {
             namingService = NamingFactory.createNamingService(nacosConfig);
         } catch (NacosException e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_INIT_NACOS_NAMING_SERVICE, address), e);
