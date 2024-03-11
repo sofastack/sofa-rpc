@@ -82,9 +82,9 @@ public class NacosRegistryTest extends BaseNacosTest {
     }
 
     @Test
-    public void testMulitInit() throws InterruptedException {
+    public void testMuiltInit() throws InterruptedException {
         ExecutorService executorService = Executors.newFixedThreadPool(10);
-        final CountDownLatch latch = new CountDownLatch(1);
+        final CountDownLatch latch = new CountDownLatch(10);
         Set<NacosRegistryProviderObserver> sets = new ConcurrentHashSet<>();
 
         for (int i = 0; i < 10; i++) {

@@ -25,6 +25,7 @@ import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -360,7 +361,7 @@ public class NacosRegistry extends Registry {
      *
      * @return
      */
-    @Deprecated
+    @VisibleForTesting
     public NacosRegistryProviderObserver getProviderObserver() {
         return providerObserver;
     }
