@@ -81,9 +81,7 @@ public class UserThreadPoolManager {
     public static Set<UserThreadPool> getUserThreadPoolSet() {
         Set<UserThreadPool> userThreadPoolSet = new HashSet<>();
         if (hasUserThread()) {
-            for (UserThreadPool userThreadPool : userThreadMap.values()) {
-                userThreadPoolSet.add(userThreadPool);
-            }
+            userThreadPoolSet.addAll(userThreadMap.values());
         }
         return userThreadPoolSet;
     }

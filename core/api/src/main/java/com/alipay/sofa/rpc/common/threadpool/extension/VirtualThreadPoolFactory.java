@@ -18,10 +18,12 @@ package com.alipay.sofa.rpc.common.threadpool.extension;
 
 import com.alipay.sofa.rpc.common.threadpool.SofaExecutorFactory;
 import com.alipay.sofa.common.thread.virtual.SofaVirtualThreadFactory;
+import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
 
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -31,9 +33,31 @@ import java.util.concurrent.Executor;
 @Extension(value = "virtual")
 public class VirtualThreadPoolFactory implements SofaExecutorFactory {
 
+    /**
+     * 系统全局线程池计数器
+     */
+    private static final AtomicInteger POOL_COUNT = new AtomicInteger();
+
     @Override
     public Executor createExecutor(String namePrefix, ServerConfig serverConfig) {
         // virtual thread does not support any configs now
-        return SofaVirtualThreadFactory.ofExecutorService(namePrefix);
+        return SofaVirtualThreadFactory.ofExecutorService(buildNamePrefix(namePrefix));
+    }
+
+    /**
+     * refine virtual thread name
+     * SOFA-originInput-0-VT123
+     * @param namePrefix
+     * @return
+     */
+    private String buildNamePrefix(String namePrefix) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("SOFA-");
+        sb.append(namePrefix);
+        sb.append("-");
+        sb.append(POOL_COUNT.getAndIncrement());
+        sb.append("-");
+        sb.append(ThreadPoolConstant.TYPE_PREFIX_VIRTUAL_TREAD);
+        return sb.toString();
     }
 }
