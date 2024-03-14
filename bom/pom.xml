@@ -60,6 +60,7 @@
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
+        <fastjson.version>1.2.83</fastjson.version>
     </properties>
 
     <dependencyManagement>
@@ -443,6 +444,11 @@
                 <groupId>com.alipay.sofa.common</groupId>
                 <artifactId>sofa-common-tools</artifactId>
                 <version>${sofa.common.tools.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba</groupId>
+                <artifactId>fastjson</artifactId>
+                <version>${fastjson.version}</version>
             </dependency>
             <dependency>
                 <groupId>commons-lang</groupId>
