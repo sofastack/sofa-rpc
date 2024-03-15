@@ -269,8 +269,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             long deserializeStartTime = System.nanoTime();
             try {
                 byte[] content = requestCommand.getContent();
-                if (content == null || content.length == 0) {
-                    throw new DeserializationException("Content of request is null");
+                // The content may be empty in protobuf protocol scenario.
+                if (content == null) {
+                    content = new byte[0];
                 }
                 String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
                 ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -282,8 +283,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory
                         .getSerializer(requestCommand.getSerializer());
                     Object sofaRequest = ClassUtils.forName(requestCommand.getRequestClass()).newInstance();
-                    rpcSerializer.decode(new ByteArrayWrapperByteBuf(requestCommand.getContent()),
-                        sofaRequest, headerMap);
+                    rpcSerializer.decode(new ByteArrayWrapperByteBuf(content), sofaRequest, headerMap);
 
                     //for service mesh or other scene, we need to add more info from header
                     setRequestPropertiesWithHeaderInfo(headerMap, sofaRequest);
@@ -431,8 +431,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
             RpcResponseCommand responseCommand = (RpcResponseCommand) response;
             byte serializer = response.getSerializer();
             byte[] content = responseCommand.getContent();
-            if (content == null || content.length == 0) {
-                return false;
+            if (content == null) {
+                content = new byte[0];
             }
             long deserializeStartTime = System.nanoTime();
 
@@ -451,7 +451,7 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
                     (String) invokeContext.get(RemotingConstants.HEAD_GENERIC_TYPE));
 
                 Serializer rpcSerializer = com.alipay.sofa.rpc.codec.SerializerFactory.getSerializer(serializer);
-                rpcSerializer.decode(new ByteArrayWrapperByteBuf(responseCommand.getContent()), sofaResponse, header);
+                rpcSerializer.decode(new ByteArrayWrapperByteBuf(content), sofaResponse, header);
                 if (sofaResponse instanceof SofaResponse) {
                     parseResponseHeader(header, (SofaResponse) sofaResponse);
                 }
