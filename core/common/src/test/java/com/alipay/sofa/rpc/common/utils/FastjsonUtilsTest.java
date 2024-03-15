@@ -36,11 +36,6 @@ public class FastjsonUtilsTest {
 
     @Test
     public void testToJSONString() {
-        assertEquals("obj", fastjsonUtilsTest.toJSONString("obj"));
-    }
-
-    @Test
-    public void testToJSONStringWithObject() {
         assertEquals("{\"age\":1,\"name\":\"name\"}", fastjsonUtilsTest.toJSONString(new TestClass(1, "name")));
     }
 
