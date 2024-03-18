@@ -396,6 +396,12 @@ public class RpcOptions {
      * 默认开启epoll？
      */
     public static final String TRANSPORT_USE_EPOLL                      = "transport.use.epoll";
+
+    /**
+     * 是否开始io_uring
+     */
+    public static final String TRANSPORT_USE_IO_URING                   = "transport.use.ioUring";
+
     /**
      * 默认服务端 数据包限制
      */
