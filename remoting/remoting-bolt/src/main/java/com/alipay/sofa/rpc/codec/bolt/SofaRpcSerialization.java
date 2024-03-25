@@ -312,6 +312,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         if (sofaRequest instanceof SofaRequest) {
             // 处理 tracer
             parseRequestHeader(RemotingConstants.RPC_TRACE_NAME, headerMap, (SofaRequest) sofaRequest);
+            if (RpcInvokeContext.isBaggageEnable()) {
+                parseRequestHeader(RemotingConstants.RPC_REQUEST_BAGGAGE, headerMap, (SofaRequest) sofaRequest);
+            }
             Map<String, Object> requestProps = ((SofaRequest) sofaRequest).getRequestProps();
             if (requestProps == null) {
                 for (Map.Entry<String, String> entry : headerMap.entrySet()) {

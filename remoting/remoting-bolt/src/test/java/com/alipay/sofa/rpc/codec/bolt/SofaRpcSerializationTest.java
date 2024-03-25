@@ -25,6 +25,7 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import org.junit.Assert;
 import org.junit.Test;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -92,10 +93,13 @@ public class SofaRpcSerializationTest {
         headerMap.put("testKey1","testValue1");
         headerMap.put("rpc_trace_context.sofaTraceId", "traceId");
         headerMap.put("rpc_trace_context.sofaRpcId", "rpcId");
+        headerMap.put("rpc_req_baggage.testBaggageKey1", "testBaggageValue1");
+        headerMap.put("rpc_req_baggage.testBaggageKey2", "testBaggageValue2");
         SofaRpcSerialization sofaRpcSerialization = new SofaRpcSerialization();
         SofaRequest sofaRequest = new SofaRequest();
         sofaRequest.addRequestProp("testKey1", "testValue11");
         sofaRequest.addRequestProp("testKey2", "testValue2");
+        sofaRpcSerialization.parseRequestHeader(headerMap, sofaRequest);
         sofaRpcSerialization.parseRequestHeader(headerMap, sofaRequest);
         Assert.assertEquals("testValue1", sofaRequest.getRequestProp("testKey1"));
         Assert.assertEquals("testValue2", sofaRequest.getRequestProp("testKey2"));
@@ -103,5 +107,10 @@ public class SofaRpcSerializationTest {
         Assert.assertTrue(traceMap instanceof Map);
         Assert.assertEquals("traceId",((Map)traceMap).get("sofaTraceId"));
         Assert.assertEquals("rpcId",((Map)traceMap).get("sofaRpcId"));
+        Object baggageMap = sofaRequest.getRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE);
+        Assert.assertTrue(baggageMap instanceof Map);
+        Assert.assertEquals("testBaggageValue1", ((Map) baggageMap).get("testBaggageKey1"));
+        Assert.assertEquals("testBaggageValue2", ((Map) baggageMap).get("testBaggageKey2"));
+
     }
 }
