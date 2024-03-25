@@ -48,8 +48,11 @@ public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel
      */
     private Channel               channel;
 
+    private NettyBatchWriteQueue  writeQueue;
+
     public NettyChannel(Channel channel) {
         this.channel = channel;
+        this.writeQueue = NettyBatchWriteQueue.createWriteQueue(channel);
     }
 
     public NettyChannel(ChannelHandlerContext context) {
@@ -79,17 +82,14 @@ public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel
 
     @Override
     public void writeAndFlush(final Object obj) {
-        Future future = channel.writeAndFlush(obj);
-        future.addListener(new FutureListener() {
-            @Override
-            public void operationComplete(Future future1) throws Exception {
-                if (!future1.isSuccess()) {
-                    Throwable throwable = future1.cause();
-                    LOGGER.error("Failed to send to "
-                        + NetUtils.channelToString(localAddress(), remoteAddress())
-                        + " for msg : " + obj
-                        + ", Cause by:", throwable);
-                }
+        Future future = writeQueue.enqueue(obj);
+        future.addListener((FutureListener) future1 -> {
+            if (!future1.isSuccess()) {
+                Throwable throwable = future1.cause();
+                LOGGER.error("Failed to send to "
+                    + NetUtils.channelToString(localAddress(), remoteAddress())
+                    + " for msg : " + obj
+                    + ", Cause by:", throwable);
             }
         });
     }
@@ -98,4 +98,14 @@ public class NettyChannel extends AbstractChannel<ChannelHandlerContext, Channel
     public boolean isAvailable() {
         return channel.isOpen() && channel.isActive();
     }
+
+    /**
+     * UT only
+     * @param writeQueue
+     */
+    @Deprecated
+    public void setWriteQueue(NettyBatchWriteQueue writeQueue) {
+        this.writeQueue = writeQueue;
+    }
+
 }
