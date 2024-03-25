@@ -133,6 +133,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
         // 额外属性通过HEAD传递给服务端
         request.addRequestProp(RemotingConstants.HEAD_APP_NAME, consumerConfig.getAppName());
         request.addRequestProp(RemotingConstants.HEAD_PROTOCOL, consumerConfig.getProtocol());
+        request.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE, request.getInvokeType());
 
         customRequest(request, internalContext);
 

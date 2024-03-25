@@ -60,7 +60,8 @@
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
-
+        <!-- Fabric8 for Kubernetes -->
+        <fabric8_kubernetes_version>6.9.2</fabric8_kubernetes_version>
         <!-- io_uring -->
         <netty-iouring.version>0.0.21.Final</netty-iouring.version>
     </properties>
@@ -515,6 +516,19 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+
+            <!-- Fabric8 for Kubernetes -->
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${fabric8_kubernetes_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-server-mock</artifactId>
+                <scope>test</scope>
+                <version>${fabric8_kubernetes_version}</version>
             </dependency>
 
             <!-- Test libs -->
