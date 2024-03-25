@@ -51,8 +51,6 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
-import io.netty.channel.epoll.EpollSocketChannel;
-import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpHeaderNames;
@@ -145,7 +143,7 @@ public abstract class AbstractHttp2ClientTransport extends ClientTransport {
             int port = providerInfo.getPort();
             Bootstrap b = new Bootstrap();
             b.group(workerGroup);
-            b.channel(transportConfig.isUseEpoll() ? EpollSocketChannel.class : NioSocketChannel.class);
+            b.channel(NettyHelper.socketChannel());
             b.option(ChannelOption.SO_KEEPALIVE, true);
             b.remoteAddress(host, port);
             b.handler(initializer);

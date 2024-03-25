@@ -29,7 +29,13 @@ import io.netty.channel.AdaptiveRecvByteBufAllocator;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.epoll.EpollEventLoopGroup;
+import io.netty.channel.epoll.EpollSocketChannel;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.SocketChannel;
+import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.incubator.channel.uring.IOUring;
+import io.netty.incubator.channel.uring.IOUringEventLoopGroup;
+import io.netty.incubator.channel.uring.IOUringSocketChannel;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 
@@ -42,6 +48,7 @@ import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_CLIENT_IO_THREADS;
 import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_USE_EPOLL;
+import static com.alipay.sofa.rpc.common.RpcOptions.TRANSPORT_USE_IO_URING;
 
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
@@ -188,14 +195,36 @@ public class NettyHelper {
                 clientIoThreads : // 用户配置
                 Math.max(4, SystemInfo.getCpuCores() + 1); // 默认cpu+1,至少4个
             NamedThreadFactory threadName = new NamedThreadFactory("CLI-IO", true);
-            boolean useEpoll = getBooleanValue(TRANSPORT_USE_EPOLL);
-            clientIOEventLoopGroup = useEpoll ? new EpollEventLoopGroup(threads, threadName)
-                : new NioEventLoopGroup(threads, threadName);
+            clientIOEventLoopGroup = eventLoopGroup(threads, threadName);
             refCounter.putIfAbsent(clientIOEventLoopGroup, new AtomicInteger(0));
             // SelectStrategyFactory 未设置
         }
         refCounter.get(clientIOEventLoopGroup).incrementAndGet();
         return clientIOEventLoopGroup;
+    }
+
+    public synchronized static EventLoopGroup eventLoopGroup(int threads, NamedThreadFactory threadName) {
+        boolean useEpoll = getBooleanValue(TRANSPORT_USE_EPOLL);
+        boolean useIoUring = getBooleanValue(TRANSPORT_USE_IO_URING);
+        if (useEpoll) {
+            return new EpollEventLoopGroup(threads, threadName);
+        } else if (useIoUring && SystemInfo.isLinux() && IOUring.isAvailable()) {
+            return new IOUringEventLoopGroup(threads, threadName);
+        } else {
+            return new NioEventLoopGroup(threads, threadName);
+        }
+    }
+
+    public synchronized static Class<? extends SocketChannel> socketChannel() {
+        boolean useEpoll = getBooleanValue(TRANSPORT_USE_EPOLL);
+        boolean useIoUring = getBooleanValue(TRANSPORT_USE_IO_URING);
+        if (useEpoll) {
+            return EpollSocketChannel.class;
+        } else if (useIoUring && SystemInfo.isLinux() && IOUring.isAvailable()) {
+            return IOUringSocketChannel.class;
+        } else {
+            return NioSocketChannel.class;
+        }
     }
 
     /**
