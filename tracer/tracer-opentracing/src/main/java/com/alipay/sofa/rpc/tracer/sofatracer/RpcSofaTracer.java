@@ -61,6 +61,10 @@ import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_APP_NAME;
+import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_INVOKE_TYPE;
+import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_PROTOCOL;
+
 /**
  * SofaTracer
  *
@@ -490,11 +494,19 @@ public class RpcSofaTracer extends Tracer {
 
         // Record server receive event
         serverSpan.log(LogData.SERVER_RECV_EVENT_VALUE);
+        // Retrieve logging context information from the request
+        RpcInternalContext context = RpcInternalContext.getContext();
+        serverSpan.setTag(RpcSpanTags.LOCAL_APP, request.getTargetAppName());
+        serverSpan.setTag(RpcSpanTags.SERVICE, request.getTargetServiceUniqueName());
+        serverSpan.setTag(RpcSpanTags.METHOD, request.getMethodName());
+        serverSpan.setTag(RpcSpanTags.PROTOCOL, (String) request.getRequestProp(HEAD_PROTOCOL));
+        serverSpan.setTag(RpcSpanTags.INVOKE_TYPE, (String) request.getRequestProp(HEAD_INVOKE_TYPE));
+        serverSpan.setTag(RpcSpanTags.REMOTE_IP, context.getRemoteHostName());
+        serverSpan.setTag(RpcSpanTags.REMOTE_APP, (String) request.getRequestProp(HEAD_APP_NAME));
         //放到线程上下文
         sofaTraceContext.push(serverSpan);
         //rpc 上下文
         if (RpcInternalContext.isAttachmentEnable()) {
-            RpcInternalContext context = RpcInternalContext.getContext();
             context.setAttachment(RpcConstants.INTERNAL_KEY_TRACE_ID, spanContext.getTraceId());
             context.setAttachment(RpcConstants.INTERNAL_KEY_SPAN_ID, spanContext.getSpanId());
         }
@@ -564,6 +576,10 @@ public class RpcSofaTracer extends Tracer {
 
         RpcInternalContext context = RpcInternalContext.getContext();
         RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+        serverSpan.setTag(RpcSpanTags.SERVER_THREAD_POOL_WAIT_TIME,
+            (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME));
+        serverSpan.setTag(RpcSpanTags.SERVER_BIZ_TIME,
+            (Number) RpcInternalContext.getContext().getAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE));
         serverSpan.setTag(RpcSpanTags.RESP_SERIALIZE_TIME,
             (Number) context.getAttachment(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME));
         serverSpan.setTag(RpcSpanTags.REQ_DESERIALIZE_TIME,
