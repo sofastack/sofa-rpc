@@ -398,6 +398,36 @@ public class RegistryConfig extends AbstractIdConfig implements Serializable {
         return parameters == null ? null : parameters.get(key);
     }
 
+    /**
+     * Gets parameter or default.
+     *
+     * @param key the key
+     * @return the value
+     */
+    public String getParameter(String key, String defaultValue) {
+        return getParameter(key) == null ? defaultValue : getParameter(key);
+    }
+
+    /**
+     * Gets parameter or default.
+     *
+     * @param key the key
+     * @return the value
+     */
+    public int getParameter(String key, int defaultValue) {
+        return getParameter(key) == null ? defaultValue : Integer.parseInt(parameters.get(key));
+    }
+
+    /**
+     * Gets parameter or default.
+     *
+     * @param key the key
+     * @return the value
+     */
+    public boolean getParameter(String key, boolean defaultValue) {
+        return getParameter(key) == null ? defaultValue : Boolean.parseBoolean(parameters.get(key));
+    }
+
     @Override
     public String toString() {
         return "RegistryConfig{" +
