@@ -20,12 +20,12 @@ import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.naming.NamingFactory;
 import com.alibaba.nacos.api.naming.NamingService;
-import com.alibaba.nacos.api.naming.listener.Event;
 import com.alibaba.nacos.api.naming.listener.EventListener;
 import com.alibaba.nacos.api.naming.listener.NamingEvent;
 import com.alibaba.nacos.api.naming.pojo.Instance;
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
@@ -144,6 +144,10 @@ public class NacosRegistry extends Registry {
         Map<String, String> parameters = registryConfig.getParameters();
         if (parameters != null) {
             nacosConfig.putAll(parameters);
+        }
+
+        if (providerObserver == null) {
+            providerObserver = new NacosRegistryProviderObserver();
         }
 
         try {
@@ -272,26 +276,19 @@ public class NacosRegistry extends Registry {
             }
 
             try {
-                if (providerObserver == null) {
-                    providerObserver = new NacosRegistryProviderObserver();
-                }
-
                 ProviderInfoListener providerInfoListener = config.getProviderInfoListener();
                 providerObserver.addProviderListener(config, providerInfoListener);
 
-                EventListener eventListener = new EventListener() {
-                    @Override
-                    public void onEvent(Event event) {
-                        if (event instanceof NamingEvent) {
-                            NamingEvent namingEvent = (NamingEvent) event;
-                            List<Instance> instances = namingEvent.getInstances();
-                            // avoid npe
-                            if (null == instances) {
-                                instances = new ArrayList<Instance>();
-                            }
-                            instances.removeIf(i -> !i.isEnabled());
-                            providerObserver.updateProviders(config, instances);
+                EventListener eventListener = event -> {
+                    if (event instanceof NamingEvent) {
+                        NamingEvent namingEvent = (NamingEvent) event;
+                        List<Instance> instances = namingEvent.getInstances();
+                        // avoid npe
+                        if (null == instances) {
+                            instances = new ArrayList<Instance>();
                         }
+                        instances.removeIf(i -> !i.isEnabled());
+                        providerObserver.updateProviders(config, instances);
                     }
                 };
                 namingService.subscribe(serviceName, defaultCluster, eventListener);
@@ -358,5 +355,15 @@ public class NacosRegistry extends Registry {
 
     public Properties getNacosConfig() {
         return nacosConfig;
+    }
+
+    /**
+     * UT only
+     *
+     * @return
+     */
+    @VisibleForTesting
+    public NacosRegistryProviderObserver getProviderObserver() {
+        return providerObserver;
     }
 }

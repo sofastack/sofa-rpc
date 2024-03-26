@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.registry.nacos;
 
 import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.common.struct.ConcurrentHashSet;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -36,9 +37,12 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -66,8 +70,6 @@ public class NacosRegistryTest extends BaseNacosTest {
             .setRegister(true);
 
         registry = (NacosRegistry) RegistryFactory.getRegistry(registryConfig);
-        registry.init();
-        Assert.assertTrue(registry.start());
     }
 
     /**
@@ -77,7 +79,30 @@ public class NacosRegistryTest extends BaseNacosTest {
     public void tearDown() {
         registry.destroy();
         registry = null;
-        serverConfig.destroy();
+    }
+
+    @Test
+    public void testMuiltInit() throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        final CountDownLatch latch = new CountDownLatch(10);
+        Set<NacosRegistryProviderObserver> sets = new ConcurrentHashSet<>();
+
+        for (int i = 0; i < 10; i++) {
+            executorService.submit(() -> {
+                try {
+                    registry.init();
+                    NacosRegistryProviderObserver providerObserver = registry.getProviderObserver();
+                    sets.add(providerObserver);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        Assert.assertEquals(1, sets.size());
     }
 
     /**
@@ -87,6 +112,8 @@ public class NacosRegistryTest extends BaseNacosTest {
      */
     @Test
     public void testProviderObserver() throws Exception {
+        registry.init();
+        Assert.assertTrue(registry.start());
         int timeoutPerSub = 2000;
 
         //wait nacos startup ok
@@ -227,6 +254,7 @@ public class NacosRegistryTest extends BaseNacosTest {
         List<ConsumerConfig> consumerConfigList = new ArrayList<>();
         consumerConfigList.add(consumer2);
         registry.batchUnSubscribe(consumerConfigList);
+        serverConfig.destroy();
     }
 
     /**
@@ -236,6 +264,8 @@ public class NacosRegistryTest extends BaseNacosTest {
      */
     @Test
     public void testVirtualHostAndVirtualPort() throws Exception {
+        registry.init();
+        Assert.assertTrue(registry.start());
         //wait nacos startup ok
         TimeUnit.SECONDS.sleep(10);
         // 模拟的场景 client -> proxy:127.7.7.7:8888 -> netty:0.0.0.0:12200
@@ -297,6 +327,7 @@ public class NacosRegistryTest extends BaseNacosTest {
             virtualHost + ":" + virtualPort);
         Assert.assertEquals("The provider's host should be virtualHost", virtualHost, pri.getHost());
         Assert.assertEquals("The provider's port should be virtualPort", virtualPort, pri.getPort());
+        serverConfig.destroy();
     }
 
     private static class MockProviderInfoListener implements ProviderInfoListener {
