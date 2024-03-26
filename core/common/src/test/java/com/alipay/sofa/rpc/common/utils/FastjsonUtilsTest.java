@@ -22,21 +22,22 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Map;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
 
 public class FastjsonUtilsTest {
 
-    private FastjsonUtils fastjsonUtilsTest;
+    private FastjsonUtils fastjsonUtils;
 
     @Before
     public void setUp() throws Exception {
-        fastjsonUtilsTest = new FastjsonUtils();
+        fastjsonUtils = new FastjsonUtils();
     }
 
     @Test
     public void testToJSONString() {
-        assertEquals("{\"age\":1,\"name\":\"name\"}", fastjsonUtilsTest.toJSONString(new TestClass(1, "name")));
+        assertEquals("{\"age\":1,\"name\":\"name\"}", fastjsonUtils.toJSONString(new TestClass(1, "name")));
     }
 
     @Test
@@ -87,6 +88,22 @@ public class FastjsonUtilsTest {
 
         public void setName(String name) {
             this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            TestClass testClass = (TestClass) o;
+            return age == testClass.age &&
+                Objects.equals(name, testClass.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(age, name);
         }
     }
 }
