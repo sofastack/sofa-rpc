@@ -136,4 +136,61 @@ public class NacosRegistryHelperTest {
         serviceName = NacosRegistryHelper.buildServiceName(provider, RpcConstants.PROTOCOL_TYPE_REST);
         assertEquals(serviceName, "com.alipay.xxx.TestService:nacos-test:" + RpcConstants.PROTOCOL_TYPE_REST);
     }
+
+    @Test
+    public void testNacosWeight() {
+        Instance instance = new Instance();
+        instance.setClusterName(NacosRegistryHelper.DEFAULT_CLUSTER);
+        instance.setIp("1.1.1.1");
+        instance.setPort(12200);
+        instance.setServiceName("com.alipay.xxx.TestService");
+        instance.setWeight(0.99D);
+
+        List<ProviderInfo> providerInfos = NacosRegistryHelper
+            .convertInstancesToProviders(Lists.newArrayList(instance));
+        assertNotNull(providerInfos);
+        assertEquals(1, providerInfos.size());
+
+        ProviderInfo providerInfo = providerInfos.get(0);
+        assertNotNull(providerInfo);
+        assertEquals(99, providerInfo.getWeight());
+    }
+
+    @Test
+    public void testNacosWeightLessThan0() {
+        Instance instance = new Instance();
+        instance.setClusterName(NacosRegistryHelper.DEFAULT_CLUSTER);
+        instance.setIp("1.1.1.1");
+        instance.setPort(12200);
+        instance.setServiceName("com.alipay.xxx.TestService");
+        instance.setWeight(-0.1D);
+
+        List<ProviderInfo> providerInfos = NacosRegistryHelper
+            .convertInstancesToProviders(Lists.newArrayList(instance));
+        assertNotNull(providerInfos);
+        assertEquals(1, providerInfos.size());
+
+        ProviderInfo providerInfo = providerInfos.get(0);
+        assertNotNull(providerInfo);
+        assertEquals(-10, providerInfo.getWeight());
+    }
+
+    @Test
+    public void testNacosWeightWith0() {
+        Instance instance = new Instance();
+        instance.setClusterName(NacosRegistryHelper.DEFAULT_CLUSTER);
+        instance.setIp("1.1.1.1");
+        instance.setPort(12200);
+        instance.setServiceName("com.alipay.xxx.TestService");
+        instance.setWeight(0.0D);
+
+        List<ProviderInfo> providerInfos = NacosRegistryHelper
+            .convertInstancesToProviders(Lists.newArrayList(instance));
+        assertNotNull(providerInfos);
+        assertEquals(1, providerInfos.size());
+
+        ProviderInfo providerInfo = providerInfos.get(0);
+        assertNotNull(providerInfo);
+        assertEquals(0, providerInfo.getWeight());
+    }
 }

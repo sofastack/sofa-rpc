@@ -123,6 +123,13 @@ class NacosRegistryHelper {
         for (Instance instance : allInstances) {
             String url = convertInstanceToUrl(instance);
             ProviderInfo providerInfo = ProviderHelper.toProviderInfo(url);
+
+            // Nacos的默认权重为1.0
+            // 当Nacos默认权重传入1.0，根据代码逻辑计算结果为100，与sofa-rpc默认权重一致
+            // 因为是接口级别，如果不同的服务具有不同的权重也不会出现被覆盖或者冲突的情况
+            long weight = Math.round(providerInfo.getWeight() * instance.getWeight());
+            providerInfo.setWeight(Math.round(weight));
+
             providerInfos.add(providerInfo);
         }
         return providerInfos;
