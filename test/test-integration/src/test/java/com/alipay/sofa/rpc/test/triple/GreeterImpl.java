@@ -51,4 +51,24 @@ public class GreeterImpl extends SofaGreeterTriple.GreeterImplBase {
         responseObserver.onNext(reply);
         responseObserver.onCompleted();
     }
+
+    @Override
+    public StreamObserver<HelloRequest> sayHelloBinary(StreamObserver<HelloReply> responseObserver) {
+        return new StreamObserver<HelloRequest>() {
+
+            @Override
+            public void onNext(HelloRequest value) {
+                responseObserver.onNext(HelloReply.newBuilder().setMessage(value.getName())
+                    .build());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+            }
+
+            @Override
+            public void onCompleted() {
+            }
+        };
+    }
 }

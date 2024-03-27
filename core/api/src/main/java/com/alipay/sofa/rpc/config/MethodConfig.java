@@ -16,9 +16,15 @@
  */
 package com.alipay.sofa.rpc.config;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.transport.StreamHandler;
 
 import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -43,7 +49,8 @@ public class MethodConfig implements Serializable {
     protected Map<String, String>  parameters;
 
     /**
-     * The Timeout. 远程调用超时时间(毫秒)
+     * The Timeout. 远程调用超时时间(毫秒)。
+     * 对于Stream调用，这个时间为整个调用的超时时长，而非stream内单个调用的时长。未在这个时长内完成（调用{@link StreamHandler#onFinish()})的Stream调用会认为超时并抛出异常。
      */
     protected Integer              timeout;
 
@@ -325,5 +332,39 @@ public class MethodConfig implements Serializable {
      */
     public String getParameter(String key) {
         return parameters == null ? null : parameters.get(key);
+    }
+
+    /**
+     * Gets the stream call type of certain method
+     * @param method the method
+     * @return call type,server/client/bidirectional stream or default value. If not mapped to any stream call type, use the default value
+     */
+    public static String mapStreamType(Method method, String defaultValue){
+        Class<?>[] paramClasses = method.getParameterTypes();
+        Class<?> returnClass = method.getReturnType();
+
+        int paramLen = paramClasses.length;
+        String callType;
+
+        //BidirectionalStream & ClientStream
+        if(paramLen > 0 && StreamHandler.class.isAssignableFrom(paramClasses[0]) && StreamHandler.class.isAssignableFrom(returnClass)){
+            if(paramLen > 1){
+                throw new SofaRpcException(RpcErrorType.CLIENT_CALL_TYPE,"Bidirectional/Client stream method parameters can be only one StreamHandler.");
+            }
+            callType = RpcConstants.INVOKER_TYPE_BI_STREAMING;
+        }
+        //ServerStream
+        else if (paramLen > 1 && StreamHandler.class.isAssignableFrom(paramClasses[0]) && void.class == returnClass){
+            callType = RpcConstants.INVOKER_TYPE_SERVER_STREAMING;
+        }
+        else if (StreamHandler.class.isAssignableFrom(returnClass) || Arrays.stream(paramClasses).anyMatch(StreamHandler.class::isAssignableFrom)) {
+            throw new SofaRpcException(RpcErrorType.CLIENT_CALL_TYPE, "StreamHandler can only at the specified location of parameter. Please check related docs.");
+        }
+        //Other call types
+        else {
+            callType = defaultValue;
+        }
+
+        return callType;
     }
 }

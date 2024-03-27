@@ -50,6 +50,23 @@ stub = GenericServiceGrpc.newStub(channel).build(channel, callOptions);
     .generic(request, responseObserver);
     }
 
+    public java.util.Iterator<triple.Response> genericServerStream(triple.Request request) {
+    return blockingStub
+    .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
+    .genericServerStream(request);
+    }
+
+    public void genericServerStream(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
+    stub
+    .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
+    .genericServerStream(request, responseObserver);
+    }
+
+    public io.grpc.stub.StreamObserver<triple.Request> genericBiStream(io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
+    return stub
+    .withDeadlineAfter(timeout, TimeUnit.MILLISECONDS)
+    .genericBiStream(responseObserver);
+    }
 }
 
 public static SofaGenericServiceStub getSofaStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions,int timeout) {
@@ -71,6 +88,14 @@ public interface IGenericService {
 
     public void generic(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver);
 
+    default public java.util.Iterator<triple.Response> genericServerStream(triple.Request request) {
+    throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
+    }
+
+    public void genericServerStream(triple.Request request, io.grpc.stub.StreamObserver<triple.Response> responseObserver);
+
+    public io.grpc.stub.StreamObserver<triple.Request> genericBiStream(io.grpc.stub.StreamObserver<triple.Response> responseObserver);
+
 }
 
 public static abstract class GenericServiceImplBase implements io.grpc.BindableService, IGenericService {
@@ -91,9 +116,22 @@ this.proxiedImpl = proxiedImpl;
     throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
     }
 
+    @java.lang.Override
+    public final java.util.Iterator<triple.Response> genericServerStream(triple.Request request) {
+    throw new UnsupportedOperationException("No need to override this method, extend XxxImplBase and override all methods it allows.");
+    }
+
         public void generic(triple.Request request,
         io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
         asyncUnimplementedUnaryCall(triple.GenericServiceGrpc.getGenericMethod(), responseObserver);
+        }
+        public io.grpc.stub.StreamObserver<triple.Request> genericBiStream(
+        io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
+        return asyncUnimplementedStreamingCall(triple.GenericServiceGrpc.getGenericBiStreamMethod(), responseObserver);
+        }
+        public void genericServerStream(triple.Request request,
+        io.grpc.stub.StreamObserver<triple.Response> responseObserver) {
+        asyncUnimplementedUnaryCall(triple.GenericServiceGrpc.getGenericServerStreamMethod(), responseObserver);
         }
 
 @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
@@ -105,10 +143,26 @@ return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
     triple.Request,
     triple.Response>(
     proxiedImpl, METHODID_GENERIC)))
+    .addMethod(
+    triple.GenericServiceGrpc.getGenericBiStreamMethod(),
+    asyncBidiStreamingCall(
+    new MethodHandlers<
+    triple.Request,
+    triple.Response>(
+    proxiedImpl, METHODID_GENERIC_BI_STREAM)))
+    .addMethod(
+    triple.GenericServiceGrpc.getGenericServerStreamMethod(),
+    asyncServerStreamingCall(
+    new MethodHandlers<
+    triple.Request,
+    triple.Response>(
+    proxiedImpl, METHODID_GENERIC_SERVER_STREAM)))
 .build();
 }
 }
     private static final int METHODID_GENERIC = 0;
+    private static final int METHODID_GENERIC_BI_STREAM = 1;
+    private static final int METHODID_GENERIC_SERVER_STREAM = 2;
 
 private static final class MethodHandlers
 <Req, Resp> implements
@@ -137,6 +191,10 @@ public void invoke(Req request, io.grpc.stub.StreamObserver
             serviceImpl.generic((triple.Request) request,
             (io.grpc.stub.StreamObserver<triple.Response>) responseObserver);
             break;
+            case METHODID_GENERIC_SERVER_STREAM:
+            serviceImpl.genericServerStream((triple.Request) request,
+            (io.grpc.stub.StreamObserver<triple.Response>) responseObserver);
+            break;
     default:
     throw new java.lang.AssertionError();
     }
@@ -148,6 +206,10 @@ public void invoke(Req request, io.grpc.stub.StreamObserver
     <Req> invoke(io.grpc.stub.StreamObserver
         <Resp> responseObserver) {
             switch (methodId) {
+                    case METHODID_GENERIC_BI_STREAM:
+                    return (io.grpc.stub.StreamObserver
+                <Req>) serviceImpl.genericBiStream(
+                    (io.grpc.stub.StreamObserver<triple.Response>) responseObserver);
             default:
             throw new java.lang.AssertionError();
            }

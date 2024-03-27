@@ -38,14 +38,16 @@ import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.filter.FilterChain;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import com.alipay.sofa.rpc.message.triple.stream.ClientStreamObserverAdapter;
 import com.alipay.sofa.rpc.message.triple.TripleResponseFuture;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
+import com.alipay.sofa.rpc.transport.StreamHandler;
+import com.alipay.sofa.rpc.utils.SofaProtoUtils;
+import com.alipay.sofa.rpc.utils.TripleExceptionUtils;
 import com.google.protobuf.ByteString;
-import io.grpc.CallOptions;
-import io.grpc.Channel;
-import io.grpc.MethodDescriptor;
-import io.grpc.Status;
+import io.grpc.*;
 import io.grpc.protobuf.ProtoUtils;
 import io.grpc.stub.ClientCalls;
 import io.grpc.stub.StreamObserver;
@@ -69,22 +71,22 @@ import static io.grpc.MethodDescriptor.generateFullMethodName;
  * @date 2018.12.15 7:06 PM
  */
 public class TripleClientInvoker implements TripleInvoker {
-    private final static Logger LOGGER                = LoggerFactory.getLogger(TripleClientInvoker.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientInvoker.class);
 
     private final static String DEFAULT_SERIALIZATION = SERIALIZE_HESSIAN2;
 
-    protected Channel           channel;
+    protected Channel channel;
 
-    protected ConsumerConfig    consumerConfig;
+    protected ConsumerConfig consumerConfig;
 
     protected ProviderInfo providerInfo;
 
-    protected Method            sofaStub;
+    protected Method sofaStub;
 
-    protected boolean           useGeneric;
+    protected boolean useGeneric;
 
-    private Serializer          serializer;
-    private String              serialization;
+    private Serializer serializer;
+    private String serialization;
 
     private Map<String, Method> methodMap = new ConcurrentHashMap<>();
 
@@ -106,6 +108,23 @@ public class TripleClientInvoker implements TripleInvoker {
         }
     }
 
+    public static Request getRequest(SofaRequest sofaRequest, String serialization, Serializer serializer, int trueParamStart) {
+        Request.Builder builder = Request.newBuilder();
+        builder.setSerializeType(serialization);
+
+        String[] methodArgSigs = sofaRequest.getMethodArgSigs();
+        Object[] methodArgs = sofaRequest.getMethodArgs();
+
+        for (int i = trueParamStart; i < methodArgSigs.length; i++) {
+            Object arg = methodArgs[i];
+            ByteString argByteString = ByteString.copyFrom(serializer.encode(arg, null).array());
+            builder.addArgs(argByteString);
+            builder.addArgTypes(methodArgSigs[i]);
+        }
+        return builder.build();
+    }
+
+
     private void cacheCommonData(ConsumerConfig consumerConfig) {
         String serialization = consumerConfig.getSerialization();
         if (StringUtils.isBlank(serialization)) {
@@ -121,35 +140,132 @@ public class TripleClientInvoker implements TripleInvoker {
 
     @Override
     public SofaResponse invoke(SofaRequest sofaRequest, int timeout)
-        throws Exception {
-        if (!useGeneric) {
-            SofaResponse sofaResponse = new SofaResponse();
-            Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout),
-                timeout);
-            final Method method = sofaRequest.getMethod();
-            Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
-            sofaResponse.setAppResponse(appResponse);
-            return sofaResponse;
+            throws Exception {
+
+        MethodDescriptor.MethodType callType = mapCallType(sofaRequest);
+
+        if(!useGeneric){
+            return stubCall(sofaRequest,timeout);
+        } else if (callType.equals(MethodDescriptor.MethodType.UNARY)) {
+            return unaryCall(sofaRequest, timeout);
         } else {
-            MethodDescriptor methodDescriptor = getMethodDescriptor(sofaRequest);
-            Request request = getRequest(sofaRequest, serialization, serializer);
-            Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
+            return streamCall(sofaRequest, timeout, callType);
+        }
+    }
+
+    private MethodDescriptor.MethodType mapCallType(SofaRequest sofaRequest) {
+        String sofaCallType = sofaRequest.getInvokeType();
+        switch (sofaCallType) {
+            case RpcConstants.INVOKER_TYPE_BI_STREAMING:
+                return MethodDescriptor.MethodType.BIDI_STREAMING;
+            case RpcConstants.INVOKER_TYPE_CLIENT_STREAMING:
+                return MethodDescriptor.MethodType.CLIENT_STREAMING;
+            case RpcConstants.INVOKER_TYPE_SERVER_STREAMING:
+                return MethodDescriptor.MethodType.SERVER_STREAMING;
+            default:
+                return MethodDescriptor.MethodType.UNARY;
+        }
+    }
+
+    private SofaResponse streamCall(SofaRequest sofaRequest, int timeout, MethodDescriptor.MethodType callType) {
+        switch (callType) {
+            case BIDI_STREAMING:
+                return binaryStreamCall(sofaRequest, timeout);
+            case CLIENT_STREAMING:
+                return clientStreamCall(sofaRequest, timeout);
+            case SERVER_STREAMING:
+                return serverStreamCall(sofaRequest, timeout);
+            default:
+                throw new SofaRpcException(RpcErrorType.CLIENT_CALL_TYPE, "Unknown stream call type:" + callType);
+        }
+    }
+
+
+    private SofaResponse unaryCall(SofaRequest sofaRequest, int timeout) throws Exception{
+        MethodDescriptor methodDescriptor = getMethodDescriptor(sofaRequest);
+        Request request = getRequest(sofaRequest, serialization, serializer, 0);
+        Response response = (Response) ClientCalls.blockingUnaryCall(channel, methodDescriptor,
                 buildCustomCallOptions(sofaRequest, timeout), request);
 
-            SofaResponse sofaResponse = new SofaResponse();
-            byte[] responseDate = response.getData().toByteArray();
-            Class returnType = sofaRequest.getMethod().getReturnType();
-            if (returnType != void.class) {
-                if (responseDate != null && responseDate.length > 0) {
-                    Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
-                    Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
-                    sofaResponse.setAppResponse(appResponse);
-                }
+        SofaResponse sofaResponse = new SofaResponse();
+        byte[] responseDate = response.getData().toByteArray();
+        Class returnType = sofaRequest.getMethod().getReturnType();
+        if (returnType != void.class) {
+            if (responseDate != null && responseDate.length > 0) {
+                Serializer responseSerializer = SerializerFactory.getSerializer(response.getSerializeType());
+                Object appResponse = responseSerializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
+                sofaResponse.setAppResponse(appResponse);
+            }
+        }
+        return sofaResponse;
+    }
+
+    private SofaResponse stubCall(SofaRequest sofaRequest, int timeout) throws Exception{
+        SofaResponse sofaResponse = new SofaResponse();
+        Object stub = sofaStub.invoke(null, channel, buildCustomCallOptions(sofaRequest, timeout),
+                timeout);
+        final Method method = sofaRequest.getMethod();
+        Object appResponse = method.invoke(stub, sofaRequest.getMethodArgs()[0]);
+        sofaResponse.setAppResponse(appResponse);
+        return sofaResponse;
+    }
+
+    private SofaResponse binaryStreamCall(SofaRequest sofaRequest, int timeout) {
+        StreamHandler streamHandler = (StreamHandler) sofaRequest.getMethodArgs()[0];
+
+        MethodDescriptor<Request, Response> methodDescriptor = getMethodDescriptor(sofaRequest);
+        ClientCall<Request, Response> call = channel.newCall(methodDescriptor, buildCustomCallOptions(sofaRequest, timeout));
+
+        StreamObserver<Request> observer = ClientCalls.asyncBidiStreamingCall(
+                call,
+                new ClientStreamObserverAdapter(
+                        streamHandler,
+                        sofaRequest.getSerializeType()
+                )
+        );
+        StreamHandler<Request> handler = new StreamHandler() {
+            @Override
+            public void onMessage(Object message) {
+                SofaRequest request = MessageBuilder.copyEmptyRequest(sofaRequest);
+                Object[] args = new Object[]{message};
+                request.setMethodArgs(args);
+                request.setMethodArgSigs(rebuildTrueRequestArgSigs(args));
+                Request req = getRequest(request, serialization, serializer, 0);
+                observer.onNext(req);
             }
 
-            return sofaResponse;
-        }
+            @Override
+            public void onFinish() {
+                observer.onCompleted();
+            }
 
+            @Override
+            public void onException(Throwable throwable) {
+                observer.onError(TripleExceptionUtils.asStatusRuntimeException(throwable));
+            }
+        };
+        SofaResponse sofaResponse = new SofaResponse();
+        sofaResponse.setAppResponse(handler);
+        return sofaResponse;
+    }
+
+    private SofaResponse clientStreamCall(SofaRequest sofaRequest, int timeout) {
+        return binaryStreamCall(sofaRequest, timeout);
+    }
+
+    private SofaResponse serverStreamCall(SofaRequest sofaRequest, int timeout) {
+        StreamHandler streamHandler = (StreamHandler) sofaRequest.getMethodArgs()[0];
+
+        MethodDescriptor<Request, Response> methodDescriptor = getMethodDescriptor(sofaRequest);
+        ClientCall<Request, Response> call = channel.newCall(methodDescriptor, buildCustomCallOptions(sofaRequest, timeout));
+
+        Request req = getRequest(sofaRequest, serialization, serializer, 1);
+
+        ClientStreamObserverAdapter responseObserver = new ClientStreamObserverAdapter(streamHandler, sofaRequest.getSerializeType());
+
+        ClientCalls.asyncServerStreamingCall(call, req, responseObserver);
+
+        return new SofaResponse();
     }
 
     @Override
@@ -199,7 +315,7 @@ public class TripleClientInvoker implements TripleInvoker {
             });
         } else {
             MethodDescriptor methodDescriptor = getMethodDescriptor(sofaRequest);
-            Request request = getRequest(sofaRequest, serialization, serializer);
+            Request request = getRequest(sofaRequest, serialization, serializer, 0);
             ClientCalls.asyncUnaryCall(channel.newCall(methodDescriptor, buildCustomCallOptions(sofaRequest, timeout)), request, new StreamObserver<Object>() {
                 @Override
                 public void onNext(Object o) {
@@ -218,6 +334,24 @@ public class TripleClientInvoker implements TripleInvoker {
             });
         }
         return future;
+    }
+
+    /**
+     * Build arg sigs for stream calls.
+     *
+     * @param requestArgs request args
+     * @return arg sigs, arg.getClass().getName().
+     */
+    private String[] rebuildTrueRequestArgSigs(Object[] requestArgs) {
+        String[] classes = new String[requestArgs.length];
+        for (int k = 0; k < requestArgs.length; k++) {
+            if (requestArgs[k] != null) {
+                classes[k] = requestArgs[k].getClass().getName();
+            } else {
+                classes[k] = void.class.getName();
+            }
+        }
+        return classes;
     }
 
     private void processSuccess(boolean needDecode, RpcInternalContext context, SofaRequest sofaRequest, Object o, SofaResponseCallback sofaResponseCallback, TripleResponseFuture future, ClassLoader classLoader) {
@@ -299,7 +433,7 @@ public class TripleClientInvoker implements TripleInvoker {
                 Status status = Status.fromThrowable(throwable);
                 if (status.getCode() == Status.Code.UNKNOWN) {
                     sofaResponseCallback.onAppException(throwable, sofaRequest.getMethodName(), sofaRequest);
-                }else {
+                } else {
                     sofaResponseCallback.onSofaException(new SofaRpcException(RpcErrorType.UNKNOWN, status.getCause()), sofaRequest.getMethodName(), sofaRequest);
                 }
             } else {
@@ -342,41 +476,28 @@ public class TripleClientInvoker implements TripleInvoker {
         }
     }
 
-    private MethodDescriptor getMethodDescriptor(SofaRequest sofaRequest) {
+    private MethodDescriptor<Request, Response> getMethodDescriptor(SofaRequest sofaRequest) {
         String serviceName = sofaRequest.getInterfaceName();
         String methodName = sofaRequest.getMethodName();
         MethodDescriptor.Marshaller<?> requestMarshaller = ProtoUtils.marshaller(Request.getDefaultInstance());
         MethodDescriptor.Marshaller<?> responseMarshaller = ProtoUtils.marshaller(Response.getDefaultInstance());
         String fullMethodName = generateFullMethodName(serviceName, methodName);
-        MethodDescriptor methodDescriptor = MethodDescriptor
+
+        MethodDescriptor.Builder builder = MethodDescriptor
                 .newBuilder()
-                .setType(MethodDescriptor.MethodType.UNARY)
                 .setFullMethodName(fullMethodName)
                 .setSampledToLocalTracing(true)
                 .setRequestMarshaller((MethodDescriptor.Marshaller<Object>) requestMarshaller)
-                .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller)
-                .build();
-        return methodDescriptor;
-    }
+                .setResponseMarshaller((MethodDescriptor.Marshaller<Object>) responseMarshaller);
 
-    public static Request getRequest(SofaRequest sofaRequest, String serialization, Serializer serializer) {
-        Request.Builder builder = Request.newBuilder();
-        builder.setSerializeType(serialization);
-
-        String[] methodArgSigs = sofaRequest.getMethodArgSigs();
-        Object[] methodArgs = sofaRequest.getMethodArgs();
-
-        for (int i = 0; i < methodArgSigs.length; i++) {
-            Object arg = methodArgs[i];
-            ByteString argByteString = ByteString.copyFrom(serializer.encode(arg, null).array());
-            builder.addArgs(argByteString);
-            builder.addArgTypes(methodArgSigs[i]);
-        }
+        MethodDescriptor.MethodType callType = SofaProtoUtils.mapGrpcCallType(sofaRequest.getInvokeType());
+        builder.setType(callType);
         return builder.build();
     }
 
     /**
      * set some custom info
+     *
      * @param sofaRequest
      * @param timeout
      * @return

@@ -40,7 +40,6 @@ import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 import com.alipay.sofa.rpc.utils.SofaProtoUtils;
 import io.grpc.BindableService;
 import io.grpc.MethodDescriptor;
-import io.grpc.ServerCallHandler;
 import io.grpc.ServerInterceptors;
 import io.grpc.ServerMethodDefinition;
 import io.grpc.ServerServiceDefinition;
@@ -58,7 +57,9 @@ import triple.Request;
 import triple.Response;
 
 import java.lang.reflect.Method;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -67,6 +68,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
@@ -112,7 +114,7 @@ public class TripleServer implements Server {
     /**
      * The mapping relationship between service name and unique id invoker
      */
-    protected Map<String, UniqueIdInvoker>                               invokerMap = new ConcurrentHashMap<>();
+    protected Map<String, UniqueIdInvoker> invokerMap = new ConcurrentHashMap<>();
 
     /**
      * invoker count
@@ -296,7 +298,7 @@ public class TripleServer implements Server {
             BindableService bindableService = (BindableService) providerConfig.getRef();
             serviceDef = bindableService.bindService();
         } else {
-            GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker);
+            GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker,providerConfig);
             genericService.setProxiedImpl(genericService);
             serviceDef = buildSofaServiceDef(genericService, providerConfig);
         }
@@ -328,11 +330,9 @@ public class TripleServer implements Server {
     private ServerServiceDefinition buildSofaServiceDef(GenericServiceImpl genericService,
                                                         ProviderConfig providerConfig) {
         ServerServiceDefinition templateDefinition = genericService.bindService();
-        ServerCallHandler<Request, Response> templateHandler = (ServerCallHandler<Request, Response>) templateDefinition
-            .getMethods().iterator().next().getServerCallHandler();
         List<MethodDescriptor<Request, Response>> methodDescriptor = getMethodDescriptor(providerConfig);
-        List<ServerMethodDefinition<Request, Response>> methodDefs = getMethodDefinitions(templateHandler,
-            methodDescriptor);
+        List<ServerMethodDefinition<Request, Response>> methodDefs = createMethodDefinition(templateDefinition,methodDescriptor);
+        // Bind the actual service to a specific method in the generic service
         ServerServiceDefinition.Builder builder = ServerServiceDefinition.builder(getServiceDescriptor(
             templateDefinition, providerConfig, methodDescriptor));
         for (ServerMethodDefinition<Request, Response> methodDef : methodDefs) {
@@ -341,14 +341,26 @@ public class TripleServer implements Server {
         return builder.build();
     }
 
-    private List<ServerMethodDefinition<Request, Response>> getMethodDefinitions(ServerCallHandler<Request, Response> templateHandler,List<MethodDescriptor<Request, Response>> methodDescriptors) {
-        List<ServerMethodDefinition<Request, Response>> result = new ArrayList<>();
-        for (MethodDescriptor<Request, Response> methodDescriptor : methodDescriptors) {
-            ServerMethodDefinition<Request, Response> serverMethodDefinition = ServerMethodDefinition.create(methodDescriptor, templateHandler);
-            result.add(serverMethodDefinition);
-        }
-        return result;
+    private List<ServerMethodDefinition<Request,Response>> createMethodDefinition(ServerServiceDefinition geneticServiceDefinition, List<MethodDescriptor<Request, Response>> serviceMethods){
+            Collection<ServerMethodDefinition<?, ?>> genericServiceMethods = geneticServiceDefinition.getMethods();
+            List<ServerMethodDefinition<Request,Response>> serverMethodDefinitions = new ArrayList<>();
+            //Map ture service method to certain generic service method.
+            for (ServerMethodDefinition<?,?> genericMethods : genericServiceMethods){
+                for(MethodDescriptor<Request,Response> methodDescriptor : serviceMethods){
+
+                    if(methodDescriptor.getType().equals(genericMethods.getMethodDescriptor().getType())){
+
+                        ServerMethodDefinition<Request,Response> genericMeth = (ServerMethodDefinition<Request, Response>) genericMethods;
+
+                        serverMethodDefinitions.add(
+                                ServerMethodDefinition.create(methodDescriptor, genericMeth.getServerCallHandler())
+                        );
+                    }
+                }
+            }
+            return serverMethodDefinitions;
     }
+
 
     private ServiceDescriptor getServiceDescriptor(ServerServiceDefinition template, ProviderConfig providerConfig,
                                                    List<MethodDescriptor<Request, Response>> methodDescriptors) {
@@ -365,9 +377,11 @@ public class TripleServer implements Server {
     private List<MethodDescriptor<Request, Response>> getMethodDescriptor(ProviderConfig providerConfig) {
         List<MethodDescriptor<Request, Response>> result = new ArrayList<>();
         Set<String> methodNames = SofaProtoUtils.getMethodNames(providerConfig.getInterfaceId());
+
         for (String name : methodNames) {
+            MethodDescriptor.MethodType methodType = SofaProtoUtils.mapGrpcCallType(providerConfig.getMethodCallType(name));
             MethodDescriptor<Request, Response> methodDescriptor = MethodDescriptor.<Request, Response>newBuilder()
-                    .setType(MethodDescriptor.MethodType.UNARY)
+                    .setType(methodType)
                     .setFullMethodName(generateFullMethodName(providerConfig.getInterfaceId(), name))
                     .setSampledToLocalTracing(true)
                     .setRequestMarshaller(ProtoUtils.marshaller(

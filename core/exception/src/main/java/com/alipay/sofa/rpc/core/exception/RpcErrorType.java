@@ -94,6 +94,11 @@ public class RpcErrorType {
     public static final int CLIENT_NETWORK           = 250;
 
     /**
+     * 不支持的RPC调用方式异常
+     */
+    public static final int CLIENT_CALL_TYPE         = 260;
+
+    /**
      * 客户端过滤器异常
      */
     public static final int CLIENT_FILTER            = 270;

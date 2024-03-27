@@ -70,6 +70,21 @@ public class MessageBuilder {
     }
 
     /**
+     * 根据一个请求的属性复制一个不包含具体方法实参的请求。
+     * 复制以下属性：请求接口名、请求方法名、请求方法、方法参数类型
+     *
+     * @param sofaRequest 被复制的请求实例
+     */
+    public static SofaRequest copyEmptyRequest(SofaRequest sofaRequest) {
+        SofaRequest request = new SofaRequest();
+        request.setInterfaceName(sofaRequest.getInterfaceName());
+        request.setMethodName(sofaRequest.getMethodName());
+        request.setMethod(sofaRequest.getMethod());
+        request.setMethodArgSigs(sofaRequest.getMethodArgSigs());
+        return request;
+    }
+
+    /**
      * 构建rpc错误结果
      *
      * @param errorMsg 错误消息

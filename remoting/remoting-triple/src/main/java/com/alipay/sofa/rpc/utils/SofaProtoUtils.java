@@ -18,13 +18,19 @@ package com.alipay.sofa.rpc.utils;
 
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+
 import io.grpc.BindableService;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
+import io.grpc.MethodDescriptor;
 
 import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
+
+import static com.alipay.sofa.rpc.common.RpcConstants.*;
 
 /**
  * @author zhaowang
@@ -60,6 +66,24 @@ public class SofaProtoUtils {
         }
 
         return true;
+    }
+
+    public static MethodDescriptor.MethodType mapGrpcCallType(String callType) {
+        switch (callType) {
+            case INVOKER_TYPE_ONEWAY:
+            case INVOKER_TYPE_FUTURE:
+            case INVOKER_TYPE_CALLBACK:
+            case INVOKER_TYPE_SYNC:
+                return MethodDescriptor.MethodType.UNARY;
+            case INVOKER_TYPE_BI_STREAMING:
+                return MethodDescriptor.MethodType.BIDI_STREAMING;
+            case INVOKER_TYPE_CLIENT_STREAMING:
+                return MethodDescriptor.MethodType.CLIENT_STREAMING;
+            case INVOKER_TYPE_SERVER_STREAMING:
+                return MethodDescriptor.MethodType.SERVER_STREAMING;
+            default:
+                throw new SofaRpcException(RpcErrorType.CLIENT_CALL_TYPE, "Unsupported invoke type:" + callType);
+        }
     }
 
 }

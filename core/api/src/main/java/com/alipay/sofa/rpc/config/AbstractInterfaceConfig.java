@@ -213,6 +213,11 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected transient volatile Map<String, Object> configValueCache = null;
 
     /**
+     * 方法调用类型，（方法全名 - 调用类型）
+     */
+    protected transient volatile Map<String, String> methodCallType   = null;
+
+    /**
      * 代理接口类，和T对应，主要针对泛化调用
      */
     protected transient volatile Class               proxyClass;
@@ -245,6 +250,21 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     public S setProxyClass(Class proxyClass) {
         this.proxyClass = proxyClass;
         return castThis();
+    }
+
+    /**
+     * Cache the call type of interface methods
+     */
+    protected void loadMethodCallType(Class<?> interfaceClass){
+        Method[] methods =  interfaceClass.getDeclaredMethods();
+        this.methodCallType = new ConcurrentHashMap<>();
+        for(Method method :methods) {
+            methodCallType.put(method.getName(),MethodConfig.mapStreamType(method,RpcConstants.INVOKER_TYPE_SYNC));
+        }
+    }
+
+    public String getMethodCallType(String methodName) {
+        return methodCallType.get(methodName);
     }
 
     /**
@@ -1015,7 +1035,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @param key        the key
      * @return the string
      */
-    private String buildmkey(String methodName, String key) {
+    protected String buildmkey(String methodName, String key) {
         return RpcConstants.HIDE_KEY_PREFIX + methodName + RpcConstants.HIDE_KEY_PREFIX + key;
     }
 
