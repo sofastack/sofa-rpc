@@ -28,7 +28,7 @@ import java.util.zip.GZIPOutputStream;
  * @author chengming
  * @version GzipRpcCompressor.java, v 0.1 2024年02月28日 11:25 AM chengming
  */
-@Extension(value = "bzip2", code = 4)
+@Extension(value = "gzip", code = 4)
 public class GzipRpcCompressor implements Compressor {
 
     @Override
