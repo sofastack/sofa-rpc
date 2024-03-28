@@ -14,19 +14,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.event;
+package com.alipay.sofa.rpc.tracer.sofatracer;
 
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.common.RemotingConstants;
-import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.event.ClientBeforeSendEvent;
+import com.alipay.sofa.rpc.event.ClientStartInvokeEvent;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ServerReceiveEvent;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
 import io.opentracing.tag.Tags;
-import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Map;
@@ -40,11 +41,6 @@ import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_PROTOCOL;
  * @date 2024/2/27 19:48
  */
 public class SofaTracerSubscriberTest {
-
-    @BeforeClass
-    public static void beforeClass() {
-        System.getProperties().put(RpcOptions.DEFAULT_TRACER, "sofaTracer");
-    }
 
     @Test
     public void testClientSendAndServerReceiveTracerEvent() {
@@ -83,11 +79,6 @@ public class SofaTracerSubscriberTest {
         Assert.assertEquals("127.0.0.1", serverTagsWithStr.get(RpcSpanTags.REMOTE_IP));
         Assert.assertEquals("callerAppName", serverTagsWithStr.get(RpcSpanTags.REMOTE_APP));
         SofaTraceContextHolder.getSofaTraceContext().clear();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        System.getProperties().remove(RpcOptions.DEFAULT_TRACER);
     }
 
 }
