@@ -37,7 +37,9 @@ import java.util.List;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
+import static com.alipay.sofa.rpc.common.RpcConfigs.getListValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_EXCEPTIONS;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_REJECTED_EXECUTION_POLICY;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ADDRESS_HOLDER;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ADDRESS_WAIT;
@@ -224,6 +226,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * The Retries. 失败后重试次数
      */
     protected int                                   retries                 = getIntValue(CONSUMER_RETRIES);
+
+    /**
+     * 用户自定义异常集合
+     */
+    protected List<String>                          customerExceptions      = getListValue(CONSUMER_EXCEPTIONS);
 
     /**
      * 接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
@@ -440,6 +447,14 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public ConsumerConfig<T> setRetries(int retries) {
         this.retries = retries;
         return this;
+    }
+
+    public List<String> getCustomerExceptions() {
+        return customerExceptions;
+    }
+
+    public void setCustomerExceptions(List<String> customerExceptions) {
+        this.customerExceptions = customerExceptions;
     }
 
     /**
@@ -908,6 +923,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public int getMethodRetries(String methodName) {
         return (Integer) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_RETRIES,
             getRetries());
+    }
+
+    public List<String> getCustomerExceptions() {
+        return getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_RETRIES,
+                getRetries());
     }
 
     /**

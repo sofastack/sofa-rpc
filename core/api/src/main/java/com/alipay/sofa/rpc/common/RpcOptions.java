@@ -300,6 +300,10 @@ public class RpcOptions {
      */
     public static final String CONSUMER_RETRIES                         = "consumer.retries";
     /**
+     * 用户自定义异常集合
+     */
+    public static final String CONSUMER_EXCEPTIONS                      = "consumer.exceptions";
+    /**
      * 默认是否异步
      */
     public static final String CONSUMER_INVOKE_TYPE                     = "consumer.invokeType";

@@ -171,6 +171,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "consumer.loadBalancer": "auto",
   //默认失败重试次数
   "consumer.retries": 0,
+  // 用户自定义异常集合, 默认为空
+  "consumer.exceptions": [],
   //接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
   "consumer.concurrents": 0,
   // 默认是否异步

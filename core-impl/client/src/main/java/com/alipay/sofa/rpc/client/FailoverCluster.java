@@ -31,6 +31,9 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.alipay.sofa.rpc.common.RpcConfigs.getListValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_EXCEPTIONS;
+
 /**
  * 故障转移，支持重试和指定地址调用
  *
@@ -57,6 +60,7 @@ public class FailoverCluster extends AbstractCluster {
     public SofaResponse doInvoke(SofaRequest request) throws SofaRpcException {
         String methodName = request.getMethodName();
         int retries = consumerConfig.getMethodRetries(methodName);
+        consumerConfig.
         int time = 0;
         // 异常日志
         SofaRpcException throwable = null;
