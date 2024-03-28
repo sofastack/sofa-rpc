@@ -516,6 +516,18 @@
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
+            <!-- Fabric8 for Kubernetes -->
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-client</artifactId>
+                <version>${fabric8_kubernetes_version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.fabric8</groupId>
+                <artifactId>kubernetes-server-mock</artifactId>
+                <scope>test</scope>
+                <version>${fabric8_kubernetes_version}</version>
+            </dependency>
 
             <!-- Test libs -->
             <dependency>
