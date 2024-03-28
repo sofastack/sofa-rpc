@@ -529,6 +529,8 @@
                 <version>${fabric8_kubernetes_version}</version>
             </dependency>
 
+
+
             <!-- Test libs -->
             <dependency>
                 <groupId>org.apache.curator</groupId>
@@ -612,6 +614,12 @@
                 <artifactId>simpleclient_hotspot</artifactId>
                 <version>0.16.0</version>
                 <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons_compress_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
