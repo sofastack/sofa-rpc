@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.triple.stream;
+package com.alipay.sofa.rpc.test.triple.stream;
 
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -23,64 +23,60 @@ import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.alipay.sofa.rpc.transport.StreamHandler;
-import org.junit.After;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.transport.SofaStreamObserver;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 public class TripleGenericStreamTest {
 
-    static final String          HELLO_MSG = "Hello, world!";
-    ConsumerConfig<HelloService> consumerConfig;
-    ProviderConfig<HelloService> providerConfig;
-    HelloService                 helloServiceInst;
+    private static final Logger                 LOGGER    = LoggerFactory.getLogger(TripleGenericStreamTest.class);
+    private static final String                 HELLO_MSG = "Hello, world!";
+    private static ConsumerConfig<HelloService> consumerConfig;
+    private static ProviderConfig<HelloService> providerConfig;
+    private static HelloService                 helloServiceInst;
+    private static HelloService                 helloServiceRef;
 
-    ConsumerConfig<HelloService> consumerRefer() {
-        ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setProtocol("tri")
-            .setDirectUrl("triple://127.0.0.1:12200");
-        consumerConfig.refer();
-        return consumerConfig;
-    }
-
-    ProviderConfig<HelloService> providerExport() {
+    @BeforeClass
+    public static void beforeClass() throws InterruptedException {
+        RpcRunningState.setUnitTestMode(true);
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("tri")
-            .setPort(12200)
+            .setPort(50066)
             .setDaemon(false);
 
         helloServiceInst = Mockito.spy(new HelloServiceImpl());
-
-        ProviderConfig<HelloService> providerConfig = new ProviderConfig<HelloService>()
+        providerConfig = new ProviderConfig<HelloService>()
             .setInterfaceId(HelloService.class.getName())
             .setRef(helloServiceInst)
             .setServer(serverConfig);
-
         providerConfig.export();
-        return providerConfig;
+
+        consumerConfig = new ConsumerConfig<HelloService>()
+            .setInterfaceId(HelloService.class.getName())
+            .setProtocol("tri")
+            .setDirectUrl("triple://127.0.0.1:50066");
+        helloServiceRef = consumerConfig.refer();
     }
 
-    @Before
-    public void bootStrap() {
-        RpcRunningState.setUnitTestMode(true);
-        providerConfig = providerExport();
-        consumerConfig = consumerRefer();
-    }
-
-    @After
-    public void shutdown() {
+    @AfterClass
+    public static void afterClass() {
         consumerConfig.unRefer();
         providerConfig.unExport();
         RpcRuntimeContext.destroy();
@@ -88,59 +84,9 @@ public class TripleGenericStreamTest {
         RpcInvokeContext.removeContext();
     }
 
-    public void testTripleBiStream(boolean endWithException) throws InterruptedException {
-
-        int requestTimes = 5;
-        CountDownLatch countDownLatch = new CountDownLatch(requestTimes + 1);
-
-        AtomicBoolean receivedFinish = new AtomicBoolean(false);
-        AtomicBoolean receivedException = new AtomicBoolean(false);
-
-        HelloService helloServiceRef = consumerConfig.refer();
-
-        StreamHandler<ClientRequest> streamHandler = helloServiceRef
-                .sayHelloBiStream(new StreamHandler<ServerResponse>() {
-                    final AtomicInteger requestCount = new AtomicInteger(0);
-
-                    @Override
-                    public void onMessage(ServerResponse message) {
-                        Assert.assertEquals(requestCount.getAndIncrement(), message.getCount());
-                        Assert.assertEquals(HELLO_MSG, message.getMsg());
-                        countDownLatch.countDown();
-                    }
-
-                    @Override
-                    public void onFinish() {
-                        receivedFinish.set(true);
-                        countDownLatch.countDown();
-                    }
-
-                    @Override
-                    public void onException(Throwable throwable) {
-                        Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
-                        receivedException.set(true);
-                        countDownLatch.countDown();
-                    }
-                });
-        for (int k = 0; k < requestTimes; k++) {
-            streamHandler.onMessage(new ClientRequest(HELLO_MSG, k));
-        }
-        if (!endWithException) {
-            streamHandler.onMessage(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_FINISH, -2));
-            Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
-            Assert.assertTrue(receivedFinish.get());
-            streamHandler.onFinish();
-            Assert.assertFalse(receivedException.get());
-            Assert.assertThrows(Throwable.class, () -> streamHandler.onMessage(new ClientRequest("", 123)));
-        } else {
-            streamHandler.onMessage(new ClientRequest(HelloService.CMD_TRIGGER_STEAM_ERROR, -2));
-            Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
-            streamHandler.onException(new RuntimeException(HelloService.ERROR_MSG));
-            Assert.assertThrows(Throwable.class,()->streamHandler.onMessage(new ClientRequest(HELLO_MSG,0)));
-            Assert.assertFalse(receivedFinish.get());
-            Assert.assertTrue(receivedException.get());
-        }
-        verify(helloServiceInst, times(1)).sayHelloBiStream(any());
+    @Test
+    public void testTripleBiStreamFinish() throws InterruptedException {
+        testTripleBiStream(false);
     }
 
     @Test
@@ -148,52 +94,67 @@ public class TripleGenericStreamTest {
         testTripleBiStream(true);
     }
 
-    @Test
-    public void testTripleBiStreamFinish() throws InterruptedException {
-        testTripleBiStream(false);
-    }
+    public void testTripleBiStream(boolean endWithException) throws InterruptedException {
+        int requestTimes = 5;
+        CountDownLatch countDownLatch = new CountDownLatch(requestTimes + 1);
 
-    public void testTripleServerStream(boolean endWithException) throws InterruptedException {
-        HelloService helloServiceRef = consumerConfig.refer();
-        AtomicInteger count = new AtomicInteger(0);
-        int responseTimes = 5;
-        CountDownLatch countDownLatch = new CountDownLatch(responseTimes + 1);
-        AtomicBoolean responseFinished = new AtomicBoolean(false);
-        AtomicBoolean responseException = new AtomicBoolean(false);
+        AtomicBoolean receivedFinish = new AtomicBoolean(false);
+        AtomicBoolean receivedException = new AtomicBoolean(false);
 
-        helloServiceRef.sayHelloServerStream(new StreamHandler<ServerResponse>() {
-            @Override
-            public void onMessage(ServerResponse message) {
-                Assert.assertEquals(endWithException ? HelloService.CMD_TRIGGER_STEAM_ERROR : HELLO_MSG,
-                    message.getMsg());
-                Assert.assertEquals(count.getAndIncrement(), message.getCount());
-                countDownLatch.countDown();
+        List<ServerResponse> serverResponseList = new ArrayList<>();
+        SofaStreamObserver<ClientRequest> sofaStreamObserver = helloServiceRef
+                .sayHelloBiStream(new SofaStreamObserver<ServerResponse>() {
+                    final AtomicInteger requestCount = new AtomicInteger(0);
+
+                    @Override
+                    public void onNext(ServerResponse message) {
+                        LOGGER.info("bi stream resp onMessage");
+                        Assert.assertEquals(requestCount.getAndIncrement(), message.getCount());
+                        Assert.assertEquals(HELLO_MSG, message.getMsg());
+                        serverResponseList.add(message);
+                        countDownLatch.countDown();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        LOGGER.info("bi stream resp onFinish");
+                        receivedFinish.set(true);
+                        countDownLatch.countDown();
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        LOGGER.error("bi stream resp onException", throwable);
+                        Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
+                        receivedException.set(true);
+                        countDownLatch.countDown();
+                    }
+                });
+
+        for (int k = 0; k < requestTimes; k++) {
+            if (k % 2 == 0) {
+                sofaStreamObserver.onNext(new ClientRequest(HELLO_MSG, k));
+            } else {
+                sofaStreamObserver.onNext(new ExtendClientRequest(HELLO_MSG, k, "testExtendString"));
             }
-
-            @Override
-            public void onFinish() {
-                responseFinished.set(true);
-                countDownLatch.countDown();
-            }
-
-            @Override
-            public void onException(Throwable throwable) {
-                Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
-                responseException.set(true);
-                countDownLatch.countDown();
-            }
-        }, new ClientRequest(endWithException ? HelloService.CMD_TRIGGER_STEAM_ERROR : HELLO_MSG, 0));
-
-        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
-        if (endWithException) {
-            Assert.assertTrue(responseException.get());
-            Assert.assertFalse(responseFinished.get());
-        } else {
-            Assert.assertTrue(responseFinished.get());
-            Assert.assertFalse(responseException.get());
         }
-        Assert.assertEquals(responseTimes, count.get());
-        verify(helloServiceInst, times(1)).sayHelloServerStream(any(), any());
+        if (!endWithException) {
+            sofaStreamObserver.onNext(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_FINISH, -2));
+            Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+            Assert.assertTrue(receivedFinish.get());
+            sofaStreamObserver.onCompleted();
+            assertServerResponseType(serverResponseList);
+            Assert.assertFalse(receivedException.get());
+            Assert.assertThrows(Throwable.class, () -> sofaStreamObserver.onNext(new ClientRequest("", 123)));
+        } else {
+            sofaStreamObserver.onNext(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_ERROR, -2));
+            Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+            sofaStreamObserver.onError(new RuntimeException(HelloService.ERROR_MSG));
+            Assert.assertThrows(Throwable.class, () -> sofaStreamObserver.onNext(new ClientRequest(HELLO_MSG, 0)));
+            Assert.assertFalse(receivedFinish.get());
+            Assert.assertTrue(receivedException.get());
+        }
+        verify(helloServiceInst, times(1)).sayHelloBiStream(any());
     }
 
     @Test
@@ -205,4 +166,59 @@ public class TripleGenericStreamTest {
     public void testTripleServerStreamException() throws InterruptedException {
         testTripleServerStream(true);
     }
+
+    public void testTripleServerStream(boolean endWithException) throws InterruptedException {
+        reset(helloServiceInst);
+        AtomicInteger count = new AtomicInteger(0);
+        int responseTimes = 5;
+        CountDownLatch countDownLatch = new CountDownLatch(responseTimes + 1);
+        AtomicBoolean responseFinished = new AtomicBoolean(false);
+        AtomicBoolean responseException = new AtomicBoolean(false);
+
+        List<ServerResponse> serverResponseList = new ArrayList<>();
+        helloServiceRef.sayHelloServerStream(new ClientRequest(endWithException ? HelloService.CMD_TRIGGER_STREAM_ERROR : HELLO_MSG, 0), new SofaStreamObserver<ServerResponse>() {
+            @Override
+            public void onNext(ServerResponse message) {
+                Assert.assertEquals(endWithException ? HelloService.CMD_TRIGGER_STREAM_ERROR : HELLO_MSG,
+                        message.getMsg());
+                Assert.assertEquals(count.getAndIncrement(), message.getCount());
+                serverResponseList.add(message);
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                responseFinished.set(true);
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
+                responseException.set(true);
+                countDownLatch.countDown();
+            }
+        });
+
+        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+        if (endWithException) {
+            Assert.assertTrue(responseException.get());
+            Assert.assertFalse(responseFinished.get());
+            assertServerResponseType(serverResponseList);
+        } else {
+            Assert.assertTrue(responseFinished.get());
+            Assert.assertFalse(responseException.get());
+        }
+        Assert.assertEquals(responseTimes, count.get());
+        verify(helloServiceInst, times(1)).sayHelloServerStream(any(), any());
+    }
+
+    private void assertServerResponseType(List<ServerResponse> serverResponseList) {
+        for (int i = 0; i < serverResponseList.size(); i++) {
+            if (i % 2 != 0) {
+                Assert.assertTrue(serverResponseList.get(i) instanceof ExtendServerResponse);
+            }
+        }
+    }
+
 }

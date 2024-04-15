@@ -21,7 +21,7 @@ import com.alipay.sofa.rpc.codec.SerializerFactory;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-import com.alipay.sofa.rpc.transport.StreamHandler;
+import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 import io.grpc.stub.StreamObserver;
 
 /**
@@ -29,23 +29,23 @@ import io.grpc.stub.StreamObserver;
  */
 public class ClientStreamObserverAdapter implements StreamObserver<triple.Response> {
 
-    private final StreamHandler<Object> streamHandler;
+    private final SofaStreamObserver<Object> sofaStreamObserver;
 
-    private final Serializer            serializer;
+    private final Serializer                 serializer;
 
-    private volatile Class<?>           returnType;
+    private volatile Class<?>                returnType;
 
-    public ClientStreamObserverAdapter(StreamHandler<Object> streamHandler, byte serializeType) {
-        this.streamHandler = streamHandler;
+    public ClientStreamObserverAdapter(SofaStreamObserver<Object> sofaStreamObserver, byte serializeType) {
+        this.sofaStreamObserver = sofaStreamObserver;
         this.serializer = SerializerFactory.getSerializer(serializeType);
     }
 
     @Override
     public void onNext(triple.Response response) {
-        byte[] responseDate = response.getData().toByteArray();
+        byte[] responseData = response.getData().toByteArray();
         Object appResponse = null;
         String returnTypeName = response.getType();
-        if (responseDate != null && responseDate.length > 0) {
+        if (responseData != null && responseData.length > 0) {
             if (returnType == null && !returnTypeName.isEmpty()) {
                 try {
                     returnType = Class.forName(returnTypeName);
@@ -53,19 +53,19 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
                     throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Can not find return type :" + returnType);
                 }
             }
-            appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseDate), returnType, null);
+            appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
         }
 
-        streamHandler.onMessage(appResponse);
+        sofaStreamObserver.onNext(appResponse);
     }
 
     @Override
     public void onError(Throwable t) {
-        streamHandler.onException(t);
+        sofaStreamObserver.onError(t);
     }
 
     @Override
     public void onCompleted() {
-        streamHandler.onFinish();
+        sofaStreamObserver.onCompleted();
     }
 }

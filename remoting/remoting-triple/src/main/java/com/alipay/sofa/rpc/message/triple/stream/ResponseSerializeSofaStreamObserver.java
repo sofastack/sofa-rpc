@@ -18,7 +18,8 @@ package com.alipay.sofa.rpc.message.triple.stream;
 
 import com.alipay.sofa.rpc.codec.Serializer;
 import com.alipay.sofa.rpc.codec.SerializerFactory;
-import com.alipay.sofa.rpc.transport.StreamHandler;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
+import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 import com.alipay.sofa.rpc.utils.TripleExceptionUtils;
 import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
@@ -27,7 +28,7 @@ import triple.Response;
 /**
  * Response serialize stream handler.
  */
-public class ResponseSerializeStreamHandler<T> implements StreamHandler<T> {
+public class ResponseSerializeSofaStreamObserver<T> implements SofaStreamObserver<T> {
 
     private final StreamObserver<triple.Response> streamObserver;
 
@@ -35,14 +36,16 @@ public class ResponseSerializeStreamHandler<T> implements StreamHandler<T> {
 
     private String                                serializeType;
 
-    public ResponseSerializeStreamHandler(StreamObserver<triple.Response> streamObserver, String serializeType) {
+    public ResponseSerializeSofaStreamObserver(StreamObserver<triple.Response> streamObserver, String serializeType) {
         this.streamObserver = streamObserver;
-        serializer = SerializerFactory.getSerializer(serializeType);
-        this.serializeType = serializeType;
+        if (StringUtils.isNotBlank(serializeType)) {
+            this.serializer = SerializerFactory.getSerializer(serializeType);
+            this.serializeType = serializeType;
+        }
     }
 
     @Override
-    public void onMessage(T message) {
+    public void onNext(T message) {
         Response.Builder builder = Response.newBuilder();
         builder.setType(message.getClass().getName());
         builder.setSerializeType(serializeType);
@@ -52,13 +55,18 @@ public class ResponseSerializeStreamHandler<T> implements StreamHandler<T> {
     }
 
     @Override
-    public void onFinish() {
+    public void onCompleted() {
         streamObserver.onCompleted();
     }
 
     @Override
-    public void onException(Throwable throwable) {
+    public void onError(Throwable throwable) {
         streamObserver.onError(TripleExceptionUtils.asStatusRuntimeException(throwable));
+    }
+
+    public void setSerializeType(String serializeType) {
+        this.serializer = SerializerFactory.getSerializer(serializeType);
+        this.serializeType = serializeType;
     }
 
 }

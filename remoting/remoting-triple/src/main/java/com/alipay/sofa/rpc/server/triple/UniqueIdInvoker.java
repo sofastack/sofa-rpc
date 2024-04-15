@@ -28,7 +28,7 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
-import com.alipay.sofa.rpc.transport.StreamHandler;
+import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 import triple.Request;
 
 import java.lang.reflect.Method;
@@ -181,14 +181,13 @@ public class UniqueIdInvoker implements Invoker {
     public Method getDeclaredMethod(SofaRequest sofaRequest, Request request, String callType) {
         String uniqueName = this.getServiceUniqueName(sofaRequest);
         List<String> argTypesList = request.getArgTypesList();
-        if(RpcConstants.INVOKER_TYPE_SERVER_STREAMING.equals(callType)){
-            List<String> a = new ArrayList<>(argTypesList.size()+1);
-            a.add(0, StreamHandler.class.getCanonicalName());
+        if (RpcConstants.INVOKER_TYPE_SERVER_STREAMING.equals(callType)) {
+            List<String> a = new ArrayList<>(argTypesList.size() + 1);
             a.addAll(argTypesList);
+            a.add(SofaStreamObserver.class.getCanonicalName());
             argTypesList = a;
         }
-        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), argTypesList
-            .toArray(new String[0]));
+        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(), argTypesList.toArray(new String[0]));
     }
 
     public String getServiceUniqueName(SofaRequest sofaRequest) {

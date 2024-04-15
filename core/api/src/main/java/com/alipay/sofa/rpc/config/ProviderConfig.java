@@ -208,7 +208,6 @@ public class ProviderConfig<T> extends AbstractInterfaceConfig<T, ProviderConfig
      */
     public ProviderConfig<T> setRef(T ref) {
         this.ref = ref;
-        loadMethodCallType(ref.getClass());
         return this;
     }
 

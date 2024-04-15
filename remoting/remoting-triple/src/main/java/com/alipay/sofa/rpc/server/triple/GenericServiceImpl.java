@@ -22,8 +22,6 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
-import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -31,10 +29,10 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
-import com.alipay.sofa.rpc.message.triple.stream.ResponseSerializeStreamHandler;
+import com.alipay.sofa.rpc.message.triple.stream.ResponseSerializeSofaStreamObserver;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-import com.alipay.sofa.rpc.transport.StreamHandler;
+import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.ProtocolStringList;
 import io.grpc.Context;
@@ -46,8 +44,6 @@ import triple.SofaGenericServiceTriple;
 import java.lang.reflect.Method;
 import java.util.List;
 
-import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_SERIALIZATION;
-
 /**
  * @author zhaowang
  * @version : GenericServiceImpl.java, v 0.1 2020年05月27日 9:19 下午 zhaowang Exp $
@@ -58,30 +54,28 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     protected UniqueIdInvoker   invoker;
 
-    private ProviderConfig<?>   providerConfig;
-
-    public GenericServiceImpl(UniqueIdInvoker invoker, ProviderConfig<?> serverConfig) {
+    public GenericServiceImpl(UniqueIdInvoker invoker) {
         super();
         this.invoker = invoker;
-        this.providerConfig = serverConfig;
     }
 
     @Override
     public void generic(Request request, StreamObserver<Response> responseObserver) {
-
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
 
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
         String methodName = sofaRequest.getMethodName();
+        Method declaredMethod = invoker.getDeclaredMethod(sofaRequest, request, RpcConstants.INVOKER_TYPE_UNARY);
+        if (declaredMethod == null) {
+            throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
+                methodName);
+        }
+
         try {
-            Method declaredMethod = setClassLoaderAndGetRequestMethod(sofaRequest, request,
-                RpcConstants.INVOKER_TYPE_UNARY);
-            if (declaredMethod == null) {
-                throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
-                    methodName);
-            }
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
+            Thread.currentThread().setContextClassLoader(serviceClassLoader);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
-            setUnaryOrServerRequestParams(sofaRequest, request, methodName, serializer, declaredMethod, false);
+            setUnaryOrServerRequestParams(sofaRequest, request, serializer, declaredMethod, false);
 
             SofaResponse response = invoker.invoke(sofaRequest);
             Object ret = getAppResponse(declaredMethod, response);
@@ -103,9 +97,12 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
     @Override
     public StreamObserver<Request> genericBiStream(StreamObserver<Response> responseObserver) {
-        Method serviceMethod = getBidirectionalStreamRequestMethod();
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         //通过上下文创建请求
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
+        String uniqueName = invoker.getServiceUniqueName(sofaRequest);
+        Method serviceMethod = ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(),
+            new String[] { SofaStreamObserver.class.getCanonicalName() });
 
         if (serviceMethod == null) {
             throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
@@ -113,60 +110,68 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         }
         String methodName = serviceMethod.getName();
         try {
-            ResponseSerializeStreamHandler serverResponseHandler = new ResponseSerializeStreamHandler(responseObserver,
-                getSerialization());
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
+            Thread.currentThread().setContextClassLoader(serviceClassLoader);
+            ResponseSerializeSofaStreamObserver serverResponseHandler = new ResponseSerializeSofaStreamObserver(
+                responseObserver,
+                null);
 
             setBidirectionalStreamRequestParams(sofaRequest, serviceMethod, serverResponseHandler);
 
             SofaResponse sofaResponse = invoker.invoke(sofaRequest);
 
-            StreamHandler<Object> clientHandler = (StreamHandler<Object>) sofaResponse.getAppResponse();
+            SofaStreamObserver<Object> clientHandler = (SofaStreamObserver<Object>) sofaResponse.getAppResponse();
 
             return new StreamObserver<Request>() {
-                volatile Serializer serializer = null;
+                private volatile Serializer serializer    = null;
 
-                volatile Class<?>[] argTypes   = null;
+                private volatile String     serializeType = null;
+
+                private volatile Class<?>[] argTypes      = null;
 
                 @Override
                 public void onNext(Request request) {
                     checkInitialize(request);
                     Object message = getInvokeArgs(request, argTypes, serializer, false)[0];
-                    clientHandler.onMessage(message);
+                    serverResponseHandler.setSerializeType(serializeType);
+                    clientHandler.onNext(message);
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    clientHandler.onError(t);
+                }
+
+                @Override
+                public void onCompleted() {
+                    clientHandler.onCompleted();
                 }
 
                 private void checkInitialize(Request request) {
                     if (serializer == null && argTypes == null) {
                         synchronized (this) {
                             if (serializer == null && argTypes == null) {
+                                serializeType = request.getSerializeType();
                                 serializer = SerializerFactory.getSerializer(request.getSerializeType());
                                 argTypes = getArgTypes(request, false);
                             }
                         }
                     }
                 }
-
-                @Override
-                public void onError(Throwable t) {
-                    clientHandler.onException(t);
-                }
-
-                @Override
-                public void onCompleted() {
-                    clientHandler.onFinish();
-                }
             };
         } catch (Exception e) {
             LOGGER.error("Invoke " + methodName + " error:", e);
             throw new SofaRpcRuntimeException(e);
         } finally {
-            Thread.currentThread().setContextClassLoader(Thread.currentThread().getContextClassLoader());
+            Thread.currentThread().setContextClassLoader(oldClassLoader);
         }
     }
 
     @Override
     public void genericServerStream(Request request, StreamObserver<Response> responseObserver) {
+        ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
         SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
-        Method serviceMethod = setClassLoaderAndGetRequestMethod(sofaRequest, request,RpcConstants.INVOKER_TYPE_SERVER_STREAMING);
+        Method serviceMethod = invoker.getDeclaredMethod(sofaRequest, request, RpcConstants.INVOKER_TYPE_SERVER_STREAMING);
 
         if (serviceMethod == null) {
             throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
@@ -175,31 +180,20 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
         String methodName = serviceMethod.getName();
         try {
+            ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
+            Thread.currentThread().setContextClassLoader(serviceClassLoader);
             Serializer serializer = SerializerFactory.getSerializer(request.getSerializeType());
 
-            setUnaryOrServerRequestParams(sofaRequest, request, methodName, serializer, serviceMethod, true);
-            sofaRequest.getMethodArgs()[0] = new ResponseSerializeStreamHandler<>(responseObserver, getSerialization());
+            setUnaryOrServerRequestParams(sofaRequest, request, serializer, serviceMethod, true);
+            sofaRequest.getMethodArgs()[sofaRequest.getMethodArgs().length -1] = new ResponseSerializeSofaStreamObserver<>(responseObserver, request.getSerializeType());
 
             invoker.invoke(sofaRequest);
         } catch (Exception e) {
             LOGGER.error("Invoke " + methodName + " error:", e);
             throw new SofaRpcRuntimeException(e);
         } finally {
-            Thread.currentThread().setContextClassLoader(Thread.currentThread().getContextClassLoader());
+            Thread.currentThread().setContextClassLoader(oldClassLoader);
         }
-    }
-
-    private Method setClassLoaderAndGetRequestMethod(SofaRequest sofaRequest, Request request, String callType) {
-        ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
-        Thread.currentThread().setContextClassLoader(serviceClassLoader);
-        return invoker.getDeclaredMethod(sofaRequest, request, callType);
-    }
-
-    private Method getBidirectionalStreamRequestMethod() {
-        SofaRequest sofaRequest = TracingContextKey.getKeySofaRequest().get(Context.current());
-        String uniqueName = invoker.getServiceUniqueName(sofaRequest);
-        return ReflectCache.getOverloadMethodCache(uniqueName, sofaRequest.getMethodName(),
-            new String[] { StreamHandler.class.getCanonicalName() });
     }
 
     /**
@@ -207,17 +201,11 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
      *
      * @param sofaRequest    SofaRequest
      * @param request        Request
-     * @param methodName     MethodName
      * @param serializer     Serializer
      * @param declaredMethod Target invoke method
      */
-    private void setUnaryOrServerRequestParams(SofaRequest sofaRequest, Request request, String methodName,
+    private void setUnaryOrServerRequestParams(SofaRequest sofaRequest, Request request,
                                                Serializer serializer, Method declaredMethod, boolean isServerStreamCall) {
-        setClassLoader(sofaRequest);
-        if (declaredMethod == null) {
-            throw new SofaRpcException(RpcErrorType.SERVER_NOT_FOUND_INVOKER, "Cannot find invoke method " +
-                methodName);
-        }
         Class[] argTypes = getArgTypes(request, isServerStreamCall);
         Object[] invokeArgs = getInvokeArgs(request, argTypes, serializer, isServerStreamCall);
 
@@ -235,20 +223,13 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
      * @param serverStreamPushHandler The StreamHandler used to push a message to a client. It's a wrapper for {@link StreamObserver}, and encode method return value to {@link Response}.
      */
     private void setBidirectionalStreamRequestParams(SofaRequest sofaRequest, Method serviceMethod,
-                                                     StreamHandler<Response> serverStreamPushHandler) {
-        setClassLoader(sofaRequest);
-
-        Class[] argTypes = new Class[] { StreamHandler.class };
+                                                     SofaStreamObserver<Response> serverStreamPushHandler) {
+        Class[] argTypes = new Class[] { SofaStreamObserver.class };
         Object[] invokeArgs = new Object[] { serverStreamPushHandler };
 
         sofaRequest.setMethod(serviceMethod);
         sofaRequest.setMethodArgs(invokeArgs);
         sofaRequest.setMethodArgSigs(ClassTypeUtils.getTypeStrs(argTypes, true));
-    }
-
-    private void setClassLoader(SofaRequest sofaRequest) {
-        ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
-        Thread.currentThread().setContextClassLoader(serviceClassLoader);
     }
 
     private Object getAppResponse(Method method, SofaResponse response) {
@@ -282,17 +263,13 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
         int size = addStreamHandler ? argTypesList.size() + 1 : argTypesList.size();
         Class[] argTypes = new Class[size];
 
-        if (addStreamHandler) {
-            argTypes[0] = StreamHandler.class;
-        }
-        for (int i = addStreamHandler ? 1 : 0; i < size; i++) {
-            String typeName;
-            if (addStreamHandler) {
-                typeName = argTypesList.get(i - 1);
-            } else {
-                typeName = argTypesList.get(i);
-            }
+        for (int i = 0; i < argTypesList.size(); i++) {
+            String typeName = argTypesList.get(i);
             argTypes[i] = ClassTypeUtils.getClass(typeName);
+        }
+
+        if (addStreamHandler) {
+            argTypes[size - 1] = SofaStreamObserver.class;
         }
         return argTypes;
     }
@@ -306,31 +283,13 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
     private Object[] getInvokeArgs(Request request, Class[] argTypes, Serializer serializer, boolean addStreamHandler) {
         List<ByteString> argsList = request.getArgsList();
         int size = addStreamHandler ? argsList.size() + 1 : argsList.size();
-        int start = addStreamHandler ? 1 : 0;
-        Object[] args = new Object[size];
 
-        for (int i = start; i < size; i++) {
-            byte[] data;
-            if (addStreamHandler) {
-                data = argsList.get(i - 1).toByteArray();
-            } else {
-                data = argsList.get(i).toByteArray();
-            }
+        Object[] args = new Object[size];
+        for (int i = 0; i < argsList.size(); i++) {
+            byte[] data = argsList.get(i).toByteArray();
             args[i] = serializer.decode(new ByteArrayWrapperByteBuf(data), argTypes[i],
                 null);
         }
         return args;
-    }
-
-    private String getSerialization() {
-        String serialization = providerConfig.getSerialization();
-        if (StringUtils.isBlank(serialization)) {
-            serialization = getDefaultSerialization();
-        }
-        return serialization;
-    }
-
-    private String getDefaultSerialization() {
-        return DEFAULT_SERIALIZATION;
     }
 }

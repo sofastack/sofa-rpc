@@ -33,14 +33,10 @@ import io.grpc.StatusException;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
 import io.grpc.examples.helloworld.SofaGreeterTriple;
-import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
@@ -210,55 +206,6 @@ public class TripleServerTest {
         String reply = sampleService.hello("world");
         Assert.assertNotNull(reply);
         Assert.assertEquals(reply, "Hello! world");
-    }
-
-    @Test
-    public void testBiStream() throws InterruptedException {
-        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
-
-        int port = 50052;
-
-        ServerConfig serverConfig = new ServerConfig()
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setPort(port);
-
-        ProviderConfig<SofaGreeterTriple.IGreeter> providerConfig = new ProviderConfig<SofaGreeterTriple.IGreeter>()
-            .setApplication(applicationConfig)
-            .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
-            .setRef(new GreeterImpl())
-            .setServer(serverConfig);
-
-        providerConfig.export();
-
-        ConsumerConfig<SofaGreeterTriple.IGreeter> consumerConfig = new ConsumerConfig<SofaGreeterTriple.IGreeter>();
-        consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
-            .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-            .setDirectUrl("tri://127.0.0.1:" + port);
-
-        SofaGreeterTriple.IGreeter greeterBlockingStub = consumerConfig.refer();
-
-        HelloRequest request = HelloRequest.newBuilder().setName("Hello world!").build();
-        CountDownLatch countDownLatch = new CountDownLatch(1);
-        StreamObserver<HelloRequest> requestStreamObserver = greeterBlockingStub
-            .sayHelloBinary(new StreamObserver<HelloReply>() {
-                @Override
-                public void onNext(HelloReply value) {
-                    Assert.assertEquals(value.getMessage(), request.getName());
-                    countDownLatch.countDown();
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                }
-
-                @Override
-                public void onCompleted() {
-                }
-            });
-        requestStreamObserver.onNext(request);
-        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
-        requestStreamObserver.onCompleted();
     }
 
     @Test

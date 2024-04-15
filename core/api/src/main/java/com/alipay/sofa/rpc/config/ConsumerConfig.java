@@ -27,7 +27,6 @@ import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.common.utils.ExceptionUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
-import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.listener.ChannelListener;
 import com.alipay.sofa.rpc.listener.ConsumerStateListener;
 import com.alipay.sofa.rpc.listener.ProviderInfoListener;
@@ -936,62 +935,12 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * Gets the call type corresponding to the method name
      *
-     * @param sofaRequest the request
+     * @param methodName the method name
      * @return the call type
      */
-    public String getMethodInvokeType(SofaRequest sofaRequest) {
-        String methodName = sofaRequest.getMethodName();
-
-        String invokeType = (String) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_INVOKE_TYPE, null);
-
-        if (invokeType == null) {
-            invokeType = getAndCacheCallType(sofaRequest);
-        }
-
-        return invokeType;
-    }
-
-    /**
-     * Get and cache the call type of certain method
-     * @param request RPC request
-     * @return request call type
-     */
-    public String getAndCacheCallType(SofaRequest request) {
-        Method method = request.getMethod();
-        String callType = MethodConfig
-            .mapStreamType(
-                method,
-                (String) getMethodConfigValue(request.getMethodName(), RpcConstants.CONFIG_KEY_INVOKE_TYPE,
-                    getInvokeType())
-            );
-        //Method level config
-        updateAttribute(buildMethodConfigKey(request, RpcConstants.CONFIG_KEY_INVOKE_TYPE), callType, true);
-        return callType;
-    }
-
-    /**
-     * 通过请求的目标方法构建方法配置key。该key使用内部配置格式。（以'.' 开头）
-     * @param request RPC请求
-     * @return 方法配置名称，带方法参数列表
-     */
-    public String buildMethodConfigKey(SofaRequest request, String propertyKey) {
-        return "." + getMethodSignature(request.getMethod()) + "." + propertyKey;
-    }
-
-    public static String getMethodSignature(Method method) {
-        Class<?>[] parameterTypes = method.getParameterTypes();
-        StringBuilder methodSignature = new StringBuilder();
-        methodSignature.append(method.getName()).append("(");
-
-        for (int i = 0; i < parameterTypes.length; i++) {
-            methodSignature.append(parameterTypes[i].getSimpleName());
-            if (i < parameterTypes.length - 1) {
-                methodSignature.append(", ");
-            }
-        }
-
-        methodSignature.append(")");
-        return methodSignature.toString();
+    public String getMethodInvokeType(String methodName) {
+        return (String) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_INVOKE_TYPE,
+            getInvokeType());
     }
 
     /**

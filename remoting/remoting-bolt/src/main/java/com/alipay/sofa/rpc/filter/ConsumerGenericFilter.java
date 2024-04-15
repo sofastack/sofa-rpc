@@ -90,7 +90,7 @@ public class ConsumerGenericFilter extends Filter {
 
             // 修正类型
             ConsumerConfig consumerConfig = (ConsumerConfig) invoker.getConfig();
-            String invokeType = consumerConfig.getMethodInvokeType(request);
+            String invokeType = consumerConfig.getMethodInvokeType(methodName);
             request.setInvokeType(invokeType);
             request.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE, invokeType);
             request.addRequestProp(REVISE_KEY, REVISE_VALUE);

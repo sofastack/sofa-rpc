@@ -14,23 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.triple.stream;
+package com.alipay.sofa.rpc.test.triple.stream;
 
-public class ClientRequest {
-    private String meg;
+/**
+ * @author Even
+ * @date 2024/4/15 10:33
+ */
+public class ExtendServerResponse extends ServerResponse {
 
-    private int    count;
+    private String extendString;
 
-    public ClientRequest(String meg, int count) {
-        this.meg = meg;
-        this.count = count;
+    public ExtendServerResponse(String msg, int count, String extendString) {
+        super(msg, count);
+        this.extendString = extendString;
     }
 
-    public String getMsg() {
-        return meg;
+    public String getExtendString() {
+        return extendString;
     }
 
-    public int getCount() {
-        return count;
+    public void setExtendString(String extendString) {
+        this.extendString = extendString;
     }
 }

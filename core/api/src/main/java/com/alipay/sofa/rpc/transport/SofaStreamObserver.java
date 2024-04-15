@@ -19,13 +19,13 @@ package com.alipay.sofa.rpc.transport;
 /**
  * StreamHandler, works just like gRPC StreamObserver.
  */
-public interface StreamHandler<T> {
+public interface SofaStreamObserver<T> {
 
     /**
      * Sends a message, or defines the behavior when a message is received.
-     * <p>This method should never be called after {@link StreamHandler#onFinish()} has been invoked.
+     * <p>This method should never be called after {@link SofaStreamObserver#onCompleted()} has been invoked.
      */
-    void onMessage(T message);
+    void onNext(T message);
 
     /**
      * Note: This method MUST be invoked after the transport is complete.
@@ -33,16 +33,16 @@ public interface StreamHandler<T> {
      * <p>
      * Signals that all messages have been sent/received normally, and closes this stream.
      */
-    void onFinish();
+    void onCompleted();
 
     /**
      * Signals an exception to terminate this stream, or defines the behavior when an error occurs.
      * <p></p>
      * Once this method is invoked by one side, it can't send more messages, and the corresponding method on the other side will be triggered.
-     * Depending on the protocol implementation, it's possible that the other side can still call {@link StreamHandler#onMessage(Object)} after this method has been invoked, although this is not recommended.
+     * Depending on the protocol implementation, it's possible that the other side can still call {@link SofaStreamObserver#onNext(Object)} after this method has been invoked, although this is not recommended.
      * <p></p>
      * As a best practice, it is advised not to send any more information once this method is called.
      *
      */
-    void onException(Throwable throwable);
+    void onError(Throwable throwable);
 }

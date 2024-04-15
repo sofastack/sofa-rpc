@@ -69,7 +69,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-
 import static io.grpc.MethodDescriptor.generateFullMethodName;
 
 /**
@@ -114,7 +113,7 @@ public class TripleServer implements Server {
     /**
      * The mapping relationship between service name and unique id invoker
      */
-    protected Map<String, UniqueIdInvoker> invokerMap = new ConcurrentHashMap<>();
+    protected Map<String, UniqueIdInvoker>                               invokerMap = new ConcurrentHashMap<>();
 
     /**
      * invoker count
@@ -298,7 +297,7 @@ public class TripleServer implements Server {
             BindableService bindableService = (BindableService) providerConfig.getRef();
             serviceDef = bindableService.bindService();
         } else {
-            GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker,providerConfig);
+            GenericServiceImpl genericService = new GenericServiceImpl(uniqueIdInvoker);
             genericService.setProxiedImpl(genericService);
             serviceDef = buildSofaServiceDef(genericService, providerConfig);
         }
@@ -377,9 +376,9 @@ public class TripleServer implements Server {
     private List<MethodDescriptor<Request, Response>> getMethodDescriptor(ProviderConfig providerConfig) {
         List<MethodDescriptor<Request, Response>> result = new ArrayList<>();
         Set<String> methodNames = SofaProtoUtils.getMethodNames(providerConfig.getInterfaceId());
-
+        Map<String, String> streamCallTypeMap = SofaProtoUtils.cacheStreamCallType(providerConfig.getProxyClass());
         for (String name : methodNames) {
-            MethodDescriptor.MethodType methodType = SofaProtoUtils.mapGrpcCallType(providerConfig.getMethodCallType(name));
+            MethodDescriptor.MethodType methodType = SofaProtoUtils.mapGrpcCallType(streamCallTypeMap.get(name));
             MethodDescriptor<Request, Response> methodDescriptor = MethodDescriptor.<Request, Response>newBuilder()
                     .setType(methodType)
                     .setFullMethodName(generateFullMethodName(providerConfig.getInterfaceId(), name))

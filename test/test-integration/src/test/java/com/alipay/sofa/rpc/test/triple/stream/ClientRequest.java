@@ -14,26 +14,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.triple.stream;
+package com.alipay.sofa.rpc.test.triple.stream;
 
-import com.alipay.sofa.rpc.transport.StreamHandler;
+public class ClientRequest {
+    private String msg;
 
-public interface HelloService {
+    private int    count;
 
-    String CMD_TRIGGER_STREAM_FINISH = "finish";
+    public ClientRequest(String msg, int count) {
+        this.msg = msg;
+        this.count = count;
+    }
 
-    String CMD_TRIGGER_STEAM_ERROR   = "error";
+    public String getMsg() {
+        return msg;
+    }
 
-    String ERROR_MSG                 = "error msg";
-
-    void sayHello();
-
-    void sayHello(String msg);
-
-    String sayHelloUnary(String message);
-
-    StreamHandler<ClientRequest> sayHelloBiStream(StreamHandler<ServerResponse> streamHandler);
-
-    void sayHelloServerStream(StreamHandler<ServerResponse> streamHandler, ClientRequest clientRequest);
-
+    public int getCount() {
+        return count;
+    }
 }

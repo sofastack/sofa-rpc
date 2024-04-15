@@ -92,7 +92,7 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
 
         if (!consumerConfig.isGeneric()) {
             // 找到调用类型， generic的时候类型在filter里进行判断
-            request.setInvokeType(consumerConfig.getMethodInvokeType(request));
+            request.setInvokeType(consumerConfig.getMethodInvokeType(request.getMethodName()));
         }
 
         RpcInvokeContext invokeCtx = RpcInvokeContext.peekContext();
