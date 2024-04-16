@@ -925,11 +925,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
             getRetries());
     }
 
-    public List<String> getCustomerExceptions() {
-        return getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_RETRIES,
-                getRetries());
-    }
-
     /**
      * Gets the timeout corresponding to the method name
      *

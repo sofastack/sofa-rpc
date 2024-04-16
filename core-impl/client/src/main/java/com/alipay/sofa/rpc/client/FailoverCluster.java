@@ -31,9 +31,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.alipay.sofa.rpc.common.RpcConfigs.getListValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_EXCEPTIONS;
-
 /**
  * 故障转移，支持重试和指定地址调用
  *
@@ -60,7 +57,8 @@ public class FailoverCluster extends AbstractCluster {
     public SofaResponse doInvoke(SofaRequest request) throws SofaRpcException {
         String methodName = request.getMethodName();
         int retries = consumerConfig.getMethodRetries(methodName);
-        consumerConfig.
+        // 用户定义的异常
+        List<Class<? extends Throwable>> customerExceptions = consumerConfig.getCustomerExceptions();
         int time = 0;
         // 异常日志
         SofaRpcException throwable = null;
@@ -99,7 +97,14 @@ public class FailoverCluster extends AbstractCluster {
                         throw e;
                     }
                 }
-            } catch (Exception e) { // 其它异常不重试
+            } catch (Exception e) {
+                // 执行用户自定义异常重试
+                for (Class<? extends Throwable> exceptionClass : customerExceptions) {
+                    if (exceptionClass.isInstance(e)) {
+                        time++;
+                    }
+                }
+                // 其它异常不重试
                 throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
                     "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
                         + " on remote server: " + providerInfo + ", cause by unknown exception: "
