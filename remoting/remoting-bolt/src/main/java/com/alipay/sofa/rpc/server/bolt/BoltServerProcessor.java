@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.UserThreadPoolManager;
+import com.alipay.sofa.rpc.context.RecordContextResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
@@ -211,6 +212,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                 LOGGER.errorWithApp(appName, e.getMessage(), e);
             }
         } finally {
+            RecordContextResolver.carryWithRequest(bizCtx.getInvokeContext().getRecordContext(), request);
             processingCount.decrementAndGet();
             if (!isAsyncChain) {
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
