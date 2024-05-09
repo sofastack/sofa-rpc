@@ -14,8 +14,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.biz2;
+package com.alipay.sofa.rpc.codec.bzip2;
 
+import com.alipay.sofa.rpc.codec.Compressor;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,10 +43,10 @@ public class Bzip2RpcCompressorTest {
 
     @Test
     public void testCompression() throws UnsupportedEncodingException {
-        Bzip2RpcCompressor compressor = new Bzip2RpcCompressor();
-        byte[] bs = compressor.compress(TEST_STR.getBytes("utf-8"));
-        Assert.assertNotNull(TEST_STR);
+        Compressor compressor = ExtensionLoaderFactory.getExtensionLoader(Compressor.class).getExtension("bzip2");
+        Assert.assertTrue(compressor instanceof Bzip2RpcCompressor);
 
+        byte[] bs = compressor.compress(TEST_STR.getBytes("utf-8"));
         String s1 = new String(compressor.deCompress(bs), "utf-8");
         Assert.assertEquals(TEST_STR, s1);
     }

@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.codec.biz2;
+package com.alipay.sofa.rpc.codec.bzip2;
 
 import com.alipay.sofa.rpc.codec.Compressor;
 import com.alipay.sofa.rpc.ext.Extension;

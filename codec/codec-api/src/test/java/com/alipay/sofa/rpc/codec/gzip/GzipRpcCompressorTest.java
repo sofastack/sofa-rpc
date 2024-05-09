@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.codec.gzip;
 
+import com.alipay.sofa.rpc.codec.Compressor;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,10 +43,10 @@ public class GzipRpcCompressorTest {
 
     @Test
     public void testCompression() throws UnsupportedEncodingException {
-        GzipRpcCompressor compressor = new GzipRpcCompressor();
-        byte[] bs = compressor.compress(TEST_STR.getBytes("utf-8"));
-        Assert.assertNotNull(TEST_STR);
+        Compressor compressor = ExtensionLoaderFactory.getExtensionLoader(Compressor.class).getExtension("gzip");
+        Assert.assertTrue(compressor instanceof GzipRpcCompressor);
 
+        byte[] bs = compressor.compress(TEST_STR.getBytes("utf-8"));
         String s1 = new String(compressor.deCompress(bs), "utf-8");
         Assert.assertEquals(TEST_STR, s1);
     }
