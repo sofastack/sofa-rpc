@@ -74,7 +74,7 @@
         <guava.version>32.0.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
         <fury.version>0.4.1</fury.version>
-        <commons_compress_version>1.25.0</commons_compress_version>
+        <commons_compress_version>1.26.0</commons_compress_version>
     </properties>
 
     <dependencies>
