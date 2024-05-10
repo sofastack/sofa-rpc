@@ -62,7 +62,7 @@
         <module.deploy.skip>true</module.deploy.skip>
         <!-- Fabric8 for Kubernetes -->
         <fabric8_kubernetes_version>6.9.2</fabric8_kubernetes_version>
-        <commons_compress_version>1.25.0</commons_compress_version>
+        <commons_compress_version>1.26.0</commons_compress_version>
     </properties>
 
     <dependencyManagement>
