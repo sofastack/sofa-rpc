@@ -1,1 +1,3 @@
 snappy=com.alipay.sofa.rpc.codec.snappy.SnappyRpcCompressor
+bzip2=com.alipay.sofa.rpc.codec.bzip2.Bzip2RpcCompressor
+gzip=com.alipay.sofa.rpc.codec.gzip.GzipRpcCompressor
