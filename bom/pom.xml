@@ -18,7 +18,7 @@
         <servlet.version>2.5</servlet.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
         <jaxrs.api.version>1.0.2.Final</jaxrs.api.version>
-        <cxf.version>3.4.10</cxf.version>
+        <cxf.version>3.5.8</cxf.version>
         <jetty.version>7.5.4.v20111024</jetty.version>
         <zookeeper.version>3.5.7</zookeeper.version>
         <curator.version>4.3.0</curator.version>
@@ -32,7 +32,7 @@
         <guava.version>32.0.0-jre</guava.version>
         <prometheus.client.version>0.16.0</prometheus.client.version>
         <!-- serialization -->
-        <hessian.version>3.5.2</hessian.version>
+        <hessian.version>3.5.3</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.22.0</protobuf.version>
         <jackson.version>2.12.7</jackson.version>
@@ -63,6 +63,7 @@
         <!-- Fabric8 for Kubernetes -->
         <fabric8_kubernetes_version>6.9.2</fabric8_kubernetes_version>
         <fastjson.version>1.2.83</fastjson.version>
+        <commons_compress_version>1.26.0</commons_compress_version>
     </properties>
 
     <dependencyManagement>
@@ -521,7 +522,6 @@
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
             </dependency>
-
             <!-- Fabric8 for Kubernetes -->
             <dependency>
                 <groupId>io.fabric8</groupId>
@@ -534,6 +534,8 @@
                 <scope>test</scope>
                 <version>${fabric8_kubernetes_version}</version>
             </dependency>
+
+
 
             <!-- Test libs -->
             <dependency>
@@ -618,6 +620,12 @@
                 <artifactId>simpleclient_hotspot</artifactId>
                 <version>0.16.0</version>
                 <scope>test</scope>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-compress</artifactId>
+                <version>${commons_compress_version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
