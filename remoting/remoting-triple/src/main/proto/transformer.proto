@@ -9,6 +9,11 @@ option java_outer_classname = "GenericProto";
 
 service GenericService {
     rpc generic (Request) returns (Response) {}
+
+    rpc genericBiStream (stream Request) returns (stream Response){}
+
+    rpc genericServerStream(Request) returns (stream Response){}
+
 }
 
 message Request {

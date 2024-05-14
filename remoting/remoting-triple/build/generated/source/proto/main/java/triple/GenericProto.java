@@ -36,9 +36,12 @@ public final class GenericProto {
       "\n\021transformer.proto\"@\n\007Request\022\025\n\rserial" +
       "izeType\030\001 \001(\t\022\014\n\004args\030\002 \003(\014\022\020\n\010argTypes\030" +
       "\003 \003(\t\"=\n\010Response\022\025\n\rserializeType\030\001 \001(\t" +
-      "\022\014\n\004data\030\002 \001(\014\022\014\n\004type\030\003 \001(\t22\n\016GenericS" +
-      "ervice\022 \n\007generic\022\010.Request\032\t.Response\"\000" +
-      "B\030\n\006tripleB\014GenericProtoP\001b\006proto3"
+      "\022\014\n\004data\030\002 \001(\014\022\014\n\004type\030\003 \001(\t2\220\001\n\016Generic" +
+      "Service\022 \n\007generic\022\010.Request\032\t.Response\"" +
+      "\000\022,\n\017genericBiStream\022\010.Request\032\t.Respons" +
+      "e\"\000(\0010\001\022.\n\023genericServerStream\022\010.Request" +
+      "\032\t.Response\"\0000\001B\030\n\006tripleB\014GenericProtoP" +
+      "\001b\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,

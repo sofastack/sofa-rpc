@@ -121,6 +121,22 @@ public class RpcConstants {
      * 调用方式：future
      */
     public static final String  INVOKER_TYPE_FUTURE                          = "future";
+    /**
+     * 调用方式：一元调用
+     */
+    public static final String  INVOKER_TYPE_UNARY                           = "unary";
+    /**
+     * 调用方式：客户端流
+     */
+    public static final String  INVOKER_TYPE_CLIENT_STREAMING                = "clientStream";
+    /**
+     * 调用方式：服务端流
+     */
+    public static final String  INVOKER_TYPE_SERVER_STREAMING                = "serverStream";
+    /**
+     * 调用方式：双向流
+     */
+    public static final String  INVOKER_TYPE_BI_STREAMING                    = "bidirectionalStream";
 
     /**
      * Hessian序列化 [不推荐]
