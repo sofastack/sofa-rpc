@@ -27,7 +27,7 @@ import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-import com.alipay.sofa.rpc.transport.triple.TripleClientInvoker;
+import com.alipay.sofa.rpc.utils.SofaProtoUtils;
 import io.grpc.Context;
 import org.junit.Assert;
 import org.junit.Test;
@@ -136,7 +136,8 @@ public class GenericServiceImplTest {
     private Request buildRequest(Method method, Object[] args) {
         Class<?>[] parameterTypes = method.getParameterTypes();
         SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(HelloService.class, method, parameterTypes, args);
-        Request request = TripleClientInvoker.getRequest(sofaRequest, serialization, serializer);
+        Request request = SofaProtoUtils.buildRequest(sofaRequest.getMethodArgSigs(), sofaRequest.getMethodArgs(),
+            serialization, serializer, 0);
         Context context = Context.current().withValue(TracingContextKey.getKeySofaRequest(), sofaRequest);
         context.attach();
         return request;

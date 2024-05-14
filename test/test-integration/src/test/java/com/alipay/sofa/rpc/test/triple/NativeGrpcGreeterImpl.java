@@ -18,9 +18,9 @@ package com.alipay.sofa.rpc.test.triple;
 
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import io.grpc.examples.helloworld.GreeterGrpc;
 import io.grpc.examples.helloworld.HelloReply;
 import io.grpc.examples.helloworld.HelloRequest;
-import io.grpc.examples.helloworld.SofaGreeterTriple;
 import io.grpc.stub.StreamObserver;
 
 import java.time.LocalDateTime;
@@ -28,9 +28,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GreeterImpl extends SofaGreeterTriple.GreeterImplBase {
+/**
+ * @author Even
+ * @date 2024/5/9 10:21
+ */
+public class NativeGrpcGreeterImpl extends GreeterGrpc.GreeterImplBase {
 
-    private static final Logger              LOGGER            = LoggerFactory.getLogger(GreeterImpl.class);
+    private static final Logger              LOGGER            = LoggerFactory.getLogger(NativeGrpcGreeterImpl.class);
 
     //Intentionally using unsupported format
     private static final DateTimeFormatter[] datetimeFormatter = new DateTimeFormatter[] {
@@ -87,7 +91,6 @@ public class GreeterImpl extends SofaGreeterTriple.GreeterImplBase {
 
     @Override
     public StreamObserver<HelloRequest> sayHelloClientStream(StreamObserver<HelloReply> responseObserver) {
-
         List<HelloRequest> helloRequestList = new ArrayList<>();
 
         return new StreamObserver<HelloRequest>() {
