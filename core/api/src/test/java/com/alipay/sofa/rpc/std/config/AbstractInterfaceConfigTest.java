@@ -58,7 +58,7 @@ public class AbstractInterfaceConfigTest {
         assertEquals(null, defaultConfig.getInterfaceId());
         assertEquals("", defaultConfig.getUniqueId());
         assertEquals(null, defaultConfig.getFilterRef());
-        assertEquals(null, defaultConfig.getFilter());
+        assertNotNull(defaultConfig.getFilter());
         assertEquals(null, defaultConfig.getRegistry());
         assertEquals(null, defaultConfig.getMethods());
         assertEquals("hessian2", defaultConfig.getSerialization());
@@ -122,9 +122,18 @@ public class AbstractInterfaceConfigTest {
         config.setFilterRef(filterRefList);
         assertSame(filterRefList, config.getFilterRef());
 
+        List<String> defaultFilter = config.getFilter();
         List<String> filterList = new ArrayList<>();
+        filterList.add("testFilter");
+        config.addFilter(filterList);
+        Assert.assertTrue(defaultFilter.contains("testChainFilter0"));
+        Assert.assertTrue(defaultFilter.contains("-testChainFilter8"));
+        Assert.assertTrue(defaultFilter.contains("testFilter"));
+        assertSame(defaultFilter, config.getFilter());
+
         config.setFilter(filterList);
         assertSame(filterList, config.getFilter());
+        assertNotSame(defaultFilter, config.getFilter());
 
         List<RegistryConfig> registryConfigs = new ArrayList<>();
         config.setRegistry(registryConfigs);

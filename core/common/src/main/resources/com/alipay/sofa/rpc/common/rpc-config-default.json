@@ -66,6 +66,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "default.transport": "netty4",
   // 默认tracer实现
   "default.tracer": "",
+  // 默认filter实现
+  "default.filters": [],
   /*-------------默认配置值结束-------------*/
 
 

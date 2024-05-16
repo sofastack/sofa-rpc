@@ -25,7 +25,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  *
@@ -38,12 +37,10 @@ public class FilterChainTest {
     public void buildProviderChain() {
 
         ProviderConfig providerConfig = new ProviderConfig();
-        providerConfig.setFilter(Arrays.asList("testChainFilter0", "-testChainFilter8"));
         providerConfig.setInterfaceId(Serializer.class.getName());
 
         ConsumerConfig consumerConfig = new ConsumerConfig();
         ArrayList<Filter> list = new ArrayList<Filter>();
-        consumerConfig.setFilter(Arrays.asList("testChainFilter0", "-testChainFilter8"));
         list.add(new TestChainFilter1());
         list.add(new TestChainFilter2());
         list.add(new TestChainFilter3());
