@@ -122,6 +122,10 @@ public class RpcOptions {
      * 默认Tracer实现
      */
     public static final String DEFAULT_TRACER                           = "default.tracer";
+    /**
+     * 默认filter实现
+     */
+    public static final String DEFAULT_FILTERS                          = "default.filters";
 
     /**
      * 注册中心发现服务（保存注册中心地址的服务）的地址

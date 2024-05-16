@@ -42,7 +42,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
+import static com.alipay.sofa.rpc.common.RpcConfigs.getListValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_FILTERS;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_GROUP;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROXY;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_SERIALIZATION;
@@ -106,7 +108,8 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     /**
      * 过滤器配置别名，多个用逗号隔开
      */
-    protected List<String>                           filter;
+    protected List<String>                           filter           = new ArrayList<String>(
+                                                                          getListValue(DEFAULT_FILTERS));
 
     /**
      * 注册中心配置，可配置多个
@@ -359,6 +362,18 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     public S setFilter(List<String> filter) {
         this.filter = filter;
         return castThis();
+    }
+
+    /**
+     * add filter
+     *
+     * @param filter the add filter
+     */
+    public void addFilter(List<String> filter) {
+        if(this.filter == null) {
+            filter = new ArrayList<>();
+        }
+        this.filter.addAll(filter);
     }
 
     /**
