@@ -381,6 +381,13 @@ public class RpcOptions {
     public static final String CONSUMER_REJECTED_EXECUTION_POLICY       = "consumer.rejected.execution.policy";
 
     /**
+     * 需要解析的 routers
+     *
+     * @since 5.13.0
+     */
+    public static final String CONSUMER_ROUTERS                         = "consumer.routers";
+
+    /**
      * 默认回调线程池最小
      */
     public static final String ASYNC_POOL_CORE                          = "async.pool.core";

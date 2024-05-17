@@ -143,7 +143,7 @@ public class RouterChain {
         List<ExtensionClass<Router>> extensionRouters = new ArrayList<ExtensionClass<Router>>();
         List<String> routerAliases = consumerConfig.getRouter();
         if (CommonUtils.isNotEmpty(routerAliases)) {
-            for (String routerAlias : routerAliases) {
+            routerAliases.stream().distinct().forEach(routerAlias -> {
                 if (startsWithExcludePrefix(routerAlias)) { // 排除用的特殊字符
                     excludes.add(routerAlias.substring(1));
                 } else {
@@ -152,7 +152,7 @@ public class RouterChain {
                         extensionRouters.add(extensionRouter);
                     }
                 }
-            }
+            });
         }
         // 解析自动加载的router
         if (!excludes.contains(StringUtils.ALL) && !excludes.contains(StringUtils.DEFAULT)) { // 配了-*和-default表示不加载内置
@@ -162,7 +162,6 @@ public class RouterChain {
                 }
             }
         }
-        excludes = null; // 不需要了
         // 按order从小到大排序
         if (extensionRouters.size() > 1) {
             extensionRouters.sort(Comparator.comparingInt(ExtensionClass::getOrder));

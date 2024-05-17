@@ -193,7 +193,7 @@ public class FilterChain implements Invoker {
         List<ExtensionClass<Filter>> extensionFilters = new LinkedList<ExtensionClass<Filter>>();
         List<String> filterAliases = config.getFilter(); //
         if (CommonUtils.isNotEmpty(filterAliases)) {
-            for (String filterAlias : filterAliases) {
+            filterAliases.stream().distinct().forEach(filterAlias -> {
                 if (startsWithExcludePrefix(filterAlias)) { // 排除用的特殊字符
                     excludes.add(filterAlias.substring(1));
                 } else {
@@ -202,7 +202,7 @@ public class FilterChain implements Invoker {
                         extensionFilters.add(filter);
                     }
                 }
-            }
+            });
         }
         // 解析自动加载的过滤器
         if (!excludes.contains(StringUtils.ALL) && !excludes.contains(StringUtils.DEFAULT)) { // 配了-*和-default表示不加载内置
