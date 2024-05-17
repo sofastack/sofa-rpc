@@ -1,6 +1,6 @@
 {
   "rpc.config.order": 999,
   "logger.impl": "com.alipay.sofa.rpc.log.SystemLogger",
-  "default.filters" : ["testChainFilter0", "-testChainFilter8"],
-  "consumer.routers" : ["testChainRouter0", "-testChainRouter8", "notExistChainRouter"]
+  "default.filters" : ["testChainFilter0", "-testChainFilter8", "testChainFilter0"],
+  "consumer.routers" : ["testChainRouter0", "-testChainRouter8", "notExistChainRouter", "testChainRouter0"]
 }
