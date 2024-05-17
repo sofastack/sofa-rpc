@@ -213,6 +213,7 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "consumer.connect.create.when.absent": true,
   // 默认回调线程池满时的拒绝策略，可用值：DISCARD, CALLER_RUNS, CALLER_HANDLE_EXCEPTION
   "consumer.rejected.execution.policy": "DISCARD",
+  "consumer.routers": [],
   /*-------------Consumer相关配置结束-------------*/
 
 

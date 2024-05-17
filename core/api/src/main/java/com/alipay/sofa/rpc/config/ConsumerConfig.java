@@ -33,10 +33,12 @@ import com.alipay.sofa.rpc.listener.ProviderInfoListener;
 
 import java.io.Serializable;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.alipay.sofa.rpc.common.RpcConfigs.getBooleanValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
+import static com.alipay.sofa.rpc.common.RpcConfigs.getListValue;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getStringValue;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_REJECTED_EXECUTION_POLICY;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ADDRESS_HOLDER;
@@ -56,6 +58,7 @@ import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_LOAD_BALANCER;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_RECONNECT_PERIOD;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_REPEATED_REFERENCE_LIMIT;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_RETRIES;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_ROUTERS;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_STICKY;
 import static com.alipay.sofa.rpc.common.RpcOptions.DEFAULT_PROTOCOL;
 
@@ -173,7 +176,8 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * 路由配置别名
      */
-    protected List<String>                          router;
+    protected List<String>                          router                  = new ArrayList<String>(
+                                                                                getListValue(CONSUMER_ROUTERS));
 
     /**
      * 路由规则引用，多个用英文逗号隔开。List<Router>
@@ -680,6 +684,18 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public ConsumerConfig<T> setRouter(List<String> router) {
         this.router = router;
         return this;
+    }
+
+    /**
+     * Add router.
+     *
+     * @param router the add router
+     */
+    public void addRouter(List<String> router) {
+        if (this.router == null) {
+            this.router = new ArrayList<>();
+        }
+        this.router.addAll(router);
     }
 
     /**

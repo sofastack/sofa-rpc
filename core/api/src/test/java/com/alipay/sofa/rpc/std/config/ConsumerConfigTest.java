@@ -24,8 +24,12 @@ import static org.junit.Assert.*;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.std.sample.SampleService;
 import com.alipay.sofa.rpc.std.sample.SampleServiceImpl;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author zhaowang
@@ -59,7 +63,7 @@ public class ConsumerConfigTest {
         assertEquals(30000, config.getHeartbeatPeriod());
         assertEquals(10000, config.getReconnectPeriod());
         assertEquals("DISCARD", config.getRejectedExecutionPolicy());
-        assertEquals(null, config.getRouter());
+        assertNotNull(config.getRouter());
         assertEquals(null, config.getRouterRef());
         assertEquals(null, config.getOnReturn());
         assertEquals(null, config.getOnConnect());
@@ -117,6 +121,20 @@ public class ConsumerConfigTest {
 
         config.setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE);
         assertEquals("serviceName", config.getInterfaceId());
+    }
+
+    @Test
+    public void testRouter() {
+        List<String> router = config.getRouter();
+        List<String> addRouter = new ArrayList<>();
+        addRouter.add("testRouter");
+        config.addRouter(addRouter);
+        assertSame(router, config.getRouter());
+        Assert.assertTrue(router.contains("testRouter"));
+
+        config.setRouter(addRouter);
+        assertNotSame(router, config.getRouter());
+        assertSame(addRouter, config.getRouter());
     }
 
     public interface InnerInterface {
