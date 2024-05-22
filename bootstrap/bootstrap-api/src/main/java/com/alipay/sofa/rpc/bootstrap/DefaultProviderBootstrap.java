@@ -26,6 +26,9 @@ import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.event.ProviderProcessorRegisterEvent;
+import com.alipay.sofa.rpc.event.ProviderProcessorUnRegistryEvent;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
@@ -175,6 +178,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     Server server = serverConfig.buildIfAbsent();
                     // 注册请求调用器
                     server.registerProcessor(providerConfig, providerProxyInvoker);
+                    if (EventBus.isEnable(ProviderProcessorRegisterEvent.class)) {
+                        EventBus.post(new ProviderProcessorRegisterEvent(providerConfig, serverConfig));
+                    }
                     if (serverConfig.isAutoStart()) {
                         server.start();
                     }
@@ -306,6 +312,9 @@ public class DefaultProviderBootstrap<T> extends ProviderBootstrap<T> {
                     if (server != null) {
                         try {
                             server.unRegisterProcessor(providerConfig, serverConfig.isAutoStart());
+                            if (EventBus.isEnable(ProviderProcessorUnRegistryEvent.class)) {
+                                EventBus.post(new ProviderProcessorUnRegistryEvent(providerConfig, serverConfig));
+                            }
                         } catch (Exception e) {
                             if (LOGGER.isWarnEnabled(appName)) {
                                 // TODO WARN
