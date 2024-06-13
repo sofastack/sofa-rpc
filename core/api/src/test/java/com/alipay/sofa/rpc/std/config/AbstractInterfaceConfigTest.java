@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.common.utils.TestUtils;
 import com.alipay.sofa.rpc.config.AbstractInterfaceConfig;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.MethodConfig;
+import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.listener.ConfigListener;
@@ -50,6 +51,22 @@ import static org.junit.Assert.fail;
  * @version : AbstractInterfaceConfigTest.java, v 0.1 2022年01月25日 4:46 下午 zhaowang
  */
 public class AbstractInterfaceConfigTest {
+    @Test
+    public void testMethodTimeout() {
+        MethodConfig config = new MethodConfig();
+        config.setTimeout(null);
+
+        ProviderConfig p = new ProviderConfig();
+        p.setMethods(new HashMap<>());
+        p.getMethods().put("test", config);
+
+        try {
+            Assert.assertFalse(p.hasTimeout());
+        } catch (Exception e) {
+            Assert.fail("exception should not appears: " + e.getMessage());
+        }
+    }
+
 
     @Test
     public void testDefaultValue() {

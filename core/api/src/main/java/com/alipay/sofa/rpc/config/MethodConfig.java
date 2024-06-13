@@ -137,7 +137,7 @@ public class MethodConfig implements Serializable {
      * @return the timeout
      */
     public Integer getTimeout() {
-        return timeout;
+        return timeout == null ? 0 : timeout;
     }
 
     /**
