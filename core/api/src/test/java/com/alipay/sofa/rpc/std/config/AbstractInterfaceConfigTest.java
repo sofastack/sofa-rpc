@@ -67,7 +67,6 @@ public class AbstractInterfaceConfigTest {
         }
     }
 
-
     @Test
     public void testDefaultValue() {
         TestConfig defaultConfig = new TestConfig();
