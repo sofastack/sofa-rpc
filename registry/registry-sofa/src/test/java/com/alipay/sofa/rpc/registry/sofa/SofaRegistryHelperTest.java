@@ -150,6 +150,17 @@ public class SofaRegistryHelperTest {
         Assert.assertEquals(serverConfig3.getPort(), providerInfo3.getPort());
         Assert.assertEquals(providerConfig.getAppName(), providerInfo3.getAttr(ProviderInfoAttrs.ATTR_APP_NAME));
         Assert.assertEquals(providerConfig.getTimeout(), providerInfo3.getDynamicAttr(ProviderInfoAttrs.ATTR_TIMEOUT));
+
+        ProviderConfig<?> providerConfig2 = new ProviderConfig<>();
+        providerConfig2.setMethods(new HashMap<>());
+        providerConfig2.getMethods().put("test", new MethodConfig().setTimeout(null));
+        Assert.assertNotNull(providerConfig2.getTimeout());
+        String s4 = SofaRegistryHelper.convertProviderToUrls(providerConfig2, serverConfig);
+        Assert.assertNotNull(s3);
+        ProviderInfo providerInfo4 = SofaRegistryHelper.parseProviderInfo(s4);
+        Assert.assertEquals(0, providerInfo4.getDynamicAttr(".test.timeout"));
+        Assert.assertFalse(providerConfig2.hasTimeout());
+
     }
 
     @Test
