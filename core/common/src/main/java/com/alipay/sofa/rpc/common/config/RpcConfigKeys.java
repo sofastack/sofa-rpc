@@ -140,4 +140,21 @@ public class RpcConfigKeys {
                                                                                         false,
                                                                                         "specify biz thread pool implementation type",
                                                                                         new String[] { "sofa_rpc_server_thread_pool_type" });
+
+    // config center
+    public static ConfigKey<String>         ZK_ADDRESS                          = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.config.center.zookeeper.address",
+                                                                                        "127.0.0.1:2181",
+                                                                                        false,
+                                                                                        "The address of Zookeeper configuration center.",
+                                                                                        new String[] { "zookeeper_address" });
+
+    public static ConfigKey<String>         NACOS_ADDRESS                       = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.config.center.nacos.address",
+                                                                                        "127.0.0.1:8848",
+                                                                                        false,
+                                                                                        "The address of Nacos configuration center.",
+                                                                                        new String[] { "nacos_address" });
 }
