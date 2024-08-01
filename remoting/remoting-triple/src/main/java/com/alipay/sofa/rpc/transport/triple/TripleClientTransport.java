@@ -16,9 +16,11 @@
  */
 package com.alipay.sofa.rpc.transport.triple;
 
+import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
+import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -77,6 +79,11 @@ public class TripleClientTransport extends ClientTransport {
     protected final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
 
     protected final Object lock = new Object();
+
+    protected static int KEEP_ALIVE_INTERVAL = SofaConfigs.getOrCustomDefault(
+                                                    RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL,
+                                                    RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_CLIENT_KEEP_ALIVE_INTERVAL));
+
 
     /**
      * The constructor
@@ -278,6 +285,12 @@ public class TripleClientTransport extends ClientTransport {
         builder.disableRetry();
         builder.intercept(clientHeaderClientInterceptor);
         builder.maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE));
+
+        if (KEEP_ALIVE_INTERVAL > 0) {
+            builder.keepAliveWithoutCalls(true);
+            builder.keepAliveTime(KEEP_ALIVE_INTERVAL, TimeUnit.SECONDS);
+        }
+
         return builder.build();
     }
 
