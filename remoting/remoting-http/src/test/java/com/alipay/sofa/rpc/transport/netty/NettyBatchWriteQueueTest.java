@@ -23,9 +23,7 @@ import io.netty.channel.EventLoop;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -37,20 +35,16 @@ import static org.mockito.Mockito.when;
  */
 public class NettyBatchWriteQueueTest {
 
-    @Mock
-    private Channel              mockChannel;
+    private Channel              mockChannel          = Mockito.mock(Channel.class);
 
-    @Mock
-    private EventLoop            mockEventLoop;
+    private EventLoop            mockEventLoop        = Mockito.mock(EventLoop.class);
 
-    @Mock
-    private ChannelPromise       mockChannelPromise;
+    private ChannelPromise       mockChannelPromise   = Mockito.mock(ChannelPromise.class);
 
-    private NettyBatchWriteQueue nettyBatchWriteQueue;
+    private NettyBatchWriteQueue nettyBatchWriteQueue = Mockito.mock(NettyBatchWriteQueue.class);
 
     @Before
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
         when(mockChannel.eventLoop()).thenReturn(mockEventLoop);
         when(mockChannel.newPromise()).thenReturn(mockChannelPromise);
         nettyBatchWriteQueue = NettyBatchWriteQueue.createWriteQueue(mockChannel);
