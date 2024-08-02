@@ -140,4 +140,16 @@ public class RpcConfigKeys {
                                                                                         false,
                                                                                         "specify biz thread pool implementation type",
                                                                                         new String[] { "sofa_rpc_server_thread_pool_type" });
+
+    /**
+     * grpc client keep alive interval
+     */
+    public static ConfigKey<Integer>        TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL   = ConfigKey
+                                                                                    .build(
+                                                                                        "sofa.rpc.triple.client.keepAlive.interval",
+                                                                                        0,
+                                                                                        false,
+                                                                                        "keep alive interval in second for triple client",
+                                                                                        new String[] { "sofa_rpc_triple_client_keepAlive_interval" });
+
 }
