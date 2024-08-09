@@ -30,17 +30,18 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-import io.fury.Fury;
-import io.fury.ThreadLocalFury;
-import io.fury.ThreadSafeFury;
-import io.fury.config.Language;
-import io.fury.memory.MemoryBuffer;
-import io.fury.resolver.AllowListChecker;
+import org.apache.fury.Fury;
+import org.apache.fury.ThreadLocalFury;
+import org.apache.fury.ThreadSafeFury;
+import org.apache.fury.config.Language;
+import org.apache.fury.memory.MemoryBuffer;
+import org.apache.fury.resolver.AllowListChecker;
 
 import java.util.List;
 import java.util.Map;
 
-import static io.fury.config.CompatibleMode.COMPATIBLE;
+
+import static org.apache.fury.config.CompatibleMode.COMPATIBLE;
 
 /**
  * @author lipan
