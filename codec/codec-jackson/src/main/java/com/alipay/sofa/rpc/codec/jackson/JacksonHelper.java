@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.codec.jackson;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
@@ -26,6 +27,8 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import static com.alipay.sofa.rpc.common.utils.ClassLoaderUtils.getCurrentClassLoader;
 
 /**
  * @author <a href="mailto:zhiyuan.lzy@antfin.com">zhiyuan.lzy</a>
@@ -37,12 +40,12 @@ public class JacksonHelper {
     /**
      * Request service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, JavaType[]> requestClassCache  = new ConcurrentHashMap<String, JavaType[]>();
+    private ConcurrentHashMap<ClassLoader, Map<String, JavaType[]>> requestClassCache  = new ConcurrentHashMap<>();
 
     /**
      * Response service and method cache {service+method:class}
      */
-    private ConcurrentHashMap<String, JavaType>   responseClassCache = new ConcurrentHashMap<String, JavaType>();
+    private ConcurrentHashMap<ClassLoader, Map<String, JavaType>>   responseClassCache = new ConcurrentHashMap<>();
 
     /**
      * Fetch request class for cache according  service and method
@@ -54,14 +57,22 @@ public class JacksonHelper {
     public JavaType[] getReqClass(String service, String methodName) {
 
         String key = buildMethodKey(service, methodName);
-        Type[] reqClassList = requestClassCache.get(key);
+        Type[] reqClassList = getRequestCache().get(key);
         if (reqClassList == null) {
             //read interface and method from cache
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
             loadClassToCache(key, clazz, methodName);
         }
-        return requestClassCache.get(key);
+        return getRequestCache().get(key);
+    }
+
+    public Map<String, JavaType[]> getRequestCache() {
+        return requestClassCache.computeIfAbsent(getCurrentClassLoader(), k -> new ConcurrentHashMap<>());
+    }
+
+    public Map<String, JavaType> getResponseCache() {
+        return responseClassCache.computeIfAbsent(getCurrentClassLoader(), k -> new ConcurrentHashMap<>());
     }
 
     /**
@@ -73,14 +84,14 @@ public class JacksonHelper {
      */
     public JavaType getResClass(String service, String methodName) {
         String key = service + "#" + methodName;
-        JavaType reqType = responseClassCache.get(key);
+        JavaType reqType = getResponseCache().get(key);
         if (reqType == null) {
             // 读取接口里的方法参数和返回值
             String interfaceClass = ConfigUniqueNameGenerator.getInterfaceName(service);
             Class clazz = ClassUtils.forName(interfaceClass, true);
             loadClassToCache(key, clazz, methodName);
         }
-        return responseClassCache.get(key);
+        return getResponseCache().get(key);
     }
 
     /**
@@ -122,7 +133,7 @@ public class JacksonHelper {
             JavaType javaType = mapper.getTypeFactory().constructType(parameterTypes[i]);
             javaTypes[i] = javaType;
         }
-        requestClassCache.put(key, javaTypes);
+        getRequestCache().put(key, javaTypes);
 
         // parse response types
         Type resType = jsonMethod.getGenericReturnType();
@@ -130,6 +141,6 @@ public class JacksonHelper {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_VOID_RETURN, "jackson", clazz.getName()));
         }
         JavaType resJavaType = mapper.getTypeFactory().constructType(resType);
-        responseClassCache.put(key, resJavaType);
+        getResponseCache().put(key, resJavaType);
     }
 }
