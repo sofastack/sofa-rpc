@@ -67,12 +67,20 @@ public class JacksonHelper {
         return getRequestCache().get(key);
     }
 
-    public Map<String, JavaType[]> getRequestCache() {
+    private Map<String, JavaType[]> getRequestCache() {
         return requestClassCache.computeIfAbsent(getCurrentClassLoader(), k -> new ConcurrentHashMap<>());
     }
 
-    public Map<String, JavaType> getResponseCache() {
+    private Map<String, JavaType> getResponseCache() {
         return responseClassCache.computeIfAbsent(getCurrentClassLoader(), k -> new ConcurrentHashMap<>());
+    }
+
+    public void clearCache(ClassLoader classLoader) {
+        if (classLoader == null) {
+            return;
+        }
+        requestClassCache.remove(classLoader);
+        responseClassCache.remove(classLoader);
     }
 
     /**
