@@ -393,7 +393,7 @@ public class LogCodes {
             return CODE_DOES_NOT_EXIST + code;
         }
         try {
-            return String.format(LOG, code, LOG_CODES.get(code), LogCodes.NOTE);
+            return format(code, LOG_CODES.get(code), LogCodes.NOTE);
         } catch (Throwable e) {
             LOGGER.error(LOG_FORMAT_ERROR + code, e);
         }
@@ -428,7 +428,7 @@ public class LogCodes {
         }
 
         try {
-            return String.format(LOG, code, MessageFormat.format(message, messages), LogCodes.NOTE);
+            return format(code, MessageFormat.format(message, messages), LogCodes.NOTE);
         } catch (Throwable e) {
             LOGGER.error(LOG_FORMAT_ERROR + code, e);
         }
@@ -456,4 +456,9 @@ public class LogCodes {
         }
         return LITE_LOG_FORMAT_ERROR + codeOrMsg;
     }
+
+    private static String format(String code, String message, String note) {
+        return "RPC-" + code + ": " + message + " " + note;
+    }
+
 }
