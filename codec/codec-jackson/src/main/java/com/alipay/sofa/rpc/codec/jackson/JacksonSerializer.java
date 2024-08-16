@@ -395,4 +395,7 @@ public class JacksonSerializer extends AbstractSerializer {
         return this.mapper;
     }
 
+    public void clearCache(ClassLoader classLoader) {
+        jacksonHelper.clearCache(classLoader);
+    }
 }
