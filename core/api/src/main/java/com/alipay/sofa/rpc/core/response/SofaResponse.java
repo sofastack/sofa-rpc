@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.core.response;
 
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 
 import java.io.Serializable;
@@ -105,7 +106,7 @@ public final class SofaResponse implements Serializable {
      * @param error the error
      */
     public void setErrorMsg(String error) {
-        if (error == null) {
+        if (StringUtils.isBlank(error)) {
             return;
         }
         errorMsg = error;
