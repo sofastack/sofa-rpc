@@ -40,7 +40,6 @@ import org.apache.fury.resolver.AllowListChecker;
 import java.util.List;
 import java.util.Map;
 
-
 import static org.apache.fury.config.CompatibleMode.COMPATIBLE;
 
 /**

@@ -73,7 +73,7 @@
         <grpc.version>1.53.0</grpc.version>
         <guava.version>32.0.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
-        <fury.version>0.6.0</fury.version>
+        <fury.version>0.7.0</fury.version>
         <commons_compress_version>1.26.0</commons_compress_version>
     </properties>
 
