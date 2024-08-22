@@ -650,6 +650,6 @@ public class JacksonSerializerTest {
         ctx.put(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
         jacksonSerializer.decode(nullByteBuf, sofaResponse, ctx);
         Assert.assertTrue(sofaResponse.isError());
-        Assert.assertEquals("", sofaResponse.getErrorMsg());
+        Assert.assertNull(sofaResponse.getErrorMsg());
     }
 }
