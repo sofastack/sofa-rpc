@@ -1,0 +1,22 @@
+name: FOSSA Scan
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  fossa:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Run FOSSA Scan
+      uses: fossa-contrib/fossa-action@v1
+      with:
+        api_key: ${{ secrets.FOSSA_API_KEY }}
+        # 可选：指定FOSSA命令行参数，例如目录、排除等
+        # args: '--exclude=**/node_modules,**/vendor'
