@@ -17,6 +17,6 @@ jobs:
     - name: Run FOSSA Scan
       uses: fossa-contrib/fossa-action@v1
       with:
-        api_key: ${{ secrets.FOSSA_API_KEY }}
+        fossa-api-key: ${{ secrets.FOSSA_API_KEY }}
         # 可选：指定FOSSA命令行参数，例如目录、排除等
         # args: '--exclude=**/node_modules,**/vendor'
