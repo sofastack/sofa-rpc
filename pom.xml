@@ -18,7 +18,6 @@
 
     <modules>
         <!-- ALl-in-one -->
-             <!-- ALl-in-one -->
         <module>all</module>
         <!-- Project Management -->
         <module>bom</module>
