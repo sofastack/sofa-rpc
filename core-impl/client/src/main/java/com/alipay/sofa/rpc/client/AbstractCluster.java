@@ -209,14 +209,15 @@ public abstract class AbstractCluster extends Cluster {
     public void updateProviders(ProviderGroup providerGroup) {
         checkProviderInfo(providerGroup);
         ProviderGroup oldProviderGroup = addressHolder.getProviderGroup(providerGroup.getName());
+        boolean isOldProviderGroupEmpty = ProviderHelper.isEmpty(oldProviderGroup);
         if (ProviderHelper.isEmpty(providerGroup)) {
             addressHolder.updateProviders(providerGroup);
-            if (!ProviderHelper.isEmpty(oldProviderGroup)) {
+            if (!isOldProviderGroupEmpty) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
                         "providers has been closed, or this consumer has been add to blacklist");
-                    closeTransports();
                 }
+                closeTransports();
             }
         } else {
             addressHolder.updateProviders(providerGroup);
