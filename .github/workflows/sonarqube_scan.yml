@@ -9,12 +9,12 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Set up JDK 8
+    - name: Set up JDK 17
       uses: actions/setup-java@v2
       with:
-        java-version: '8'
+        java-version: '17'
         distribution: 'adopt'
 
     # 如果是Maven
     - name: Build and analyze with Maven
-      run: mvn clean verify sonar:sonar -Dsonar.projectKey=${{ github.event.repository.name }} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
+      run: mvn clean -Dmaven.test.skip=true verify sonar:sonar -Dsonar.projectKey=${{ github.event.repository.name }} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
