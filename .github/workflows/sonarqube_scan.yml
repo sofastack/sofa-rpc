@@ -17,4 +17,4 @@ jobs:
 
     # 如果是Maven
     - name: Build and analyze with Maven
-      run: mvn clean -Dmaven.test.skip=true verify sonar:sonar -Dsonar.projectKey=${{ github.event.repository.name }} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }}
+      run: mvn clean verify sonar:sonar -Dmaven.test.skip=true -Dsonar.projectKey=${{ github.event.repository.name }} -Dsonar.host.url=${{ secrets.SONARQUBE_HOST }} -Dsonar.login=${{ secrets.SONARQUBE_TOKEN }} -Dsonar.maven.pluginVersion=3.9.1.2184
