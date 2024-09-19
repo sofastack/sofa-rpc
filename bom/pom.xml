@@ -32,7 +32,7 @@
         <guava.version>32.0.0-jre</guava.version>
         <prometheus.client.version>0.16.0</prometheus.client.version>
         <!-- serialization -->
-        <hessian.version>3.5.4</hessian.version>
+        <hessian.version>3.5.5</hessian.version>
         <thrift.version>0.9.2</thrift.version>
         <protobuf.version>3.22.0</protobuf.version>
         <jackson.version>2.12.7</jackson.version>
