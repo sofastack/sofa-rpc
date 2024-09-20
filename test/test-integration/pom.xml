@@ -133,11 +133,6 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-metrics-lookout</artifactId>
-            <version>${project.parent.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-metrics-micrometer</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
@@ -255,13 +250,6 @@
             <scope>test</scope>
         </dependency>
         <!-- dependencies for validation end -->
-
-        <!-- lookout for test-->
-        <dependency>
-            <groupId>com.alipay.sofa.lookout</groupId>
-            <artifactId>lookout-core</artifactId>
-            <scope>test</scope>
-        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
