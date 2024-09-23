@@ -16,10 +16,44 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.common.config.ConfigKey;
+
 /**
  * @author bystander
  * @version : DynamicConfigKeys.java, v 0.1 2019年04月17日 21:51 bystander Exp $
  */
 public class DynamicConfigKeys {
-    public static final String DYNAMIC_ALIAS = "dynamicAlias";
+    public static final String      DYNAMIC_ALIAS     = "dynamicAlias";
+
+    public static final String      DYNAMIC_URL       = "dynamicUrl";
+
+    public static final String      CONFIG_NODE       = "config";
+
+    public static final String      DEFAULT_NAMESPACE = "sofa-rpc";
+
+    public static final String      DEFAULT_GROUP     = "sofa-rpc";
+
+    public static ConfigKey<String> ZK_ADDRESS        = ConfigKey
+                                                          .build(
+                                                              "sofa.rpc.config.center.zookeeper.address",
+                                                              "127.0.0.1:2181",
+                                                              false,
+                                                              "The address of Zookeeper configuration center.",
+                                                              new String[] { "zookeeper_address" });
+
+    public static ConfigKey<String> NACOS_ADDRESS     = ConfigKey
+                                                          .build(
+                                                              "sofa.rpc.config.center.nacos.address",
+                                                              "127.0.0.1:8848",
+                                                              false,
+                                                              "The address of Nacos configuration center.",
+                                                              new String[] { "nacos_address" });
+    public static ConfigKey<String> APOLLO_ADDRESS    = ConfigKey
+                                                          .build(
+                                                              "sofa.rpc.config.center.apollo.address",
+                                                              "127.0.0.1:8080",
+                                                              false,
+                                                              "The address of Apollo configuration center.",
+                                                              new String[] { "apollo_address" });
+
 }

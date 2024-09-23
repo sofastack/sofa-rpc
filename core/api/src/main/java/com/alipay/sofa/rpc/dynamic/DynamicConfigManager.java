@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.dynamic;
 
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.ext.Extensible;
+import com.alipay.sofa.rpc.listener.ConfigListener;
 
 /**
  *
@@ -31,6 +32,10 @@ public abstract class DynamicConfigManager {
 
     protected DynamicConfigManager(String appName) {
         this.appName = appName;
+    }
+
+    protected String getAppName() {
+        return appName;
     }
 
     /**
@@ -86,4 +91,21 @@ public abstract class DynamicConfigManager {
      * @return auth rules
      */
     public abstract AuthRuleGroup getServiceAuthRule(String service);
+
+    /**
+     * Add config listener.
+     *
+     * @param key config key
+     * @param listener config listener
+     */
+    public abstract void addListener(String key, ConfigListener listener);
+
+    /**
+     * Get config value by key.
+     *
+     * @param key config key
+     * @return config value
+     */
+    public abstract String getConfig(String key);
+
 }

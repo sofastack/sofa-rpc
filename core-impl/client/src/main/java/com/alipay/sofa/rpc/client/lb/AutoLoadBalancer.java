@@ -53,7 +53,7 @@ public class AutoLoadBalancer extends AbstractLoadBalancer {
     @Override
     protected ProviderInfo doSelect(SofaRequest request, List<ProviderInfo> providerInfos) {
 
-        // 动态配置优先
+        // 请求级别动态配置优先
         final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
         if (StringUtils.isNotBlank(dynamicAlias)) {
             String dynamicLoadBalancer = null;

@@ -51,7 +51,7 @@ public class DynamicConfigManagerFactory {
                                                                                       .getLogger(DynamicConfigManagerFactory.class);
 
     /**
-     * 得到动态配置管理
+     * 得到请求级别动态配置管理
      *
      * @param alias 别名
      * @return DynamicManager 实现
@@ -80,6 +80,46 @@ public class DynamicConfigManagerFactory {
             return registry;
         } catch (Throwable e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "DynamicConfigManager", alias),
+                e);
+        } finally {
+            classLock.unlock();
+        }
+    }
+
+    /**
+     * 得到接口级别动态配置管理
+     *
+     * @param url 配置中心别名与地址
+     * @return DynamicManager 实现
+     */
+    public static DynamicConfigManager getDynamicManagerWithUrl(String appName, String url) {
+
+        String[] urlValues = url.split("://", 2);
+
+        classLock.lock();
+        try {
+            if (ALL_DYNAMICS.size() > 3) {
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("Size of dynamic manager is greater than 3, Please check it!");
+                }
+            }
+            DynamicConfigManager registry = ALL_DYNAMICS.get(urlValues[0]);
+            if (registry == null) {
+                ExtensionClass<DynamicConfigManager> ext = ExtensionLoaderFactory.getExtensionLoader(
+                    DynamicConfigManager.class)
+                    .getExtensionClass(urlValues[0]);
+                if (ext == null) {
+                    throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "DynamicConfigManager",
+                        urlValues[0]));
+                }
+                registry = ext.getExtInstance(new Class[] { String.class, String.class }, new Object[] { appName,
+                        urlValues[1] });
+                ALL_DYNAMICS.put(urlValues[0], registry);
+            }
+            return registry;
+        } catch (Throwable e) {
+            throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_LOAD_EXT, "DynamicConfigManager",
+                urlValues[0]),
                 e);
         } finally {
             classLock.unlock();

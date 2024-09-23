@@ -40,6 +40,11 @@ public class StringUtils {
     public static final String   CONTEXT_SEP        = "/";
 
     /**
+     * The config key separator String {@code ":"}
+     */
+    public static final String   KEY_SEPARATOR      = ":";
+
+    /**
      * The string {@code "*"}.
      *
      * @since 5.3.1

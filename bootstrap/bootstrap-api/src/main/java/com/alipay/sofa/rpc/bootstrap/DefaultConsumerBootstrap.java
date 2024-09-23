@@ -28,6 +28,8 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
+import com.alipay.sofa.rpc.dynamic.ConfigChangeType;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
@@ -42,10 +44,7 @@ import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.registry.Registry;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -156,13 +155,26 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
                     proxyInvoker);
 
-                //动态配置
+                //启用请求级别动态配置
                 final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
                 if (StringUtils.isNotBlank(dynamicAlias)) {
                     final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
                         consumerConfig.getAppName(), dynamicAlias);
                     dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId());
                 }
+
+                //启用接口级别动态配置
+                final String dynamicUrl = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_URL);
+                if (StringUtils.isNotBlank(dynamicUrl)) {
+                    final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl(
+                            consumerConfig.getAppName(), dynamicUrl);
+
+                    //build listeners for dynamic config
+                    consumerConfig.setConfigListener(buildConfigListener(this,dynamicManager));
+                }
+
+
+
             } catch (Exception e) {
                 if (cluster != null) {
                     cluster.destroy();
@@ -200,6 +212,17 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     protected ConfigListener buildConfigListener(ConsumerBootstrap bootstrap) {
         return new ConsumerAttributeListener();
+    }
+
+    /**
+     * Build ConfigListener for consumer bootstrap with dynamic config.
+     *
+     * @param bootstrap ConsumerBootstrap
+     * @param dynamicManager DynamicConfigManager
+     * @return ConfigListener
+     */
+    protected ConfigListener buildConfigListener(ConsumerBootstrap bootstrap, DynamicConfigManager dynamicManager) {
+        return new ConsumerAttributeListener(dynamicManager);
     }
 
     /**
@@ -438,8 +461,46 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     private class ConsumerAttributeListener implements ConfigListener {
 
+        private Map<String, String> newValueMap = new HashMap<>();
+
+        ConsumerAttributeListener() {
+
+        }
+
+        ConsumerAttributeListener(DynamicConfigManager dynamicManager) {
+            this.initWith(consumerConfig.getInterfaceId(),dynamicManager);
+        }
+
+        public void initWith(String key, DynamicConfigManager dynamicManager) {
+            dynamicManager.addListener(key, this);
+            // 初始化配置值
+            String rawConfig = dynamicManager.getConfig(key);
+            if (!StringUtils.isEmpty(rawConfig)) {
+                process(new ConfigChangedEvent(key, "sofa-rpc",rawConfig));
+            }
+        }
+
         @Override
-        public void configChanged(Map newValue) {
+        public void process(ConfigChangedEvent event){
+            if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
+                newValueMap = null;
+            } else {
+                // ADDED or MODIFIED
+                String[] lines = event.getContent().split("\n");
+                for (String line : lines) {
+                    String[] keyValue = line.split("=", 2);
+                    if (keyValue.length == 2) {
+                        String key = keyValue[0].trim();
+                        String value = keyValue[1].trim();
+                        newValueMap.put(key, value);
+                    }
+                }
+            }
+            attrUpdated(newValueMap);
+        }
+
+        @Override
+        public void configChanged(Map newValueMap) {
 
         }
 
