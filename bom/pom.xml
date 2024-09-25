@@ -25,7 +25,7 @@
         <opentracing.version>0.22.0</opentracing.version>
         <dubbo.version>3.1.11</dubbo.version>
         <nacos.version>2.0.3</nacos.version>
-        <sofa.registry.version>6.3.0</sofa.registry.version>
+        <sofa.registry.version>6.5.6</sofa.registry.version>
         <polaris.version>1.2.2</polaris.version>
         <swagger.version>1.6.9</swagger.version>
         <asm.version>7.0</asm.version>

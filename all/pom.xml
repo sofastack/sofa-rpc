@@ -64,7 +64,7 @@
         <bolt.version>1.6.10</bolt.version>
         <tracer.version>3.1.6</tracer.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
-        <sofa.registry.version>6.3.0</sofa.registry.version>
+        <sofa.registry.version>6.5.6</sofa.registry.version>
         <bolt.swagger.version>1.6.9</bolt.swagger.version>
         <asm.version>7.0</asm.version>
         <httpclient.version>4.5.13</httpclient.version>
