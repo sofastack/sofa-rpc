@@ -82,8 +82,7 @@ public class TripleClientTransport extends ClientTransport {
 
     protected static int KEEP_ALIVE_INTERVAL = SofaConfigs.getOrCustomDefault(
                                                     RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL,
-                                                    RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_CLIENT_KEEP_ALIVE_INTERVAL));
-
+                                                    RpcConfigs.getIntValue(RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL.getKey()));
 
     /**
      * The constructor
