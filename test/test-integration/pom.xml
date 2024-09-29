@@ -206,7 +206,7 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
-            <artifactId>sofa-rpc-config-apollo</artifactId>
+            <artifactId>sofa-rpc-config-nacos</artifactId>
             <version>${project.parent.version}</version>
             <scope>test</scope>
         </dependency>
@@ -271,6 +271,24 @@
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-config-apollo</artifactId>
+            <version>5.13.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-config-zk</artifactId>
+            <version>5.13.1-SNAPSHOT</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-test</artifactId>
+            <version>4.3.0</version>
             <scope>test</scope>
         </dependency>
 

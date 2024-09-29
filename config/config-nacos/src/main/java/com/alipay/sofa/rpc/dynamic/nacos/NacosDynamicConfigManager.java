@@ -38,8 +38,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.Executor;
 
-import static com.alipay.sofa.rpc.common.utils.StringUtils.KEY_SEPARATOR;
-
 /**
  * @author Narziss
  * @version NaocsDynamicConfigManager.java, v 0.1 2024年07月26日 09:37 Narziss
@@ -48,39 +46,47 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.KEY_SEPARATOR;
 @Extension(value = "nacos", override = true)
 public class NacosDynamicConfigManager extends DynamicConfigManager {
 
-    private final static Logger LOGGER            = LoggerFactory.getLogger(NacosDynamicConfigManager.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(NacosDynamicConfigManager.class);
 
-    private static final long   DEFAULT_TIMEOUT   = 5000;
+    private static final long DEFAULT_TIMEOUT = 5000;
 
-    private final String        address;
-
-    private ConfigService       configService;
-
-    private Properties          nacosConfig       = new Properties();
-
-    private final String        group;
+    private final String group;
 
     private final ConcurrentMap<String, NacosConfigListener> watchListenerMap = new ConcurrentHashMap<>();
 
-    protected NacosDynamicConfigManager(String appName) {
-        super(appName);
-        address=SofaConfigs.getOrDefault(DynamicConfigKeys.NACOS_ADDRESS);
-        group = DynamicConfigKeys.DEFAULT_GROUP;
-        try {
-            nacosConfig.put(PropertyKeyConst.SERVER_ADDR, address);
-            configService = ConfigFactory.createConfigService(nacosConfig);
+    private ConfigService configService;
 
+    private Properties nacosConfig = new Properties();
+
+    protected NacosDynamicConfigManager(String appName) {
+        super(appName, SofaConfigs.getOrDefault(DynamicConfigKeys.NACOS_ADDRESS));
+        group = appName;
+        nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getAddress());
+        try {
+            configService = ConfigFactory.createConfigService(nacosConfig);
         } catch (NacosException e) {
             LOGGER.error("Failed to create ConfigService", e);
         }
     }
 
-    protected NacosDynamicConfigManager(String appName, String address) {
-        super(appName);
-        this.address = address;
-        group = DynamicConfigKeys.DEFAULT_GROUP;
+    protected NacosDynamicConfigManager(String appName, String remainUrl) {
+        super(appName, remainUrl);
+        group = appName;
+        nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getAddress());
+        String params[] = getParams();
+        if (params != null && params.length > 0) {
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                if (keyValue.length == 2) {
+                    if ("username".equals(keyValue[0])) {
+                        nacosConfig.put(PropertyKeyConst.USERNAME, keyValue[1]);
+                    } else if ("password".equals(keyValue[0])) {
+                        nacosConfig.put(PropertyKeyConst.PASSWORD, keyValue[1]);
+                    }
+                }
+            }
+        }
         try {
-            nacosConfig.put(PropertyKeyConst.SERVER_ADDR, address);
             configService = ConfigFactory.createConfigService(nacosConfig);
 
         } catch (NacosException e) {
@@ -90,15 +96,26 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
 
     @Override
     public void initServiceConfiguration(String service) {
-        //TODO not now
+        // TODO 暂不支持
+    }
 
+    @Override
+    public void initServiceConfiguration(String service, ConfigListener listener) {
+        try {
+            String rawConfig = configService.getConfig(service, group, DEFAULT_TIMEOUT);
+            if (!StringUtils.isEmpty(rawConfig)) {
+                listener.process(new ConfigChangedEvent(service, rawConfig));
+            }
+        } catch (NacosException e) {
+            LOGGER.error("Failed to getConfig for key:{}, group:{}", service, group, e);
+        }
     }
 
     @Override
     public String getProviderServiceProperty(String service, String key) {
         try {
             String configValue = configService.getConfig(
-                DynamicConfigKeyHelper.buildProviderServiceProKey(service, key),
+                    DynamicConfigKeyHelper.buildProviderServiceProKey(service, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         } catch (NacosException e) {
@@ -110,7 +127,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
     public String getConsumerServiceProperty(String service, String key) {
         try {
             String configValue = configService.getConfig(
-                DynamicConfigKeyHelper.buildConsumerServiceProKey(service, key),
+                    DynamicConfigKeyHelper.buildConsumerServiceProKey(service, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         } catch (NacosException e) {
@@ -122,7 +139,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
     public String getProviderMethodProperty(String service, String method, String key) {
         try {
             String configValue = configService.getConfig(
-                DynamicConfigKeyHelper.buildProviderMethodProKey(service, method, key),
+                    DynamicConfigKeyHelper.buildProviderMethodProKey(service, method, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         } catch (NacosException e) {
@@ -134,16 +151,12 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
     public String getConsumerMethodProperty(String service, String method, String key) {
         try {
             String configValue = configService.getConfig(
-                    buildDataId(DynamicConfigKeyHelper.buildConsumerMethodProKey(service, method, key)),
+                    DynamicConfigKeyHelper.buildConsumerMethodProKey(service, method, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         } catch (NacosException e) {
             return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         }
-    }
-
-    public String buildDataId(String proKey) {
-        return getAppName() + KEY_SEPARATOR + proKey;
     }
 
     @Override
@@ -153,22 +166,12 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
     }
 
     @Override
-    public String getConfig(String key){
-        try {
-            return configService.getConfig(getAppName()+ KEY_SEPARATOR +key, group, DEFAULT_TIMEOUT);
-        } catch (NacosException e) {
-            LOGGER.error("Failed to getConfig for key:{}, group:{}", key, group, e);
-            return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        }
-    }
-
-    @Override
     public void addListener(String key, ConfigListener listener) {
         NacosConfigListener nacosConfigListener = watchListenerMap.computeIfAbsent(
                 key, k -> createTargetListener(key));
         nacosConfigListener.addListener(listener);
         try {
-            configService.addListener(getAppName()+KEY_SEPARATOR +key, group, nacosConfigListener);
+            configService.addListener(key, group, nacosConfigListener);
         } catch (NacosException e) {
             LOGGER.error("Failed to add listener for key:{}, group:{}", key, group, e);
         }
@@ -194,7 +197,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
         }
 
         /**
-         * receive
+         * receive config change event
          *
          * @param dataId     data ID
          * @param group      group
@@ -204,7 +207,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
         public void innerReceive(String dataId, String group, String configInfo) {
             String oldValue = cacheData.get(dataId);
             ConfigChangedEvent event =
-                    new ConfigChangedEvent(dataId, group, configInfo, getChangeType(configInfo, oldValue));
+                    new ConfigChangedEvent(dataId, configInfo, getChangeType(configInfo, oldValue));
             if (configInfo == null) {
                 cacheData.remove(dataId);
             } else {

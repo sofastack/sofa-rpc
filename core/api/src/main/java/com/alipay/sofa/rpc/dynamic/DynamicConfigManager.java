@@ -30,12 +30,30 @@ public abstract class DynamicConfigManager {
 
     private String appName;
 
-    protected DynamicConfigManager(String appName) {
+    private String address;
+
+    private String params[];
+
+    protected DynamicConfigManager(String appName, String remainUrl) {
         this.appName = appName;
+        int queryIndex = remainUrl.indexOf("?");
+        this.address = (queryIndex > -1) ? remainUrl.substring(0, queryIndex) : remainUrl;
+        if (queryIndex > -1 && queryIndex < remainUrl.length() - 1) {
+            String query = remainUrl.substring(queryIndex + 1);
+            this.params = query.split("&");
+        }
     }
 
     protected String getAppName() {
         return appName;
+    }
+
+    protected String getAddress() {
+        return address;
+    }
+
+    protected String[] getParams() {
+        return params;
     }
 
     /**
@@ -45,6 +63,15 @@ public abstract class DynamicConfigManager {
      * @param service target service
      */
     public abstract void initServiceConfiguration(String service);
+
+    /**
+     * Init service's governance related configuration.
+     * Such as auth rules、lb rules
+     *
+     * @param service  target service
+     * @param listener config listener
+     */
+    public abstract void initServiceConfiguration(String service, ConfigListener listener);
 
     /**
      * Get provider service related property.
@@ -99,13 +126,5 @@ public abstract class DynamicConfigManager {
      * @param listener config listener
      */
     public abstract void addListener(String key, ConfigListener listener);
-
-    /**
-     * Get config value by key.
-     *
-     * @param key config key
-     * @return config value
-     */
-    public abstract String getConfig(String key);
 
 }

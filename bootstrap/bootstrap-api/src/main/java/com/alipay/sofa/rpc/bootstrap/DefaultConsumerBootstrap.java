@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ClusterFactory;
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SofaConfigs;
 import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -53,6 +54,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.REGISTRY_PROTOCOL_DOMAIN;
+import static com.alipay.sofa.common.config.SofaConfigs.getOrDefault;
 
 /**
  * Default consumer bootstrap.
@@ -145,7 +147,8 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 // build cluster
                 cluster = ClusterFactory.getCluster(this);
                 // build listeners
-                consumerConfig.setConfigListener(buildConfigListener(this));
+                ConfigListener configListener = buildConfigListener(this);
+                consumerConfig.setConfigListener(configListener);
                 consumerConfig.setProviderInfoListener(buildProviderInfoListener(this));
                 // init cluster
                 cluster.init();
@@ -155,26 +158,23 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
                     proxyInvoker);
 
-                //启用请求级别动态配置
+                //请求级别动态配置参数
                 final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
                 if (StringUtils.isNotBlank(dynamicAlias)) {
                     final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
-                        consumerConfig.getAppName(), dynamicAlias);
+                            consumerConfig.getAppName(), dynamicAlias);
                     dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId());
                 }
 
-                //启用接口级别动态配置
-                final String dynamicUrl = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_URL);
-                if (StringUtils.isNotBlank(dynamicUrl)) {
+                //接口级别动态配置参数
+                final String dynamicUrl = getOrDefault(DynamicConfigKeys.DYNAMIC_URL);
+                if ( StringUtils.isNotBlank(dynamicUrl)) {
+                    //启用接口级别动态配置
                     final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl(
                             consumerConfig.getAppName(), dynamicUrl);
-
-                    //build listeners for dynamic config
-                    consumerConfig.setConfigListener(buildConfigListener(this,dynamicManager));
+                    dynamicManager.addListener(consumerConfig.getInterfaceId(), configListener);
+                    dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId(), configListener);
                 }
-
-
-
             } catch (Exception e) {
                 if (cluster != null) {
                     cluster.destroy();
@@ -212,17 +212,6 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     protected ConfigListener buildConfigListener(ConsumerBootstrap bootstrap) {
         return new ConsumerAttributeListener();
-    }
-
-    /**
-     * Build ConfigListener for consumer bootstrap with dynamic config.
-     *
-     * @param bootstrap ConsumerBootstrap
-     * @param dynamicManager DynamicConfigManager
-     * @return ConfigListener
-     */
-    protected ConfigListener buildConfigListener(ConsumerBootstrap bootstrap, DynamicConfigManager dynamicManager) {
-        return new ConsumerAttributeListener(dynamicManager);
     }
 
     /**
@@ -463,28 +452,20 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
 
         private Map<String, String> newValueMap = new HashMap<>();
 
+        // 动态配置项
+        private List<String> dynamicConfigKeys = Arrays.asList(RpcConstants.CONFIG_KEY_TIMEOUT,
+                RpcConstants.CONFIG_KEY_RETRIES, RpcConstants.CONFIG_KEY_LOADBALANCER);
+
         ConsumerAttributeListener() {
 
         }
 
-        ConsumerAttributeListener(DynamicConfigManager dynamicManager) {
-            this.initWith(consumerConfig.getInterfaceId(),dynamicManager);
-        }
-
-        public void initWith(String key, DynamicConfigManager dynamicManager) {
-            dynamicManager.addListener(key, this);
-            // 初始化配置值
-            String rawConfig = dynamicManager.getConfig(key);
-            if (!StringUtils.isEmpty(rawConfig)) {
-                process(new ConfigChangedEvent(key, "sofa-rpc",rawConfig));
-            }
-        }
-
         @Override
-        public void process(ConfigChangedEvent event){
-            if (event.getChangeType().equals(ConfigChangeType.DELETED)) {
-                newValueMap = null;
-            } else {
+        public void process(ConfigChangedEvent event) {
+            for (String key : newValueMap.keySet()) {
+                newValueMap.put(key, "");
+            }
+            if (!event.getChangeType().equals(ConfigChangeType.DELETED)) {
                 // ADDED or MODIFIED
                 String[] lines = event.getContent().split("\n");
                 for (String line : lines) {
@@ -492,7 +473,14 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                     if (keyValue.length == 2) {
                         String key = keyValue[0].trim();
                         String value = keyValue[1].trim();
-                        newValueMap.put(key, value);
+                        for (String dynamicConfigKey : dynamicConfigKeys) {
+                            if (key.equals(dynamicConfigKey) || key.endsWith("." + dynamicConfigKey)) {
+                                newValueMap.put(key, value);
+                                break;
+                            }
+                        }
+                    } else {
+                        LOGGER.warn("Malformed configuration line: {}", line);
                     }
                 }
             }

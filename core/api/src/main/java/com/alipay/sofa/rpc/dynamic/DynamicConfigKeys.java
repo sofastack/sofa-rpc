@@ -25,13 +25,17 @@ import com.alipay.sofa.common.config.ConfigKey;
 public class DynamicConfigKeys {
     public static final String      DYNAMIC_ALIAS     = "dynamicAlias";
 
-    public static final String      DYNAMIC_URL       = "dynamicUrl";
-
     public static final String      CONFIG_NODE       = "config";
 
     public static final String      DEFAULT_NAMESPACE = "sofa-rpc";
 
-    public static final String      DEFAULT_GROUP     = "sofa-rpc";
+    public static ConfigKey<String> DYNAMIC_URL       = ConfigKey
+                                                          .build(
+                                                              "dynamicUrl",
+                                                              " ",
+                                                              false,
+                                                              "The url of the dynamic configuration.",
+                                                              new String[] { "dynamicUrl" });
 
     public static ConfigKey<String> ZK_ADDRESS        = ConfigKey
                                                           .build(

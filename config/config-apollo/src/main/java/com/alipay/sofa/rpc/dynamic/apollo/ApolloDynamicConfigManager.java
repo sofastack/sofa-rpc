@@ -18,11 +18,10 @@ package com.alipay.sofa.rpc.dynamic.apollo;
 
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.dynamic.*;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
@@ -45,11 +44,11 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Extension(value = "apollo", override = true)
 public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
-    Logger LOGGER = LoggerFactory.getLogger(ApolloDynamicConfigManager.class);
-
     private static final String APOLLO_APPID_KEY = "app.id";
 
     private static final String APOLLO_ADDR_KEY = "apollo.meta";
+
+    private static final String APOLLO_CLUSTER_KEY = "apollo.cluster";
 
     private static final String APOLLO_PROTOCOL_PREFIX = "http://";
 
@@ -58,47 +57,70 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
     private final ConcurrentMap<String, ApolloListener> watchListenerMap = new ConcurrentHashMap<>();
 
     protected ApolloDynamicConfigManager(String appName) {
-        super(appName);
-        System.setProperty(APOLLO_APPID_KEY, appName);
-        System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + SofaConfigs.getOrDefault(DynamicConfigKeys.APOLLO_ADDRESS));
-        config = ConfigService.getConfig(DynamicConfigKeys.DEFAULT_GROUP);
+        super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.APOLLO_ADDRESS,""));
+        if (StringUtils.isNotBlank(appName)) {
+            System.setProperty(APOLLO_APPID_KEY, appName);
+        }
+        if (StringUtils.isNotBlank(getAddress())) {
+            System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + getAddress());
+        }
+        config = ConfigService.getAppConfig();
     }
 
-    protected ApolloDynamicConfigManager(String appName,String address) {
-        super(appName);
+    protected ApolloDynamicConfigManager(String appName, String remainUrl) {
+        super(appName, remainUrl);
         System.setProperty(APOLLO_APPID_KEY, appName);
-        System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + address);
-        config = ConfigService.getConfig(DynamicConfigKeys.DEFAULT_GROUP);
+        System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + getAddress());
+        String params[] = getParams();
+        if (params!= null && params.length > 0){
+            for (String param : params) {
+                String[] keyValue = param.split("=");
+                if (keyValue.length == 2) {
+                    if ("cluster".equals(keyValue[0])) {
+                        System.setProperty(APOLLO_CLUSTER_KEY, keyValue[1]);
+                    }
+                }
+            }
+        }
+        config = ConfigService.getAppConfig();
     }
 
     @Override
     public void initServiceConfiguration(String service) {
-        //TODO not now
+        // TODO 暂不支持
+    }
+
+    @Override
+    public void initServiceConfiguration(String service, ConfigListener listener) {
+        String rawConfig = config.getProperty(service, "");
+        if (StringUtils.isNotBlank(rawConfig)) {
+            listener.process(new ConfigChangedEvent(service, rawConfig));
+        }
     }
 
     @Override
     public String getProviderServiceProperty(String service, String key) {
         return config.getProperty(DynamicConfigKeyHelper.buildProviderServiceProKey(service, key),
-            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
+                DynamicHelper.DEFAULT_DYNAMIC_VALUE);
     }
 
     @Override
     public String getConsumerServiceProperty(String service, String key) {
         return config.getProperty(DynamicConfigKeyHelper.buildConsumerServiceProKey(service, key),
-            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
+                DynamicHelper.DEFAULT_DYNAMIC_VALUE);
 
     }
 
     @Override
     public String getProviderMethodProperty(String service, String method, String key) {
         return config.getProperty(DynamicConfigKeyHelper.buildProviderMethodProKey(service, method, key),
-            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
+                DynamicHelper.DEFAULT_DYNAMIC_VALUE);
     }
 
     @Override
     public String getConsumerMethodProperty(String service, String method, String key) {
         return config.getProperty(DynamicConfigKeyHelper.buildConsumerMethodProKey(service, method, key),
-            DynamicHelper.DEFAULT_DYNAMIC_VALUE);
+                DynamicHelper.DEFAULT_DYNAMIC_VALUE);
 
     }
 
@@ -109,12 +131,7 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
     }
 
     @Override
-    public String getConfig(String key){
-        return config.getProperty(key, DynamicHelper.DEFAULT_DYNAMIC_VALUE);
-    }
-
-    @Override
-    public void addListener(String key, ConfigListener listener){
+    public void addListener(String key, ConfigListener listener) {
         ApolloListener apolloListener = watchListenerMap.computeIfAbsent(key, k -> new ApolloListener());
         apolloListener.addListener(listener);
         config.addChangeListener(apolloListener, Collections.singleton(key));
@@ -124,19 +141,15 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
         private Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
 
-        ApolloListener() {}
+        ApolloListener() {
+        }
 
         @Override
         public void onChange(com.ctrip.framework.apollo.model.ConfigChangeEvent changeEvent) {
             for (String key : changeEvent.changedKeys()) {
                 ConfigChange change = changeEvent.getChange(key);
-                if ("".equals(change.getNewValue())) {
-                        LOGGER.info("an empty rule is received for key: " + key);
-                    return;
-                }
-
                 ConfigChangedEvent event =
-                        new ConfigChangedEvent(key, change.getNamespace(), change.getNewValue(), getChangeType(change));
+                        new ConfigChangedEvent(key, change.getNewValue(), getChangeType(change));
                 listeners.forEach(listener -> listener.process(event));
             }
         }

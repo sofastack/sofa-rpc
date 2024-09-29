@@ -216,6 +216,11 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected transient volatile Map<String, Object> configValueCache = null;
 
     /**
+     * 动态配置的方法名称和方法参数配置的map
+     */
+    protected transient volatile Map<String, Object> dynamicConfigValueCache = new ConcurrentHashMap<>();
+
+    /**
      * 代理接口类，和T对应，主要针对泛化调用
      */
     protected transient volatile Class               proxyClass;
@@ -924,6 +929,10 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     public boolean updateAttribute(String property, String newValueStr, boolean overwrite) {
         try {
             boolean changed = false;
+            if(StringUtils.isBlank(newValueStr)){
+                // 改为默认值
+                newValueStr = configValueCache.get(property) == null ? null : configValueCache.get(property).toString();
+            }
             if (property.charAt(0) == RpcConstants.HIDE_KEY_PREFIX) {
                 // 方法级配置 例如.echoStr.timeout
                 String methodAndP = property.substring(1);
@@ -940,6 +949,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 // 拿到旧的值
                 Object oldValue = null;
                 Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+
                 if (methodConfig == null) {
                     methodConfig = new MethodConfig();
                     methodConfig.setName(methodName);
@@ -960,6 +970,11 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 }
                 if (changed && overwrite) {
                     BeanUtils.setProperty(methodConfig, methodProperty, propertyClazz, newValue);// 覆盖属性
+                    if (newValue != null){
+                        dynamicConfigValueCache.put(property, newValue);
+                    } else {
+                        dynamicConfigValueCache.remove(property);
+                    }
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Property \"" + methodName + "." + methodProperty + "\" changed from {} to {}",
                             oldValue, newValueStr);
@@ -1016,11 +1031,17 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return 配置值 method config value
      */
     public Object getMethodConfigValue(String methodName, String configKey) {
-        if (configValueCache == null) {
-            return null;
-        }
         String key = buildmkey(methodName, configKey);
-        return configValueCache.get(key);
+        Object value = null;
+        if (dynamicConfigValueCache != null) {
+            value = dynamicConfigValueCache.get(key);
+        }
+        if (value == null) {
+            if (configValueCache != null) {
+                value = configValueCache.get(key);
+            }
+        }
+        return value;
     }
 
     /**

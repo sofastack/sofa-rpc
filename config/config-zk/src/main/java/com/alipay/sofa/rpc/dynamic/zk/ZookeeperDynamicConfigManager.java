@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.dynamic.zk;
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.dynamic.*;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
@@ -35,7 +36,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
-import static com.alipay.sofa.rpc.common.utils.StringUtils.KEY_SEPARATOR;
 
 /**
  * @author Narziss
@@ -45,27 +45,23 @@ import static com.alipay.sofa.rpc.common.utils.StringUtils.KEY_SEPARATOR;
 @Extension(value = "zookeeper", override = true)
 public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
 
-    private final static Logger                      LOGGER            = LoggerFactory
-                                                                           .getLogger(ZookeeperDynamicConfigManager.class);
+    private final static Logger LOGGER = LoggerFactory
+            .getLogger(ZookeeperDynamicConfigManager.class);
 
-    private final CuratorFramework                   zkClient;
+    private final CuratorFramework zkClient;
 
-    private final String                      address;
-
-    private final String                             rootPath;
+    private final String rootPath;
+    private final ConcurrentMap<String, ZookeeperConfigListener> watchListenerMap = new ConcurrentHashMap<>();
     private ConcurrentMap<String, String> configMap = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String, ZookeeperConfigListener> watchListenerMap = new ConcurrentHashMap<>();
-
     protected ZookeeperDynamicConfigManager(String appName) {
-        super(appName);
-        rootPath = CONTEXT_SEP + DynamicConfigKeys.CONFIG_NODE + CONTEXT_SEP + DynamicConfigKeys.DEFAULT_GROUP + CONTEXT_SEP + getAppName();
-        address = SofaConfigs.getOrDefault(DynamicConfigKeys.ZK_ADDRESS);
+        super(appName, SofaConfigs.getOrDefault(DynamicConfigKeys.ZK_ADDRESS));
+        rootPath = CONTEXT_SEP + DynamicConfigKeys.CONFIG_NODE + CONTEXT_SEP + appName;
         zkClient = CuratorFrameworkFactory.builder()
-            .connectString(address)
-            .retryPolicy(new ExponentialBackoffRetry(1000, 3))
-            .namespace(DynamicConfigKeys.DEFAULT_NAMESPACE)
-            .build();
+                .connectString(getAddress())
+                .retryPolicy(new ExponentialBackoffRetry(1000, 3))
+                .namespace(DynamicConfigKeys.DEFAULT_NAMESPACE)
+                .build();
         zkClient.start();
 
         PathChildrenCache cache = new PathChildrenCache(zkClient, rootPath, true);
@@ -97,12 +93,11 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
         }
     }
 
-    protected ZookeeperDynamicConfigManager(String appName,String address) {
-        super(appName);
-        rootPath = CONTEXT_SEP + DynamicConfigKeys.CONFIG_NODE + CONTEXT_SEP + DynamicConfigKeys.DEFAULT_GROUP;
-        this.address = address;
+    protected ZookeeperDynamicConfigManager(String appName, String remainUrl) {
+        super(appName, remainUrl);
+        rootPath = CONTEXT_SEP + DynamicConfigKeys.CONFIG_NODE + CONTEXT_SEP + appName;
         zkClient = CuratorFrameworkFactory.builder()
-                .connectString(address)
+                .connectString(getAddress())
                 .retryPolicy(new ExponentialBackoffRetry(1000, 3))
                 .namespace(DynamicConfigKeys.DEFAULT_NAMESPACE)
                 .build();
@@ -111,7 +106,23 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
 
     @Override
     public void initServiceConfiguration(String service) {
-        //TODO not now
+        // TODO 暂不支持
+    }
+
+    @Override
+    public void initServiceConfiguration(String service, ConfigListener listener) {
+        try {
+            String path = rootPath + CONTEXT_SEP + service;
+            if (zkClient.checkExists().forPath(path) != null) {
+                byte[] bytes = zkClient.getData().forPath(rootPath + CONTEXT_SEP + service);
+                String rawConfig = new String(bytes, RpcConstants.DEFAULT_CHARSET);
+                if (!StringUtils.isEmpty(rawConfig)) {
+                    listener.process(new ConfigChangedEvent(service, rawConfig));
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to init service configuration for service: " + service, e);
+        }
 
     }
 
@@ -163,19 +174,8 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
     }
 
     @Override
-    public String getConfig(String key){
-        try {
-            byte[] bytes = zkClient.getData().forPath(rootPath+ CONTEXT_SEP +getAppName()+ KEY_SEPARATOR + key);
-            String configValue = new String(bytes, RpcConstants.DEFAULT_CHARSET);
-            return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        } catch (Exception e) {
-            return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        }
-    }
-
-    @Override
-    public void addListener(String key, ConfigListener listener){
-        String pathKey = rootPath+ CONTEXT_SEP +getAppName()+ KEY_SEPARATOR + key;
+    public void addListener(String key, ConfigListener listener) {
+        String pathKey = rootPath + CONTEXT_SEP + key;
 
         ZookeeperConfigListener zookeeperConfigListener = watchListenerMap.computeIfAbsent(
                 key, k -> createTargetListener(pathKey));
@@ -224,12 +224,11 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
                 content = new String(childData.getData(), RpcConstants.DEFAULT_CHARSET);
                 changeType = ConfigChangeType.MODIFIED;
             }
-            ConfigChangedEvent configChangeEvent = new ConfigChangedEvent(pathKey, DynamicConfigKeys.DEFAULT_GROUP, (String) content, changeType);
+            ConfigChangedEvent configChangeEvent = new ConfigChangedEvent(pathKey, (String) content, changeType);
             listeners.forEach(listener -> listener.process(configChangeEvent));
 
         }
     }
-
 
 
 }
