@@ -419,6 +419,7 @@ public class RpcOptions {
      * 默认 grpc maxInboundMessageSize大小
      */
     public static final String TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE  = "transport.grpc.maxInboundMessageSize";
+
     /**
      * 最大IO的buffer大小
      */
