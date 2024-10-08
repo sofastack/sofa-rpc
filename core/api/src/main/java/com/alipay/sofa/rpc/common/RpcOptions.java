@@ -529,6 +529,7 @@ public class RpcOptions {
     /**
      * Whether to close lookout collection.
      */
+    @Deprecated
     public static final String LOOKOUT_COLLECT_DISABLE                  = "lookout.collect.disable";
 
     /**
