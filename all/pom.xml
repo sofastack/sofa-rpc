@@ -22,7 +22,7 @@
     </licenses>
 
     <organization>
-        <name>The Ant Financial</name>
+        <name>SOFAStack</name>
         <url>https://www.sofastack.tech/</url>
     </organization>
 
@@ -30,17 +30,17 @@
         <developer>
             <name>Geng Zhang</name>
             <email>zhanggeng.zg@antfin.com</email>
-            <organization>The Ant Financial</organization>
+            <organization>SOFAStack</organization>
         </developer>
         <developer>
             <name>Wei Li</name>
             <email>lw111072@antfin.com</email>
-            <organization>The Ant Financial</organization>
+            <organization>SOFAStack</organization>
         </developer>
         <developer>
             <name>ZhiYuan Lei</name>
             <email>zhiyuan.lzy@antfin.com</email>
-            <organization>The Ant Financial</organization>
+            <organization>SOFAStack</organization>
         </developer>
     </developers>
 
