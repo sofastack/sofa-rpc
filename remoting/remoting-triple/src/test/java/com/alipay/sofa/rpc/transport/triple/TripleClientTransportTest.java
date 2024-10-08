@@ -14,20 +14,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.module;
+package com.alipay.sofa.rpc.transport.triple;
 
 import org.junit.Assert;
 import org.junit.Test;
 
 /**
  *
- * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
+ * @author junyuan
+ * @version TripleClientTransportTest.java, v 0.1 2024-08-01 17:12 junyuan Exp $
  */
-public class LookoutModuleTest {
+public class TripleClientTransportTest {
 
     @Test
-    public void testNeedLoad() {
-        LookoutModule lookoutModule = new LookoutModule();
-        Assert.assertEquals(true, lookoutModule.needLoad());
+    public void testInit() {
+
+        Assert.assertEquals(TripleClientTransport.KEEP_ALIVE_INTERVAL, 0);
+
     }
 }

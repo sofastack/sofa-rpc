@@ -419,6 +419,7 @@ public class RpcOptions {
      * 默认 grpc maxInboundMessageSize大小
      */
     public static final String TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE  = "transport.grpc.maxInboundMessageSize";
+
     /**
      * 最大IO的buffer大小
      */
@@ -529,6 +530,7 @@ public class RpcOptions {
     /**
      * Whether to close lookout collection.
      */
+    @Deprecated
     public static final String LOOKOUT_COLLECT_DISABLE                  = "lookout.collect.disable";
 
     /**

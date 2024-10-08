@@ -273,6 +273,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "compress.size.baseline": 2048,
   //Whether the Http2 Cleartext protocol client uses Prior Knowledge to start Http2
   "transport.client.h2c.usePriorKnowledge": true,
+  // grpc client keep alive interval, default to 0, no keep alive
+  "sofa.rpc.triple.client.keepAlive.interval": 0,
   /*-------------Transport层相关配置结束-------------*/
 
   /*
