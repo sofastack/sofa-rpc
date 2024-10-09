@@ -75,7 +75,8 @@ public class UserThreadPoolManagerTest {
         UserThreadPool userThreadPool = new UserThreadPool();
         Executor executorService = userThreadPool.getUserExecutor();
         Assert.assertTrue(executorService instanceof ThreadPoolExecutor);
-        RejectedExecutionHandler rejectedExecutionHandler = ((ThreadPoolExecutor) executorService).getRejectedExecutionHandler();
+        RejectedExecutionHandler rejectedExecutionHandler = ((ThreadPoolExecutor) executorService)
+            .getRejectedExecutionHandler();
         Assert.assertTrue(rejectedExecutionHandler instanceof SofaRejectedExecutionHandler);
     }
 
