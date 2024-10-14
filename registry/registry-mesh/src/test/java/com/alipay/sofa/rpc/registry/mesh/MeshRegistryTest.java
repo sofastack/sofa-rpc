@@ -167,6 +167,8 @@ public class MeshRegistryTest extends BaseMeshTest {
     public void testAll() throws Exception {
 
         int timeoutPerSub = 1000;
+        Map<String, String> parameter = new HashMap<>();
+        parameter.put(SofaRegistryConstants.SOFA_GROUP_KEY, "SOFA_TEST");
 
         ServerConfig serverConfig = new ServerConfig()
             .setProtocol("bolt")
@@ -183,7 +185,8 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setSerialization("hessian2")
             .setServer(serverConfig)
             .setWeight(222)
-            .setTimeout(3000);
+            .setTimeout(3000)
+            .setParameters(parameter);
 
         // 注册
         registry.register(provider);
@@ -196,7 +199,8 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setSubscribe(true)
             .setSerialization("java")
             .setInvokeType("sync")
-            .setTimeout(4444);
+            .setTimeout(4444)
+            .setParameters(parameter);
 
         String tag0 = MeshRegistryHelper.buildMeshKey(provider, serverConfig.getProtocol());
         String tag1 = MeshRegistryHelper.buildMeshKey(consumer, consumer.getProtocol());
@@ -205,6 +209,7 @@ public class MeshRegistryTest extends BaseMeshTest {
         PublishServiceRequest publishServiceRequest = registry.buildPublishServiceRequest(tag0,
             serverConfig.getProtocol(), providerInfo, "test-server");
         Assert.assertEquals(serverConfig.getProtocol(), publishServiceRequest.getProtocolType());
+        Assert.assertEquals("SOFA_TEST", publishServiceRequest.getGroup());
 
         // 订阅
         MeshRegistryTest.MockProviderInfoListener providerInfoListener = new MeshRegistryTest.MockProviderInfoListener();
@@ -216,6 +221,8 @@ public class MeshRegistryTest extends BaseMeshTest {
         Assert.assertTrue(ps.toString(), ps.size() == 1);
         SubscribeServiceRequest subscribeServiceRequest = registry.buildSubscribeServiceRequest(consumer);
         Assert.assertEquals(consumer.getProtocol(), subscribeServiceRequest.getProtocolType());
+        Assert.assertEquals("SOFA_TEST", subscribeServiceRequest.getGroup());
+        Assert.assertNotNull(subscribeServiceRequest.getProperties());
 
         // 反注册
         CountDownLatch latch = new CountDownLatch(1);
@@ -226,6 +233,7 @@ public class MeshRegistryTest extends BaseMeshTest {
         Assert.assertTrue(ps.size() == 1);
         UnPublishServiceRequest unPublishServiceRequest = registry.buildUnPublishServiceRequest(tag0, providerInfo);
         Assert.assertEquals(serverConfig.getProtocol(), unPublishServiceRequest.getProtocolType());
+        Assert.assertEquals("SOFA_TEST", unPublishServiceRequest.getGroup());
 
         // 一次发2个端口的再次注册
         latch = new CountDownLatch(1);
@@ -246,7 +254,8 @@ public class MeshRegistryTest extends BaseMeshTest {
             .setSubscribe(true)
             .setSerialization("java")
             .setInvokeType("sync")
-            .setTimeout(4444);
+            .setTimeout(4444)
+            .setParameters(parameter);
         CountDownLatch latch2 = new CountDownLatch(1);
         MeshRegistryTest.MockProviderInfoListener providerInfoListener2 = new MeshRegistryTest.MockProviderInfoListener();
         providerInfoListener2.setCountDownLatch(latch2);
@@ -261,6 +270,7 @@ public class MeshRegistryTest extends BaseMeshTest {
         registry.unSubscribe(consumer);
         UnSubscribeServiceRequest unSubscribeServiceRequest = registry.buildUnSubscribeServiceRequest(consumer);
         Assert.assertEquals(consumer.getProtocol(), unSubscribeServiceRequest.getProtocolType());
+        Assert.assertEquals("SOFA_TEST", unSubscribeServiceRequest.getGroup());
 
         // 批量反注册，判断订阅者2的数据
         latch = new CountDownLatch(1);

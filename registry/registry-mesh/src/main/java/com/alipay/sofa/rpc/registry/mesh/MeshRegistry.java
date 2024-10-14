@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ProviderGroup;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
@@ -184,6 +185,10 @@ public class MeshRegistry extends Registry {
         providerMetaInfo.setVersion(VERSION);
         providerMetaInfo.setProperties(providerInfo.getStaticAttrs());
         publishServiceRequest.setProviderMetaInfo(providerMetaInfo);
+        String group = providerInfo.getStaticAttrs().get(SofaRegistryConstants.SOFA_GROUP_KEY);
+        if (StringUtils.isNotBlank(group)) {
+            publishServiceRequest.setGroup(group);
+        }
         return publishServiceRequest;
     }
 
@@ -233,6 +238,10 @@ public class MeshRegistry extends Registry {
         UnPublishServiceRequest unPublishServiceRequest = new UnPublishServiceRequest();
         unPublishServiceRequest.setServiceName(serviceName);
         unPublishServiceRequest.setProtocolType(providerInfo.getProtocolType());
+        String group = providerInfo.getStaticAttr(SofaRegistryConstants.SOFA_GROUP_KEY);
+        if (StringUtils.isNotBlank(group)) {
+            unPublishServiceRequest.setGroup(group);
+        }
         return unPublishServiceRequest;
     }
 
@@ -303,6 +312,11 @@ public class MeshRegistry extends Registry {
         SubscribeServiceRequest subscribeRequest = new SubscribeServiceRequest();
         subscribeRequest.setServiceName(key);
         subscribeRequest.setProtocolType(consumerConfig.getProtocol());
+        subscribeRequest.setProperties(consumerConfig.getParameters());
+        String group = consumerConfig.getParameter(SofaRegistryConstants.SOFA_GROUP_KEY);
+        if (StringUtils.isNotBlank(group)) {
+            subscribeRequest.setGroup(group);
+        }
         return subscribeRequest;
     }
 
@@ -368,6 +382,10 @@ public class MeshRegistry extends Registry {
         String key = MeshRegistryHelper.buildMeshKey(config, config.getProtocol());
         unsubscribeRequest.setServiceName(key);
         unsubscribeRequest.setProtocolType(config.getProtocol());
+        String group = config.getParameter(SofaRegistryConstants.SOFA_GROUP_KEY);
+        if (StringUtils.isNotBlank(group)) {
+            unsubscribeRequest.setGroup(group);
+        }
         return unsubscribeRequest;
     }
 

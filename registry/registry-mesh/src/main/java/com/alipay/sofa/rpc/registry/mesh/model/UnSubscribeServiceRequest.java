@@ -30,6 +30,8 @@ public class UnSubscribeServiceRequest {
     //这个值是类似DEFAULT/XFIRE这种，也有可能是tr
     private String protocolType;
 
+    private String group;
+
     public String getServiceName() {
         return serviceName;
     }
@@ -54,12 +56,21 @@ public class UnSubscribeServiceRequest {
         this.protocolType = protocolType;
     }
 
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("UnSubscribeServiceRequest{");
         sb.append("serviceName='").append(serviceName).append('\'');
         sb.append(", targetAppAddress='").append(targetAppAddress).append('\'');
         sb.append(", protocolType='").append(protocolType).append('\'');
+        sb.append(", group='").append(group).append('\'');
         sb.append('}');
         return sb.toString();
     }

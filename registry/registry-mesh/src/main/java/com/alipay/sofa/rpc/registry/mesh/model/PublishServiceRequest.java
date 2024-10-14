@@ -32,6 +32,8 @@ public class PublishServiceRequest {
 
     private boolean          onlyPublishInCloud;
 
+    private String           group;
+
     public String getServiceName() {
         return serviceName;
     }
@@ -64,6 +66,14 @@ public class PublishServiceRequest {
         this.onlyPublishInCloud = onlyPublishInCloud;
     }
 
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("PublishServiceRequest{");
@@ -71,6 +81,7 @@ public class PublishServiceRequest {
         sb.append(", protocolType='").append(protocolType).append('\'');
         sb.append(", providerMetaInfo=").append(providerMetaInfo);
         sb.append(", onlyPublishInCloud=").append(onlyPublishInCloud);
+        sb.append(", group='").append(group).append('\'');
         sb.append('}');
         return sb.toString();
     }
