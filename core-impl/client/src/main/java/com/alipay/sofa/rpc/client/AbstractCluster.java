@@ -210,19 +210,22 @@ public abstract class AbstractCluster extends Cluster {
         checkProviderInfo(providerGroup);
         ProviderGroup oldProviderGroup = addressHolder.getProviderGroup(providerGroup.getName());
         if (ProviderHelper.isEmpty(providerGroup)) {
+            boolean previouslyEmpty = ProviderHelper.isEmpty(oldProviderGroup);
             addressHolder.updateProviders(providerGroup);
-            if (!ProviderHelper.isEmpty(oldProviderGroup)) {
+            if (!previouslyEmpty) {
                 if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                     LOGGER.warnWithApp(consumerConfig.getAppName(), "Provider list is emptied, may be all " +
                         "providers has been closed, or this consumer has been add to blacklist");
-                    closeTransports();
                 }
+                closeTransports();
             }
         } else {
             addressHolder.updateProviders(providerGroup);
             connectionHolder.updateProviders(providerGroup);
         }
         if (EventBus.isEnable(ProviderInfoUpdateEvent.class)) {
+            // see: https://github.com/sofastack/sofa-rpc/issues/1442
+            // there is a swallow copy problem which makes the oldProviderGroup same as providerGroup
             ProviderInfoUpdateEvent event = new ProviderInfoUpdateEvent(consumerConfig, oldProviderGroup, providerGroup);
             EventBus.post(event);
         }
