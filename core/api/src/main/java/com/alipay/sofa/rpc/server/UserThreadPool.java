@@ -113,6 +113,7 @@ public class UserThreadPool {
         if (prestartAllCoreThreads) {
             threadPoolExecutor.prestartAllCoreThreads();
         }
+        threadPoolExecutor.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
         return threadPoolExecutor;
     }
 
