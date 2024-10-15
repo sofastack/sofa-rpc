@@ -27,6 +27,8 @@ public class UnPublishServiceRequest {
     //这个值是类似DEFAULT/XFIRE这种，也有可能是tr
     private String protocolType;
 
+    private String group;
+
     public String getServiceName() {
         return serviceName;
     }
@@ -41,6 +43,14 @@ public class UnPublishServiceRequest {
 
     public void setProtocolType(String protocolType) {
         this.protocolType = protocolType;
+    }
+
+    public String getGroup() {
+        return group;
+    }
+
+    public void setGroup(String group) {
+        this.group = group;
     }
 
     @Override

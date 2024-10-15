@@ -18,10 +18,13 @@ package com.alipay.sofa.rpc.config;
 
 import com.alipay.sofa.rpc.server.UserThreadPool;
 import com.alipay.sofa.rpc.server.UserVirtualThreadPool;
+import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
 import org.junit.Assert;
 import org.junit.Test;
+
 import java.util.Set;
 import java.util.concurrent.Executor;
+import java.util.concurrent.RejectedExecutionHandler;
 import java.util.concurrent.ThreadPoolExecutor;
 
 public class UserThreadPoolManagerTest {
@@ -65,6 +68,16 @@ public class UserThreadPoolManagerTest {
             return;
         }
         Assert.assertNull(result);
+    }
+
+    @Test
+    public void testRejectedExecutionHandler() {
+        UserThreadPool userThreadPool = new UserThreadPool();
+        Executor executorService = userThreadPool.getUserExecutor();
+        Assert.assertTrue(executorService instanceof ThreadPoolExecutor);
+        RejectedExecutionHandler rejectedExecutionHandler = ((ThreadPoolExecutor) executorService)
+            .getRejectedExecutionHandler();
+        Assert.assertTrue(rejectedExecutionHandler instanceof SofaRejectedExecutionHandler);
     }
 
     @Test

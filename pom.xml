@@ -7,13 +7,13 @@
     <artifactId>sofa-rpc-parent</artifactId>
     <version>${revision}</version>
     <packaging>pom</packaging>
-    <name>[SOFA] - RPC Framework</name>
-    <url>http://www.antfin.com</url>
+    <name>[SOFA] RPC Framework</name>
+    <url>https://www.sofastack.tech</url>
     <description>[SOFA] RPC Framework of Java.</description>
 
     <organization>
-        <name>The Ant Financial</name>
-        <url>http://www.antfin.com/</url>
+        <name>SOFAStack</name>
+        <url>https://www.sofastack.tech/</url>
     </organization>
 
     <modules>
@@ -77,7 +77,7 @@
 
     <properties>
         <!-- Build args -->
-        <revision>5.13.1-SNAPSHOT</revision>
+        <revision>5.13.2-SNAPSHOT</revision>
         <jmh.version>1.33</jmh.version>
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>
