@@ -45,7 +45,12 @@ import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.registry.Registry;
 import com.alipay.sofa.rpc.registry.RegistryFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -167,7 +172,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 }
 
                 //接口级别动态配置参数
-                final String dynamicUrl = getOrDefault(DynamicConfigKeys.DYNAMIC_URL);
+                final String dynamicUrl = getOrDefault(DynamicConfigKeys.CENTER_ADDRESS);
                 if ( StringUtils.isNotBlank(dynamicUrl)) {
                     //启用接口级别动态配置
                     final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl(
@@ -453,38 +458,40 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
         private Map<String, String> newValueMap = new HashMap<>();
 
         // 动态配置项
-        private List<String> dynamicConfigKeys = Arrays.asList(RpcConstants.CONFIG_KEY_TIMEOUT,
-                RpcConstants.CONFIG_KEY_RETRIES, RpcConstants.CONFIG_KEY_LOADBALANCER);
+        private final Set<String> dynamicConfigKeys = new HashSet<>();
 
         ConsumerAttributeListener() {
-
+            dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_TIMEOUT);
+            dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_RETRIES);
+            dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_LOADBALANCER);
         }
 
         @Override
         public void process(ConfigChangedEvent event) {
-            for (String key : newValueMap.keySet()) {
-                newValueMap.put(key, "");
-            }
+            // 清除上次的赋值，并保留赋值过的key
+            newValueMap.replaceAll((k, v) -> "");
             if (!event.getChangeType().equals(ConfigChangeType.DELETED)) {
                 // ADDED or MODIFIED
-                String[] lines = event.getContent().split("\n");
-                for (String line : lines) {
-                    String[] keyValue = line.split("=", 2);
-                    if (keyValue.length == 2) {
-                        String key = keyValue[0].trim();
-                        String value = keyValue[1].trim();
-                        for (String dynamicConfigKey : dynamicConfigKeys) {
-                            if (key.equals(dynamicConfigKey) || key.endsWith("." + dynamicConfigKey)) {
-                                newValueMap.put(key, value);
-                                break;
-                            }
-                        }
-                    } else {
-                        LOGGER.warn("Malformed configuration line: {}", line);
-                    }
-                }
+                parseConfigurationLines(event.getContent());
             }
             attrUpdated(newValueMap);
+        }
+
+        private void parseConfigurationLines(String content) {
+            String[] lines = content.split("\n");
+            for (String line : lines) {
+                String[] keyValue = line.split("=", 2);
+                if (keyValue.length == 2) {
+                    String key = keyValue[0].trim();
+                    String value = keyValue[1].trim();
+                    String tempKey = key.lastIndexOf(".") == -1 ? key : key.substring(key.lastIndexOf(".") + 1);
+                    if (dynamicConfigKeys.contains(tempKey)) {
+                        newValueMap.put(key, value);
+                    }
+                } else {
+                    LOGGER.warn("Malformed configuration line: {}", line);
+                }
+            }
         }
 
         @Override

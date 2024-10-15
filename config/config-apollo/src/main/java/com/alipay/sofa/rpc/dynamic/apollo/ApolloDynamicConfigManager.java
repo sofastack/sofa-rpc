@@ -29,6 +29,7 @@ import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -71,16 +72,10 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
         super(appName, remainUrl);
         System.setProperty(APOLLO_APPID_KEY, appName);
         System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + getAddress());
-        String params[] = getParams();
-        if (params!= null && params.length > 0){
-            for (String param : params) {
-                String[] keyValue = param.split("=");
-                if (keyValue.length == 2) {
-                    if ("cluster".equals(keyValue[0])) {
-                        System.setProperty(APOLLO_CLUSTER_KEY, keyValue[1]);
-                    }
-                }
-            }
+        Map params = getParams();
+        if (params != null && params.containsKey("cluster")) {
+            String clusterValue = (String)params.get("cluster");
+            System.setProperty(APOLLO_CLUSTER_KEY, clusterValue);
         }
         config = ConfigService.getAppConfig();
     }
@@ -157,6 +152,9 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
         private ConfigChangeType getChangeType(ConfigChange change) {
             if (change.getChangeType() == PropertyChangeType.DELETED) {
                 return ConfigChangeType.DELETED;
+            }
+            if (change.getChangeType() == PropertyChangeType.ADDED) {
+                return ConfigChangeType.ADDED;
             }
             return ConfigChangeType.MODIFIED;
         }

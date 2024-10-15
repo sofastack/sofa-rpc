@@ -38,7 +38,8 @@ public class NacosDynamicConfigTest {
 
     @Test
     public void testNacosDynamicConfig() throws Exception {
-        System.setProperty(DynamicConfigKeys.DYNAMIC_URL.getKey(), "nacos://127.0.0.1:8848");
+        System.setProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey(),
+            "nacos://127.0.0.1:8848?username=nacos&password=nacos");
         ApplicationConfig clientApplication = new ApplicationConfig();
         clientApplication.setAppName("demo");
 
@@ -53,7 +54,7 @@ public class NacosDynamicConfigTest {
 
         // 获取接口对应的动态配置监听器
         DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl
-            (clientApplication.getAppName(), System.getProperty(DynamicConfigKeys.DYNAMIC_URL.getKey()));
+            (clientApplication.getAppName(), System.getProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey()));
         Field field = NacosDynamicConfigManager.class.getDeclaredField("watchListenerMap");
         field.setAccessible(true);
         Map<String, NacosDynamicConfigManager.NacosConfigListener> watchListenerMap = (Map<String, NacosDynamicConfigManager.NacosConfigListener>) field
@@ -61,12 +62,19 @@ public class NacosDynamicConfigTest {
         NacosDynamicConfigManager.NacosConfigListener nacosConfigListener = watchListenerMap.get(consumerConfig
             .getInterfaceId());
 
-        // 测试配置更新
+        // 测试配置新增
         String configValue = "timeout=5000";
         nacosConfigListener.innerReceive(consumerConfig.getInterfaceId(), consumerConfig.getAppName(), configValue);
         Assert.assertEquals(5000, consumerConfig.getMethodTimeout("sayHello"));
+        // 测试配置修改
         configValue = "timeout=5000\n.sayHello.timeout=6000";
         nacosConfigListener.innerReceive(consumerConfig.getInterfaceId(), consumerConfig.getAppName(), configValue);
         Assert.assertEquals(6000, consumerConfig.getMethodTimeout("sayHello"));
+        // 测试配置删除
+        configValue = "";
+        nacosConfigListener.innerReceive(consumerConfig.getInterfaceId(), consumerConfig.getAppName(), configValue);
+        Assert.assertEquals(-1, consumerConfig.getMethodTimeout("sayHello"));
+
+        System.clearProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey());
     }
 }

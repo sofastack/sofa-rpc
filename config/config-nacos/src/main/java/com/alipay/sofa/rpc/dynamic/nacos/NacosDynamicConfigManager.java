@@ -73,17 +73,15 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
         super(appName, remainUrl);
         group = appName;
         nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getAddress());
-        String params[] = getParams();
-        if (params != null && params.length > 0) {
-            for (String param : params) {
-                String[] keyValue = param.split("=");
-                if (keyValue.length == 2) {
-                    if ("username".equals(keyValue[0])) {
-                        nacosConfig.put(PropertyKeyConst.USERNAME, keyValue[1]);
-                    } else if ("password".equals(keyValue[0])) {
-                        nacosConfig.put(PropertyKeyConst.PASSWORD, keyValue[1]);
-                    }
-                }
+        Map params = getParams();
+        if (params != null) {
+            if( params.containsKey("username")) {
+                String username = (String)params.get("username");
+                nacosConfig.put(PropertyKeyConst.USERNAME, username);
+            }
+            if( params.containsKey("password")) {
+                String password = (String) params.get("password");
+                nacosConfig.put(PropertyKeyConst.PASSWORD, password);
             }
         }
         try {

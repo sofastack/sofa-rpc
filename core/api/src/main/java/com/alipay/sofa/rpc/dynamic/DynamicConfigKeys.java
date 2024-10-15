@@ -29,13 +29,13 @@ public class DynamicConfigKeys {
 
     public static final String      DEFAULT_NAMESPACE = "sofa-rpc";
 
-    public static ConfigKey<String> DYNAMIC_URL       = ConfigKey
+    public static ConfigKey<String> CENTER_ADDRESS    = ConfigKey
                                                           .build(
-                                                              "dynamicUrl",
+                                                              "sofa.rpc.config.center.address",
                                                               " ",
                                                               false,
                                                               "The url of the dynamic configuration.",
-                                                              new String[] { "dynamicUrl" });
+                                                              new String[] { "sofa_rpc_config_center_address" });
 
     public static ConfigKey<String> ZK_ADDRESS        = ConfigKey
                                                           .build(
@@ -43,7 +43,7 @@ public class DynamicConfigKeys {
                                                               "127.0.0.1:2181",
                                                               false,
                                                               "The address of Zookeeper configuration center.",
-                                                              new String[] { "zookeeper_address" });
+                                                              new String[] { "sofa_rpc_config_center_zookeeper_address" });
 
     public static ConfigKey<String> NACOS_ADDRESS     = ConfigKey
                                                           .build(
@@ -51,13 +51,13 @@ public class DynamicConfigKeys {
                                                               "127.0.0.1:8848",
                                                               false,
                                                               "The address of Nacos configuration center.",
-                                                              new String[] { "nacos_address" });
+                                                              new String[] { "sofa_rpc_config_center_nacos_address" });
     public static ConfigKey<String> APOLLO_ADDRESS    = ConfigKey
                                                           .build(
                                                               "sofa.rpc.config.center.apollo.address",
                                                               "127.0.0.1:8080",
                                                               false,
                                                               "The address of Apollo configuration center.",
-                                                              new String[] { "apollo_address" });
+                                                              new String[] { "sofa_rpc_config_center_apollo_address" });
 
 }

@@ -20,6 +20,9 @@ import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.ext.Extensible;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author bystander
@@ -32,15 +35,25 @@ public abstract class DynamicConfigManager {
 
     private String address;
 
-    private String params[];
+    private Map<String, String> params = new HashMap<>();
 
     protected DynamicConfigManager(String appName, String remainUrl) {
         this.appName = appName;
+        parseRemainUrl(remainUrl);
+    }
+
+    protected void parseRemainUrl(String remainUrl) {
         int queryIndex = remainUrl.indexOf("?");
         this.address = (queryIndex > -1) ? remainUrl.substring(0, queryIndex) : remainUrl;
         if (queryIndex > -1 && queryIndex < remainUrl.length() - 1) {
             String query = remainUrl.substring(queryIndex + 1);
-            this.params = query.split("&");
+            String[] paramPairs = query.split("&");
+            for (String paramPair : paramPairs) {
+                String[] keyValue = paramPair.split("=");
+                if (keyValue.length == 2) {
+                    this.params.put(keyValue[0], keyValue[1]);
+                }
+            }
         }
     }
 
@@ -52,7 +65,7 @@ public abstract class DynamicConfigManager {
         return address;
     }
 
-    protected String[] getParams() {
+    protected Map getParams() {
         return params;
     }
 
