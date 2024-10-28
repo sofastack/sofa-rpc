@@ -24,8 +24,8 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
-import io.fury.ThreadSafeFury;
-import io.fury.memory.MemoryBuffer;
+import org.apache.fury.ThreadSafeFury;
+import org.apache.fury.memory.MemoryBuffer;
 
 import java.util.Map;
 
