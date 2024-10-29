@@ -20,7 +20,12 @@ import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.dynamic.*;
+import com.alipay.sofa.rpc.dynamic.ConfigChangeType;
+import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeyHelper;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -35,6 +40,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
+import static com.alipay.sofa.common.config.SofaConfigs.getOrDefault;
 import static com.alipay.sofa.rpc.common.utils.StringUtils.CONTEXT_SEP;
 
 /**
@@ -55,53 +61,44 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
     private ConcurrentMap<String, String> configMap = new ConcurrentHashMap<>();
 
     protected ZookeeperDynamicConfigManager(String appName) {
-        super(appName, SofaConfigs.getOrDefault(DynamicConfigKeys.ZK_ADDRESS));
+        super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS, "zookeeper://127.0.0.1:2181"));
         rootPath = CONTEXT_SEP + DynamicConfigKeys.CONFIG_NODE + CONTEXT_SEP + appName;
         zkClient = CuratorFrameworkFactory.builder()
-                .connectString(getAddress())
+                .connectString(getDynamicUrl().getAddress())
                 .retryPolicy(new ExponentialBackoffRetry(1000, 3))
                 .namespace(DynamicConfigKeys.DEFAULT_NAMESPACE)
                 .build();
         zkClient.start();
 
-        PathChildrenCache cache = new PathChildrenCache(zkClient, rootPath, true);
-        cache.getListenable().addListener(new PathChildrenCacheListener() {
-            @Override
-            public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
-                switch (event.getType()) {
-                    case CHILD_ADDED:
-                    case CHILD_UPDATED:
-                        String key = event.getData().getPath().substring(rootPath.length() + 1);
-                        String value = new String(event.getData().getData());
-                        configMap.put(key, value);
-                        LOGGER.info("Receive zookeeper event: " + "type=[" + event.getType() + "] key=[" + key + "] value=[" + value + "]");
-                        break;
-                    case CHILD_REMOVED:
-                        key = event.getData().getPath().substring(rootPath.length() + 1);
-                        configMap.remove(key);
-                        LOGGER.info("Receive zookeeper event: " + "type=[" + event.getType() + "] key=[" + key + "]");
-                        break;
-                    default:
-                        break;
+        if (!getOrDefault(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE)) {
+            PathChildrenCache cache = new PathChildrenCache(zkClient, rootPath, true);
+            cache.getListenable().addListener(new PathChildrenCacheListener() {
+                @Override
+                public void childEvent(CuratorFramework client, PathChildrenCacheEvent event) throws Exception {
+                    switch (event.getType()) {
+                        case CHILD_ADDED:
+                        case CHILD_UPDATED:
+                            String key = event.getData().getPath().substring(rootPath.length() + 1);
+                            String value = new String(event.getData().getData());
+                            configMap.put(key, value);
+                            LOGGER.info("Receive zookeeper event: " + "type=[" + event.getType() + "] key=[" + key + "] value=[" + value + "]");
+                            break;
+                        case CHILD_REMOVED:
+                            key = event.getData().getPath().substring(rootPath.length() + 1);
+                            configMap.remove(key);
+                            LOGGER.info("Receive zookeeper event: " + "type=[" + event.getType() + "] key=[" + key + "]");
+                            break;
+                        default:
+                            break;
+                    }
                 }
+            });
+            try {
+                cache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
+            } catch (Exception e) {
+                LOGGER.error("setupPathChildrenCache error", e);
             }
-        });
-        try {
-            cache.start(PathChildrenCache.StartMode.BUILD_INITIAL_CACHE);
-        } catch (Exception e) {
-            LOGGER.error("setupPathChildrenCache error", e);
         }
-    }
-
-    protected ZookeeperDynamicConfigManager(String appName, String remainUrl) {
-        super(appName, remainUrl);
-        rootPath = CONTEXT_SEP + DynamicConfigKeys.CONFIG_NODE + CONTEXT_SEP + appName;
-        zkClient = CuratorFrameworkFactory.builder()
-                .connectString(getAddress())
-                .retryPolicy(new ExponentialBackoffRetry(1000, 3))
-                .namespace(DynamicConfigKeys.DEFAULT_NAMESPACE)
-                .build();
-        zkClient.start();
     }
 
     @Override

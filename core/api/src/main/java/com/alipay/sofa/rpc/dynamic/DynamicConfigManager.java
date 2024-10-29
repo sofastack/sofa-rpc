@@ -17,43 +17,29 @@
 package com.alipay.sofa.rpc.dynamic;
 
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.ext.Extensible;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
- *
  * @author bystander
  * @version : DynamicManager.java, v 0.1 2019年04月12日 11:35 bystander Exp $
  */
 @Extensible(singleton = true)
 public abstract class DynamicConfigManager {
 
-    private String appName;
+    private String     appName;
 
-    private String address;
+    private DynamicUrl dynamicUrl;
 
-    private Map<String, String> params = new HashMap<>();
-
-    protected DynamicConfigManager(String appName, String remainUrl) {
+    protected DynamicConfigManager(String appName) {
         this.appName = appName;
-        parseRemainUrl(remainUrl);
     }
 
-    protected void parseRemainUrl(String remainUrl) {
-        int queryIndex = remainUrl.indexOf("?");
-        this.address = (queryIndex > -1) ? remainUrl.substring(0, queryIndex) : remainUrl;
-        if (queryIndex > -1 && queryIndex < remainUrl.length() - 1) {
-            String query = remainUrl.substring(queryIndex + 1);
-            String[] paramPairs = query.split("&");
-            for (String paramPair : paramPairs) {
-                String[] keyValue = paramPair.split("=");
-                if (keyValue.length == 2) {
-                    this.params.put(keyValue[0], keyValue[1]);
-                }
-            }
+    protected DynamicConfigManager(String appName, String configCenterAddress) {
+        this.appName = appName;
+        if (StringUtils.isNotBlank(configCenterAddress)) {
+            this.dynamicUrl = new DynamicUrl(configCenterAddress);
         }
     }
 
@@ -61,12 +47,8 @@ public abstract class DynamicConfigManager {
         return appName;
     }
 
-    protected String getAddress() {
-        return address;
-    }
-
-    protected Map getParams() {
-        return params;
+    protected DynamicUrl getDynamicUrl() {
+        return dynamicUrl;
     }
 
     /**
@@ -84,13 +66,14 @@ public abstract class DynamicConfigManager {
      * @param service  target service
      * @param listener config listener
      */
-    public abstract void initServiceConfiguration(String service, ConfigListener listener);
+    public void initServiceConfiguration(String service, ConfigListener listener) {
+    }
 
     /**
      * Get provider service related property.
      *
      * @param service target service
-     * @param key property key
+     * @param key     property key
      * @return property value
      */
     public abstract String getProviderServiceProperty(String service, String key);
@@ -99,7 +82,7 @@ public abstract class DynamicConfigManager {
      * Get consumer service related property.
      *
      * @param service target service
-     * @param key property key
+     * @param key     property key
      * @return property value
      */
     public abstract String getConsumerServiceProperty(String service, String key);
@@ -108,8 +91,8 @@ public abstract class DynamicConfigManager {
      * Get provider method related property.
      *
      * @param service target service
-     * @param method target method
-     * @param key property key
+     * @param method  target method
+     * @param key     property key
      * @return property value
      */
     public abstract String getProviderMethodProperty(String service, String method, String key);
@@ -118,8 +101,8 @@ public abstract class DynamicConfigManager {
      * Get consumer method related property.
      *
      * @param service target service
-     * @param method target method
-     * @param key property key
+     * @param method  target method
+     * @param key     property key
      * @return property value
      */
     public abstract String getConsumerMethodProperty(String service, String method, String key);
@@ -135,9 +118,10 @@ public abstract class DynamicConfigManager {
     /**
      * Add config listener.
      *
-     * @param key config key
+     * @param key      config key
      * @param listener config listener
      */
-    public abstract void addListener(String key, ConfigListener listener);
+    public void addListener(String key, ConfigListener listener) {
+    }
 
 }

@@ -34,6 +34,7 @@ import com.alipay.sofa.rpc.dynamic.ConfigChangeType;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
+import com.alipay.sofa.rpc.dynamic.DynamicUrl;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
@@ -172,13 +173,17 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 }
 
                 //接口级别动态配置参数
-                final String dynamicUrl = getOrDefault(DynamicConfigKeys.CENTER_ADDRESS);
-                if ( StringUtils.isNotBlank(dynamicUrl)) {
-                    //启用接口级别动态配置
-                    final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl(
-                            consumerConfig.getAppName(), dynamicUrl);
-                    dynamicManager.addListener(consumerConfig.getInterfaceId(), configListener);
-                    dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId(), configListener);
+                Boolean dynamicConfigRefreshEnable = getOrDefault(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE);
+                if (dynamicConfigRefreshEnable) {
+                    String configCenterAddress = getOrDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS);
+                    if (StringUtils.isNotBlank(configCenterAddress)) {
+                        DynamicUrl dynamicUrl = new DynamicUrl(configCenterAddress);
+                        //启用接口级别动态配置
+                        final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
+                                consumerConfig.getAppName(), dynamicUrl.getProtocol());
+                        dynamicManager.addListener(consumerConfig.getInterfaceId(), configListener);
+                        dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId(), configListener);
+                    }
                 }
             } catch (Exception e) {
                 if (cluster != null) {

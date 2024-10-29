@@ -38,7 +38,8 @@ public class NacosDynamicConfigTest {
 
     @Test
     public void testNacosDynamicConfig() throws Exception {
-        System.setProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey(),
+        System.setProperty(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE.getKey(), "true");
+        System.setProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey(),
             "nacos://127.0.0.1:8848?username=nacos&password=nacos");
         ApplicationConfig clientApplication = new ApplicationConfig();
         clientApplication.setAppName("demo");
@@ -53,8 +54,8 @@ public class NacosDynamicConfigTest {
         consumerConfig.refer();
 
         // 获取接口对应的动态配置监听器
-        DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl
-            (clientApplication.getAppName(), System.getProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey()));
+        DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager
+            (clientApplication.getAppName(), "nacos");
         Field field = NacosDynamicConfigManager.class.getDeclaredField("watchListenerMap");
         field.setAccessible(true);
         Map<String, NacosDynamicConfigManager.NacosConfigListener> watchListenerMap = (Map<String, NacosDynamicConfigManager.NacosConfigListener>) field
@@ -75,6 +76,6 @@ public class NacosDynamicConfigTest {
         nacosConfigListener.innerReceive(consumerConfig.getInterfaceId(), consumerConfig.getAppName(), configValue);
         Assert.assertEquals(-1, consumerConfig.getMethodTimeout("sayHello"));
 
-        System.clearProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey());
+        System.clearProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey());
     }
 }

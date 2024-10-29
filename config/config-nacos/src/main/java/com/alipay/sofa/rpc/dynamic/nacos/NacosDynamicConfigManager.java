@@ -21,7 +21,12 @@ import com.alibaba.nacos.api.config.listener.AbstractSharedListener;
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.dynamic.*;
+import com.alipay.sofa.rpc.dynamic.ConfigChangeType;
+import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeyHelper;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
@@ -59,34 +64,17 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
     private Properties nacosConfig = new Properties();
 
     protected NacosDynamicConfigManager(String appName) {
-        super(appName, SofaConfigs.getOrDefault(DynamicConfigKeys.NACOS_ADDRESS));
+        super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS, "nacos://127.0.0.1:8848"));
         group = appName;
-        nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getAddress());
-        try {
-            configService = ConfigFactory.createConfigService(nacosConfig);
-        } catch (NacosException e) {
-            LOGGER.error("Failed to create ConfigService", e);
+        nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getDynamicUrl().getAddress());
+        if (StringUtils.isNotBlank(getDynamicUrl().getParam(PropertyKeyConst.USERNAME))) {
+            nacosConfig.put(PropertyKeyConst.USERNAME, getDynamicUrl().getParam(PropertyKeyConst.USERNAME));
         }
-    }
-
-    protected NacosDynamicConfigManager(String appName, String remainUrl) {
-        super(appName, remainUrl);
-        group = appName;
-        nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getAddress());
-        Map params = getParams();
-        if (params != null) {
-            if( params.containsKey("username")) {
-                String username = (String)params.get("username");
-                nacosConfig.put(PropertyKeyConst.USERNAME, username);
-            }
-            if( params.containsKey("password")) {
-                String password = (String) params.get("password");
-                nacosConfig.put(PropertyKeyConst.PASSWORD, password);
-            }
+        if (StringUtils.isNotBlank(getDynamicUrl().getParam(PropertyKeyConst.PASSWORD))) {
+            nacosConfig.put(PropertyKeyConst.PASSWORD, getDynamicUrl().getParam(PropertyKeyConst.PASSWORD));
         }
         try {
             configService = ConfigFactory.createConfigService(nacosConfig);
-
         } catch (NacosException e) {
             LOGGER.error("Failed to create ConfigService", e);
         }

@@ -19,7 +19,12 @@ package com.alipay.sofa.rpc.dynamic.apollo;
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.auth.AuthRuleGroup;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
-import com.alipay.sofa.rpc.dynamic.*;
+import com.alipay.sofa.rpc.dynamic.ConfigChangeType;
+import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeyHelper;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.ctrip.framework.apollo.Config;
@@ -29,7 +34,6 @@ import com.ctrip.framework.apollo.enums.PropertyChangeType;
 import com.ctrip.framework.apollo.model.ConfigChange;
 
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -51,31 +55,26 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
     private static final String APOLLO_CLUSTER_KEY = "apollo.cluster";
 
-    private static final String APOLLO_PROTOCOL_PREFIX = "http://";
+    private static final String APOLLO_PARAM_APPID_KEY = "appId";
 
+    private static final String APOLLO_PARAM_CLUSTER_KEY = "cluster";
+
+    private static final String APOLLO_PROTOCOL_PREFIX = "http://";
+    private final ConcurrentMap<String, ApolloListener> watchListenerMap = new ConcurrentHashMap<>();
     private Config config;
 
-    private final ConcurrentMap<String, ApolloListener> watchListenerMap = new ConcurrentHashMap<>();
-
     protected ApolloDynamicConfigManager(String appName) {
-        super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.APOLLO_ADDRESS,""));
-        if (StringUtils.isNotBlank(appName)) {
-            System.setProperty(APOLLO_APPID_KEY, appName);
-        }
-        if (StringUtils.isNotBlank(getAddress())) {
-            System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + getAddress());
-        }
-        config = ConfigService.getAppConfig();
-    }
-
-    protected ApolloDynamicConfigManager(String appName, String remainUrl) {
-        super(appName, remainUrl);
-        System.setProperty(APOLLO_APPID_KEY, appName);
-        System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + getAddress());
-        Map params = getParams();
-        if (params != null && params.containsKey("cluster")) {
-            String clusterValue = (String)params.get("cluster");
-            System.setProperty(APOLLO_CLUSTER_KEY, clusterValue);
+        super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS, ""));
+        if (getDynamicUrl() != null) {
+            if (StringUtils.isNotBlank(getDynamicUrl().getParam(APOLLO_PARAM_APPID_KEY))) {
+                System.setProperty(APOLLO_APPID_KEY, getDynamicUrl().getParam(APOLLO_PARAM_APPID_KEY));
+            }
+            if (StringUtils.isNotBlank(getDynamicUrl().getAddress())) {
+                System.setProperty(APOLLO_ADDR_KEY, APOLLO_PROTOCOL_PREFIX + getDynamicUrl().getAddress());
+            }
+            if (StringUtils.isNotBlank(getDynamicUrl().getParam(APOLLO_PARAM_CLUSTER_KEY))) {
+                System.setProperty(APOLLO_CLUSTER_KEY, getDynamicUrl().getParam(APOLLO_PARAM_CLUSTER_KEY));
+            }
         }
         config = ConfigService.getAppConfig();
     }

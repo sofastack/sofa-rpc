@@ -43,7 +43,8 @@ public class ZookeeperDynamicConfigTest extends BaseZkTest {
 
     @Test
     public void testZookeeperDynamicConfig() throws Exception {
-        System.setProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey(), "zookeeper://127.0.0.1:2181");
+        System.setProperty(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE.getKey(), "true");
+        System.setProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey(), "zookeeper://127.0.0.1:2181");
         ApplicationConfig clientApplication = new ApplicationConfig();
         clientApplication.setAppName("demo");
 
@@ -56,8 +57,8 @@ public class ZookeeperDynamicConfigTest extends BaseZkTest {
 
         consumerConfig.refer();
 
-        DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl
-            (clientApplication.getAppName(), System.getProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey()));
+        DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager
+            (clientApplication.getAppName(), "zookeeper");
         Field field = ZookeeperDynamicConfigManager.class.getDeclaredField("zkClient");
         field.setAccessible(true);
         CuratorFramework zkClient = (CuratorFramework) field.get(dynamicConfigManager);
@@ -90,7 +91,7 @@ public class ZookeeperDynamicConfigTest extends BaseZkTest {
         // 验证配置是否删除
         Assert.assertEquals(-1, consumerConfig.getMethodTimeout("sayHello"));
 
-        System.clearProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey());
+        System.clearProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey());
 
     }
 }

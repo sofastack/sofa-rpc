@@ -41,7 +41,8 @@ public class ApolloDynamicConfigTest {
 
     @Test
     public void testApolloDynamicConfig() throws Exception {
-        System.setProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey(), "apollo://127.0.0.1:8080?cluster=default");
+        System.setProperty(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE.getKey(), "true");
+        System.setProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey(), "apollo://127.0.0.1:8080?appId=demo");
         ApplicationConfig clientApplication = new ApplicationConfig();
         clientApplication.setAppName("demo");
 
@@ -55,8 +56,8 @@ public class ApolloDynamicConfigTest {
         consumerConfig.refer();
 
         // 获取接口对应的动态配置监听器
-        DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManagerWithUrl
-            (clientApplication.getAppName(), System.getProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey()));
+        DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager
+            (clientApplication.getAppName(), "apollo");
         Field field = ApolloDynamicConfigManager.class.getDeclaredField("watchListenerMap");
         field.setAccessible(true);
         Map<String, ApolloDynamicConfigManager.ApolloListener> watchListenerMap = (Map<String, ApolloDynamicConfigManager.ApolloListener>) field
@@ -91,6 +92,6 @@ public class ApolloDynamicConfigTest {
         apolloConfigListener.onChange(event);
         Assert.assertEquals(-1, consumerConfig.getMethodTimeout("sayHello"));
 
-        System.clearProperty(DynamicConfigKeys.CENTER_ADDRESS.getKey());
+        System.clearProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey());
     }
 }
