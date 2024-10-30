@@ -35,7 +35,7 @@ public class DynamicConfigKeys {
                                                                     " ",
                                                                     false,
                                                                     "The url of the dynamic configuration.",
-                                                                    new String[] { "sofa_rpc_config_CONFIG_CENTER_ADDRESS" });
+                                                                    new String[] { "sofa_rpc_config_center_address" });
 
     public static ConfigKey<Boolean> DYNAMIC_REFRESH_ENABLE = ConfigKey
                                                                 .build(

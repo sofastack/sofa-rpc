@@ -16,7 +16,12 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
+
 import java.util.EventObject;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author Narziss
@@ -24,12 +29,17 @@ import java.util.EventObject;
  */
 
 public class ConfigChangedEvent extends EventObject {
+    private final static Logger LOGGER = LoggerFactory.getLogger(ConfigChangedEvent.class);
 
-    private final String           key;
+    private final String key;
 
-    private final String           content;
+    private final String content;
 
     private final ConfigChangeType changeType;
+
+
+    private Map<String, String> dynamicValueMap = new HashMap<>();
+    ;
 
     public ConfigChangedEvent(String key, String content) {
         this(key, content, ConfigChangeType.MODIFIED);
@@ -40,6 +50,23 @@ public class ConfigChangedEvent extends EventObject {
         this.key = key;
         this.content = content;
         this.changeType = changeType;
+        if (content != null) {
+            parseConfigurationLines(content);
+        }
+    }
+
+    private void parseConfigurationLines(String content) {
+        String[] lines = content.split("\n");
+        for (String line : lines) {
+            String[] keyValue = line.split("=", 2);
+            if (keyValue.length == 2) {
+                String mapKey = keyValue[0].trim();
+                String mapValue = keyValue[1].trim();
+                dynamicValueMap.put(mapKey, mapValue);
+            } else {
+                LOGGER.warn("Malformed configuration line: {}", line);
+            }
+        }
     }
 
     public String getKey() {
@@ -53,4 +80,9 @@ public class ConfigChangedEvent extends EventObject {
     public ConfigChangeType getChangeType() {
         return changeType;
     }
+
+    public Map<String, String> getDynamicValueMap() {
+        return dynamicValueMap;
+    }
+
 }

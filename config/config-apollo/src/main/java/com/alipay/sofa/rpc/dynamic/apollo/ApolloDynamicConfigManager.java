@@ -27,6 +27,8 @@ import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.listener.ConfigListener;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.ctrip.framework.apollo.Config;
 import com.ctrip.framework.apollo.ConfigChangeListener;
 import com.ctrip.framework.apollo.ConfigService;
@@ -49,6 +51,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 @Extension(value = "apollo", override = true)
 public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
+    private final static Logger LOGGER = LoggerFactory.getLogger(ApolloDynamicConfigManager.class);
+
     private static final String APOLLO_APPID_KEY = "app.id";
 
     private static final String APOLLO_ADDR_KEY = "apollo.meta";
@@ -58,6 +62,8 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
     private static final String APOLLO_PARAM_APPID_KEY = "appId";
 
     private static final String APOLLO_PARAM_CLUSTER_KEY = "cluster";
+
+    private static final String APOLLO_PARAM_NAMESPACE_KEY = "namespace";
 
     private static final String APOLLO_PROTOCOL_PREFIX = "http://";
     private final ConcurrentMap<String, ApolloListener> watchListenerMap = new ConcurrentHashMap<>();
@@ -75,8 +81,14 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
             if (StringUtils.isNotBlank(getDynamicUrl().getParam(APOLLO_PARAM_CLUSTER_KEY))) {
                 System.setProperty(APOLLO_CLUSTER_KEY, getDynamicUrl().getParam(APOLLO_PARAM_CLUSTER_KEY));
             }
+            if (StringUtils.isNotBlank(getDynamicUrl().getParam(APOLLO_PARAM_NAMESPACE_KEY))) {
+                config = ConfigService.getConfig(getDynamicUrl().getParam(APOLLO_PARAM_NAMESPACE_KEY));
+            } else {
+                config = ConfigService.getAppConfig();
+            }
+        } else {
+            config = ConfigService.getAppConfig();
         }
-        config = ConfigService.getAppConfig();
     }
 
     @Override
@@ -86,9 +98,13 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
 
     @Override
     public void initServiceConfiguration(String service, ConfigListener listener) {
-        String rawConfig = config.getProperty(service, "");
-        if (StringUtils.isNotBlank(rawConfig)) {
-            listener.process(new ConfigChangedEvent(service, rawConfig));
+        try {
+            String rawConfig = config.getProperty(service, "");
+            if (StringUtils.isNotBlank(rawConfig)) {
+                listener.process(new ConfigChangedEvent(service, rawConfig));
+            }
+        } catch (Exception e) {
+            LOGGER.error("Init service configuration error", e);
         }
     }
 
@@ -131,12 +147,9 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
         config.addChangeListener(apolloListener, Collections.singleton(key));
     }
 
-    public class ApolloListener implements ConfigChangeListener {
+    public static class ApolloListener implements ConfigChangeListener {
 
-        private Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
-
-        ApolloListener() {
-        }
+        private final Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
 
         @Override
         public void onChange(com.ctrip.framework.apollo.model.ConfigChangeEvent changeEvent) {

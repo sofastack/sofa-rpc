@@ -27,6 +27,7 @@ import java.util.regex.Pattern;
  */
 public class DynamicUrl {
 
+    private final String originalUrl;
     private final String protocol;
     private final String address;
     private final String host;
@@ -34,8 +35,11 @@ public class DynamicUrl {
     private final String path;
     private final Map<String, String> params = new HashMap<>();
 
-    //apollo://127.0.0.1:8080/config?appId=xxx&cluster=yyy
+    /**
+     * @param configCenterAddress example: apollo://127.0.0.1:8080/config?appId=xxx&cluster=yyy
+     */
     public DynamicUrl(String configCenterAddress) {
+        this.originalUrl = configCenterAddress;
         // 正则表达式解析协议、主机、端口、路径和参数，其中路径和参数是可选的
         String regex = "^(\\w+)://([^:/]+):(\\d+)(/[^?]*)?(\\?.*)?$";
         Matcher matcher = Pattern.compile(regex).matcher(configCenterAddress);
@@ -62,6 +66,10 @@ public class DynamicUrl {
                 params.put(keyValue[0], keyValue[1]);
             }
         }
+    }
+
+    public String getOriginalUrl() {
+        return originalUrl;
     }
 
     public String getProtocol() {

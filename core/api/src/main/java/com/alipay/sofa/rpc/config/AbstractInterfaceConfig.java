@@ -709,6 +709,15 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     }
 
     /**
+     * Gets dynamic config value cache.
+     *
+     * @return the dynamic config value cache
+     */
+    public Map<String, Object> getDynamicConfigValueCache() {
+        return dynamicConfigValueCache;
+    }
+
+    /**
      * Sets config listener.
      *
      * @param configListener the config listener
@@ -929,17 +938,13 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     public boolean updateAttribute(String property, String newValueStr, boolean overwrite) {
         try {
             boolean changed = false;
-            if(StringUtils.isBlank(newValueStr)){
-                // 改为默认值
-                newValueStr = configValueCache.get(property) == null ? null : configValueCache.get(property).toString();
-            }
             if (property.charAt(0) == RpcConstants.HIDE_KEY_PREFIX) {
                 // 方法级配置 例如.echoStr.timeout
                 String methodAndP = property.substring(1);
                 int index = methodAndP.indexOf(RpcConstants.HIDE_KEY_PREFIX);
                 if (index <= 0) {
                     throw ExceptionUtils.buildRuntime(property, newValueStr,
-                        "Unknown update attribute key!");
+                            "Unknown update attribute key!");
                 }
                 String methodName = methodAndP.substring(0, index);
                 String methodProperty = methodAndP.substring(index + 1);
@@ -948,8 +953,10 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 Class propertyClazz = getMethod.getReturnType(); // 旧值的类型
                 // 拿到旧的值
                 Object oldValue = null;
-                Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
-
+                Object newValue = newValueStr == "null" ? null : CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                if (dynamicConfigValueCache.containsKey(property)) {
+                    dynamicConfigValueCache.put(property, newValue);
+                }
                 if (methodConfig == null) {
                     methodConfig = new MethodConfig();
                     methodConfig.setName(methodName);
@@ -970,14 +977,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 }
                 if (changed && overwrite) {
                     BeanUtils.setProperty(methodConfig, methodProperty, propertyClazz, newValue);// 覆盖属性
-                    if (newValue != null){
-                        dynamicConfigValueCache.put(property, newValue);
-                    } else {
-                        dynamicConfigValueCache.remove(property);
-                    }
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Property \"" + methodName + "." + methodProperty + "\" changed from {} to {}",
-                            oldValue, newValueStr);
+                                oldValue, newValueStr);
                     }
                 }
             } else { // 接口级配置 例如timeout
@@ -986,7 +988,10 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 Class propertyClazz = getMethod.getReturnType(); // 旧值的类型
                 // 拿到旧的值
                 Object oldValue = BeanUtils.getProperty(this, property, propertyClazz);
-                Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                Object newValue = newValueStr == "null" ? null : CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                if (dynamicConfigValueCache.containsKey(property)) {
+                    dynamicConfigValueCache.put(property, newValue);
+                }
                 if (oldValue == null) {
                     if (newValueStr != null) {
                         changed = true;
@@ -1006,7 +1011,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
             throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UPDATE_ATTRIBUTE, property, newValueStr),
-                e);
+                    e);
         }
     }
 

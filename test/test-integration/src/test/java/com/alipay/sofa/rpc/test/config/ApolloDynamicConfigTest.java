@@ -47,30 +47,30 @@ public class ApolloDynamicConfigTest {
         clientApplication.setAppName("demo");
 
         ConsumerConfig<HelloService> consumerConfig = new ConsumerConfig<HelloService>()
-            .setInterfaceId(HelloService.class.getName())
-            .setProtocol("bolt")
-            .setDirectUrl("bolt://127.0.0.1:12200")
-            .setConnectTimeout(10 * 1000)
-            .setApplication(clientApplication);
+                .setInterfaceId(HelloService.class.getName())
+                .setProtocol("bolt")
+                .setDirectUrl("bolt://127.0.0.1:12200")
+                .setConnectTimeout(10 * 1000)
+                .setApplication(clientApplication);
 
         consumerConfig.refer();
 
         // 获取接口对应的动态配置监听器
         DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager
-            (clientApplication.getAppName(), "apollo");
+                (clientApplication.getAppName(), "apollo");
         Field field = ApolloDynamicConfigManager.class.getDeclaredField("watchListenerMap");
         field.setAccessible(true);
         Map<String, ApolloDynamicConfigManager.ApolloListener> watchListenerMap = (Map<String, ApolloDynamicConfigManager.ApolloListener>) field
-            .get(dynamicConfigManager);
+                .get(dynamicConfigManager);
         ApolloDynamicConfigManager.ApolloListener apolloConfigListener = watchListenerMap.get(consumerConfig
-            .getInterfaceId());
+                .getInterfaceId());
 
         // 测试配置新增
         String configValue = "timeout=5000\n";
         ConfigChange configChange = new ConfigChange("application", consumerConfig.getInterfaceId(), null, configValue, PropertyChangeType.ADDED);
-        Map<String, ConfigChange> changes= new HashMap<>();
+        Map<String, ConfigChange> changes = new HashMap<>();
         changes.put(configChange.getPropertyName(), configChange);
-        ConfigChangeEvent event = new ConfigChangeEvent("application",changes);
+        ConfigChangeEvent event = new ConfigChangeEvent("application", changes);
         apolloConfigListener.onChange(event);
         Assert.assertEquals(5000, consumerConfig.getMethodTimeout("sayHello"));
 
@@ -78,17 +78,17 @@ public class ApolloDynamicConfigTest {
         String oldValue = configValue;
         configValue = "timeout=5000\n.sayHello.timeout=6000";
         configChange = new ConfigChange("application", consumerConfig.getInterfaceId(), oldValue, configValue, PropertyChangeType.MODIFIED);
-        changes= new HashMap<>();
+        changes = new HashMap<>();
         changes.put(configChange.getPropertyName(), configChange);
-        event = new ConfigChangeEvent("application",changes);
+        event = new ConfigChangeEvent("application", changes);
         apolloConfigListener.onChange(event);
         Assert.assertEquals(6000, consumerConfig.getMethodTimeout("sayHello"));
 
         // 测试配置删除
         configChange = new ConfigChange("application", consumerConfig.getInterfaceId(), configValue, null, PropertyChangeType.DELETED);
-        changes= new HashMap<>();
+        changes = new HashMap<>();
         changes.put(configChange.getPropertyName(), configChange);
-        event = new ConfigChangeEvent("application",changes);
+        event = new ConfigChangeEvent("application", changes);
         apolloConfigListener.onChange(event);
         Assert.assertEquals(-1, consumerConfig.getMethodTimeout("sayHello"));
 

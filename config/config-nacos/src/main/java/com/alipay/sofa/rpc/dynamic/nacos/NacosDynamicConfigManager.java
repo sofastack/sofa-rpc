@@ -29,7 +29,6 @@ import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alibaba.nacos.api.config.ConfigService;
-import com.alibaba.nacos.api.exception.NacosException;
 import com.alibaba.nacos.api.config.ConfigFactory;
 import com.alipay.sofa.rpc.listener.ConfigListener;
 import com.alipay.sofa.rpc.log.Logger;
@@ -75,7 +74,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
         }
         try {
             configService = ConfigFactory.createConfigService(nacosConfig);
-        } catch (NacosException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to create ConfigService", e);
         }
     }
@@ -92,7 +91,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
             if (!StringUtils.isEmpty(rawConfig)) {
                 listener.process(new ConfigChangedEvent(service, rawConfig));
             }
-        } catch (NacosException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to getConfig for key:{}, group:{}", service, group, e);
         }
     }
@@ -104,7 +103,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
                     DynamicConfigKeyHelper.buildProviderServiceProKey(service, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        } catch (NacosException e) {
+        } catch (Exception e) {
             return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         }
     }
@@ -116,7 +115,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
                     DynamicConfigKeyHelper.buildConsumerServiceProKey(service, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        } catch (NacosException e) {
+        } catch (Exception e) {
             return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         }
     }
@@ -128,7 +127,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
                     DynamicConfigKeyHelper.buildProviderMethodProKey(service, method, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        } catch (NacosException e) {
+        } catch (Exception e) {
             return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         }
     }
@@ -140,7 +139,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
                     DynamicConfigKeyHelper.buildConsumerMethodProKey(service, method, key),
                     group, DEFAULT_TIMEOUT);
             return configValue != null ? configValue : DynamicHelper.DEFAULT_DYNAMIC_VALUE;
-        } catch (NacosException e) {
+        } catch (Exception e) {
             return DynamicHelper.DEFAULT_DYNAMIC_VALUE;
         }
     }
@@ -158,7 +157,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
         nacosConfigListener.addListener(listener);
         try {
             configService.addListener(key, group, nacosConfigListener);
-        } catch (NacosException e) {
+        } catch (Exception e) {
             LOGGER.error("Failed to add listener for key:{}, group:{}", key, group, e);
         }
     }
@@ -171,7 +170,7 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
 
     public class NacosConfigListener extends AbstractSharedListener {
 
-        private Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
+        private final Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
         /**
          * cache data to store old value
          */

@@ -174,16 +174,14 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
 
                 //接口级别动态配置参数
                 Boolean dynamicConfigRefreshEnable = getOrDefault(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE);
-                if (dynamicConfigRefreshEnable) {
-                    String configCenterAddress = getOrDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS);
-                    if (StringUtils.isNotBlank(configCenterAddress)) {
-                        DynamicUrl dynamicUrl = new DynamicUrl(configCenterAddress);
-                        //启用接口级别动态配置
-                        final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
-                                consumerConfig.getAppName(), dynamicUrl.getProtocol());
-                        dynamicManager.addListener(consumerConfig.getInterfaceId(), configListener);
-                        dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId(), configListener);
-                    }
+                String configCenterAddress = getOrDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS);
+                if (dynamicConfigRefreshEnable && StringUtils.isNotBlank(configCenterAddress)) {
+                    DynamicUrl dynamicUrl = new DynamicUrl(configCenterAddress);
+                    //启用接口级别动态配置
+                    final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
+                            consumerConfig.getAppName(), dynamicUrl.getProtocol());
+                    dynamicManager.addListener(consumerConfig.getInterfaceId(), configListener);
+                    dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId(), configListener);
                 }
             } catch (Exception e) {
                 if (cluster != null) {
@@ -460,10 +458,9 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     private class ConsumerAttributeListener implements ConfigListener {
 
-        private Map<String, String> newValueMap = new HashMap<>();
-
-        // 动态配置项
+        // 可以动态配置的选项
         private final Set<String> dynamicConfigKeys = new HashSet<>();
+        private Map<String, String> newValueMap = new HashMap<>();
 
         ConsumerAttributeListener() {
             dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_TIMEOUT);
@@ -473,30 +470,24 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
 
         @Override
         public void process(ConfigChangedEvent event) {
-            // 清除上次的赋值，并保留赋值过的key
-            newValueMap.replaceAll((k, v) -> "");
+            // 清除上次的动态配置值缓存
+            consumerConfig.getDynamicConfigValueCache().clear();
+            // 获取对应配置项的默认值
+            for (String key : newValueMap.keySet()) {
+                newValueMap.put(key, String.valueOf(consumerConfig.getConfigValueCache().get(key)));
+            }
             if (!event.getChangeType().equals(ConfigChangeType.DELETED)) {
                 // ADDED or MODIFIED
-                parseConfigurationLines(event.getContent());
-            }
-            attrUpdated(newValueMap);
-        }
-
-        private void parseConfigurationLines(String content) {
-            String[] lines = content.split("\n");
-            for (String line : lines) {
-                String[] keyValue = line.split("=", 2);
-                if (keyValue.length == 2) {
-                    String key = keyValue[0].trim();
-                    String value = keyValue[1].trim();
+                Map<String, String> dynamicValueMap = event.getDynamicValueMap();
+                for (String key : dynamicValueMap.keySet()) {
                     String tempKey = key.lastIndexOf(".") == -1 ? key : key.substring(key.lastIndexOf(".") + 1);
                     if (dynamicConfigKeys.contains(tempKey)) {
-                        newValueMap.put(key, value);
+                        consumerConfig.getDynamicConfigValueCache().put(key, dynamicValueMap.get(key));
+                        newValueMap.put(key, dynamicValueMap.get(key));
                     }
-                } else {
-                    LOGGER.warn("Malformed configuration line: {}", line);
                 }
             }
+            attrUpdated(newValueMap);
         }
 
         @Override
@@ -513,7 +504,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
             Map<String, String> oldValues = new HashMap<String, String>();
             boolean rerefer = false;
             try { // 检查是否有变化
-                  // 是否过滤map?
+                // 是否过滤map?
                 for (Map.Entry<String, String> entry : newValues.entrySet()) {
                     String newValue = entry.getValue();
                     String oldValue = consumerConfig.queryAttribute(entry.getKey());

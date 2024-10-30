@@ -58,7 +58,7 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
 
     private final String rootPath;
     private final ConcurrentMap<String, ZookeeperConfigListener> watchListenerMap = new ConcurrentHashMap<>();
-    private ConcurrentMap<String, String> configMap = new ConcurrentHashMap<>();
+    private final ConcurrentMap<String, String> configMap = new ConcurrentHashMap<>();
 
     protected ZookeeperDynamicConfigManager(String appName) {
         super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS, "zookeeper://127.0.0.1:2181"));
