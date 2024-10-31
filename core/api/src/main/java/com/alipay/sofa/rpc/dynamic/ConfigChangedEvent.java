@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 
@@ -29,6 +30,7 @@ import java.util.Map;
  */
 
 public class ConfigChangedEvent extends EventObject {
+
     private final static Logger LOGGER = LoggerFactory.getLogger(ConfigChangedEvent.class);
 
     private final String key;
@@ -37,9 +39,7 @@ public class ConfigChangedEvent extends EventObject {
 
     private final ConfigChangeType changeType;
 
-
-    private Map<String, String> dynamicValueMap = new HashMap<>();
-    ;
+    private final Map<String, String> dynamicValueMap = new HashMap<>();
 
     public ConfigChangedEvent(String key, String content) {
         this(key, content, ConfigChangeType.MODIFIED);
@@ -50,13 +50,13 @@ public class ConfigChangedEvent extends EventObject {
         this.key = key;
         this.content = content;
         this.changeType = changeType;
-        if (content != null) {
+        if (StringUtils.isNotBlank(content)) {
             parseConfigurationLines(content);
         }
     }
 
     private void parseConfigurationLines(String content) {
-        String[] lines = content.split("\n");
+        String[] lines = content.split(System.lineSeparator());
         for (String line : lines) {
             String[] keyValue = line.split("=", 2);
             if (keyValue.length == 2) {

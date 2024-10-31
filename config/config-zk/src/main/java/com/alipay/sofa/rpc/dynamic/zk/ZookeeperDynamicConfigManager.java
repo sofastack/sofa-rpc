@@ -187,9 +187,9 @@ public class ZookeeperDynamicConfigManager extends DynamicConfigManager {
 
     public class ZookeeperConfigListener implements NodeCacheListener {
 
-        private String pathKey;
-        private Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
-        private NodeCache nodeCache;
+        private final String pathKey;
+        private final Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
+        private final NodeCache nodeCache;
 
         public ZookeeperConfigListener(String pathKey) {
             this.pathKey = pathKey;

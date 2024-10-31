@@ -459,13 +459,13 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
     private class ConsumerAttributeListener implements ConfigListener {
 
         // 可以动态配置的选项
-        private final Set<String> dynamicConfigKeys = new HashSet<>();
-        private Map<String, String> newValueMap = new HashMap<>();
+        private final Set<String> supportDynamicConfigKeys = new HashSet<>();
+        private final Map<String, String> newValueMap = new HashMap<>();
 
         ConsumerAttributeListener() {
-            dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_TIMEOUT);
-            dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_RETRIES);
-            dynamicConfigKeys.add(RpcConstants.CONFIG_KEY_LOADBALANCER);
+            supportDynamicConfigKeys.add(RpcConstants.CONFIG_KEY_TIMEOUT);
+            supportDynamicConfigKeys.add(RpcConstants.CONFIG_KEY_RETRIES);
+            supportDynamicConfigKeys.add(RpcConstants.CONFIG_KEY_LOADBALANCER);
         }
 
         @Override
@@ -474,16 +474,23 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
             consumerConfig.getDynamicConfigValueCache().clear();
             // 获取对应配置项的默认值
             for (String key : newValueMap.keySet()) {
-                newValueMap.put(key, String.valueOf(consumerConfig.getConfigValueCache().get(key)));
+                if (consumerConfig.getConfigValueCache().get(key) != null) {
+                    newValueMap.put(key, String.valueOf(consumerConfig.getConfigValueCache().get(key)));
+                } else {
+                    newValueMap.put(key, null);
+                }
             }
             if (!event.getChangeType().equals(ConfigChangeType.DELETED)) {
                 // ADDED or MODIFIED
                 Map<String, String> dynamicValueMap = event.getDynamicValueMap();
                 for (String key : dynamicValueMap.keySet()) {
                     String tempKey = key.lastIndexOf(".") == -1 ? key : key.substring(key.lastIndexOf(".") + 1);
-                    if (dynamicConfigKeys.contains(tempKey)) {
-                        consumerConfig.getDynamicConfigValueCache().put(key, dynamicValueMap.get(key));
-                        newValueMap.put(key, dynamicValueMap.get(key));
+                    if (supportDynamicConfigKeys.contains(tempKey)) {
+                        String value = dynamicValueMap.get(key);
+                        if (StringUtils.isNotBlank(value)) {
+                            consumerConfig.getDynamicConfigValueCache().put(key, value);
+                            newValueMap.put(key, value);
+                        }
                     }
                 }
             }

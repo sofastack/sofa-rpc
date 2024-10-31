@@ -40,8 +40,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executor;
-
 /**
  * @author Narziss
  * @version NaocsDynamicConfigManager.java, v 0.1 2024年07月26日 09:37 Narziss
@@ -60,18 +58,12 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
 
     private ConfigService configService;
 
-    private Properties nacosConfig = new Properties();
-
     protected NacosDynamicConfigManager(String appName) {
         super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS, "nacos://127.0.0.1:8848"));
         group = appName;
+        Properties nacosConfig = new Properties();
         nacosConfig.put(PropertyKeyConst.SERVER_ADDR, getDynamicUrl().getAddress());
-        if (StringUtils.isNotBlank(getDynamicUrl().getParam(PropertyKeyConst.USERNAME))) {
-            nacosConfig.put(PropertyKeyConst.USERNAME, getDynamicUrl().getParam(PropertyKeyConst.USERNAME));
-        }
-        if (StringUtils.isNotBlank(getDynamicUrl().getParam(PropertyKeyConst.PASSWORD))) {
-            nacosConfig.put(PropertyKeyConst.PASSWORD, getDynamicUrl().getParam(PropertyKeyConst.PASSWORD));
-        }
+        nacosConfig.putAll(getDynamicUrl().getParams());
         try {
             configService = ConfigFactory.createConfigService(nacosConfig);
         } catch (Exception e) {
@@ -168,18 +160,14 @@ public class NacosDynamicConfigManager extends DynamicConfigManager {
         return configListener;
     }
 
-    public class NacosConfigListener extends AbstractSharedListener {
+    public static class NacosConfigListener extends AbstractSharedListener {
 
         private final Set<ConfigListener> listeners = new CopyOnWriteArraySet<>();
+
         /**
          * cache data to store old value
          */
-        private Map<String, String> cacheData = new ConcurrentHashMap<>();
-
-        @Override
-        public Executor getExecutor() {
-            return null;
-        }
+        private final Map<String, String> cacheData = new ConcurrentHashMap<>();
 
         /**
          * receive config change event

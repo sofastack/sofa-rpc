@@ -953,7 +953,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 Class propertyClazz = getMethod.getReturnType(); // 旧值的类型
                 // 拿到旧的值
                 Object oldValue = null;
-                Object newValue = newValueStr == "null" ? null : CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
                 if (dynamicConfigValueCache.containsKey(property)) {
                     dynamicConfigValueCache.put(property, newValue);
                 }
@@ -988,7 +988,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 Class propertyClazz = getMethod.getReturnType(); // 旧值的类型
                 // 拿到旧的值
                 Object oldValue = BeanUtils.getProperty(this, property, propertyClazz);
-                Object newValue = newValueStr == "null" ? null : CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
                 if (dynamicConfigValueCache.containsKey(property)) {
                     dynamicConfigValueCache.put(property, newValue);
                 }

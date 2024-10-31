@@ -66,7 +66,7 @@ public class ApolloDynamicConfigTest {
                 .getInterfaceId());
 
         // 测试配置新增
-        String configValue = "timeout=5000\n";
+        String configValue = "timeout=5000"+System.lineSeparator();
         ConfigChange configChange = new ConfigChange("application", consumerConfig.getInterfaceId(), null, configValue, PropertyChangeType.ADDED);
         Map<String, ConfigChange> changes = new HashMap<>();
         changes.put(configChange.getPropertyName(), configChange);
@@ -76,7 +76,7 @@ public class ApolloDynamicConfigTest {
 
         // 测试配置修改
         String oldValue = configValue;
-        configValue = "timeout=5000\n.sayHello.timeout=6000";
+        configValue = "timeout=5000"+System.lineSeparator()+".sayHello.timeout=6000";
         configChange = new ConfigChange("application", consumerConfig.getInterfaceId(), oldValue, configValue, PropertyChangeType.MODIFIED);
         changes = new HashMap<>();
         changes.put(configChange.getPropertyName(), configChange);

@@ -66,8 +66,10 @@ public class ApolloDynamicConfigManager extends DynamicConfigManager {
     private static final String APOLLO_PARAM_NAMESPACE_KEY = "namespace";
 
     private static final String APOLLO_PROTOCOL_PREFIX = "http://";
+
     private final ConcurrentMap<String, ApolloListener> watchListenerMap = new ConcurrentHashMap<>();
-    private Config config;
+
+    private final Config config;
 
     protected ApolloDynamicConfigManager(String appName) {
         super(appName, SofaConfigs.getOrCustomDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS, ""));

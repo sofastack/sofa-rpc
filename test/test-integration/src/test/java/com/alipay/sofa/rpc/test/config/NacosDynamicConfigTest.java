@@ -40,7 +40,7 @@ public class NacosDynamicConfigTest {
     public void testNacosDynamicConfig() throws Exception {
         System.setProperty(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE.getKey(), "true");
         System.setProperty(DynamicConfigKeys.CONFIG_CENTER_ADDRESS.getKey(),
-            "nacos://127.0.0.1:8848?username=nacos&password=nacos");
+            "nacos://127.0.0.1:8848/sofa-rpc-config?username=nacos&password=nacos");
         ApplicationConfig clientApplication = new ApplicationConfig();
         clientApplication.setAppName("demo");
 
@@ -68,7 +68,7 @@ public class NacosDynamicConfigTest {
         nacosConfigListener.innerReceive(consumerConfig.getInterfaceId(), consumerConfig.getAppName(), configValue);
         Assert.assertEquals(5000, consumerConfig.getMethodTimeout("sayHello"));
         // 测试配置修改
-        configValue = "timeout=5000\n.sayHello.timeout=6000";
+        configValue = "timeout=5000" + System.lineSeparator() + ".sayHello.timeout=6000";
         nacosConfigListener.innerReceive(consumerConfig.getInterfaceId(), consumerConfig.getAppName(), configValue);
         Assert.assertEquals(6000, consumerConfig.getMethodTimeout("sayHello"));
         // 测试配置删除
