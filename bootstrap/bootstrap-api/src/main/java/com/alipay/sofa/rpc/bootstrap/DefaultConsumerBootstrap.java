@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.client.ClientProxyInvoker;
 import com.alipay.sofa.rpc.client.Cluster;
 import com.alipay.sofa.rpc.client.ClusterFactory;
 import com.alipay.sofa.rpc.client.ProviderGroup;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.SofaConfigs;
 import com.alipay.sofa.rpc.common.SofaOptions;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
@@ -28,9 +29,12 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
+import com.alipay.sofa.rpc.dynamic.ConfigChangeType;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigKeys;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
+import com.alipay.sofa.rpc.dynamic.DynamicUrl;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.listener.ConfigListener;
@@ -44,8 +48,10 @@ import com.alipay.sofa.rpc.registry.RegistryFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CountDownLatch;
@@ -54,6 +60,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.REGISTRY_PROTOCOL_DOMAIN;
+import static com.alipay.sofa.common.config.SofaConfigs.getOrDefault;
 
 /**
  * Default consumer bootstrap.
@@ -146,7 +153,8 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 // build cluster
                 cluster = ClusterFactory.getCluster(this);
                 // build listeners
-                consumerConfig.setConfigListener(buildConfigListener(this));
+                ConfigListener configListener = buildConfigListener(this);
+                consumerConfig.setConfigListener(configListener);
                 consumerConfig.setProviderInfoListener(buildProviderInfoListener(this));
                 // init cluster
                 cluster.init();
@@ -156,12 +164,24 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
                 proxyIns = (T) ProxyFactory.buildProxy(consumerConfig.getProxy(), consumerConfig.getProxyClass(),
                     proxyInvoker);
 
-                //动态配置
+                //请求级别动态配置参数
                 final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
                 if (StringUtils.isNotBlank(dynamicAlias)) {
                     final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
-                        consumerConfig.getAppName(), dynamicAlias);
+                            consumerConfig.getAppName(), dynamicAlias);
                     dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId());
+                }
+
+                //接口级别动态配置参数
+                Boolean dynamicConfigRefreshEnable = getOrDefault(DynamicConfigKeys.DYNAMIC_REFRESH_ENABLE);
+                String configCenterAddress = getOrDefault(DynamicConfigKeys.CONFIG_CENTER_ADDRESS);
+                if (dynamicConfigRefreshEnable && StringUtils.isNotBlank(configCenterAddress)) {
+                    DynamicUrl dynamicUrl = new DynamicUrl(configCenterAddress);
+                    //启用接口级别动态配置
+                    final DynamicConfigManager dynamicManager = DynamicConfigManagerFactory.getDynamicManager(
+                            consumerConfig.getAppName(), dynamicUrl.getProtocol());
+                    dynamicManager.addListener(consumerConfig.getInterfaceId(), configListener);
+                    dynamicManager.initServiceConfiguration(consumerConfig.getInterfaceId(), configListener);
                 }
             } catch (Exception e) {
                 if (cluster != null) {
@@ -438,8 +458,47 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
      */
     private class ConsumerAttributeListener implements ConfigListener {
 
+        // 可以动态配置的选项
+        private final Set<String> supportDynamicConfigKeys = new HashSet<>();
+        private final Map<String, String> newValueMap = new HashMap<>();
+
+        ConsumerAttributeListener() {
+            supportDynamicConfigKeys.add(RpcConstants.CONFIG_KEY_TIMEOUT);
+            supportDynamicConfigKeys.add(RpcConstants.CONFIG_KEY_RETRIES);
+            supportDynamicConfigKeys.add(RpcConstants.CONFIG_KEY_LOADBALANCER);
+        }
+
         @Override
-        public void configChanged(Map newValue) {
+        public void process(ConfigChangedEvent event) {
+            // 清除上次的动态配置值缓存
+            consumerConfig.getDynamicConfigValueCache().clear();
+            // 获取对应配置项的默认值
+            for (String key : newValueMap.keySet()) {
+                if (consumerConfig.getConfigValueCache().get(key) != null) {
+                    newValueMap.put(key, String.valueOf(consumerConfig.getConfigValueCache().get(key)));
+                } else {
+                    newValueMap.put(key, null);
+                }
+            }
+            if (!event.getChangeType().equals(ConfigChangeType.DELETED)) {
+                // ADDED or MODIFIED
+                Map<String, String> dynamicValueMap = event.getDynamicValueMap();
+                for (String key : dynamicValueMap.keySet()) {
+                    String tempKey = key.lastIndexOf(".") == -1 ? key : key.substring(key.lastIndexOf(".") + 1);
+                    if (supportDynamicConfigKeys.contains(tempKey)) {
+                        String value = dynamicValueMap.get(key);
+                        if (StringUtils.isNotBlank(value)) {
+                            consumerConfig.getDynamicConfigValueCache().put(key, value);
+                            newValueMap.put(key, value);
+                        }
+                    }
+                }
+            }
+            attrUpdated(newValueMap);
+        }
+
+        @Override
+        public void configChanged(Map newValueMap) {
 
         }
 
@@ -452,7 +511,7 @@ public class DefaultConsumerBootstrap<T> extends ConsumerBootstrap<T> {
             Map<String, String> oldValues = new HashMap<String, String>();
             boolean rerefer = false;
             try { // 检查是否有变化
-                  // 是否过滤map?
+                // 是否过滤map?
                 for (Map.Entry<String, String> entry : newValues.entrySet()) {
                     String newValue = entry.getValue();
                     String oldValue = consumerConfig.queryAttribute(entry.getKey());

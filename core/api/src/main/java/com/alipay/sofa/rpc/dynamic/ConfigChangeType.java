@@ -14,39 +14,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.listener;
-
-import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
-
-import java.util.Map;
+package com.alipay.sofa.rpc.dynamic;
 
 /**
- * Listener of config for registry.
- *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
+ * @author Narziss
+ * @version ConfigChangeType.java, v 0.1 2024年09月15日 20:20 Narziss
  */
-public interface ConfigListener {
+
+public enum ConfigChangeType {
+    /**
+     * A config is created.
+     */
+    ADDED,
 
     /**
-     * 处理配置变更事件
-     *
-     * @param event 配置变更事件
+     * A config is updated.
      */
-    default void process(ConfigChangedEvent event){
-        // do nothing
-    }
+    MODIFIED,
 
     /**
-     * 配置发生变化，例如
-     *
-     * @param newValue 新配置
+     * A config is deleted.
      */
-    void configChanged(Map newValue);
-
-    /**
-     * 属性发生变化
-     *
-     * @param newValue 新配置
-     */
-    void attrUpdated(Map newValue);
+    DELETED
 }
