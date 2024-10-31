@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.dynamic.apollo;
+package com.alipay.sofa.rpc.dynamic.zk;
 
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
 import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
@@ -24,35 +24,35 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ApolloDynamicConfigManagerTest {
+public class ZookeeperDynamicConfigManagerTest {
 
-    private final static Logger  logger                     = LoggerFactory
-                                                                .getLogger(ApolloDynamicConfigManagerTest.class);
+    private final static Logger  logger                        = LoggerFactory
+                                                                   .getLogger(ZookeeperDynamicConfigManager.class);
 
-    private DynamicConfigManager apolloDynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager("test",
-                                                                "apollo");
+    private DynamicConfigManager zookeeperDynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
+                                                                   "test", "zookeeper");
 
     @Test
     public void getProviderServiceProperty() {
-        String result = apolloDynamicConfigManager.getProviderServiceProperty("serviceName", "timeout");
+        String result = zookeeperDynamicConfigManager.getProviderServiceProperty("serviceName", "timeout");
         Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 
     @Test
     public void getConsumerServiceProperty() {
-        String result = apolloDynamicConfigManager.getConsumerServiceProperty("serviceName", "timeout");
+        String result = zookeeperDynamicConfigManager.getConsumerServiceProperty("serviceName", "timeout");
         Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 
     @Test
     public void getProviderMethodProperty() {
-        String result = apolloDynamicConfigManager.getProviderMethodProperty("serviceName", "methodName", "timeout");
+        String result = zookeeperDynamicConfigManager.getProviderMethodProperty("serviceName", "methodName", "timeout");
         Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 
     @Test
     public void getConsumerMethodProperty() {
-        String result = apolloDynamicConfigManager.getConsumerMethodProperty("serviceName", "methodName", "timeout");
+        String result = zookeeperDynamicConfigManager.getConsumerMethodProperty("serviceName", "methodName", "timeout");
         Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 }
