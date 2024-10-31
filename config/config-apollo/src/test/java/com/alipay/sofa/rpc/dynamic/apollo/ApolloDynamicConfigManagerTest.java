@@ -26,11 +26,11 @@ import org.junit.Test;
 
 public class ApolloDynamicConfigManagerTest {
 
-    private final static Logger logger = LoggerFactory
-            .getLogger(ApolloDynamicConfigManagerTest.class);
+    private final static Logger  logger                     = LoggerFactory
+                                                                .getLogger(ApolloDynamicConfigManagerTest.class);
 
     private DynamicConfigManager apolloDynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager("test",
-            "apollo");
+                                                                "apollo");
 
     @Test
     public void getProviderServiceProperty() {
