@@ -200,9 +200,9 @@ public class SofaRpcMetricsCollector extends Collector implements AutoCloseable 
         EventBus.unRegister(ConsumerSubEvent.class, subscriber);
     }
 
-    private static Long getLongAvoidNull(Object object) {
+    private static long getLongAvoidNull(Object object) {
         if (object == null) {
-            return null;
+            return 0L;
         }
 
         if (object instanceof Integer) {
