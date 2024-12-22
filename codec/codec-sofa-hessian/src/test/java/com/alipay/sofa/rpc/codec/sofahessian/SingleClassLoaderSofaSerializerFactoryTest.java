@@ -16,13 +16,17 @@
  */
 package com.alipay.sofa.rpc.codec.sofahessian;
 
+import com.caucho.hessian.io.Deserializer;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.SerializerFactory;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,6 +65,37 @@ public class SingleClassLoaderSofaSerializerFactoryTest {
         assertEquals(a1.length, a2.length);
         for (int i = 0; i < a1.length; ++i)
             assertEquals(a1[i], a2[i]);
+    }
+
+    @Test
+    public void testDynamicLoadDisabled() throws Exception {
+        SingleClassLoaderSofaSerializerFactory factory = new SingleClassLoaderSofaSerializerFactory();
+        Field field = SingleClassLoaderSofaSerializerFactory.class.getDeclaredField("_typeNotFoundMap");
+        field.setAccessible(true);
+        Map<ClassLoader, Map<String, Object>> _typeNotFoundMap = (Map<ClassLoader, Map<String, Object>>) field
+            .get(factory);
+        Assert.assertEquals(0, _typeNotFoundMap.size());
+        Deserializer deserializer = factory.getDeserializer("mock.xxx.MockObject");
+        Assert.assertNull(deserializer);
+        Assert.assertEquals(1, _typeNotFoundMap.size());
+    }
+
+    @Test
+    public void testDynamicLoadEnabled() throws Exception {
+        try {
+            System.setProperty(SerializerFactory.DYNAMIC_LOAD_ENABLE_KEY, "true");
+            SingleClassLoaderSofaSerializerFactory factory = new SingleClassLoaderSofaSerializerFactory();
+            Field field = SingleClassLoaderSofaSerializerFactory.class.getDeclaredField("_typeNotFoundMap");
+            field.setAccessible(true);
+            Map<ClassLoader, Map<String, Object>> _typeNotFoundMap = (Map<ClassLoader, Map<String, Object>>) field
+                .get(factory);
+            Assert.assertEquals(0, _typeNotFoundMap.size());
+            Deserializer deserializer = factory.getDeserializer("mock.xxx.MockObject");
+            Assert.assertNull(deserializer);
+            Assert.assertEquals(0, _typeNotFoundMap.size());
+        } finally {
+            System.clearProperty(SerializerFactory.DYNAMIC_LOAD_ENABLE_KEY);
+        }
     }
 
 }
