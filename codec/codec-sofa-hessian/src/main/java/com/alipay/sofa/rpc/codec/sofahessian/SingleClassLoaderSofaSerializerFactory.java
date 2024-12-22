@@ -27,6 +27,9 @@ import com.caucho.hessian.io.JavaSerializer;
 import com.caucho.hessian.io.Serializer;
 import com.caucho.hessian.io.SerializerFactory;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static com.alipay.hessian.generic.io.GenericDeserializer.ARRAY_PREFIX;
 import static com.alipay.sofa.rpc.codec.sofahessian.serialize.GenericCustomThrowableDeterminer.isGenericThrowException;
 
@@ -40,8 +43,14 @@ public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
     /**
      * logger for this class 
      */
-    private static final Logger LOGGER = LoggerFactory
-                                           .getLogger(SingleClassLoaderSofaSerializerFactory.class);
+    private static final Logger                         LOGGER            = LoggerFactory
+                                                                              .getLogger(SingleClassLoaderSofaSerializerFactory.class);
+
+    private final Map<ClassLoader, Map<String, Object>> _typeNotFoundMap  = new ConcurrentHashMap<>(8);
+    private static final Object                         NOT_FOUND         = new Object();
+    private final boolean                               dynamicLoadEnable = Boolean.parseBoolean(System.getProperty(
+                                                                              DYNAMIC_LOAD_ENABLE_KEY,
+                                                                              Boolean.FALSE.toString()));
 
     @Override
     protected Serializer getDefaultSerializer(Class cl) {
@@ -73,14 +82,24 @@ public class SingleClassLoaderSofaSerializerFactory extends SerializerFactory {
             Deserializer subDeserializer = getDeserializer(type.substring(1));
             deserializer = new ArrayDeserializer(subDeserializer);
         } else {
+            ClassLoader appClassLoader = Thread.currentThread().getContextClassLoader();
             try {
-                ClassLoader appClassLoader = Thread.currentThread().getContextClassLoader();
+                if (!dynamicLoadEnable) {
+                    Map<String, Object> typeMap = _typeNotFoundMap.get(appClassLoader);
+                    if (typeMap != null) {
+                        if (typeMap.containsKey(type)) {
+                            return null;
+                        }
+                    }
+                }
                 Class<?> cl = Class.forName(type, true, appClassLoader);
                 deserializer = getDeserializer(cl);
             } catch (Exception e) {
                 if (e instanceof ClassNotFoundException) {
-                    LOGGER.errorWithApp(null, LogCodes.getLog(LogCodes.ERROR_DECODE_CLASS_NOT_FOUND,
-                        getClass().getName(), type, Thread.currentThread().getContextClassLoader()));
+                    if (!dynamicLoadEnable) {
+                        _typeNotFoundMap.computeIfAbsent(appClassLoader, k -> new ConcurrentHashMap<>(8)).put(type, NOT_FOUND);
+                    }
+                    LOGGER.errorWithApp(null, LogCodes.getLog(LogCodes.ERROR_DECODE_CLASS_NOT_FOUND, getClass().getName(), type, appClassLoader));
                 } else {
                     LOGGER.errorWithApp(null, e.toString(), e);
                 }
