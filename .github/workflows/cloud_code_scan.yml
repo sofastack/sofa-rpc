@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: codeScan
-        uses: huqiuxiang/alipay-cloud-devops-codescan@main
+        uses: huqiuxiang/alipay-cloud-devops-codescan@new_stc
         with:
           parent_uid: ${{ secrets.ALI_PID }}
           private_key: ${{ secrets.ALI_PK }}
