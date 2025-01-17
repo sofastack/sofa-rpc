@@ -31,6 +31,8 @@ public class TracingContextKey {
     public static final String                    KEY_SOFA_REQUEST_NAME = "io.opentracing.sofa-request";
     private static final Context.Key<SofaRequest> keySofaRequest        = Context.key(KEY_SOFA_REQUEST_NAME);
     private static final Context.Key<Metadata>    keyMetadata           = Context.key("io.opentracing.metadata");
+    public static final String                    KEY_TRIPLE_USER_ID    = "io.opentracing.tri-user-id";
+    private static final Context.Key<String>      keyUserId             = Context.key(KEY_TRIPLE_USER_ID);
 
     /**
      * Retrieves the active span.
@@ -69,5 +71,9 @@ public class TracingContextKey {
 
     public static Context.Key<Metadata> getKeyMetadata() {
         return keyMetadata;
+    }
+
+    public static Context.Key<String> getKeyUserId() {
+        return keyUserId;
     }
 }

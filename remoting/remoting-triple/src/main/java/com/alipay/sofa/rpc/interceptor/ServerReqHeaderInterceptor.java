@@ -62,6 +62,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
         SofaResponse sofaResponse = new SofaResponse();
         final Throwable[] throwable = { null };
         SofaRequest sofaRequest = new SofaRequest();
+        String userId = TripleTracerAdapter.getUserId(requestHeaders);
         TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
         SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
         SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
@@ -69,7 +70,9 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
         Context ctxWithSpan = Context.current()
             .withValue(TracingContextKey.getKey(), serverSpan)
             .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context())
-            .withValue(TracingContextKey.getKeySofaRequest(), sofaRequest);
+            .withValue(TracingContextKey.getKeySofaRequest(), sofaRequest)
+            .withValue(TracingContextKey.getKeyMetadata(), requestHeaders)
+            .withValue(TracingContextKey.getKeyUserId(), userId);
 
         //这里和下面不在一个线程
         if (RpcRunningState.isDebugMode()) {

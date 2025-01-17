@@ -27,16 +27,16 @@ public final class Version {
     /**
      * 当前RPC版本，例如：5.6.7
      */
-    public static final String VERSION       = "5.13.2";
+    public static final String VERSION       = "5.13.3";
 
     /**
      * 当前RPC版本，例如： 5.6.7 对应 50607
      */
-    public static final int    RPC_VERSION   = 51302;
+    public static final int    RPC_VERSION   = 51303;
 
     /**
      * 当前Build版本，每次发布修改
      */
-    public static final String BUILD_VERSION = "5.13.2_20241016193119";
+    public static final String BUILD_VERSION = "5.13.3_20250117153647";
 
 }
