@@ -307,8 +307,8 @@ public class TripleTracerAdapter {
     public static String getUserId(Metadata requestHeaders) {
         String unitInfo = requestHeaders.get(HEAD_KEY_UNIT_INFO);
         Map<String, String> unitInfoMap = JSON.parseObject(unitInfo,
-                new TypeReference<Map<String, String>>() {
-                });
+            new TypeReference<Map<String, String>>() {
+            });
         if (unitInfoMap != null) {
             return unitInfoMap.get(USERID_KEY);
         }
