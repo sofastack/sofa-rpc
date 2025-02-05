@@ -16,10 +16,33 @@
  */
 package com.alipay.sofa.rpc.dynamic;
 
+import com.alipay.sofa.common.config.ConfigKey;
+
 /**
  * @author bystander
  * @version : DynamicConfigKeys.java, v 0.1 2019年04月17日 21:51 bystander Exp $
  */
 public class DynamicConfigKeys {
-    public static final String DYNAMIC_ALIAS = "dynamicAlias";
+    public static final String       DYNAMIC_ALIAS          = "dynamicAlias";
+
+    public static final String       CONFIG_NODE            = "config";
+
+    public static final String       DEFAULT_NAMESPACE      = "sofa-rpc";
+
+    public static ConfigKey<String>  CONFIG_CENTER_ADDRESS  = ConfigKey
+                                                                .build(
+                                                                    "sofa.rpc.config.center.address",
+                                                                    " ",
+                                                                    false,
+                                                                    "The url of the dynamic configuration.",
+                                                                    new String[] { "sofa_rpc_config_center_address" });
+
+    public static ConfigKey<Boolean> DYNAMIC_REFRESH_ENABLE = ConfigKey
+                                                                .build(
+                                                                    "sofa.rpc.config.dynamic.refresh.enable",
+                                                                    false,
+                                                                    false,
+                                                                    "Switch for dynamic configuration refresh.",
+                                                                    new String[] { "sofa_rpc_config_dynamic_refresh_enable" });
+
 }

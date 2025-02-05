@@ -51,7 +51,7 @@ public class DynamicConfigManagerFactory {
                                                                                       .getLogger(DynamicConfigManagerFactory.class);
 
     /**
-     * 得到动态配置管理
+     * 得到动态配置管理器
      *
      * @param alias 别名
      * @return DynamicManager 实现
