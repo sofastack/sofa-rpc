@@ -306,11 +306,18 @@ public class TripleTracerAdapter {
 
     public static String getUserId(Metadata requestHeaders) {
         String unitInfo = requestHeaders.get(HEAD_KEY_UNIT_INFO);
-        Map<String, String> unitInfoMap = JSON.parseObject(unitInfo,
-            new TypeReference<Map<String, String>>() {
-            });
-        if (unitInfoMap != null) {
-            return unitInfoMap.get(USERID_KEY);
+        if (unitInfo == null) {
+            return null;
+        }
+        try {
+            Map<String, String> unitInfoMap = JSON.parseObject(unitInfo,
+                new TypeReference<Map<String, String>>() {
+                });
+            if (unitInfoMap != null) {
+                return unitInfoMap.get(USERID_KEY);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to parse tri-unit-info: " + unitInfo, e);
         }
         return null;
     }
