@@ -53,4 +53,14 @@ public class TripleTracerAdapterTest {
         Assert.assertEquals("value2", metadata.get(TripleHeadKeys.getKey("triple.header.object.key2")));
     }
 
+    @Test
+    public void testGetUserId() {
+        Metadata metadata = new Metadata();
+        Assert.assertNull(TripleTracerAdapter.getUserId(metadata));
+        metadata.put(TripleHeadKeys.HEAD_KEY_UNIT_INFO, "test");
+        Assert.assertNull(TripleTracerAdapter.getUserId(metadata));
+        metadata.put(TripleHeadKeys.HEAD_KEY_UNIT_INFO, "{\"userid\":\"99\"}");
+        Assert.assertEquals("99", TripleTracerAdapter.getUserId(metadata));
+    }
+
 }
