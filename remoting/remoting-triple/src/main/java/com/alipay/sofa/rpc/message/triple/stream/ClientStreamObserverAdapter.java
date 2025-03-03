@@ -23,11 +23,15 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 import io.grpc.stub.StreamObserver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * ClientStreamObserverAdapter.
  */
 public class ClientStreamObserverAdapter implements StreamObserver<triple.Response> {
+
+    public static final Logger               LOGGER = LoggerFactory.getLogger(ClientStreamObserverAdapter.class);
 
     private final SofaStreamObserver<Object> sofaStreamObserver;
 
@@ -66,6 +70,7 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
                 appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
                 sofaStreamObserver.onNext(appResponse);
             } catch (ClassNotFoundException e) {
+                LOGGER.error("Can not find return type :" + returnType, e);
                 throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, "Can not find return type :" + returnType,
                     e);
             } finally {
