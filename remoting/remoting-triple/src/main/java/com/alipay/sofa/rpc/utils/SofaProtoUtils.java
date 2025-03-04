@@ -96,7 +96,7 @@ public class SofaProtoUtils {
 
     public static Map<String, String> cacheStreamCallType(Class proxyClass) {
         Map<String, String> methodCallType = new ConcurrentHashMap<>();
-        Method[] declaredMethods = proxyClass.getDeclaredMethods();
+        Method[] declaredMethods = proxyClass.getMethods();
         for (Method method : declaredMethods) {
             String streamType = mapStreamType(method);
             if (StringUtils.isNotBlank(streamType)) {
