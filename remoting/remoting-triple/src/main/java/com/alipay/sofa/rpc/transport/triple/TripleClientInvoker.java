@@ -193,7 +193,8 @@ public class TripleClientInvoker implements TripleInvoker {
                 call,
                 new ClientStreamObserverAdapter(
                         sofaStreamObserver,
-                        sofaRequest.getSerializeType()
+                        sofaRequest.getSerializeType(),
+                        ClassLoaderUtils.getCurrentClassLoader()
                 )
         );
         SofaStreamObserver<Request> handler = new SofaStreamObserver() {
@@ -231,7 +232,7 @@ public class TripleClientInvoker implements TripleInvoker {
 
         Request req = SofaProtoUtils.buildRequest(sofaRequest.getMethodArgSigs(), sofaRequest.getMethodArgs(), serialization, serializer, 1);
 
-        ClientStreamObserverAdapter responseObserver = new ClientStreamObserverAdapter(sofaStreamObserver, sofaRequest.getSerializeType());
+        ClientStreamObserverAdapter responseObserver = new ClientStreamObserverAdapter(sofaStreamObserver, sofaRequest.getSerializeType(), ClassLoaderUtils.getCurrentClassLoader());
 
         ClientCalls.asyncServerStreamingCall(call, req, responseObserver);
 

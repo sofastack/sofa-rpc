@@ -35,9 +35,20 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
 
     private volatile Class<?>                returnType;
 
-    public ClientStreamObserverAdapter(SofaStreamObserver<Object> sofaStreamObserver, byte serializeType) {
+    private final ClassLoader                classLoader;
+
+    /**
+     * Instantiates a new triple stream invoker callback adapter.
+     *
+     * @param sofaStreamObserver stream callback
+     * @param serializeType serialize type
+     * @param classLoader Classloader of the rpc calling thread
+     */
+    public ClientStreamObserverAdapter(SofaStreamObserver<Object> sofaStreamObserver, byte serializeType,
+                                       ClassLoader classLoader) {
         this.sofaStreamObserver = sofaStreamObserver;
         this.serializer = SerializerFactory.getSerializer(serializeType);
+        this.classLoader = classLoader;
     }
 
     @Override
@@ -46,14 +57,19 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
         Object appResponse = null;
         String returnTypeName = response.getType();
         if (responseData != null && responseData.length > 0) {
-            if (returnType == null && !returnTypeName.isEmpty()) {
-                try {
-                    returnType = Class.forName(returnTypeName);
-                } catch (ClassNotFoundException e) {
-                    throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Can not find return type :" + returnType);
+            ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
+            try {
+                Thread.currentThread().setContextClassLoader(classLoader);
+                if (returnType == null && !returnTypeName.isEmpty()) {
+                    returnType = Class.forName(returnTypeName, true, classLoader);
                 }
+                appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
+            } catch (ClassNotFoundException e) {
+                throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, "Can not find return type :" + returnType,
+                    e);
+            } finally {
+                Thread.currentThread().setContextClassLoader(oldClassloader);
             }
-            appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
         }
 
         sofaStreamObserver.onNext(appResponse);
