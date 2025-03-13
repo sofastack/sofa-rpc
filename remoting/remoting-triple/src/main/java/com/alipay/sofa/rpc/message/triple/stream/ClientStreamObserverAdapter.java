@@ -54,7 +54,7 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
     @Override
     public void onNext(triple.Response response) {
         byte[] responseData = response.getData().toByteArray();
-        Object appResponse = null;
+        Object appResponse;
         String returnTypeName = response.getType();
         if (responseData != null && responseData.length > 0) {
             ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
@@ -64,6 +64,7 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
                     returnType = Class.forName(returnTypeName, true, classLoader);
                 }
                 appResponse = serializer.decode(new ByteArrayWrapperByteBuf(responseData), returnType, null);
+                sofaStreamObserver.onNext(appResponse);
             } catch (ClassNotFoundException e) {
                 throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, "Can not find return type :" + returnType,
                     e);
@@ -71,17 +72,27 @@ public class ClientStreamObserverAdapter implements StreamObserver<triple.Respon
                 Thread.currentThread().setContextClassLoader(oldClassloader);
             }
         }
-
-        sofaStreamObserver.onNext(appResponse);
     }
 
     @Override
     public void onError(Throwable t) {
-        sofaStreamObserver.onError(t);
+        ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(classLoader);
+            sofaStreamObserver.onError(t);
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldClassloader);
+        }
     }
 
     @Override
     public void onCompleted() {
-        sofaStreamObserver.onCompleted();
+        ClassLoader oldClassloader = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(classLoader);
+            sofaStreamObserver.onCompleted();
+        } finally {
+            Thread.currentThread().setContextClassLoader(oldClassloader);
+        }
     }
 }
