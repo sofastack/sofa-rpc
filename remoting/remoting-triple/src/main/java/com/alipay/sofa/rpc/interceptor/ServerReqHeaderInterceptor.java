@@ -62,14 +62,8 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
         SofaResponse sofaResponse = new SofaResponse();
         final Throwable[] throwable = { null };
         SofaRequest sofaRequest = new SofaRequest();
-        TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
-        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
-        SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
 
-        Context ctxWithSpan = Context.current()
-            .withValue(TracingContextKey.getKey(), serverSpan)
-            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context())
-            .withValue(TracingContextKey.getKeySofaRequest(), sofaRequest);
+        Context ctxWithSpan = convertHeaderToContext(call, requestHeaders, sofaRequest, serverServiceDefinition);
 
         //这里和下面不在一个线程
         if (RpcRunningState.isDebugMode()) {
@@ -166,5 +160,20 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
             }
         };
         return result;
+    }
+
+    protected <ReqT, RespT> Context convertHeaderToContext(ServerCall<ReqT, RespT> call,
+                                                           Metadata requestHeaders, SofaRequest sofaRequest,
+                                                           ServerServiceDefinition serverServiceDefinition) {
+        TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
+        String userId = TripleTracerAdapter.getUserId(requestHeaders);
+        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+        SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
+        return Context.current()
+            .withValue(TracingContextKey.getKey(), serverSpan)
+            .withValue(TracingContextKey.getSpanContextKey(), serverSpan.context())
+            .withValue(TracingContextKey.getKeySofaRequest(), sofaRequest)
+            .withValue(TracingContextKey.getKeyMetadata(), requestHeaders)
+            .withValue(TracingContextKey.getKeyUserId(), userId);
     }
 }

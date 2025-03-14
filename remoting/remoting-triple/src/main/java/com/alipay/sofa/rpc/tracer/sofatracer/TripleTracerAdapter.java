@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.tracer.sofatracer;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.TypeReference;
 import com.alipay.common.tracer.core.appender.self.SelfLog;
 import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
@@ -51,6 +53,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_APP_NAME;
+import static com.alipay.sofa.rpc.server.triple.TripleHeadKeys.HEAD_KEY_UNIT_INFO;
 
 /**
  * 客户端：startRpc ——&gt; filter --&gt; beforeSend --&gt; 存入tracer信息 --&gt; clientReceived
@@ -114,7 +117,7 @@ public class TripleTracerAdapter {
         if (StringUtils.isNotBlank(route)) {
             Map<String, String> map = new HashMap<>();
             map.put(USERID_KEY, route);
-            header.put(TripleHeadKeys.HEAD_KEY_UNIT_INFO.name(), JSONUtils.toJSONString(map));
+            header.put(HEAD_KEY_UNIT_INFO.name(), JSONUtils.toJSONString(map));
         }
 
         if (StringUtils.isNotEmpty(consumerConfig.getUniqueId())) {
@@ -299,5 +302,23 @@ public class TripleTracerAdapter {
             }
             EventBus.post(new ServerSendEvent(request, response, throwable));
         }
+    }
+
+    public static String getUserId(Metadata requestHeaders) {
+        String unitInfo = requestHeaders.get(HEAD_KEY_UNIT_INFO);
+        if (unitInfo == null) {
+            return null;
+        }
+        try {
+            Map<String, String> unitInfoMap = JSON.parseObject(unitInfo,
+                new TypeReference<Map<String, String>>() {
+                });
+            if (unitInfoMap != null) {
+                return unitInfoMap.get(USERID_KEY);
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to parse tri-unit-info: " + unitInfo, e);
+        }
+        return null;
     }
 }
