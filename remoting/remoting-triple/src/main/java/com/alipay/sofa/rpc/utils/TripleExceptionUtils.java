@@ -16,6 +16,10 @@
  */
 package com.alipay.sofa.rpc.utils;
 
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRouteException;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 
@@ -26,6 +30,18 @@ public class TripleExceptionUtils {
             return Status.fromThrowable(t).withDescription(t.getMessage()).withCause(t.getCause()).asRuntimeException();
         } else {
             return Status.UNKNOWN.withDescription("Error message is null.").asRuntimeException();
+        }
+    }
+
+    public static Throwable getThrowableFromStatus(Status status) {
+        if (status.getCode() == Status.OK.getCode()) {
+            return null;
+        } else if (status.getCode() == Status.UNAVAILABLE.getCode()) {
+            return new SofaRouteException(status.getDescription(), status.getCause());
+        } else if (status.getCode() == Status.DEADLINE_EXCEEDED.getCode()) {
+            return new SofaTimeOutException(status.getDescription(), status.getCause());
+        } else {
+            return new SofaRpcException(RpcErrorType.UNKNOWN, status.getDescription(), status.getCause());
         }
     }
 

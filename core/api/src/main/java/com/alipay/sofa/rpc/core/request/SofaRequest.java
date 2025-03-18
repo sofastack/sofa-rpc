@@ -306,7 +306,10 @@ public class SofaRequest extends RequestBase {
      * @return 如果是Future和Callback，是异步请求
      */
     public boolean isAsync() {
-        return invokeType != null && (RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)
-            || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType));
+        return RpcConstants.INVOKER_TYPE_CALLBACK.equals(invokeType)
+            || RpcConstants.INVOKER_TYPE_FUTURE.equals(invokeType)
+            || RpcConstants.INVOKER_TYPE_BI_STREAMING.equals(invokeType)
+            || RpcConstants.INVOKER_TYPE_SERVER_STREAMING.equals(invokeType)
+            || RpcConstants.INVOKER_TYPE_CLIENT_STREAMING.equals(invokeType);
     }
 }

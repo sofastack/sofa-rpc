@@ -73,6 +73,7 @@ public class TripleGenericStreamTest {
             .setProtocol("tri")
             .setDirectUrl("triple://127.0.0.1:50066");
         helloServiceRef = consumerConfig.refer();
+        Thread.sleep(5000);
     }
 
     @AfterClass
@@ -82,6 +83,39 @@ public class TripleGenericStreamTest {
         RpcRuntimeContext.destroy();
         RpcInternalContext.removeContext();
         RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testTripleParentCall() throws InterruptedException {
+        ClientRequest clientRequest = new ClientRequest("hello world", 5);
+        ServerResponse serverResponse = helloServiceRef.sayHello(clientRequest);
+        Assert.assertEquals("hello world", serverResponse.getMsg());
+
+        CountDownLatch countDownLatch = new CountDownLatch(6);
+        AtomicBoolean receivedFinish = new AtomicBoolean(false);
+        List<ServerResponse> list = new ArrayList<>();
+        helloServiceRef.parentSayHelloServerStream(clientRequest, new SofaStreamObserver<ServerResponse>() {
+            @Override
+            public void onNext(ServerResponse message) {
+                list.add(message);
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onCompleted() {
+                receivedFinish.set(true);
+                countDownLatch.countDown();
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                countDownLatch.countDown();
+            }
+        });
+
+        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+        Assert.assertEquals(5, list.size());
+        Assert.assertTrue(receivedFinish.get());
     }
 
     @Test

@@ -65,6 +65,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -142,6 +143,8 @@ public class TripleServer implements Server {
             .executor(bizThreadPool)
             .channelType(constructChannel())
             .maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE))
+            .permitKeepAliveTime(1, TimeUnit.SECONDS)
+            .permitKeepAliveWithoutCalls(true)
             .build();
         this.lock = new ReentrantLock();
     }

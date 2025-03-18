@@ -78,4 +78,15 @@ public class HelloServiceImpl implements HelloService {
         }
     }
 
+    @Override
+    public ServerResponse sayHello(ClientRequest clientRequest) {
+        return new ServerResponse(clientRequest.getMsg(), clientRequest.getCount());
+    }
+
+    @Override
+    public void parentSayHelloServerStream(ClientRequest clientRequest,
+                                           SofaStreamObserver<ServerResponse> sofaStreamObserver) {
+        sayHelloServerStream(clientRequest, sofaStreamObserver);
+    }
+
 }

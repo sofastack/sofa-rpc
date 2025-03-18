@@ -66,5 +66,9 @@
             <groupId>com.alipay.sofa</groupId>
             <artifactId>tracer-core</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-tracer-opentracing</artifactId>
+        </dependency>
     </dependencies>
 </project>

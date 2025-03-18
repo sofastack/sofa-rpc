@@ -933,8 +933,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      * @return the time out
      */
     public int getMethodTimeout(String methodName) {
-        return (Integer) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_TIMEOUT,
-            getTimeout());
+        Object methodTimeout = getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_TIMEOUT);
+        if (methodTimeout == null || ((Integer) methodTimeout) == 0) {
+            return getTimeout();
+        }
+        return (Integer) methodTimeout;
     }
 
     /**

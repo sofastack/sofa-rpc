@@ -128,15 +128,15 @@ public class RpcConstants {
     /**
      * 调用方式：客户端流
      */
-    public static final String  INVOKER_TYPE_CLIENT_STREAMING                = "clientStream";
+    public static final String  INVOKER_TYPE_CLIENT_STREAMING                = "client_stream";
     /**
      * 调用方式：服务端流
      */
-    public static final String  INVOKER_TYPE_SERVER_STREAMING                = "serverStream";
+    public static final String  INVOKER_TYPE_SERVER_STREAMING                = "server_stream";
     /**
      * 调用方式：双向流
      */
-    public static final String  INVOKER_TYPE_BI_STREAMING                    = "bidirectionalStream";
+    public static final String  INVOKER_TYPE_BI_STREAMING                    = "bi_stream";
 
     /**
      * Hessian序列化 [不推荐]

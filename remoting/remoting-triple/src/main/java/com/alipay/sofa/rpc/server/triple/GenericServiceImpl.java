@@ -131,20 +131,37 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
                 @Override
                 public void onNext(Request request) {
-                    checkInitialize(request);
-                    Object message = getInvokeArgs(request, argTypes, serializer, false)[0];
-                    serverResponseHandler.setSerializeType(serializeType);
-                    clientHandler.onNext(message);
+                    try {
+                        Thread.currentThread().setContextClassLoader(serviceClassLoader);
+                        checkInitialize(request);
+                        Object message = getInvokeArgs(request, argTypes, serializer, false)[0];
+                        serverResponseHandler.setSerializeType(serializeType);
+                        clientHandler.onNext(message);
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(oldClassLoader);
+                    }
                 }
 
                 @Override
                 public void onError(Throwable t) {
-                    clientHandler.onError(t);
+                    try {
+                        Thread.currentThread().setContextClassLoader(serviceClassLoader);
+                        clientHandler.onError(t);
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(oldClassLoader);
+                    }
+
                 }
 
                 @Override
                 public void onCompleted() {
-                    clientHandler.onCompleted();
+                    try {
+                        Thread.currentThread().setContextClassLoader(serviceClassLoader);
+                        clientHandler.onCompleted();
+                    } finally {
+                        Thread.currentThread().setContextClassLoader(oldClassLoader);
+                    }
+
                 }
 
                 private void checkInitialize(Request request) {

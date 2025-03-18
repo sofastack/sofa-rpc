@@ -46,7 +46,7 @@ public class TripleTracerAdapterTest {
         sofaRequest.addRequestProp(HEAD_TARGET_SERVICE, "targetService2");
         ConsumerConfig consumerConfig = new ConsumerConfig();
         Metadata metadata = new Metadata();
-        TripleTracerAdapter.beforeSend(sofaRequest, consumerConfig, metadata);
+        TripleTracerAdapter.beforeSend(sofaRequest, consumerConfig, metadata, null);
         Assert.assertEquals("targetService2", metadata.get(TripleHeadKeys.getKey(HEAD_TARGET_SERVICE)));
         Assert.assertEquals("triple.header.value", metadata.get(TripleHeadKeys.getKey("triple.header.key")));
         Assert.assertEquals("value1", metadata.get(TripleHeadKeys.getKey("triple.header.object.key1")));

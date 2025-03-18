@@ -16,12 +16,20 @@
  */
 package com.alipay.sofa.rpc.interceptor;
 
+import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
+import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
+import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
+import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.tracer.sofatracer.TripleTracerAdapter;
+import com.alipay.sofa.rpc.utils.TripleExceptionUtils;
 import io.grpc.CallOptions;
 import io.grpc.Channel;
 import io.grpc.ClientCall;
@@ -59,12 +67,15 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
 
             @Override
             public void start(Listener<RespT> responseListener, Metadata requestHeader) {
-
+                RpcInternalContext internalContext = RpcInternalContext.getContext();
                 RpcInvokeContext context = RpcInvokeContext.getContext();
                 SofaRequest sofaRequest = (SofaRequest) context.get(TripleContants.SOFA_REQUEST_KEY);
 
-                ConsumerConfig consumerConfig = (ConsumerConfig) context.get(TripleContants.SOFA_CONSUMER_CONFIG_KEY);
-                TripleTracerAdapter.beforeSend(sofaRequest, consumerConfig, requestHeader);
+                ConsumerConfig<?> consumerConfig = (ConsumerConfig<?>) context
+                    .get(TripleContants.SOFA_CONSUMER_CONFIG_KEY);
+                TripleTracerAdapter.beforeSend(sofaRequest, consumerConfig, requestHeader, method);
+                SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                SofaTracerSpan clientSpan = sofaTraceContext.getCurrentSpan();
                 if (RpcRunningState.isDebugMode()) {
                     LOGGER.info("[2]prepare to send from client:{}", requestHeader);
                 }
@@ -80,18 +91,48 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
 
                     @Override
                     public void onMessage(RespT message) {
-                        if (RpcRunningState.isDebugMode()) {
-                            LOGGER.info("[4]response message received from server:{}", message);
+                        // onMessage -> onNext()
+                        try {
+                            if (sofaRequest.isAsync()) {
+                                RpcInvokeContext.setContext(context);
+                                sofaTraceContext.push(clientSpan);
+                            }
+                            if (RpcRunningState.isDebugMode()) {
+                                LOGGER.info("[4]response message received from server:{}", message);
+                            }
+                            super.onMessage(message);
+                        } finally {
+                            if (sofaRequest.isAsync()) {
+                                sofaTraceContext.clear();
+                                RpcInvokeContext.removeContext();
+                            }
                         }
-                        super.onMessage(message);
                     }
 
                     @Override
                     public void onClose(Status status, Metadata trailers) {
-                        if (RpcRunningState.isDebugMode()) {
-                            LOGGER.info("[5]response close received from server:{},trailers:{}", status, trailers);
+                        // onClose -> onComplete() or onError()
+                        try {
+                            if (sofaRequest.isAsync()) {
+                                RpcInvokeContext.setContext(context);
+                                sofaTraceContext.push(clientSpan);
+                            }
+                            if (RpcRunningState.isDebugMode()) {
+                                LOGGER.info("[5]response close received from server:{},trailers:{}", status, trailers);
+                            }
+                            super.onClose(status, trailers);
+                        } finally {
+                            if (sofaRequest.isAsync()) {
+                                Throwable throwable = TripleExceptionUtils.getThrowableFromStatus(status);
+                                RpcInternalContext.setContext(internalContext);
+                                if (EventBus.isEnable(ClientAsyncReceiveEvent.class)) {
+                                    EventBus.post(new ClientAsyncReceiveEvent(consumerConfig, null,
+                                        sofaRequest, new SofaResponse(), throwable));
+                                }
+                                RpcInvokeContext.removeContext();
+                                RpcInternalContext.removeAllContext();
+                            }
                         }
-                        super.onClose(status, trailers);
                     }
 
                     @Override
@@ -104,6 +145,15 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                 }, requestHeader);
             }
 
+            @Override
+            public void sendMessage(ReqT message) {
+                try {
+                    super.sendMessage(message);
+                } catch (Throwable t) {
+                    LOGGER.error("Client invoke grpc sendMessage meet error:", t);
+                    throw t;
+                }
+            }
         };
     }
 }

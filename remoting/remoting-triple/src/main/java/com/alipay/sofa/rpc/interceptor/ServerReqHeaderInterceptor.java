@@ -21,7 +21,6 @@ import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
-import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
@@ -57,109 +56,164 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
     public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(final ServerCall<ReqT, RespT> call,
                                                                  final Metadata requestHeaders,
                                                                  ServerCallHandler<ReqT, RespT> next) {
-        final ServerServiceDefinition serverServiceDefinition = this.getServerServiceDefinition();
+        try {
+            final ServerServiceDefinition serverServiceDefinition = this.getServerServiceDefinition();
 
-        SofaResponse sofaResponse = new SofaResponse();
-        final Throwable[] throwable = { null };
-        SofaRequest sofaRequest = new SofaRequest();
+            SofaResponse sofaResponse = new SofaResponse();
+            SofaRequest sofaRequest = new SofaRequest();
 
-        Context ctxWithSpan = convertHeaderToContext(call, requestHeaders, sofaRequest, serverServiceDefinition);
+            Context ctxWithSpan = convertHeaderToContext(call, requestHeaders, sofaRequest, serverServiceDefinition);
 
-        //这里和下面不在一个线程
-        if (RpcRunningState.isDebugMode()) {
-            LOGGER.info("[1]header received from client:" + requestHeaders);
+            //这里和下面不在一个线程
+            if (RpcRunningState.isDebugMode()) {
+                LOGGER.info("[1]header received from client:{}", requestHeaders);
+            }
+
+            ServerCall<ReqT, RespT> realCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
+                @Override
+                public void sendHeaders(Metadata responseHeaders) {
+                    try {
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[4]send response header:{}", responseHeaders);
+                        }
+                        super.sendHeaders(responseHeaders);
+                    } catch (Throwable t) {
+                        LOGGER.error("Server invoke grpc sendHeaders meet error:", t);
+                        throw t;
+                    }
+                }
+
+                //服务端发完了
+                @Override
+                public void sendMessage(RespT message) {
+                    try {
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[5]send response message:{}", message);
+                        }
+                        super.sendMessage(message);
+
+                        sofaResponse.setAppResponse(message);
+                    } catch (Throwable t) {
+                        LOGGER.error("Server invoke grpc sendMessage meet error:", t);
+                        throw t;
+                    }
+                }
+
+                @Override
+                public void close(Status status, Metadata trailers) {
+                    // onError -> close
+                    try {
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[6]send response message:{},trailers:{}", status, trailers);
+                        }
+                        if (status.getCause() != null) {
+                            status = status.withDescription(status.getCause().getMessage());
+                        }
+                        super.close(status, trailers);
+                    } finally {
+                        if (!status.isOk()) {
+                            Throwable cause = status.getCause();
+                            TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, cause,
+                                ctxWithSpan);
+                        }
+                    }
+
+                }
+            };
+            ServerCall.Listener<ReqT> listenerWithContext;
+            try {
+                listenerWithContext = Contexts.interceptCall(ctxWithSpan, realCall, requestHeaders, next);
+            } catch (Throwable t) {
+                LOGGER.error("Server invoke grpc interceptCall meet error:", t);
+                TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, t, ctxWithSpan);
+                Status status = Status.UNKNOWN.withDescription(t.getMessage()).withCause(t);
+                throw new StatusRuntimeException(status);
+            }
+            RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+            return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
+                listenerWithContext) {
+
+                @Override
+                public void onCancel() {
+                    // onCancel -> onError()
+                    try {
+                        SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                        SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
+                        sofaTraceContext.push(originalSpan);
+                        RpcInvokeContext.setContext(invokeContext);
+                        super.onCancel();
+                    } finally {
+                        TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse,
+                            new StatusRuntimeException(Status.CANCELLED, new Metadata()), ctxWithSpan);
+                    }
+                }
+
+                //完成的时候走到这里
+                @Override
+                public void onComplete() {
+                    try {
+                        // 和代码执行不一定在一个线程池
+                        super.onComplete();
+                        if (RpcRunningState.isDebugMode()) {
+                            LOGGER.info("[7]server processed done received from client:" + requestHeaders);
+                        }
+                    } finally {
+                        TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, null, ctxWithSpan);
+                    }
+                }
+
+                @Override
+                public void onMessage(ReqT message) {
+                    // onMessage -> onNext()
+                    SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                    try {
+                        SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
+                        sofaTraceContext.push(originalSpan);
+                        RpcInvokeContext.setContext(invokeContext);
+                        super.onMessage(message);
+                    } catch (Throwable t) {
+                        LOGGER.error("Server invoke grpc onMessage meet error:", t);
+                        throw t;
+                    } finally {
+                        RpcInvokeContext.removeContext();
+                        sofaTraceContext.clear();
+                    }
+                }
+
+                //客户端发完了
+                @Override
+                public void onHalfClose() {
+                    // onHalfClose -> onComplete() -> close
+                    SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                    try {
+                        SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
+                        sofaTraceContext.push(originalSpan);
+                        RpcInvokeContext.setContext(invokeContext);
+                        doOnHalfClose();
+                    } finally {
+                        RpcInvokeContext.removeContext();
+                        sofaTraceContext.clear();
+                    }
+                }
+
+                private void doOnHalfClose() {
+                    if (RpcRunningState.isDebugMode()) {
+                        LOGGER.info("[2]body received done from client:" + requestHeaders);
+                    }
+                    try {
+                        super.onHalfClose();
+                    } catch (Throwable t) {
+                        // 统一处理异常
+                        final Metadata trailers = new Metadata();
+                        Status status = Status.UNKNOWN.withDescription(t.getMessage()).withCause(t);
+                        realCall.close(status, trailers);
+                    }
+                }
+            };
+        } finally {
+            RpcInvokeContext.removeContext();
+            SofaTraceContextHolder.getSofaTraceContext().clear();
         }
-
-        ServerCall<ReqT, RespT> realCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
-            @Override
-            public void sendHeaders(Metadata responseHeaders) {
-                if (RpcRunningState.isDebugMode()) {
-                    LOGGER.info("[4]send response header:{}", responseHeaders);
-                }
-                super.sendHeaders(responseHeaders);
-            }
-
-            //服务端发完了
-            @Override
-            public void sendMessage(RespT message) {
-                if (RpcRunningState.isDebugMode()) {
-                    LOGGER.info("[5]send response message:{}", message);
-                }
-                super.sendMessage(message);
-
-                sofaResponse.setAppResponse(message);
-            }
-
-            @Override
-            public void close(Status status, Metadata trailers) {
-                if (RpcRunningState.isDebugMode()) {
-                    LOGGER.info("[6]send response message:{},trailers:{}", status, trailers);
-                }
-                super.close(status, trailers);
-            }
-        };
-
-        ServerCall.Listener<ReqT> listenerWithContext =
-                Contexts.interceptCall(ctxWithSpan, realCall, requestHeaders, next);
-
-        ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT> result = new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
-            listenerWithContext) {
-
-            //完成的时候走到这里
-            @Override
-            public void onComplete() {
-                // 和代码执行不一定在一个线程池
-                super.onComplete();
-                if (RpcRunningState.isDebugMode()) {
-                    LOGGER.info("[7]server processed done received from client:" + requestHeaders);
-                }
-                TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
-
-                //进行一下补偿
-                SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
-                SofaTracerSpan serverSpan = sofaTraceContext.getCurrentSpan();
-                SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
-                serverSpan.setStartTime(originalSpan.getStartTime());
-                serverSpan.setTag("remote.ip", originalSpan.getTagsWithStr().get("remote.ip"));
-                long endTime = RpcRuntimeContext.now();
-                serverSpan.setTag("biz.impl.time", endTime - originalSpan.getStartTime());
-                TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, throwable[0]);
-            }
-
-            //客户端发完了
-            @Override
-            public void onHalfClose() {
-                try {
-                    doOnHalfClose();
-                } finally {
-                    RpcInvokeContext.removeContext();
-                }
-            }
-
-            private void doOnHalfClose() {
-                if (RpcRunningState.isDebugMode()) {
-                    LOGGER.info("[2]body received done from client:" + requestHeaders);
-                }
-                // 服务端收到所有信息
-                TripleTracerAdapter.serverReceived(sofaRequest, serverServiceDefinition, call, requestHeaders);
-                try {
-                    super.onHalfClose();
-                } catch (Throwable t) {
-                    // 统一处理异常
-                    StatusRuntimeException exception = fromThrowable(t);
-                    // 调用 call.close() 发送 Status 和 metadata
-                    // 这个方式和 onError()本质是一样的
-                    call.close(exception.getStatus(), exception.getTrailers());
-                    throwable[0] = t;
-                }
-            }
-
-            private StatusRuntimeException fromThrowable(Throwable t) {
-                final Metadata trailers = new Metadata();
-                return new StatusRuntimeException(Status.UNKNOWN, trailers);
-            }
-        };
-        return result;
     }
 
     protected <ReqT, RespT> Context convertHeaderToContext(ServerCall<ReqT, RespT> call,
