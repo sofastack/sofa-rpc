@@ -6,7 +6,7 @@
 
     <groupId>com.alipay.sofa</groupId>
     <artifactId>sofa-rpc-all</artifactId>
-    <version>5.13.3</version>
+    <version>5.14.0-SNAPSHOT</version>
 
 
     <name>${project.groupId}:${project.artifactId}</name>
@@ -306,6 +306,16 @@
         </dependency>
         <dependency>
             <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-config-zk</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-config-nacos</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
             <artifactId>bolt</artifactId>
             <version>${bolt.version}</version>
             <exclusions>
@@ -553,6 +563,8 @@
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-triple</include>
                                     <include>com.alipay.sofa:sofa-rpc-config-apollo</include>
+                                    <include>com.alipay.sofa:sofa-rpc-config-zk</include>
+                                    <include>com.alipay.sofa:sofa-rpc-config-nacos</include>
                                     <include>com.alipay.sofa:sofa-rpc-doc-swagger</include>
                                     <!-- TODO -->
                                 </includes>

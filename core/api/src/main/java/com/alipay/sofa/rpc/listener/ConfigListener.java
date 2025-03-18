@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.listener;
 
+import com.alipay.sofa.rpc.dynamic.ConfigChangedEvent;
+
 import java.util.Map;
 
 /**
@@ -24,6 +26,15 @@ import java.util.Map;
  * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
  */
 public interface ConfigListener {
+
+    /**
+     * 处理配置变更事件
+     *
+     * @param event 配置变更事件
+     */
+    default void process(ConfigChangedEvent event){
+        // do nothing
+    }
 
     /**
      * 配置发生变化，例如

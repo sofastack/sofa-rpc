@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.dynamic.apollo;
 
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManager;
+import com.alipay.sofa.rpc.dynamic.DynamicConfigManagerFactory;
 import com.alipay.sofa.rpc.dynamic.DynamicHelper;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
@@ -24,10 +26,11 @@ import org.junit.Test;
 
 public class ApolloDynamicConfigManagerTest {
 
-    private final static Logger        logger                     = LoggerFactory
-                                                                      .getLogger(ApolloDynamicConfigManagerTest.class);
+    private final static Logger  logger                     = LoggerFactory
+                                                                .getLogger(ApolloDynamicConfigManagerTest.class);
 
-    private ApolloDynamicConfigManager apolloDynamicConfigManager = new ApolloDynamicConfigManager("test");
+    private DynamicConfigManager apolloDynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager("test",
+                                                                "apollo");
 
     @Test
     public void getProviderServiceProperty() {
@@ -37,17 +40,19 @@ public class ApolloDynamicConfigManagerTest {
 
     @Test
     public void getConsumerServiceProperty() {
+        String result = apolloDynamicConfigManager.getConsumerServiceProperty("serviceName", "timeout");
+        Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 
     @Test
     public void getProviderMethodProperty() {
+        String result = apolloDynamicConfigManager.getProviderMethodProperty("serviceName", "methodName", "timeout");
+        Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 
     @Test
     public void getConsumerMethodProperty() {
-    }
-
-    @Test
-    public void getServiceAuthRule() {
+        String result = apolloDynamicConfigManager.getConsumerMethodProperty("serviceName", "methodName", "timeout");
+        Assert.assertEquals(DynamicHelper.DEFAULT_DYNAMIC_VALUE, result);
     }
 }
