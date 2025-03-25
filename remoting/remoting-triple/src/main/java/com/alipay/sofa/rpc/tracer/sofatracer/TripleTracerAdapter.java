@@ -41,8 +41,11 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
+import io.grpc.Context;
 import io.grpc.Grpc;
 import io.grpc.Metadata;
+import io.grpc.MethodDescriptor;
 import io.grpc.ServerCall;
 import io.grpc.ServerServiceDefinition;
 
@@ -76,7 +79,20 @@ public class TripleTracerAdapter {
      * @param sofaRequest   SofaRequest
      * @param requestHeader Metadata
      */
-    public static void beforeSend(SofaRequest sofaRequest, ConsumerConfig consumerConfig, Metadata requestHeader) {
+    @Deprecated
+    public static void beforeSend(SofaRequest sofaRequest, ConsumerConfig<?> consumerConfig, Metadata requestHeader) {
+        beforeSend(sofaRequest, consumerConfig, requestHeader, null);
+    }
+
+    /**
+     * 存入tracer信息
+     *
+     * @param sofaRequest
+     * @param consumerConfig
+     * @param requestHeader
+     * @param method
+     */
+    public static <ReqT, RespT> void beforeSend(SofaRequest sofaRequest, ConsumerConfig<?> consumerConfig, Metadata requestHeader, MethodDescriptor<ReqT, RespT> method) {
 
         // 客户端设置请求服务端的Header
         // tracer信息放入request 发到服务端
@@ -108,6 +124,25 @@ public class TripleTracerAdapter {
 
             header.put(TripleHeadKeys.HEAD_KEY_SYS_BAGGAGE_TYPE.name(),
                     sofaTracerSpanContext.getSysSerializedBaggage());
+            if (method != null) {
+                switch (method.getType()) {
+                    case CLIENT_STREAMING :
+                        sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_CLIENT_STREAMING);
+                        clientSpan.setTag(RpcSpanTags.INVOKE_TYPE, RpcConstants.INVOKER_TYPE_CLIENT_STREAMING);
+                        break;
+                    case SERVER_STREAMING :
+                        sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_SERVER_STREAMING);
+                        clientSpan.setTag(RpcSpanTags.INVOKE_TYPE, RpcConstants.INVOKER_TYPE_SERVER_STREAMING);
+                        break;
+                    case BIDI_STREAMING:
+                        sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_BI_STREAMING);
+                        clientSpan.setTag(RpcSpanTags.INVOKE_TYPE, RpcConstants.INVOKER_TYPE_BI_STREAMING);
+                        break;
+                    default:
+                        header.put(TripleHeadKeys.HEAD_KEY_INVOKE_TYPE.name(), RpcConstants.INVOKER_TYPE_SYNC);
+                }
+                sofaRequest.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE, sofaRequest.getInvokeType());
+            }
         }
         //获取 RPC 上下文
 
@@ -288,9 +323,25 @@ public class TripleTracerAdapter {
     /**
      * 适配服务端serverSend
      */
+    @Deprecated
     public static void serverSend(SofaRequest request, final Metadata requestHeaders, SofaResponse response,
                                   Throwable throwable) {
+        serverSend(request, requestHeaders, response, throwable, null);
+    }
+
+    /**
+     * 适配服务端serverSend
+     */
+    public static void serverSend(SofaRequest request, final Metadata requestHeaders, SofaResponse response,
+                                  Throwable throwable, Context ctxWithSpan) {
         if (EventBus.isEnable(ServerSendEvent.class)) {
+            if (ctxWithSpan != null) {
+                SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                if (sofaTraceContext.getCurrentSpan() == null) {
+                    SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
+                    sofaTraceContext.push(originalSpan);
+                }
+            }
             if (request == null) {
                 request = new SofaRequest();
             }
