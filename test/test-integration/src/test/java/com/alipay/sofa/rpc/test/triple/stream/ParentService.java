@@ -18,15 +18,14 @@ package com.alipay.sofa.rpc.test.triple.stream;
 
 import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 
-public interface HelloService extends ParentService {
+/**
+ * @author Even
+ * @date 2025/3/4 23:49
+ */
+public interface ParentService {
 
-    String CMD_TRIGGER_STREAM_FINISH = "finish";
+    ServerResponse sayHello(ClientRequest clientRequest);
 
-    String CMD_TRIGGER_STREAM_ERROR  = "error";
+    void parentSayHelloServerStream(ClientRequest clientRequest, SofaStreamObserver<ServerResponse> sofaStreamObserver);
 
-    String ERROR_MSG                 = "error msg";
-
-    SofaStreamObserver<ClientRequest> sayHelloBiStream(SofaStreamObserver<ServerResponse> sofaStreamObserver);
-
-    void sayHelloServerStream(ClientRequest clientRequest, SofaStreamObserver<ServerResponse> sofaStreamObserver);
 }
