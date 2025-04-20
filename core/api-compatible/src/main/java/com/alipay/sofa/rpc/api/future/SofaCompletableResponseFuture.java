@@ -1,15 +1,14 @@
 package com.alipay.sofa.rpc.api.future;
 
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.message.ResponseFuture;
-import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
 
 public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> implements ResponseFuture<T> {
 
@@ -38,5 +37,25 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
 
     public ResponseFuture<T> getDelegate() {
         return delegate;
+    }
+
+    @Override
+    public ResponseFuture<T> addListeners(List<SofaResponseCallback> callbacks) {
+        return delegate.addListeners(callbacks);
+    }
+
+    @Override
+    public ResponseFuture<T> addListener(SofaResponseCallback callback) {
+        return delegate.addListener(callback);
+    }
+
+    @Override
+    public T get() {
+        try {
+            return delegate.get();
+        } catch (Exception e) {
+            throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
+                "Get response failed, cause: " + e.getMessage(), e);
+        }
     }
 }
