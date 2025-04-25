@@ -57,7 +57,6 @@ import triple.Request;
 import triple.Response;
 
 import java.lang.reflect.Method;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -66,7 +65,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -107,19 +105,13 @@ public class TripleServer implements Server {
     protected MutableHandlerRegistry                                     handlerRegistry = new MutableHandlerRegistry();
 
     /**
-     * The mapping relationship between BindableService and ServerServiceDefinition
+     * The mapping relationship between interface BindableService and ServerServiceDefinition
      */
-    protected ConcurrentHashMap<ProviderConfig, ServerServiceDefinition> serviceInfo     = new ConcurrentHashMap<ProviderConfig,
-                                                                                                 ServerServiceDefinition>();
+    protected ConcurrentHashMap<String, ServerServiceDefinition> serviceInfo     = new ConcurrentHashMap<>();
     /**
      * The mapping relationship between service name and unique id invoker
      */
     protected Map<String, UniqueIdInvoker>                               invokerMap = new ConcurrentHashMap<>();
-
-    /**
-     * invoker count
-     */
-    protected AtomicInteger                                              invokerCnt      = new AtomicInteger();
 
     /**
      * Thread pool
@@ -274,17 +266,15 @@ public class TripleServer implements Server {
             }
 
             ServerServiceDefinition serviceDefinition = getServerServiceDefinition(providerConfig, uniqueIdInvoker);
-            this.serviceInfo.put(providerConfig, serviceDefinition);
+            this.serviceInfo.put(providerConfig.getInterfaceId(), serviceDefinition);
             ServerServiceDefinition ssd = this.handlerRegistry.addService(serviceDefinition);
             if (ssd != null) {
                 throw new IllegalStateException("Can not expose service with same name:" +
                     serviceDefinition.getServiceDescriptor().getName());
             }
-            this.invokerCnt.incrementAndGet();
         } catch (Exception e) {
             String msg = "Register triple service error";
             LOGGER.error(msg, e);
-            this.serviceInfo.remove(providerConfig);
             throw new SofaRpcRuntimeException(msg, e);
         } finally {
             this.lock.unlock();
@@ -413,24 +403,24 @@ public class TripleServer implements Server {
         this.lock.lock();
         cleanReflectCache(providerConfig);
         try {
-            ServerServiceDefinition serverServiceDefinition = this.serviceInfo.get(providerConfig);
+            ServerServiceDefinition serverServiceDefinition = this.serviceInfo.get(providerConfig.getInterfaceId());
             UniqueIdInvoker uniqueIdInvoker = this.invokerMap.get(providerConfig.getInterfaceId());
             if (null != uniqueIdInvoker) {
                 uniqueIdInvoker.unRegisterInvoker(providerConfig);
                 if (!uniqueIdInvoker.hasInvoker()) {
                     this.invokerMap.remove(providerConfig.getInterfaceId());
                     this.handlerRegistry.removeService(serverServiceDefinition);
+                    this.serviceInfo.remove(providerConfig.getInterfaceId());
                 }
             } else {
                 this.handlerRegistry.removeService(serverServiceDefinition);
             }
-            invokerCnt.decrementAndGet();
         } catch (Exception e) {
             LOGGER.error("Unregister triple service error", e);
         } finally {
             this.lock.unlock();
         }
-        if (closeIfNoEntry && invokerCnt.get() == 0) {
+        if (closeIfNoEntry && invokerMap.isEmpty()) {
             stop();
         }
     }
