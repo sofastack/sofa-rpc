@@ -52,10 +52,19 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
     @Override
     public T get() {
         try {
-            return delegate.get();
+            // 如果CompletableFuture已经完成，直接返回结果
+            if (isDone()) {
+                return super.join();
+            }
+            // 否则调用delegate的get方法
+            T result = delegate.get();
+            // 完成当前CompletableFuture
+            this.complete(result);
+            return result;
         } catch (Exception e) {
+            this.completeExceptionally(e);
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
-                "Get response failed, cause: " + e.getMessage(), e);
+                    "Get response failed, cause: " + e.getMessage(), e);
         }
     }
 }
