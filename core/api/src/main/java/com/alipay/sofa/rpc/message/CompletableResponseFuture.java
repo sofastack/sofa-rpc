@@ -14,7 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.api.future;
+package com.alipay.sofa.rpc.message;
 
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
@@ -29,27 +29,27 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> implements ResponseFuture<T> {
+public class CompletableResponseFuture<T> extends CompletableFuture<T> implements ResponseFuture<T> {
 
     private final ResponseFuture<T> delegate;
 
-    public SofaCompletableResponseFuture(ResponseFuture<T> delegate) {
+    public CompletableResponseFuture(ResponseFuture<T> delegate) {
         this.delegate = delegate;
 
         RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback<T>() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                SofaCompletableResponseFuture.this.complete((T) appResponse);
+                CompletableResponseFuture.this.complete((T) appResponse);
             }
 
             @Override
             public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                SofaCompletableResponseFuture.this.completeExceptionally(throwable);
+                CompletableResponseFuture.this.completeExceptionally(throwable);
             }
 
             @Override
             public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-                SofaCompletableResponseFuture.this.completeExceptionally(sofaException);
+                CompletableResponseFuture.this.completeExceptionally(sofaException);
             }
         });
     }
