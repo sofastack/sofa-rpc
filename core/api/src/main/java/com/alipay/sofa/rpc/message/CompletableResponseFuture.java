@@ -24,10 +24,7 @@ import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
 
 public class CompletableResponseFuture<T> extends CompletableFuture<T> implements ResponseFuture<T> {
 
@@ -106,6 +103,33 @@ public class CompletableResponseFuture<T> extends CompletableFuture<T> implement
             this.completeExceptionally(e);
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
                 "Get response failed, cause: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean cancel(boolean mayInterruptIfRunning) {
+        try {
+            boolean cancelled = delegate.cancel(mayInterruptIfRunning);
+            if (cancelled) {
+                super.cancel(mayInterruptIfRunning);
+            }
+            return cancelled;
+        } catch (Exception e) {
+            if (!isDone()) {
+                this.completeExceptionally(e);
+            }
+            throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
+                "Cancel response failed, cause: " + e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean isCancelled() {
+        try {
+            return delegate.isCancelled();
+        } catch (Exception e) {
+            throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
+                    "Check cancelled state failed, cause: " + e.getMessage(), e);
         }
     }
 }
