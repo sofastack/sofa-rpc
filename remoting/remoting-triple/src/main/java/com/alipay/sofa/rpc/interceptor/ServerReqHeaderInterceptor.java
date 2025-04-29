@@ -19,12 +19,18 @@ package com.alipay.sofa.rpc.interceptor;
 import com.alipay.common.tracer.core.context.trace.SofaTraceContext;
 import com.alipay.common.tracer.core.holder.SofaTraceContextHolder;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.common.tracer.core.span.SpanEventData;
+import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRunningState;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.tracer.sofatracer.TracingContextKey;
 import com.alipay.sofa.rpc.tracer.sofatracer.TripleTracerAdapter;
+import com.alipay.sofa.rpc.tracer.sofatracer.code.TracerResultCode;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcEventTags;
+import com.google.protobuf.GeneratedMessageV3;
 import io.grpc.Context;
 import io.grpc.Contexts;
 import io.grpc.ForwardingServerCall;
@@ -37,6 +43,8 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 服务端收请求Header的拦截器
@@ -57,18 +65,19 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                                                                  final Metadata requestHeaders,
                                                                  ServerCallHandler<ReqT, RespT> next) {
         try {
+            RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+            RpcInternalContext internalContext = RpcInternalContext.getContext();
+            internalContext.setProviderSide(true);
             final ServerServiceDefinition serverServiceDefinition = this.getServerServiceDefinition();
-
             SofaResponse sofaResponse = new SofaResponse();
             SofaRequest sofaRequest = new SofaRequest();
-
             Context ctxWithSpan = convertHeaderToContext(call, requestHeaders, sofaRequest, serverServiceDefinition);
-
+            AtomicInteger receiveId = new AtomicInteger();
+            AtomicInteger sendId = new AtomicInteger();
             //这里和下面不在一个线程
             if (RpcRunningState.isDebugMode()) {
                 LOGGER.info("[1]header received from client:{}", requestHeaders);
             }
-
             ServerCall<ReqT, RespT> realCall = new ForwardingServerCall.SimpleForwardingServerCall<ReqT, RespT>(call) {
                 @Override
                 public void sendHeaders(Metadata responseHeaders) {
@@ -86,16 +95,44 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 //服务端发完了
                 @Override
                 public void sendMessage(RespT message) {
+                    Throwable throwable = null;
+                    SpanEventData spanEventData = null;
+                    SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
                     try {
                         if (RpcRunningState.isDebugMode()) {
                             LOGGER.info("[5]send response message:{}", message);
                         }
+                        if (sofaRequest.isAsync()) {
+                            spanEventData = new SpanEventData();
+                            spanEventData.setTimestamp(System.currentTimeMillis());
+                            spanEventData.addTag(RpcEventTags.SEQUENCE_ID, sendId.incrementAndGet());
+                            spanEventData.addTag(RpcEventTags.EVENT_TYPE, RpcConstants.SERVER_SEND_EVENT);
+                            spanEventData.addTag(RpcEventTags.CURRENT_THREAD_NAME,
+                                Thread.currentThread().getName());
+                            if (message instanceof GeneratedMessageV3) {
+                                int messageSize = ((GeneratedMessageV3) message).getSerializedSize();
+                                spanEventData.addTag(RpcEventTags.SIZE, messageSize);
+                                Object respSize = internalContext.getAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE);
+                                int currentSize = respSize == null ? 0 : (int) respSize;
+                                internalContext.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, currentSize +
+                                    messageSize);
+                            }
+                        }
                         super.sendMessage(message);
-
                         sofaResponse.setAppResponse(message);
                     } catch (Throwable t) {
+                        throwable = t;
                         LOGGER.error("Server invoke grpc sendMessage meet error:", t);
                         throw t;
+                    } finally {
+                        if (spanEventData != null) {
+                            if (throwable != null) {
+                                spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
+                            } else {
+                                spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_SUCCESS);
+                            }
+                            originalSpan.addEvent(spanEventData);
+                        }
                     }
                 }
 
@@ -103,6 +140,8 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 public void close(Status status, Metadata trailers) {
                     // onError -> close
                     try {
+                        RpcInvokeContext.setContext(invokeContext);
+                        RpcInternalContext.setContext(internalContext);
                         if (RpcRunningState.isDebugMode()) {
                             LOGGER.info("[6]send response message:{},trailers:{}", status, trailers);
                         }
@@ -115,6 +154,8 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                             Throwable cause = status.getCause();
                             TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, cause,
                                 ctxWithSpan);
+                            RpcInvokeContext.removeContext();
+                            RpcInternalContext.removeAllContext();
                         }
                     }
 
@@ -129,7 +170,6 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 Status status = Status.UNKNOWN.withDescription(t.getMessage()).withCause(t);
                 throw new StatusRuntimeException(status);
             }
-            RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
             return new ForwardingServerCallListener.SimpleForwardingServerCallListener<ReqT>(
                 listenerWithContext) {
 
@@ -141,10 +181,13 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                         SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
                         sofaTraceContext.push(originalSpan);
                         RpcInvokeContext.setContext(invokeContext);
+                        RpcInternalContext.setContext(internalContext);
                         super.onCancel();
                     } finally {
                         TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse,
                             new StatusRuntimeException(Status.CANCELLED, new Metadata()), ctxWithSpan);
+                        RpcInvokeContext.removeContext();
+                        RpcInternalContext.removeAllContext();
                     }
                 }
 
@@ -152,6 +195,8 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                 @Override
                 public void onComplete() {
                     try {
+                        RpcInvokeContext.setContext(invokeContext);
+                        RpcInternalContext.setContext(internalContext);
                         // 和代码执行不一定在一个线程池
                         super.onComplete();
                         if (RpcRunningState.isDebugMode()) {
@@ -159,23 +204,54 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                         }
                     } finally {
                         TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse, null, ctxWithSpan);
+                        RpcInvokeContext.removeContext();
+                        RpcInternalContext.removeAllContext();
                     }
                 }
 
                 @Override
                 public void onMessage(ReqT message) {
+
                     // onMessage -> onNext()
+                    Throwable throwable = null;
+                    SpanEventData spanEventData = null;
                     SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
+                    SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
                     try {
-                        SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
                         sofaTraceContext.push(originalSpan);
                         RpcInvokeContext.setContext(invokeContext);
+                        RpcInternalContext.setContext(internalContext);
+                        if (sofaRequest.isAsync()) {
+                            spanEventData = new SpanEventData();
+                            spanEventData.setTimestamp(System.currentTimeMillis());
+                            spanEventData.addTag(RpcEventTags.SEQUENCE_ID, receiveId.incrementAndGet());
+                            spanEventData.addTag(RpcEventTags.EVENT_TYPE, RpcConstants.SERVER_RECEIVE_EVENT);
+                            spanEventData.addTag(RpcEventTags.CURRENT_THREAD_NAME, Thread.currentThread().getName());
+                            if (message instanceof GeneratedMessageV3) {
+                                int messageSize = ((GeneratedMessageV3) message).getSerializedSize();
+                                spanEventData.getEventTagWithNumber().put(RpcEventTags.SIZE, messageSize);
+                                Object reqSize = internalContext.getAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE);
+                                int currentSize = reqSize == null ? 0 : (int) reqSize;
+                                internalContext.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, currentSize +
+                                    messageSize);
+                            }
+                        }
                         super.onMessage(message);
                     } catch (Throwable t) {
+                        throwable = t;
                         LOGGER.error("Server invoke grpc onMessage meet error:", t);
                         throw t;
                     } finally {
+                        if (spanEventData != null) {
+                            if (throwable != null) {
+                                spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
+                            } else {
+                                spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_SUCCESS);
+                            }
+                            originalSpan.addEvent(spanEventData);
+                        }
                         RpcInvokeContext.removeContext();
+                        RpcInternalContext.removeAllContext();
                         sofaTraceContext.clear();
                     }
                 }
@@ -189,9 +265,11 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                         SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
                         sofaTraceContext.push(originalSpan);
                         RpcInvokeContext.setContext(invokeContext);
+                        RpcInternalContext.setContext(internalContext);
                         doOnHalfClose();
                     } finally {
                         RpcInvokeContext.removeContext();
+                        RpcInternalContext.removeAllContext();
                         sofaTraceContext.clear();
                     }
                 }
@@ -212,6 +290,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
             };
         } finally {
             RpcInvokeContext.removeContext();
+            RpcInternalContext.removeAllContext();
             SofaTraceContextHolder.getSofaTraceContext().clear();
         }
     }

@@ -84,10 +84,12 @@ public class TripleStubStreamTest {
                 .setServer(serverConfig);
         providerConfig.export();
 
+        ApplicationConfig consumerApp = new ApplicationConfig().setAppName("triple-client");
         consumerConfig = new ConsumerConfig<>();
         consumerConfig.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+                .setApplication(consumerApp)
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setDirectUrl("tri://127.0.0.1:" + port);
+                .setDirectUrl("tri://127.0.0.1:" + port + "?appName=triple-server");
 
         greeterStub = consumerConfig.refer();
 
@@ -103,8 +105,9 @@ public class TripleStubStreamTest {
 
         consumerConfigToNative = new ConsumerConfig<>();
         consumerConfigToNative.setInterfaceId(SofaGreeterTriple.IGreeter.class.getName())
+                .setApplication(consumerApp)
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
-                .setDirectUrl("tri://127.0.0.1:" + 50051);
+                .setDirectUrl("tri://127.0.0.1:" + 50051 + "?appName=triple-server");
         greeterStubToNative = consumerConfigToNative.refer();
         Thread.sleep(10000);
     }
@@ -117,6 +120,13 @@ public class TripleStubStreamTest {
         RpcRuntimeContext.destroy();
         RpcInternalContext.removeContext();
         RpcInvokeContext.removeContext();
+    }
+
+    @Test
+    public void testTripleSayHello() {
+        HelloRequest request = HelloRequest.newBuilder().setName("Jack").build();
+        HelloReply helloReply = greeterStub.sayHello(request);
+        Assert.assertEquals("Hello Jack", helloReply.getMessage());
     }
 
     @Test

@@ -287,6 +287,20 @@ public class TripleTracerAdapter {
             if (!traceMap.isEmpty()) {
                 sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
             }
+            MethodDescriptor.MethodType methodType = call.getMethodDescriptor().getType();
+            switch (methodType) {
+                case CLIENT_STREAMING:
+                    sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_CLIENT_STREAMING);
+                    break;
+                case SERVER_STREAMING:
+                    sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_SERVER_STREAMING);
+                    break;
+                case BIDI_STREAMING:
+                    sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_BI_STREAMING);
+                    break;
+                default:
+                    sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_SYNC);
+            }
 
             if (EventBus.isEnable(ServerReceiveEvent.class)) {
                 EventBus.post(new ServerReceiveEvent(sofaRequest));
