@@ -25,10 +25,20 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import java.util.List;
 import java.util.concurrent.*;
 
+/**
+ * A wrapper for CompletableFuture that implements ResponseFuture to provide
+ * enhanced functionalities for handling asynchronous responses in a more convenient way.
+ */
 public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> implements ResponseFuture<T> {
 
     private final ResponseFuture<T> delegate;
 
+    /**
+     * Constructor that creates a new SofaCompletableResponseFuture and
+     * registers a callback to handle the response.
+     *
+     * @param delegate The delegate ResponseFuture to wrap.
+     */
     public SofaCompletableResponseFuture(ResponseFuture<T> delegate) {
         this.delegate = delegate;
 
@@ -50,20 +60,43 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
         });
     }
 
+    /**
+     * Returns the delegate ResponseFuture.
+     *
+     * @return The delegate ResponseFuture.
+     */
     public ResponseFuture<T> getDelegate() {
         return delegate;
     }
 
+    /**
+     * Adds listeners to the delegate ResponseFuture.
+     *
+     * @param callbacks The list of callbacks to add.
+     * @return The current instance of SofaCompletableResponseFuture.
+     */
     @Override
     public ResponseFuture<T> addListeners(List<SofaResponseCallback> callbacks) {
         return delegate.addListeners(callbacks);
     }
 
+    /**
+     * Adds a listener to the delegate ResponseFuture.
+     *
+     * @param callback The callback to add.
+     * @return The current instance of SofaCompletableResponseFuture.
+     */
     @Override
     public ResponseFuture<T> addListener(SofaResponseCallback callback) {
         return delegate.addListener(callback);
     }
 
+    /**
+     * Get the result of the RPC call, blocking until it is available.
+     *
+     * @return The result of the RPC call.
+     * @throws SofaRpcException if the call fails or is interrupted.
+     **/
     @Override
     public T get() {
         try {
@@ -100,6 +133,14 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
         }
     }
 
+    /**
+     * Get the result of the RPC call with a timeout.
+     *
+     * @param timeout The timeout duration.
+     * @param unit    The time unit of the timeout duration.
+     * @return The result of the RPC call.
+     * @throws SofaRpcException if the call fails or is interrupted.
+     **/
     @Override
     public T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         try {
@@ -141,6 +182,13 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
         }
     }
 
+    /**
+     * Attempts to cancel the execution of this task.
+     *
+     * @param mayInterruptIfRunning {@code true} if the thread executing this
+     * task should be interrupted; otherwise
+     * @return {@code true} if this task was cancelled
+     */
     @Override
     public boolean cancel(boolean mayInterruptIfRunning) {
         try {
@@ -158,6 +206,11 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
         }
     }
 
+    /**
+     * Checks if the task was cancelled.
+     *
+     * @return {@code true} if this task was cancelled
+     */
     @Override
     public boolean isCancelled() {
         try {
