@@ -33,6 +33,11 @@ import java.util.concurrent.CompletableFuture;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
+/**
+ * Test class for SofaCompletableResponseFuture.
+ *
+ * @author ecstasoy
+ */
 public class SofaCompletableResponseFutureTest {
 
     @Mock

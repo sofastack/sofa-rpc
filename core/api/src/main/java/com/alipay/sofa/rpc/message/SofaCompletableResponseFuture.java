@@ -28,6 +28,8 @@ import java.util.concurrent.*;
 /**
  * A wrapper for CompletableFuture that implements ResponseFuture to provide
  * enhanced functionalities for handling asynchronous responses in a more convenient way.
+ *
+ * @author ecstasoy
  */
 public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> implements ResponseFuture<T> {
 
@@ -116,20 +118,20 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
                 this.completeExceptionally(e);
             }
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Get response interrupted, cause: " + e.getMessage(), e);
+                "Get response interrupted, cause: " + e.getMessage(), e);
         } catch (ExecutionException e) {
             if (!isDone()) {
                 this.completeExceptionally(e);
             }
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
-                    "Get response failed, cause: " + e.getMessage(), e);
+                "Get response failed, cause: " + e.getMessage(), e);
         } catch (Exception e) {
             if (!isDone()) {
                 this.completeExceptionally(e);
             }
             // 其他异常可能是客户端错误
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Get response failed, cause: " + e.getMessage(), e);
+                "Get response failed, cause: " + e.getMessage(), e);
         }
     }
 
@@ -160,25 +162,25 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
                 this.completeExceptionally(e);
             }
             throw new SofaRpcException(RpcErrorType.CLIENT_TIMEOUT,
-                    "Get response timeout, cause: " + e.getMessage(), e);
+                "Get response timeout, cause: " + e.getMessage(), e);
         } catch (InterruptedException e) {
             if (!isDone()) {
                 this.completeExceptionally(e);
             }
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Get response interrupted, cause: " + e.getMessage(), e);
+                "Get response interrupted, cause: " + e.getMessage(), e);
         } catch (ExecutionException e) {
             if (!isDone()) {
                 this.completeExceptionally(e);
             }
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR,
-                    "Get response failed, cause: " + e.getMessage(), e);
+                "Get response failed, cause: " + e.getMessage(), e);
         } catch (Exception e) {
             if (!isDone()) {
                 this.completeExceptionally(e);
             }
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Get response failed, cause: " + e.getMessage(), e);
+                "Get response failed, cause: " + e.getMessage(), e);
         }
     }
 
@@ -217,7 +219,7 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
             return delegate.isCancelled();
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
-                    "Check cancelled state failed, cause: " + e.getMessage(), e);
+                "Check cancelled state failed, cause: " + e.getMessage(), e);
         }
     }
 }
