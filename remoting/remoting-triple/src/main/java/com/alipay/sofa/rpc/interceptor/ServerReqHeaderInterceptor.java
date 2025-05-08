@@ -125,7 +125,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                         LOGGER.error("Server invoke grpc sendMessage meet error:", t);
                         throw t;
                     } finally {
-                        if (spanEventData != null) {
+                        if (spanEventData != null && originalSpan != null) {
                             if (throwable != null) {
                                 spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
                             } else {
@@ -242,7 +242,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                         LOGGER.error("Server invoke grpc onMessage meet error:", t);
                         throw t;
                     } finally {
-                        if (spanEventData != null) {
+                        if (spanEventData != null && originalSpan != null) {
                             if (throwable != null) {
                                 spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
                             } else {

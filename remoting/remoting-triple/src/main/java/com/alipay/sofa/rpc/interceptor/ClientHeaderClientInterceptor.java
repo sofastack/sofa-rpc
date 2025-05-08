@@ -140,7 +140,7 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                             throwable = t;
                             throw t;
                         } finally {
-                            if (spanEventData != null) {
+                            if (spanEventData != null && clientSpan != null) {
                                 if (throwable != null) {
                                     spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
                                 } else {
@@ -218,7 +218,7 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                     LOGGER.error("Client invoke grpc sendMessage meet error:", t);
                     throw t;
                 } finally {
-                    if (spanEventData != null) {
+                    if (spanEventData != null && clientSpan != null) {
                         if (throwable != null) {
                             spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
                         } else {

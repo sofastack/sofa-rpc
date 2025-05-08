@@ -20,6 +20,7 @@ import com.alipay.common.tracer.core.appender.builder.JsonStringBuilder;
 import com.alipay.common.tracer.core.appender.encoder.SpanEncoder;
 import com.alipay.common.tracer.core.context.span.SofaTracerSpanContext;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
+import com.alipay.common.tracer.core.span.SpanEventData;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
 
@@ -45,25 +46,29 @@ public abstract class AbstractRpcEventJsonEncoder implements SpanEncoder<SofaTra
         // toApp
         buffer.append(RpcSpanTags.REMOTE_APP, spanTagsWithStr.get(RpcSpanTags.REMOTE_APP));
         // event tags
-        Map<String, String> tagsWithStr = span.getEventData().getEventTagWithStr();
-        if (CommonUtils.isNotEmpty(tagsWithStr)) {
-            for (Map.Entry<String, String> entry : tagsWithStr.entrySet()) {
-                buffer.append(entry.getKey(), entry.getValue());
+        SpanEventData currentEventData = span.getEventData();
+        if (currentEventData != null) {
+            Map<String, String> tagsWithStr = currentEventData.getEventTagWithStr();
+            if (CommonUtils.isNotEmpty(tagsWithStr)) {
+                for (Map.Entry<String, String> entry : tagsWithStr.entrySet()) {
+                    buffer.append(entry.getKey(), entry.getValue());
+                }
+            }
+            Map<String, Number> tagsWithNumber = currentEventData.getEventTagWithNumber();
+            if (CommonUtils.isNotEmpty(tagsWithNumber)) {
+                for (Map.Entry<String, Number> entry : tagsWithNumber.entrySet()) {
+                    Number value = entry.getValue();
+                    buffer.append(entry.getKey(), value == null ? null : String.valueOf(value));
+                }
+            }
+            Map<String, Boolean> tagsWithBool = currentEventData.getEventTagWithBool();
+            if (CommonUtils.isNotEmpty(tagsWithBool)) {
+                for (Map.Entry<String, Boolean> entry : tagsWithBool.entrySet()) {
+                    buffer.append(entry.getKey(), entry.getValue());
+                }
             }
         }
-        Map<String, Number> tagsWithNumber = span.getEventData().getEventTagWithNumber();
-        if (CommonUtils.isNotEmpty(tagsWithNumber)) {
-            for (Map.Entry<String, Number> entry : tagsWithNumber.entrySet()) {
-                Number value = entry.getValue();
-                buffer.append(entry.getKey(), value == null ? null : String.valueOf(value));
-            }
-        }
-        Map<String, Boolean> tagsWithBool = span.getEventData().getEventTagWithBool();
-        if (CommonUtils.isNotEmpty(tagsWithBool)) {
-            for (Map.Entry<String, Boolean> entry : tagsWithBool.entrySet()) {
-                buffer.append(entry.getKey(), entry.getValue());
-            }
-        }
+
     }
 
 }
