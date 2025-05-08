@@ -28,6 +28,8 @@ public enum RpcTracerLogEnum {
     RPC_SERVER_DIGEST("rpc_server_digest_log_name", "rpc-server-digest.log", "rpc_server_digest_rolling"),
     RPC_CLIENT_STAT("rpc_client_stat_log_name", "rpc-client-stat.log", "rpc_client_stat_rolling"),
     RPC_SERVER_STAT("rpc_server_stat_log_name", "rpc-server-stat.log", "rpc_server_stat_rolling"),
+    RPC_CLIENT_EVENT("rpc_client_event_log_name", "rpc-client-event.log", "rpc_client_event_rolling"),
+    RPC_SERVER_EVENT("rpc_server_event_log_name", "rpc-server-event.log", "rpc_server_event_rolling"),
     RPC_2_JVM_DIGEST("rpc_2_jvm_digest_log_name", "rpc-2-jvm-digest.log", "rpc_2_jvm_digest_rolling"),
     RPC_2_JVM_STAT("rpc_2_jvm_stat_log_name", "rpc-2-jvm-stat.log", "rpc_2_jvm_stat_rolling");
 

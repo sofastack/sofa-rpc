@@ -55,7 +55,7 @@
         <!-- alipay libs -->
         <bolt.version>1.6.10</bolt.version>
         <sofa.common.tools.version>1.4.0</sofa.common.tools.version>
-        <tracer.version>3.1.6</tracer.version>
+        <tracer.version>3.1.10</tracer.version>
         <!-- Build args -->
         <module.install.skip>true</module.install.skip>
         <module.deploy.skip>true</module.deploy.skip>

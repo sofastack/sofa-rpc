@@ -62,7 +62,7 @@
         <hessian.version>3.5.5</hessian.version>
         <resteasy.version>3.6.3.Final</resteasy.version>
         <bolt.version>1.6.10</bolt.version>
-        <tracer.version>3.1.6</tracer.version>
+        <tracer.version>3.1.10</tracer.version>
         <bytebuddy.version>1.9.8</bytebuddy.version>
         <sofa.registry.version>6.5.6</sofa.registry.version>
         <bolt.swagger.version>1.6.9</bolt.swagger.version>

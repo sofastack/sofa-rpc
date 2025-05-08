@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.tracer.sofatracer.factory;
 
 import com.alipay.common.tracer.core.appender.encoder.SpanEncoder;
 import com.alipay.common.tracer.core.reporter.digest.DiskReporterImpl;
+import com.alipay.common.tracer.core.reporter.digest.event.SpanEventDiskReporter;
 import com.alipay.common.tracer.core.reporter.facade.Reporter;
 import com.alipay.common.tracer.core.reporter.stat.SofaTracerStatisticReporter;
 import com.alipay.common.tracer.core.span.SofaTracerSpan;
@@ -30,12 +31,12 @@ import com.alipay.sofa.rpc.common.utils.StringUtils;
  */
 public class ReporterFactory {
 
-    private static String REPORT_TYPE = SofaConfigs.getOrDefault(RpcConfigKeys.TRACER_EXPOSE_TYPE);
+    private static final String REPORT_TYPE = SofaConfigs.getOrDefault(RpcConfigKeys.TRACER_EXPOSE_TYPE);
 
     public static Reporter build(String digestLog, String digestRollingPolicy,
                                  String digestLogReserveConfig, SpanEncoder<SofaTracerSpan> spanEncoder,
                                  SofaTracerStatisticReporter statReporter) {
-        Reporter reporter = null;
+        Reporter reporter;
 
         if (StringUtils.equals(REPORT_TYPE, "MEMORY")) {
             //构造实例
@@ -47,5 +48,11 @@ public class ReporterFactory {
                 digestLogReserveConfig, spanEncoder, statReporter);
         }
         return reporter;
+    }
+
+    public static Reporter buildEventReport(String evenLogType, String digestRollingPolicy,
+                                            String digestLogReserveConfig, SpanEncoder<SofaTracerSpan> spanEncoder) {
+        return new SpanEventDiskReporter(evenLogType, digestRollingPolicy, digestLogReserveConfig, spanEncoder,
+            evenLogType);
     }
 }
