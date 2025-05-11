@@ -41,7 +41,10 @@ public class SofaCallbackCompletableFuture<T> extends CompletableFuture<T> {
         RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback<T>() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                future.complete((T) appResponse);
+                // Safe cast assumes the response type will match the expected type T
+                @SuppressWarnings("unchecked")
+                T typedResponse = (T) appResponse;
+                future.complete(typedResponse);
             }
             @Override
             public void onAppException(Throwable throwable, String methodName, RequestBase request) {
