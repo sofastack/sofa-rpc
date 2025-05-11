@@ -29,15 +29,15 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author ecstasoy
  */
-public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> {
+public class SofaCallbackCompletableFuture<T> extends CompletableFuture<T> {
 
     /**
-     * Factory method to create an instance of SofaCompletableResponseFuture.
+     * Factory method to create an instance of SofaCallbackCompletableFuture.
      *
-     * @return SofaCompletableResponseFuture instance
+     * @return SofaCallbackCompletableFuture instance
      */
-    public static <T> SofaCompletableResponseFuture<T> create() {
-        SofaCompletableResponseFuture<T> future = new SofaCompletableResponseFuture<>();
+    public static <T> SofaCallbackCompletableFuture<T> create() {
+        SofaCallbackCompletableFuture<T> future = new SofaCallbackCompletableFuture<>();
         RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback<T>() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
@@ -58,6 +58,6 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> {
     /**
      * Private constructor.
      */
-    private SofaCompletableResponseFuture() {}
+    private SofaCallbackCompletableFuture() {}
 
 }
