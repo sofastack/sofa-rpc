@@ -39,7 +39,7 @@ import java.util.concurrent.*;
 
 public class SofaCallbackCompletableFutureIntegrationTest extends ActivelyDestroyTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AsyncChainTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SofaCallbackCompletableFutureIntegrationTest.class);
 
     @Test
     public void testAsyncHelloServiceWithSofaCallbackCompletableFuture() throws Exception {
