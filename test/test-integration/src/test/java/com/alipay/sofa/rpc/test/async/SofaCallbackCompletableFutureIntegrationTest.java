@@ -232,6 +232,32 @@ public class SofaCallbackCompletableFutureIntegrationTest extends ActivelyDestro
             String combined = f1.thenCombine(f2, (r1, r2) -> r1 + "+" + r2).get();
             Assert.assertTrue(combined.contains("foo") && combined.contains("bar"));
 
+            // 9. 回调链式调用测试（先注册 callback，再 create future）
+            java.util.concurrent.atomic.AtomicBoolean callbackInvoked = new java.util.concurrent.atomic.AtomicBoolean(false);
+            RpcInvokeContext.getContext().setResponseCallback(new com.alipay.sofa.rpc.core.invoke.SofaResponseCallback<String>() {
+                @Override
+                public void onAppResponse(Object appResponse, String methodName, com.alipay.sofa.rpc.core.request.RequestBase request) {
+                    callbackInvoked.set(true);
+                }
+                @Override public void onAppException(Throwable throwable, String methodName, com.alipay.sofa.rpc.core.request.RequestBase request) {}
+                @Override public void onSofaException(com.alipay.sofa.rpc.core.exception.SofaRpcException sofaException, String methodName, com.alipay.sofa.rpc.core.request.RequestBase request) {}
+            });
+            SofaCallbackCompletableFuture<String> chainedFuture = SofaCallbackCompletableFuture.create();
+            asyncHelloService.sayHello("chain", 1);
+            chainedFuture.whenComplete((res, ex) -> {
+                if (ex == null) {
+                    LOGGER.info("A get result: " + res);
+                } else {
+                    LOGGER.error("A get exception: ", ex);
+                }
+            });
+            String chainedResult = chainedFuture.thenApply(res -> {
+                LOGGER.info("Chained result: " + res);
+                return res + " chained";
+            }).get(2000, TimeUnit.MILLISECONDS);
+            Assert.assertTrue(chainedResult.contains("chain"));
+            Assert.assertTrue(callbackInvoked.get());
+
         } finally {
             a2bConsumer.unRefer();
             bProvider.unExport();

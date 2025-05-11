@@ -38,6 +38,11 @@ public class SofaCallbackCompletableFuture<T> extends CompletableFuture<T> {
     }
 
     /**
+     * Indicates whether the future is attached to a callback.
+     */
+    private volatile boolean isAttached = false;
+
+    /**
      * Factory method to create an instance of SofaCallbackCompletableFuture.
      *
      * @return SofaCallbackCompletableFuture instance
@@ -49,26 +54,59 @@ public class SofaCallbackCompletableFuture<T> extends CompletableFuture<T> {
             future.completeExceptionally(new IllegalStateException("RPC invoke context is not initialized"));
             return future;
         }
-        context.setResponseCallback(new SofaResponseCallback<T>() {
-            @Override
-            public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                // Safe cast assumes the response type will match the expected type T
-                @SuppressWarnings("unchecked")
-                T typedResponse = (T) appResponse;
-                future.complete(typedResponse);
+        // 防止竞态
+        ResponseFuture<T> responseFuture = context.getFuture();
+        if (responseFuture != null && responseFuture.isDone()) {
+            try {
+                T result = responseFuture.get();
+                future.complete(result);
+                return future;
+            } catch (Exception e) {
+                future.completeExceptionally(e);
+                return future;
             }
+        } else {
+            // 如果原来注册了回调，直接用
+            SofaResponseCallback<?> existing = context.getResponseCallback();
+            context.setResponseCallback(new SofaResponseCallback<T>() {
+                { future.isAttached = true; }
+                @Override
+                public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
+                    if (existing != null) {
+                        existing.onAppResponse(appResponse, methodName, request);
+                    }
+                    @SuppressWarnings("unchecked")
+                    T typedResponse = (T) appResponse;
+                    future.complete(typedResponse);
+                }
 
-            @Override
-            public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                future.completeExceptionally(throwable);
-            }
+                @Override
+                public void onAppException(Throwable throwable, String methodName, RequestBase request) {
+                    if (existing != null) {
+                        existing.onAppException(throwable, methodName, request);
+                    }
+                    future.completeExceptionally(throwable);
+                }
 
-            @Override
-            public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-                future.completeExceptionally(sofaException);
-            }
-        });
+                @Override
+                public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
+                    if (existing != null) {
+                        existing.onSofaException(sofaException, methodName, request);
+                    }
+                    future.completeExceptionally(sofaException);
+                }
+            });
+        }
         return future;
+    }
+
+    /**
+     * Checks if the future is attached to a callback.
+     *
+     * @return true if attached, false otherwise
+     */
+    public boolean isAttached() {
+        return isAttached;
     }
 
 }
