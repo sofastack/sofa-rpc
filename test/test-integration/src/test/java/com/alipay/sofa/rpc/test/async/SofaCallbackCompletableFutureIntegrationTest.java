@@ -146,8 +146,10 @@ public class SofaCallbackCompletableFutureIntegrationTest extends ActivelyDestro
                 Assert.fail("Should throw TimeoutException");
             } catch (TimeoutException e) {
                 // 预期超时
+                LOGGER.info("Got expected TimeoutException");
             } catch (ExecutionException e) {
                 Assert.assertTrue(e.getCause() instanceof SofaRpcException);
+                LOGGER.info("Got SofaRpcException wrapped in ExecutionException instead of TimeoutException");
             }
 
             // 5. 并发异步请求
