@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.RequestBase;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 
 import java.util.List;
 import java.util.concurrent.*;
@@ -39,27 +40,46 @@ public class SofaCompletableResponseFuture<T> extends CompletableFuture<T> imple
      * Constructor that creates a new SofaCompletableResponseFuture and
      * registers a callback to handle the response.
      *
-     * @param delegate The delegate ResponseFuture to wrap.
+     * @return A new SofaCompletableResponseFuture instance.
      */
-    public SofaCompletableResponseFuture(ResponseFuture<T> delegate) {
-        this.delegate = delegate;
-
+    public static <T> SofaCompletableResponseFuture<T> create() {
+        SofaCompletableResponseFuture<T> future = new SofaCompletableResponseFuture<>(null);
+        RpcInternalContext.getContext().setFuture(future);
         RpcInvokeContext.getContext().setResponseCallback(new SofaResponseCallback<T>() {
             @Override
             public void onAppResponse(Object appResponse, String methodName, RequestBase request) {
-                SofaCompletableResponseFuture.this.complete((T) appResponse);
+                future.complete((T) appResponse);
             }
 
             @Override
             public void onAppException(Throwable throwable, String methodName, RequestBase request) {
-                SofaCompletableResponseFuture.this.completeExceptionally(throwable);
+                future.completeExceptionally(throwable);
             }
 
             @Override
             public void onSofaException(SofaRpcException sofaException, String methodName, RequestBase request) {
-                SofaCompletableResponseFuture.this.completeExceptionally(sofaException);
+                future.completeExceptionally(sofaException);
             }
         });
+        return future;
+    }
+
+    /**
+     * Creates a new SofaCompletableResponseFuture with a delegate ResponseFuture.
+     * This is used when you already have a ResponseFuture and want to wrap it.
+     *
+     * @param delegate The delegate ResponseFuture to wrap.
+     * @return A new SofaCompletableResponseFuture instance.
+     */
+    public static <T> SofaCompletableResponseFuture<T> create(ResponseFuture<T> delegate) {
+        return new SofaCompletableResponseFuture<>(delegate);
+    }
+
+    /**
+     * Private constructor to force usage of factory methods.
+     */
+    private SofaCompletableResponseFuture(ResponseFuture<T> delegate) {
+        this.delegate = delegate;
     }
 
     /**
