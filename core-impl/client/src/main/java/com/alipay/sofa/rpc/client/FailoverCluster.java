@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.annotation.RetryableException;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -67,6 +68,29 @@ public class FailoverCluster extends AbstractCluster {
                 providerInfo = select(request, invokedProviderInfos);
                 SofaResponse response = filterChain(providerInfo, request);
                 if (response != null) {
+                    // 检查是否是用户自定义的可重试异常
+                    Object appResponse = response.getAppResponse();
+                    if (appResponse instanceof Throwable) {
+                        Throwable t = (Throwable) appResponse;
+                        boolean retryable = false;
+                        Throwable cause = t;
+                        while (cause != null) {
+                            if (cause.getClass().isAnnotationPresent(RetryableException.class)) {
+                                retryable = true;
+                                break;
+                            }
+                            cause = cause.getCause();
+                        }
+                        if (retryable) {
+                            throwable = new SofaRpcException(RpcErrorType.CUSTOMER_DESIGN_ERROR, t.getMessage());
+                            time++;
+                            if (providerInfo != null) {
+                                invokedProviderInfos.add(providerInfo);
+                            }
+                            continue; // 重试
+                        }
+                    }
+
                     if (throwable != null) {
                         if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                             LOGGER.warnWithApp(consumerConfig.getAppName(),
