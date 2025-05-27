@@ -105,6 +105,12 @@ public class RpcInvokeContext {
         LOCAL.set(RpcInvokeContext.clone(context));
     }
 
+    public static void resetContext(RpcInvokeContext context) {
+        if (peekContext() != context) {
+            LOCAL.set(context);
+        }
+    }
+
     private static RpcInvokeContext clone(RpcInvokeContext parent) {
         if (parent == null) {
             return null;

@@ -582,7 +582,9 @@ public abstract class AbstractCluster extends Cluster {
 
     @Override
     public SofaResponse sendMsg(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
+        long start = System.nanoTime();
         ClientTransport clientTransport = connectionHolder.getAvailableClientTransport(providerInfo);
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, System.nanoTime() - start);
         if (clientTransport != null && clientTransport.isAvailable()) {
             return doSendMsg(providerInfo, clientTransport, request);
         } else {

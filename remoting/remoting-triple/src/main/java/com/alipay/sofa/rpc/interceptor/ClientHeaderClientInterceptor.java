@@ -107,29 +107,31 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                         Throwable throwable = null;
                         SpanEventData spanEventData = null;
                         try {
+                            int messageId = receiveId.incrementAndGet();
+                            if (messageId == 1) {
+                                context.put(INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO, System.nanoTime() -
+                                    startTimeNano);
+                            }
+                            int messageSize = 0;
+                            if (message instanceof GeneratedMessageV3) {
+                                messageSize = ((GeneratedMessageV3) message).getSerializedSize();
+                                Object respSize = internalContext.getAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE);
+                                int currentSize = respSize == null ? 0 : (int) respSize;
+                                internalContext.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, currentSize +
+                                    messageSize);
+                            }
+
                             if (sofaRequest.isAsync()) {
-                                int messageId = receiveId.incrementAndGet();
-                                RpcInvokeContext.setContext(context);
-                                sofaTraceContext.push(clientSpan);
+                                if (clientSpan != null) {
+                                    sofaTraceContext.push(clientSpan.getParentSofaTracerSpan());
+                                }
                                 spanEventData = new SpanEventData();
                                 spanEventData.setTimestamp(System.currentTimeMillis());
                                 spanEventData.addTag(RpcEventTags.EVENT_TYPE, RpcConstants.CLIENT_RECEIVE_EVENT);
                                 spanEventData
                                     .addTag(RpcEventTags.CURRENT_THREAD_NAME, Thread.currentThread().getName());
                                 spanEventData.addTag(RpcEventTags.SEQUENCE_ID, messageId);
-                                if (messageId == 1) {
-                                    context.put(INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO, System.nanoTime() -
-                                        startTimeNano);
-                                }
-                                if (message instanceof GeneratedMessageV3) {
-                                    int messageSize = ((GeneratedMessageV3) message).getSerializedSize();
-                                    Object respSize = internalContext
-                                        .getAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE);
-                                    int currentSize = respSize == null ? 0 : (int) respSize;
-                                    internalContext.setAttachment(RpcConstants.INTERNAL_KEY_RESP_SIZE, currentSize +
-                                        messageSize);
-                                    spanEventData.addTag(RpcEventTags.SIZE, messageSize);
-                                }
+                                spanEventData.addTag(RpcEventTags.SIZE, messageSize);
                             }
                             if (RpcRunningState.isDebugMode()) {
                                 LOGGER.info("[4]response message received from server:{}", message);
@@ -140,17 +142,22 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                             throwable = t;
                             throw t;
                         } finally {
-                            if (spanEventData != null && clientSpan != null) {
-                                if (throwable != null) {
-                                    spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_RPC_FAILED);
-                                } else {
-                                    spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_SUCCESS);
+                            if (clientSpan != null && sofaRequest.isAsync()) {
+                                RpcInvokeContext.resetContext(context);
+                                RpcInternalContext.setContext(internalContext);
+                                if (spanEventData != null) {
+                                    if (throwable != null) {
+                                        spanEventData.addTag(RpcEventTags.STATUS,
+                                            TracerResultCode.RPC_RESULT_RPC_FAILED);
+                                    } else {
+                                        spanEventData.addTag(RpcEventTags.STATUS, TracerResultCode.RPC_RESULT_SUCCESS);
+                                    }
+                                    sofaTraceContext.push(clientSpan);
+                                    clientSpan.addEvent(spanEventData);
                                 }
-                                clientSpan.addEvent(spanEventData);
-                            }
-                            if (sofaRequest.isAsync()) {
                                 sofaTraceContext.clear();
                                 RpcInvokeContext.removeContext();
+                                RpcInternalContext.removeAllContext();
                             }
                         }
                     }
@@ -160,17 +167,19 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                         // onClose -> onComplete() or onError()
                         try {
                             if (sofaRequest.isAsync()) {
-                                RpcInvokeContext.setContext(context);
-                                sofaTraceContext.push(clientSpan);
+                                if (clientSpan != null) {
+                                    sofaTraceContext.push(clientSpan.getParentSofaTracerSpan());
+                                }
                             }
                             if (RpcRunningState.isDebugMode()) {
                                 LOGGER.info("[5]response close received from server:{},trailers:{}", status, trailers);
                             }
                             super.onClose(status, trailers);
                         } finally {
-                            if (sofaRequest.isAsync()) {
+                            if (clientSpan != null && sofaRequest.isAsync()) {
                                 Throwable throwable = TripleExceptionUtils.getThrowableFromStatus(status);
                                 sofaTraceContext.push(clientSpan);
+                                RpcInvokeContext.resetContext(context);
                                 RpcInternalContext.setContext(internalContext);
                                 if (EventBus.isEnable(ClientAsyncReceiveEvent.class)) {
                                     EventBus.post(new ClientAsyncReceiveEvent(consumerConfig, null,
@@ -197,20 +206,21 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                 Throwable throwable = null;
                 SpanEventData spanEventData = null;
                 try {
+                    int messageSize = 0;
+                    if (message instanceof GeneratedMessageV3) {
+                        messageSize = ((GeneratedMessageV3) message).getSerializedSize();
+                        Object reqSize = internalContext.getAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE);
+                        int currentSize = reqSize == null ? 0 : (int) reqSize;
+                        internalContext.setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, currentSize + messageSize);
+                    }
+
                     if (sofaRequest.isAsync()) {
                         spanEventData = new SpanEventData();
                         spanEventData.setTimestamp(System.currentTimeMillis());
                         spanEventData.addTag(RpcEventTags.SEQUENCE_ID, sendId.incrementAndGet());
                         spanEventData.addTag(RpcEventTags.EVENT_TYPE, RpcConstants.CLIENT_SEND_EVENT);
                         spanEventData.addTag(RpcEventTags.CURRENT_THREAD_NAME, Thread.currentThread().getName());
-                        if (message instanceof GeneratedMessageV3) {
-                            int messageSize = ((GeneratedMessageV3) message).getSerializedSize();
-                            spanEventData.addTag(RpcEventTags.SIZE, messageSize);
-                            Object reqSize = internalContext.getAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE);
-                            int currentSize = reqSize == null ? 0 : (int) reqSize;
-                            internalContext
-                                .setAttachment(RpcConstants.INTERNAL_KEY_REQ_SIZE, currentSize + messageSize);
-                        }
+                        spanEventData.addTag(RpcEventTags.SIZE, messageSize);
                     }
                     super.sendMessage(message);
                 } catch (Throwable t) {
