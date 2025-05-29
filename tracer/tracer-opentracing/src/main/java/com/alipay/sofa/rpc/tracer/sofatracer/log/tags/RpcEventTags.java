@@ -17,22 +17,23 @@
 package com.alipay.sofa.rpc.tracer.sofatracer.log.tags;
 
 /**
- * 阶段说明（单位微秒）                TraceLog字符串	备注
- * 流式首响应耗时（client <- server）  R0
- * 路由寻址（client）	                R1
- * 建立链接（client）	                R2
- * Filter过滤（client）	            R3
- * 负载均衡LB（client）	            R4
- * 请求序列化/响应反序列化（client） 	R5
- * 请求反序列化/响应序列化（server）	R6
- * 线程等待（server）             	R7
- * 业务执行时间（server）	            R8
- * ambush 耗时	                    R9
- * Filter过滤（server）              R10
- * 网络等待时间（server）             R11
- * @author zhaowang
- * @version : TracerRecord.java, v 0.1 2021年06月29日 8:20 下午 zhaowang
+ * @author Even
+ * @date 2025/3/20 17:12
  */
-public enum TracerRecord {
-    R0, R1, R2, R3, R4, R5, R6, R7, R8, R9, R10, R11
+public class RpcEventTags {
+
+    public static final String STREAM_ID           = "streamId";
+
+    public static final String SEQUENCE_ID         = "sequenceId";
+
+    public static final String EVENT_TYPE          = "eventType";
+
+    public static final String STATUS              = "status";
+
+    public static final String SIZE                = "size";
+
+    public static final String CURRENT_THREAD_NAME = "currentThreadName";
+
+    public static final String ATTRIBUTES          = "attributes";
+
 }

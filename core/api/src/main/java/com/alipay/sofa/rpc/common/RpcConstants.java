@@ -137,6 +137,22 @@ public class RpcConstants {
      * 调用方式：双向流
      */
     public static final String  INVOKER_TYPE_BI_STREAMING                    = "bi_stream";
+    /**
+     * client stream send
+     */
+    public static final String  CLIENT_SEND_EVENT                            = "client_send";
+    /**
+     * client stream receive
+     */
+    public static final String  CLIENT_RECEIVE_EVENT                         = "client_receive";
+    /**
+     * server stream send
+     */
+    public static final String  SERVER_SEND_EVENT                            = "server_send";
+    /**
+     * server stream receive
+     */
+    public static final String  SERVER_RECEIVE_EVENT                         = "server_receive";
 
     /**
      * Hessian序列化 [不推荐]
@@ -675,6 +691,9 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_SERVER_NET_WAIT_NANO            = INTERNAL_KEY_PREFIX +
                                                                                  "server_net_wait_nano";
+
+    public static final String  INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO   = INTERNAL_KEY_PREFIX +
+                                                                                 "client_first_stream_resp_nano";
 
     /**
      * 内部使用的key：_client_elapse_micro 客户端总耗时，long，微秒级别

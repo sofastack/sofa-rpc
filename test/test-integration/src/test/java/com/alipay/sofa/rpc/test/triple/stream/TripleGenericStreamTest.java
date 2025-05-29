@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.test.triple.stream;
 
+import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -61,17 +62,22 @@ public class TripleGenericStreamTest {
             .setPort(50066)
             .setDaemon(false);
 
+        ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
         helloServiceInst = Mockito.spy(new HelloServiceImpl());
         providerConfig = new ProviderConfig<HelloService>()
+            .setApplication(applicationConfig)
             .setInterfaceId(HelloService.class.getName())
             .setRef(helloServiceInst)
             .setServer(serverConfig);
         providerConfig.export();
 
+        ApplicationConfig consumerApp = new ApplicationConfig().setAppName("triple-client");
         consumerConfig = new ConsumerConfig<HelloService>()
+            .setApplication(consumerApp)
             .setInterfaceId(HelloService.class.getName())
             .setProtocol("tri")
-            .setDirectUrl("triple://127.0.0.1:50066");
+            .setTimeout(1000000)
+            .setDirectUrl("triple://127.0.0.1:50066?appName=triple-server");
         helloServiceRef = consumerConfig.refer();
         Thread.sleep(5000);
     }
