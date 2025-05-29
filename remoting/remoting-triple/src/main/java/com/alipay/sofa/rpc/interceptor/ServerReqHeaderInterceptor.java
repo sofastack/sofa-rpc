@@ -44,6 +44,7 @@ import io.grpc.StatusRuntimeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -74,6 +75,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
         Context ctxWithSpan = convertHeaderToContext(call, requestHeaders, sofaRequest, serverServiceDefinition);
         AtomicInteger receiveId = new AtomicInteger();
         AtomicInteger sendId = new AtomicInteger();
+        AtomicBoolean traceEnd = new AtomicBoolean();
         //这里和下面不在一个线程
         if (RpcRunningState.isDebugMode()) {
             LOGGER.info("[1]header received from client:{}", requestHeaders);
@@ -149,7 +151,8 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                     }
                     super.close(status, trailers);
                 } finally {
-                    if (!status.isOk() && RpcInternalContext.getContext().isProviderSide()) {
+                    if (!status.isOk() && RpcInternalContext.getContext().isProviderSide() &&
+                        traceEnd.compareAndSet(false, true)) {
                         RpcInvokeContext.resetContext(invokeContext);
                         RpcInternalContext.setContext(internalContext);
                         Throwable cause = status.getCause();
@@ -184,6 +187,10 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                     RpcInternalContext.setContext(internalContext);
                     super.onCancel();
                 } finally {
+                    if (traceEnd.compareAndSet(false, true)) {
+                        TripleTracerAdapter.serverSend(sofaRequest, requestHeaders, sofaResponse,
+                            new StatusRuntimeException(Status.CANCELLED, new Metadata()), ctxWithSpan);
+                    }
                     RpcInvokeContext.removeContext();
                     RpcInternalContext.removeAllContext();
                 }
