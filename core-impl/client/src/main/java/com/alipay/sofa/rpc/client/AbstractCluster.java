@@ -691,7 +691,7 @@ public abstract class AbstractCluster extends Cluster {
      * @return 调用超时
      */
     private int resolveTimeout(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
-        // 动态配置优先
+        // 请求级别动态配置优先
         final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
         if (StringUtils.isNotBlank(dynamicAlias)) {
             String dynamicTimeout = null;
@@ -709,6 +709,7 @@ public abstract class AbstractCluster extends Cluster {
                 return Integer.parseInt(dynamicTimeout);
             }
         }
+
         // 先去调用级别配置
         Integer timeout = request.getTimeout();
         if (timeout == null || timeout <= 0) {

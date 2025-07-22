@@ -216,6 +216,11 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     protected transient volatile Map<String, Object> configValueCache = null;
 
     /**
+     * 动态配置的方法名称和方法参数配置的map
+     */
+    protected transient volatile Map<String, Object> dynamicConfigValueCache = new ConcurrentHashMap<>();
+
+    /**
      * 代理接口类，和T对应，主要针对泛化调用
      */
     protected transient volatile Class               proxyClass;
@@ -704,6 +709,15 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
     }
 
     /**
+     * Gets dynamic config value cache.
+     *
+     * @return the dynamic config value cache
+     */
+    public Map<String, Object> getDynamicConfigValueCache() {
+        return dynamicConfigValueCache;
+    }
+
+    /**
      * Sets config listener.
      *
      * @param configListener the config listener
@@ -930,7 +944,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 int index = methodAndP.indexOf(RpcConstants.HIDE_KEY_PREFIX);
                 if (index <= 0) {
                     throw ExceptionUtils.buildRuntime(property, newValueStr,
-                        "Unknown update attribute key!");
+                            "Unknown update attribute key!");
                 }
                 String methodName = methodAndP.substring(0, index);
                 String methodProperty = methodAndP.substring(index + 1);
@@ -940,6 +954,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 // 拿到旧的值
                 Object oldValue = null;
                 Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                if (dynamicConfigValueCache.containsKey(property)) {
+                    dynamicConfigValueCache.put(property, newValue);
+                }
                 if (methodConfig == null) {
                     methodConfig = new MethodConfig();
                     methodConfig.setName(methodName);
@@ -962,7 +979,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                     BeanUtils.setProperty(methodConfig, methodProperty, propertyClazz, newValue);// 覆盖属性
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Property \"" + methodName + "." + methodProperty + "\" changed from {} to {}",
-                            oldValue, newValueStr);
+                                oldValue, newValueStr);
                     }
                 }
             } else { // 接口级配置 例如timeout
@@ -972,6 +989,9 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
                 // 拿到旧的值
                 Object oldValue = BeanUtils.getProperty(this, property, propertyClazz);
                 Object newValue = CompatibleTypeUtils.convert(newValueStr, propertyClazz);
+                if (dynamicConfigValueCache.containsKey(property)) {
+                    dynamicConfigValueCache.put(property, newValue);
+                }
                 if (oldValue == null) {
                     if (newValueStr != null) {
                         changed = true;
@@ -991,7 +1011,7 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
             throw e;
         } catch (Exception e) {
             throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_UPDATE_ATTRIBUTE, property, newValueStr),
-                e);
+                    e);
         }
     }
 
@@ -1016,11 +1036,17 @@ public abstract class AbstractInterfaceConfig<T, S extends AbstractInterfaceConf
      * @return 配置值 method config value
      */
     public Object getMethodConfigValue(String methodName, String configKey) {
-        if (configValueCache == null) {
-            return null;
-        }
         String key = buildmkey(methodName, configKey);
-        return configValueCache.get(key);
+        Object value = null;
+        if (dynamicConfigValueCache != null) {
+            value = dynamicConfigValueCache.get(key);
+        }
+        if (value == null) {
+            if (configValueCache != null) {
+                value = configValueCache.get(key);
+            }
+        }
+        return value;
     }
 
     /**
