@@ -47,6 +47,8 @@ import com.alipay.sofa.rpc.tracer.sofatracer.code.TracerResultCode;
 import com.alipay.sofa.rpc.tracer.sofatracer.factory.ReporterFactory;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcClientDigestSpanJsonEncoder;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.digest.RpcServerDigestSpanJsonEncoder;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.event.RpcClientEventJsonEncoder;
+import com.alipay.sofa.rpc.tracer.sofatracer.log.event.RpcServerEventJsonEncoder;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcClientStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.stat.RpcServerStatJsonReporter;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
@@ -95,10 +97,15 @@ public class RpcSofaTracer extends Tracer {
         SpanEncoder<SofaTracerSpan> serverEncoder = getServerSpanEncoder();
         SofaTracerStatisticReporter serverStats = generateServerStatReporter(RpcTracerLogEnum.RPC_SERVER_STAT);
         Reporter serverReporter = generateReporter(serverStats, RpcTracerLogEnum.RPC_SERVER_DIGEST, serverEncoder);
+        Reporter clientEventReporter = generateEventReport(RpcTracerLogEnum.RPC_CLIENT_EVENT, getClientEventEncoder());
+        Reporter serverEventReporter = generateEventReport(RpcTracerLogEnum.RPC_SERVER_EVENT, getServerEventEncoder());
 
         //构造 RPC 的 tracer 实例
         sofaTracer = new SofaTracer.Builder(RPC_TRACER_TYPE)
-            .withClientReporter(clientReporter).withServerReporter(serverReporter)
+            .withClientReporter(clientReporter)
+            .withServerReporter(serverReporter)
+            .withClientEventReporter(clientEventReporter)
+            .withServerEventReporter(serverEventReporter)
             .build();
     }
 
@@ -108,6 +115,14 @@ public class RpcSofaTracer extends Tracer {
 
     protected SpanEncoder<SofaTracerSpan> getServerSpanEncoder() {
         return new RpcServerDigestSpanJsonEncoder();
+    }
+
+    protected SpanEncoder<SofaTracerSpan> getClientEventEncoder() {
+        return new RpcClientEventJsonEncoder();
+    }
+
+    protected SpanEncoder<SofaTracerSpan> getServerEventEncoder() {
+        return new RpcServerEventJsonEncoder();
     }
 
     protected SofaTracerStatisticReporter generateClientStatReporter(RpcTracerLogEnum statRpcTracerLogEnum) {
@@ -139,9 +154,17 @@ public class RpcSofaTracer extends Tracer {
         String digestLogReserveConfig = SofaTracerConfiguration.getLogReserveConfig(digestRpcTracerLogEnum
             .getLogReverseKey());
         //构造实例
-        Reporter reporter = ReporterFactory.build(digestLog, digestRollingPolicy,
-            digestLogReserveConfig, spanEncoder, statReporter);
-        return reporter;
+        return ReporterFactory.build(digestLog, digestRollingPolicy, digestLogReserveConfig, spanEncoder, statReporter);
+    }
+
+    protected Reporter generateEventReport(RpcTracerLogEnum eventRpcTracerLogEnum,
+                                           SpanEncoder<SofaTracerSpan> spanEncoder) {
+        //构造摘要实例
+        String evenLogType = eventRpcTracerLogEnum.getDefaultLogName();
+        String digestRollingPolicy = SofaTracerConfiguration.getRollingPolicy(eventRpcTracerLogEnum.getRollingKey());
+        String digestLogReserveConfig = SofaTracerConfiguration.getLogReserveConfig(eventRpcTracerLogEnum
+            .getLogReverseKey());
+        return ReporterFactory.buildEventReport(evenLogType, digestRollingPolicy, digestLogReserveConfig, spanEncoder);
     }
 
     @Override
@@ -394,12 +417,14 @@ public class RpcSofaTracer extends Tracer {
     private String generateClientPhaseTimeCostSpan(RpcInvokeContext context){
 
         TreeMap<String, String> resultMap = new TreeMap<>();
+        Long streamFirstRespTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO);
         Long routerTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO);
         Long connTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO);
         Long filterTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO);
         Long balancerTime = (Long) context.get(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO);
         Long reqSerializeTime = (Long) context.get(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO);
         Long respDeSerializeTime = (Long) context.get(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO);
+        resultMap.put(TracerRecord.R0.toString(), calculateNanoTime(streamFirstRespTime).toString());
         resultMap.put(TracerRecord.R1.toString(), calculateNanoTime(routerTime).toString());
         resultMap.put(TracerRecord.R2.toString(), calculateNanoTime(connTime).toString());
         resultMap.put(TracerRecord.R3.toString(), calculateNanoTime(filterTime).toString());
