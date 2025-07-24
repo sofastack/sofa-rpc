@@ -152,7 +152,7 @@ public class MultiClassLoaderTest {
                 .setApplication(serverApp)
                 .setRegister(false)
                 .setUniqueId("anotherHelloService");
-        providerConfig2.export();
+        providerConfig3.export();
 
         Thread.currentThread().setContextClassLoader(clientClassloader2);
         ConsumerConfig<HelloService> consumerConfig3 = new ConsumerConfig<>();
