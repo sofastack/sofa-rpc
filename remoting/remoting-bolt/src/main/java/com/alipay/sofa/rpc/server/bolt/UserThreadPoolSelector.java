@@ -44,10 +44,9 @@ public class UserThreadPoolSelector implements UserProcessor.ExecutorSelector {
 
     @Override
     public Executor select(String requestClass, Object requestHeader) {
-        if (SofaRequest.class.getName().equals(requestClass)
-            && requestHeader != null) {
-            Map<String, String> headerMap = (Map<String, String>) requestHeader;
+        if (SofaRequest.class.getName().equals(requestClass) && requestHeader instanceof Map) {
             try {
+                Map<String, String> headerMap = (Map<String, String>) requestHeader;
                 String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
                 if (service == null) {
                     service = headerMap.get(RemotingConstants.HEAD_TARGET_SERVICE);
@@ -56,20 +55,12 @@ public class UserThreadPoolSelector implements UserProcessor.ExecutorSelector {
                     UserThreadPool threadPool;
                     String methodName = headerMap.get(RemotingConstants.HEAD_METHOD_NAME);
                     threadPool = UserThreadPoolManager.getUserThread(service, methodName);
-                    if (threadPool != null) {
-                        Executor executor = threadPool.getUserExecutor();
-                        if (executor != null) {
-                            // 存在自定义线程池，且不为空
-                            return executor;
-                        }
+                    if (threadPool != null && threadPool.getUserExecutor() != null) {
+                        return threadPool.getUserExecutor();
                     }
                     threadPool = UserThreadPoolManager.getUserThread(service);
-                    if (threadPool != null) {
-                        Executor executor = threadPool.getUserExecutor();
-                        if (executor != null) {
-                            // 存在自定义线程池，且不为空
-                            return executor;
-                        }
+                    if (threadPool != null && threadPool.getUserExecutor() != null) {
+                        return threadPool.getUserExecutor();
                     }
                 }
             } catch (Exception e) {

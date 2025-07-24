@@ -30,8 +30,6 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * @author Even
@@ -39,25 +37,26 @@ import java.util.concurrent.Executors;
  */
 public class UserThreadPoolSelectorTest {
 
+    private static BoltServer     boltServer;
+
     private static UserThreadPool interfaceUserThreadPool = new UserThreadPool();
 
     private static UserThreadPool methodUserThreadPool    = new UserThreadPool();
 
-    private static Executor       executor                = Executors.newSingleThreadExecutor();
-
     @BeforeClass
     public static void beforeClass() {
+        boltServer = (BoltServer) ExtensionLoaderFactory.getExtensionLoader(Server.class).getExtension("bolt");
+        boltServer.init(new ServerConfig());
         interfaceUserThreadPool.init();
         methodUserThreadPool.init();
         UserThreadPoolManager.registerUserThread("interface:1.0:uniqueId", interfaceUserThreadPool);
         UserThreadPoolManager.registerUserThread("interface:1.0:uniqueId", "hello", methodUserThreadPool);
-
     }
 
     @Test
     public void select() {
-        UserThreadPoolSelector userThreadPoolSelector = new UserThreadPoolSelector(executor);
-        Map<String, String> map = new HashMap<>();
+        UserThreadPoolSelector userThreadPoolSelector = new UserThreadPoolSelector(boltServer.getBizExecutor());
+        Map<String, Object> map = new HashMap<>();
         map.put(RemotingConstants.HEAD_SERVICE, "interface:1.0:uniqueId");
         Assert.assertEquals(interfaceUserThreadPool.getUserExecutor(), userThreadPoolSelector.select("com.alipay.sofa.rpc.core.request.SofaRequest", map));
         map.put(RemotingConstants.HEAD_METHOD_NAME, "hello");
@@ -65,13 +64,13 @@ public class UserThreadPoolSelectorTest {
         map.put(RemotingConstants.HEAD_METHOD_NAME, "message");
         Assert.assertEquals(interfaceUserThreadPool.getUserExecutor(), userThreadPoolSelector.select("com.alipay.sofa.rpc.core.request.SofaRequest", map));
         map.put(RemotingConstants.HEAD_SERVICE, "interface:1.0");
-        Assert.assertEquals(executor, userThreadPoolSelector.select("com.alipay.sofa.rpc.core.request.SofaRequest", map));
+        Assert.assertEquals(boltServer.getBizExecutor(), userThreadPoolSelector.select("com.alipay.sofa.rpc.core.request.SofaRequest", map));
+        map.put(RemotingConstants.HEAD_SERVICE, new HashMap<>());
+        Assert.assertEquals(boltServer.getBizExecutor(), userThreadPoolSelector.select("com.alipay.sofa.rpc.core.request.SofaRequest", map));
     }
 
     @Test
     public void customUserThreadPoolSelector() {
-        BoltServer boltServer = (BoltServer) ExtensionLoaderFactory.getExtensionLoader(Server.class).getExtension("bolt");
-        boltServer.init(new ServerConfig());
         UserProcessor.ExecutorSelector executorSelector = getCustomExecutorSelector(boltServer);
         Map<String, String> map = new HashMap<>();
         Assert.assertEquals(boltServer.getBizExecutor(), executorSelector.select("", map));
@@ -79,6 +78,8 @@ public class UserThreadPoolSelectorTest {
         Assert.assertEquals(methodUserThreadPool.getUserExecutor(), executorSelector.select("", map));
         map.put("customThreadPool", "interface");
         Assert.assertEquals(interfaceUserThreadPool.getUserExecutor(), executorSelector.select("", map));
+        map.remove("customThreadPool");
+        Assert.assertEquals(boltServer.getBizExecutor(), executorSelector.select("", map));
     }
 
     private static UserProcessor.ExecutorSelector getCustomExecutorSelector(BoltServer boltServer) {
@@ -103,6 +104,6 @@ public class UserThreadPoolSelectorTest {
         UserThreadPoolManager.unRegisterUserThread("interface:1.0:uniqueId", "hello");
         interfaceUserThreadPool = null;
         methodUserThreadPool = null;
-        executor = null;
+        boltServer = null;
     }
 }

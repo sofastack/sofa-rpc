@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class UserThreadPoolManager {
 
-    private static final String                          SPLIT         = "/";
+    private static final String                          SEPARATOR     = "/";
 
     /**
      * 用户自定义的业务线程池，可以给不同的接口指定不同的业务线程池
@@ -70,7 +70,7 @@ public class UserThreadPoolManager {
         if (userThreadMap == null) {
             userThreadMap = new ConcurrentHashMap<String, UserThreadPool>();
         }
-        userThreadMap.put(service + SPLIT + methodName, userThreadPool);
+        userThreadMap.put(service + SEPARATOR + methodName, userThreadPool);
     }
 
     /**
@@ -92,7 +92,7 @@ public class UserThreadPoolManager {
      */
     public static synchronized void unRegisterUserThread(String service, String methodName) {
         if (userThreadMap != null) {
-            userThreadMap.remove(service + SPLIT + methodName);
+            userThreadMap.remove(service + SEPARATOR + methodName);
         }
     }
 
@@ -114,7 +114,7 @@ public class UserThreadPoolManager {
      * @return 用户自定义线程池
      */
     public static UserThreadPool getUserThread(String service, String methodName) {
-        return userThreadMap == null ? null : userThreadMap.get(service + SPLIT + methodName);
+        return userThreadMap == null ? null : userThreadMap.get(service + SEPARATOR + methodName);
     }
 
     public static Set<UserThreadPool> getUserThreadPoolSet() {
