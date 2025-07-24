@@ -55,6 +55,12 @@ public class UserThreadPoolManagerTest {
         UserThreadPoolManager.registerUserThread("service4", pool4);
         userThreadPoolSet = UserThreadPoolManager.getUserThreadPoolSet();
         Assert.assertEquals(4, userThreadPoolSet.size());
+
+        UserThreadPool methodUserThreadPool = new UserThreadPool();
+        UserThreadPoolManager.registerUserThread("service1", "method1", methodUserThreadPool);
+        Assert.assertEquals(methodUserThreadPool, UserThreadPoolManager.getUserThread("service1", "method1"));
+        UserThreadPoolManager.unRegisterUserThread("service1", "method1");
+        Assert.assertNull(UserThreadPoolManager.getUserThread("service1", "method1"));
     }
 
     @Test
