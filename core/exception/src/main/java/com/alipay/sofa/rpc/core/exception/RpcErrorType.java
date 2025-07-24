@@ -107,4 +107,9 @@ public class RpcErrorType {
      * 客户端未定义异常
      */
     public static final int CLIENT_UNDECLARED_ERROR  = 299;
+
+    /**
+     * 用户自定义异常
+     */
+    public static final int CUSTOMER_DESIGN_ERROR    = 310;
 }
