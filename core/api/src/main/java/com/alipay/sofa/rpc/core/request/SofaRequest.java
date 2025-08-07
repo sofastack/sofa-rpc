@@ -165,6 +165,11 @@ public class SofaRequest extends RequestBase {
     private transient Integer              timeout;
 
     /**
+     * 用户层请求deadline，调用级别（客户端使用）
+     */
+    private transient Integer              deadline;
+
+    /**
      * Gets method.
      *
      * @return the method
@@ -277,6 +282,26 @@ public class SofaRequest extends RequestBase {
      */
     public SofaRequest setTimeout(Integer timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * Gets deadline.
+     *
+     * @return the deadline
+     */
+    public Integer getDeadline() {
+        return deadline;
+    }
+
+    /**
+     * Sets deadline.
+     *
+     * @param deadline the deadline
+     * @return the deadline
+     */
+    public SofaRequest setDeadline(Integer deadline) {
+        this.deadline = deadline;
         return this;
     }
 

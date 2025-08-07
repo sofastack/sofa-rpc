@@ -84,6 +84,10 @@ public final class ProviderInfoAttrs {
      */
     public static final String ATTR_TIMEOUT               = RpcConstants.CONFIG_KEY_TIMEOUT;
     /**
+     * 动态配置：deadline
+     */
+    public static final String ATTR_DEADLINE              = RpcConstants.CONFIG_KEY_DEADLINE;
+    /**
      * 动态配置：connections
      */
     public static final String ATTR_CONNECTIONS           = "connections";

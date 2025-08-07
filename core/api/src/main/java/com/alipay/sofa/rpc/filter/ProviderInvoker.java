@@ -93,6 +93,13 @@ public class ProviderInvoker<T> extends FilterInvoker {
         long startTime = RpcRuntimeContext.now();
         long bizStartTime = System.nanoTime();
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO, System.nanoTime());
+
+        // 获取deadline时间
+        Integer deadline = (Integer) request.getRequestProp(RpcConstants.RPC_REQUEST_DEADLINE);
+        if (deadline != null) {
+            RpcInvokeContext.getContext().setDeadline(deadline + System.currentTimeMillis());
+        }
+
         try {
             // 反射 真正调用业务代码
             Method method = request.getMethod();
