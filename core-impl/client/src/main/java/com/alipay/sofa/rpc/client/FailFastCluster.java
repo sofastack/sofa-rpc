@@ -52,6 +52,9 @@ public class FailFastCluster extends AbstractCluster {
                     "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
                         + " on remote server " + providerInfo + ", return null");
             }
+        } catch (SofaRpcException e) {
+            // 如果是SofaRpcException，直接抛出
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
                 "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
