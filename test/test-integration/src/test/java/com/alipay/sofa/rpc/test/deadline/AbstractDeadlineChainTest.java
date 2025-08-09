@@ -32,7 +32,7 @@ import org.junit.Assert;
  *
  */
 public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
-    public static boolean isServiceCStarted = false;
+    private final ThreadLocal<Boolean> isServiceCStarted = ThreadLocal.withInitial(() -> false);
 
     // 服务接口定义
     public interface ServiceA {
@@ -59,7 +59,7 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         public String processC(String message) {
             try {
                 Thread.sleep(processTime);
-                isServiceCStarted = true; // 使用实例变量
+                isServiceCStarted.set(true); // 标记ServiceC已启动
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("ServiceC interrupted", e);
@@ -155,106 +155,159 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         int basePort = getBasePort();
         String protocol = getProtocolType();
 
-        // 配置ServiceC
-        ServerConfig serverConfigC = new ServerConfig()
-            .setPort(basePort)
-            .setProtocol(protocol)
-            .setDaemon(true);
+        // 声明需要清理的资源
+        ProviderConfig<ServiceC> providerC = null;
+        ProviderConfig<ServiceB> providerB = null;
+        ProviderConfig<ServiceA> providerA = null;
+        ConsumerConfig<ServiceC> consumerConfigC = null;
+        ConsumerConfig<ServiceB> consumerConfigB = null;
 
-        ProviderConfig<ServiceC> providerC = new ProviderConfig<ServiceC>()
-            .setInterfaceId(ServiceC.class.getName())
-            .setRef(new ServiceCImpl(5000)) // 5秒处理时间
-            .setServer(serverConfigC)
-            .setApplication(new ApplicationConfig().setAppName("serviceC"))
-            .setRegister(false);
+        try {
+            // 配置ServiceC
+            ServerConfig serverConfigC = new ServerConfig()
+                .setPort(basePort)
+                .setProtocol(protocol)
+                .setDaemon(true);
 
-        // 调用协议特定配置
-        configureProvider(providerC, serverConfigC, new ApplicationConfig().setAppName("serviceC"));
-        providerC.export();
+            providerC = new ProviderConfig<ServiceC>()
+                .setInterfaceId(ServiceC.class.getName())
+                .setRef(new ServiceCImpl(5000)) // 5秒处理时间
+                .setServer(serverConfigC)
+                .setApplication(new ApplicationConfig().setAppName("serviceC"))
+                .setRegister(false);
 
-        // 配置ServiceB
-        ServerConfig serverConfigB = new ServerConfig()
-            .setPort(basePort + 1)
-            .setProtocol(protocol)
-            .setDaemon(true);
+            // 调用协议特定配置
+            configureProvider(providerC, serverConfigC, new ApplicationConfig().setAppName("serviceC"));
+            providerC.export();
 
-        ServiceBImpl serviceBImpl = new ServiceBImpl(5000); // 5秒处理时间
+            // 配置ServiceB
+            ServerConfig serverConfigB = new ServerConfig()
+                .setPort(basePort + 1)
+                .setProtocol(protocol)
+                .setDaemon(true);
 
-        // ServiceB调用ServiceC的客户端配置
-        ConsumerConfig<ServiceC> consumerConfigC = new ConsumerConfig<ServiceC>()
-            .setInterfaceId(ServiceC.class.getName())
-            .setTimeout(30000)
-            .setApplication(new ApplicationConfig().setAppName("serviceB"));
+            ServiceBImpl serviceBImpl = new ServiceBImpl(5000); // 5秒处理时间
 
-        // 调用协议特定配置
-        String urlC = protocol + "://127.0.0.1:" + basePort;
-        configureConsumer(consumerConfigC, protocol, urlC, new ApplicationConfig().setAppName("serviceB"));
-        if (consumerConfigC.getDirectUrl() == null) {
-            consumerConfigC.setDirectUrl(urlC);
+            // ServiceB调用ServiceC的客户端配置
+            consumerConfigC = new ConsumerConfig<ServiceC>()
+                .setInterfaceId(ServiceC.class.getName())
+                .setTimeout(30000)
+                .setApplication(new ApplicationConfig().setAppName("serviceB"));
+
+            // 调用协议特定配置
+            String urlC = protocol + "://127.0.0.1:" + basePort;
+            configureConsumer(consumerConfigC, protocol, urlC, new ApplicationConfig().setAppName("serviceB"));
+            if (consumerConfigC.getDirectUrl() == null) {
+                consumerConfigC.setDirectUrl(urlC);
+            }
+
+            ServiceC serviceCProxy = consumerConfigC.refer();
+            serviceBImpl.setServiceC(serviceCProxy);
+
+            providerB = new ProviderConfig<ServiceB>()
+                .setInterfaceId(ServiceB.class.getName())
+                .setRef(serviceBImpl)
+                .setServer(serverConfigB)
+                .setApplication(new ApplicationConfig().setAppName("serviceB"))
+                .setRegister(false);
+
+            // 调用协议特定配置
+            configureProvider(providerB, serverConfigB, new ApplicationConfig().setAppName("serviceB"));
+            providerB.export();
+
+            // 配置ServiceA
+            ServerConfig serverConfigA = new ServerConfig()
+                .setPort(basePort + 2)
+                .setProtocol(protocol)
+                .setDaemon(true);
+
+            ServiceAImpl serviceAImpl = new ServiceAImpl(3000); // 3秒处理时间
+
+            // ServiceA调用ServiceB的客户端配置
+            consumerConfigB = new ConsumerConfig<ServiceB>()
+                .setInterfaceId(ServiceB.class.getName())
+                .setTimeout(30000)
+                .setApplication(new ApplicationConfig().setAppName("serviceA"));
+
+            // 调用协议特定配置
+            String urlB = protocol + "://127.0.0.1:" + (basePort + 1);
+            configureConsumer(consumerConfigB, protocol, urlB, new ApplicationConfig().setAppName("serviceA"));
+            if (consumerConfigB.getDirectUrl() == null) {
+                consumerConfigB.setDirectUrl(urlB);
+            }
+
+            ServiceB serviceBProxy = consumerConfigB.refer();
+            serviceAImpl.setServiceB(serviceBProxy);
+
+            providerA = new ProviderConfig<ServiceA>()
+                .setInterfaceId(ServiceA.class.getName())
+                .setRef(serviceAImpl)
+                .setServer(serverConfigA)
+                .setApplication(new ApplicationConfig().setAppName("serviceA"))
+                .setRegister(false);
+
+            // 调用协议特定配置
+            configureProvider(providerA, serverConfigA, new ApplicationConfig().setAppName("serviceA"));
+            providerA.export();
+
+            Thread.sleep(1000); // 等待服务启动
+
+            // 测试1：正常情况 - deadline足够长
+            testNormalCase(protocol, basePort + 2);
+
+            // 测试2：deadline超时
+            testDeadlineTimeout(protocol, basePort + 2);
+
+            // 测试3：上游deadline传播
+            testUpstreamDeadlinePropagation(protocol, basePort + 2);
+
+            // 测试4：deadline与timeout交互 - deadline更严格
+            testDeadlineVsTimeout(protocol, basePort + 2);
+
+        } finally {
+            // 清理资源 - 按创建的逆序清理
+            if (providerA != null) {
+                try {
+                    providerA.unExport();
+                } catch (Exception e) {
+                    // 记录异常但不抛出，确保其他资源能继续清理
+                    System.err.println("Failed to unexport providerA: " + e.getMessage());
+                }
+            }
+
+            if (providerB != null) {
+                try {
+                    providerB.unExport();
+                } catch (Exception e) {
+                    System.err.println("Failed to unexport providerB: " + e.getMessage());
+                }
+            }
+
+            if (providerC != null) {
+                try {
+                    providerC.unExport();
+                } catch (Exception e) {
+                    System.err.println("Failed to unexport providerC: " + e.getMessage());
+                }
+            }
+
+            // 清理消费者配置
+            if (consumerConfigB != null) {
+                try {
+                    consumerConfigB.unRefer();
+                } catch (Exception e) {
+                    System.err.println("Failed to unrefer consumerConfigB: " + e.getMessage());
+                }
+            }
+
+            if (consumerConfigC != null) {
+                try {
+                    consumerConfigC.unRefer();
+                } catch (Exception e) {
+                    System.err.println("Failed to unrefer consumerConfigC: " + e.getMessage());
+                }
+            }
         }
-
-        ServiceC serviceCProxy = consumerConfigC.refer();
-        serviceBImpl.setServiceC(serviceCProxy);
-
-        ProviderConfig<ServiceB> providerB = new ProviderConfig<ServiceB>()
-            .setInterfaceId(ServiceB.class.getName())
-            .setRef(serviceBImpl)
-            .setServer(serverConfigB)
-            .setApplication(new ApplicationConfig().setAppName("serviceB"))
-            .setRegister(false);
-
-        // 调用协议特定配置
-        configureProvider(providerB, serverConfigB, new ApplicationConfig().setAppName("serviceB"));
-        providerB.export();
-
-        // 配置ServiceA
-        ServerConfig serverConfigA = new ServerConfig()
-            .setPort(basePort + 2)
-            .setProtocol(protocol)
-            .setDaemon(true);
-
-        ServiceAImpl serviceAImpl = new ServiceAImpl(3000); // 3秒处理时间
-
-        // ServiceA调用ServiceB的客户端配置
-        ConsumerConfig<ServiceB> consumerConfigB = new ConsumerConfig<ServiceB>()
-            .setInterfaceId(ServiceB.class.getName())
-            .setTimeout(30000)
-            .setApplication(new ApplicationConfig().setAppName("serviceA"));
-
-        // 调用协议特定配置
-        String urlB = protocol + "://127.0.0.1:" + (basePort + 1);
-        configureConsumer(consumerConfigB, protocol, urlB, new ApplicationConfig().setAppName("serviceA"));
-        if (consumerConfigB.getDirectUrl() == null) {
-            consumerConfigB.setDirectUrl(urlB);
-        }
-
-        ServiceB serviceBProxy = consumerConfigB.refer();
-        serviceAImpl.setServiceB(serviceBProxy);
-
-        ProviderConfig<ServiceA> providerA = new ProviderConfig<ServiceA>()
-            .setInterfaceId(ServiceA.class.getName())
-            .setRef(serviceAImpl)
-            .setServer(serverConfigA)
-            .setApplication(new ApplicationConfig().setAppName("serviceA"))
-            .setRegister(false);
-
-        // 调用协议特定配置
-        configureProvider(providerA, serverConfigA, new ApplicationConfig().setAppName("serviceA"));
-        providerA.export();
-
-        Thread.sleep(1000); // 等待服务启动
-
-        // 测试1：正常情况 - deadline足够长
-        testNormalCase(protocol, basePort + 2);
-
-        // 测试2：deadline超时
-        testDeadlineTimeout(protocol, basePort + 2);
-
-        // 测试3：上游deadline传播
-        testUpstreamDeadlinePropagation(protocol, basePort + 2);
-
-        // 测试4：deadline与timeout交互 - deadline更严格
-        testDeadlineVsTimeout(protocol, basePort + 2);
     }
 
     /**
@@ -305,9 +358,9 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
             consumerConfig.setDirectUrl(url);
         }
 
-        isServiceCStarted = false;
+        isServiceCStarted.set(false);
         ServiceA serviceA = consumerConfig.refer();
-        Assert.assertFalse(isServiceCStarted);
+        Assert.assertFalse(isServiceCStarted.get());
 
         long startTime = System.currentTimeMillis();
         boolean error = false;
