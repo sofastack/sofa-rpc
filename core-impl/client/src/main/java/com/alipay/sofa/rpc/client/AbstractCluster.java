@@ -29,10 +29,7 @@ import com.alipay.sofa.rpc.context.AsyncRuntime;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.alipay.sofa.rpc.core.exception.RpcErrorType;
-import com.alipay.sofa.rpc.core.exception.SofaRouteException;
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
-import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.core.exception.*;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -63,6 +60,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_DEADLINE;
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
@@ -609,6 +607,22 @@ public abstract class AbstractCluster extends Cluster {
             checkProviderVersion(providerInfo, request); // 根据服务端版本特殊处理
             String invokeType = request.getInvokeType();
             int timeout = resolveTimeout(request, consumerConfig, providerInfo);
+            int deadline = resolveDeadline(request, consumerConfig, providerInfo);
+
+            Long upStreamDeadlineTime = RpcInvokeContext.getContext().getDeadline();
+            if (upStreamDeadlineTime != null) {
+                int remain = (int) (upStreamDeadlineTime - System.currentTimeMillis());
+                if (remain > 0) {
+                    timeout = Math.min(timeout, remain);
+                    request.addRequestProp(RpcConstants.RPC_REQUEST_DEADLINE, remain);
+                } else {
+                    throw new SofaTimeOutException("Deadline exceeded before sending request");
+                }
+            } else if (deadline != -1) {
+                timeout = Math.min(timeout, deadline);
+                request.addRequestProp(RpcConstants.RPC_REQUEST_DEADLINE, deadline);
+            }
+
             request.setTimeout(timeout);
             SofaResponse response = null;
             // 同步调用
@@ -680,6 +694,46 @@ public abstract class AbstractCluster extends Cluster {
             response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
         }
         return response;
+    }
+
+    /**
+     * 决定deadline时间
+     *
+     * @param request        请求
+     * @param consumerConfig 客户端配置
+     * @param providerInfo   服务提供者信息
+     * @return deadline时间
+     */
+    private int resolveDeadline(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
+        // 请求级别动态配置优先
+        final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
+        if (StringUtils.isNotBlank(dynamicAlias)) {
+            String dynamicTimeout = null;
+            DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
+                consumerConfig.getAppName(),
+                dynamicAlias);
+
+            if (dynamicConfigManager != null) {
+                dynamicTimeout = dynamicConfigManager.getConsumerMethodProperty(request.getInterfaceName(),
+                    request.getMethodName(),
+                    "deadline");
+            }
+
+            if (DynamicHelper.isNotDefault(dynamicTimeout) && StringUtils.isNotBlank(dynamicTimeout)) {
+                return Integer.parseInt(dynamicTimeout);
+            }
+        }
+        // 先去调用级别配置
+        Integer deadline = request.getDeadline();
+        if (deadline == null || deadline <= 0) {
+            // 取客户端配置（先方法级别再接口级别）
+            deadline = consumerConfig.getMethodDeadlineTimeout(request.getMethodName());
+            if (deadline == null || deadline <= 0) {
+                // 再取服务端配置
+                deadline = StringUtils.parseInteger(providerInfo.getAttr(ATTR_DEADLINE));
+            }
+        }
+        return deadline == null ? -1 : deadline;
     }
 
     /**

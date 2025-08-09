@@ -53,4 +53,29 @@ public class ConsumerConfigTest {
         consumerConfig.getConfigValueCache(true);
         Assert.assertEquals(-1, consumerConfig.getMethodTimeout("invoke"));
     }
+
+    @Test
+    public void testMethodDeadlineTimeout() {
+        ConsumerConfig<Invoker> consumerConfig = new ConsumerConfig<>();
+        consumerConfig.setDeadline(6000);
+        consumerConfig.setInterfaceId(Invoker.class.getName());
+        consumerConfig.getConfigValueCache(true);
+        Assert.assertEquals(6000, consumerConfig.getMethodDeadlineTimeout("invoke"));
+
+        List<MethodConfig> methodConfigs = new ArrayList<>();
+        MethodConfig methodConfig = new MethodConfig();
+        methodConfig.setName("invoke");
+        methodConfigs.add(methodConfig);
+        consumerConfig.setMethods(methodConfigs);
+        consumerConfig.getConfigValueCache(true);
+        Assert.assertEquals(6000, consumerConfig.getMethodDeadlineTimeout("invoke"));
+
+        methodConfig.setDeadline(7000);
+        consumerConfig.getConfigValueCache(true);
+        Assert.assertEquals(7000, consumerConfig.getMethodDeadlineTimeout("invoke"));
+
+        methodConfig.setDeadline(0);
+        consumerConfig.getConfigValueCache(true);
+        Assert.assertEquals(0, consumerConfig.getMethodDeadlineTimeout("invoke"));
+    }
 }

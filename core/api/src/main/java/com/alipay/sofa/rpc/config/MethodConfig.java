@@ -48,6 +48,11 @@ public class MethodConfig implements Serializable {
     protected Integer              timeout;
 
     /**
+     * The Deadline. 调用deadline超时时间(毫秒)
+     */
+    protected Integer              deadline;
+
+    /**
      * The Retries. 失败后重试次数
      */
     protected Integer              retries;
@@ -147,6 +152,25 @@ public class MethodConfig implements Serializable {
      */
     public MethodConfig setTimeout(Integer timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * Gets deadline.
+     *
+     * @return the deadline
+     */
+    public Integer getDeadline() {
+        return deadline == null ? -1 : deadline;
+    }
+
+    /**
+     * Sets deadline.
+     *
+     * @param deadline the deadline
+     */
+    public MethodConfig setDeadline(Integer deadline) {
+        this.deadline = deadline;
         return this;
     }
 

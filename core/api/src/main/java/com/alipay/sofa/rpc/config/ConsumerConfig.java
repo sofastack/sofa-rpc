@@ -225,6 +225,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     protected int                                   timeout                 = -1;
 
     /**
+     * 调用deadline超时时间(毫秒)
+     */
+    protected int                                   deadline                = -1;
+
+    /**
      * The Retries. 失败后重试次数
      */
     protected int                                   retries                 = getIntValue(CONSUMER_RETRIES);
@@ -658,7 +663,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * Sets rejected execution policy.
      *
-     * @param rejectedExecutionPolicy the rejected execution policy 
+     * @param rejectedExecutionPolicy the rejected execution policy
      * @return the rejected execution policy
      */
     public ConsumerConfig<T> setRejectedExecutionPolicy(String rejectedExecutionPolicy) {
@@ -795,6 +800,26 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     public ConsumerConfig<T> setTimeout(int timeout) {
         this.timeout = timeout;
+        return this;
+    }
+
+    /**
+     * Gets deadline timeout.
+     *
+     * @return the deadline timeout
+     */
+    public int getDeadline() {
+        return deadline;
+    }
+
+    /**
+     * Sets deadline timeout.
+     *
+     * @param deadline the deadline timeout
+     * @return the deadline timeout
+     */
+    public ConsumerConfig<T> setDeadline(int deadline) {
+        this.deadline = deadline;
         return this;
     }
 
@@ -938,6 +963,20 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
             return getTimeout();
         }
         return (Integer) methodTimeout;
+    }
+
+    /**
+     * Gets the deadline timeout corresponding to the method name
+     *
+     * @param methodName the method name
+     * @return the deadline timeout
+     */
+    public int getMethodDeadlineTimeout(String methodName) {
+        Object methodDeadlineTimeout = getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_DEADLINE);
+        if (methodDeadlineTimeout == null || ((Integer) methodDeadlineTimeout) == -1) {
+            return getDeadline();
+        }
+        return (Integer) methodDeadlineTimeout;
     }
 
     /**
