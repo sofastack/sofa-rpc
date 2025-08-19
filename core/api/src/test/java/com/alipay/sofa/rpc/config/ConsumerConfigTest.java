@@ -57,10 +57,16 @@ public class ConsumerConfigTest {
     @Test
     public void testMethodDeadlineTimeout() {
         ConsumerConfig<Invoker> consumerConfig = new ConsumerConfig<>();
-        consumerConfig.setDeadline(6000);
         consumerConfig.setInterfaceId(Invoker.class.getName());
+        
+        // 默认情况下，没有方法级配置，应该返回false
         consumerConfig.getConfigValueCache(true);
-        Assert.assertEquals(6000, consumerConfig.getMethodDeadlineTimeout("invoke"));
+        Assert.assertFalse(consumerConfig.isMethodDeadlineEnabled("invoke"));
+        
+        // 测试deadline开关
+        Assert.assertFalse(consumerConfig.isDeadlineEnabled());
+        consumerConfig.setDeadlineEnabled(true);
+        Assert.assertTrue(consumerConfig.isDeadlineEnabled());
 
         List<MethodConfig> methodConfigs = new ArrayList<>();
         MethodConfig methodConfig = new MethodConfig();
@@ -68,14 +74,14 @@ public class ConsumerConfigTest {
         methodConfigs.add(methodConfig);
         consumerConfig.setMethods(methodConfigs);
         consumerConfig.getConfigValueCache(true);
-        Assert.assertEquals(6000, consumerConfig.getMethodDeadlineTimeout("invoke"));
+        Assert.assertFalse(consumerConfig.isMethodDeadlineEnabled("invoke"));
 
-        methodConfig.setDeadline(7000);
+        methodConfig.setDeadlineEnabled(true);
         consumerConfig.getConfigValueCache(true);
-        Assert.assertEquals(7000, consumerConfig.getMethodDeadlineTimeout("invoke"));
+        Assert.assertTrue(consumerConfig.isMethodDeadlineEnabled("invoke"));
 
-        methodConfig.setDeadline(0);
+        methodConfig.setDeadlineEnabled(false);
         consumerConfig.getConfigValueCache(true);
-        Assert.assertEquals(0, consumerConfig.getMethodDeadlineTimeout("invoke"));
+        Assert.assertFalse(consumerConfig.isMethodDeadlineEnabled("invoke"));
     }
 }

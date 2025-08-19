@@ -225,9 +225,9 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     protected int                                   timeout                 = -1;
 
     /**
-     * 调用deadline超时时间(毫秒)
+     * 是否启用deadline机制，接口级别配置
      */
-    protected int                                   deadline                = -1;
+    protected boolean                               deadlineEnabled         = false;
 
     /**
      * The Retries. 失败后重试次数
@@ -804,22 +804,22 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     }
 
     /**
-     * Gets deadline timeout.
+     * Gets deadline enabled status.
      *
-     * @return the deadline timeout
+     * @return the deadline enabled status
      */
-    public int getDeadline() {
-        return deadline;
+    public boolean isDeadlineEnabled() {
+        return deadlineEnabled;
     }
 
     /**
-     * Sets deadline timeout.
+     * Sets deadline enabled status.
      *
-     * @param deadline the deadline timeout
-     * @return the deadline timeout
+     * @param deadlineEnabled the deadline enabled status
+     * @return this ConsumerConfig
      */
-    public ConsumerConfig<T> setDeadline(int deadline) {
-        this.deadline = deadline;
+    public ConsumerConfig<T> setDeadlineEnabled(boolean deadlineEnabled) {
+        this.deadlineEnabled = deadlineEnabled;
         return this;
     }
 
@@ -966,17 +966,17 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     }
 
     /**
-     * Gets the deadline timeout corresponding to the method name
+     * Gets the deadline enabled status corresponding to the method name
      *
      * @param methodName the method name
-     * @return the deadline timeout
+     * @return true if method level deadline is enabled
      */
-    public int getMethodDeadlineTimeout(String methodName) {
-        Object methodDeadlineTimeout = getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_DEADLINE);
-        if (methodDeadlineTimeout == null || ((Integer) methodDeadlineTimeout) == -1) {
-            return getDeadline();
+    public boolean isMethodDeadlineEnabled(String methodName) {
+        Object methodDeadlineEnabled = getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_DEADLINE_ENABLED);
+        if (methodDeadlineEnabled == null) {
+            return false; // 方法级别未配置，返回false
         }
-        return (Integer) methodDeadlineTimeout;
+        return (Boolean) methodDeadlineEnabled;
     }
 
     /**

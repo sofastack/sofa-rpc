@@ -18,12 +18,15 @@ package com.alipay.sofa.rpc.test.deadline;
 
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
+
+import java.util.Arrays;
 
 /**
  * Deadline 机制的调用链集成测试抽象基类
@@ -314,10 +317,16 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
      * 测试正常情况 - deadline足够长
      */
     private void testNormalCase(String protocol, int port) {
+        // 创建方法级deadline配置
+        MethodConfig methodConfig = new MethodConfig()
+            .setName("processA")
+            .setDeadlineEnabled(true); // 启用deadline
+            
         ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
             .setInterfaceId(ServiceA.class.getName())
             .setTimeout(30000)
-            .setDeadline(20000) // 20秒deadline
+            .setDeadlineEnabled(true) // 启用deadline机制
+            .setMethods(Arrays.asList(methodConfig))
             .setRepeatedReferLimit(-1) // 允许重复引用
             .setApplication(new ApplicationConfig().setAppName("client1"));
 
@@ -344,10 +353,16 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
      * 测试deadline超时
      */
     private void testDeadlineTimeout(String protocol, int port) {
+        // 创建方法级deadline配置
+        MethodConfig methodConfig = new MethodConfig()
+            .setName("processA")
+            .setDeadlineEnabled(true); // 启用deadline
+            
         ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
             .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(30000)
-            .setDeadline(4000)
+            .setTimeout(9000)
+            .setDeadlineEnabled(true) // 启用deadline机制
+            .setMethods(Arrays.asList(methodConfig))
             .setRepeatedReferLimit(-1) // 允许重复引用
             .setApplication(new ApplicationConfig().setAppName("client2"));
 
@@ -370,7 +385,7 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         } catch (Exception e) {
             long endTime = System.currentTimeMillis();
             Assert.assertTrue(e instanceof SofaTimeOutException);
-            Assert.assertTrue(endTime - startTime <= 9000);
+            Assert.assertTrue(endTime - startTime <= 10000);
             error = true;
         }
         Assert.assertTrue(error);
@@ -382,7 +397,8 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
     private void testUpstreamDeadlinePropagation(String protocol, int port) {
         ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
             .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(30000)
+            .setTimeout(9000)
+            .setDeadlineEnabled(true) // 启用deadline机制，依赖上游deadline传播
             .setRepeatedReferLimit(-1) // 允许重复引用
             .setApplication(new ApplicationConfig().setAppName("client3"));
 
@@ -419,10 +435,16 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
      * 测试deadline与timeout交互 - deadline更严格
      */
     private void testDeadlineVsTimeout(String protocol, int port) {
+        // 创建方法级deadline配置
+        MethodConfig methodConfig = new MethodConfig()
+            .setName("processA")
+            .setDeadlineEnabled(true); // 启用deadline
+            
         ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
             .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(25000) // 25秒timeout
-            .setDeadline(9000) // 9秒deadline，更严格
+            .setTimeout(9000)
+            .setDeadlineEnabled(true) // 启用deadline机制
+            .setMethods(Arrays.asList(methodConfig))
             .setRepeatedReferLimit(-1) // 允许重复引用
             .setApplication(new ApplicationConfig().setAppName("client4"));
 
