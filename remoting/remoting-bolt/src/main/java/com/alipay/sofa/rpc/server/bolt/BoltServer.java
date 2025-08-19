@@ -325,6 +325,14 @@ public class BoltServer implements Server {
     }
 
     /**
+     * 得到 BoltServerProcessor
+     * @return Bolt 处理器
+     */
+    public BoltServerProcessor getBoltServerProcessor() {
+        return boltServerProcessor;
+    }
+
+    /**
      * 找到服务端Invoker
      *
      * @param serviceName 服务名
