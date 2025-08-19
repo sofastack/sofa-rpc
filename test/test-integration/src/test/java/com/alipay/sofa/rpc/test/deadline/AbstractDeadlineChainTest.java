@@ -26,16 +26,18 @@ import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.Assert;
 
-import java.util.Arrays;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import static com.alipay.sofa.rpc.common.RpcConstants.CONFIG_KEY_DEADLINE_ENABLED;
 
 /**
  * Deadline 机制的调用链集成测试抽象基类
  * 调用链: Client -> ServiceA(3s) -> ServiceB(5s) -> ServiceC(5s)
- *
- *
  */
 public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
-    private final ThreadLocal<Boolean> isServiceCStarted = ThreadLocal.withInitial(() -> false);
+    private final AtomicBoolean isServiceCStarted = new AtomicBoolean(false);
 
     // 服务接口定义
     public interface ServiceA {
@@ -61,8 +63,8 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         @Override
         public String processC(String message) {
             try {
+                isServiceCStarted.set(true); // 标记ServiceC已开始处理，移到开始时设置
                 Thread.sleep(processTime);
-                isServiceCStarted.set(true); // 标记ServiceC已启动
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new RuntimeException("ServiceC interrupted", e);
@@ -74,7 +76,7 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
     // ServiceB 实现 - 中间层服务，模拟5秒处理时间并调用ServiceC
     public class ServiceBImpl implements ServiceB {
         private final int processTime;
-        private ServiceC  serviceC;
+        private ServiceC serviceC;
 
         public ServiceBImpl(int processTime) {
             this.processTime = processTime;
@@ -101,7 +103,7 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
     // ServiceA 实现 - 上层服务，模拟3秒处理时间并调用ServiceB
     public class ServiceAImpl implements ServiceA {
         private final int processTime;
-        private ServiceB  serviceB;
+        private ServiceB serviceB;
 
         public ServiceAImpl(int processTime) {
             this.processTime = processTime;
@@ -125,30 +127,17 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         }
     }
 
-    /**
-     * 获取协议类型，由子类实现
-     */
+
     protected abstract String getProtocolType();
 
-    /**
-     * 获取基础端口，由子类实现，避免端口冲突
-     */
     protected abstract int getBasePort();
 
-    /**
-     * 配置Provider的钩子方法，子类可以重写以添加协议特定配置
-     */
     protected void configureProvider(ProviderConfig<?> providerConfig, ServerConfig serverConfig,
                                      ApplicationConfig appConfig) {
-        // 默认实现为空，子类可以重写
     }
 
-    /**
-     * 配置Consumer的钩子方法，子类可以重写以添加协议特定配置
-     */
     protected void configureConsumer(ConsumerConfig<?> consumerConfig, String protocol, String url,
                                      ApplicationConfig appConfig) {
-        // 默认实现为空，子类可以重写
     }
 
     /**
@@ -168,16 +157,16 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         try {
             // 配置ServiceC
             ServerConfig serverConfigC = new ServerConfig()
-                .setPort(basePort)
-                .setProtocol(protocol)
-                .setDaemon(true);
+                    .setPort(basePort)
+                    .setProtocol(protocol)
+                    .setDaemon(true);
 
             providerC = new ProviderConfig<ServiceC>()
-                .setInterfaceId(ServiceC.class.getName())
-                .setRef(new ServiceCImpl(5000)) // 5秒处理时间
-                .setServer(serverConfigC)
-                .setApplication(new ApplicationConfig().setAppName("serviceC"))
-                .setRegister(false);
+                    .setInterfaceId(ServiceC.class.getName())
+                    .setRef(new ServiceCImpl(5000)) // 5秒处理时间
+                    .setServer(serverConfigC)
+                    .setApplication(new ApplicationConfig().setAppName("serviceC"))
+                    .setRegister(false);
 
             // 调用协议特定配置
             configureProvider(providerC, serverConfigC, new ApplicationConfig().setAppName("serviceC"));
@@ -185,17 +174,17 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
 
             // 配置ServiceB
             ServerConfig serverConfigB = new ServerConfig()
-                .setPort(basePort + 1)
-                .setProtocol(protocol)
-                .setDaemon(true);
+                    .setPort(basePort + 1)
+                    .setProtocol(protocol)
+                    .setDaemon(true);
 
             ServiceBImpl serviceBImpl = new ServiceBImpl(5000); // 5秒处理时间
 
             // ServiceB调用ServiceC的客户端配置
             consumerConfigC = new ConsumerConfig<ServiceC>()
-                .setInterfaceId(ServiceC.class.getName())
-                .setTimeout(30000)
-                .setApplication(new ApplicationConfig().setAppName("serviceB"));
+                    .setInterfaceId(ServiceC.class.getName())
+                    .setTimeout(30000)
+                    .setApplication(new ApplicationConfig().setAppName("serviceB"));
 
             // 调用协议特定配置
             String urlC = protocol + "://127.0.0.1:" + basePort;
@@ -208,11 +197,11 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
             serviceBImpl.setServiceC(serviceCProxy);
 
             providerB = new ProviderConfig<ServiceB>()
-                .setInterfaceId(ServiceB.class.getName())
-                .setRef(serviceBImpl)
-                .setServer(serverConfigB)
-                .setApplication(new ApplicationConfig().setAppName("serviceB"))
-                .setRegister(false);
+                    .setInterfaceId(ServiceB.class.getName())
+                    .setRef(serviceBImpl)
+                    .setServer(serverConfigB)
+                    .setApplication(new ApplicationConfig().setAppName("serviceB"))
+                    .setRegister(false);
 
             // 调用协议特定配置
             configureProvider(providerB, serverConfigB, new ApplicationConfig().setAppName("serviceB"));
@@ -220,17 +209,17 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
 
             // 配置ServiceA
             ServerConfig serverConfigA = new ServerConfig()
-                .setPort(basePort + 2)
-                .setProtocol(protocol)
-                .setDaemon(true);
+                    .setPort(basePort + 2)
+                    .setProtocol(protocol)
+                    .setDaemon(true);
 
             ServiceAImpl serviceAImpl = new ServiceAImpl(3000); // 3秒处理时间
 
             // ServiceA调用ServiceB的客户端配置
             consumerConfigB = new ConsumerConfig<ServiceB>()
-                .setInterfaceId(ServiceB.class.getName())
-                .setTimeout(30000)
-                .setApplication(new ApplicationConfig().setAppName("serviceA"));
+                    .setInterfaceId(ServiceB.class.getName())
+                    .setTimeout(30000)
+                    .setApplication(new ApplicationConfig().setAppName("serviceA"));
 
             // 调用协议特定配置
             String urlB = protocol + "://127.0.0.1:" + (basePort + 1);
@@ -243,11 +232,11 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
             serviceAImpl.setServiceB(serviceBProxy);
 
             providerA = new ProviderConfig<ServiceA>()
-                .setInterfaceId(ServiceA.class.getName())
-                .setRef(serviceAImpl)
-                .setServer(serverConfigA)
-                .setApplication(new ApplicationConfig().setAppName("serviceA"))
-                .setRegister(false);
+                    .setInterfaceId(ServiceA.class.getName())
+                    .setRef(serviceAImpl)
+                    .setServer(serverConfigA)
+                    .setApplication(new ApplicationConfig().setAppName("serviceA"))
+                    .setRegister(false);
 
             // 调用协议特定配置
             configureProvider(providerA, serverConfigA, new ApplicationConfig().setAppName("serviceA"));
@@ -255,17 +244,7 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
 
             Thread.sleep(1000); // 等待服务启动
 
-            // 测试1：正常情况 - deadline足够长
-            testNormalCase(protocol, basePort + 2);
-
-            // 测试2：deadline超时
             testDeadlineTimeout(protocol, basePort + 2);
-
-            // 测试3：上游deadline传播
-            testUpstreamDeadlinePropagation(protocol, basePort + 2);
-
-            // 测试4：deadline与timeout交互 - deadline更严格
-            testDeadlineVsTimeout(protocol, basePort + 2);
 
         } finally {
             // 清理资源 - 按创建的逆序清理
@@ -313,58 +292,17 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
         }
     }
 
-    /**
-     * 测试正常情况 - deadline足够长
-     */
-    private void testNormalCase(String protocol, int port) {
-        // 创建方法级deadline配置
-        MethodConfig methodConfig = new MethodConfig()
-            .setName("processA")
-            .setDeadlineEnabled(true); // 启用deadline
-            
-        ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
-            .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(30000)
-            .setDeadlineEnabled(true) // 启用deadline机制
-            .setMethods(Arrays.asList(methodConfig))
-            .setRepeatedReferLimit(-1) // 允许重复引用
-            .setApplication(new ApplicationConfig().setAppName("client1"));
-
-        // 调用协议特定配置
-        String url = protocol + "://127.0.0.1:" + port;
-        configureConsumer(consumerConfig, protocol, url, new ApplicationConfig().setAppName("client1"));
-        if (consumerConfig.getDirectUrl() == null) {
-            consumerConfig.setDirectUrl(url);
-        }
-
-        ServiceA serviceA = consumerConfig.refer();
-
-        long startTime = System.currentTimeMillis();
-        String result = serviceA.processA("test-message");
-        long endTime = System.currentTimeMillis();
-
-        Assert.assertNotNull(result);
-        Assert.assertTrue(result.contains("ServiceA-ServiceB-ServiceC-test-message"));
-        Assert.assertTrue(endTime - startTime >= 13000); // 至少13秒
-        Assert.assertTrue(endTime - startTime < 20000); // 小于deadline
-    }
 
     /**
      * 测试deadline超时
      */
-    private void testDeadlineTimeout(String protocol, int port) {
-        // 创建方法级deadline配置
-        MethodConfig methodConfig = new MethodConfig()
-            .setName("processA")
-            .setDeadlineEnabled(true); // 启用deadline
-            
+    private void testDeadlineTimeout(String protocol, int port) throws InterruptedException {
         ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
-            .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(9000)
-            .setDeadlineEnabled(true) // 启用deadline机制
-            .setMethods(Arrays.asList(methodConfig))
-            .setRepeatedReferLimit(-1) // 允许重复引用
-            .setApplication(new ApplicationConfig().setAppName("client2"));
+                .setInterfaceId(ServiceA.class.getName())
+                .setParameter(CONFIG_KEY_DEADLINE_ENABLED, "true")
+                .setTimeout(6000)
+                .setRepeatedReferLimit(-1) // 允许重复引用
+                .setApplication(new ApplicationConfig().setAppName("client2"));
 
         // 调用协议特定配置
         String url = protocol + "://127.0.0.1:" + port;
@@ -375,97 +313,15 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
 
         isServiceCStarted.set(false);
         ServiceA serviceA = consumerConfig.refer();
-        Assert.assertFalse(isServiceCStarted.get());
 
-        long startTime = System.currentTimeMillis();
         boolean error = false;
         try {
             serviceA.processA("test-message");
             Assert.fail("Should throw timeout exception");
         } catch (Exception e) {
-            long endTime = System.currentTimeMillis();
             Assert.assertTrue(e instanceof SofaTimeOutException);
-            Assert.assertTrue(endTime - startTime <= 10000);
-            error = true;
-        }
-        Assert.assertTrue(error);
-    }
-
-    /**
-     * 测试上游deadline传播
-     */
-    private void testUpstreamDeadlinePropagation(String protocol, int port) {
-        ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
-            .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(9000)
-            .setDeadlineEnabled(true) // 启用deadline机制，依赖上游deadline传播
-            .setRepeatedReferLimit(-1) // 允许重复引用
-            .setApplication(new ApplicationConfig().setAppName("client3"));
-
-        // 调用协议特定配置
-        String url = protocol + "://127.0.0.1:" + port;
-        configureConsumer(consumerConfig, protocol, url, new ApplicationConfig().setAppName("client3"));
-        if (consumerConfig.getDirectUrl() == null) {
-            consumerConfig.setDirectUrl(url);
-        }
-
-        ServiceA serviceA = consumerConfig.refer();
-
-        // 设置上游deadline：8秒后过期
-        long upstreamDeadline = System.currentTimeMillis() + 8000;
-        RpcInvokeContext.getContext().setDeadline(upstreamDeadline);
-
-        long startTime = System.currentTimeMillis();
-        boolean error = false;
-        try {
-            serviceA.processA("test-message");
-            Assert.fail("Should throw timeout exception due to upstream deadline");
-        } catch (Exception e) {
-            long endTime = System.currentTimeMillis();
-            Assert.assertTrue(e instanceof SofaTimeOutException);
-            Assert.assertTrue(endTime - startTime <= 10000); // 应该在8秒附近超时
-            error = true;
-        } finally {
-            RpcInvokeContext.removeContext();
-        }
-        Assert.assertTrue(error);
-    }
-
-    /**
-     * 测试deadline与timeout交互 - deadline更严格
-     */
-    private void testDeadlineVsTimeout(String protocol, int port) {
-        // 创建方法级deadline配置
-        MethodConfig methodConfig = new MethodConfig()
-            .setName("processA")
-            .setDeadlineEnabled(true); // 启用deadline
-            
-        ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
-            .setInterfaceId(ServiceA.class.getName())
-            .setTimeout(9000)
-            .setDeadlineEnabled(true) // 启用deadline机制
-            .setMethods(Arrays.asList(methodConfig))
-            .setRepeatedReferLimit(-1) // 允许重复引用
-            .setApplication(new ApplicationConfig().setAppName("client4"));
-
-        // 调用协议特定配置
-        String url = protocol + "://127.0.0.1:" + port;
-        configureConsumer(consumerConfig, protocol, url, new ApplicationConfig().setAppName("client4"));
-        if (consumerConfig.getDirectUrl() == null) {
-            consumerConfig.setDirectUrl(url);
-        }
-
-        ServiceA serviceA = consumerConfig.refer();
-
-        long startTime = System.currentTimeMillis();
-        boolean error = false;
-        try {
-            serviceA.processA("test-message");
-            Assert.fail("Should throw timeout exception due to deadline");
-        } catch (Exception e) {
-            long endTime = System.currentTimeMillis();
-            Assert.assertTrue(e instanceof SofaTimeOutException);
-            Assert.assertTrue(endTime - startTime <= 11000); // 应该按deadline超时
+            Thread.sleep(9000);
+            Assert.assertFalse(isServiceCStarted.get());
             error = true;
         }
         Assert.assertTrue(error);

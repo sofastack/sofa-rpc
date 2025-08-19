@@ -29,7 +29,11 @@ import com.alipay.sofa.rpc.context.AsyncRuntime;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
-import com.alipay.sofa.rpc.core.exception.*;
+import com.alipay.sofa.rpc.core.exception.RpcErrorType;
+import com.alipay.sofa.rpc.core.exception.SofaRouteException;
+import com.alipay.sofa.rpc.core.exception.SofaRpcException;
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -62,6 +66,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
+import static com.alipay.sofa.rpc.common.RpcConstants.CONFIG_KEY_DEADLINE_ENABLED;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
 
 /**
@@ -606,7 +611,6 @@ public abstract class AbstractCluster extends Cluster {
             checkProviderVersion(providerInfo, request); // 根据服务端版本特殊处理
             String invokeType = request.getInvokeType();
             int timeout = resolveTimeout(request, consumerConfig, providerInfo);
-            boolean deadlineEnabled = isDeadlineEnabled(request, consumerConfig, providerInfo);
 
             Long upStreamDeadlineTime = RpcInvokeContext.getContext().getDeadline();
             if (upStreamDeadlineTime != null) {
@@ -617,7 +621,7 @@ public abstract class AbstractCluster extends Cluster {
                 } else {
                     throw new SofaTimeOutException("Deadline exceeded before sending request");
                 }
-            } else if (deadlineEnabled) {
+            } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLED))) {
                 // 如果启用了deadline机制，使用timeout值作为deadline进行透传
                 request.addRequestProp(RpcConstants.RPC_REQUEST_DEADLINE, timeout);
             }
@@ -693,55 +697,6 @@ public abstract class AbstractCluster extends Cluster {
             response.setAppResponse(ClassUtils.getDefaultPrimitiveValue(method.getReturnType()));
         }
         return response;
-    }
-
-    /**
-     * 判断是否启用deadline机制
-     *
-     * @param request        请求
-     * @param consumerConfig 客户端配置
-     * @param providerInfo   服务提供者信息
-     * @return 是否启用deadline机制
-     */
-    private boolean isDeadlineEnabled(SofaRequest request, ConsumerConfig consumerConfig, ProviderInfo providerInfo) {
-        // 请求级别动态配置优先
-        final String dynamicAlias = consumerConfig.getParameter(DynamicConfigKeys.DYNAMIC_ALIAS);
-        if (StringUtils.isNotBlank(dynamicAlias)) {
-            DynamicConfigManager dynamicConfigManager = DynamicConfigManagerFactory.getDynamicManager(
-                consumerConfig.getAppName(),
-                dynamicAlias);
-
-            if (dynamicConfigManager != null) {
-                String dynamicDeadlineEnabled = dynamicConfigManager.getConsumerMethodProperty(
-                    request.getInterfaceName(),
-                    request.getMethodName(),
-                    "deadlineEnabled");
-
-                if (DynamicHelper.isNotDefault(dynamicDeadlineEnabled) &&
-                    StringUtils.isNotBlank(dynamicDeadlineEnabled)) {
-                    return Boolean.parseBoolean(dynamicDeadlineEnabled);
-                }
-            }
-        }
-
-        // 检查方法级别配置，方法级别可以覆盖接口级别
-        if (consumerConfig.isMethodDeadlineEnabled(request.getMethodName())) {
-            return true;
-        }
-
-        // 检查接口级别是否启用deadline机制
-        if (!consumerConfig.isDeadlineEnabled()) {
-            return false;
-        }
-
-        // 检查服务端是否禁用了deadline机制
-        String serverDeadlineEnabled = providerInfo.getAttr("deadlineEnabled");
-        if ("false".equals(serverDeadlineEnabled)) {
-            return false;
-        }
-
-        // 默认情况：不启用
-        return false;
     }
 
     /**

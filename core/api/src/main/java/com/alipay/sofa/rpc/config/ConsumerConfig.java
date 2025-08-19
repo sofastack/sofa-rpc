@@ -224,10 +224,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     protected int                                   timeout                 = -1;
 
-    /**
-     * 是否启用deadline机制，接口级别配置
-     */
-    protected boolean                               deadlineEnabled         = false;
 
     /**
      * The Retries. 失败后重试次数
@@ -804,26 +800,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     }
 
     /**
-     * Gets deadline enabled status.
-     *
-     * @return the deadline enabled status
-     */
-    public boolean isDeadlineEnabled() {
-        return deadlineEnabled;
-    }
-
-    /**
-     * Sets deadline enabled status.
-     *
-     * @param deadlineEnabled the deadline enabled status
-     * @return this ConsumerConfig
-     */
-    public ConsumerConfig<T> setDeadlineEnabled(boolean deadlineEnabled) {
-        this.deadlineEnabled = deadlineEnabled;
-        return this;
-    }
-
-    /**
      * Gets concurrents.
      *
      * @return the concurrents
@@ -965,19 +941,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         return (Integer) methodTimeout;
     }
 
-    /**
-     * Gets the deadline enabled status corresponding to the method name
-     *
-     * @param methodName the method name
-     * @return true if method level deadline is enabled
-     */
-    public boolean isMethodDeadlineEnabled(String methodName) {
-        Object methodDeadlineEnabled = getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_DEADLINE_ENABLED);
-        if (methodDeadlineEnabled == null) {
-            return false; // 方法级别未配置，返回false
-        }
-        return (Boolean) methodDeadlineEnabled;
-    }
 
     /**
      * 得到方法名对应的自定义参数列表

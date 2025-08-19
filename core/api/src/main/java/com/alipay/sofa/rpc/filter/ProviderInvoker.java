@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.filter;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -32,6 +33,8 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+
+import static com.alipay.sofa.rpc.common.RpcConstants.CONFIG_KEY_DEADLINE_ENABLED;
 
 /**
  * 服务端调用业务实现类
@@ -94,9 +97,11 @@ public class ProviderInvoker<T> extends FilterInvoker {
         long bizStartTime = System.nanoTime();
         RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_START_TIME_NANO, System.nanoTime());
 
+        // 在服务端配置中，检查是否启用deadline功能（默认启用，只有明确设置为"false"时才禁用）
+        String deadlineEnabled = providerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLED);
         // 获取deadline时间
         Integer deadline = (Integer) request.getRequestProp(RpcConstants.RPC_REQUEST_DEADLINE);
-        if (deadline != null) {
+        if (!StringUtils.FALSE.equalsIgnoreCase(deadlineEnabled) && deadline != null) {
             RpcInvokeContext.getContext().setDeadline(deadline + System.currentTimeMillis());
         }
 

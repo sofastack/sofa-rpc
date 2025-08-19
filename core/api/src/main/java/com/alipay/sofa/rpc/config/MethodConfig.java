@@ -47,10 +47,6 @@ public class MethodConfig implements Serializable {
      */
     protected Integer              timeout;
 
-    /**
-     * The DeadlineEnabled. 是否启用deadline机制
-     */
-    protected Boolean              deadlineEnabled;
 
     /**
      * The Retries. 失败后重试次数
@@ -155,24 +151,6 @@ public class MethodConfig implements Serializable {
         return this;
     }
 
-    /**
-     * Gets deadline enabled status.
-     *
-     * @return the deadline enabled status
-     */
-    public Boolean isDeadlineEnabled() {
-        return deadlineEnabled != null && deadlineEnabled;
-    }
-
-    /**
-     * Sets deadline enabled status.
-     *
-     * @param deadlineEnabled the deadline enabled status
-     */
-    public MethodConfig setDeadlineEnabled(Boolean deadlineEnabled) {
-        this.deadlineEnabled = deadlineEnabled;
-        return this;
-    }
 
     /**
      * Gets retries.

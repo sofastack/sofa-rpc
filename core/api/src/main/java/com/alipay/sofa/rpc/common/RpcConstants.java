@@ -408,11 +408,6 @@ public class RpcConstants {
     public static final String  CONFIG_KEY_TIMEOUT                           = "timeout";
 
     /**
-     * 配置key:deadline
-     */
-    public static final String  CONFIG_KEY_DEADLINE                          = "deadline";
-
-    /**
      * 配置key:deadlineEnabled
      */
     public static final String  CONFIG_KEY_DEADLINE_ENABLED                  = "deadlineEnabled";
