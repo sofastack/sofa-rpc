@@ -47,7 +47,6 @@ public class MethodConfig implements Serializable {
      */
     protected Integer              timeout;
 
-
     /**
      * The Retries. 失败后重试次数
      */
@@ -150,7 +149,6 @@ public class MethodConfig implements Serializable {
         this.timeout = timeout;
         return this;
     }
-
 
     /**
      * Gets retries.

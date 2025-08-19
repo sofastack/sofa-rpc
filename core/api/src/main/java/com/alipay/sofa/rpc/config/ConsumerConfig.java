@@ -224,7 +224,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     protected int                                   timeout                 = -1;
 
-
     /**
      * The Retries. 失败后重试次数
      */
@@ -940,7 +939,6 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
         }
         return (Integer) methodTimeout;
     }
-
 
     /**
      * 得到方法名对应的自定义参数列表
