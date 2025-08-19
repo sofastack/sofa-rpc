@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class UserThreadPoolManager {
 
-    private static final String                          SEPARATOR     = "/";
+    private static final String                          SEPARATOR     = "#";
 
     /**
      * 用户自定义的业务线程池，可以给不同的接口指定不同的业务线程池
