@@ -413,6 +413,11 @@ public class RpcConstants {
     public static final String  CONFIG_KEY_DEADLINE                          = "deadline";
 
     /**
+     * 配置key:deadlineEnabled
+     */
+    public static final String  CONFIG_KEY_DEADLINE_ENABLED                  = "deadlineEnabled";
+
+    /**
      * 配置key:concurrents
      */
     public static final String  CONFIG_KEY_CONCURRENTS                       = "concurrents";
