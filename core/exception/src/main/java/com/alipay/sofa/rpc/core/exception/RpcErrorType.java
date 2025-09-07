@@ -111,5 +111,5 @@ public class RpcErrorType {
     /**
      * 用户自定义可重试异常
      */
-    public static final int CUSTOMER_RETRY_ERROR = 300;
+    public static final int CUSTOMER_RETRY_ERROR     = 300;
 }
