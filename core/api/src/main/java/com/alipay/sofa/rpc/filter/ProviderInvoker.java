@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.filter;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
+import com.alipay.sofa.rpc.common.annotation.RetryableException;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
@@ -113,7 +114,12 @@ public class ProviderInvoker<T> extends FilterInvoker {
             //            sofaResponse.setErrorMsg(e.getMessage());
         } catch (InvocationTargetException e) { // 业务代码抛出异常
             cutCause(e.getCause());
-            sofaResponse.setAppResponse(e.getCause());
+            // 查看该异常是否被用户声明为可重试异常
+            if (e.getCause().getClass().isAnnotationPresent(RetryableException.class)) {
+                sofaResponse.setAppResponse(new SofaRpcException(RpcErrorType.CUSTOMER_RETRY_ERROR, e.getCause()));
+            } else {
+                sofaResponse.setAppResponse(e.getCause());
+            }
         } finally {
             // R8: Record business processing execution time
             if (RpcInternalContext.isAttachmentEnable()) {
