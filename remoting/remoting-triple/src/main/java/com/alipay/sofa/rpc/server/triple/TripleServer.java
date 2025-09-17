@@ -134,6 +134,7 @@ public class TripleServer implements Server {
             .workerEventLoopGroup(constructWorkerEventLoopGroup())
             .executor(bizThreadPool)
             .channelType(constructChannel())
+            .maxInboundMetadataSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE))
             .maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE))
             .permitKeepAliveTime(1, TimeUnit.SECONDS)
             .permitKeepAliveWithoutCalls(true)

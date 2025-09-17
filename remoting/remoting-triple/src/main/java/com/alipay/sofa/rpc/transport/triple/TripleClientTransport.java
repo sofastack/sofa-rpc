@@ -283,6 +283,7 @@ public class TripleClientTransport extends ClientTransport {
         builder.usePlaintext();
         builder.disableRetry();
         builder.intercept(clientHeaderClientInterceptor);
+        builder.maxInboundMetadataSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE));
         builder.maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE));
 
         if (KEEP_ALIVE_INTERVAL > 0) {
