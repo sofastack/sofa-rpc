@@ -397,7 +397,7 @@ public class TripleServerTest {
         int originInboundMetadataSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE);
         Assert.assertEquals(65536, originInboundMetadataSize);
         try {
-            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
+            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-defaultMetadata");
             int port = 50052;
             ServerConfig serverConfig = new ServerConfig()
                     .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
@@ -444,7 +444,7 @@ public class TripleServerTest {
         Assert.assertEquals(65536, originInboundMetadataSize);
         RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE, "67584");
         try {
-            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
+            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-customMetadata");
             int port = 50052;
             ServerConfig serverConfig = new ServerConfig()
                     .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
