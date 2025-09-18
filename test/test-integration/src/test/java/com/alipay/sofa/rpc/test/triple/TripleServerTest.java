@@ -390,6 +390,101 @@ public class TripleServerTest {
         }
     }
 
+    @Test
+    public void testDefaultMetadataSize() {
+        boolean originDebugMode = RpcRunningState.isDebugMode();
+        RpcRunningState.setDebugMode(false);
+        int originInboundMetadataSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE);
+        Assert.assertEquals(65536, originInboundMetadataSize);
+        try {
+            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-defaultMetadata");
+            int port = 50052;
+            ServerConfig serverConfig = new ServerConfig()
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setPort(port);
+            ProviderConfig<SampleService> providerConfig = new ProviderConfig<SampleService>()
+                    .setApplication(applicationConfig)
+                    .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setInterfaceId(SampleService.class.getName())
+                    .setRef(new SampleServiceImpl())
+                    .setServer(serverConfig);
+            providerConfig.export();
+
+            ConsumerConfig<SampleService> consumerConfig = new ConsumerConfig<>();
+            consumerConfig.setInterfaceId(SampleService.class.getName())
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setDirectUrl("tri://127.0.0.1:" + port);
+
+            SampleService sampleService = consumerConfig.refer();
+            String msg = buildMsg(1);
+            try {
+                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(32));
+                sampleService.messageSize(msg, 5);
+                Assert.fail();
+            } catch (Exception e) {
+                Assert.assertTrue(e.getCause().getCause().getMessage().contains("Header size exceeded max allowed size (65536)"));
+            }
+
+            try {
+                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(31));
+                sampleService.messageSize(msg, 1);
+            } catch (Exception e) {
+                Assert.fail();
+            }
+        } finally {
+            RpcRunningState.setDebugMode(originDebugMode);
+        }
+    }
+
+    @Test
+    public void testSetInboundMetadataSize() {
+        boolean originDebugMode = RpcRunningState.isDebugMode();
+        RpcRunningState.setDebugMode(false);
+        int originInboundMetadataSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE);
+        Assert.assertEquals(65536, originInboundMetadataSize);
+        RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE, "67584");
+        try {
+            ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-customMetadata");
+            int port = 50052;
+            ServerConfig serverConfig = new ServerConfig()
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setPort(port);
+            ProviderConfig<SampleService> providerConfig = new ProviderConfig<SampleService>()
+                    .setApplication(applicationConfig)
+                    .setBootstrap(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setInterfaceId(SampleService.class.getName())
+                    .setRef(new SampleServiceImpl())
+                    .setServer(serverConfig);
+            providerConfig.export();
+
+            ConsumerConfig<SampleService> consumerConfig = new ConsumerConfig<>();
+            consumerConfig.setInterfaceId(SampleService.class.getName())
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setDirectUrl("tri://127.0.0.1:" + port);
+
+            SampleService sampleService = consumerConfig.refer();
+            String msg = buildMsg(1);
+            try {
+                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(32));
+                sampleService.messageSize(msg, 5);
+            } catch (Exception e) {
+                Assert.fail();
+            }
+
+            try {
+                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(33));
+                sampleService.messageSize(msg, 1);
+                Assert.fail();
+            } catch (Exception e) {
+                Assert.assertTrue(e.getCause().getCause().getMessage().contains("Header size exceeded max allowed size (67584)"));
+
+            }
+        } finally {
+            RpcRunningState.setDebugMode(originDebugMode);
+            RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE, originInboundMetadataSize);
+        }
+    }
+
     private String buildMsg(int messageSize) {
         StringBuilder sb = new StringBuilder();
         // 1KB
