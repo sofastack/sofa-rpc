@@ -30,6 +30,8 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class UserThreadPoolManager {
 
+    private static final String                          SEPARATOR     = "#";
+
     /**
      * 用户自定义的业务线程池，可以给不同的接口指定不同的业务线程池
      */
@@ -58,6 +60,20 @@ public class UserThreadPoolManager {
     }
 
     /**
+     * 给某个服务分配到独立的线程池
+     *
+     * @param service        服务唯一名
+     * @param methodName     方法名
+     * @param userThreadPool 自定义线程池
+     */
+    public static synchronized void registerUserThread(String service, String methodName, UserThreadPool userThreadPool) {
+        if (userThreadMap == null) {
+            userThreadMap = new ConcurrentHashMap<String, UserThreadPool>();
+        }
+        userThreadMap.put(service + SEPARATOR + methodName, userThreadPool);
+    }
+
+    /**
      * 给某个服务取消分配到独立线程池
      *
      * @param service 服务唯一名
@@ -69,6 +85,18 @@ public class UserThreadPoolManager {
     }
 
     /**
+     * 给某个服务取消分配到独立线程池
+     *
+     * @param service 服务唯一名
+     * @param methodName 方法名
+     */
+    public static synchronized void unRegisterUserThread(String service, String methodName) {
+        if (userThreadMap != null) {
+            userThreadMap.remove(service + SEPARATOR + methodName);
+        }
+    }
+
+    /**
      * 得到用户线程池
      *
      * @param service 服务唯一名
@@ -76,6 +104,17 @@ public class UserThreadPoolManager {
      */
     public static UserThreadPool getUserThread(String service) {
         return userThreadMap == null ? null : userThreadMap.get(service);
+    }
+
+    /**
+     * 得到用户线程池
+     *
+     * @param service 服务唯一名
+     * @param methodName 方法名
+     * @return 用户自定义线程池
+     */
+    public static UserThreadPool getUserThread(String service, String methodName) {
+        return userThreadMap == null ? null : userThreadMap.get(service + SEPARATOR + methodName);
     }
 
     public static Set<UserThreadPool> getUserThreadPoolSet() {
