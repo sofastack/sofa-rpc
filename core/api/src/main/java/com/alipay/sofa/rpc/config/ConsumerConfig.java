@@ -658,7 +658,7 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     /**
      * Sets rejected execution policy.
      *
-     * @param rejectedExecutionPolicy the rejected execution policy 
+     * @param rejectedExecutionPolicy the rejected execution policy
      * @return the rejected execution policy
      */
     public ConsumerConfig<T> setRejectedExecutionPolicy(String rejectedExecutionPolicy) {
