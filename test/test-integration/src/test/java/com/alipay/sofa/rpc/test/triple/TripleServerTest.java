@@ -418,7 +418,7 @@ public class TripleServerTest {
             SampleService sampleService = consumerConfig.refer();
             String msg = buildMsg(1);
             try {
-                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(32));
+                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(36));
                 sampleService.messageSize(msg, 5);
                 Assert.fail();
             } catch (Exception e) {
@@ -426,7 +426,7 @@ public class TripleServerTest {
             }
 
             try {
-                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(31));
+                RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(25));
                 sampleService.messageSize(msg, 1);
             } catch (Exception e) {
                 Assert.fail();
