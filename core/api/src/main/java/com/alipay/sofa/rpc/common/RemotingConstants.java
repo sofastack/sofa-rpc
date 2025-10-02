@@ -261,9 +261,4 @@ public class RemotingConstants {
      * @since 5.1.0
      */
     public static final String INVOKE_CTX_IS_ASYNC_CHAIN  = "rpc.async.chain";
-
-    /**
-     * bolt RpcInvokeContext的Key
-     */
-    public static final String INVOKE_CTX_SERVER_ASYNC    = "rpc.server.async";
 }

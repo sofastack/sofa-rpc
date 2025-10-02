@@ -45,7 +45,7 @@ public class BoltAsyncContext {
         sofaRequest = (SofaRequest) internalContext.getAttachment(RpcConstants.HIDDEN_KEY_ASYNC_REQUEST);
         invokeCtx = RpcInvokeContext.getContext();
         restoreClassLoader = Thread.currentThread().getContextClassLoader();
-        invokeCtx.put(RemotingConstants.INVOKE_CTX_SERVER_ASYNC, true);
+        invokeCtx.put(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN, true);
     }
 
     public synchronized void signalContextSwitch() {

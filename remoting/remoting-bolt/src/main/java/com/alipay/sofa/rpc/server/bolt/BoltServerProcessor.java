@@ -110,8 +110,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
         // 是否链路异步化中
         boolean isAsyncChain = false;
-        // 是否服务端异步
-        boolean isServerAsync = false;
 
         try { // 这个 try-finally 为了保证Context一定被清理
             processingCount.incrementAndGet(); // 统计值加1
@@ -196,10 +194,8 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                 RpcInvokeContext invokeContext = RpcInvokeContext.peekContext();
                 isAsyncChain = CommonUtils.isTrue(invokeContext != null ?
                     (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null);
-                isServerAsync = CommonUtils.isTrue(invokeContext != null ?
-                    (Boolean) invokeContext.get(RemotingConstants.INVOKE_CTX_SERVER_ASYNC) : null);
                 // 如果是服务端异步代理模式或服务端模式，特殊处理，因为该模式是在业务代码自主异步返回的
-                if (!isAsyncChain && !isServerAsync) {
+                if (!isAsyncChain) {
                     // 其它正常请求
                     try { // 这个try-catch 保证一定要记录tracer
                         asyncCtx.sendResponse(response);
@@ -218,7 +214,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         } finally {
             RecordContextResolver.carryWithRequest(bizCtx.getInvokeContext().getRecordContext(), request);
             processingCount.decrementAndGet();
-            if (!isAsyncChain && !isServerAsync) {
+            if (!isAsyncChain) {
                 if (EventBus.isEnable(ServerEndHandleEvent.class)) {
                     EventBus.post(new ServerEndHandleEvent());
                 }
