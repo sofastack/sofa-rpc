@@ -119,9 +119,13 @@ public class TripleClientTransport extends ClientTransport {
             } catch (InterruptedException e) {
                 LOGGER.warn("Triple channel shut down interrupted.");
             }
-            channel = null;
+            if (channel.isShutdown()) {
+                channel = null;
+                channelMap.remove(providerInfo.toString());
+            }
+        } else {
+            channelMap.remove(providerInfo.toString());
         }
-        channelMap.remove(providerInfo.toString());
     }
 
     @Override

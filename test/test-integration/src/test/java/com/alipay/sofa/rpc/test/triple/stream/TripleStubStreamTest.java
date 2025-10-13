@@ -109,7 +109,6 @@ public class TripleStubStreamTest {
                 .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
                 .setDirectUrl("tri://127.0.0.1:" + 50051 + "?appName=triple-server");
         greeterStubToNative = consumerConfigToNative.refer();
-        Thread.sleep(10000);
     }
 
     @AfterClass
