@@ -79,7 +79,6 @@ public class TripleGenericStreamTest {
             .setTimeout(1000000)
             .setDirectUrl("triple://127.0.0.1:50066?appName=triple-server");
         helloServiceRef = consumerConfig.refer();
-        Thread.sleep(5000);
     }
 
     @AfterClass
