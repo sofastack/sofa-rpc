@@ -110,11 +110,13 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
         // 是否链路异步化中
         boolean isAsyncChain = false;
+
         try { // 这个 try-finally 为了保证Context一定被清理
             processingCount.incrementAndGet(); // 统计值加1
 
             context.setRemoteAddress(bizCtx.getRemoteHost(), bizCtx.getRemotePort()); // 远程地址
             context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 远程返回的通道
+            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_REQUEST, request);
 
             InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
             if (RpcInternalContext.isAttachmentEnable()) {
@@ -192,7 +194,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                 RpcInvokeContext invokeContext = RpcInvokeContext.peekContext();
                 isAsyncChain = CommonUtils.isTrue(invokeContext != null ?
                     (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null);
-                // 如果是服务端异步代理模式，特殊处理，因为该模式是在业务代码自主异步返回的
+                // 如果是服务端异步代理模式或服务端模式，特殊处理，因为该模式是在业务代码自主异步返回的
                 if (!isAsyncChain) {
                     // 其它正常请求
                     try { // 这个try-catch 保证一定要记录tracer
