@@ -213,7 +213,7 @@ public class RpcInvokeContext {
     /**
      * 判断是否deadline超时，用户可以在业务执行时进行判断
      */
-    public boolean isDeadlineTimeout() {
+    public boolean isDeadlined() {
         return deadline != null && System.currentTimeMillis() >= deadline;
     }
 

@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.alipay.sofa.rpc.common.RpcConstants.CONFIG_KEY_DEADLINE_ENABLED;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONFIG_KEY_DEADLINE_TIMEOUT_ENABLED;
 
 /**
  * Deadline 机制的调用链集成测试抽象基类
@@ -297,7 +297,7 @@ public abstract class AbstractDeadlineChainTest extends ActivelyDestroyTest {
     private void testDeadlineTimeout(String protocol, int port) throws InterruptedException {
         ConsumerConfig<ServiceA> consumerConfig = new ConsumerConfig<ServiceA>()
             .setInterfaceId(ServiceA.class.getName())
-            .setParameter(CONFIG_KEY_DEADLINE_ENABLED, "true")
+            .setParameter(CONFIG_KEY_DEADLINE_TIMEOUT_ENABLED, "true")
             .setTimeout(6000)
             .setRepeatedReferLimit(-1) // 允许重复引用
             .setApplication(new ApplicationConfig().setAppName("client2"));

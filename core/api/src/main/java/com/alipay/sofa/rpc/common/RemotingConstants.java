@@ -261,4 +261,9 @@ public class RemotingConstants {
      * @since 5.1.0
      */
     public static final String INVOKE_CTX_IS_ASYNC_CHAIN  = "rpc.async.chain";
+
+    /**
+     * deadline time
+     */
+    public static final String REQUEST_DEADLINE_TIMEOUT   = "sofa.head.deadline";
 }

@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.client;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.http.RpcHttpClient;
 import com.alipay.sofa.rpc.common.MockMode;
+import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
@@ -66,7 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
-import static com.alipay.sofa.rpc.common.RpcConstants.CONFIG_KEY_DEADLINE_ENABLED;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONFIG_KEY_DEADLINE_TIMEOUT_ENABLED;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
 
 /**
@@ -614,16 +615,16 @@ public abstract class AbstractCluster extends Cluster {
 
             Long upStreamDeadlineTime = RpcInvokeContext.getContext().getDeadline();
             if (upStreamDeadlineTime != null) {
-                int remain = (int) (upStreamDeadlineTime - System.currentTimeMillis());
-                if (remain > 0) {
-                    timeout = Math.min(timeout, remain);
-                    request.addRequestProp(RpcConstants.RPC_REQUEST_DEADLINE, remain);
-                } else {
+                int remainTime = (int) (upStreamDeadlineTime - System.currentTimeMillis());
+                if (remainTime <= 0) {
                     throw new SofaTimeOutException("Deadline exceeded before sending request");
+                } else {
+                    timeout = Math.min(timeout, remainTime);
+                    request.addRequestProp(RemotingConstants.REQUEST_DEADLINE_TIMEOUT, remainTime);
                 }
-            } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLED))) {
+            } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_TIMEOUT_ENABLED))) {
                 // 如果启用了deadline机制，使用timeout值作为deadline进行透传
-                request.addRequestProp(RpcConstants.RPC_REQUEST_DEADLINE, timeout);
+                request.addRequestProp(RemotingConstants.REQUEST_DEADLINE_TIMEOUT, timeout);
             }
 
             request.setTimeout(timeout);

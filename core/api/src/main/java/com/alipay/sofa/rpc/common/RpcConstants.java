@@ -408,11 +408,6 @@ public class RpcConstants {
     public static final String  CONFIG_KEY_TIMEOUT                           = "timeout";
 
     /**
-     * 配置key:deadlineEnabled
-     */
-    public static final String  CONFIG_KEY_DEADLINE_ENABLED                  = "deadlineEnabled";
-
-    /**
      * 配置key:concurrents
      */
     public static final String  CONFIG_KEY_CONCURRENTS                       = "concurrents";
@@ -748,10 +743,4 @@ public class RpcConstants {
      */
     public static final String  INTERNAL_KEY_RPC_REQUEST_COMMAND             = INTERNAL_KEY_PREFIX +
                                                                                  "rpc_request_command";
-
-    /**
-     * deadline time
-     */
-    public static final String  RPC_REQUEST_DEADLINE                         = "sofa_head_deadline";
-
 }
