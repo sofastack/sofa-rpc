@@ -50,6 +50,10 @@ public class RpcInvokeContext {
      */
     protected Integer timeout;
     /**
+     * 用户自定义的deadline时间
+     */
+    protected Long deadline;
+    /**
      * 用户自定义对方地址，单次调用生效
      */
     protected String targetURL;
@@ -184,6 +188,33 @@ public class RpcInvokeContext {
     public RpcInvokeContext setTimeout(Integer timeout) {
         this.timeout = timeout;
         return this;
+    }
+
+    /**
+     * 得到deadline时间
+     *
+     * @return deadline时间
+     */
+    public Long getDeadline() {
+        return deadline;
+    }
+
+    /**
+     * 设置调用级别deadline时间
+     *
+     * @param deadline deadline时间
+     * @return 当前
+     */
+    public RpcInvokeContext setDeadline(Long deadline) {
+        this.deadline = deadline;
+        return this;
+    }
+
+    /**
+     * 判断是否deadline超时，用户可以在业务执行时进行判断
+     */
+    public boolean isDeadlined() {
+        return deadline != null && System.currentTimeMillis() >= deadline;
     }
 
     /**
@@ -461,6 +492,7 @@ public class RpcInvokeContext {
         final StringBuilder sb = new StringBuilder(128);
         sb.append(super.toString());
         sb.append("{timeout=").append(timeout);
+        sb.append(", deadline=").append(deadline);
         sb.append(", targetURL='").append(targetURL).append('\'');
         sb.append(", targetGroup='").append(targetGroup).append('\'');
         sb.append(", responseCallback=").append(responseCallback);

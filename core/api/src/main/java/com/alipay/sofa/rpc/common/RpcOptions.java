@@ -589,4 +589,8 @@ public class RpcOptions {
      */
     public static final String BOLT_SERIALIZER_REGISTER_EXTENSION       = "sofa.rpc.bolt.serializer.register.extension";
 
+    /**
+     * 是否开启deadline机制
+     */
+    public static final String CONFIG_KEY_DEADLINE_ENABLE               = "deadline.enable";
 }
