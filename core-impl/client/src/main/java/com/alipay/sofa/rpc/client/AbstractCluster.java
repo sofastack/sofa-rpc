@@ -620,10 +620,10 @@ public abstract class AbstractCluster extends Cluster {
                     throw new SofaTimeOutException("Deadline exceeded before sending request");
                 }
                 timeout = Math.min(timeout, remainTime);
-                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_TIMEOUT, remainTime);
+                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_REMAIN_TIME, remainTime);
             } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLE))) {
                 // 如果启用了deadline机制，使用timeout值作为deadline进行透传
-                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_TIMEOUT, timeout);
+                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_REMAIN_TIME, timeout);
             }
 
             request.setTimeout(timeout);

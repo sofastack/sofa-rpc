@@ -217,7 +217,7 @@ public class RemotingConstants {
     /**
      * deadline remain time
      */
-    public static final String HEAD_DEADLINE_REMAIN_TIME      = "sofa_head_deadline_remain_time";
+    public static final String HEAD_DEADLINE_REMAIN_TIME  = "sofa_head_deadline_remain_time";
 
     /**
      * RPC透传请求链路数据

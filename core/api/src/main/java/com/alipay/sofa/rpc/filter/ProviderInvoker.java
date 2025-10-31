@@ -102,7 +102,7 @@ public class ProviderInvoker<T> extends FilterInvoker {
         String deadlineEnabled = providerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLE);
         try {
             // 获取deadline时间
-            Integer deadline = (Integer) request.getRequestProp(RemotingConstants.HEAD_DEADLINE_TIMEOUT);
+            Integer deadline = (Integer) request.getRequestProp(RemotingConstants.HEAD_DEADLINE_REMAIN_TIME);
             if (!StringUtils.FALSE.equalsIgnoreCase(deadlineEnabled) && deadline != null) {
                 RpcInvokeContext.getContext().setDeadline(deadline + System.currentTimeMillis());
             }
