@@ -215,9 +215,9 @@ public class RemotingConstants {
     public static final String HEAD_SERIALIZE_TYPE        = "sofa_head_serialize_type";
 
     /**
-     * deadline time
+     * deadline remain time
      */
-    public static final String HEAD_DEADLINE_TIMEOUT      = "sofa_head_deadline_timeout";
+    public static final String HEAD_DEADLINE_TIMEOUT      = "sofa_head_deadline_remain_time";
 
     /**
      * RPC透传请求链路数据
