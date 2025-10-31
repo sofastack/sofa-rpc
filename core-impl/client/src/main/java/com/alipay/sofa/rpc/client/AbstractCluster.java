@@ -67,7 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
-import static com.alipay.sofa.rpc.common.RpcOptions.CONFIG_KEY_DEADLINE_TIMEOUT_ENABLED;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONFIG_KEY_DEADLINE_ENABLE;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
 
 /**
@@ -618,13 +618,12 @@ public abstract class AbstractCluster extends Cluster {
                 int remainTime = (int) (upStreamDeadlineTime - System.currentTimeMillis());
                 if (remainTime <= 0) {
                     throw new SofaTimeOutException("Deadline exceeded before sending request");
-                } else {
-                    timeout = Math.min(timeout, remainTime);
-                    request.addRequestProp(RemotingConstants.REQUEST_DEADLINE_TIMEOUT, remainTime);
                 }
-            } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_TIMEOUT_ENABLED))) {
+                timeout = Math.min(timeout, remainTime);
+                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_TIMEOUT, remainTime);
+            } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLE))) {
                 // 如果启用了deadline机制，使用timeout值作为deadline进行透传
-                request.addRequestProp(RemotingConstants.REQUEST_DEADLINE_TIMEOUT, timeout);
+                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_TIMEOUT, timeout);
             }
 
             request.setTimeout(timeout);

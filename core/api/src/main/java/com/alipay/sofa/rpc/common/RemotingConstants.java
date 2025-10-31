@@ -215,6 +215,11 @@ public class RemotingConstants {
     public static final String HEAD_SERIALIZE_TYPE        = "sofa_head_serialize_type";
 
     /**
+     * deadline time
+     */
+    public static final String HEAD_DEADLINE_TIMEOUT      = "sofa_head_deadline_timeout";
+
+    /**
      * RPC透传请求链路数据
      *
      * @since 4.12.0
@@ -261,9 +266,4 @@ public class RemotingConstants {
      * @since 5.1.0
      */
     public static final String INVOKE_CTX_IS_ASYNC_CHAIN  = "rpc.async.chain";
-
-    /**
-     * deadline time
-     */
-    public static final String REQUEST_DEADLINE_TIMEOUT   = "sofa.head.deadline";
 }
