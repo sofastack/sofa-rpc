@@ -35,8 +35,6 @@ import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.interceptor.ClientHeaderClientInterceptor;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
@@ -63,9 +61,13 @@ import java.util.concurrent.TimeUnit;
 @Extension("tri")
 public class TripleClientTransport extends ClientTransport {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientTransport.class);
-
+    /**
+     * use clientTransportConfig.getProviderInfo() instead of
+     */
+    @Deprecated
     protected ProviderInfo providerInfo;
+
+    protected ClientTransportConfig clientTransportConfig;
 
     protected ManagedChannel channel;
 
@@ -76,7 +78,13 @@ public class TripleClientTransport extends ClientTransport {
     protected TripleInvoker tripleClientInvoker;
 
     /* <address, gRPC channels> */
+    /**
+     * use URL_CONNECTION_MAP instead to cache ReferenceCountManagedChannel
+     */
+    @Deprecated
     protected final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
+
+    protected final static ConcurrentMap<ClientTransportConfig, ReferenceCountManagedChannel> URL_CONNECTION_MAP = new ConcurrentHashMap<>();
 
     protected final Object lock = new Object();
 
@@ -92,6 +100,7 @@ public class TripleClientTransport extends ClientTransport {
     public TripleClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
         providerInfo = transportConfig.getProviderInfo();
+        clientTransportConfig = transportConfig;
         connect();
         remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
         localAddress = InetSocketAddress.createUnresolved(NetUtils.getLocalIpv4(), 0);// 端口不准
@@ -102,8 +111,7 @@ public class TripleClientTransport extends ClientTransport {
         if (isAvailable()) {
             return;
         }
-        ProviderInfo providerInfo = transportConfig.getProviderInfo();
-        channel = getSharedChannel(providerInfo);
+        channel = getSharedChannel(transportConfig);
         tripleClientInvoker = buildClientInvoker();
     }
 
@@ -114,17 +122,13 @@ public class TripleClientTransport extends ClientTransport {
     @Override
     public void disconnect() {
         if (channel != null) {
-            try {
-                channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.warn("Triple channel shut down interrupted.");
-            }
+            channel.shutdown();
             if (channel.isShutdown()) {
                 channel = null;
-                channelMap.remove(providerInfo.toString());
+                URL_CONNECTION_MAP.remove(clientTransportConfig);
             }
         } else {
-            channelMap.remove(providerInfo.toString());
+            URL_CONNECTION_MAP.remove(clientTransportConfig);
         }
     }
 
@@ -251,9 +255,8 @@ public class TripleClientTransport extends ClientTransport {
     /**
      * Get shared channel connection
      */
-    private ReferenceCountManagedChannel getSharedChannel(ProviderInfo url) {
-        String key = url.toString();
-        ReferenceCountManagedChannel channel = channelMap.get(key);
+    private ReferenceCountManagedChannel getSharedChannel(ClientTransportConfig config) {
+        ReferenceCountManagedChannel channel = URL_CONNECTION_MAP.get(config);
 
         if (channelAvailable(channel)) {
             channel.incrementAndGetCount();
@@ -263,13 +266,13 @@ public class TripleClientTransport extends ClientTransport {
         }
 
         synchronized (lock) {
-            channel = channelMap.get(key);
+            channel = URL_CONNECTION_MAP.get(config);
             // double check
             if (channelAvailable(channel)) {
                 channel.incrementAndGetCount();
             } else {
-                channel = new ReferenceCountManagedChannel(initChannel(url));
-                channelMap.put(key, channel);
+                channel = new ReferenceCountManagedChannel(initChannel(config.getProviderInfo()));
+                URL_CONNECTION_MAP.put(config, channel);
             }
         }
 

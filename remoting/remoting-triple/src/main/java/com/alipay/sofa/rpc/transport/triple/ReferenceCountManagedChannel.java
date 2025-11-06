@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.transport.triple;
 
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import io.grpc.CallOptions;
 import io.grpc.ClientCall;
 import io.grpc.ConnectivityState;
@@ -29,6 +31,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Also see ReferenceCountExchangeClient
  */
 public class ReferenceCountManagedChannel extends ManagedChannel {
+
+    private final static Logger LOGGER         = LoggerFactory.getLogger(ReferenceCountManagedChannel.class);
 
     private final AtomicInteger referenceCount = new AtomicInteger(0);
 
@@ -48,7 +52,13 @@ public class ReferenceCountManagedChannel extends ManagedChannel {
     @Override
     public ManagedChannel shutdown() {
         if (referenceCount.decrementAndGet() <= 0) {
-            return grpcChannel.shutdown();
+            ManagedChannel shutdown = grpcChannel.shutdown();
+            try {
+                shutdown.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOGGER.warn("Triple channel shut down interrupted.");
+            }
+            return shutdown;
         }
         return grpcChannel;
     }
