@@ -420,7 +420,7 @@ public class TripleServerTest {
             try {
                 RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(36));
                 sampleService.messageSize(msg, 5);
-                Assert.fail();
+                Assert.fail("testDefaultMetadataSize error");
             } catch (Exception e) {
                 Assert.assertTrue(e.getCause().getCause().getMessage().contains("Header size exceeded max allowed size (65536)"));
             }
@@ -429,7 +429,7 @@ public class TripleServerTest {
                 RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(25));
                 sampleService.messageSize(msg, 1);
             } catch (Exception e) {
-                Assert.fail();
+                Assert.fail("testDefaultMetadataSize error: " + e.getMessage());
             }
         } finally {
             RpcRunningState.setDebugMode(originDebugMode);
@@ -468,13 +468,13 @@ public class TripleServerTest {
                 RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(32));
                 sampleService.messageSize(msg, 5);
             } catch (Exception e) {
-                Assert.fail();
+                Assert.fail("testSetInboundMetadataSize error: " + e.getMessage());
             }
 
             try {
                 RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(33));
                 sampleService.messageSize(msg, 1);
-                Assert.fail();
+                Assert.fail("testSetInboundMetadataSize error");
             } catch (Exception e) {
                 Assert.assertTrue(e.getCause().getCause().getMessage().contains("Header size exceeded max allowed size (67584)"));
 
