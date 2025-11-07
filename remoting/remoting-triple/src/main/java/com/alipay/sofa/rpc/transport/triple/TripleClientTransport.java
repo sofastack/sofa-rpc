@@ -273,6 +273,7 @@ public class TripleClientTransport extends ClientTransport {
             } else {
                 channel = new ReferenceCountManagedChannel(initChannel(config.getProviderInfo()));
                 URL_CONNECTION_MAP.put(config, channel);
+                channel.incrementAndGetCount();
             }
         }
 
