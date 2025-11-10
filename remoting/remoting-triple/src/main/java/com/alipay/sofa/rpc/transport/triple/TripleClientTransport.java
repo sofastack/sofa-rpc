@@ -62,12 +62,10 @@ import java.util.concurrent.TimeUnit;
 public class TripleClientTransport extends ClientTransport {
 
     /**
-     * use clientTransportConfig.getProviderInfo() instead of
+     * use transportConfig.getProviderInfo() instead of
      */
     @Deprecated
     protected ProviderInfo providerInfo;
-
-    protected ClientTransportConfig clientTransportConfig;
 
     protected ManagedChannel channel;
 
@@ -100,7 +98,6 @@ public class TripleClientTransport extends ClientTransport {
     public TripleClientTransport(ClientTransportConfig transportConfig) {
         super(transportConfig);
         providerInfo = transportConfig.getProviderInfo();
-        clientTransportConfig = transportConfig;
         connect();
         remoteAddress = InetSocketAddress.createUnresolved(providerInfo.getHost(), providerInfo.getPort());
         localAddress = InetSocketAddress.createUnresolved(NetUtils.getLocalIpv4(), 0);// 端口不准
@@ -125,10 +122,10 @@ public class TripleClientTransport extends ClientTransport {
             channel.shutdown();
             if (channel.isShutdown()) {
                 channel = null;
-                URL_CONNECTION_MAP.remove(clientTransportConfig);
+                URL_CONNECTION_MAP.remove(transportConfig);
             }
         } else {
-            URL_CONNECTION_MAP.remove(clientTransportConfig);
+            URL_CONNECTION_MAP.remove(transportConfig);
         }
     }
 
