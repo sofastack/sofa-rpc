@@ -35,8 +35,6 @@ import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.interceptor.ClientHeaderClientInterceptor;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
@@ -63,8 +61,6 @@ import java.util.concurrent.TimeUnit;
 @Extension("tri")
 public class TripleClientTransport extends ClientTransport {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientTransport.class);
-
     protected ProviderInfo providerInfo;
 
     protected ManagedChannel channel;
@@ -78,7 +74,7 @@ public class TripleClientTransport extends ClientTransport {
     /* <address, gRPC channels> */
     protected final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
 
-    protected final Object lock = new Object();
+    protected final static Object lock = new Object();
 
     protected static int KEEP_ALIVE_INTERVAL = SofaConfigs.getOrCustomDefault(
                                                     RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL,
@@ -114,17 +110,11 @@ public class TripleClientTransport extends ClientTransport {
     @Override
     public void disconnect() {
         if (channel != null) {
-            try {
-                channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.warn("Triple channel shut down interrupted.");
-            }
+            channel.shutdown();
             if (channel.isShutdown()) {
-                channel = null;
                 channelMap.remove(providerInfo.toString());
             }
-        } else {
-            channelMap.remove(providerInfo.toString());
+            channel = null;
         }
     }
 
@@ -270,6 +260,7 @@ public class TripleClientTransport extends ClientTransport {
             } else {
                 channel = new ReferenceCountManagedChannel(initChannel(url));
                 channelMap.put(key, channel);
+                channel.incrementAndGetCount();
             }
         }
 
