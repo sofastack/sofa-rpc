@@ -112,7 +112,7 @@ public class TripleClientTransport extends ClientTransport {
         if (channel != null) {
             channel.shutdown();
             if (channel.isShutdown()) {
-                channelMap.remove(providerInfo.toString());
+                channelMap.remove(providerInfo.toString(), (ReferenceCountManagedChannel) channel);
             }
             channel = null;
         }
