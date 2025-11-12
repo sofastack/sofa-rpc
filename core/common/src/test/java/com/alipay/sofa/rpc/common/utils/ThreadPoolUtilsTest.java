@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.common.utils;
 
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
+import com.alipay.sofa.rpc.common.threadpool.MemorySafeLinkedBlockingQueue;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -151,7 +152,7 @@ public class ThreadPoolUtilsTest {
         BlockingQueue<Runnable> queue = ThreadPoolUtils.buildQueue(0);
         Assert.assertEquals(queue.getClass(), SynchronousQueue.class);
         queue = ThreadPoolUtils.buildQueue(-1);
-        Assert.assertEquals(queue.getClass(), LinkedBlockingQueue.class);
+        Assert.assertEquals(queue.getClass(), MemorySafeLinkedBlockingQueue.class);
         queue = ThreadPoolUtils.buildQueue(10);
         Assert.assertEquals(queue.getClass(), LinkedBlockingQueue.class);
     }
@@ -165,7 +166,7 @@ public class ThreadPoolUtilsTest {
         queue = ThreadPoolUtils.buildQueue(100, true);
         Assert.assertEquals(queue.getClass(), PriorityBlockingQueue.class);
         queue = ThreadPoolUtils.buildQueue(-1, false);
-        Assert.assertEquals(queue.getClass(), LinkedBlockingQueue.class);
+        Assert.assertEquals(queue.getClass(), MemorySafeLinkedBlockingQueue.class);
         queue = ThreadPoolUtils.buildQueue(100, false);
         Assert.assertEquals(queue.getClass(), LinkedBlockingQueue.class);
     }
