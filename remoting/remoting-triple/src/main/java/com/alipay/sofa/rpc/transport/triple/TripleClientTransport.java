@@ -259,8 +259,8 @@ public class TripleClientTransport extends ClientTransport {
                 channel.incrementAndGetCount();
             } else {
                 channel = new ReferenceCountManagedChannel(initChannel(url));
-                channelMap.put(key, channel);
                 channel.incrementAndGetCount();
+                channelMap.put(key, channel);
             }
         }
 
