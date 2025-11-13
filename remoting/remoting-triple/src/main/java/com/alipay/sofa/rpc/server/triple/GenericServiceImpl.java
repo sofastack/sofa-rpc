@@ -120,7 +120,11 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
 
             SofaResponse sofaResponse = invoker.invoke(sofaRequest);
 
-            SofaStreamObserver<Object> clientHandler = (SofaStreamObserver<Object>) sofaResponse.getAppResponse();
+            Object appResponse = sofaResponse.getAppResponse();
+            if (appResponse instanceof Exception) {
+                throw (Exception) appResponse;
+            }
+            SofaStreamObserver<Object> clientHandler = (SofaStreamObserver<Object>) appResponse;
 
             return new StreamObserver<Request>() {
                 private volatile Serializer serializer    = null;
