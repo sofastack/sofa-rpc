@@ -100,7 +100,9 @@ public class SofaProtoUtils {
         for (Method method : declaredMethods) {
             String streamType = mapStreamType(method);
             if (StringUtils.isNotBlank(streamType)) {
-                methodCallType.put(method.getName(), streamType);
+                if (methodCallType.putIfAbsent(method.getName(), streamType) != null) {
+                    throw new SofaRpcException(RpcErrorType.UNKNOWN, "triple pojo stream do not support method overload!!!");
+                }
             }
         }
         return methodCallType;
