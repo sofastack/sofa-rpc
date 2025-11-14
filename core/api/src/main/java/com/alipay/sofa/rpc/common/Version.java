@@ -37,6 +37,6 @@ public final class Version {
     /**
      * 当前Build版本，每次发布修改
      */
-    public static final String BUILD_VERSION = "5.14.1_20251030191357";
+    public static final String BUILD_VERSION = "5.14.1_20251114145341";
 
 }
