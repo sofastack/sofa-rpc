@@ -114,7 +114,7 @@ public class JacksonHelper {
     }
 
     /**
-     * load method paramters and return types to cache, will not pass through to next
+     * load method parameters and return types to cache, will not pass through to next
      *
      * @param key        key
      * @param clazz      interface name
