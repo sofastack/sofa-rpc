@@ -234,6 +234,8 @@ PS:大家也看到了，本JSON文档是支持注释的，而标准JSON是不支
   "transport.use.epoll": false,
   //默认数据包大小 8*1024*1024
   "transport.payload.max": 8388608,
+  //默认grpc header 大小 64*1024
+  "transport.grpc.maxInboundMetadataSize": 65536,
   //默认grpc数据包大小 4*1024*1024
   "transport.grpc.maxInboundMessageSize": 4194304,
   // 客户端io线程数，默认 max(4,cpu+1)

@@ -14,29 +14,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.alipay.sofa.rpc.common;
+package com.alipay.sofa.rpc.test.deadline;
+
+import com.alipay.sofa.rpc.common.RpcConstants;
+import org.junit.Test;
 
 /**
+ * Bolt协议的Deadline调用链集成测试
  *
- * @author <a href=mailto:zhanggeng.zg@antfin.com>GengZhang</a>
- * @since 5.1.0
- * //FIXME 每次发布修改
+ * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public final class Version {
+public class BoltDeadlineChainTest extends AbstractDeadlineChainTest {
 
-    /**
-     * 当前RPC版本，例如：5.6.7
-     */
-    public static final String VERSION       = "5.14.1";
+    @Override
+    protected String getProtocolType() {
+        return RpcConstants.PROTOCOL_TYPE_BOLT;
+    }
 
-    /**
-     * 当前RPC版本，例如： 5.6.7 对应 50607
-     */
-    public static final int    RPC_VERSION   = 51401;
+    @Override
+    protected int getBasePort() {
+        return 22300; // Bolt协议使用22300-22302端口
+    }
 
-    /**
-     * 当前Build版本，每次发布修改
-     */
-    public static final String BUILD_VERSION = "5.14.1_20251114145341";
-
+    @Test
+    public void testBoltDeadlineChain() throws InterruptedException {
+        doTestDeadlineChain();
+    }
 }

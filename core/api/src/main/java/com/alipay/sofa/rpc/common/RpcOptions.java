@@ -416,6 +416,10 @@ public class RpcOptions {
      */
     public static final String TRANSPORT_BUFFER_SIZE                    = "transport.buffer.size";
     /**
+     * 默认 grpc maxInboundMetaSize大小
+     */
+    public static final String TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE = "transport.grpc.maxInboundMetadataSize";
+    /**
      * 默认 grpc maxInboundMessageSize大小
      */
     public static final String TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE  = "transport.grpc.maxInboundMessageSize";
@@ -585,4 +589,8 @@ public class RpcOptions {
      */
     public static final String BOLT_SERIALIZER_REGISTER_EXTENSION       = "sofa.rpc.bolt.serializer.register.extension";
 
+    /**
+     * 是否开启deadline机制
+     */
+    public static final String CONFIG_KEY_DEADLINE_ENABLE               = "deadline.enable";
 }

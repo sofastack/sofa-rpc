@@ -35,8 +35,6 @@ import com.alipay.sofa.rpc.event.ClientSyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.interceptor.ClientHeaderClientInterceptor;
-import com.alipay.sofa.rpc.log.Logger;
-import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
@@ -63,8 +61,6 @@ import java.util.concurrent.TimeUnit;
 @Extension("tri")
 public class TripleClientTransport extends ClientTransport {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(TripleClientTransport.class);
-
     protected ProviderInfo providerInfo;
 
     protected ManagedChannel channel;
@@ -78,7 +74,7 @@ public class TripleClientTransport extends ClientTransport {
     /* <address, gRPC channels> */
     protected final static ConcurrentMap<String, ReferenceCountManagedChannel> channelMap = new ConcurrentHashMap<>();
 
-    protected final Object lock = new Object();
+    protected final static Object lock = new Object();
 
     protected static int KEEP_ALIVE_INTERVAL = SofaConfigs.getOrCustomDefault(
                                                     RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL,
@@ -114,14 +110,12 @@ public class TripleClientTransport extends ClientTransport {
     @Override
     public void disconnect() {
         if (channel != null) {
-            try {
-                channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.warn("Triple channel shut down interrupted.");
+            channel.shutdown();
+            if (channel.isShutdown()) {
+                channelMap.remove(providerInfo.toString(), (ReferenceCountManagedChannel) channel);
             }
             channel = null;
         }
-        channelMap.remove(providerInfo.toString());
     }
 
     @Override
@@ -265,6 +259,7 @@ public class TripleClientTransport extends ClientTransport {
                 channel.incrementAndGetCount();
             } else {
                 channel = new ReferenceCountManagedChannel(initChannel(url));
+                channel.incrementAndGetCount();
                 channelMap.put(key, channel);
             }
         }
@@ -283,6 +278,7 @@ public class TripleClientTransport extends ClientTransport {
         builder.usePlaintext();
         builder.disableRetry();
         builder.intercept(clientHeaderClientInterceptor);
+        builder.maxInboundMetadataSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE));
         builder.maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE));
 
         if (KEEP_ALIVE_INTERVAL > 0) {

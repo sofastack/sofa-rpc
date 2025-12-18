@@ -20,7 +20,6 @@ import com.alipay.remoting.AsyncContext;
 import com.alipay.remoting.BizContext;
 import com.alipay.remoting.InvokeContext;
 import com.alipay.remoting.rpc.protocol.AsyncUserProcessor;
-import com.alipay.remoting.rpc.protocol.UserProcessor;
 import com.alipay.sofa.rpc.codec.bolt.AbstractSerializationRegister;
 import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConfigs;
@@ -50,7 +49,6 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.MessageBuilder;
 import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
-import com.alipay.sofa.rpc.server.UserThreadPool;
 
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -90,7 +88,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
      */
     public BoltServerProcessor(BoltServer boltServer) {
         this.boltServer = boltServer;
-        this.executorSelector = new UserThreadPoolSelector(); // 支持自定义业务线程池
+        this.executorSelector = new UserThreadPoolSelector(getExecutor()); // 支持自定义业务线程池
     }
 
     /**
@@ -340,44 +338,6 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
     @Override
     public ExecutorSelector getExecutorSelector() {
         return UserThreadPoolManager.hasUserThread() ? executorSelector : null;
-    }
-
-    /**
-     * Executor Selector
-     *
-     * @author zhanggeng
-     * @since 4.10.0
-     */
-    public class UserThreadPoolSelector implements UserProcessor.ExecutorSelector {
-
-        @Override
-        public Executor select(String requestClass, Object requestHeader) {
-            if (SofaRequest.class.getName().equals(requestClass)
-                && requestHeader != null) {
-                Map<String, String> headerMap = (Map<String, String>) requestHeader;
-                try {
-                    String service = headerMap.get(RemotingConstants.HEAD_SERVICE);
-                    if (service == null) {
-                        service = headerMap.get(RemotingConstants.HEAD_TARGET_SERVICE);
-                    }
-                    if (service != null) {
-                        UserThreadPool threadPool = UserThreadPoolManager.getUserThread(service);
-                        if (threadPool != null) {
-                            Executor executor = threadPool.getUserExecutor();
-                            if (executor != null) {
-                                // 存在自定义线程池，且不为空
-                                return executor;
-                            }
-                        }
-                    }
-                } catch (Exception e) {
-                    if (LOGGER.isWarnEnabled()) {
-                        LOGGER.warn(LogCodes.getLog(LogCodes.WARN_DESERIALIZE_HEADER_ERROR), e);
-                    }
-                }
-            }
-            return getExecutor();
-        }
     }
 
     @Override

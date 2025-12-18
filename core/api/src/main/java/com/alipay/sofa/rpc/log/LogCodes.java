@@ -216,6 +216,7 @@ public class LogCodes {
     public static final String                 ERROR_QUERY_ATTRIBUTE                      = "019990025";
     public static final String                 ERROR_UPDATE_ATTRIBUTE                     = "019990026";
     public static final String                 ERROR_SERVER_PROTOCOL_NOT_SUPPORT          = "019990027";
+    public static final String                 ERROR_DEADLINE_TIMEOUT_EXTRACT             = "019990028";
 
     //02 运行
     // 02000 泛化

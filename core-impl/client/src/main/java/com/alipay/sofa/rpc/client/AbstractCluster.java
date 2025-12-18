@@ -19,6 +19,7 @@ package com.alipay.sofa.rpc.client;
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
 import com.alipay.sofa.rpc.client.http.RpcHttpClient;
 import com.alipay.sofa.rpc.common.MockMode;
+import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.json.JSON;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
@@ -33,6 +34,7 @@ import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRouteException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
+import com.alipay.sofa.rpc.core.exception.SofaTimeOutException;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
@@ -65,6 +67,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.alipay.sofa.rpc.client.ProviderInfoAttrs.ATTR_TIMEOUT;
 import static com.alipay.sofa.rpc.common.RpcConfigs.getIntValue;
+import static com.alipay.sofa.rpc.common.RpcOptions.CONFIG_KEY_DEADLINE_ENABLE;
 import static com.alipay.sofa.rpc.common.RpcOptions.CONSUMER_INVOKE_TIMEOUT;
 
 /**
@@ -609,6 +612,20 @@ public abstract class AbstractCluster extends Cluster {
             checkProviderVersion(providerInfo, request); // 根据服务端版本特殊处理
             String invokeType = request.getInvokeType();
             int timeout = resolveTimeout(request, consumerConfig, providerInfo);
+
+            Long upStreamDeadlineTime = RpcInvokeContext.getContext().getDeadline();
+            if (upStreamDeadlineTime != null) {
+                int remainTime = (int) (upStreamDeadlineTime - System.currentTimeMillis());
+                if (remainTime <= 0) {
+                    throw new SofaTimeOutException("Deadline exceeded before sending request");
+                }
+                timeout = Math.min(timeout, remainTime);
+                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_REMAIN_TIME, remainTime);
+            } else if (Boolean.parseBoolean(consumerConfig.getParameter(CONFIG_KEY_DEADLINE_ENABLE))) {
+                // 如果启用了deadline机制，使用timeout值作为deadline进行透传
+                request.addRequestProp(RemotingConstants.HEAD_DEADLINE_REMAIN_TIME, timeout);
+            }
+
             request.setTimeout(timeout);
             SofaResponse response = null;
             // 同步调用
