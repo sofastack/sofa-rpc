@@ -138,9 +138,15 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
                     try {
                         Thread.currentThread().setContextClassLoader(serviceClassLoader);
                         checkInitialize(request);
-                        Object message = getInvokeArgs(request, argTypes, serializer, false)[0];
-                        serverResponseHandler.setSerializeType(serializeType);
-                        clientHandler.onNext(message);
+                        Object[] invokeArgs = getInvokeArgs(request, argTypes, serializer, false);
+                        if (invokeArgs.length > 0) {
+                            Object message = invokeArgs[0];
+                            serverResponseHandler.setSerializeType(serializeType);
+                            clientHandler.onNext(message);
+                        } else {
+                            // 根据业务逻辑决定如何处理没有参数的情况
+                            LOGGER.warn("Received request without arguments");
+                        }
                     } finally {
                         Thread.currentThread().setContextClassLoader(oldClassLoader);
                     }
