@@ -144,8 +144,8 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
                             serverResponseHandler.setSerializeType(serializeType);
                             clientHandler.onNext(message);
                         } else {
-                            // 根据业务逻辑决定如何处理没有参数的情况
-                            LOGGER.warn("Received request without arguments");
+                            // Empty argument list from request - may indicate client sending empty/malformed message
+                            LOGGER.warn("Received request without arguments for method: {}", methodName);
                         }
                     } finally {
                         Thread.currentThread().setContextClassLoader(oldClassLoader);
