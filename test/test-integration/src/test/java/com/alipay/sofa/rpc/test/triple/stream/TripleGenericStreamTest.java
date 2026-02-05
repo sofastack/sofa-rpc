@@ -58,17 +58,17 @@ public class TripleGenericStreamTest {
     public static void beforeClass() throws InterruptedException {
         RpcRunningState.setUnitTestMode(true);
         ServerConfig serverConfig = new ServerConfig()
-                .setProtocol("tri")
-                .setPort(50066)
-                .setDaemon(false);
+            .setProtocol("tri")
+            .setPort(50066)
+            .setDaemon(false);
 
         ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server");
         helloServiceInst = Mockito.spy(new HelloServiceImpl());
         providerConfig = new ProviderConfig<HelloService>()
-                .setApplication(applicationConfig)
-                .setInterfaceId(HelloService.class.getName())
-                .setRef(helloServiceInst)
-                .setServer(serverConfig);
+            .setApplication(applicationConfig)
+            .setInterfaceId(HelloService.class.getName())
+            .setRef(helloServiceInst)
+            .setServer(serverConfig);
         providerConfig.export();
 
         // 等待服务器完全启动
@@ -76,11 +76,11 @@ public class TripleGenericStreamTest {
 
         ApplicationConfig consumerApp = new ApplicationConfig().setAppName("triple-client");
         consumerConfig = new ConsumerConfig<HelloService>()
-                .setApplication(consumerApp)
-                .setInterfaceId(HelloService.class.getName())
-                .setProtocol("tri")
-                .setTimeout(1000000)
-                .setDirectUrl("triple://127.0.0.1:50066?appName=triple-server");
+            .setApplication(consumerApp)
+            .setInterfaceId(HelloService.class.getName())
+            .setProtocol("tri")
+            .setTimeout(1000000)
+            .setDirectUrl("triple://127.0.0.1:50066?appName=triple-server");
         helloServiceRef = consumerConfig.refer();
 
         // 等待客户端连接完全建立
