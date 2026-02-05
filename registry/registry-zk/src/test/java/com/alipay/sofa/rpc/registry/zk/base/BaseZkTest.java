@@ -38,7 +38,7 @@ public abstract class BaseZkTest {
         RpcRunningState.setUnitTestMode(true);
 
         try {
-            server = new TestingServer(2181, true);
+            server = new TestingServer(2181, false);
             server.start();
         } catch (Exception e) {
             e.printStackTrace();

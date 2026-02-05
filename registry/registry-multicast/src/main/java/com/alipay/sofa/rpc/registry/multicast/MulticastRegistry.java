@@ -294,7 +294,7 @@ public class MulticastRegistry extends Registry {
                 public void run() {
                     byte[] buf = new byte[2048];
                     DatagramPacket recv = new DatagramPacket(buf, buf.length);
-                    while (!multicastSocket.isClosed()) {
+                    while (multicastSocket != null && !multicastSocket.isClosed()) {
                         try {
                             multicastSocket.receive(recv);
                             String msg = new String(recv.getData()).trim();
@@ -305,7 +305,7 @@ public class MulticastRegistry extends Registry {
                             MulticastRegistry.this.receive(msg, (InetSocketAddress) recv.getSocketAddress());
                             Arrays.fill(buf, (byte) 0);
                         } catch (Throwable e) {
-                            if (!multicastSocket.isClosed()) {
+                            if (multicastSocket != null && !multicastSocket.isClosed()) {
                                 LOGGER.error(e.getMessage(), e);
                             }
                         }
