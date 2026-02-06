@@ -21,6 +21,8 @@ import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.RegistryConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.registry.multicast.api.HelloService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,6 +35,8 @@ import java.net.InetAddress;
  * @version : MulticastRegistryTest.java, v 0.1 2020年03月04日 9:33 下午 zhaowang Exp $
  */
 public class MulticastRegistryTest {
+
+    private final static Logger LOGGER = LoggerFactory.getLogger(MulticastRegistryTest.class);
 
     // 非守护线程
     public static final ServerConfig SERVER_CONFIG = new ServerConfig()
@@ -104,7 +108,7 @@ public class MulticastRegistryTest {
             Assert.assertTrue(providerGroup.isEmpty());
         } catch (Exception e) {
             // 多播测试可能因网络环境而失败，这是预期的行为
-            System.out.println("Multicast test failed due to network environment: " + e.getMessage());
+            LOGGER.warn("Multicast test failed due to network environment: " + e.getMessage());
         } finally {
             server.destroy();
             try {
@@ -134,13 +138,13 @@ public class MulticastRegistryTest {
             ProviderGroup providerGroup1 = client.getAllProviderCache().get(MulticastRegistryHelper.buildListDataId(PROVIDER_CONFIG, SERVER_CONFIG.getProtocol()));
             // 多播测试可能因网络环境而失败，此时直接通过测试
             if (providerGroup1 == null || providerGroup1.isEmpty()) {
-                System.out.println("Multicast message not received due to network environment, skipping assertion");
+                LOGGER.warn("Multicast message not received due to network environment, skipping assertion");
                 return;
             }
             Assert.assertFalse(providerGroup1.isEmpty());
         } catch (Exception e) {
             // 多播测试可能因网络环境而失败，这是预期的行为
-            System.out.println("Multicast test failed due to network environment: " + e.getMessage());
+            LOGGER.warn("Multicast test failed due to network environment: " + e.getMessage());
         } finally {
             server.destroy();
             try {

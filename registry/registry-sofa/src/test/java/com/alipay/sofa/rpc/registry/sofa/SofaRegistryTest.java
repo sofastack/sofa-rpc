@@ -63,7 +63,7 @@ public class SofaRegistryTest {
 
     @BeforeClass
     public static void beforeClass() {
-        // 强制指定本地为Leader,避免Leader选举问题
+        // force local as leader
         System.setProperty("meta.server.leader.address", "127.0.0.1:9600");
         System.setProperty("meta.server.address", "127.0.0.1;127.0.0.1:9600");
         System.setProperty("data.server.address", "127.0.0.1:9620");
@@ -120,6 +120,13 @@ public class SofaRegistryTest {
             registryMain.stopRegistry();
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            // clean after test
+            System.clearProperty("meta.server.leader.address");
+            System.clearProperty("meta.server.address");
+            System.clearProperty("data.server.address");
+            System.clearProperty("registry.data.server.initial.leader");
+            System.clearProperty("session.server.address");
         }
     }
 
