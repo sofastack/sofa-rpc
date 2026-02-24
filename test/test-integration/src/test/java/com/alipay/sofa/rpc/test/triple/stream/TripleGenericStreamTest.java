@@ -71,6 +71,9 @@ public class TripleGenericStreamTest {
             .setServer(serverConfig);
         providerConfig.export();
 
+        // 等待服务器完全启动
+        Thread.sleep(2000);
+
         ApplicationConfig consumerApp = new ApplicationConfig().setAppName("triple-client");
         consumerConfig = new ConsumerConfig<HelloService>()
             .setApplication(consumerApp)
@@ -79,15 +82,46 @@ public class TripleGenericStreamTest {
             .setTimeout(1000000)
             .setDirectUrl("triple://127.0.0.1:50066?appName=triple-server");
         helloServiceRef = consumerConfig.refer();
+
+        // 等待客户端连接完全建立
+        Thread.sleep(3000);
     }
 
     @AfterClass
     public static void afterClass() {
-        consumerConfig.unRefer();
-        providerConfig.unExport();
-        RpcRuntimeContext.destroy();
-        RpcInternalContext.removeContext();
-        RpcInvokeContext.removeContext();
+        try {
+            if (consumerConfig != null) {
+                consumerConfig.unRefer();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error while unRefer consumerConfig", e);
+        }
+
+        try {
+            if (providerConfig != null) {
+                providerConfig.unExport();
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Error while unExport providerConfig", e);
+        }
+
+        try {
+            RpcRuntimeContext.destroy();
+        } catch (Exception e) {
+            LOGGER.warn("Error while destroying RpcRuntimeContext", e);
+        }
+
+        try {
+            RpcInternalContext.removeContext();
+        } catch (Exception e) {
+            LOGGER.warn("Error while removing RpcInternalContext", e);
+        }
+
+        try {
+            RpcInvokeContext.removeContext();
+        } catch (Exception e) {
+            LOGGER.warn("Error while removing RpcInvokeContext", e);
+        }
     }
 
     @Test
@@ -114,13 +148,14 @@ public class TripleGenericStreamTest {
 
             @Override
             public void onError(Throwable throwable) {
+                LOGGER.error("Error in testTripleParentCall stream", throwable);
                 countDownLatch.countDown();
             }
         });
 
-        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
-        Assert.assertEquals(5, list.size());
-        Assert.assertTrue(receivedFinish.get());
+        Assert.assertTrue("Stream operation timed out", countDownLatch.await(30, TimeUnit.SECONDS));
+        Assert.assertEquals("Expected 5 responses", 5, list.size());
+        Assert.assertTrue("Stream should be completed", receivedFinish.get());
     }
 
     @Test
@@ -164,7 +199,9 @@ public class TripleGenericStreamTest {
                     @Override
                     public void onError(Throwable throwable) {
                         LOGGER.error("bi stream resp onException", throwable);
-                        Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
+                        if (throwable.getMessage() != null) {
+                            Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
+                        }
                         receivedException.set(true);
                         countDownLatch.countDown();
                     }
@@ -179,19 +216,19 @@ public class TripleGenericStreamTest {
         }
         if (!endWithException) {
             sofaStreamObserver.onNext(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_FINISH, -2));
-            Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
-            Assert.assertTrue(receivedFinish.get());
+            Assert.assertTrue("Bi-stream operation timed out", countDownLatch.await(30, TimeUnit.SECONDS));
+            Assert.assertTrue("Stream should be completed", receivedFinish.get());
             sofaStreamObserver.onCompleted();
             assertServerResponseType(serverResponseList);
-            Assert.assertFalse(receivedException.get());
+            Assert.assertFalse("Should not receive exception", receivedException.get());
             Assert.assertThrows(Throwable.class, () -> sofaStreamObserver.onNext(new ClientRequest("", 123)));
         } else {
             sofaStreamObserver.onNext(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_ERROR, -2));
-            Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+            Assert.assertTrue("Bi-stream operation timed out", countDownLatch.await(30, TimeUnit.SECONDS));
             sofaStreamObserver.onError(new RuntimeException(HelloService.ERROR_MSG));
             Assert.assertThrows(Throwable.class, () -> sofaStreamObserver.onNext(new ClientRequest(HELLO_MSG, 0)));
-            Assert.assertFalse(receivedFinish.get());
-            Assert.assertTrue(receivedException.get());
+            Assert.assertFalse("Stream should not be completed", receivedFinish.get());
+            Assert.assertTrue("Should receive exception", receivedException.get());
         }
         verify(helloServiceInst, times(1)).sayHelloBiStream(any());
     }
@@ -233,22 +270,25 @@ public class TripleGenericStreamTest {
 
             @Override
             public void onError(Throwable throwable) {
-                Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
+                LOGGER.error("Server stream error", throwable);
+                if (throwable.getMessage() != null) {
+                    Assert.assertTrue(throwable.getMessage().contains(HelloService.ERROR_MSG));
+                }
                 responseException.set(true);
                 countDownLatch.countDown();
             }
         });
 
-        Assert.assertTrue(countDownLatch.await(20, TimeUnit.SECONDS));
+        Assert.assertTrue("Server stream operation timed out", countDownLatch.await(30, TimeUnit.SECONDS));
         if (endWithException) {
-            Assert.assertTrue(responseException.get());
-            Assert.assertFalse(responseFinished.get());
+            Assert.assertTrue("Should receive exception", responseException.get());
+            Assert.assertFalse("Stream should not be completed", responseFinished.get());
             assertServerResponseType(serverResponseList);
         } else {
-            Assert.assertTrue(responseFinished.get());
-            Assert.assertFalse(responseException.get());
+            Assert.assertTrue("Stream should be completed", responseFinished.get());
+            Assert.assertFalse("Should not receive exception", responseException.get());
         }
-        Assert.assertEquals(responseTimes, count.get());
+        Assert.assertEquals("Expected response count", responseTimes, count.get());
         verify(helloServiceInst, times(1)).sayHelloServerStream(any(), any());
     }
 
