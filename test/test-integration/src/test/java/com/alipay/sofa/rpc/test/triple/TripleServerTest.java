@@ -433,6 +433,7 @@ public class TripleServerTest {
             }
         } finally {
             RpcRunningState.setDebugMode(originDebugMode);
+            RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE, originInboundMetadataSize);
         }
     }
 
