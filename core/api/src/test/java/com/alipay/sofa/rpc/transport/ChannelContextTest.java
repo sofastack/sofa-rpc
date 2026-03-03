@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.transport;
 
+import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -57,21 +58,18 @@ public class ChannelContextTest {
         context.putHeadCache((short) 1, "testValue");
         Assert.assertEquals("testValue", context.getHeader((short) 1));
 
-        // Note: invalidateHeadCache takes Byte key while putHeadCache uses Short key.
-        // Due to type mismatch, a Byte key cannot find a Short entry in the map.
-        // Verify that cache remains unchanged when called with a Byte key.
-        context.invalidateHeadCache((byte) 1, "testValue");
-        Assert.assertEquals("testValue", context.getHeader((short) 1));
+        // Invalidate with matching value should succeed
+        context.invalidateHeadCache((short) 1, "testValue");
+        Assert.assertNull(context.getHeader((short) 1));
     }
 
-    @Test
-    public void testInvalidateHeadCacheNoMatchingKey() {
+    @Test(expected = SofaRpcRuntimeException.class)
+    public void testInvalidateHeadCacheMismatch() {
         ChannelContext context = new ChannelContext();
         context.putHeadCache((short) 1, "testValue");
 
-        // Byte key cannot match Short key in the map, so no exception is thrown
-        context.invalidateHeadCache((byte) 1, "wrongValue");
-        Assert.assertEquals("testValue", context.getHeader((short) 1));
+        // Invalidate with non-matching value should throw
+        context.invalidateHeadCache((short) 1, "wrongValue");
     }
 
     @Test
@@ -80,7 +78,7 @@ public class ChannelContextTest {
         context.putHeadCache((short) 1, "testValue");
 
         // Invalidate a key that doesn't exist should be a no-op
-        context.invalidateHeadCache((byte) 99, "anyValue");
+        context.invalidateHeadCache((short) 99, "anyValue");
         Assert.assertEquals("testValue", context.getHeader((short) 1));
     }
 
@@ -88,7 +86,7 @@ public class ChannelContextTest {
     public void testInvalidateHeadCacheWhenCacheIsNull() {
         ChannelContext context = new ChannelContext();
         // Should not throw when headerCache is null
-        context.invalidateHeadCache((byte) 1, "value");
+        context.invalidateHeadCache((short) 1, "value");
     }
 
     @Test

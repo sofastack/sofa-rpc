@@ -80,7 +80,7 @@ public class ChannelContext {
      * @param key   the key
      * @param value the value
      */
-    public void invalidateHeadCache(Byte key, String value) {
+    public void invalidateHeadCache(Short key, String value) {
         if (headerCache != null) {
             String old = headerCache.get(key);
             if (old != null) {
