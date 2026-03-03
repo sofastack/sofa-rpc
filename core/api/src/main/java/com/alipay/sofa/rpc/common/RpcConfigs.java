@@ -342,7 +342,7 @@ public class RpcConfigs {
         List<RpcConfigListener> listeners = CFG_LISTENER.get(key);
         if (listeners != null) {
             listeners.remove(listener);
-            if (listeners.size() == 0) {
+            if (listeners.isEmpty()) {
                 CFG_LISTENER.remove(key);
             }
         }
