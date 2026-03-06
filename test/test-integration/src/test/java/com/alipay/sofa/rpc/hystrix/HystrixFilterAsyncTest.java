@@ -255,7 +255,7 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
     }
 
     @Test
-    public void testHystrixLockNotRelease() {
+    public void testHystrixLockNotRelease() throws InterruptedException {
         // 通过 filter mock 锁超时的情况
         providerConfig = defaultServer(2000);
         providerConfig.export();
@@ -267,11 +267,10 @@ public class HystrixFilterAsyncTest extends ActivelyDestroyTest {
 
         try {
             //wait server ok
-            Thread.sleep(2000);
+            Thread.sleep(3000);
             HystrixService.sayHello("abc", 24);
             Assert.fail();
-        } catch (Exception e) {
-            Assert.assertTrue(e instanceof SofaTimeOutException);
+        } catch (SofaTimeOutException e) {
             Assert
                 .assertEquals(
                     "Asynchronous execution timed out, please check Hystrix configuration. Events: [SofaAsyncHystrixEvent#EMIT]",

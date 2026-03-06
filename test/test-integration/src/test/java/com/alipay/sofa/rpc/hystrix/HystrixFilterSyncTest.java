@@ -128,13 +128,15 @@ public class HystrixFilterSyncTest extends ActivelyDestroyTest {
         return new ProviderConfig<HystrixService>()
             .setInterfaceId(HystrixService.class.getName())
             .setRef(new InvokeCounterHystrixService(sleep))
-            .setServer(serverConfig);
+            .setServer(serverConfig)
+            .setRepeatedExportLimit(-1);
     }
 
     private ConsumerConfig<HystrixService> defaultClient() {
         return new ConsumerConfig<HystrixService>()
             .setInterfaceId(HystrixService.class.getName())
             .setDirectUrl("bolt://127.0.0.1:22222")
-            .setParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED, String.valueOf(true));
+            .setParameter(HystrixConstants.SOFA_HYSTRIX_ENABLED, String.valueOf(true))
+            .setRepeatedReferLimit(-1);
     }
 }
