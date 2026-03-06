@@ -209,7 +209,7 @@ public abstract class AbstractHttpServer implements Server {
         String key = getUniqueName(providerConfig);
         serverHandler.getInvokerMap().remove(key);
         // 如果最后一个需要关闭，则关闭
-        if (closeIfNoEntry && serverHandler.getInvokerMap().size() == 0) {
+        if (closeIfNoEntry && serverHandler.getInvokerMap().isEmpty()) {
             stop();
         }
     }

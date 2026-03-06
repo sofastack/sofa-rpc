@@ -341,7 +341,7 @@ public class LocalRegistry extends Registry {
         List<ConsumerConfig> listeners = notifyListeners.get(key);
         if (listeners != null) {
             listeners.remove(config);
-            if (listeners.size() == 0) {
+            if (listeners.isEmpty()) {
                 notifyListeners.remove(key);
             }
         }

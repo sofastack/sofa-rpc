@@ -69,7 +69,7 @@ public class BatchExecutorQueue<T> {
             int i = 0;
             boolean flushedOnce = false;
             while ((item = snapshot.poll()) != null) {
-                if (snapshot.size() == 0) {
+                if (snapshot.isEmpty()) {
                     flushedOnce = false;
                     break;
                 }
