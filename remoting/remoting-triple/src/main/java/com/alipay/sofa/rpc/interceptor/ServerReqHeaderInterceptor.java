@@ -151,7 +151,7 @@ public class ServerReqHeaderInterceptor extends TripleServerInterceptor {
                         }
                         super.close(status, trailers);
                     } finally {
-                        if (!status.isOk() && RpcInternalContext.getContext().isProviderSide() &&
+                        if (!status.isOk() && internalContext.isProviderSide() &&
                             traceEnd.compareAndSet(false, true)) {
                             RpcInvokeContext.resetContext(invokeContext);
                             RpcInternalContext.setContext(internalContext);
