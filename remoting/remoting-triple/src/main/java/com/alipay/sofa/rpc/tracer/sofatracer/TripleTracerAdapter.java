@@ -351,10 +351,8 @@ public class TripleTracerAdapter {
         if (EventBus.isEnable(ServerSendEvent.class)) {
             if (ctxWithSpan != null) {
                 SofaTraceContext sofaTraceContext = SofaTraceContextHolder.getSofaTraceContext();
-                if (sofaTraceContext.getCurrentSpan() == null) {
-                    SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
-                    sofaTraceContext.push(originalSpan);
-                }
+                SofaTracerSpan originalSpan = (SofaTracerSpan) TracingContextKey.getKey().get(ctxWithSpan);
+                sofaTraceContext.push(originalSpan);
             }
             if (request == null) {
                 request = new SofaRequest();
