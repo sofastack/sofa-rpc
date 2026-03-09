@@ -310,7 +310,7 @@ public class TripleTracerAdapter {
             SocketAddress socketAddress = call.getAttributes().get(
                 Grpc.TRANSPORT_ATTR_REMOTE_ADDR);
             if (socketAddress instanceof InetSocketAddress) {
-                remoteIp = ((InetSocketAddress) socketAddress).getHostName();
+                remoteIp = ((InetSocketAddress) socketAddress).getAddress().getHostAddress();
             }
 
             String methodName;
