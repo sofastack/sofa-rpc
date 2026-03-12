@@ -31,6 +31,7 @@ import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.UnPublishServiceResult;
 import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceRequest;
 import com.alipay.sofa.rpc.registry.mesh.model.UnSubscribeServiceResult;
+import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -39,7 +40,7 @@ import org.junit.Test;
 /**
  * @author <a href=mailto:leizhiyuan@gmail.com>leizhiyuan</a>
  */
-public class MeshApiClientTest extends BaseMeshTest {
+public class MeshApiClientTest extends ActivelyDestroyTest {
 
     private MeshApiClient  meshApiClient;
 

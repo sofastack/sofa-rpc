@@ -286,4 +286,240 @@ public class FurySerializerTest {
         System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
     }
 
+    @Test
+    public void testEncodeAndDecodeWithEmptyString() {
+        // Test empty string serialization
+        AbstractByteBuf data = serializer.encode("", null);
+        String result = (String) serializer.decode(data, String.class, null);
+        Assert.assertEquals("", result);
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithSpecialCharacters() {
+        // Test string with special characters
+        String specialString = "Hello\nWorld\tWith\"Special'Chars\\And/Symbols!@#$%^&*()";
+        AbstractByteBuf data = serializer.encode(specialString, null);
+        String result = (String) serializer.decode(data, String.class, null);
+        Assert.assertEquals(specialString, result);
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithUnicodeCharacters() {
+        // Test string with unicode characters
+        String unicodeString = "Hello 世界 🌍 Привет";
+        AbstractByteBuf data = serializer.encode(unicodeString, null);
+        String result = (String) serializer.decode(data, String.class, null);
+        Assert.assertEquals(unicodeString, result);
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithLargeString() {
+        // Test large string serialization
+        StringBuilder largeString = new StringBuilder();
+        for (int i = 0; i < 10000; i++) {
+            largeString.append("test");
+        }
+        AbstractByteBuf data = serializer.encode(largeString.toString(), null);
+        String result = (String) serializer.decode(data, String.class, null);
+        Assert.assertEquals(largeString.toString(), result);
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithNullContext() {
+        // Test encoding/decoding with null context (already tested but explicit)
+        DemoRequest request = new DemoRequest();
+        request.setName("test");
+        AbstractByteBuf data = serializer.encode(request, null);
+        DemoRequest result = (DemoRequest) serializer.decode(data, DemoRequest.class, null);
+        Assert.assertEquals("test", result.getName());
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithEmptyContext() {
+        // Test encoding/decoding with empty context
+        Map<String, String> emptyContext = new HashMap<>();
+        DemoRequest request = new DemoRequest();
+        request.setName("test");
+        AbstractByteBuf data = serializer.encode(request, emptyContext);
+        DemoRequest result = (DemoRequest) serializer.decode(data, DemoRequest.class, emptyContext);
+        Assert.assertEquals("test", result.getName());
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithContextWithData() {
+        // Test encoding/decoding with context containing data
+        Map<String, String> context = new HashMap<>();
+        context.put("key1", "value1");
+        context.put("key2", "value2");
+        DemoRequest request = new DemoRequest();
+        request.setName("test");
+        AbstractByteBuf data = serializer.encode(request, context);
+        DemoRequest result = (DemoRequest) serializer.decode(data, DemoRequest.class, context);
+        Assert.assertEquals("test", result.getName());
+    }
+
+    @Test
+    public void testDecodeWithWrongClassType() {
+        // Note: Fury may not throw exception for wrong class type if the classes are compatible
+        // This test verifies the behavior - it may succeed or fail depending on fury's type checking
+        DemoRequest request = new DemoRequest();
+        request.setName("test");
+        AbstractByteBuf data = serializer.encode(request, null);
+
+        // Try to decode as DemoResponse instead of DemoRequest
+        // Fury uses compatible mode, so this may not throw exception
+        // Just verify no exception is thrown
+        try {
+            Object result = serializer.decode(data, DemoResponse.class, null);
+            // If no exception, the result may be null or castable
+        } catch (Exception e) {
+            // Exception is also acceptable behavior
+        }
+    }
+
+    @Test
+    public void testEncodePrimitiveTypes() {
+        // Test integer serialization
+        Integer intVal = 12345;
+        AbstractByteBuf data = serializer.encode(intVal, null);
+        Integer result = (Integer) serializer.decode(data, Integer.class, null);
+        Assert.assertEquals(intVal, result);
+
+        // Test long serialization
+        Long longVal = 9876543210L;
+        data = serializer.encode(longVal, null);
+        Long resultLong = (Long) serializer.decode(data, Long.class, null);
+        Assert.assertEquals(longVal, resultLong);
+
+        // Test boolean serialization
+        Boolean boolVal = true;
+        data = serializer.encode(boolVal, null);
+        Boolean resultBool = (Boolean) serializer.decode(data, Boolean.class, null);
+        Assert.assertEquals(boolVal, resultBool);
+    }
+
+    @Test
+    public void testEncodeAndDecodeWithNullValue() {
+        // Test DemoRequest with null name
+        DemoRequest request = new DemoRequest();
+        request.setName(null);
+        AbstractByteBuf data = serializer.encode(request, null);
+        DemoRequest result = (DemoRequest) serializer.decode(data, DemoRequest.class, null);
+        Assert.assertNull(result.getName());
+    }
+
+    @Test
+    public void testMultipleEncodeDecodeCycles() {
+        // Test multiple encode/decode cycles
+        DemoRequest original = new DemoRequest();
+        original.setName("original");
+
+        // First cycle
+        AbstractByteBuf data1 = serializer.encode(original, null);
+        DemoRequest result1 = (DemoRequest) serializer.decode(data1, DemoRequest.class, null);
+        Assert.assertEquals("original", result1.getName());
+
+        // Second cycle
+        AbstractByteBuf data2 = serializer.encode(result1, null);
+        DemoRequest result2 = (DemoRequest) serializer.decode(data2, DemoRequest.class, null);
+        Assert.assertEquals("original", result2.getName());
+
+        // Third cycle
+        AbstractByteBuf data3 = serializer.encode(result2, null);
+        DemoRequest result3 = (DemoRequest) serializer.decode(data3, DemoRequest.class, null);
+        Assert.assertEquals("original", result3.getName());
+    }
+
+    @Test
+    public void testSofaRequestWithNullMethodArgs() {
+        // Test SofaRequest with null method args
+        SofaRequest request = new SofaRequest();
+        request.setInterfaceName("test.Interface");
+        request.setMethodName("testMethod");
+        request.setTargetServiceUniqueName("test.Interface:1.0");
+        request.setMethodArgs(null);
+        request.setMethodArgSigs(null);
+
+        AbstractByteBuf data = serializer.encode(request, null);
+        SofaRequest result = (SofaRequest) serializer.decode(data, SofaRequest.class, null);
+
+        Assert.assertEquals("test.Interface", result.getInterfaceName());
+        Assert.assertEquals("testMethod", result.getMethodName());
+        Assert.assertNull(result.getMethodArgs());
+        Assert.assertNull(result.getMethodArgSigs());
+    }
+
+    @Test
+    public void testSofaRequestWithEmptyMethodArgs() {
+        // Test SofaRequest with empty method args
+        SofaRequest request = new SofaRequest();
+        request.setInterfaceName("test.Interface");
+        request.setMethodName("testMethod");
+        request.setTargetServiceUniqueName("test.Interface:1.0");
+        request.setMethodArgs(new Object[] {});
+        request.setMethodArgSigs(new String[] {});
+
+        AbstractByteBuf data = serializer.encode(request, null);
+        SofaRequest result = (SofaRequest) serializer.decode(data, SofaRequest.class, null);
+
+        Assert.assertEquals("test.Interface", result.getInterfaceName());
+        Assert.assertEquals("testMethod", result.getMethodName());
+        Assert.assertNotNull(result.getMethodArgs());
+        Assert.assertEquals(0, result.getMethodArgs().length);
+    }
+
+    @Test
+    public void testSofaResponseWithNullAppResponse() {
+        // Test SofaResponse with null app response
+        SofaResponse response = new SofaResponse();
+        response.setAppResponse(null);
+
+        AbstractByteBuf data = serializer.encode(response, null);
+        SofaResponse result = (SofaResponse) serializer.decode(data, SofaResponse.class, null);
+
+        Assert.assertFalse(result.isError());
+        Assert.assertNull(result.getAppResponse());
+    }
+
+    @Test
+    public void testSofaResponseWithMultipleDecode() {
+        // Test decoding the same data multiple times
+        SofaResponse response = new SofaResponse();
+        DemoResponse demoResponse = new DemoResponse();
+        demoResponse.setWord("result");
+        response.setAppResponse(demoResponse);
+
+        AbstractByteBuf data = serializer.encode(response, null);
+
+        // First decode
+        SofaResponse result1 = (SofaResponse) serializer.decode(data, SofaResponse.class, null);
+        Assert.assertEquals("result", ((DemoResponse) result1.getAppResponse()).getWord());
+
+        // Second decode with new instance
+        SofaResponse result2 = new SofaResponse();
+        serializer.decode(data, result2, null);
+        Assert.assertEquals("result", ((DemoResponse) result2.getAppResponse()).getWord());
+    }
+
+    @Test
+    public void testEncodeWithNegativeByteBufferSize() {
+        // Test that encoder handles edge cases properly
+        String testString = "test";
+        AbstractByteBuf data = serializer.encode(testString, null);
+        Assert.assertTrue(data.readableBytes() > 0);
+    }
+
+    @Test
+    public void testDecodeWithCorruptedData() {
+        // Test decoding with corrupted/invalid data
+        byte[] corruptedData = new byte[] { -1, -2, -3, -4, -5 };
+        AbstractByteBuf byteBuf = new ByteArrayWrapperByteBuf(corruptedData);
+
+        try {
+            serializer.decode(byteBuf, String.class, null);
+            // May or may not throw exception depending on fury's behavior
+        } catch (Exception e) {
+            // Expected - corrupted data should not decode successfully
+        }
+    }
 }

@@ -50,10 +50,12 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import com.alipay.sofa.rpc.test.ActivelyDestroyTest;
+
 /**
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
  */
-public class MeshRegistryTest extends BaseMeshTest {
+public class MeshRegistryTest extends ActivelyDestroyTest {
 
     private RegistryConfig registryConfig;
 

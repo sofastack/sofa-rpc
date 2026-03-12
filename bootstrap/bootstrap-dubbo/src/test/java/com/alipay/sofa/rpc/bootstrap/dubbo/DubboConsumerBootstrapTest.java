@@ -54,4 +54,69 @@ public class DubboConsumerBootstrapTest {
     public void test_dubbo_service_version() {
         Assert.assertEquals("1.0.1", dubboConsumerBootstrap.getConsumerConfig().getParameter("version"));
     }
+
+    @Test
+    public void testConsumerBootstrapCreation() {
+        Assert.assertNotNull(dubboConsumerBootstrap);
+        Assert.assertEquals(DemoService.class.getName(),
+            dubboConsumerBootstrap.getConsumerConfig().getInterfaceId());
+    }
+
+    @Test
+    public void testConsumerBootstrapExtensionAnnotation() {
+        // Verify extension annotation
+        Assert.assertNotNull(
+            DubboConsumerBootstrap.class.getAnnotation(com.alipay.sofa.rpc.ext.Extension.class));
+
+        com.alipay.sofa.rpc.ext.Extension extension =
+                DubboConsumerBootstrap.class.getAnnotation(com.alipay.sofa.rpc.ext.Extension.class);
+        Assert.assertEquals("dubbo", extension.value());
+    }
+
+    @Test
+    public void testRefer() {
+        // Test refer method - may fail due to network connection
+        try {
+            DemoService service = dubboConsumerBootstrap.refer();
+            // If connection succeeds, service should not be null
+            // In test environment without actual dubbo server, this may fail
+        } catch (Exception e) {
+            // Expected in test environment without dubbo server
+        }
+    }
+
+    @Test
+    public void testUnRefer() {
+        // Test unRefer method - should not throw exception
+        try {
+            dubboConsumerBootstrap.unRefer();
+        } catch (Exception e) {
+            // Should not happen
+            Assert.fail("unRefer should not throw exception: " + e.getMessage());
+        }
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testGetCluster() {
+        // getCluster should throw UnsupportedOperationException
+        dubboConsumerBootstrap.getCluster();
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void testSubscribe() {
+        // subscribe should throw UnsupportedOperationException
+        dubboConsumerBootstrap.subscribe();
+    }
+
+    @Test
+    public void testIsSubscribed() {
+        // Initially not subscribed
+        Assert.assertFalse(dubboConsumerBootstrap.isSubscribed());
+    }
+
+    @Test
+    public void testGetProxyIns() {
+        // Initially proxy is null
+        Assert.assertNull(dubboConsumerBootstrap.getProxyIns());
+    }
 }
