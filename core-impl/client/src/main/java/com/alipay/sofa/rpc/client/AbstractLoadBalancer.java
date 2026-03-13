@@ -42,7 +42,7 @@ public abstract class AbstractLoadBalancer extends LoadBalancer {
 
     @Override
     public ProviderInfo select(SofaRequest request, List<ProviderInfo> providerInfos) throws SofaRpcException {
-        if (providerInfos.size() == 0) {
+        if (providerInfos.isEmpty()) {
             throw noAvailableProviderException(request.getTargetServiceUniqueName());
         }
         if (providerInfos.size() == 1) {

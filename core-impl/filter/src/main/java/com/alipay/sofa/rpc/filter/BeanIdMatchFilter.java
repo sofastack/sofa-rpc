@@ -100,7 +100,7 @@ public abstract class BeanIdMatchFilter extends Filter {
             return true;
         } else {
             //如果没有排除，那么只生效指定id，其余不生效。
-            if (excludeId.size() == 0) {
+            if (excludeId.isEmpty()) {
                 return effectiveId.contains(invokerId);
                 //如果有排除，那么除排除id外，其余都生效。
             } else {

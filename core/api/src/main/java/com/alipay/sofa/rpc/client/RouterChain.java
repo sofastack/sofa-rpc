@@ -32,7 +32,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -55,14 +54,12 @@ public class RouterChain {
     /**
      * 服务端自动激活的 {"alias":ExtensionClass}
      */
-    private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+    private final static Map<String, ExtensionClass<Router>> PROVIDER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 调用端自动激活的 {"alias":ExtensionClass}
      */
-    private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = Collections
-                                                                                       .synchronizedMap(new ConcurrentHashMap<String, ExtensionClass<Router>>());
+    private final static Map<String, ExtensionClass<Router>> CONSUMER_AUTO_ACTIVES = new ConcurrentHashMap<String, ExtensionClass<Router>>();
 
     /**
      * 扩展加载器
