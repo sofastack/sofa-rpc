@@ -112,6 +112,12 @@ public class FurySerializer extends AbstractSerializer {
         if (object == null) {
             throw buildSerializeError("Unsupported null message!");
         }
+        // Set the context classloader so Fury can resolve classes correctly.
+        // We intentionally do NOT call clearClassLoader() afterwards; that would destroy the
+        // thread-local Fury instance on every call, causing a new instance to be created each
+        // time and generating massive GC pressure under high throughput.
+        // setClassLoader() already handles classloader changes (e.g. in OSGi/hot-deploy
+        // environments) by creating a new Fury instance when the classloader differs.
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             fury.setClassLoader(contextClassLoader);
@@ -126,8 +132,6 @@ public class FurySerializer extends AbstractSerializer {
             }
         } catch (Exception e) {
             throw buildSerializeError(e.getMessage(), e);
-        } finally {
-            fury.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -137,6 +141,7 @@ public class FurySerializer extends AbstractSerializer {
         if (data.readableBytes() <= 0 || clazz == null) {
             throw buildDeserializeError("Deserialized array is empty.");
         }
+        // See encode() for the rationale of not calling clearClassLoader() here.
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             fury.setClassLoader(contextClassLoader);
@@ -149,8 +154,6 @@ public class FurySerializer extends AbstractSerializer {
             }
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
-        } finally {
-            fury.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -160,6 +163,7 @@ public class FurySerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         }
+        // See encode() for the rationale of not calling clearClassLoader() here.
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
             fury.setClassLoader(contextClassLoader);
@@ -171,8 +175,6 @@ public class FurySerializer extends AbstractSerializer {
             }
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
-        } finally {
-            fury.clearClassLoader(contextClassLoader);
         }
     }
 
