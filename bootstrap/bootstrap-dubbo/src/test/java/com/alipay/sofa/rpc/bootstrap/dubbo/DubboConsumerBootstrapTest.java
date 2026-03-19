@@ -20,8 +20,13 @@ import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
+import org.apache.dubbo.config.ConfigKeys;
+import org.apache.dubbo.config.context.ConfigMode;
+import org.apache.dubbo.rpc.model.FrameworkModel;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 /**
@@ -30,6 +35,23 @@ import org.junit.Test;
 public class DubboConsumerBootstrapTest {
 
     private DubboConsumerBootstrap<DemoService> dubboConsumerBootstrap;
+
+    @BeforeClass
+    public static void setUpClass() {
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE, "true");
+        System.setProperty(ConfigKeys.DUBBO_CONFIG_MODE, ConfigMode.IGNORE.name());
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+        try {
+            FrameworkModel.defaultModel().destroy();
+        } catch (Exception e) {
+            // ignore cleanup errors
+        }
+        System.clearProperty(ConfigKeys.DUBBO_CONFIG_IGNORE_DUPLICATED_INTERFACE);
+        System.clearProperty(ConfigKeys.DUBBO_CONFIG_MODE);
+    }
 
     @Before
     public void setUp() {
