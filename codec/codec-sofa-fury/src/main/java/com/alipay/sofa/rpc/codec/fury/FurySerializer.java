@@ -52,6 +52,14 @@ public class FurySerializer extends AbstractSerializer {
 
     private final String           checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.SERIALIZE_CHECKER_MODE);
 
+    /**
+     * Tracks the ClassLoader currently bound to the Fury instance for each thread.
+     * We only call setClassLoader/clearClassLoader when the ClassLoader actually changes,
+     * avoiding unnecessary Fury instance recreation that causes Full GC under high TPS.
+     * See: https://github.com/sofastack/sofa-rpc/issues/1424
+     */
+    private final ThreadLocal<ClassLoader> boundClassLoaderHolder = new ThreadLocal<>();
+
     public FurySerializer() {
         fury = new ThreadLocalFury(classLoader -> {
             Fury f = Fury.builder().withLanguage(Language.JAVA)
@@ -113,8 +121,8 @@ public class FurySerializer extends AbstractSerializer {
             throw buildSerializeError("Unsupported null message!");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        boolean classLoaderSwitched = switchClassLoaderIfNeeded(contextClassLoader);
         try {
-            fury.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getObjCustomSerializer(object);
             if (customSerializer != null) {
                 return customSerializer.encodeObject(object, context);
@@ -127,7 +135,10 @@ public class FurySerializer extends AbstractSerializer {
         } catch (Exception e) {
             throw buildSerializeError(e.getMessage(), e);
         } finally {
-            fury.clearClassLoader(contextClassLoader);
+            if (classLoaderSwitched) {
+                fury.clearClassLoader(contextClassLoader);
+                boundClassLoaderHolder.remove();
+            }
         }
     }
 
@@ -138,8 +149,8 @@ public class FurySerializer extends AbstractSerializer {
             throw buildDeserializeError("Deserialized array is empty.");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        boolean classLoaderSwitched = switchClassLoaderIfNeeded(contextClassLoader);
         try {
-            fury.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getCustomSerializer(clazz);
             if (customSerializer != null) {
                 return customSerializer.decodeObject(data, context);
@@ -150,7 +161,10 @@ public class FurySerializer extends AbstractSerializer {
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
         } finally {
-            fury.clearClassLoader(contextClassLoader);
+            if (classLoaderSwitched) {
+                fury.clearClassLoader(contextClassLoader);
+                boundClassLoaderHolder.remove();
+            }
         }
     }
 
@@ -161,8 +175,8 @@ public class FurySerializer extends AbstractSerializer {
             throw buildDeserializeError("template is null!");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        boolean classLoaderSwitched = switchClassLoaderIfNeeded(contextClassLoader);
         try {
-            fury.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getObjCustomSerializer(template);
             if (customSerializer != null) {
                 customSerializer.decodeObjectByTemplate(data, context, template);
@@ -172,8 +186,31 @@ public class FurySerializer extends AbstractSerializer {
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
         } finally {
-            fury.clearClassLoader(contextClassLoader);
+            if (classLoaderSwitched) {
+                fury.clearClassLoader(contextClassLoader);
+                boundClassLoaderHolder.remove();
+            }
         }
+    }
+
+    /**
+     * Switches the Fury instance's ClassLoader only when it differs from the currently bound one.
+     * In typical RPC scenarios, the ClassLoader remains the same across calls on the same thread,
+     * so this avoids redundant setClassLoader/clearClassLoader calls that trigger Fury instance recreation.
+     * ClassLoader switching is still handled correctly for SOFAArk multi-module environments.
+     *
+     * @param contextClassLoader the ClassLoader of the current thread
+     * @return true if a switch occurred and the caller must call clearClassLoader in finally
+     */
+    private boolean switchClassLoaderIfNeeded(ClassLoader contextClassLoader) {
+        ClassLoader boundClassLoader = boundClassLoaderHolder.get();
+        if (boundClassLoader == contextClassLoader) {
+            // ClassLoader unchanged: reuse the existing Fury instance on this thread
+            return false;
+        }
+        fury.setClassLoader(contextClassLoader);
+        boundClassLoaderHolder.set(contextClassLoader);
+        return true;
     }
 
 }
