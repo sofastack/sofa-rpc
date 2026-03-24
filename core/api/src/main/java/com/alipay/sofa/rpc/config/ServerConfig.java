@@ -315,6 +315,20 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     }
 
     /**
+     * Sets the actual port that the server is bound to after startup.
+     * This is used when the configured port is a random port (0 or -1): after the OS assigns
+     * an available port, the actual binding port is written back here so that callers can
+     * retrieve it via {@link #getPort()}.
+     * Unlike {@link #setPort(int)}, this method skips the random-port validation check and
+     * directly updates the port field with the real OS-assigned port number.
+     *
+     * @param actualPort the actual port number assigned by the OS after binding
+     */
+    public void setActualBindingPort(int actualPort) {
+        this.port = actualPort;
+    }
+
+    /**
      * Gets context path.
      *
      * @return the context path
