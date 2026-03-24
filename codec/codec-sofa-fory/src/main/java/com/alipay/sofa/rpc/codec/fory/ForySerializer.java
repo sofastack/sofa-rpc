@@ -48,6 +48,7 @@ import static org.apache.fory.config.CompatibleMode.COMPATIBLE;
  * Uses the new Apache Fory dependency (org.apache.fory:fory-core)
  * instead of the legacy org.furyio:fury-core used by FurySerializer.
  *
+ * @author <a href="mailto:sunhailin.shl@antgroup.com">sunhailin-Leo</a>
  * @see com.alipay.sofa.rpc.codec.fury.FurySerializer
  */
 @Extension(value = "fory", code = 23)
@@ -70,9 +71,8 @@ public class ForySerializer extends AbstractSerializer {
                     .withAsyncCompilation(true)
                     .build();
 
-            // In Apache Fory 0.16.0, the security checker is set via
-            // typeResolver.setTypeChecker(TypeChecker).
-            // ClassResolver extends TypeResolver and is used for addListener.
+            // In Apache Fory, the security checker is set via
+            // classResolver.setClassChecker(ClassChecker).
             ClassResolver classResolver = (ClassResolver) foryInstance.getTypeResolver();
 
             if (checkerMode.equalsIgnoreCase(SerializeCheckStatus.DISABLE.name())) {
@@ -86,8 +86,8 @@ public class ForySerializer extends AbstractSerializer {
                 for (String key : blackList) {
                     blackListChecker.disallowClass(key + "*");
                 }
-            } else {
-                // Default: STRICT mode
+            } else if (checkerMode.equalsIgnoreCase(SerializeCheckStatus.STRICT.name())) {
+                // STRICT mode: apply both whitelist and blacklist
                 AllowListChecker blackAndWhiteListChecker = new AllowListChecker(AllowListChecker.CheckLevel.STRICT);
                 classResolver.setTypeChecker(blackAndWhiteListChecker);
                 blackAndWhiteListChecker.addListener(classResolver);
@@ -127,6 +127,8 @@ public class ForySerializer extends AbstractSerializer {
                 fory.serialize(writeBuffer, object);
                 return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
             }
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
             throw buildSerializeError(e.getMessage(), e);
         } finally {
@@ -137,7 +139,10 @@ public class ForySerializer extends AbstractSerializer {
     @Override
     public Object decode(final AbstractByteBuf data, final Class clazz, final Map<String, String> context)
         throws SofaRpcException {
-        if (data.readableBytes() <= 0 || clazz == null) {
+        if (clazz == null) {
+            throw buildDeserializeError("Target class is null!");
+        }
+        if (data.readableBytes() <= 0) {
             throw buildDeserializeError("Deserialized array is empty.");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
@@ -150,6 +155,8 @@ public class ForySerializer extends AbstractSerializer {
                 MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
                 return fory.deserialize(readBuffer);
             }
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
         } finally {
@@ -172,6 +179,8 @@ public class ForySerializer extends AbstractSerializer {
             } else {
                 throw buildDeserializeError("Only support decode from SofaRequest and SofaResponse template");
             }
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
         } finally {

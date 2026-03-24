@@ -41,6 +41,8 @@ import java.util.Map;
 
 /**
  * Unit tests for {@link ForySerializer}.
+ *
+ * @author <a href="mailto:sunhailin.shl@antgroup.com">sunhailin-Leo</a>
  */
 public class ForySerializerTest {
 
@@ -192,15 +194,16 @@ public class ForySerializerTest {
     }
 
     private void assertEqualsSofaRequest(SofaRequest request, SofaRequest decode) {
-        Assert.assertEquals(decode.getInterfaceName(), request.getInterfaceName());
-        Assert.assertEquals(decode.getMethodName(), request.getMethodName());
-        Assert.assertArrayEquals(decode.getMethodArgSigs(), request.getMethodArgSigs());
-        Assert.assertEquals(decode.getMethodArgs().length, request.getMethodArgs().length);
+        // Fixed: assertEquals(expected, actual) — expected first
+        Assert.assertEquals(request.getInterfaceName(), decode.getInterfaceName());
+        Assert.assertEquals(request.getMethodName(), decode.getMethodName());
+        Assert.assertArrayEquals(request.getMethodArgSigs(), decode.getMethodArgSigs());
+        Assert.assertEquals(request.getMethodArgs().length, decode.getMethodArgs().length);
         Assert.assertEquals("name", ((DemoRequest) decode.getMethodArgs()[0]).getName());
-        Assert.assertEquals(decode.getTargetServiceUniqueName(), request.getTargetServiceUniqueName());
-        Assert.assertEquals(decode.getTargetAppName(), request.getTargetAppName());
-        Assert.assertEquals(decode.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
-            request.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
+        Assert.assertEquals(request.getTargetServiceUniqueName(), decode.getTargetServiceUniqueName());
+        Assert.assertEquals(request.getTargetAppName(), decode.getTargetAppName());
+        Assert.assertEquals(request.getRequestProp(RemotingConstants.RPC_TRACE_NAME),
+            decode.getRequestProp(RemotingConstants.RPC_TRACE_NAME));
     }
 
     @Test
@@ -244,43 +247,49 @@ public class ForySerializerTest {
             // expected: contains blacklist class
         }
 
-        // test WARN mode
+        // test WARN mode — wrapped in try-finally to guarantee system property cleanup
         System.getProperties().put("sofa.rpc.codec.serialize.checkMode", "WARN");
-        ForySerializer warnForySerializer = new ForySerializer();
-
-        warnForySerializer.encode(noneClassNullBlackClass, null);
-
         try {
-            warnForySerializer.encode(noneClassHasBlackClass, null);
-            Assert.fail();
-        } catch (Exception e) {
-            // expected
+            ForySerializer warnForySerializer = new ForySerializer();
+
+            warnForySerializer.encode(noneClassNullBlackClass, null);
+
+            try {
+                warnForySerializer.encode(noneClassHasBlackClass, null);
+                Assert.fail();
+            } catch (Exception e) {
+                // expected
+            }
+
+            try {
+                warnForySerializer.encode(blackListClass, null);
+                Assert.fail();
+            } catch (Exception e) {
+                // expected
+            }
+
+            warnForySerializer.encode(whiteClassNullBlackClass, null);
+            try {
+                warnForySerializer.encode(whiteClassHasBlackClass, null);
+                Assert.fail();
+            } catch (Exception e) {
+                // expected
+            }
+        } finally {
+            System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
         }
 
-        try {
-            warnForySerializer.encode(blackListClass, null);
-            Assert.fail();
-        } catch (Exception e) {
-            // expected
-        }
-
-        warnForySerializer.encode(whiteClassNullBlackClass, null);
-        try {
-            warnForySerializer.encode(whiteClassHasBlackClass, null);
-            Assert.fail();
-        } catch (Exception e) {
-            // expected
-        }
-        System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
-
-        // test DISABLE mode
+        // test DISABLE mode — wrapped in try-finally to guarantee system property cleanup
         System.getProperties().put("sofa.rpc.codec.serialize.checkMode", "DISABLE");
-        ForySerializer disableForySerializer = new ForySerializer();
-        disableForySerializer.encode(noneClassNullBlackClass, null);
-        disableForySerializer.encode(noneClassHasBlackClass, null);
-        disableForySerializer.encode(blackListClass, null);
-        disableForySerializer.encode(whiteClassNullBlackClass, null);
-        disableForySerializer.encode(whiteClassHasBlackClass, null);
-        System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
+        try {
+            ForySerializer disableForySerializer = new ForySerializer();
+            disableForySerializer.encode(noneClassNullBlackClass, null);
+            disableForySerializer.encode(noneClassHasBlackClass, null);
+            disableForySerializer.encode(blackListClass, null);
+            disableForySerializer.encode(whiteClassNullBlackClass, null);
+            disableForySerializer.encode(whiteClassHasBlackClass, null);
+        } finally {
+            System.getProperties().remove("sofa.rpc.codec.serialize.checkMode");
+        }
     }
 }

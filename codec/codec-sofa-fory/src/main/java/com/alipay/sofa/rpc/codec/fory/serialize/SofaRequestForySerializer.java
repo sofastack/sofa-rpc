@@ -31,6 +31,8 @@ import java.util.Map;
 
 /**
  * Custom serializer for {@link SofaRequest} using Apache Fory.
+ *
+ * @author <a href="mailto:sunhailin.shl@antgroup.com">sunhailin-Leo</a>
  */
 public class SofaRequestForySerializer implements CustomSerializer<SofaRequest> {
 
@@ -57,6 +59,8 @@ public class SofaRequestForySerializer implements CustomSerializer<SofaRequest> 
             fory.serialize(writeBuffer, args);
 
             return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e.getMessage(), e);
         }
@@ -76,6 +80,8 @@ public class SofaRequestForySerializer implements CustomSerializer<SofaRequest> 
             final Object[] args = (Object[]) fory.deserialize(readBuffer);
             sofaRequest.setMethodArgs(args);
             return sofaRequest;
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e.getMessage(), e);
         }
@@ -103,6 +109,8 @@ public class SofaRequestForySerializer implements CustomSerializer<SofaRequest> 
             template.setInterfaceName(interfaceName);
             final Object[] args = (Object[]) fory.deserialize(readBuffer);
             template.setMethodArgs(args);
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
             throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e.getMessage(), e);
         }

@@ -30,6 +30,8 @@ import java.util.Map;
 
 /**
  * Custom serializer for {@link SofaResponse} using Apache Fory.
+ *
+ * @author <a href="mailto:sunhailin.shl@antgroup.com">sunhailin-Leo</a>
  */
 public class SofaResponseForySerializer implements CustomSerializer<SofaResponse> {
 
@@ -46,8 +48,11 @@ public class SofaResponseForySerializer implements CustomSerializer<SofaResponse
             writeBuffer.writerIndex(0);
             fory.serialize(writeBuffer, object);
             return new ByteArrayWrapperByteBuf(writeBuffer.getBytes(0, writeBuffer.writerIndex()));
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
-            throw new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, e.getMessage(), e);
+            // Fixed: was SERVER_DESERIALIZE, should be SERVER_SERIALIZE for encoding path
+            throw new SofaRpcException(RpcErrorType.SERVER_SERIALIZE, e.getMessage(), e);
         }
     }
 
@@ -59,11 +64,15 @@ public class SofaResponseForySerializer implements CustomSerializer<SofaResponse
                 context.get(RemotingConstants.HEAD_GENERIC_TYPE));
             if (genericSerialize) {
                 // TODO support generic call
-                throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Generic call is not supported for now.");
+                // Fixed: was CLIENT_SERIALIZE, should be CLIENT_DESERIALIZE for decoding path
+                throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, "Generic call is not supported for now.");
             }
             return (SofaResponse) fory.deserialize(readBuffer);
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e.getMessage(), e);
+            // Fixed: was CLIENT_SERIALIZE, should be CLIENT_DESERIALIZE for decoding path
+            throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, e.getMessage(), e);
         }
     }
 
@@ -71,7 +80,8 @@ public class SofaResponseForySerializer implements CustomSerializer<SofaResponse
     public void decodeObjectByTemplate(AbstractByteBuf data, Map<String, String> context, SofaResponse template)
         throws SofaRpcException {
         if (data.readableBytes() <= 0) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Deserialized array is empty.");
+            // Fixed: was CLIENT_SERIALIZE, should be CLIENT_DESERIALIZE for decoding path
+            throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, "Deserialized array is empty.");
         }
         try {
             MemoryBuffer readBuffer = MemoryBuffer.fromByteArray(data.array());
@@ -79,15 +89,17 @@ public class SofaResponseForySerializer implements CustomSerializer<SofaResponse
                 context.get(RemotingConstants.HEAD_GENERIC_TYPE));
             if (genericSerialize) {
                 // TODO support generic call
-                throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, "Generic call is not supported for now.");
+                throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, "Generic call is not supported for now.");
             } else {
                 SofaResponse tmp = (SofaResponse) fory.deserialize(readBuffer);
                 template.setErrorMsg(tmp.getErrorMsg());
                 template.setAppResponse(tmp.getAppResponse());
                 template.setResponseProps(tmp.getResponseProps());
             }
+        } catch (SofaRpcException e) {
+            throw e;
         } catch (Exception e) {
-            throw new SofaRpcException(RpcErrorType.CLIENT_SERIALIZE, e.getMessage(), e);
+            throw new SofaRpcException(RpcErrorType.CLIENT_DESERIALIZE, e.getMessage(), e);
         }
     }
 
