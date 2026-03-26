@@ -39,7 +39,6 @@ import org.apache.fory.memory.MemoryBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -305,10 +304,10 @@ public class ForySerializerTest {
     private Fory buildXlangFory() {
         final String typeTag = "com.alipay.sofa.rpc.codec.fory.model.whitelist.DemoRequest";
         Fory xlangFory = Fory.builder()
-                .withLanguage(Language.XLANG)
-                .withRefTracking(true)
-                .requireClassRegistration(true)
-                .build();
+            .withLanguage(Language.XLANG)
+            .withRefTracking(true)
+            .requireClassRegistration(true)
+            .build();
         xlangFory.register(DemoRequest.class, typeTag);
         return xlangFory;
     }
