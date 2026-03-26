@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
@@ -97,27 +98,33 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         if (CommonUtils.isNotEmpty(serverConfigs)) {
             List<ProtocolConfig> dubboProtocolConfigs = new ArrayList<ProtocolConfig>();
             for (ServerConfig serverConfig : serverConfigs) {
-                // 生成并丢到缓存里
-                ProtocolConfig protocolConfig = DubboSingleton.SERVER_MAP.get(serverConfig);
-                if (protocolConfig == null) {
-                    protocolConfig = new ProtocolConfig();
-                    copyServerFields(serverConfig, protocolConfig);
-                    ProtocolConfig old = DubboSingleton.SERVER_MAP.putIfAbsent(serverConfig, protocolConfig);
-                    if (old != null) {
-                        protocolConfig = old;
-                    }
-                }
+                ProtocolConfig protocolConfig = getOrCreateProtocolConfig(serverConfig);
                 dubboProtocolConfigs.add(protocolConfig);
             }
             serviceConfig.setProtocols(dubboProtocolConfigs);
         }
     }
 
-    private void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
+    ProtocolConfig getOrCreateProtocolConfig(ServerConfig serverConfig) {
+        String serverCacheKey = buildServerCacheKey(serverConfig);
+        ProtocolConfig protocolConfig = DubboSingleton.SERVER_MAP.get(serverCacheKey);
+        if (protocolConfig == null) {
+            protocolConfig = new ProtocolConfig();
+            copyServerFields(serverConfig, protocolConfig);
+            ProtocolConfig old = DubboSingleton.SERVER_MAP.putIfAbsent(serverCacheKey, protocolConfig);
+            if (old != null) {
+                protocolConfig = old;
+            }
+        }
+        return protocolConfig;
+    }
+
+    @VisibleForTesting
+    void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
         protocolConfig.setId(serverConfig.getId());
         protocolConfig.setName(serverConfig.getProtocol());
-        protocolConfig.setHost(serverConfig.getHost());
-        protocolConfig.setPort(serverConfig.getPort());
+        protocolConfig.setHost(resolveHost(serverConfig));
+        protocolConfig.setPort(resolvePort(serverConfig));
         protocolConfig.setAccepts(serverConfig.getAccepts());
         protocolConfig.setSerialization(serverConfig.getSerialization());
         if (!StringUtils.CONTEXT_SEP.equals(serverConfig.getContextPath())) {
@@ -130,6 +137,25 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         protocolConfig.setQueues(serverConfig.getQueues());
 
         protocolConfig.setParameters(serverConfig.getParameters());
+    }
+
+    private String resolveHost(ServerConfig serverConfig) {
+        return StringUtils.isNotBlank(serverConfig.getVirtualHost()) ? serverConfig.getVirtualHost()
+            : serverConfig.getHost();
+    }
+
+    private Integer resolvePort(ServerConfig serverConfig) {
+        return serverConfig.getVirtualPort() != null ? serverConfig.getVirtualPort() : serverConfig.getPort();
+    }
+
+    String buildServerCacheKey(ServerConfig serverConfig) {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(serverConfig.getProtocol()).append(':')
+            .append(serverConfig.getHost()).append(':')
+            .append(serverConfig.getPort()).append(':')
+            .append(resolveHost(serverConfig)).append(':')
+            .append(resolvePort(serverConfig));
+        return sb.toString();
     }
 
     private void copyProvider(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
@@ -194,8 +220,8 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
                 List<String> urls = new ArrayList<String>();
                 for (ServerConfig server : servers) {
                     StringBuilder sb = new StringBuilder(200);
-                    sb.append(server.getProtocol()).append("://").append(server.getHost())
-                        .append(":").append(server.getPort()).append(server.getContextPath())
+                    sb.append(server.getProtocol()).append("://").append(resolveHost(server))
+                        .append(":").append(resolvePort(server)).append(server.getContextPath())
                         .append(providerConfig.getInterfaceId())
                         .append("?uniqueId=").append(providerConfig.getUniqueId())
                         .append(getKeyPairs("version", "1.0"))
