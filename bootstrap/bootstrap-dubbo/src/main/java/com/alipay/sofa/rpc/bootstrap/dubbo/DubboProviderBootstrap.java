@@ -16,6 +16,7 @@
  */
 package com.alipay.sofa.rpc.bootstrap.dubbo;
 
+import com.alipay.sofa.rpc.common.annotation.VisibleForTesting;
 import org.apache.dubbo.config.ProtocolConfig;
 import org.apache.dubbo.config.ServiceConfig;
 import com.alipay.sofa.rpc.bootstrap.ProviderBootstrap;
@@ -97,22 +98,28 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         if (CommonUtils.isNotEmpty(serverConfigs)) {
             List<ProtocolConfig> dubboProtocolConfigs = new ArrayList<ProtocolConfig>();
             for (ServerConfig serverConfig : serverConfigs) {
-                // 生成并丢到缓存里
-                ProtocolConfig protocolConfig = DubboSingleton.SERVER_MAP.get(serverConfig);
-                if (protocolConfig == null) {
-                    protocolConfig = new ProtocolConfig();
-                    copyServerFields(serverConfig, protocolConfig);
-                    ProtocolConfig old = DubboSingleton.SERVER_MAP.putIfAbsent(serverConfig, protocolConfig);
-                    if (old != null) {
-                        protocolConfig = old;
-                    }
-                }
+                ProtocolConfig protocolConfig = getOrCreateProtocolConfig(serverConfig);
                 dubboProtocolConfigs.add(protocolConfig);
             }
             serviceConfig.setProtocols(dubboProtocolConfigs);
         }
     }
 
+    ProtocolConfig getOrCreateProtocolConfig(ServerConfig serverConfig) {
+        String serverCacheKey = buildServerCacheKey(serverConfig);
+        ProtocolConfig protocolConfig = DubboSingleton.SERVER_MAP.get(serverCacheKey);
+        if (protocolConfig == null) {
+            protocolConfig = new ProtocolConfig();
+            copyServerFields(serverConfig, protocolConfig);
+            ProtocolConfig old = DubboSingleton.SERVER_MAP.putIfAbsent(serverCacheKey, protocolConfig);
+            if (old != null) {
+                protocolConfig = old;
+            }
+        }
+        return protocolConfig;
+    }
+
+    @VisibleForTesting
     void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
         protocolConfig.setId(serverConfig.getId());
         protocolConfig.setName(serverConfig.getProtocol());
@@ -139,6 +146,16 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
 
     private Integer resolvePort(ServerConfig serverConfig) {
         return serverConfig.getVirtualPort() != null ? serverConfig.getVirtualPort() : serverConfig.getPort();
+    }
+
+    String buildServerCacheKey(ServerConfig serverConfig) {
+        StringBuilder sb = new StringBuilder(64);
+        sb.append(serverConfig.getProtocol()).append(':')
+            .append(serverConfig.getHost()).append(':')
+            .append(serverConfig.getPort()).append(':')
+            .append(resolveHost(serverConfig)).append(':')
+            .append(resolvePort(serverConfig));
+        return sb.toString();
     }
 
     private void copyProvider(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {

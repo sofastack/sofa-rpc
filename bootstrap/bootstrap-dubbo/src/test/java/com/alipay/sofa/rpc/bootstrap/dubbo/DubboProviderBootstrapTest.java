@@ -35,6 +35,7 @@ public class DubboProviderBootstrapTest {
 
     @Before
     public void setUp() throws Exception {
+        DubboSingleton.SERVER_MAP.clear();
 
         ApplicationConfig serverApplacation = new ApplicationConfig();
         serverApplacation.setAppName("server");
@@ -162,5 +163,78 @@ public class DubboProviderBootstrapTest {
         String url = dubboProviderBootstrap.buildUrls().get(0).toString();
         Assert.assertTrue(url.startsWith("dubbo://10.0.0.1:80/" + DemoService.class.getName()));
         Assert.assertTrue(url.contains("?uniqueId="));
+    }
+
+    /**
+     * buildUrls should fall back to the bound host and port when no virtual address is configured.
+     */
+    @Test
+    public void test_build_urls_fallback_to_host_and_port() throws Exception {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("dubbo")
+            .setContextPath("/")
+            .setHost("127.0.0.1")
+            .setPort(12200);
+        dubboProviderBootstrap.getProviderConfig().setServer(serverConfig);
+        dubboProviderBootstrap.exported = true;
+
+        String url = dubboProviderBootstrap.buildUrls().get(0).toString();
+        Assert.assertTrue(url.startsWith("dubbo://127.0.0.1:12200/" + DemoService.class.getName()));
+        Assert.assertTrue(url.contains("?uniqueId="));
+    }
+
+    /**
+     * Different virtual addresses should not reuse the same cached ProtocolConfig for the same bound address.
+     */
+    @Test
+    public void test_protocol_config_cache_key_should_distinguish_virtual_address() {
+        ServerConfig serverConfig1 = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.1")
+            .setVirtualPort(80);
+        ServerConfig serverConfig2 = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.2")
+            .setVirtualPort(81);
+
+        ProtocolConfig protocolConfig1 = dubboProviderBootstrap.getOrCreateProtocolConfig(serverConfig1);
+        ProtocolConfig protocolConfig2 = dubboProviderBootstrap.getOrCreateProtocolConfig(serverConfig2);
+
+        Assert.assertNotSame(protocolConfig1, protocolConfig2);
+        Assert.assertEquals("10.0.0.1", protocolConfig1.getHost());
+        Assert.assertEquals(Integer.valueOf(80), protocolConfig1.getPort());
+        Assert.assertEquals("10.0.0.2", protocolConfig2.getHost());
+        Assert.assertEquals(Integer.valueOf(81), protocolConfig2.getPort());
+    }
+
+    /**
+     * Same resolved virtual address should reuse the cached ProtocolConfig even if different ServerConfig instances
+     * share the same bound address.
+     */
+    @Test
+    public void test_protocol_config_cache_key_should_reuse_same_virtual_address() {
+        ServerConfig serverConfig1 = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.1")
+            .setVirtualPort(80);
+        ServerConfig serverConfig2 = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.1")
+            .setVirtualPort(80);
+
+        ProtocolConfig protocolConfig1 = dubboProviderBootstrap.getOrCreateProtocolConfig(serverConfig1);
+        ProtocolConfig protocolConfig2 = dubboProviderBootstrap.getOrCreateProtocolConfig(serverConfig2);
+
+        Assert.assertSame(protocolConfig1, protocolConfig2);
+        Assert.assertEquals("10.0.0.1", protocolConfig1.getHost());
+        Assert.assertEquals(Integer.valueOf(80), protocolConfig1.getPort());
     }
 }
