@@ -21,6 +21,7 @@
         <module>codec-sofa-hessian</module>
         <module>codec-msgpack</module>
         <module>codec-sofa-fury</module>
+        <module>codec-sofa-fory</module>
     </modules>
 
     <dependencyManagement>
