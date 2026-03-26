@@ -223,8 +223,11 @@ public abstract class AbstractCluster extends Cluster {
                 closeTransports();
             }
         } else {
-            addressHolder.updateProviders(providerGroup);
+            // Establish connections before making addresses visible to avoid race conditions
+            // where an address is available but its connection is not yet established.
+            // See: https://github.com/sofastack/sofa-rpc/issues/1490
             connectionHolder.updateProviders(providerGroup);
+            addressHolder.updateProviders(providerGroup);
         }
         if (EventBus.isEnable(ProviderInfoUpdateEvent.class)) {
             // see: https://github.com/sofastack/sofa-rpc/issues/1442
@@ -255,8 +258,11 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         } else {
-            addressHolder.updateAllProviders(providerGroups);
+            // Establish connections before making addresses visible to avoid race conditions
+            // where an address is available but its connection is not yet established.
+            // See: https://github.com/sofastack/sofa-rpc/issues/1490
             connectionHolder.updateAllProviders(providerGroups);
+            addressHolder.updateAllProviders(providerGroups);
         }
         if (EventBus.isEnable(ProviderInfoUpdateAllEvent.class)) {
             ProviderInfoUpdateAllEvent event = new ProviderInfoUpdateAllEvent(consumerConfig, oldProviderGroups,
