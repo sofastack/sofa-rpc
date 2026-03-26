@@ -203,8 +203,8 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
                 List<String> urls = new ArrayList<String>();
                 for (ServerConfig server : servers) {
                     StringBuilder sb = new StringBuilder(200);
-                    sb.append(server.getProtocol()).append("://").append(server.getHost())
-                        .append(":").append(server.getPort()).append(server.getContextPath())
+                    sb.append(server.getProtocol()).append("://").append(resolveHost(server))
+                        .append(":").append(resolvePort(server)).append(server.getContextPath())
                         .append(providerConfig.getInterfaceId())
                         .append("?uniqueId=").append(providerConfig.getUniqueId())
                         .append(getKeyPairs("version", "1.0"))

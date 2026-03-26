@@ -143,4 +143,24 @@ public class DubboProviderBootstrapTest {
         Assert.assertEquals("127.0.0.1", protocolConfig.getHost());
         Assert.assertEquals(Integer.valueOf(80), protocolConfig.getPort());
     }
+
+    /**
+     * buildUrls should use the resolved virtual address instead of the bound host and port.
+     */
+    @Test
+    public void test_build_urls_use_virtual_host_and_port() throws Exception {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("dubbo")
+            .setContextPath("/")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.1")
+            .setVirtualPort(80);
+        dubboProviderBootstrap.getProviderConfig().setServer(serverConfig);
+        dubboProviderBootstrap.exported = true;
+
+        String url = dubboProviderBootstrap.buildUrls().get(0).toString();
+        Assert.assertTrue(url.startsWith("dubbo://10.0.0.1:80/" + DemoService.class.getName()));
+        Assert.assertTrue(url.contains("?uniqueId="));
+    }
 }
