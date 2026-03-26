@@ -113,11 +113,11 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         }
     }
 
-    private void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
+    void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
         protocolConfig.setId(serverConfig.getId());
         protocolConfig.setName(serverConfig.getProtocol());
-        protocolConfig.setHost(serverConfig.getHost());
-        protocolConfig.setPort(serverConfig.getPort());
+        protocolConfig.setHost(resolveHost(serverConfig));
+        protocolConfig.setPort(resolvePort(serverConfig));
         protocolConfig.setAccepts(serverConfig.getAccepts());
         protocolConfig.setSerialization(serverConfig.getSerialization());
         if (!StringUtils.CONTEXT_SEP.equals(serverConfig.getContextPath())) {
@@ -130,6 +130,15 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
         protocolConfig.setQueues(serverConfig.getQueues());
 
         protocolConfig.setParameters(serverConfig.getParameters());
+    }
+
+    private String resolveHost(ServerConfig serverConfig) {
+        return StringUtils.isNotBlank(serverConfig.getVirtualHost()) ? serverConfig.getVirtualHost()
+            : serverConfig.getHost();
+    }
+
+    private Integer resolvePort(ServerConfig serverConfig) {
+        return serverConfig.getVirtualPort() != null ? serverConfig.getVirtualPort() : serverConfig.getPort();
     }
 
     private void copyProvider(ProviderConfig<T> providerConfig, ServiceConfig<T> serviceConfig) {
