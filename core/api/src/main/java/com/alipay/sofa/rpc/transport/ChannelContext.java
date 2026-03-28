@@ -80,13 +80,15 @@ public class ChannelContext {
      * @param key   the key
      * @param value the value
      */
-    public void invalidateHeadCache(Byte key, String value) {
-        if (headerCache != null && headerCache.containsKey(key)) {
+    public void invalidateHeadCache(Short key, String value) {
+        if (headerCache != null) {
             String old = headerCache.get(key);
-            if (!old.equals(value)) {
-                throw new SofaRpcRuntimeException("Value of old is not match current");
+            if (old != null) {
+                if (!old.equals(value)) {
+                    throw new SofaRpcRuntimeException("Value of old is not match current");
+                }
+                headerCache.remove(key);
             }
-            headerCache.remove(key);
         }
     }
 
