@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.context.AsyncContext;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
@@ -34,6 +35,7 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.concurrent.CompletableFuture;
 
 import static com.alipay.sofa.rpc.common.RpcOptions.CONFIG_KEY_DEADLINE_ENABLE;
 
@@ -119,6 +121,15 @@ public class ProviderInvoker<T> extends FilterInvoker {
             }
             Object result = method.invoke(providerConfig.getRef(), request.getMethodArgs());
 
+            // Check if the result is a CompletableFuture
+            if (result instanceof CompletableFuture) {
+                @SuppressWarnings("unchecked")
+                CompletableFuture<Object> completableFuture = (CompletableFuture<Object>) result;
+                handleCompletableFuture(completableFuture, request);
+                // Return null to indicate that response will be sent asynchronously
+                return null;
+            }
+
             sofaResponse.setAppResponse(result);
         } catch (IllegalArgumentException e) { // 非法参数，可能是实现类和接口类不对应)
             sofaResponse.setErrorMsg(e.getMessage());
@@ -170,5 +181,30 @@ public class ProviderInvoker<T> extends FilterInvoker {
                 LOGGER.warnWithApp(null, LogCodes.getLog(LogCodes.WARN_PROVIDER_CUT_CAUSE), e);
             }
         }
+    }
+
+    /**
+     * Handle CompletableFuture return type.
+     * When the business method returns a CompletableFuture, this method registers a callback
+     * to send the response when the future completes.
+     *
+     * @param completableFuture the returned CompletableFuture
+     * @param request          the current request
+     */
+    private void handleCompletableFuture(CompletableFuture<Object> completableFuture, SofaRequest request) {
+        // Register callback to handle the result when future completes
+        completableFuture.whenComplete((result, throwable) -> {
+            try {
+                // Get the async context
+                AsyncContext asyncContext = RpcInvokeContext.startAsync();
+                if (throwable != null) {
+                    asyncContext.writeError(throwable);
+                } else {
+                    asyncContext.write(result);
+                }
+            } catch (Exception e) {
+                LOGGER.errorWithApp(null, "Error sending async response for CompletableFuture", e);
+            }
+        });
     }
 }
