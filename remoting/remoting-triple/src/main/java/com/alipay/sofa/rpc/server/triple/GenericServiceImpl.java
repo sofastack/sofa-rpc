@@ -22,6 +22,9 @@ import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
+import com.alipay.sofa.rpc.context.RpcInvokeContext;
+import com.alipay.sofa.rpc.context.ServerAsyncResponseSender;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -71,6 +74,10 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
                 methodName);
         }
 
+        // Store the TripleServerAsyncResponseSender in RpcInternalContext for AsyncContext to use
+        ServerAsyncResponseSender asyncResponseSender = new TripleServerAsyncResponseSender(responseObserver);
+        RpcInternalContext.getContext().setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncResponseSender);
+
         try {
             ClassLoader serviceClassLoader = invoker.getServiceClassLoader(sofaRequest);
             Thread.currentThread().setContextClassLoader(serviceClassLoader);
@@ -78,20 +85,31 @@ public class GenericServiceImpl extends SofaGenericServiceTriple.GenericServiceI
             setUnaryOrServerRequestParams(sofaRequest, request, serializer, declaredMethod, false);
 
             SofaResponse response = invoker.invoke(sofaRequest);
-            Object ret = getAppResponse(declaredMethod, response);
 
-            Response.Builder builder = Response.newBuilder();
-            builder.setSerializeType(request.getSerializeType());
-            builder.setType(declaredMethod.getReturnType().getName());
-            builder.setData(ByteString.copyFrom(serializer.encode(ret, null).array()));
-            Response build = builder.build();
-            responseObserver.onNext(build);
-            responseObserver.onCompleted();
+            // Check if async was started via RpcInvokeContext.startAsync() or method returned CompletableFuture
+            // When CompletableFuture is returned, response will be null
+            boolean isAsyncStarted = RpcInvokeContext.isAsyncStarted();
+
+            if (!isAsyncStarted && response != null) {
+                // Normal synchronous response
+                Object ret = getAppResponse(declaredMethod, response);
+
+                Response.Builder builder = Response.newBuilder();
+                builder.setSerializeType(request.getSerializeType());
+                builder.setType(declaredMethod.getReturnType().getName());
+                builder.setData(ByteString.copyFrom(serializer.encode(ret, null).array()));
+                Response build = builder.build();
+                responseObserver.onNext(build);
+                responseObserver.onCompleted();
+            }
+            // If async started, the response will be sent by AsyncContext or CompletableFuture callback
         } catch (Exception e) {
             LOGGER.error("Invoke " + methodName + " error:", e);
             throw new SofaRpcRuntimeException(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
+            // Clean up the async context after the request is processed
+            RpcInternalContext.getContext().removeAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT);
         }
     }
 

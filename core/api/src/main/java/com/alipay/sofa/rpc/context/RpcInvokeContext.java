@@ -17,8 +17,10 @@
 package com.alipay.sofa.rpc.context;
 
 import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.core.invoke.SofaResponseCallback;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.core.util.SafeConcurrentHashMap;
 import com.alipay.sofa.rpc.message.ResponseFuture;
 
@@ -485,6 +487,89 @@ public class RpcInvokeContext {
 
     public void clearCustomHeader() {
         customHeader.clear();
+    }
+
+    /**
+     * Start async context for server-side async processing.
+     * This allows business code to control when to send the response.
+     * <p>
+     * Usage:
+     * <pre>
+     * public String sayHello(String name) {
+     *     AsyncContext asyncContext = RpcInvokeContext.startAsync();
+     *     executorService.submit(() -> {
+     *         try {
+     *             Thread.sleep(1000);
+     *             asyncContext.write("Hello, " + name);
+     *         } catch (Exception e) {
+     *             asyncContext.writeError(e);
+     *         }
+     *     });
+     *     return null;
+     * }
+     * </pre>
+     *
+     * @return the AsyncContext for controlling async response
+     * @throws IllegalStateException if async context is not available (not in server side or protocol not supported)
+     */
+    public static AsyncContext startAsync() {
+        RpcInternalContext internalContext = RpcInternalContext.peekContext();
+        if (internalContext == null) {
+            throw new IllegalStateException("RpcInternalContext is not available, startAsync must be called in server side");
+        }
+
+        // Get the server async response sender from protocol layer
+        ServerAsyncResponseSender responseSender = (ServerAsyncResponseSender) internalContext.getAttachment(RpcConstants.HIDDEN_KEY_ASYNC_RESPONSE_SENDER);
+        if (responseSender == null) {
+            throw new IllegalStateException("Async context is not available. Please ensure you are calling this method in a server-side invocation context with a supported protocol (Bolt or Triple).");
+        }
+
+        // Create and return the async context
+        SofaResponse sofaResponse = new SofaResponse();
+        DefaultAsyncContext asyncContext = new DefaultAsyncContext(responseSender, sofaResponse);
+
+        // Set flag to indicate async mode
+        RpcInvokeContext invokeContext = RpcInvokeContext.getContext();
+        invokeContext.asyncStarted = true;
+
+        return asyncContext;
+    }
+
+    /**
+     * Internal flag to track if async has been started
+     */
+    private boolean                       asyncStarted   = false;
+
+    /**
+     * Check if async has been started in current context.
+     * This is a static convenience method.
+     *
+     * @return true if async has been started
+     */
+    public static boolean isAsyncStarted() {
+        RpcInvokeContext context = RpcInvokeContext.peekContext();
+        if (context == null) {
+            return false;
+        }
+        return context.asyncStarted;
+    }
+
+    /**
+     * Get async started flag (instance method)
+     *
+     * @return true if async has been started
+     */
+    public boolean isAsyncStartedFlag() {
+        return asyncStarted;
+    }
+
+    /**
+     * Set async started flag
+     *
+     * @param asyncStarted the flag value
+     */
+    public void setAsyncStarted(boolean asyncStarted) {
+        this.asyncStarted = asyncStarted;
     }
 
     @Override

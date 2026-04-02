@@ -34,6 +34,7 @@ import com.alipay.sofa.rpc.context.RecordContextResolver;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
+import com.alipay.sofa.rpc.context.ServerAsyncResponseSender;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -114,7 +115,12 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
             processingCount.incrementAndGet(); // 统计值加1
 
             context.setRemoteAddress(bizCtx.getRemoteHost(), bizCtx.getRemotePort()); // 远程地址
-            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 远程返回的通道
+            // Store both the original Bolt AsyncContext and the ServerAsyncResponseSender for compatibility
+            // HIDDEN_KEY_ASYNC_CONTEXT: original Bolt AsyncContext (for BoltSendableResponseCallback)
+            // HIDDEN_KEY_ASYNC_RESPONSE_SENDER: ServerAsyncResponseSender (for CompletableFuture support)
+            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 原始Bolt AsyncContext
+            ServerAsyncResponseSender asyncResponseSender = new BoltServerAsyncResponseSender(asyncCtx);
+            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_RESPONSE_SENDER, asyncResponseSender);
 
             InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
             if (RpcInternalContext.isAttachmentEnable()) {
@@ -192,8 +198,12 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                 RpcInvokeContext invokeContext = RpcInvokeContext.peekContext();
                 isAsyncChain = CommonUtils.isTrue(invokeContext != null ?
                     (Boolean) invokeContext.remove(RemotingConstants.INVOKE_CTX_IS_ASYNC_CHAIN) : null);
+
+                // Check if async was started via RpcInvokeContext.startAsync() or method returned CompletableFuture
+                boolean isAsyncStarted = invokeContext != null && invokeContext.isAsyncStarted();
+
                 // 如果是服务端异步代理模式，特殊处理，因为该模式是在业务代码自主异步返回的
-                if (!isAsyncChain) {
+                if (!isAsyncChain && !isAsyncStarted) {
                     // 其它正常请求
                     try { // 这个try-catch 保证一定要记录tracer
                         asyncCtx.sendResponse(response);
@@ -212,8 +222,13 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         } finally {
             RecordContextResolver.carryWithRequest(bizCtx.getInvokeContext().getRecordContext(), request);
             processingCount.decrementAndGet();
+            // For async mode (AsyncContext or CompletableFuture), we still need to trigger ServerEndHandleEvent
+            // but we should not do it here as the response will be sent later by the async callback
+            // The async callback in DefaultAsyncContext will handle triggering the event
             if (!isAsyncChain) {
-                if (EventBus.isEnable(ServerEndHandleEvent.class)) {
+                RpcInvokeContext invokeContext = RpcInvokeContext.peekContext();
+                boolean isAsyncStarted = invokeContext != null && invokeContext.isAsyncStarted();
+                if (!isAsyncStarted && EventBus.isEnable(ServerEndHandleEvent.class)) {
                     EventBus.post(new ServerEndHandleEvent());
                 }
             }

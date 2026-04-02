@@ -16,9 +16,11 @@
  */
 package com.alipay.sofa.rpc.proxy.javassist;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassLoaderUtils;
 import com.alipay.sofa.rpc.common.utils.ClassTypeUtils;
 import com.alipay.sofa.rpc.common.utils.ReflectUtils;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
@@ -30,6 +32,7 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.MessageBuilder;
+import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.proxy.Proxy;
 import javassist.ClassPool;
 import javassist.CtClass;
@@ -201,11 +204,47 @@ public class JavassistProxy implements Proxy {
                 + (c > 0 ? "new Class[]{" + methodSig.toString().substring(1) + "}" : "new Class[0]") + ");"
                 );
 
+            // Check if return type is CompletableFuture
+            boolean isCompletableFutureReturn = java.util.concurrent.CompletableFuture.class
+                .isAssignableFrom(returnType);
+
+            LOGGER.infoWithApp(null, "Creating method " + m.getName() + " with return type " + returnType +
+                ", isCompletableFutureReturn: " + isCompletableFutureReturn);
+
+            // Handle CompletableFuture return type
+            if (isCompletableFutureReturn) {
+                LOGGER.infoWithApp(null, "Will generate CompletableFuture handling code for method " + m.getName());
+            }
+
             sb.append(SofaRequest.class.getCanonicalName()).append(" request = ")
                 .append(MessageBuilder.class.getCanonicalName())
                 .append(".buildSofaRequest(clazz, method, paramTypes, paramValues);");
+
+            // If return type is CompletableFuture, use future invoke type
+            if (isCompletableFutureReturn) {
+                sb.append("request.setInvokeType(\"").append(RpcConstants.INVOKER_TYPE_FUTURE).append("\");");
+            }
+
             sb.append(SofaResponse.class.getCanonicalName()).append(" response = ")
                 .append("proxyInvoker.invoke(request);");
+
+            // Handle CompletableFuture return type
+            // IMPORTANT: Get the future immediately after invoke to avoid race condition
+            // when multiple CompletableFuture requests are in flight
+            if (isCompletableFutureReturn) {
+                sb.append(ResponseFuture.class.getCanonicalName()).append(" responseFuture = ")
+                    .append(RpcInternalContext.class.getCanonicalName())
+                    .append(".getContext().getFuture();");
+                // Only clear the future if we got it, to prevent race condition
+                sb.append("if (responseFuture != null) { ");
+                sb.append(RpcInternalContext.class.getCanonicalName())
+                    .append(".getContext().setFuture(null); ");
+                sb.append("    return (").append(ClassTypeUtils.getTypeStr(returnType)).append(") ")
+                    .append(JavassistProxy.class.getCanonicalName())
+                    .append(".createCompletableFuture(responseFuture);");
+                sb.append("}");
+            }
+
             sb.append("if(response.isError()){");
             sb.append("  throw new ").append(SofaRpcException.class.getName()).append("(")
                 .append(RpcErrorType.class.getName())
@@ -301,5 +340,37 @@ public class JavassistProxy implements Proxy {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    /**
+     * Create a CompletableFuture from a ResponseFuture.
+     * This is a helper method for Javassist generated proxy code.
+     *
+     * @param responseFuture the response future
+     * @return a CompletableFuture that wraps the response
+     */
+    public static java.util.concurrent.CompletableFuture<Object> createCompletableFuture(
+            ResponseFuture<?> responseFuture) {
+        java.util.concurrent.CompletableFuture<Object> completableFuture = new java.util.concurrent.CompletableFuture<>();
+        responseFuture.addListener(new com.alipay.sofa.rpc.core.invoke.SofaResponseCallback() {
+            @Override
+            public void onAppResponse(Object appResponse, String methodName,
+                                      com.alipay.sofa.rpc.core.request.RequestBase request) {
+                completableFuture.complete(appResponse);
+            }
+
+            @Override
+            public void onAppException(Throwable throwable, String methodName,
+                                       com.alipay.sofa.rpc.core.request.RequestBase request) {
+                completableFuture.completeExceptionally(throwable);
+            }
+
+            @Override
+            public void onSofaException(SofaRpcException sofaException, String methodName,
+                                        com.alipay.sofa.rpc.core.request.RequestBase request) {
+                completableFuture.completeExceptionally(sofaException);
+            }
+        });
+        return completableFuture;
     }
 }
