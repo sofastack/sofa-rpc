@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.client;
 
 import com.alipay.sofa.rpc.bootstrap.ConsumerBootstrap;
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
@@ -96,8 +97,12 @@ public class ClientProxyInvoker implements Invoker {
             decorateResponse(response);
             return response;
         } finally {
-            RpcInternalContext.removeContext();
-            RpcInternalContext.popContext();
+            // For future invoke type, don't remove context or pop context as the proxy needs to get the future
+            // The context will be removed after the proxy gets the future
+            if (!RpcConstants.INVOKER_TYPE_FUTURE.equals(request.getInvokeType())) {
+                RpcInternalContext.removeContext();
+                RpcInternalContext.popContext();
+            }
         }
     }
 

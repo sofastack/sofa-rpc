@@ -519,7 +519,7 @@ public class RpcInvokeContext {
         }
 
         // Get the server async response sender from protocol layer
-        ServerAsyncResponseSender responseSender = (ServerAsyncResponseSender) internalContext.getAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT);
+        ServerAsyncResponseSender responseSender = (ServerAsyncResponseSender) internalContext.getAttachment(RpcConstants.HIDDEN_KEY_ASYNC_RESPONSE_SENDER);
         if (responseSender == null) {
             throw new IllegalStateException("Async context is not available. Please ensure you are calling this method in a server-side invocation context with a supported protocol (Bolt or Triple).");
         }

@@ -266,13 +266,18 @@ public class RpcConstants {
     public static final char    INTERNAL_KEY_PREFIX                          = '_';
 
     /**
-     * 隐藏的key：.async_context 异步调用上下文
+     * 隐藏的key：.async_context 异步调用上下文 (Bolt AsyncContext for callbacks)
      */
     public static final String  HIDDEN_KEY_ASYNC_CONTEXT                     = HIDE_KEY_PREFIX + "async_context";
     /**
      * 隐藏的key：.async_req 异步调用请求
      */
     public static final String  HIDDEN_KEY_ASYNC_REQUEST                     = HIDE_KEY_PREFIX + "async_req";
+    /**
+     * 隐藏的key：.async_response_sender Server端异步响应发送器 (for CompletableFuture support)
+     */
+    public static final String  HIDDEN_KEY_ASYNC_RESPONSE_SENDER             = HIDE_KEY_PREFIX +
+                                                                                 "async_response_sender";
     /**
      * 隐藏的key：.pinpoint 指定远程调用地址
      */

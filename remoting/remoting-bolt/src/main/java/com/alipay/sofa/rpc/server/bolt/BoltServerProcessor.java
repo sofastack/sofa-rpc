@@ -116,8 +116,11 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
             context.setRemoteAddress(bizCtx.getRemoteHost(), bizCtx.getRemotePort()); // 远程地址
             // Store both the original Bolt AsyncContext and the ServerAsyncResponseSender for compatibility
+            // HIDDEN_KEY_ASYNC_CONTEXT: original Bolt AsyncContext (for BoltSendableResponseCallback)
+            // HIDDEN_KEY_ASYNC_RESPONSE_SENDER: ServerAsyncResponseSender (for CompletableFuture support)
+            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 原始Bolt AsyncContext
             ServerAsyncResponseSender asyncResponseSender = new BoltServerAsyncResponseSender(asyncCtx);
-            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncResponseSender); // 远程返回的通道
+            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_RESPONSE_SENDER, asyncResponseSender);
 
             InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
             if (RpcInternalContext.isAttachmentEnable()) {
