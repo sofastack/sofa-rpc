@@ -86,6 +86,11 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     protected int                             port             = getIntValue(SERVER_PORT_START);
 
     /**
+     * 实际绑定端口（随机端口时由OS分配）
+     */
+    protected int                             actualPort       = 0;
+
+    /**
      * 基本路径
      */
     protected String                          contextPath      = getStringValue(SERVER_CONTEXT_PATH);
@@ -312,6 +317,35 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
         }
         this.port = port;
         return this;
+    }
+
+    /**
+     * Sets the actual port that the server is bound to after startup.
+     * This is used when the configured port is a random port (-1) or port 0: after the OS assigns
+     * an available port, the actual binding port is written back here so that callers can
+     * retrieve it via {@link #getActualPort()}.
+     * Unlike {@link #setPort(int)}, this method stores the value in a separate field to avoid
+     * mutating the configured port, which is used as a cache key in {@link com.alipay.sofa.rpc.server.ServerFactory}.
+     * The caller is responsible for passing a valid, non-random port number.
+     *
+     * @param actualPort the actual port number assigned by the OS after binding
+     * @return this server config instance for chaining
+     */
+    public ServerConfig setActualBindingPort(int actualPort) {
+        this.actualPort = actualPort;
+        return this;
+    }
+
+    /**
+     * Gets the actual port that the server is bound to after startup.
+     * When a random port (configured as -1 or 0) is used, this returns the OS-assigned port
+     * after the server has started. Returns 0 if the server has not been started or if the
+     * configured port was not a random port.
+     *
+     * @return the actual bound port, or 0 if not yet bound
+     */
+    public int getActualPort() {
+        return actualPort;
     }
 
     /**

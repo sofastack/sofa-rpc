@@ -100,4 +100,29 @@ public class BoltServerTest {
         server.destroy();
     }
 
+    @Test
+    public void testRandomPort() throws Exception {
+        String host = "127.0.0.1";
+        ServerConfig serverConfig = new ServerConfig();
+        serverConfig.setBoundHost(host);
+        serverConfig.setPort(0);
+        serverConfig.setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+
+        BoltServer server = new BoltServer();
+        server.init(serverConfig);
+        server.start();
+        Assert.assertTrue(server.started);
+
+        int actualPort = serverConfig.getActualPort();
+        Assert.assertTrue("Actual port should be a valid port number", actualPort > 0);
+        Assert.assertTrue(NetUtils.canTelnet(host, actualPort, 1000));
+
+        server.stop();
+        Assert.assertFalse(server.started);
+        Thread.sleep(1000);
+        Assert.assertFalse(NetUtils.canTelnet(host, actualPort, 1000));
+
+        server.destroy();
+    }
+
 }
