@@ -141,16 +141,17 @@ public class BoltServer implements Server {
             remotingServer = initRemotingServer();
             try {
                 if (remotingServer.start()) {
-                    // When a random port (0 or -1) is configured, the OS assigns an available port
-                    // at bind time. The bolt RpcServer updates its internal port field after binding,
-                    // so we read it back and write it into ServerConfig so that callers can retrieve
-                    // the actual port via serverConfig.getPort().
-                    if (NetUtils.isRandomPort(serverConfig.getPort())) {
+                    // When a random port (-1) or port 0 is configured, the OS assigns an available
+                    // port at bind time. The bolt RpcServer updates its internal port field after
+                    // binding, so we read it back and store it in ServerConfig so that callers can
+                    // retrieve the actual port via serverConfig.getActualPort().
+                    int configuredPort = serverConfig.getPort();
+                    if (NetUtils.isRandomPort(configuredPort) || configuredPort == 0) {
                         serverConfig.setActualBindingPort(remotingServer.port());
                     }
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
-                            serverConfig.getPort());
+                            remotingServer.port());
                     }
                 } else {
                     throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_BOLT_SERVER));
