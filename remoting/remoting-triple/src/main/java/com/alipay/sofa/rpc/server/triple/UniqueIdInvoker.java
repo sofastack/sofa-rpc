@@ -109,6 +109,69 @@ public class UniqueIdInvoker implements Invoker {
     }
 
     /**
+     * Get the first inner invoker from the map.
+     * This is useful for HTTP/1.1 handling where we need to access the ProviderConfig.
+     *
+     * @return the first inner invoker, or null if empty
+     */
+    public Invoker getInnerInvoker() {
+        this.readLock.lock();
+        try {
+            if (this.uniqueIdInvokerMap.isEmpty()) {
+                return null;
+            }
+            return this.uniqueIdInvokerMap.values().iterator().next();
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
+    /**
+     * Check if the service is a protobuf service (BindableService).
+     *
+     * @return true if the service is a protobuf service
+     */
+    public boolean isProtoService() {
+        this.readLock.lock();
+        try {
+            if (this.uniqueIdInvokerMap.isEmpty()) {
+                return false;
+            }
+            Invoker invoker = this.uniqueIdInvokerMap.values().iterator().next();
+            if (invoker instanceof ProviderProxyInvoker) {
+                ProviderConfig providerConfig = ((ProviderProxyInvoker) invoker).getProviderConfig();
+                if (providerConfig != null && providerConfig.getRef() != null) {
+                    return io.grpc.BindableService.class.isAssignableFrom(providerConfig.getRef().getClass());
+                }
+            }
+            return false;
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
+    /**
+     * Get the ProviderConfig from the first inner invoker.
+     *
+     * @return the ProviderConfig, or null if not available
+     */
+    public ProviderConfig getProviderConfig() {
+        this.readLock.lock();
+        try {
+            if (this.uniqueIdInvokerMap.isEmpty()) {
+                return null;
+            }
+            Invoker invoker = this.uniqueIdInvokerMap.values().iterator().next();
+            if (invoker instanceof ProviderProxyInvoker) {
+                return ((ProviderProxyInvoker) invoker).getProviderConfig();
+            }
+            return null;
+        } finally {
+            this.readLock.unlock();
+        }
+    }
+
+    /**
      * get unique id from provider config, this function won't return null
      *
      * @param providerConfig provider config
@@ -182,8 +245,15 @@ public class UniqueIdInvoker implements Invoker {
         String uniqueName = this.getServiceUniqueName(sofaRequest);
         List<String> argTypesList = request.getArgTypesList();
         if (RpcConstants.INVOKER_TYPE_SERVER_STREAMING.equals(callType)) {
+            // For server streaming, add SofaStreamObserver at the end
             List<String> a = new ArrayList<>(argTypesList.size() + 1);
             a.addAll(argTypesList);
+            a.add(SofaStreamObserver.class.getCanonicalName());
+            argTypesList = a;
+        } else if (RpcConstants.INVOKER_TYPE_BI_STREAMING.equals(callType)) {
+            // For bidirectional streaming, the method takes only SofaStreamObserver as parameter
+            // The argTypes from request contains the stream input type, not the method parameter type
+            List<String> a = new ArrayList<>(1);
             a.add(SofaStreamObserver.class.getCanonicalName());
             argTypesList = a;
         }

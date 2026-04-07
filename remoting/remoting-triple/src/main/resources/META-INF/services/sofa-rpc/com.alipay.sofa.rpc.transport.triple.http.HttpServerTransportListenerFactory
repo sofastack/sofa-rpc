@@ -1,0 +1,4 @@
+http1=com.alipay.sofa.rpc.transport.triple.http1.Http1ServerTransportListenerFactory
+grpc=com.alipay.sofa.rpc.transport.triple.grpc.GrpcServerTransportListenerFactory
+http2-pure=com.alipay.sofa.rpc.transport.triple.http2.PureHttp2ServerTransportListenerFactory
+http3=com.alipay.sofa.rpc.transport.triple.http3.Http3ServerTransportListenerFactory

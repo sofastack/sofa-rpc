@@ -27,6 +27,8 @@ import com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException;
 import com.alipay.sofa.rpc.event.EventBus;
 import com.alipay.sofa.rpc.event.ServerStartedEvent;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.ext.ExtensionClass;
+import com.alipay.sofa.rpc.ext.ExtensionLoaderFactory;
 import com.alipay.sofa.rpc.interceptor.ServerReqHeaderInterceptor;
 import com.alipay.sofa.rpc.interceptor.TripleServerInterceptor;
 import com.alipay.sofa.rpc.invoke.Invoker;
@@ -37,6 +39,10 @@ import com.alipay.sofa.rpc.proxy.ProxyFactory;
 import com.alipay.sofa.rpc.server.BusinessPool;
 import com.alipay.sofa.rpc.server.Server;
 import com.alipay.sofa.rpc.server.SofaRejectedExecutionHandler;
+import com.alipay.sofa.rpc.transport.triple.http.HttpServerTransportListenerFactory;
+import com.alipay.sofa.rpc.transport.triple.http.HttpVersion;
+import com.alipay.sofa.rpc.transport.triple.quic.QuicServerChannelInitializer;
+import com.alipay.sofa.rpc.transport.triple.quic.QuicSslContextFactory;
 import com.alipay.sofa.rpc.utils.SofaProtoUtils;
 import io.grpc.BindableService;
 import io.grpc.MethodDescriptor;
@@ -84,6 +90,22 @@ public class TripleServer implements Server {
      */
     private static final Logger                                          LOGGER          = LoggerFactory
                                                                                              .getLogger(TripleServer.class);
+
+    /**
+     * Configuration key for HTTP/1.1 support
+     */
+    private static final String                                          HTTP1_ENABLED_KEY = "triple.http1.enabled";
+
+    /**
+     * Configuration key for HTTP/3 support
+     */
+    private static final String                                          HTTP3_ENABLED_KEY = "triple.http3.enabled";
+
+    /**
+     * Configuration key for port unification
+     */
+    private static final String                                          PORT_UNIFICATION_KEY = "triple.port-unification.enabled";
+
     /**
      * server config
      */
@@ -100,6 +122,21 @@ public class TripleServer implements Server {
     protected io.grpc.Server                                             server;
 
     /**
+     * Netty server channel for custom HTTP/1.1 + HTTP/2 support
+     */
+    protected io.grpc.netty.shaded.io.netty.channel.Channel              nettyServerChannel;
+
+    /**
+     * Boss event loop group
+     */
+    protected EventLoopGroup                                             bossGroup;
+
+    /**
+     * Worker event loop group
+     */
+    protected EventLoopGroup                                             workerGroup;
+
+    /**
      * service registry
      */
     protected MutableHandlerRegistry                                     handlerRegistry = new MutableHandlerRegistry();
@@ -114,6 +151,12 @@ public class TripleServer implements Server {
     protected Map<String, UniqueIdInvoker>                               invokerMap = new ConcurrentHashMap<>();
 
     /**
+     * The mapping relationship between gRPC service name (from proto definition) and unique id invoker
+     * This is needed for pure HTTP/2 implementation to look up invokers by gRPC service name
+     */
+    protected Map<String, UniqueIdInvoker>                               grpcServiceNameInvokerMap = new ConcurrentHashMap<>();
+
+    /**
      * Thread pool
      * @param serverConfig ServerConfig
      */
@@ -124,14 +167,76 @@ public class TripleServer implements Server {
      */
     private Lock                                                         lock;
 
+    /**
+     * HTTP/1.1 support enabled
+     */
+    private boolean                                                      http1Enabled;
+
+    /**
+     * HTTP/3 support enabled
+     */
+    private boolean                                                      http3Enabled;
+
+    /**
+     * Port unification enabled (multi-protocol on same port)
+     */
+    private boolean                                                      portUnificationEnabled;
+
+    /**
+     * HTTP transport listener factories
+     */
+    private List<HttpServerTransportListenerFactory>                     transportListenerFactories;
+
+    /**
+     * QUIC server channel for HTTP/3 support (UDP)
+     */
+    protected io.netty.channel.Channel                                   quicServerChannel;
+
+    /**
+     * QUIC event loop group (UDP)
+     */
+    protected io.netty.channel.EventLoopGroup                            quicGroup;
+
     @Override
     public void init(ServerConfig serverConfig) {
         this.serverConfig = serverConfig;
         bizThreadPool = initThreadPool(serverConfig);
-        server = NettyServerBuilder.forPort(serverConfig.getPort()).
-            fallbackHandlerRegistry(handlerRegistry)
-            .bossEventLoopGroup(constructBossEventLoopGroup())
-            .workerEventLoopGroup(constructWorkerEventLoopGroup())
+
+        // Load TripleX configuration
+        loadTripleXConfig();
+
+        // Load transport listener factories
+        loadTransportListenerFactories();
+
+        // Initialize event loop groups
+        bossGroup = constructBossEventLoopGroup();
+        workerGroup = constructWorkerEventLoopGroup();
+
+        // Build gRPC server for HTTP/2 support
+        // When HTTP/1.1 is enabled with port unification, we use a custom Netty server
+        // that detects the protocol and routes to appropriate handlers.
+        if (http1Enabled && portUnificationEnabled) {
+            initCustomNettyServer();
+        } else {
+            initGrpcServer();
+        }
+
+        // Initialize HTTP/3 (QUIC) server if enabled
+        if (http3Enabled) {
+            initQuicServer();
+        }
+
+        this.lock = new ReentrantLock();
+    }
+
+    /**
+     * Initialize gRPC server (HTTP/2 only).
+     */
+    private void initGrpcServer() {
+        server = NettyServerBuilder.forPort(serverConfig.getPort())
+            .fallbackHandlerRegistry(handlerRegistry)
+            .bossEventLoopGroup(bossGroup)
+            .workerEventLoopGroup(workerGroup)
             .executor(bizThreadPool)
             .channelType(constructChannel())
             .maxInboundMetadataSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE))
@@ -139,7 +244,193 @@ public class TripleServer implements Server {
             .permitKeepAliveTime(1, TimeUnit.SECONDS)
             .permitKeepAliveWithoutCalls(true)
             .build();
-        this.lock = new ReentrantLock();
+    }
+
+    /**
+     * Initialize custom Netty server with HTTP/1.1 and HTTP/2 support.
+     */
+    private void initCustomNettyServer() {
+        try {
+            // Create custom Netty server with protocol detection
+            // Pass invokerMap as a supplier to support dynamic service registration
+            io.grpc.netty.shaded.io.netty.bootstrap.ServerBootstrap bootstrap =
+                new io.grpc.netty.shaded.io.netty.bootstrap.ServerBootstrap();
+
+            bootstrap.group(bossGroup, workerGroup)
+                .channel(constructChannel())
+                .childHandler(new com.alipay.sofa.rpc.transport.triple.TripleServerChannelInitializer(
+                    serverConfig, () -> invokerMap, () -> grpcServiceNameInvokerMap, bizThreadPool, workerGroup));
+
+            // Bind to port
+            nettyServerChannel = bootstrap.bind(serverConfig.getPort()).syncUninterruptibly().channel();
+
+            if (LOGGER.isInfoEnabled()) {
+                LOGGER.info("Custom Netty server initialized on port {} with HTTP/1.1 and HTTP/2 support",
+                    serverConfig.getPort());
+            }
+
+            // Note: When using custom Netty server, we don't use gRPC server.
+            // Service registration is handled by the custom server.
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize custom Netty server", e);
+            throw new SofaRpcRuntimeException("Failed to initialize custom Netty server", e);
+        }
+    }
+
+    /**
+     * Initialize QUIC server for HTTP/3.
+     * QUIC uses UDP transport and requires TLS 1.3.
+     */
+    private void initQuicServer() {
+        // Check if QUIC classes are available
+        if (!isQuicAvailable()) {
+            LOGGER.warn("QUIC support not available (netty-incubator-codec-quic not in classpath). " +
+                "HTTP/3 will be disabled.");
+            this.http3Enabled = false;
+            return;
+        }
+
+        try {
+            // Create QUIC EventLoopGroup (UDP-based)
+            quicGroup = createQuicEventLoopGroup();
+
+            // Get HTTP/3 port (default: TCP port + 1)
+            int http3Port = getHttp3Port();
+
+            // Create SSL context (QUIC requires TLS 1.3)
+            io.netty.incubator.codec.quic.QuicSslContext sslContext =
+                QuicSslContextFactory.createServerSslContext(serverConfig);
+
+            // Create QUIC server channel initializer
+            QuicServerChannelInitializer initializer = new QuicServerChannelInitializer(
+                serverConfig, () -> invokerMap, () -> grpcServiceNameInvokerMap, bizThreadPool, sslContext);
+
+            // Create QUIC server bootstrap
+            io.netty.bootstrap.Bootstrap bootstrap = new io.netty.bootstrap.Bootstrap();
+
+            // Configure QUIC server codec
+            io.netty.incubator.codec.quic.QuicServerCodecBuilder codecBuilder =
+                new io.netty.incubator.codec.quic.QuicServerCodecBuilder();
+
+            codecBuilder.sslContext(sslContext)
+                .maxIdleTimeout(30000, java.util.concurrent.TimeUnit.MILLISECONDS)
+                .initialMaxData(10000000)
+                .initialMaxStreamDataBidirectionalLocal(1000000)
+                .initialMaxStreamDataBidirectionalRemote(1000000)
+                .initialMaxStreamsBidirectional(100)
+                .handler(initializer);
+
+            bootstrap.group(quicGroup)
+                .channel(io.netty.incubator.codec.quic.QuicChannel.class)
+                .handler(codecBuilder.build());
+
+            // Bind to UDP port
+            quicServerChannel = bootstrap.bind(http3Port).syncUninterruptibly().channel();
+
+            LOGGER.info("QUIC server initialized on UDP port {} for HTTP/3", http3Port);
+
+        } catch (Exception e) {
+            LOGGER.error("Failed to initialize QUIC server for HTTP/3", e);
+            // Don't throw - gracefully degrade to HTTP/2 only
+            this.http3Enabled = false;
+            LOGGER.warn("HTTP/3 disabled due to initialization failure. Falling back to HTTP/2 only.");
+        }
+    }
+
+    /**
+     * Check if QUIC support is available.
+     *
+     * @return true if QUIC classes are available
+     */
+    private boolean isQuicAvailable() {
+        try {
+            Class.forName("io.netty.incubator.codec.quic.QuicChannel");
+            Class.forName("io.netty.incubator.codec.quic.QuicServerCodecBuilder");
+            Class.forName("io.netty.incubator.codec.http3.Http3ServerConnectionHandler");
+            return true;
+        } catch (ClassNotFoundException e) {
+            return false;
+        }
+    }
+
+    /**
+     * Create QUIC EventLoopGroup (UDP-based).
+     * Uses native Netty EventLoopGroup (not grpc-netty-shaded) for QUIC compatibility.
+     *
+     * @return EventLoopGroup for QUIC
+     */
+    private io.netty.channel.EventLoopGroup createQuicEventLoopGroup() {
+        int quicThreads = serverConfig.getIoThreads();
+        quicThreads = quicThreads <= 0 ? Runtime.getRuntime().availableProcessors() : quicThreads;
+
+        NamedThreadFactory threadName =
+            new NamedThreadFactory("SEV-QUIC-" + serverConfig.getPort(), serverConfig.isDaemon());
+
+        // Use native Netty NioEventLoopGroup for QUIC
+        // QUIC requires native Netty, not grpc-netty-shaded
+        return new io.netty.channel.nio.NioEventLoopGroup(quicThreads, threadName);
+    }
+
+    /**
+     * Get HTTP/3 port.
+     * Uses separate port configuration or TCP port + 1.
+     *
+     * @return HTTP/3 port
+     */
+    private int getHttp3Port() {
+        Map<String, String> parameters = serverConfig.getParameters();
+        if (parameters != null && parameters.containsKey("triple.http3.port")) {
+            try {
+                return Integer.parseInt(parameters.get("triple.http3.port"));
+            } catch (NumberFormatException e) {
+                LOGGER.warn("Invalid triple.http3.port configuration, using default (same as TCP port)");
+            }
+        }
+        return serverConfig.getPort();
+    }
+
+    /**
+     * Load TripleX configuration from server config.
+     */
+    protected void loadTripleXConfig() {
+        // HTTP/1.1 support - default false (requires explicit configuration)
+        Map<String, String> parameters = serverConfig.getParameters();
+        this.http1Enabled = parameters != null && "true".equals(parameters.get(HTTP1_ENABLED_KEY));
+
+        // HTTP/3 support - default false (experimental)
+        this.http3Enabled = parameters != null && "true".equals(parameters.get(HTTP3_ENABLED_KEY));
+
+        // Port unification - default true
+        this.portUnificationEnabled = parameters == null || !"false".equals(parameters.get(PORT_UNIFICATION_KEY));
+
+        if (LOGGER.isInfoEnabled()) {
+            LOGGER.info("TripleX config: http1Enabled={}, http3Enabled={}, portUnificationEnabled={}",
+                    http1Enabled, http3Enabled, portUnificationEnabled);
+        }
+    }
+
+    /**
+     * Load HTTP transport listener factories via SPI.
+     */
+    protected void loadTransportListenerFactories() {
+        this.transportListenerFactories = new ArrayList<>();
+
+        try {
+            com.alipay.sofa.rpc.ext.ExtensionLoader<HttpServerTransportListenerFactory> loader =
+                    ExtensionLoaderFactory.getExtensionLoader(HttpServerTransportListenerFactory.class);
+            for (Map.Entry<String, ExtensionClass<HttpServerTransportListenerFactory>> entry : loader.getAllExtensions().entrySet()) {
+                HttpServerTransportListenerFactory factory = entry.getValue().getExtInstance();
+                if (factory != null) {
+                    transportListenerFactories.add(factory);
+                    if (LOGGER.isInfoEnabled()) {
+                        LOGGER.info("Loaded HttpServerTransportListenerFactory: {}", entry.getKey());
+                    }
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warn("Failed to load HttpServerTransportListenerFactory extensions", e);
+        }
     }
 
     private Class<? extends ServerChannel> constructChannel() {
@@ -196,9 +487,16 @@ public class TripleServer implements Server {
                 return;
             }
             try {
-                server.start();
+                // Start gRPC server if present
+                if (server != null) {
+                    server.start();
+                }
+
+                // Log server status
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Start the triple server at port {}", serverConfig.getPort());
+                    int http3Port = http3Enabled ? getHttp3Port() : -1;
+                    LOGGER.info("Start the triple server at port {}, http1Enabled={}, http3Enabled={}, http3Port={}, nettyServerChannel={}, quicServerChannel={}",
+                            serverConfig.getPort(), http1Enabled, http3Enabled, http3Port, nettyServerChannel != null, quicServerChannel != null);
                 }
                 if (EventBus.isEnable(ServerStartedEvent.class)) {
                     EventBus.post(new ServerStartedEvent(serverConfig, bizThreadPool));
@@ -233,7 +531,26 @@ public class TripleServer implements Server {
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop the triple server at port {}", serverConfig.getPort());
             }
-            server.shutdown();
+            // Stop gRPC server if present
+            if (server != null) {
+                server.shutdown();
+            }
+
+            // Stop custom Netty server if present
+            if (nettyServerChannel != null) {
+                nettyServerChannel.close();
+                nettyServerChannel = null;
+            }
+
+            // Stop QUIC server if present
+            if (quicServerChannel != null) {
+                quicServerChannel.close();
+                quicServerChannel = null;
+            }
+            if (quicGroup != null) {
+                quicGroup.shutdownGracefully();
+                quicGroup = null;
+            }
         } catch (Exception e) {
             LOGGER.error("Stop the triple server at port " + serverConfig.getPort() + " error !", e);
         }
@@ -268,6 +585,11 @@ public class TripleServer implements Server {
 
             ServerServiceDefinition serviceDefinition = getServerServiceDefinition(providerConfig, uniqueIdInvoker);
             this.serviceInfo.put(providerConfig.getInterfaceId(), serviceDefinition);
+
+            // Also map by gRPC service name for pure HTTP/2 implementation
+            String grpcServiceName = serviceDefinition.getServiceDescriptor().getName();
+            this.grpcServiceNameInvokerMap.put(grpcServiceName, uniqueIdInvoker);
+
             ServerServiceDefinition ssd = this.handlerRegistry.addService(serviceDefinition);
             if (ssd != null) {
                 throw new IllegalStateException("Can not expose service with same name:" +
@@ -412,6 +734,11 @@ public class TripleServer implements Server {
                     this.invokerMap.remove(providerConfig.getInterfaceId());
                     this.handlerRegistry.removeService(serverServiceDefinition);
                     this.serviceInfo.remove(providerConfig.getInterfaceId());
+                    // Also remove from gRPC service name map
+                    if (serverServiceDefinition != null) {
+                        String grpcServiceName = serverServiceDefinition.getServiceDescriptor().getName();
+                        this.grpcServiceNameInvokerMap.remove(grpcServiceName);
+                    }
                 }
             } else {
                 this.handlerRegistry.removeService(serverServiceDefinition);
@@ -438,6 +765,9 @@ public class TripleServer implements Server {
     public void destroy() {
         stop();
         server = null;
+        nettyServerChannel = null;
+        quicServerChannel = null;
+        quicGroup = null;
     }
 
     @Override
@@ -458,6 +788,51 @@ public class TripleServer implements Server {
      */
     public ThreadPoolExecutor getBizThreadPool() {
         return bizThreadPool;
+    }
+
+    /**
+     * Check if HTTP/1.1 support is enabled.
+     *
+     * @return true if HTTP/1.1 is enabled
+     */
+    public boolean isHttp1Enabled() {
+        return http1Enabled;
+    }
+
+    /**
+     * Check if HTTP/3 support is enabled.
+     *
+     * @return true if HTTP/3 is enabled
+     */
+    public boolean isHttp3Enabled() {
+        return http3Enabled;
+    }
+
+    /**
+     * Check if port unification is enabled.
+     *
+     * @return true if port unification is enabled
+     */
+    public boolean isPortUnificationEnabled() {
+        return portUnificationEnabled;
+    }
+
+    /**
+     * Get the transport listener factories.
+     *
+     * @return list of transport listener factories
+     */
+    public List<HttpServerTransportListenerFactory> getTransportListenerFactories() {
+        return transportListenerFactories;
+    }
+
+    /**
+     * Get the invoker map.
+     *
+     * @return invoker map
+     */
+    public Map<String, UniqueIdInvoker> getInvokerMap() {
+        return invokerMap;
     }
 
 }

@@ -46,6 +46,24 @@
             <groupId>io.grpc</groupId>
             <artifactId>grpc-stub</artifactId>
         </dependency>
+        <!-- Netty QUIC for HTTP/3 support (optional) -->
+        <dependency>
+            <groupId>io.netty.incubator</groupId>
+            <artifactId>netty-incubator-codec-quic</artifactId>
+            <classifier>${os.detected.classifier}</classifier>
+            <optional>true</optional>
+        </dependency>
+        <dependency>
+            <groupId>io.netty.incubator</groupId>
+            <artifactId>netty-incubator-codec-http3</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- protobuf-java-util for JSON parsing of protobuf messages -->
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java-util</artifactId>
+            <version>3.22.0</version>
+        </dependency>
         
         <dependency>
             <groupId>com.google.guava</groupId>

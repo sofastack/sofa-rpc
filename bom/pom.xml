@@ -41,6 +41,7 @@
         <protostuff.version>1.5.9</protostuff.version>
         <fury.version>0.4.1</fury.version>
         <grpc.version>1.53.0</grpc.version>
+        <netty.quic.version>0.0.20.Final</netty.quic.version>
 
         <!--common-->
         <httpcore.version>4.4.13</httpcore.version>
@@ -503,6 +504,18 @@
                 <groupId>io.grpc</groupId>
                 <artifactId>grpc-stub</artifactId>
                 <version>${grpc.version}</version>
+            </dependency>
+            <!-- Netty QUIC for HTTP/3 support -->
+            <dependency>
+                <groupId>io.netty.incubator</groupId>
+                <artifactId>netty-incubator-codec-quic</artifactId>
+                <version>${netty.quic.version}</version>
+                <classifier>${os.detected.classifier}</classifier>
+            </dependency>
+            <dependency>
+                <groupId>io.netty.incubator</groupId>
+                <artifactId>netty-incubator-codec-http3</artifactId>
+                <version>${netty.quic.version}</version>
             </dependency>
             <!-- Fabric8 for Kubernetes -->
             <dependency>
