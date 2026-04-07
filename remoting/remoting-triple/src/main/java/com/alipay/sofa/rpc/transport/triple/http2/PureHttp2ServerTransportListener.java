@@ -32,7 +32,6 @@ import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.triple.UniqueIdInvoker;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 import com.alipay.sofa.rpc.transport.SofaStreamObserver;
-import com.alipay.sofa.rpc.transport.triple.http.HttpChannel;
 import com.alipay.sofa.rpc.transport.triple.http.HttpInputMessage;
 import com.alipay.sofa.rpc.transport.triple.http.HttpMetadata;
 import com.alipay.sofa.rpc.transport.triple.http.HttpTransportListener;
@@ -48,7 +47,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * Pure HTTP/2 server transport listener.
@@ -69,7 +67,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
 
     private static final String          GRPC_CONTENT_TYPE = "application/grpc";
 
-    protected final HttpChannel          httpChannel;
+    protected final Http2Channel         httpChannel;
     protected final ServerConfig         serverConfig;
     protected final UniqueIdInvoker      invoker;
     protected Executor                   executor;
@@ -80,13 +78,13 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
     protected Method                     targetMethod;
     protected Serializer                 serializer;
     protected String                     serializeType;
-    protected SofaStreamObserver<Object> bidiRequestObserver;
-    protected StreamObserver<Object>     protoBidiRequestObserver;
-    protected byte[]                     pendingBidiData;
-    protected boolean                    streamComplete;
-    protected boolean                    isProtoService;
+    protected SofaStreamObserver<Object>     bidiRequestObserver;
+    protected StreamObserver<Object>         protoBidiRequestObserver;
+    protected volatile byte[]               pendingBidiData;
+    protected volatile boolean              streamComplete;
+    protected boolean                       isProtoService;
 
-    public PureHttp2ServerTransportListener(HttpChannel httpChannel, ServerConfig serverConfig,
+    public PureHttp2ServerTransportListener(Http2Channel httpChannel, ServerConfig serverConfig,
                                             UniqueIdInvoker invoker) {
         this.httpChannel = httpChannel;
         this.serverConfig = serverConfig;
@@ -96,12 +94,12 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
     /**
      * Constructor with executor.
      *
-     * @param httpChannel HTTP channel
+     * @param httpChannel HTTP/2 channel
      * @param serverConfig server configuration
      * @param invoker invoker
      * @param executor executor for request processing
      */
-    public PureHttp2ServerTransportListener(HttpChannel httpChannel, ServerConfig serverConfig,
+    public PureHttp2ServerTransportListener(Http2Channel httpChannel, ServerConfig serverConfig,
                                             UniqueIdInvoker invoker, Executor executor) {
         this.httpChannel = httpChannel;
         this.serverConfig = serverConfig;
@@ -112,12 +110,6 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
     @Override
     public void onMetadata(HttpMetadata metadata) {
         this.httpMetadata = metadata;
-
-        // Use the provided executor or create one if not set
-        if (executor == null) {
-            executor = Executors.newCachedThreadPool();
-        }
-
         // Build message listener for processing request data
         messageListener = buildMessageListener();
     }
@@ -125,6 +117,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
     @Override
     public void onData(HttpInputMessage message) {
         if (executor == null || messageListener == null) {
+            LOGGER.warn("onData called before executor/messageListener was initialized, dropping message");
             return;
         }
 
@@ -188,9 +181,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
         return data -> {
             // For bidirectional streaming with existing observer, process all gRPC frames
             if (bidiRequestObserver != null || protoBidiRequestObserver != null) {
-                // Data contains one or more gRPC frames, decode all and process
                 List<byte[]> payloads = decodeAllGrpcFrames(data);
-                LOGGER.info("Processing {} bidi frames from data", payloads.size());
                 for (byte[] payload : payloads) {
                     processBidiStreamingMessage(payload);
                 }
@@ -243,12 +234,8 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
                 // For bidirectional streaming, the request type is the type parameter of the returned StreamObserver
                 // Method signature: StreamObserver<RequestType> method(StreamObserver<ResponseType> responseObserver)
                 Class<?> requestType = getBidiStreamingRequestType();
-                LOGGER.info("Processing bidi message, requestType: {}, data length: {}",
-                    requestType != null ? requestType.getName() : "null", decodedData.length);
                 if (requestType != null) {
                     Message protoMessage = parseProtoMessage(decodedData, requestType);
-                    LOGGER.info("Parsed proto message: {}", protoMessage != null ? protoMessage.getClass().getName()
-                        : "null");
                     if (protoMessage != null) {
                         protoBidiRequestObserver.onNext(protoMessage);
                     }
@@ -367,36 +354,20 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
     protected List<byte[]> decodeAllGrpcFrames(byte[] data) {
         List<byte[]> payloads = new ArrayList<>();
         if (data == null || data.length < 5) {
-            LOGGER.info("decodeAllGrpcFrames: data is null or too short, length: {}",
-                data != null ? data.length : -1);
             return payloads;
         }
 
-        LOGGER.info("decodeAllGrpcFrames: data length: {}, first 5 bytes: {} {} {} {} {}",
-            data.length,
-            data.length > 0 ? data[0] : -1,
-            data.length > 1 ? data[1] : -1,
-            data.length > 2 ? data[2] : -1,
-            data.length > 3 ? data[3] : -1,
-            data.length > 4 ? data[4] : -1);
-
         int offset = 0;
         while (offset + 5 <= data.length) {
-            // Read length (4 bytes, big-endian) after compression flag
             int length = ((data[offset + 1] & 0xFF) << 24) |
                 ((data[offset + 2] & 0xFF) << 16) |
                 ((data[offset + 3] & 0xFF) << 8) |
                 (data[offset + 4] & 0xFF);
 
-            LOGGER.info("decodeAllGrpcFrames: offset: {}, length: {}, data.length: {}",
-                offset, length, data.length);
-
             if (offset + 5 + length > data.length) {
-                LOGGER.info("decodeAllGrpcFrames: breaking, offset + 5 + length > data.length");
                 break;
             }
 
-            // Extract payload
             byte[] payload = new byte[length];
             System.arraycopy(data, offset + 5, payload, 0, length);
             payloads.add(payload);
@@ -404,7 +375,6 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
             offset += 5 + length;
         }
 
-        LOGGER.info("decodeAllGrpcFrames: returning {} payloads", payloads.size());
         return payloads;
     }
 
@@ -472,7 +442,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
             }
 
         } catch (Exception e) {
-            LOGGER.error("Service invocation failed: " + request.getInterfaceName() + "." + request.getMethodName(), e);
+            LOGGER.error("Service invocation failed: {}.{}", request.getInterfaceName(), request.getMethodName(), e);
             onError(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -488,9 +458,9 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
      * @param data raw protobuf message data
      */
     protected void processProtoRequest(SofaRequest request, byte[] data) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Processing protobuf service request: {}.{}, data length: {}",
-                request.getInterfaceName(), request.getMethodName(), data != null ? data.length : 0);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Processing protobuf service request: {}.{}", request.getInterfaceName(),
+                request.getMethodName());
         }
 
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -554,7 +524,6 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
                 // Process all gRPC frames from the raw data
                 if (rawGrpcData != null && rawGrpcData.length > 0) {
                     List<byte[]> payloads = decodeAllGrpcFrames(rawGrpcData);
-                    LOGGER.info("Processing {} bidi frames from pending data", payloads.size());
                     for (byte[] payload : payloads) {
                         processBidiStreamingMessage(payload);
                     }
@@ -608,8 +577,8 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
             }
 
         } catch (Exception e) {
-            LOGGER.error(
-                "Protobuf service invocation failed: " + request.getInterfaceName() + "." + request.getMethodName(), e);
+            LOGGER.error("Protobuf service invocation failed: {}.{}", request.getInterfaceName(),
+                request.getMethodName(), e);
             onError(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -656,7 +625,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
             Method parseFrom = messageType.getMethod("parseFrom", byte[].class);
             return (Message) parseFrom.invoke(null, data);
         } catch (Exception e) {
-            LOGGER.error("Failed to parse protobuf message of type: " + messageType.getName(), e);
+            LOGGER.error("Failed to parse protobuf message of type: {}", messageType.getName(), e);
             return null;
         }
     }
@@ -676,8 +645,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
                     byte[] grpcFrame = encodeGrpcFrame(data);
 
                     if (httpChannel != null && httpChannel.isActive()) {
-                        Http2Channel http2Channel = (Http2Channel) httpChannel;
-                        http2Channel.writeResponse(grpcFrame);
+                        httpChannel.writeResponse(grpcFrame);
                     }
                 }
             }
@@ -985,11 +953,10 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
             byte[] data = response.toByteArray();
             byte[] grpcFrame = encodeGrpcFrame(data);
 
-            Http2Channel http2Channel = (Http2Channel) httpChannel;
             if (endOfStream) {
-                http2Channel.writeResponseAndComplete(grpcFrame);
+                httpChannel.writeResponseAndComplete(grpcFrame);
             } else {
-                http2Channel.writeResponse(grpcFrame);
+                httpChannel.writeResponse(grpcFrame);
             }
         } catch (Exception e) {
             LOGGER.error("Failed to write response", e);
@@ -1009,8 +976,7 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
         }
 
         try {
-            Http2Channel http2Channel = (Http2Channel) httpChannel;
-            http2Channel.writeGrpcTrailers(status, message);
+            httpChannel.writeGrpcTrailers(status, message);
         } catch (Exception e) {
             LOGGER.error("Failed to write trailers", e);
         }
@@ -1028,10 +994,8 @@ public class PureHttp2ServerTransportListener implements HttpTransportListener<H
         }
 
         try {
-            Http2Channel http2Channel = (Http2Channel) httpChannel;
-            // Map exception to gRPC status code
             io.grpc.Status status = io.grpc.Status.fromThrowable(throwable);
-            http2Channel.writeGrpcTrailers(status.getCode().value(), status.getDescription());
+            httpChannel.writeGrpcTrailers(status.getCode().value(), status.getDescription());
         } catch (Exception e) {
             LOGGER.error("Failed to write error response", e);
             httpChannel.close();

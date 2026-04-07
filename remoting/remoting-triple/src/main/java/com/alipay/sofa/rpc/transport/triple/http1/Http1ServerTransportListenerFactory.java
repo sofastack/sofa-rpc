@@ -21,6 +21,8 @@ import com.alipay.sofa.rpc.ext.Extension;
 import com.alipay.sofa.rpc.server.triple.UniqueIdInvoker;
 import com.alipay.sofa.rpc.transport.triple.http.*;
 
+import java.util.concurrent.Executor;
+
 /**
  * Factory for creating HTTP/1.1 server transport listeners.
  */
@@ -30,8 +32,8 @@ public class Http1ServerTransportListenerFactory implements HttpServerTransportL
     private UniqueIdInvoker invoker;
 
     @Override
-    public HttpTransportListener<?, ?> newInstance(HttpChannel channel, ServerConfig serverConfig) {
-        return new Http1ServerTransportListener(channel, serverConfig, invoker);
+    public HttpTransportListener<?, ?> newInstance(HttpChannel channel, ServerConfig serverConfig, Executor bizExecutor) {
+        return new Http1ServerTransportListener(channel, serverConfig, invoker, bizExecutor);
     }
 
     @Override

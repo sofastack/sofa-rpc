@@ -127,16 +127,16 @@ public class TripleServerChannelInitializer extends ChannelInitializer<SocketCha
 
     /**
      * Check if HTTP/1.1 is enabled in server config.
+     * Default is false; must be explicitly enabled via "triple.http1.enabled=true".
      *
      * @param serverConfig server configuration
      * @return true if HTTP/1.1 is enabled
      */
     private boolean isHttp1Enabled(ServerConfig serverConfig) {
         if (serverConfig.getParameters() == null) {
-            return true; // Default enabled
+            return false;
         }
-        String http1Enabled = serverConfig.getParameters().get("triple.http1.enabled");
-        return http1Enabled == null || !"false".equals(http1Enabled);
+        return "true".equals(serverConfig.getParameters().get("triple.http1.enabled"));
     }
 
     /**

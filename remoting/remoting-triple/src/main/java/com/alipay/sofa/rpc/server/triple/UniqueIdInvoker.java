@@ -52,14 +52,14 @@ public class UniqueIdInvoker implements Invoker {
 
     private Lock                 readLock;
 
-    private Lock                 writeLook;
+    private Lock                 writeLock;
 
     private Map<String, Invoker> uniqueIdInvokerMap;
 
     public UniqueIdInvoker() {
         this.rwLock = new ReentrantReadWriteLock();
         this.readLock = this.rwLock.readLock();
-        this.writeLook = this.rwLock.writeLock();
+        this.writeLock = this.rwLock.writeLock();
         this.uniqueIdInvokerMap = new HashMap<>();
     }
 
@@ -71,12 +71,12 @@ public class UniqueIdInvoker implements Invoker {
      * @return register success or not
      */
     public boolean registerInvoker(ProviderConfig providerConfig, Invoker invoker) {
-        this.writeLook.lock();
+        this.writeLock.lock();
         try {
             String uniqueId = this.getUniqueId(providerConfig);
             return this.uniqueIdInvokerMap.putIfAbsent(uniqueId, invoker) == null;
         } finally {
-            this.writeLook.unlock();
+            this.writeLock.unlock();
         }
     }
 
@@ -87,12 +87,12 @@ public class UniqueIdInvoker implements Invoker {
      * @return unregister success or not
      */
     public boolean unRegisterInvoker(ProviderConfig providerConfig) {
-        this.writeLook.lock();
+        this.writeLock.lock();
         try {
             String uniqueId = this.getUniqueId(providerConfig);
             return this.uniqueIdInvokerMap.remove(uniqueId) != null;
         } finally {
-            this.writeLook.unlock();
+            this.writeLock.unlock();
         }
     }
 

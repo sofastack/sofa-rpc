@@ -36,20 +36,23 @@ import java.util.concurrent.Executor;
 public class Http1ServerTransportListener
                                          extends AbstractServerTransportListener<Http1Metadata, Http1InputMessage> {
 
+    /** Default request timeout in milliseconds */
+    private static final int          DEFAULT_TIMEOUT_MS = 3000;
+
+    private final Executor             bizExecutor;
     private HttpMessageListener        messageListener;
     private Http1ServerChannelObserver responseObserver;
 
     public Http1ServerTransportListener(HttpChannel channel, ServerConfig serverConfig,
-                                        UniqueIdInvoker invoker) {
+                                        UniqueIdInvoker invoker, Executor bizExecutor) {
         super(channel, serverConfig, invoker);
+        this.bizExecutor = bizExecutor;
         this.responseObserver = new Http1ServerChannelObserver(channel);
     }
 
     @Override
     protected Executor initializeExecutor(Http1Metadata metadata) {
-        // Create a simple executor for HTTP/1.1 requests
-        // In production, this should use the server's business pool
-        return java.util.concurrent.Executors.newCachedThreadPool();
+        return bizExecutor;
     }
 
     @Override
@@ -125,9 +128,9 @@ public class Http1ServerTransportListener
             parseQueryParameters(request, query);
         }
 
-        // Set default timeout (3 seconds)
+        // Set default timeout
         if (request.getTimeout() <= 0) {
-            request.setTimeout(3000);
+            request.setTimeout(DEFAULT_TIMEOUT_MS);
         }
 
         return request;

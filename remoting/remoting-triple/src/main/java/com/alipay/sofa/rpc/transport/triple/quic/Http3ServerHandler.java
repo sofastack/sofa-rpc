@@ -107,8 +107,8 @@ public class Http3ServerHandler extends Http3RequestStreamInboundHandler {
     protected void channelRead(ChannelHandlerContext ctx, Http3HeadersFrame frame, boolean isEnd) {
         Http3Headers headers = frame.headers();
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("HTTP/3 headers received: path={}, method={}",
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("HTTP/3 headers received: path={}, method={}",
                 headers.path(), headers.method());
         }
 
@@ -122,13 +122,9 @@ public class Http3ServerHandler extends Http3RequestStreamInboundHandler {
         String path = headers.path() != null ? headers.path().toString() : "/";
         UniqueIdInvoker invoker = getInvokerForPath(path);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("HTTP/3 request path: {}, invoker found: {}", path, invoker != null);
-        }
-
         if (invoker != null) {
             // Create and initialize the transport listener
-            transportListener = new Http3ServerTransportListener(http3Channel, serverConfig, invoker);
+            transportListener = new Http3ServerTransportListener(http3Channel, serverConfig, invoker, bizExecutor);
             transportListener.onMetadata(currentMetadata);
 
             // If end of stream, complete the request

@@ -24,6 +24,8 @@ import com.alipay.sofa.rpc.transport.triple.http.HttpServerTransportListenerFact
 import com.alipay.sofa.rpc.transport.triple.http.HttpTransportListener;
 import com.alipay.sofa.rpc.transport.triple.http.HttpVersion;
 
+import java.util.concurrent.Executor;
+
 /**
  * Factory for creating pure HTTP/2 server transport listeners.
  * This implementation uses native Netty HTTP/2 (not gRPC) while maintaining
@@ -43,8 +45,11 @@ public class PureHttp2ServerTransportListenerFactory implements HttpServerTransp
     private UniqueIdInvoker invoker;
 
     @Override
-    public HttpTransportListener<?, ?> newInstance(HttpChannel channel, ServerConfig serverConfig) {
-        return new PureHttp2ServerTransportListener(channel, serverConfig, invoker);
+    public HttpTransportListener<?, ?> newInstance(HttpChannel channel, ServerConfig serverConfig, Executor bizExecutor) {
+        if (!(channel instanceof Http2Channel)) {
+            throw new IllegalArgumentException("Expected Http2Channel but got: " + channel.getClass().getName());
+        }
+        return new PureHttp2ServerTransportListener((Http2Channel) channel, serverConfig, invoker, bizExecutor);
     }
 
     @Override

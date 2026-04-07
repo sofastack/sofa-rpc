@@ -44,7 +44,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 /**
  * HTTP/3 server transport listener implementation.
@@ -146,19 +145,19 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
     protected String                     serializeType;
 
     /** Request observer for bidirectional streaming (POJO) */
-    protected SofaStreamObserver<Object> bidiRequestObserver;
+    protected SofaStreamObserver<Object>     bidiRequestObserver;
 
     /** Request observer for bidirectional streaming (Protobuf) */
-    protected StreamObserver<Object>     protoBidiRequestObserver;
+    protected StreamObserver<Object>         protoBidiRequestObserver;
 
     /** Pending data for bidirectional streaming */
-    protected byte[]                     pendingBidiData;
+    protected volatile byte[]               pendingBidiData;
 
     /** Whether the stream is complete */
-    protected boolean                    streamComplete;
+    protected volatile boolean              streamComplete;
 
     /** Whether this is a protobuf service */
-    protected boolean                    isProtoService;
+    protected boolean                       isProtoService;
 
     /** Whether headers have been sent */
     protected boolean                    headersSent;
@@ -167,9 +166,15 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
 
     public Http3ServerTransportListener(HttpChannel channel, ServerConfig serverConfig,
                                         UniqueIdInvoker invoker) {
+        this(channel, serverConfig, invoker, null);
+    }
+
+    public Http3ServerTransportListener(HttpChannel channel, ServerConfig serverConfig,
+                                        UniqueIdInvoker invoker, Executor bizExecutor) {
         this.httpChannel = channel;
         this.serverConfig = serverConfig;
         this.invoker = invoker;
+        this.executor = bizExecutor;
     }
 
     // ==================== HttpTransportListener Implementation ====================
@@ -177,7 +182,6 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
     @Override
     public void onMetadata(Http3Metadata metadata) {
         this.httpMetadata = metadata;
-        this.executor = Executors.newCachedThreadPool();
 
         if (invoker != null) {
             this.isProtoService = invoker.isProtoService();
@@ -305,7 +309,7 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
             invokeMethod(request, tripleRequest);
 
         } catch (Exception e) {
-            LOGGER.error("Service invocation failed: " + request.getInterfaceName() + "." + request.getMethodName(), e);
+            LOGGER.error("Service invocation failed: {}.{}", request.getInterfaceName(), request.getMethodName(), e);
             onError(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -384,9 +388,9 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
      * Process a protobuf service request.
      */
     protected void processProtoRequest(SofaRequest request, byte[] data) {
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("Processing protobuf service request: {}.{}, data length: {}",
-                request.getInterfaceName(), request.getMethodName(), data != null ? data.length : 0);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Processing protobuf service request: {}.{}", request.getInterfaceName(),
+                request.getMethodName());
         }
 
         ClassLoader oldClassLoader = Thread.currentThread().getContextClassLoader();
@@ -414,8 +418,8 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
             invokeProtoMethod(request, serviceInstance, declaredMethod, data);
 
         } catch (Exception e) {
-            LOGGER.error(
-                "Protobuf service invocation failed: " + request.getInterfaceName() + "." + request.getMethodName(), e);
+            LOGGER.error("Protobuf service invocation failed: {}.{}", request.getInterfaceName(),
+                request.getMethodName(), e);
             onError(e);
         } finally {
             Thread.currentThread().setContextClassLoader(oldClassLoader);
@@ -433,20 +437,19 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
             return;
         }
 
+        // For bidirectional streaming, paramTypes[0] is StreamObserver — do not parse as proto message
+        if (RpcConstants.INVOKER_TYPE_BI_STREAMING.equals(callType)) {
+            invokeProtoBidiStreaming(request, serviceInstance, declaredMethod, paramTypes);
+            return;
+        }
+
         Message protoRequest = parseProtoMessage(data, paramTypes[0]);
         if (protoRequest == null) {
             onError(new SofaRpcException(RpcErrorType.SERVER_DESERIALIZE, "Failed to parse protobuf request"));
             return;
         }
 
-        switch (callType) {
-            case RpcConstants.INVOKER_TYPE_BI_STREAMING:
-                invokeProtoBidiStreaming(request, serviceInstance, declaredMethod, paramTypes);
-                break;
-            default:
-                invokeProtoUnaryOrServerStreaming(request, serviceInstance, declaredMethod, paramTypes, protoRequest);
-                break;
-        }
+        invokeProtoUnaryOrServerStreaming(request, serviceInstance, declaredMethod, paramTypes, protoRequest);
     }
 
     /**
@@ -911,7 +914,7 @@ public class Http3ServerTransportListener implements HttpTransportListener<Http3
             Method parseFrom = messageType.getMethod("parseFrom", byte[].class);
             return (Message) parseFrom.invoke(null, data);
         } catch (Exception e) {
-            LOGGER.error("Failed to parse protobuf message of type: " + messageType.getName(), e);
+            LOGGER.error("Failed to parse protobuf message of type: {}", messageType.getName(), e);
             return null;
         }
     }

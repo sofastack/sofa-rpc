@@ -66,7 +66,10 @@ import java.util.function.Supplier;
  */
 public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
-    private static final Logger                          LOGGER = LoggerFactory.getLogger(Http1ServerHandler.class);
+    private static final Logger                          LOGGER             = LoggerFactory.getLogger(Http1ServerHandler.class);
+
+    /** Default request timeout in milliseconds */
+    private static final int                             DEFAULT_TIMEOUT_MS = 3000;
 
     /**
      * Server configuration
@@ -120,8 +123,8 @@ public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
         }
         final String requestPath = path;
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("HTTP/1.1 request received: {} {} from {}", request.method(), requestPath, ctx.channel()
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("HTTP/1.1 request received: {} {} from {}", request.method(), requestPath, ctx.channel()
                 .remoteAddress());
         }
 
@@ -146,7 +149,7 @@ public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                 }
                 processRequest(ctx, requestPath, requestBody, contentTypeFinal);
             } catch (Exception e) {
-                LOGGER.error("Error processing HTTP/1.1 request: " + requestPath, e);
+                LOGGER.error("Error processing HTTP/1.1 request: {}", requestPath, e);
                 sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     "Internal Server Error: " + e.getMessage());
             } finally {
@@ -180,7 +183,7 @@ public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             SofaRequest sofaRequest = new SofaRequest();
             sofaRequest.setInterfaceName(serviceName);
             sofaRequest.setMethodName(methodName);
-            sofaRequest.setTimeout(3000);
+            sofaRequest.setTimeout(DEFAULT_TIMEOUT_MS);
 
             // Find invoker for this service
             Invoker targetInvoker = findInvoker(serviceName);
@@ -273,7 +276,7 @@ public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
                     sofaResponse.setAppResponse(result);
                 }
             } catch (Throwable t) {
-                LOGGER.error("Service invocation failed: " + serviceName + "." + methodName, t);
+                LOGGER.error("Service invocation failed: {}.{}", serviceName, methodName, t);
                 sendErrorResponse(ctx, HttpResponseStatus.INTERNAL_SERVER_ERROR,
                     "Service error: " + t.getMessage());
                 return;
@@ -302,9 +305,11 @@ public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
 
     /**
      * Find invoker for the given service.
+     * First tries exact match by interface name, then falls back to suffix match
+     * to handle gRPC paths that use short service names.
      *
-     * @param serviceName service interface name
-     * @return invoker
+     * @param serviceName service interface name extracted from request path
+     * @return invoker, or null if not found
      */
     private Invoker findInvoker(String serviceName) {
         Map<String, UniqueIdInvoker> invokerMap = invokerMapSupplier.get();
@@ -312,11 +317,18 @@ public class Http1ServerHandler extends SimpleChannelInboundHandler<FullHttpRequ
             return null;
         }
 
-        // Try to find invoker by interface name
-        // The key in invokerMap is the uniqueId, and we need to find the one that matches
-        for (UniqueIdInvoker invoker : invokerMap.values()) {
-            if (invoker.hasInvoker()) {
-                return invoker;
+        // Try exact match first (e.g., "com.example.GreeterService")
+        UniqueIdInvoker invoker = invokerMap.get(serviceName);
+        if (invoker != null && invoker.hasInvoker()) {
+            return invoker;
+        }
+
+        // Try suffix match to handle short names in gRPC paths (e.g., "helloworld.Greeter")
+        for (Map.Entry<String, UniqueIdInvoker> entry : invokerMap.entrySet()) {
+            String key = entry.getKey();
+            if ((key.endsWith("." + serviceName) || key.endsWith("/" + serviceName))
+                    && entry.getValue().hasInvoker()) {
+                return entry.getValue();
             }
         }
 

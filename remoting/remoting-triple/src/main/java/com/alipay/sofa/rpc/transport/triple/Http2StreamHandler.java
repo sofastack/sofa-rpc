@@ -126,8 +126,8 @@ public class Http2StreamHandler extends ChannelInboundHandlerAdapter {
     private void handleHeaders(ChannelHandlerContext ctx, Http2HeadersFrame headersFrame) {
         Http2Headers headers = headersFrame.headers();
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("HTTP/2 headers received: path={}, method={}",
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("HTTP/2 headers received: path={}, method={}",
                 headers.path(), headers.method());
         }
 
@@ -144,8 +144,8 @@ public class Http2StreamHandler extends ChannelInboundHandlerAdapter {
         String path = headers.path() != null ? headers.path().toString() : "/";
         UniqueIdInvoker invoker = getInvokerForPath(path);
 
-        if (LOGGER.isInfoEnabled()) {
-            LOGGER.info("HTTP/2 request path: {}, invoker found: {}", path, invoker != null);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("HTTP/2 request path: {}, invoker found: {}", path, invoker != null);
         }
 
         // Create and initialize the transport listener
@@ -224,8 +224,10 @@ public class Http2StreamHandler extends ChannelInboundHandlerAdapter {
      * @param dataFrame data frame
      */
     private void handleData(ChannelHandlerContext ctx, Http2DataFrame dataFrame) {
-        LOGGER.info("HTTP/2 data received: {} bytes, endOfStream={}",
-            dataFrame.content().readableBytes(), dataFrame.isEndStream());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("HTTP/2 data received: {} bytes, endOfStream={}",
+                dataFrame.content().readableBytes(), dataFrame.isEndStream());
+        }
 
         if (transportListener == null) {
             LOGGER.warn("No transport listener available for data frame");
@@ -250,7 +252,6 @@ public class Http2StreamHandler extends ChannelInboundHandlerAdapter {
 
         // If end of stream, call onComplete
         if (dataFrame.isEndStream()) {
-            LOGGER.info("Calling onComplete due to endOfStream flag");
             transportListener.onComplete();
         }
 

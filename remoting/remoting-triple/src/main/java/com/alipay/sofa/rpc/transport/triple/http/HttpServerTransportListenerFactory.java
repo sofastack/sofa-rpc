@@ -19,6 +19,8 @@ package com.alipay.sofa.rpc.transport.triple.http;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extensible;
 
+import java.util.concurrent.Executor;
+
 /**
  * SPI factory for creating HTTP server transport listeners.
  * Each HTTP version (HTTP/1.1, HTTP/2, HTTP/3) should have its own factory implementation.
@@ -31,9 +33,10 @@ public interface HttpServerTransportListenerFactory {
      *
      * @param channel HTTP channel
      * @param serverConfig server configuration
+     * @param bizExecutor business thread pool executor
      * @return transport listener instance
      */
-    HttpTransportListener<?, ?> newInstance(HttpChannel channel, ServerConfig serverConfig);
+    HttpTransportListener<?, ?> newInstance(HttpChannel channel, ServerConfig serverConfig, Executor bizExecutor);
 
     /**
      * Check if this factory supports the given HTTP version.

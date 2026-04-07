@@ -43,21 +43,20 @@ public class GrpcHttp2ServerTransportListener
 
     public GrpcHttp2ServerTransportListener(HttpChannel httpChannel, ServerConfig serverConfig,
                                             UniqueIdInvoker invoker) {
+        this(httpChannel, serverConfig, invoker, null);
+    }
+
+    public GrpcHttp2ServerTransportListener(HttpChannel httpChannel, ServerConfig serverConfig,
+                                            UniqueIdInvoker invoker, Executor bizExecutor) {
         this.httpChannel = httpChannel;
         this.serverConfig = serverConfig;
         this.invoker = invoker;
+        this.executor = bizExecutor;
     }
 
     @Override
     public void onMetadata(HttpMetadata metadata) {
         this.httpMetadata = metadata;
-
-        // Process gRPC-specific headers (grpc-encoding, grpc-timeout)
-        // These are handled in parseHeaders during request building
-
-        // Initialize executor
-        executor = java.util.concurrent.Executors.newCachedThreadPool();
-
         // Build message listener
         messageListener = buildMessageListener();
     }

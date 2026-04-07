@@ -471,7 +471,7 @@ public class TripleServer implements Server {
         threadPool.setThreadFactory(new NamedThreadFactory(
             "SEV-TRIPLE-BIZ-" + serverConfig.getPort(), serverConfig.isDaemon()));
         threadPool.setRejectedExecutionHandler(new SofaRejectedExecutionHandler());
-        if (serverConfig.isPreStartCore()) { // 初始化核心线程池
+        if (serverConfig.isPreStartCore()) {
             threadPool.prestartAllCoreThreads();
         }
         return threadPool;
@@ -527,7 +527,7 @@ public class TripleServer implements Server {
             return;
         }
         try {
-            // 关闭端口，不关闭线程池
+            // Stop the port binding but keep thread pool alive
             if (LOGGER.isInfoEnabled()) {
                 LOGGER.info("Stop the triple server at port {}", serverConfig.getPort());
             }
@@ -552,7 +552,7 @@ public class TripleServer implements Server {
                 quicGroup = null;
             }
         } catch (Exception e) {
-            LOGGER.error("Stop the triple server at port " + serverConfig.getPort() + " error !", e);
+            LOGGER.error("Stop the triple server at port {} error!", serverConfig.getPort(), e);
         }
         started = false;
     }

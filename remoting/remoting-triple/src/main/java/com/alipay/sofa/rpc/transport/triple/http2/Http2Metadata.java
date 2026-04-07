@@ -21,8 +21,10 @@ import com.alipay.sofa.rpc.transport.triple.http.HttpMetadata;
 import com.alipay.sofa.rpc.transport.triple.http.HttpVersion;
 import io.grpc.netty.shaded.io.netty.handler.codec.http2.Http2Headers;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -197,9 +199,12 @@ public class Http2Metadata implements HttpMetadata {
 
         @Override
         public Iterable<String> getAll(String name) {
-            return http2Headers.getAll(name).stream()
-                .map(CharSequence::toString)
-                ::iterator;
+            List<CharSequence> values = http2Headers.getAll(name);
+            List<String> result = new ArrayList<>(values.size());
+            for (CharSequence cs : values) {
+                result.add(cs.toString());
+            }
+            return result;
         }
 
         @Override

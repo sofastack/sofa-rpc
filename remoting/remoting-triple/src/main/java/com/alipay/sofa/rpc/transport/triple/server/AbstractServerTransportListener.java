@@ -17,9 +17,10 @@
 package com.alipay.sofa.rpc.transport.triple.server;
 
 import com.alipay.sofa.rpc.config.ServerConfig;
-import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.log.Logger;
+import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.server.triple.UniqueIdInvoker;
 import com.alipay.sofa.rpc.transport.triple.http.*;
 
@@ -36,6 +37,8 @@ import java.util.concurrent.Executor;
 public abstract class AbstractServerTransportListener<H extends HttpMetadata, M extends HttpInputMessage>
                                                                                                           implements
                                                                                                           HttpTransportListener<H, M> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServerTransportListener.class);
 
     protected final ServerConfig    serverConfig;
     protected final UniqueIdInvoker invoker;
@@ -191,20 +194,10 @@ public abstract class AbstractServerTransportListener<H extends HttpMetadata, M 
 
     @Override
     public void onError(Throwable throwable) {
-        throw wrapException(throwable);
-    }
-
-    /**
-     * Wrap exception as runtime exception.
-     *
-     * @param t throwable
-     * @return runtime exception
-     */
-    protected RuntimeException wrapException(Throwable t) {
-        if (t instanceof RuntimeException) {
-            return (RuntimeException) t;
+        LOGGER.error("Transport error, closing channel", throwable);
+        if (httpChannel != null) {
+            httpChannel.close();
         }
-        return new SofaRpcException("Transport error", t);
     }
 
     /**
