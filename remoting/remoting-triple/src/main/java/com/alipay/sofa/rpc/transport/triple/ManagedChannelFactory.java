@@ -21,16 +21,16 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import io.grpc.ClientInterceptor;
 import io.grpc.ManagedChannel;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.NettyChannelBuilder;
 
 import java.util.concurrent.TimeUnit;
 
 /**
  * Factory for creating gRPC {@link ManagedChannel} instances.
  *
- * <p>Isolates the {@code grpc-netty-shaded} {@link NettyChannelBuilder} dependency from
+ * <p>Isolates the {@link NettyChannelBuilder} dependency from
  * {@link TripleClientTransport}, allowing the transport class itself to have no direct
- * reference to grpc-shaded classes. Once this factory is replaced with a pure-Netty
+ * reference to grpc transport classes. Once this factory is replaced with a pure-Netty
  * implementation in a future Sprint, {@link TripleClientTransport} will require no changes.
  *
  * <p>This class is package-private and intended only for use by {@link TripleClientTransport}.

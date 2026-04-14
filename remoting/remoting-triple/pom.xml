@@ -36,7 +36,11 @@
         <!-- grpc  -->
         <dependency>
             <groupId>io.grpc</groupId>
-            <artifactId>grpc-netty-shaded</artifactId>
+            <artifactId>grpc-netty</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.grpc</groupId>
+            <artifactId>grpc-core</artifactId>
         </dependency>
         <dependency>
             <groupId>io.grpc</groupId>
