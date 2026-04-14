@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.transport.triple;
 import com.alipay.sofa.common.config.SofaConfigs;
 import com.alipay.sofa.rpc.client.ProviderInfo;
 import com.alipay.sofa.rpc.common.RpcConfigs;
-import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.config.RpcConfigKeys;
 import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.context.RpcInternalContext;
@@ -45,12 +44,10 @@ import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.Status;
 import io.grpc.StatusException;
-import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 
 /**
  * GRPC client transport
@@ -79,6 +76,8 @@ public class TripleClientTransport extends ClientTransport {
     protected static int KEEP_ALIVE_INTERVAL = SofaConfigs.getOrCustomDefault(
                                                     RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL,
                                                     RpcConfigs.getIntValue(RpcConfigKeys.TRIPLE_CLIENT_KEEP_ALIVE_INTERVAL.getKey()));
+
+    private final ManagedChannelFactory channelFactory = new ManagedChannelFactory(KEEP_ALIVE_INTERVAL);
 
     /**
      * The constructor
@@ -274,19 +273,7 @@ public class TripleClientTransport extends ClientTransport {
      */
     private ManagedChannel initChannel(ProviderInfo url) {
         ClientInterceptor clientHeaderClientInterceptor = buildClientHeaderClientInterceptor();
-        NettyChannelBuilder builder = NettyChannelBuilder.forAddress(url.getHost(), url.getPort());
-        builder.usePlaintext();
-        builder.disableRetry();
-        builder.intercept(clientHeaderClientInterceptor);
-        builder.maxInboundMetadataSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_METADATA_SIZE));
-        builder.maxInboundMessageSize(RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE));
-
-        if (KEEP_ALIVE_INTERVAL > 0) {
-            builder.keepAliveWithoutCalls(true);
-            builder.keepAliveTime(KEEP_ALIVE_INTERVAL, TimeUnit.SECONDS);
-        }
-
-        return builder.build();
+        return channelFactory.create(url, clientHeaderClientInterceptor);
     }
 
     protected ClientInterceptor buildClientHeaderClientInterceptor() {
