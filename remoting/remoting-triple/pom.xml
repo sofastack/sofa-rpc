@@ -47,6 +47,12 @@
             <artifactId>grpc-stub</artifactId>
         </dependency>
         
+        <!-- Netty HTTP/2 — used by new Netty-native transport layer (stream/codec/call packages) -->
+        <dependency>
+            <groupId>io.netty</groupId>
+            <artifactId>netty-all</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
