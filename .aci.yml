@@ -1,0 +1,30 @@
+version: "2.0"
+
+stages:
+  - 单元测试
+
+jobs:
+  JDK8 单元测试:
+    stage: 单元测试
+    component: linkq-ut
+    inputs:
+      accurate: false #是否启用精准测试
+      #ciConfig的所有值都是字符串
+      ciConfig:
+        jdkVersion: "1.8"
+        mvnVersion: 3.5.4
+        encoding: UTF-8
+        autoPom: "false"
+    config:
+      execute:
+        isAllowSkip: true # true表示允许手工跳过 false表示不允许手工跳过 默认是false
+      afterExecute:
+        checkRule:  # 质量规则校验策略，outputs的数值在0-100之间
+          - ${{outputs.casePassRate}} >= 100 #通过率
+          - ${{outputs.changeLineCoverage}} >= 70 #变更行覆盖率
+
+triggers:
+  git:
+    pullRequest:
+      targetBranches:
+        - .*
