@@ -161,14 +161,14 @@ public class JavassistProxy implements Proxy {
         // interfaceClass.getMethods() returns duplicates, causing Javassist to throw
         // DuplicateMemberException when adding the same method twice.
         // See: https://github.com/sofastack/sofa-rpc/issues/1384
-        Set<String> addedMethodSignatures = new HashSet<String>();
+        Set<String> seenSignatures = new HashSet<>();
         for (Method m : methodAry) {
-            if (Modifier.isNative(m.getModifiers()) || Modifier.isFinal(m.getModifiers()) ||
+            if (m.isBridge() || Modifier.isNative(m.getModifiers()) || Modifier.isFinal(m.getModifiers()) ||
                 Modifier.isStatic(m.getModifiers())) {
                 continue;
             }
             // Skip duplicate methods inherited from multiple parent interfaces
-            if (!addedMethodSignatures.add(buildMethodSignature(m))) {
+            if (!seenSignatures.add(buildMethodSignature(m))) {
                 continue;
             }
             mi++;
@@ -298,16 +298,20 @@ public class JavassistProxy implements Proxy {
     }
 
     /**
-     * Builds a unique method signature string in the format: methodName(paramType1,paramType2,...)
+     * Builds a unique method signature string in the format: returnType methodName(paramType1,paramType2,...)
      * Used to deduplicate methods inherited from multiple parent interfaces that declare the same method.
      * Without deduplication, Javassist throws DuplicateMemberException when the same method is added twice.
+     *
+     * <p>The return type is included to correctly handle covariant return types, where two methods
+     * may share the same name and parameter types but differ in return type (e.g. bridge methods).
      *
      * @param method the method to build a signature for
      * @return the method signature string
      */
     private String buildMethodSignature(Method method) {
-        StringBuilder signature = new StringBuilder(method.getName());
-        signature.append('(');
+        StringBuilder signature = new StringBuilder();
+        signature.append(method.getReturnType().getName()).append(' ');
+        signature.append(method.getName()).append('(');
         Class<?>[] parameterTypes = method.getParameterTypes();
         for (int i = 0; i < parameterTypes.length; i++) {
             if (i > 0) {
