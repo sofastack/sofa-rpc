@@ -73,6 +73,7 @@
         <guava.version>32.0.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
         <fury.version>0.4.1</fury.version>
+        <fory.version>0.16.0</fory.version>
         <commons_compress_version>1.26.0</commons_compress_version>
     </properties>
 
@@ -187,6 +188,11 @@
         <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-codec-sofa-fury</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-codec-sofa-fory</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -450,6 +456,11 @@
             <artifactId>commons-compress</artifactId>
             <version>${commons_compress_version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.fory</groupId>
+            <artifactId>fory-core</artifactId>
+            <version>${fory.version}</version>
+        </dependency>
 
     </dependencies>
 
@@ -541,6 +552,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-codec-msgpack</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-hessian</include>
                                     <include>com.alipay.sofa:sofa-rpc-codec-sofa-fury</include>
+                                    <include>com.alipay.sofa:sofa-rpc-codec-sofa-fory</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-tolerance</include>
                                     <include>com.alipay.sofa:sofa-rpc-fault-hystrix</include>
                                     <include>com.alipay.sofa:sofa-rpc-log-common-tools</include>
