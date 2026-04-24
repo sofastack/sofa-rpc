@@ -155,6 +155,51 @@ public class FurySerializerTest {
         Assert.assertEquals(response.getErrorMsg(), newResponse.getErrorMsg());
     }
 
+    @Test
+    public void testSequentialCallsWithSameContextClassLoader() {
+        FurySerializer furySerializer = new FurySerializer();
+        for (int i = 0; i < 20; i++) {
+            String payload = "same-cl-" + i;
+            AbstractByteBuf data = furySerializer.encode(payload, null);
+            Assert.assertEquals(payload, furySerializer.decode(data, String.class, null));
+        }
+    }
+
+    @Test
+    public void testAlternateContextClassLoaderCalls() {
+        FurySerializer furySerializer = new FurySerializer();
+        Thread currentThread = Thread.currentThread();
+        ClassLoader original = currentThread.getContextClassLoader();
+        ClassLoader cl1 = new ClassLoader(original) {
+        };
+        ClassLoader cl2 = new ClassLoader(original) {
+        };
+        try {
+            for (int i = 0; i < 10; i++) {
+                currentThread.setContextClassLoader(i % 2 == 0 ? cl1 : cl2);
+                String payload = "switch-cl-" + i;
+                AbstractByteBuf data = furySerializer.encode(payload, null);
+                Assert.assertEquals(payload, furySerializer.decode(data, String.class, null));
+            }
+        } finally {
+            currentThread.setContextClassLoader(original);
+        }
+    }
+
+    @Test
+    public void testRecoverAfterEncodeException() {
+        FurySerializer furySerializer = new FurySerializer();
+        try {
+            furySerializer.encode(null, null);
+            Assert.fail();
+        } catch (Exception e) {
+            // expected
+        }
+
+        AbstractByteBuf data = furySerializer.encode("recover", null);
+        Assert.assertEquals("recover", furySerializer.decode(data, String.class, null));
+    }
+
     private SofaRequest buildRequest() throws NoSuchMethodException {
         SofaRequest request = new SofaRequest();
         request.setInterfaceName(DemoService.class.getName());
