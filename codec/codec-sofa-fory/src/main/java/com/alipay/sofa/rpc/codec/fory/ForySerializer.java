@@ -131,8 +131,6 @@ public class ForySerializer extends AbstractSerializer {
             throw e;
         } catch (Exception e) {
             throw buildSerializeError(e.getMessage(), e);
-        } finally {
-            fory.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -159,8 +157,6 @@ public class ForySerializer extends AbstractSerializer {
             throw e;
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
-        } finally {
-            fory.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -183,8 +179,6 @@ public class ForySerializer extends AbstractSerializer {
             throw e;
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
-        } finally {
-            fory.clearClassLoader(contextClassLoader);
         }
     }
 }
