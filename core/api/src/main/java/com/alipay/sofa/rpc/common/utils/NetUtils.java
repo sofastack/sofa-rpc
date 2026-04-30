@@ -78,6 +78,22 @@ public class NetUtils {
     }
 
     /**
+     * 判断端口是否是"非确定性"端口：
+     * <ul>
+     *     <li>-1: SOFA 框架约定的随机端口（在 bind 之前由框架/OS 选择）。</li>
+     *     <li>0:  操作系统级别的"任意可用端口"语义（bind 时由内核分配）。</li>
+     * </ul>
+     * 这两种情况下，{@code ServerConfig.getPort()} 在 bind 完成之前都拿不到真实的监听端口，
+     * server 实现需要在 start 成功后将真实端口写回 {@code ServerConfig.setActualPort(int)}。
+     *
+     * @param port 端口
+     * @return true 表示端口需要在 bind 之后回填真实值
+     */
+    public static boolean isRandomOrAnyPort(int port) {
+        return isRandomPort(port) || port == 0;
+    }
+
+    /**
      * 检查当前指定端口是否可用，不可用则自动+1再试（随机端口从默认端口开始检查）
      *
      * @param host 当前ip地址

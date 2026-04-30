@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.server.rest;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.CommonUtils;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.JAXRSProviderManager;
 import com.alipay.sofa.rpc.config.ProviderConfig;
@@ -159,8 +160,15 @@ public class RestServer implements Server {
             // 绑定到端口
             try {
                 httpServer.start();
+                // When a non-deterministic port (-1 random / 0 any) is configured, the OS
+                // assigns the real port at bind time. SofaNettyJaxrsServer reads it back from
+                // the bound channel and exposes it via getPort(); write it into ServerConfig
+                // so callers can retrieve it via serverConfig.getActualPort().
+                if (NetUtils.isRandomOrAnyPort(serverConfig.getPort())) {
+                    serverConfig.setActualPort(httpServer.getPort());
+                }
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Start the http rest server at port {}", serverConfig.getPort());
+                    LOGGER.info("Start the http rest server at port {}", httpServer.getPort());
                 }
             } catch (SofaRpcRuntimeException e) {
                 throw e;

@@ -21,6 +21,7 @@ import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.utils.StringUtils;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import io.netty.bootstrap.ServerBootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
@@ -243,14 +244,22 @@ public class SofaNettyJaxrsServer implements EmbeddedJaxrsServer {
             bootstrap.childOption(entry.getKey(), entry.getValue());
         }
 
+        // CHANGE: when port is 0/-1 (ephemeral), let OS pick a port. We bind with 0 in that
+        // case and read the real port back from the bound channel so callers can discover it
+        // via getPort() after start().
+        final int bindPort = Math.max(port, 0);
         final InetSocketAddress socketAddress;
         if (null == hostname || hostname.isEmpty()) {
-            socketAddress = new InetSocketAddress(port);
+            socketAddress = new InetSocketAddress(bindPort);
         } else {
-            socketAddress = new InetSocketAddress(hostname, port);
+            socketAddress = new InetSocketAddress(hostname, bindPort);
         }
 
-        bootstrap.bind(socketAddress).syncUninterruptibly();
+        Channel boundChannel = bootstrap.bind(socketAddress).syncUninterruptibly().channel();
+        // Write back the real OS-assigned port so getPort() reflects the actual listening port.
+        if (boundChannel.localAddress() instanceof InetSocketAddress) {
+            this.port = ((InetSocketAddress) boundChannel.localAddress()).getPort();
+        }
     }
 
     private ChannelInitializer<SocketChannel> createChannelInitializer() {

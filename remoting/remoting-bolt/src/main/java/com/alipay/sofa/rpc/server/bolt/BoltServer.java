@@ -141,13 +141,14 @@ public class BoltServer implements Server {
             remotingServer = initRemotingServer();
             try {
                 if (remotingServer.start()) {
-                    // When a random port (-1) or port 0 is configured, the OS assigns an available
-                    // port at bind time. The bolt RpcServer updates its internal port field after
-                    // binding, so we read it back and store it in ServerConfig so that callers can
-                    // retrieve the actual port via serverConfig.getActualPort().
-                    int configuredPort = serverConfig.getPort();
-                    if (NetUtils.isRandomPort(configuredPort) || configuredPort == 0) {
-                        serverConfig.setActualBindingPort(remotingServer.port());
+                    // When a non-deterministic port (-1 random / 0 any) is configured, the OS
+                    // assigns an available port at bind time. The bolt RpcServer (via
+                    // AbstractRemotingServer#setLocalBindingPort) updates its internal port
+                    // field after binding, so we read it back via remotingServer.port() and
+                    // write it into ServerConfig#actualPort so callers can retrieve it via
+                    // serverConfig.getActualPort().
+                    if (NetUtils.isRandomOrAnyPort(serverConfig.getPort())) {
+                        serverConfig.setActualPort(remotingServer.port());
                     }
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
