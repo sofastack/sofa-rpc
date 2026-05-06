@@ -1,0 +1,2 @@
+com.alipay.sofa.rpc.core.
+com.alipay.sofa.rpc.codec.fory.model.whitelist.
