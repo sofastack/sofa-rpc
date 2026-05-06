@@ -17,6 +17,8 @@
 package com.alipay.sofa.rpc.proxy.javassist;
 
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.core.response.SofaResponse;
+import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.proxy.AbstractTestClass;
@@ -105,4 +107,30 @@ public class JavassistProxyTest {
         Assert.assertTrue(error);
     }
 
+    /**
+     * Tests that JavassistProxy correctly handles diamond interface inheritance
+     * where multiple parent interfaces declare the same method signature.
+     * Before the fix, this would throw DuplicateMemberException.
+     *
+     * @see <a href="https://github.com/sofastack/sofa-rpc/issues/1384">#1384</a>
+     */
+    @Test
+    public void testDiamondInheritanceProxy() {
+        JavassistProxy proxy = new JavassistProxy();
+
+        Invoker mockInvoker = request -> {
+            SofaResponse response = new SofaResponse();
+            response.setAppResponse("mock-" + request.getMethodName());
+            return response;
+        };
+
+        DiamondHelloService service = proxy.getProxy(DiamondHelloService.class, mockInvoker);
+        Assert.assertNotNull(service);
+
+        // Verify all methods from both sub-interfaces and the service itself are callable
+        Assert.assertEquals("mock-sayHello", service.sayHello("test"));
+        Assert.assertEquals("mock-getType", service.getType());
+        Assert.assertEquals("mock-someMethod1", service.someMethod1());
+        Assert.assertEquals("mock-someMethod2", service.someMethod2());
+    }
 }

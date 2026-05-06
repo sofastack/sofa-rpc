@@ -42,8 +42,10 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -154,12 +156,22 @@ public class JavassistProxy implements Proxy {
         Method[] methodAry = interfaceClass.getMethods();
         StringBuilder sb = new StringBuilder(512);
         int mi = 0;
+        // Track method signatures to skip duplicate methods from multiple parent interfaces.
+        // When an interface extends multiple parent interfaces that declare the same method,
+        // interfaceClass.getMethods() returns duplicates, causing Javassist to throw
+        // DuplicateMemberException when adding the same method twice.
+        // See: https://github.com/sofastack/sofa-rpc/issues/1384
+        Set<String> seenSignatures = new HashSet<>();
         for (Method m : methodAry) {
-            mi++;
-            if (Modifier.isNative(m.getModifiers()) || Modifier.isFinal(m.getModifiers()) ||
+            if (m.isBridge() || Modifier.isNative(m.getModifiers()) || Modifier.isFinal(m.getModifiers()) ||
                 Modifier.isStatic(m.getModifiers())) {
                 continue;
             }
+            // Skip duplicate methods inherited from multiple parent interfaces
+            if (!seenSignatures.add(buildMethodSignature(m))) {
+                continue;
+            }
+            mi++;
             Class<?>[] mType = m.getParameterTypes();
             Class<?> returnType = m.getReturnType();
 
@@ -283,6 +295,32 @@ public class JavassistProxy implements Proxy {
     @Override
     public Invoker getInvoker(Object proxyObject) {
         return parseInvoker(proxyObject);
+    }
+
+    /**
+     * Builds a unique method signature string in the format: returnType methodName(paramType1,paramType2,...)
+     * Used to deduplicate methods inherited from multiple parent interfaces that declare the same method.
+     * Without deduplication, Javassist throws DuplicateMemberException when the same method is added twice.
+     *
+     * <p>The return type is included to correctly handle covariant return types, where two methods
+     * may share the same name and parameter types but differ in return type (e.g. bridge methods).
+     *
+     * @param method the method to build a signature for
+     * @return the method signature string
+     */
+    private String buildMethodSignature(Method method) {
+        StringBuilder signature = new StringBuilder();
+        signature.append(method.getReturnType().getName()).append(' ');
+        signature.append(method.getName()).append('(');
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        for (int i = 0; i < parameterTypes.length; i++) {
+            if (i > 0) {
+                signature.append(',');
+            }
+            signature.append(parameterTypes[i].getName());
+        }
+        signature.append(')');
+        return signature.toString();
     }
 
     /**
