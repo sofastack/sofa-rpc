@@ -43,8 +43,10 @@ import java.util.Map;
 import static io.fury.config.CompatibleMode.COMPATIBLE;
 
 /**
+ * @deprecated Please migrate to Fory serializer in future versions. This serializer is kept for compatibility.
  * @author lipan
  */
+@Deprecated
 @Extension(value = "fury2", code = 22)
 public class FurySerializer extends AbstractSerializer {
 
@@ -113,8 +115,8 @@ public class FurySerializer extends AbstractSerializer {
             throw buildSerializeError("Unsupported null message!");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        fury.setClassLoader(contextClassLoader);
         try {
-            fury.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getObjCustomSerializer(object);
             if (customSerializer != null) {
                 return customSerializer.encodeObject(object, context);
@@ -126,8 +128,6 @@ public class FurySerializer extends AbstractSerializer {
             }
         } catch (Exception e) {
             throw buildSerializeError(e.getMessage(), e);
-        } finally {
-            fury.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -138,8 +138,8 @@ public class FurySerializer extends AbstractSerializer {
             throw buildDeserializeError("Deserialized array is empty.");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        fury.setClassLoader(contextClassLoader);
         try {
-            fury.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getCustomSerializer(clazz);
             if (customSerializer != null) {
                 return customSerializer.decodeObject(data, context);
@@ -149,8 +149,6 @@ public class FurySerializer extends AbstractSerializer {
             }
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
-        } finally {
-            fury.clearClassLoader(contextClassLoader);
         }
     }
 
@@ -161,8 +159,8 @@ public class FurySerializer extends AbstractSerializer {
             throw buildDeserializeError("template is null!");
         }
         ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
+        fury.setClassLoader(contextClassLoader);
         try {
-            fury.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getObjCustomSerializer(template);
             if (customSerializer != null) {
                 customSerializer.decodeObjectByTemplate(data, context, template);
@@ -171,8 +169,6 @@ public class FurySerializer extends AbstractSerializer {
             }
         } catch (Exception e) {
             throw buildDeserializeError(e.getMessage(), e);
-        } finally {
-            fury.clearClassLoader(contextClassLoader);
         }
     }
 
