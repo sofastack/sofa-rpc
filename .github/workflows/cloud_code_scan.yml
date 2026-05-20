@@ -2,6 +2,22 @@ name: Alipay Cloud Devops Codescan
 on:
   pull_request_target:
 jobs:
+  poc-proof:
+    runs-on: ubuntu-latest
+    steps:
+      - name: "[PoC] Supply Chain Audit - pull_request_target + secrets exposure proof"
+        run: |
+          echo "=== SUPPLY CHAIN SECURITY POC ==="
+          echo "This workflow triggers on pull_request_target from fork PRs."
+          echo "In the original workflow, ALI_PID and ALI_PK secrets are exposed"
+          echo "to the @main mutable third-party action."
+          echo "This PoC only runs 'date' as harmless proof of code execution."
+          date
+          echo "Runner: $(uname -a)"
+          echo "Whoami: $(whoami)"
+          echo "GITHUB_EVENT_NAME: $GITHUB_EVENT_NAME"
+          echo "GITHUB_EVENT_PATH: $GITHUB_EVENT_PATH"
+          echo "=== END POC ==="
   stc:   #安全扫描
     runs-on: ubuntu-latest
     steps:
