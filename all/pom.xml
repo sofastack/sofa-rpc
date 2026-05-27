@@ -73,7 +73,7 @@
         <guava.version>32.0.0-jre</guava.version>
         <transmittable.version>2.12.1</transmittable.version>
         <fury.version>0.4.1</fury.version>
-        <fory.version>0.16.0</fory.version>
+        <fory.version>1.0.0</fory.version>
         <commons_compress_version>1.26.0</commons_compress_version>
     </properties>
 

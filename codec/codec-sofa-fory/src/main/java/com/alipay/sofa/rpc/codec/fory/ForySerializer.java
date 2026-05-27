@@ -49,7 +49,7 @@ import static org.apache.fory.config.CompatibleMode.COMPATIBLE;
  * instead of the legacy org.furyio:fury-core used by FurySerializer.
  *
  * @author <a href="mailto:sunhailin.shl@antgroup.com">sunhailin-Leo</a>
- * @see com.alipay.sofa.rpc.codec.fury.FurySerializer
+ * @see com.alipay.sofa.rpc.codec.fory.ForySerializer
  */
 @Extension(value = "fory", code = 23)
 public class ForySerializer extends AbstractSerializer {
@@ -59,15 +59,14 @@ public class ForySerializer extends AbstractSerializer {
     private final String           checkerMode = SofaConfigs.getOrDefault(RpcConfigKeys.SERIALIZE_CHECKER_MODE);
 
     public ForySerializer() {
-        fory = new ThreadLocalFory(classLoader -> {
-            Fory foryInstance = Fory.builder()
+        fory = new ThreadLocalFory(builder -> {
+            Fory foryInstance = builder
                     .withLanguage(Language.JAVA)
                     .withRefTracking(true)
                     .withCodegen(true)
                     .withNumberCompressed(true)
                     .withCompatibleMode(COMPATIBLE)
                     .requireClassRegistration(false)
-                    .withClassLoader(classLoader)
                     .withAsyncCompilation(true)
                     .build();
 
@@ -115,9 +114,7 @@ public class ForySerializer extends AbstractSerializer {
         if (object == null) {
             throw buildSerializeError("Unsupported null message!");
         }
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            fory.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getObjCustomSerializer(object);
             if (customSerializer != null) {
                 return customSerializer.encodeObject(object, context);
@@ -143,9 +140,7 @@ public class ForySerializer extends AbstractSerializer {
         if (data.readableBytes() <= 0) {
             throw buildDeserializeError("Deserialized array is empty.");
         }
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            fory.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getCustomSerializer(clazz);
             if (customSerializer != null) {
                 return customSerializer.decodeObject(data, context);
@@ -166,9 +161,7 @@ public class ForySerializer extends AbstractSerializer {
         if (template == null) {
             throw buildDeserializeError("template is null!");
         }
-        ClassLoader contextClassLoader = Thread.currentThread().getContextClassLoader();
         try {
-            fory.setClassLoader(contextClassLoader);
             CustomSerializer customSerializer = getObjCustomSerializer(template);
             if (customSerializer != null) {
                 customSerializer.decodeObjectByTemplate(data, context, template);
