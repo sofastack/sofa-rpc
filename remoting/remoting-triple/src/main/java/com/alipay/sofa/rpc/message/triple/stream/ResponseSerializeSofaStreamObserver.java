@@ -35,7 +35,7 @@ public class ResponseSerializeSofaStreamObserver<T> implements SofaStreamObserve
     private final StreamObserver<triple.Response> streamObserver;
 
     // ReentrantLock instead of synchronized to avoid virtual thread pinning (JDK 21+)
-    private final ReentrantLock                   writeLock      = new ReentrantLock();
+    private final ReentrantLock                   writeLock = new ReentrantLock();
 
     private Serializer                            serializer;
 
