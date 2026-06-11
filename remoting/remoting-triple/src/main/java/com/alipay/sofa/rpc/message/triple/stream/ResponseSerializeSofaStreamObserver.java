@@ -25,12 +25,17 @@ import com.google.protobuf.ByteString;
 import io.grpc.stub.StreamObserver;
 import triple.Response;
 
+import java.util.concurrent.locks.ReentrantLock;
+
 /**
  * Response serialize stream handler.
  */
 public class ResponseSerializeSofaStreamObserver<T> implements SofaStreamObserver<T> {
 
     private final StreamObserver<triple.Response> streamObserver;
+
+    // ReentrantLock instead of synchronized to avoid virtual thread pinning (JDK 21+)
+    private final ReentrantLock                   writeLock      = new ReentrantLock();
 
     private Serializer                            serializer;
 
@@ -44,6 +49,7 @@ public class ResponseSerializeSofaStreamObserver<T> implements SofaStreamObserve
         }
     }
 
+    // gRPC StreamObserver is not thread-safe, use ReentrantLock to avoid virtual thread pinning (JDK 21+)
     @Override
     public void onNext(T message) {
         Response.Builder builder = Response.newBuilder();
@@ -51,17 +57,32 @@ public class ResponseSerializeSofaStreamObserver<T> implements SofaStreamObserve
         builder.setSerializeType(serializeType);
         builder.setData(ByteString.copyFrom(serializer.encode(message, null).array()));
 
-        streamObserver.onNext(builder.build());
+        writeLock.lock();
+        try {
+            streamObserver.onNext(builder.build());
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
     public void onCompleted() {
-        streamObserver.onCompleted();
+        writeLock.lock();
+        try {
+            streamObserver.onCompleted();
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     @Override
     public void onError(Throwable throwable) {
-        streamObserver.onError(TripleExceptionUtils.asStatusRuntimeException(throwable));
+        writeLock.lock();
+        try {
+            streamObserver.onError(TripleExceptionUtils.asStatusRuntimeException(throwable));
+        } finally {
+            writeLock.unlock();
+        }
     }
 
     public void setSerializeType(String serializeType) {

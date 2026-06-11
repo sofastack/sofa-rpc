@@ -34,8 +34,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -290,6 +293,118 @@ public class TripleGenericStreamTest {
         }
         Assert.assertEquals("Expected response count", responseTimes, count.get());
         verify(helloServiceInst, times(1)).sayHelloServerStream(any(), any());
+    }
+
+    /**
+     * Test concurrent client sends on BiStream.
+     * Multiple threads call onNext simultaneously to verify no data is lost.
+     */
+    @Test
+    public void testConcurrentClientSendBiStream() throws InterruptedException {
+        int totalMessages = 100;
+        int threadCount = 8;
+
+        // totalMessages echo responses + 1 onCompleted
+        CountDownLatch responseLatch = new CountDownLatch(totalMessages + 1);
+        List<ServerResponse> receivedResponses = Collections.synchronizedList(new ArrayList<>());
+        AtomicBoolean receivedFinish = new AtomicBoolean(false);
+
+        SofaStreamObserver<ClientRequest> clientSender = helloServiceRef
+                .sayHelloBiStream(new SofaStreamObserver<ServerResponse>() {
+                    @Override
+                    public void onNext(ServerResponse message) {
+                        receivedResponses.add(message);
+                        responseLatch.countDown();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        receivedFinish.set(true);
+                        responseLatch.countDown();
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        LOGGER.error("Concurrent bi-stream error", throwable);
+                        responseLatch.countDown();
+                    }
+                });
+
+        // Use multiple threads to send concurrently
+        ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch startLatch = new CountDownLatch(1);
+        CountDownLatch sendDoneLatch = new CountDownLatch(totalMessages);
+
+        for (int i = 0; i < totalMessages; i++) {
+            final int index = i;
+            executor.submit(() -> {
+                try {
+                    startLatch.await();
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+                clientSender.onNext(new ClientRequest(HELLO_MSG, index));
+                sendDoneLatch.countDown();
+            });
+        }
+
+        // Release all threads at once to maximize concurrency
+        startLatch.countDown();
+        Assert.assertTrue("Client send timed out", sendDoneLatch.await(30, TimeUnit.SECONDS));
+
+        // Signal server to finish
+        clientSender.onNext(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_FINISH, -1));
+
+        Assert.assertTrue("Response timed out", responseLatch.await(30, TimeUnit.SECONDS));
+        executor.shutdown();
+
+        LOGGER.info("Client sent {} messages, client got back {} echo responses",
+                totalMessages, receivedResponses.size());
+
+        Assert.assertTrue("Stream should be completed", receivedFinish.get());
+        Assert.assertEquals("Client should receive all echo responses (no data loss)", totalMessages, receivedResponses.size());
+    }
+
+    /**
+     * Test concurrent server sends on ServerStream.
+     * Server uses multiple threads to call onNext simultaneously to verify no data is lost.
+     */
+    @Test
+    public void testConcurrentServerSendServerStream() throws InterruptedException {
+        int totalMessages = 100;
+        CountDownLatch responseLatch = new CountDownLatch(totalMessages + 1);
+        List<ServerResponse> receivedResponses = Collections.synchronizedList(new ArrayList<>());
+        AtomicBoolean receivedFinish = new AtomicBoolean(false);
+
+        helloServiceRef.sayHelloServerStream(
+                new ClientRequest(HelloService.CMD_TRIGGER_CONCURRENT_SERVER_SEND, totalMessages),
+                new SofaStreamObserver<ServerResponse>() {
+                    @Override
+                    public void onNext(ServerResponse message) {
+                        receivedResponses.add(message);
+                        responseLatch.countDown();
+                    }
+
+                    @Override
+                    public void onCompleted() {
+                        receivedFinish.set(true);
+                        responseLatch.countDown();
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        LOGGER.error("Concurrent server-stream error", throwable);
+                        responseLatch.countDown();
+                    }
+                });
+
+        Assert.assertTrue("Server stream timed out", responseLatch.await(30, TimeUnit.SECONDS));
+
+        LOGGER.info("Server sent {} messages concurrently, client received {} responses",
+                totalMessages, receivedResponses.size());
+
+        Assert.assertTrue("Stream should be completed", receivedFinish.get());
+        Assert.assertEquals("Client should receive all messages", totalMessages, receivedResponses.size());
     }
 
     private void assertServerResponseType(List<ServerResponse> serverResponseList) {

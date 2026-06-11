@@ -20,6 +20,11 @@ import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class HelloServiceImpl implements HelloService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HelloServiceImpl.class);
@@ -27,6 +32,7 @@ public class HelloServiceImpl implements HelloService {
     @Override
     public SofaStreamObserver<ClientRequest> sayHelloBiStream(SofaStreamObserver<ServerResponse> sofaStreamObserver) {
         return new SofaStreamObserver<ClientRequest>() {
+            private final AtomicInteger receivedCount = new AtomicInteger(0);
 
             @Override
             public void onNext(ClientRequest clientRequest) {
@@ -36,6 +42,7 @@ public class HelloServiceImpl implements HelloService {
                 } else if (clientRequest.getMsg().equals(CMD_TRIGGER_STREAM_ERROR)) {
                     sofaStreamObserver.onError(new RuntimeException(ERROR_MSG));
                 } else {
+                    receivedCount.incrementAndGet();
                     if (clientRequest instanceof ExtendClientRequest) {
                         sofaStreamObserver.onNext(new ExtendServerResponse(clientRequest.getMsg(), clientRequest
                             .getCount(), ((ExtendClientRequest) clientRequest).getExtendString()));
@@ -63,18 +70,47 @@ public class HelloServiceImpl implements HelloService {
     @Override
     public void sayHelloServerStream(ClientRequest clientRequest, SofaStreamObserver<ServerResponse> sofaStreamObserver) {
         LOGGER.info("server stream req receive");
-        sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount()));
-        sofaStreamObserver.onNext(new ExtendServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 1,
-            "extendString"));
-        sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 2));
-        sofaStreamObserver.onNext(new ExtendServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 3,
-            "extendString"));
-        sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 4));
-        if (clientRequest.getMsg().equals(CMD_TRIGGER_STREAM_ERROR)) {
-            sofaStreamObserver.onError(new RuntimeException(ERROR_MSG));
+        if (clientRequest.getMsg().equals(CMD_TRIGGER_CONCURRENT_SERVER_SEND)) {
+            // Concurrent server send: use multiple threads to send responses simultaneously
+            int totalMessages = clientRequest.getCount();
+            int threadCount = 4;
+            ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+            CountDownLatch startLatch = new CountDownLatch(1);
+            CountDownLatch doneLatch = new CountDownLatch(totalMessages);
+            for (int i = 0; i < totalMessages; i++) {
+                final int index = i;
+                executor.submit(() -> {
+                    try {
+                        startLatch.await();
+                    } catch (InterruptedException e) {
+                        Thread.currentThread().interrupt();
+                    }
+                    sofaStreamObserver.onNext(new ServerResponse(CMD_TRIGGER_CONCURRENT_SERVER_SEND, index));
+                    doneLatch.countDown();
+                });
+            }
+            startLatch.countDown();
+            try {
+                doneLatch.await();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+            executor.shutdown();
             sofaStreamObserver.onCompleted();
         } else {
-            sofaStreamObserver.onCompleted();
+            sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount()));
+            sofaStreamObserver.onNext(new ExtendServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 1,
+                "extendString"));
+            sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 2));
+            sofaStreamObserver.onNext(new ExtendServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 3,
+                "extendString"));
+            sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 4));
+            if (clientRequest.getMsg().equals(CMD_TRIGGER_STREAM_ERROR)) {
+                sofaStreamObserver.onError(new RuntimeException(ERROR_MSG));
+                sofaStreamObserver.onCompleted();
+            } else {
+                sofaStreamObserver.onCompleted();
+            }
         }
     }
 

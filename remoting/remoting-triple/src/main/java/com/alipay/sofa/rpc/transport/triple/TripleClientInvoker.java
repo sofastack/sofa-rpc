@@ -60,6 +60,7 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import static com.alipay.sofa.rpc.common.RpcConstants.SERIALIZE_HESSIAN2;
 import static com.alipay.sofa.rpc.constant.TripleConstant.UNIQUE_ID;
@@ -197,22 +198,39 @@ public class TripleClientInvoker implements TripleInvoker {
                         ClassLoaderUtils.getCurrentClassLoader()
                 )
         );
+        // gRPC StreamObserver is not thread-safe, use ReentrantLock to avoid virtual thread pinning (JDK 21+)
+        final ReentrantLock writeLock = new ReentrantLock();
         SofaStreamObserver<Request> handler = new SofaStreamObserver() {
             @Override
             public void onNext(Object message) {
                 Object[] args = new Object[]{message};
                 Request req = SofaProtoUtils.buildRequest(rebuildTrueRequestArgSigs(args), args, serialization, serializer, 0);
-                observer.onNext(req);
+                writeLock.lock();
+                try {
+                    observer.onNext(req);
+                } finally {
+                    writeLock.unlock();
+                }
             }
 
             @Override
             public void onCompleted() {
-                observer.onCompleted();
+                writeLock.lock();
+                try {
+                    observer.onCompleted();
+                } finally {
+                    writeLock.unlock();
+                }
             }
 
             @Override
             public void onError(Throwable throwable) {
-                observer.onError(TripleExceptionUtils.asStatusRuntimeException(throwable));
+                writeLock.lock();
+                try {
+                    observer.onError(TripleExceptionUtils.asStatusRuntimeException(throwable));
+                } finally {
+                    writeLock.unlock();
+                }
             }
         };
         SofaResponse sofaResponse = new SofaResponse();
