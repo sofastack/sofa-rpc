@@ -20,11 +20,13 @@ import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 
 public interface HelloService extends ParentService {
 
-    String CMD_TRIGGER_STREAM_FINISH = "finish";
+    String CMD_TRIGGER_STREAM_FINISH          = "finish";
 
-    String CMD_TRIGGER_STREAM_ERROR  = "error";
+    String CMD_TRIGGER_STREAM_ERROR           = "error";
 
-    String ERROR_MSG                 = "error msg";
+    String CMD_TRIGGER_CONCURRENT_SERVER_SEND = "concurrent_server_send";
+
+    String ERROR_MSG                          = "error msg";
 
     SofaStreamObserver<ClientRequest> sayHelloBiStream(SofaStreamObserver<ServerResponse> sofaStreamObserver);
 
