@@ -287,6 +287,13 @@ public class TripleTracerAdapter {
             if (!traceMap.isEmpty()) {
                 sofaRequest.addRequestProp(RemotingConstants.RPC_TRACE_NAME, traceMap);
             }
+
+            // 解析请求 baggage：客户端通过 flatCopyTo 将 baggage Map 展平为 rpc_req_baggage.xxx 写入 header，
+            // 此处还原为 Map 放入 requestProps，供 ProviderBaggageFilter 通过 BaggageResolver.pickupFromRequest 解析
+            if (RpcInvokeContext.isBaggageEnable()) {
+                parseBaggageHeaders(requestHeaders, sofaRequest);
+            }
+
             MethodDescriptor.MethodType methodType = call.getMethodDescriptor().getType();
             switch (methodType) {
                 case CLIENT_STREAMING:
@@ -383,5 +390,22 @@ public class TripleTracerAdapter {
             LOGGER.warn("Failed to parse tri-unit-info: " + unitInfo, e);
         }
         return null;
+    }
+
+    private static void parseBaggageHeaders(Metadata requestHeaders, SofaRequest sofaRequest) {
+        String prefix = RemotingConstants.RPC_REQUEST_BAGGAGE + ".";
+        Map<String, String> requestBaggage = new HashMap<>();
+        for (String key : requestHeaders.keys()) {
+            if (key.startsWith(prefix)) {
+                String baggageKey = key.substring(prefix.length());
+                String value = requestHeaders.get(TripleHeadKeys.getKey(key));
+                if (StringUtils.isNotBlank(baggageKey) && value != null) {
+                    requestBaggage.put(baggageKey, value);
+                }
+            }
+        }
+        if (!requestBaggage.isEmpty()) {
+            sofaRequest.addRequestProp(RemotingConstants.RPC_REQUEST_BAGGAGE, requestBaggage);
+        }
     }
 }
