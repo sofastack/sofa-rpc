@@ -37,9 +37,10 @@ public class ResponseSerializeSofaStreamObserver<T> implements SofaStreamObserve
     // ReentrantLock instead of synchronized to avoid virtual thread pinning (JDK 21+)
     private final ReentrantLock                   writeLock = new ReentrantLock();
 
-    private Serializer                            serializer;
+    // volatile ensures safe publication when setSerializeType() is called from another thread
+    private volatile Serializer                   serializer;
 
-    private String                                serializeType;
+    private volatile String                       serializeType;
 
     public ResponseSerializeSofaStreamObserver(StreamObserver<triple.Response> streamObserver, String serializeType) {
         this.streamObserver = streamObserver;

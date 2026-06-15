@@ -343,20 +343,23 @@ public class TripleGenericStreamTest {
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
-                clientSender.onNext(new ClientRequest(HELLO_MSG, index));
-                sendDoneLatch.countDown();
+                try {
+                    clientSender.onNext(new ClientRequest(HELLO_MSG, index));
+                } finally {
+                    sendDoneLatch.countDown();
+                }
             });
         }
 
         // Release all threads at once to maximize concurrency
         startLatch.countDown();
+        executor.shutdown();
         Assert.assertTrue("Client send timed out", sendDoneLatch.await(30, TimeUnit.SECONDS));
 
         // Signal server to finish
         clientSender.onNext(new ClientRequest(HelloService.CMD_TRIGGER_STREAM_FINISH, -1));
 
         Assert.assertTrue("Response timed out", responseLatch.await(30, TimeUnit.SECONDS));
-        executor.shutdown();
 
         LOGGER.info("Client sent {} messages, client got back {} echo responses",
                 totalMessages, receivedResponses.size());

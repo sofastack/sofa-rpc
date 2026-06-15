@@ -23,6 +23,7 @@ import com.alipay.sofa.rpc.transport.SofaStreamObserver;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class HelloServiceImpl implements HelloService {
@@ -85,13 +86,16 @@ public class HelloServiceImpl implements HelloService {
                     } catch (InterruptedException e) {
                         Thread.currentThread().interrupt();
                     }
-                    sofaStreamObserver.onNext(new ServerResponse(CMD_TRIGGER_CONCURRENT_SERVER_SEND, index));
-                    doneLatch.countDown();
+                    try {
+                        sofaStreamObserver.onNext(new ServerResponse(CMD_TRIGGER_CONCURRENT_SERVER_SEND, index));
+                    } finally {
+                        doneLatch.countDown();
+                    }
                 });
             }
             startLatch.countDown();
             try {
-                doneLatch.await();
+                doneLatch.await(30, TimeUnit.SECONDS);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
@@ -107,7 +111,6 @@ public class HelloServiceImpl implements HelloService {
             sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount() + 4));
             if (clientRequest.getMsg().equals(CMD_TRIGGER_STREAM_ERROR)) {
                 sofaStreamObserver.onError(new RuntimeException(ERROR_MSG));
-                sofaStreamObserver.onCompleted();
             } else {
                 sofaStreamObserver.onCompleted();
             }
