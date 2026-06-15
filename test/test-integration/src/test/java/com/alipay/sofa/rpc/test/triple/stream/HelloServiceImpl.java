@@ -24,7 +24,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class HelloServiceImpl implements HelloService {
 
@@ -33,7 +32,6 @@ public class HelloServiceImpl implements HelloService {
     @Override
     public SofaStreamObserver<ClientRequest> sayHelloBiStream(SofaStreamObserver<ServerResponse> sofaStreamObserver) {
         return new SofaStreamObserver<ClientRequest>() {
-            private final AtomicInteger receivedCount = new AtomicInteger(0);
 
             @Override
             public void onNext(ClientRequest clientRequest) {
@@ -43,7 +41,6 @@ public class HelloServiceImpl implements HelloService {
                 } else if (clientRequest.getMsg().equals(CMD_TRIGGER_STREAM_ERROR)) {
                     sofaStreamObserver.onError(new RuntimeException(ERROR_MSG));
                 } else {
-                    receivedCount.incrementAndGet();
                     if (clientRequest instanceof ExtendClientRequest) {
                         sofaStreamObserver.onNext(new ExtendServerResponse(clientRequest.getMsg(), clientRequest
                             .getCount(), ((ExtendClientRequest) clientRequest).getExtendString()));
@@ -99,7 +96,6 @@ public class HelloServiceImpl implements HelloService {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
-            executor.shutdown();
             sofaStreamObserver.onCompleted();
         } else {
             sofaStreamObserver.onNext(new ServerResponse(clientRequest.getMsg(), clientRequest.getCount()));
