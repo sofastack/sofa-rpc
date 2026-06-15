@@ -172,6 +172,9 @@ public class TripleGenericStreamTest {
     }
 
     public void testTripleBiStream(boolean endWithException) throws InterruptedException {
+        // Reset mock invocation history to avoid interference between test methods
+        Mockito.reset(helloServiceInst);
+
         int requestTimes = 5;
         CountDownLatch countDownLatch = new CountDownLatch(requestTimes + 1);
 
