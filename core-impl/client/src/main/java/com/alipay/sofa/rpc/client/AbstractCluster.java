@@ -255,8 +255,8 @@ public abstract class AbstractCluster extends Cluster {
                 }
             }
         } else {
-            addressHolder.updateAllProviders(providerGroups);
             connectionHolder.updateAllProviders(providerGroups);
+            addressHolder.updateAllProviders(providerGroups);
         }
         if (EventBus.isEnable(ProviderInfoUpdateAllEvent.class)) {
             ProviderInfoUpdateAllEvent event = new ProviderInfoUpdateAllEvent(consumerConfig, oldProviderGroups,
