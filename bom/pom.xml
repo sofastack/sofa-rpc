@@ -40,7 +40,7 @@
         <msgpack.version>0.6.12</msgpack.version>
         <protostuff.version>1.5.9</protostuff.version>
         <fury.version>0.4.1</fury.version>
-        <fory.version>0.16.0</fory.version>
+        <fory.version>1.0.0</fory.version>
         <grpc.version>1.53.0</grpc.version>
 
         <!--common-->
