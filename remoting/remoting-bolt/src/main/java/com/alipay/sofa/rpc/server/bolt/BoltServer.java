@@ -21,6 +21,7 @@ import com.alipay.remoting.rpc.RpcServer;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
 import com.alipay.sofa.rpc.common.threadpool.ThreadPoolConstant;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -140,9 +141,18 @@ public class BoltServer implements Server {
             remotingServer = initRemotingServer();
             try {
                 if (remotingServer.start()) {
+                    // When a non-deterministic port (-1 random / 0 any) is configured, the OS
+                    // assigns an available port at bind time. The bolt RpcServer (via
+                    // AbstractRemotingServer#setLocalBindingPort) updates its internal port
+                    // field after binding, so we read it back via remotingServer.port() and
+                    // write it into ServerConfig#actualPort so callers can retrieve it via
+                    // serverConfig.getActualPort().
+                    if (NetUtils.isRandomOrAnyPort(serverConfig.getPort())) {
+                        serverConfig.setActualPort(remotingServer.port());
+                    }
                     if (LOGGER.isInfoEnabled()) {
                         LOGGER.info("Bolt server has been bind to {}:{}", serverConfig.getBoundHost(),
-                            serverConfig.getPort());
+                            remotingServer.port());
                     }
                 } else {
                     throw new SofaRpcRuntimeException(LogCodes.getLog(LogCodes.ERROR_START_BOLT_SERVER));

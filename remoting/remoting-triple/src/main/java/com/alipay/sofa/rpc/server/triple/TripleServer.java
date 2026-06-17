@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RpcConfigs;
 import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.common.cache.ReflectCache;
 import com.alipay.sofa.rpc.common.struct.NamedThreadFactory;
+import com.alipay.sofa.rpc.common.utils.NetUtils;
 import com.alipay.sofa.rpc.config.ConfigUniqueNameGenerator;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
@@ -197,8 +198,15 @@ public class TripleServer implements Server {
             }
             try {
                 server.start();
+                // When a non-deterministic port (-1 random / 0 any) is configured, grpc Server
+                // assigns the real bound port at start() time. Read it back via server.getPort()
+                // and write it into ServerConfig#actualPort so callers can retrieve it via
+                // serverConfig.getActualPort().
+                if (NetUtils.isRandomOrAnyPort(serverConfig.getPort())) {
+                    serverConfig.setActualPort(server.getPort());
+                }
                 if (LOGGER.isInfoEnabled()) {
-                    LOGGER.info("Start the triple server at port {}", serverConfig.getPort());
+                    LOGGER.info("Start the triple server at port {}", server.getPort());
                 }
                 if (EventBus.isEnable(ServerStartedEvent.class)) {
                     EventBus.post(new ServerStartedEvent(serverConfig, bizThreadPool));

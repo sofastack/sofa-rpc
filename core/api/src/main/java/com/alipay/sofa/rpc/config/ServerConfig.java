@@ -86,6 +86,21 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
     protected int                             port             = getIntValue(SERVER_PORT_START);
 
     /**
+     * 实际绑定后由 OS 分配的真实监听端口。
+     * <p>
+     * 当用户配置 {@link #port} 为随机端口（-1）或任意端口（0）时，真实端口在 server.start()
+     * 完成 bind 之后才能确定。各 server 实现需要在 start 成功后将真实端口写回此字段
+     * （通过 {@link #setActualPort(int)}），调用方通过 {@link #getActualPort()} 即可获取。
+     * <p>
+     * 之所以使用独立字段而不是直接覆盖 {@link #port}，是因为 {@code port} 字段会参与
+     * {@link ServerConfig#equals(Object)}/{@link ServerConfig#hashCode()} 计算，并被
+     * {@code ServerFactory} 当作 server 缓存的 key，覆盖会导致 destroy/缓存清理失败。
+     * <p>
+     * 默认值 0，表示尚未 bind 或者无需回填。
+     */
+    protected transient int                   actualPort       = 0;
+
+    /**
      * 基本路径
      */
     protected String                          contextPath      = getStringValue(SERVER_CONTEXT_PATH);
@@ -312,6 +327,52 @@ public class ServerConfig extends AbstractIdConfig implements Serializable {
         }
         this.port = port;
         return this;
+    }
+
+    /**
+     * Sets the actual port that the server is bound to after startup.
+     * <p>
+     * This is intended to be invoked by server implementations after a successful bind, when
+     * the configured port is a random port (-1) or the OS-assigned "any" port (0). The real
+     * listening port is written into a dedicated {@link #actualPort} field so that callers can
+     * retrieve it via {@link #getActualPort()} without polluting {@link #port} (which is part
+     * of {@link #equals(Object)}/{@link #hashCode()} and is used as the cache key in
+     * {@code ServerFactory}).
+     * <p>
+     * Unlike {@link #setPort(int)} (which accepts -1 to indicate "random"), the value passed
+     * here MUST be a real port assigned by the OS, i.e. within {@code 1..65535}.
+     *
+     * @param actualPort the actual port number assigned by the OS after binding
+     * @return this server config instance for chaining
+     * @throws com.alipay.sofa.rpc.core.exception.SofaRpcRuntimeException if {@code actualPort}
+     *         is not a valid bound port (must be 1..65535)
+     */
+    public ServerConfig setActualPort(int actualPort) {
+        if (actualPort <= 0 || NetUtils.isInvalidPort(actualPort)) {
+            throw ExceptionUtils.buildRuntime("server.actualPort", String.valueOf(actualPort),
+                "actual binding port must be between 1 and 65535");
+        }
+        this.actualPort = actualPort;
+        return this;
+    }
+
+    /**
+     * Gets the actual port that the server is bound to.
+     * <p>
+     * Behavior:
+     * <ul>
+     *     <li>If {@link #setActualPort(int)} has been called (i.e. the server has finished
+     *         binding to a random/any port and written the real port back), returns the real
+     *         OS-assigned port.</li>
+     *     <li>Otherwise, falls back to {@link #getPort()}. This means callers configured with
+     *         a fixed port (e.g. 12200) can always rely on this method to obtain a usable
+     *         listening port without having to null-check / zero-check on their side.</li>
+     * </ul>
+     *
+     * @return the real listening port if known, otherwise the configured port
+     */
+    public int getActualPort() {
+        return actualPort > 0 ? actualPort : port;
     }
 
     /**

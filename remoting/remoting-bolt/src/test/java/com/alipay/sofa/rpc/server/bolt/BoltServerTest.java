@@ -60,8 +60,7 @@ public class BoltServerTest {
 
         server.stop();
         Assert.assertFalse(server.started);
-        Thread.sleep(1000); // 升级bolt后删除此行
-        Assert.assertFalse(NetUtils.canTelnet(host, port, 1000));
+        waitUntilNotTelnetAble(host, port);
 
         server.start();
         Assert.assertTrue(server.started);
@@ -69,10 +68,67 @@ public class BoltServerTest {
 
         server.stop();
         Assert.assertFalse(server.started);
-        Thread.sleep(1000); // 升级bolt后删除此行
-        Assert.assertFalse(NetUtils.canTelnet(host, port, 1000));
+        waitUntilNotTelnetAble(host, port);
 
         server.destroy();
+    }
+
+    /**
+     * Verify that when serverConfig is configured with port 0 (OS-assigned "any" port),
+     * BoltServer writes the real bound port back into ServerConfig#actualPort, and that
+     * port is reachable.
+     */
+    @Test
+    public void testRandomPort() throws Exception {
+        String host = "127.0.0.1";
+        ServerConfig serverConfig = new ServerConfig();
+        serverConfig.setBoundHost(host);
+        // Use OS-assigned ephemeral port. -1 (SOFA "random") is also acceptable, but bolt
+        // RpcServer accepts 0 directly via ServerSocket, so we test 0 here which exercises
+        // the new isRandomOrAnyPort branch.
+        serverConfig.setPort(0);
+        serverConfig.setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT);
+
+        BoltServer server = new BoltServer();
+        server.init(serverConfig);
+        try {
+            server.start();
+            Assert.assertTrue(server.started);
+
+            // Configured port stays 0 (must not be polluted, otherwise ServerFactory cache
+            // and ServerConfig.equals/hashCode would break for callers that constructed the
+            // config with port=0).
+            Assert.assertEquals(0, serverConfig.getPort());
+
+            // Actual port must be a real OS-assigned port (>0) and reachable.
+            int actualPort = serverConfig.getActualPort();
+            Assert.assertTrue("actualPort should be > 0 after bind, got: " + actualPort,
+                actualPort > 0);
+            Assert.assertTrue("server should be reachable on actual port " + actualPort,
+                NetUtils.canTelnet(host, actualPort, 1000));
+
+            server.stop();
+            Assert.assertFalse(server.started);
+            waitUntilNotTelnetAble(host, actualPort);
+        } finally {
+            server.destroy();
+        }
+    }
+
+    /**
+     * Poll-based wait to replace Thread.sleep, avoiding flakiness on slow CI.
+     * Returns as soon as the (host, port) is no longer reachable, or after 5s timeout.
+     */
+    private static void waitUntilNotTelnetAble(String host, int port) throws InterruptedException {
+        long deadline = System.currentTimeMillis() + 5000L;
+        while (System.currentTimeMillis() < deadline) {
+            if (!NetUtils.canTelnet(host, port, 200)) {
+                return;
+            }
+            Thread.sleep(100);
+        }
+        Assert.assertFalse("port " + port + " should not be reachable after stop",
+            NetUtils.canTelnet(host, port, 1000));
     }
 
     @Test
