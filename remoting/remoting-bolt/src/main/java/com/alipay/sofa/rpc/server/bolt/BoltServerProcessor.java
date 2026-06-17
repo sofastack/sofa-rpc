@@ -177,6 +177,8 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
                     response = doInvoke(serviceName, invoker, request);
                     if (bizCtx.isRequestTimeout()) { // 加上丢弃超时的响应的逻辑
                         throwable = clientTimeoutWhenSendResponse(appName, serviceName, bizCtx.getRemoteAddress());
+                        // response为空，代表超时应该丢弃响应
+                        response = null;
                         break invoke;
                     }
                 }
