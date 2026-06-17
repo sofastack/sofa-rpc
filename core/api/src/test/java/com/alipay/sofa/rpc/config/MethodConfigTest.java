@@ -40,4 +40,14 @@ public class MethodConfigTest {
     public void getParameter() throws Exception {
     }
 
+    @Test
+    public void testRetryExceptions() {
+        MethodConfig methodConfig = new MethodConfig();
+        Assert.assertNull(methodConfig.getRetryExceptions());
+
+        methodConfig.setRetryExceptions("java.lang.IllegalStateException");
+
+        Assert.assertEquals("java.lang.IllegalStateException", methodConfig.getRetryExceptions());
+    }
+
 }

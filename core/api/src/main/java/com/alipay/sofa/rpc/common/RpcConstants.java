@@ -403,6 +403,11 @@ public class RpcConstants {
     public static final String  CONFIG_KEY_RETRIES                           = "retries";
 
     /**
+     * 配置key:retryExceptions
+     */
+    public static final String  CONFIG_KEY_RETRY_EXCEPTIONS                  = "retryExceptions";
+
+    /**
      * 配置key:timeout
      */
     public static final String  CONFIG_KEY_TIMEOUT                           = "timeout";

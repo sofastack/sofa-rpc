@@ -178,9 +178,10 @@ public abstract class AbstractHttpServerTask extends AbstractTask {
                     } else {
                         if (response.getAppResponse() instanceof Throwable) {
                             ByteBuf content = ctx.alloc().buffer();
-                            String errorMsg = ExceptionUtils.toString((Throwable) response.getAppResponse());
+                            Throwable appThrowable = (Throwable) response.getAppResponse();
+                            String errorMsg = ExceptionUtils.toString(appThrowable);
                             content.writeBytes(StringSerializer.encode(errorMsg));
-                            sendAppError(HttpResponseStatus.OK, content);
+                            sendAppError(HttpResponseStatus.OK, content, appThrowable);
                         } else {
                             ByteBuf content = ctx.alloc().buffer();
                             if (request.getSerializeType() > 0) {
@@ -239,8 +240,9 @@ public abstract class AbstractHttpServerTask extends AbstractTask {
      *
      * @param status 返回状态，一般是200
      * @param data   数据
+     * @param throwable 业务异常
      */
-    protected abstract void sendAppError(HttpResponseStatus status, ByteBuf data);
+    protected abstract void sendAppError(HttpResponseStatus status, ByteBuf data, Throwable throwable);
 
     /**
      * 返回框架异常（头上带上 error=true）

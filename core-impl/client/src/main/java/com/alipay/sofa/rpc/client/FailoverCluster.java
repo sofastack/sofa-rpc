@@ -58,8 +58,11 @@ public class FailoverCluster extends AbstractCluster {
         String methodName = request.getMethodName();
         int retries = consumerConfig.getMethodRetries(methodName);
         int time = 0;
+        List<Class<? extends Throwable>> retryableExceptions = RetryableExceptionHelper
+            .resolveRetryExceptions(consumerConfig.getMethodRetryExceptions(methodName));
         // 异常日志
         SofaRpcException throwable = null;
+        SofaResponse exceptionResponse = null;
         List<ProviderInfo> invokedProviderInfos = new ArrayList<ProviderInfo>(retries + 1);
         do {
             ProviderInfo providerInfo = null;
@@ -67,39 +70,60 @@ public class FailoverCluster extends AbstractCluster {
                 providerInfo = select(request, invokedProviderInfos);
                 SofaResponse response = filterChain(providerInfo, request);
                 if (response != null) {
-                    if (throwable != null) {
-                        if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
-                            LOGGER.warnWithApp(consumerConfig.getAppName(),
-                                LogCodes.getLog(LogCodes.WARN_SUCCESS_BY_RETRY,
-                                    throwable.getClass() + ":" + throwable.getMessage(),
-                                    invokedProviderInfos));
+                    if (RetryableExceptionHelper.shouldRetry(response, retryableExceptions)) {
+                        exceptionResponse = response;
+                        throwable = null;
+                        time++;
+                    } else {
+                        if (throwable != null || exceptionResponse != null) {
+                            String failureMessage = RetryableExceptionHelper.buildFailureMessage(throwable,
+                                exceptionResponse);
+                            if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
+                                LOGGER.warnWithApp(consumerConfig.getAppName(),
+                                    LogCodes.getLog(LogCodes.WARN_SUCCESS_BY_RETRY, failureMessage,
+                                        invokedProviderInfos));
+                            }
                         }
+                        return response;
                     }
-                    return response;
                 } else {
+                    exceptionResponse = null;
                     throwable = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
                         "Failed to call " + request.getInterfaceName() + "." + methodName
                             + " on remote server " + providerInfo + ", return null");
                     time++;
                 }
-            } catch (SofaRpcException e) { // 服务端异常+ 超时异常 才发起rpc异常重试
-                if (e.getErrorType() == RpcErrorType.SERVER_BUSY
-                    || e.getErrorType() == RpcErrorType.CLIENT_TIMEOUT) {
+            } catch (SofaRpcException e) {
+                if (RetryableExceptionHelper.shouldRetry(e, retryableExceptions)) {
+                    exceptionResponse = null;
                     throwable = e;
                     time++;
                 } else {
                     // throw the exception that caused the retry
                     if (throwable != null) {
                         throw throwable;
+                    } else if (exceptionResponse != null) {
+                        return exceptionResponse;
                     } else {
                         throw e;
                     }
                 }
-            } catch (Exception e) { // 其它异常不重试
-                throw new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
+            } catch (Exception e) {
+                SofaRpcException wrappedException = new SofaRpcException(RpcErrorType.CLIENT_UNDECLARED_ERROR,
                     "Failed to call " + request.getInterfaceName() + "." + request.getMethodName()
                         + " on remote server: " + providerInfo + ", cause by unknown exception: "
                         + e.getClass().getName() + ", message is: " + e.getMessage(), e);
+                if (RetryableExceptionHelper.shouldRetry(e, retryableExceptions)) {
+                    exceptionResponse = null;
+                    throwable = wrappedException;
+                    time++;
+                } else if (throwable != null) {
+                    throw throwable;
+                } else if (exceptionResponse != null) {
+                    return exceptionResponse;
+                } else {
+                    throw wrappedException;
+                }
             } finally {
                 if (RpcInternalContext.isAttachmentEnable()) {
                     RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_INVOKE_TIMES,
@@ -111,6 +135,9 @@ public class FailoverCluster extends AbstractCluster {
             }
         } while (time <= retries);
 
+        if (exceptionResponse != null) {
+            return exceptionResponse;
+        }
         throw throwable;
     }
 

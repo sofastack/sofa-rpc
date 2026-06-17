@@ -54,16 +54,20 @@ public class Http1ServerTask extends AbstractHttpServerTask {
     }
 
     @Override
-    protected void sendAppError(HttpResponseStatus status, ByteBuf data) {
-        sendHttp1Response0(status, true, data);
+    protected void sendAppError(HttpResponseStatus status, ByteBuf data, Throwable throwable) {
+        sendHttp1Response0(status, true, data, throwable);
     }
 
     @Override
     protected void sendRpcError(HttpResponseStatus status, ByteBuf data) {
-        sendHttp1Response0(status, true, data);
+        sendHttp1Response0(status, true, data, null);
     }
 
     protected void sendHttp1Response0(HttpResponseStatus status, boolean error, ByteBuf content) {
+        sendHttp1Response0(status, error, content, null);
+    }
+
+    protected void sendHttp1Response0(HttpResponseStatus status, boolean error, ByteBuf content, Throwable throwable) {
         FullHttpResponse httpResponse = new DefaultFullHttpResponse(HTTP_1_1, status, content);
         HttpHeaders headers = httpResponse.headers();
 
@@ -76,6 +80,9 @@ public class Http1ServerTask extends AbstractHttpServerTask {
         }
         if (error) {
             headers.set(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
+        }
+        if (throwable != null) {
+            headers.set(RemotingConstants.HEAD_RESPONSE_EXCEPTION, throwable.getClass().getName());
         }
         if (!keepAlive) {
             ctx.write(httpResponse).addListener(ChannelFutureListener.CLOSE);

@@ -150,6 +150,10 @@ public abstract class AbstractHttpClientHandler implements ClientHandler {
                     String errorMsg = StringSerializer.decode(data.array());
                     Throwable throwable = new SofaRpcException(RpcErrorType.SERVER_BIZ, errorMsg);
                     response.setAppResponse(throwable);
+                    String exceptionClass = headers.get(RemotingConstants.HEAD_RESPONSE_EXCEPTION);
+                    if (exceptionClass != null) {
+                        response.addResponseProp(RemotingConstants.HEAD_RESPONSE_EXCEPTION, exceptionClass);
+                    }
                 } else {
                     // 获取序列化类型
                     if (data.readableBytes() > 0) {

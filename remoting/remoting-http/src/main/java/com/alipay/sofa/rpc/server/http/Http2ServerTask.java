@@ -51,16 +51,20 @@ public class Http2ServerTask extends AbstractHttpServerTask {
     }
 
     @Override
-    protected void sendAppError(HttpResponseStatus status, ByteBuf data) {
-        sendHttp2Response0(status, true, data);
+    protected void sendAppError(HttpResponseStatus status, ByteBuf data, Throwable throwable) {
+        sendHttp2Response0(status, true, data, throwable);
     }
 
     @Override
     protected void sendRpcError(HttpResponseStatus status, ByteBuf data) {
-        sendHttp2Response0(status, true, data);
+        sendHttp2Response0(status, true, data, null);
     }
 
     private void sendHttp2Response0(HttpResponseStatus status, boolean error, ByteBuf data) {
+        sendHttp2Response0(status, error, data, null);
+    }
+
+    private void sendHttp2Response0(HttpResponseStatus status, boolean error, ByteBuf data, Throwable throwable) {
         Http2Headers headers = new DefaultHttp2Headers().status(status.codeAsText());
 
         if (request.getSerializeType() > 0) {
@@ -71,6 +75,9 @@ public class Http2ServerTask extends AbstractHttpServerTask {
         }
         if (error) {
             headers.set(RemotingConstants.HEAD_RESPONSE_ERROR, "true");
+        }
+        if (throwable != null) {
+            headers.set(RemotingConstants.HEAD_RESPONSE_EXCEPTION, throwable.getClass().getName());
         }
         if (data != null) {
             encoder.writeHeaders(ctx, streamId, headers, 0, false, ctx.newPromise());

@@ -230,6 +230,11 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     protected int                                   retries                 = getIntValue(CONSUMER_RETRIES);
 
     /**
+     * 可重试异常列表，使用逗号或分号分隔全限定类名
+     */
+    protected String                                retryExceptions;
+
+    /**
      * 接口下每方法的最大可并行执行请求数，配置-1关闭并发过滤器，等于0表示开启过滤但是不限制
      */
     protected int                                   concurrents             = getIntValue(CONSUMER_CONCURRENTS);
@@ -443,6 +448,26 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
      */
     public ConsumerConfig<T> setRetries(int retries) {
         this.retries = retries;
+        return this;
+    }
+
+    /**
+     * Gets retry exceptions.
+     *
+     * @return the retry exceptions
+     */
+    public String getRetryExceptions() {
+        return retryExceptions;
+    }
+
+    /**
+     * Sets retry exceptions.
+     *
+     * @param retryExceptions the retry exceptions
+     * @return the retry exceptions
+     */
+    public ConsumerConfig<T> setRetryExceptions(String retryExceptions) {
+        this.retryExceptions = retryExceptions;
         return this;
     }
 
@@ -924,6 +949,17 @@ public class ConsumerConfig<T> extends AbstractInterfaceConfig<T, ConsumerConfig
     public int getMethodRetries(String methodName) {
         return (Integer) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_RETRIES,
             getRetries());
+    }
+
+    /**
+     * 得到方法对应的可重试异常配置，优先使用方法级配置
+     *
+     * @param methodName 方法名
+     * @return 可重试异常配置
+     */
+    public String getMethodRetryExceptions(String methodName) {
+        return (String) getMethodConfigValue(methodName, RpcConstants.CONFIG_KEY_RETRY_EXCEPTIONS,
+            getRetryExceptions());
     }
 
     /**

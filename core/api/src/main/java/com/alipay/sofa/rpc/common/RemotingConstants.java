@@ -202,6 +202,14 @@ public class RemotingConstants {
      * @since 5.1.0
      */
     public static final String HEAD_RESPONSE_ERROR        = "sofa_head_response_error";
+
+    /**
+     * Business exception class carried by protocols that cannot serialize the Throwable object.
+     *
+     * @since 5.14.3
+     */
+    public static final String HEAD_RESPONSE_EXCEPTION    = "sofa_head_response_exception";
+
     /**
      * 是否泛化调用
      *

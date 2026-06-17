@@ -53,6 +53,11 @@ public class MethodConfig implements Serializable {
     protected Integer              retries;
 
     /**
+     * 可重试异常列表，使用逗号或分号分隔全限定类名
+     */
+    protected String               retryExceptions;
+
+    /**
      * 调用方式
      */
     protected String               invokeType;
@@ -166,6 +171,25 @@ public class MethodConfig implements Serializable {
      */
     public MethodConfig setRetries(Integer retries) {
         this.retries = retries;
+        return this;
+    }
+
+    /**
+     * Gets retry exceptions.
+     *
+     * @return the retry exceptions
+     */
+    public String getRetryExceptions() {
+        return retryExceptions;
+    }
+
+    /**
+     * Sets retry exceptions.
+     *
+     * @param retryExceptions the retry exceptions
+     */
+    public MethodConfig setRetryExceptions(String retryExceptions) {
+        this.retryExceptions = retryExceptions;
         return this;
     }
 

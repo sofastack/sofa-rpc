@@ -53,4 +53,22 @@ public class ConsumerConfigTest {
         consumerConfig.getConfigValueCache(true);
         Assert.assertEquals(-1, consumerConfig.getMethodTimeout("invoke"));
     }
+
+    @Test
+    public void testMethodRetryExceptions() {
+        ConsumerConfig<Invoker> consumerConfig = new ConsumerConfig<>();
+        consumerConfig.setInterfaceId(Invoker.class.getName());
+        consumerConfig.setRetryExceptions("java.lang.IllegalStateException");
+        consumerConfig.getConfigValueCache(true);
+        Assert.assertEquals("java.lang.IllegalStateException", consumerConfig.getMethodRetryExceptions("invoke"));
+
+        List<MethodConfig> methodConfigs = new ArrayList<>();
+        MethodConfig methodConfig = new MethodConfig();
+        methodConfig.setName("invoke");
+        methodConfig.setRetryExceptions("java.lang.IllegalArgumentException");
+        methodConfigs.add(methodConfig);
+        consumerConfig.setMethods(methodConfigs);
+        consumerConfig.getConfigValueCache(true);
+        Assert.assertEquals("java.lang.IllegalArgumentException", consumerConfig.getMethodRetryExceptions("invoke"));
+    }
 }
