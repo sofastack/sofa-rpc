@@ -306,7 +306,7 @@ public class TripleServerTest {
         RpcRunningState.setDebugMode(false);
         try {
             int originInboundMessageSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE);
-            Assert.assertEquals(4194304, originInboundMessageSize);
+            Assert.assertEquals(16777216, originInboundMessageSize);
 
             ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
             int port = 50052;
@@ -329,12 +329,12 @@ public class TripleServerTest {
             SampleService sampleService = consumerConfig.refer();
             String msg = buildMsg(1);
             try {
-                sampleService.messageSize(msg, 5 * 1024);
+                sampleService.messageSize(msg, 17 * 1024);
                 Assert.fail();
             } catch (Exception e) {
-                Assert.assertTrue(e.getMessage().contains("gRPC message exceeds maximum size 4194304:"));
+                Assert.assertTrue(e.getMessage().contains("gRPC message exceeds maximum size 16777216:"));
             }
-            msg = buildMsg(5 * 1024);
+            msg = buildMsg(17 * 1024);
 
             try {
                 sampleService.messageSize(msg, 1);
@@ -354,8 +354,8 @@ public class TripleServerTest {
         boolean originDebugMode = RpcRunningState.isDebugMode();
         RpcRunningState.setDebugMode(false);
         int originInboundMessageSize = RpcConfigs.getIntValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE);
-        Assert.assertEquals(4194304, originInboundMessageSize);
-        RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE, "8388608");
+        Assert.assertEquals(16777216, originInboundMessageSize);
+        RpcConfigs.putValue(RpcOptions.TRANSPORT_GRPC_MAX_INBOUND_MESSAGE_SIZE, "18874368");
         try {
             ApplicationConfig applicationConfig = new ApplicationConfig().setAppName("triple-server1");
             int port = 50052;
@@ -378,9 +378,9 @@ public class TripleServerTest {
                     .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
                     .setDirectUrl("tri://127.0.0.1:" + port);
             SampleService sampleService2 = consumerConfig.refer();
-            String msg = buildMsg(5 * 1024);
+            String msg = buildMsg(17 * 1024);
             try {
-                sampleService2.messageSize(msg, 5 * 1024);
+                sampleService2.messageSize(msg, 17 * 1024);
             } catch (Exception e) {
                 Assert.fail();
             }
