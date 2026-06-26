@@ -19,7 +19,6 @@ package com.alipay.sofa.rpc.bootstrap.dubbo;
 import org.apache.dubbo.config.ProtocolConfig;
 import com.alipay.sofa.rpc.base.Destroyable;
 import com.alipay.sofa.rpc.config.RegistryConfig;
-import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.context.RpcRuntimeContext;
 import org.apache.dubbo.rpc.model.FrameworkModel;
 
@@ -48,9 +47,9 @@ public class DubboSingleton {
     }
 
     /**
-     * sofa.SeverConfig --> dubbo.ProtocolConfig
+     * server cache key --> dubbo.ProtocolConfig
      */
-    final static ConcurrentMap<ServerConfig, ProtocolConfig>                           SERVER_MAP   = new ConcurrentHashMap<>();
+    final static ConcurrentMap<String, ProtocolConfig>                                 SERVER_MAP   = new ConcurrentHashMap<>();
 
     /**
      * sofa.RegistryConfig --> dubbo.RegistryConfig
