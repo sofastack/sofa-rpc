@@ -16,16 +16,20 @@
  */
 package com.alipay.sofa.rpc.proxy.jdk;
 
+import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.common.utils.ClassUtils;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.core.exception.RpcErrorType;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.invoke.Invoker;
 import com.alipay.sofa.rpc.message.MessageBuilder;
+import com.alipay.sofa.rpc.message.ResponseFuture;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * JDK代理处理器，拦截请求变为invocation进行调用
@@ -69,9 +73,50 @@ public class JDKInvocationHandler implements InvocationHandler {
             return proxy == another ||
                 (proxy.getClass().isInstance(another) && proxyInvoker.equals(JDKProxy.parseInvoker(another)));
         }
+
+        // Check if return type is CompletableFuture
+        boolean isCompletableFutureReturn = CompletableFuture.class.isAssignableFrom(method.getReturnType());
+
         SofaRequest sofaRequest = MessageBuilder.buildSofaRequest(method.getDeclaringClass(),
             method, paramTypes, paramValues);
+
+        // If return type is CompletableFuture, use future invoke type
+        if (isCompletableFutureReturn) {
+            sofaRequest.setInvokeType(RpcConstants.INVOKER_TYPE_FUTURE);
+        }
+
         SofaResponse response = proxyInvoker.invoke(sofaRequest);
+
+        // Handle CompletableFuture return type
+        // IMPORTANT: Get the future immediately after invoke to avoid race condition
+        if (isCompletableFutureReturn) {
+            ResponseFuture<?> responseFuture = RpcInternalContext.getContext().getFuture();
+            if (responseFuture != null) {
+                // Create a CompletableFuture that wraps the ResponseFuture
+                CompletableFuture<Object> completableFuture = new CompletableFuture<>();
+                responseFuture.addListener(new com.alipay.sofa.rpc.core.invoke.SofaResponseCallback() {
+                    @Override
+                    public void onAppResponse(Object appResponse, String methodName,
+                                              com.alipay.sofa.rpc.core.request.RequestBase request) {
+                        completableFuture.complete(appResponse);
+                    }
+
+                    @Override
+                    public void onAppException(Throwable throwable, String methodName,
+                                               com.alipay.sofa.rpc.core.request.RequestBase request) {
+                        completableFuture.completeExceptionally(throwable);
+                    }
+
+                    @Override
+                    public void onSofaException(SofaRpcException sofaException, String methodName,
+                                                com.alipay.sofa.rpc.core.request.RequestBase request) {
+                        completableFuture.completeExceptionally(sofaException);
+                    }
+                });
+                return completableFuture;
+            }
+        }
+
         if (response.isError()) {
             throw new SofaRpcException(RpcErrorType.SERVER_UNDECLARED_ERROR, response.getErrorMsg());
         }

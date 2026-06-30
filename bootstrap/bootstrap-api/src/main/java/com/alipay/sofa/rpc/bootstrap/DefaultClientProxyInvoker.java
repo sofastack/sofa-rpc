@@ -90,8 +90,9 @@ public class DefaultClientProxyInvoker extends ClientProxyInvoker {
         request.setTargetServiceUniqueName(serviceName);
         request.setSerializeType(serializeType == null ? 0 : serializeType);
 
-        if (!consumerConfig.isGeneric()) {
+        if (request.getInvokeType() == null && !consumerConfig.isGeneric()) {
             // 找到调用类型， generic的时候类型在filter里进行判断
+            // Only set invokeType if not already set (e.g., by proxy for CompletableFuture return types)
             request.setInvokeType(consumerConfig.getMethodInvokeType(request.getMethodName()));
         }
 
