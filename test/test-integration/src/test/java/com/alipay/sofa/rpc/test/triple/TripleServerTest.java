@@ -432,6 +432,13 @@ public class TripleServerTest {
                 Assert.assertTrue(e.getCause().getCause().getMessage().contains("Header size exceeded max allowed size (65536)"));
             }
 
+            consumerConfig.unRefer();
+            consumerConfig = new ConsumerConfig<>();
+            consumerConfig.setInterfaceId(SampleService.class.getName())
+                    .setProtocol(RpcConstants.PROTOCOL_TYPE_TRIPLE)
+                    .setDirectUrl("tri://127.0.0.1:" + port);
+            sampleService = consumerConfig.refer();
+
             try {
                 RpcInvokeContext.getContext().addCustomHeader("grpc_custom_header", buildMsg(25));
                 sampleService.messageSize(msg, 1);
