@@ -54,6 +54,8 @@ public class ConsulRegistryTest {
 
     private static final String CONSUL_SERVICE_NAME = "test-service";
 
+    private static final int    STARTUP_TIMEOUT     = 60;
+
     private ConsulProcess       consul;
 
     private RegistryConfig      registryConfig;
@@ -64,6 +66,7 @@ public class ConsulRegistryTest {
     public void setup() {
         consul = ConsulStarterBuilder.consulStarter()
             .withConsulVersion("1.4.0")
+            .withWaitTimeout(STARTUP_TIMEOUT)
             .build()
             .start();
 
@@ -78,9 +81,14 @@ public class ConsulRegistryTest {
 
     @After
     public void tearDown() {
-        registry.destroy();
-        consul.close();
+        if (registry != null) {
+            registry.destroy();
+        }
+        if (consul != null) {
+            consul.close();
+        }
         registry = null;
+        consul = null;
     }
 
     @Test
