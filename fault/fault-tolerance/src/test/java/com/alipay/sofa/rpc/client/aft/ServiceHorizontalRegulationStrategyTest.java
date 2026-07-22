@@ -46,20 +46,11 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
         /**test degrade normal*/
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
         final InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
-        InvocationStat invocationStat = null;
-        for (int i = 0; i < 10; i++) {
-            try {
-                helloService.sayHello("liangen");
-            } catch (Exception e) {
-                LOGGER.info("超时");
-            }
-            invocationStat = InvocationStatFactory.ALL_STATS.get(statDimension);
-            if (invocationStat != null) {
-                break;
-            }
-            Thread.sleep(100);
-        }
-        Assert.assertNotNull(invocationStat);
+        final int maxRetryAttempts = 10;
+        final int retryDelayMillis = 100;
+        InvocationStat invocationStat = waitForInvocationStat(statDimension, maxRetryAttempts, retryDelayMillis);
+        Assert.assertNotNull("InvocationStat should be available after " + maxRetryAttempts + " retry attempts",
+            invocationStat);
 
         // 最多等10000ms 到了下一个周期
         Assert.assertNull(delayGet(new Callable<InvocationStat>() {
@@ -68,5 +59,24 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
                 return InvocationStatFactory.ALL_STATS.get(statDimension);
             }
         }, null, 100, 100));
+    }
+
+    private InvocationStat waitForInvocationStat(InvocationStatDimension statDimension, int maxRetryAttempts,
+                                                 int retryDelayMillis) throws InterruptedException {
+        for (int i = 0; i < maxRetryAttempts; i++) {
+            try {
+                helloService.sayHello("liangen");
+            } catch (Exception e) {
+                LOGGER.info("超时");
+            }
+            InvocationStat invocationStat = InvocationStatFactory.ALL_STATS.get(statDimension);
+            if (invocationStat != null) {
+                return invocationStat;
+            }
+            if (i < maxRetryAttempts - 1) {
+                Thread.sleep(retryDelayMillis);
+            }
+        }
+        return null;
     }
 }
