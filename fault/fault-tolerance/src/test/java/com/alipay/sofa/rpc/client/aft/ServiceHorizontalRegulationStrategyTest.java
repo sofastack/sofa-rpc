@@ -44,17 +44,21 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
         FaultToleranceConfigManager.putAppConfig(APP_NAME1, config);
 
         /**test degrade normal*/
-        for (int i = 0; i < 1; i++) {
+        final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
+        final InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
+        InvocationStat invocationStat = null;
+        for (int i = 0; i < 10; i++) {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
                 LOGGER.info("超时");
             }
+            invocationStat = InvocationStatFactory.ALL_STATS.get(statDimension);
+            if (invocationStat != null) {
+                break;
+            }
+            Thread.sleep(100);
         }
-        Thread.sleep(100);
-        final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
-        final InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
-        InvocationStat invocationStat = InvocationStatFactory.ALL_STATS.get(statDimension);
         Assert.assertNotNull(invocationStat);
 
         // 最多等10000ms 到了下一个周期
