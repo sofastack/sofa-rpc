@@ -65,9 +65,9 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
         }, null, 100, 100));
     }
 
-    private InvocationStat waitForInvocationStat(InvocationStatDimension statDimension, int maxRetryAttempts,
+    private InvocationStat waitForInvocationStat(InvocationStatDimension statDimension, int maxAttempts,
                                                  int retryDelayMillis) throws InterruptedException {
-        for (int i = 0; i < maxRetryAttempts; i++) {
+        for (int i = 0; i < maxAttempts; i++) {
             try {
                 helloService.sayHello("liangen");
             } catch (Exception e) {
@@ -77,22 +77,22 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
             if (invocationStat != null) {
                 return invocationStat;
             }
-            if (i < maxRetryAttempts - 1) {
+            if (i < maxAttempts - 1) {
                 Thread.sleep(retryDelayMillis);
             }
         }
         return null;
     }
 
-    private boolean waitForAvailableTransport(ProviderInfo providerInfo, int maxRetryAttempts, int retryDelayMillis)
+    private boolean waitForAvailableTransport(ProviderInfo providerInfo, int maxAttempts, int retryDelayMillis)
         throws InterruptedException {
-        for (int i = 0; i < maxRetryAttempts; i++) {
+        for (int i = 0; i < maxAttempts; i++) {
             ClientTransport clientTransport = consumerConfig.getConsumerBootstrap().getCluster().getConnectionHolder()
                 .getAvailableClientTransport(providerInfo);
             if (clientTransport != null && clientTransport.isAvailable()) {
                 return true;
             }
-            if (i < maxRetryAttempts - 1) {
+            if (i < maxAttempts - 1) {
                 Thread.sleep(retryDelayMillis);
             }
         }
