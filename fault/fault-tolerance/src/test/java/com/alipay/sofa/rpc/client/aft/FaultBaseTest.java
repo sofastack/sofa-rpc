@@ -91,6 +91,7 @@ public abstract class FaultBaseTest {
         consumerConfig = new ConsumerConfig<FaultHelloService>()
             .setInterfaceId(FaultHelloService.class.getName())
             .setTimeout(500)
+            .setReconnectPeriod(2000)
             .setDirectUrl("127.0.0.1:12299")
             .setRegister(false)
             .setProtocol(RpcConstants.PROTOCOL_TYPE_BOLT)

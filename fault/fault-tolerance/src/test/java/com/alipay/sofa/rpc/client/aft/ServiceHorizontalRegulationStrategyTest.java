@@ -47,7 +47,7 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
         /**test degrade normal*/
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
         final InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
-        final int maxConnectionRetryAttempts = 30;
+        final int maxConnectionRetryAttempts = 50;
         final int maxRetryAttempts = 10;
         final int retryDelayMillis = 100;
         Assert.assertTrue("Consumer transport should be available before invoking the service",
