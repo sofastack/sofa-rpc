@@ -17,6 +17,7 @@
 package com.alipay.sofa.rpc.client.aft;
 
 import com.alipay.sofa.rpc.client.ProviderInfo;
+import com.alipay.sofa.rpc.transport.ClientTransport;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -46,8 +47,11 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
         /**test degrade normal*/
         final ProviderInfo providerInfo = getProviderInfoByHost(consumerConfig, "127.0.0.1");
         final InvocationStatDimension statDimension = new InvocationStatDimension(providerInfo, consumerConfig);
+        final int maxConnectionRetryAttempts = 30;
         final int maxRetryAttempts = 10;
         final int retryDelayMillis = 100;
+        Assert.assertTrue("Consumer transport should be available before invoking the service",
+            waitForAvailableTransport(providerInfo, maxConnectionRetryAttempts, retryDelayMillis));
         InvocationStat invocationStat = waitForInvocationStat(statDimension, maxRetryAttempts, retryDelayMillis);
         Assert.assertNotNull("InvocationStat should be available after " + maxRetryAttempts + " retry attempts",
             invocationStat);
@@ -78,5 +82,20 @@ public class ServiceHorizontalRegulationStrategyTest extends FaultBaseServiceTes
             }
         }
         return null;
+    }
+
+    private boolean waitForAvailableTransport(ProviderInfo providerInfo, int maxRetryAttempts, int retryDelayMillis)
+        throws InterruptedException {
+        for (int i = 0; i < maxRetryAttempts; i++) {
+            ClientTransport clientTransport = consumerConfig.getConsumerBootstrap().getCluster().getConnectionHolder()
+                .getAvailableClientTransport(providerInfo);
+            if (clientTransport != null && clientTransport.isAvailable()) {
+                return true;
+            }
+            if (i < maxRetryAttempts - 1) {
+                Thread.sleep(retryDelayMillis);
+            }
+        }
+        return false;
     }
 }
