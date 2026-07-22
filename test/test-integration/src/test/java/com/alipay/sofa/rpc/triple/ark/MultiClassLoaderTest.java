@@ -129,6 +129,10 @@ public class MultiClassLoaderTest {
         String result2 = helloService2.sayHello("impl2", 2);
         Assert.isTrue(result2.contains("impl2"), "anotherHelloService2 run fail, result is " + result2);
 
+        Thread.currentThread().setContextClassLoader(clientClassloader);
+        consumerConfig1.unRefer();
+        consumerConfig2.unRefer();
+
         Thread.currentThread().setContextClassLoader(cl1);
         providerConfig1.unExport();
         Thread.currentThread().setContextClassLoader(cl2);
@@ -166,6 +170,9 @@ public class MultiClassLoaderTest {
 
         String result3 = helloService3.sayHello("impl3", 2);
         Assert.isTrue(result3.contains("impl3"), "anotherHelloService3 run fail, result is " + result3);
+
+        Thread.currentThread().setContextClassLoader(clientClassloader2);
+        consumerConfig3.unRefer();
 
         Thread.currentThread().setContextClassLoader(cl3);
         providerConfig3.unExport();
