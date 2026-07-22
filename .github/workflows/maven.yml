@@ -23,10 +23,7 @@ jobs:
         java-version: '8'
         distribution: 'temurin'
         cache: maven
-    - name: Build with Maven
-      run: ./mvnw clean install -Pci-install -B -U -e && bash ./tools/check_format.sh
-    - name: Test with Maven
-      run: ./mvnw package -Pci-test
+    - name: Build and test with Maven
+      run: ./mvnw clean verify -Pci-test -B -e && bash ./tools/check_format.sh
     - name: Codecov
       uses: codecov/codecov-action@v1
-
