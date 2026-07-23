@@ -24,6 +24,6 @@ jobs:
         distribution: 'temurin'
         cache: maven
     - name: Build and test with Maven
-      run: ./mvnw clean verify -Pci-test -B -e && bash ./tools/check_format.sh
+      run: ./mvnw -T 1C clean verify -Pci-test -B -e && bash ./tools/check_format.sh
     - name: Codecov
       uses: codecov/codecov-action@v1
