@@ -44,6 +44,7 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.profile.Profiles;
 import com.alipay.sofa.rpc.transport.AbstractByteBuf;
 import com.alipay.sofa.rpc.transport.ByteArrayWrapperByteBuf;
 
@@ -231,11 +232,8 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     protected void recordSerializeRequest(RequestCommand requestCommand, InvokeContext invokeContext,
                                           long serializeStartTime) {
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO,
-            System.nanoTime() - serializeStartTime);
-        if (!RpcInternalContext.isAttachmentEnable()) {
-            return;
-        }
+        long serializationTime = System.nanoTime() - serializeStartTime;
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO, serializationTime);
         RpcInternalContext context = null;
         if (invokeContext != null) {
             // 客户端异步调用的情况下，上下文会放在InvokeContext中传递
@@ -243,6 +241,10 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
         if (context == null) {
             context = RpcInternalContext.getContext();
+        }
+        Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_REQ_SERIALIZE_TIME_NANO, serializationTime);
+        if (!RpcInternalContext.isAttachmentEnable()) {
+            return;
         }
         int cost = context.getStopWatch().tick().read();
         int requestSize = RpcProtocol.getRequestHeaderLength()
@@ -363,12 +365,13 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      * @param requestCommand 请求对象
      */
     private void recordDeserializeRequest(RequestCommand requestCommand, long deserializeStartTime) {
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, System.nanoTime() -
-            deserializeStartTime);
+        long deserializationTime = System.nanoTime() - deserializeStartTime;
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, deserializationTime);
+        RpcInternalContext context = RpcInternalContext.getContext();
+        Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_REQ_DESERIALIZE_TIME_NANO, deserializationTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
-        RpcInternalContext context = RpcInternalContext.getContext();
         int cost = context.getStopWatch().tick().read();
         int requestSize = RpcProtocol.getRequestHeaderLength()
             + requestCommand.getClazzLength()
@@ -411,12 +414,13 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      * @param responseCommand 响应体
      */
     private void recordSerializeResponse(RpcResponseCommand responseCommand, long serializeStartTime) {
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, System.nanoTime() -
-            serializeStartTime);
+        long serializationTime = System.nanoTime() - serializeStartTime;
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, serializationTime);
+        RpcInternalContext context = RpcInternalContext.getContext();
+        Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_RESP_SERIALIZE_TIME_NANO, serializationTime);
         if (!RpcInternalContext.isAttachmentEnable()) {
             return;
         }
-        RpcInternalContext context = RpcInternalContext.getContext();
         int cost = context.getStopWatch().tick().read();
         int respSize = RpcProtocol.getResponseHeaderLength()
             + responseCommand.getClazzLength()
@@ -497,11 +501,9 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
      */
     private void recordDeserializeResponse(RpcResponseCommand responseCommand, InvokeContext invokeContext,
                                            long deserializeStartTime) {
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO, System.nanoTime() -
-            deserializeStartTime);
-        if (!RpcInternalContext.isAttachmentEnable()) {
-            return;
-        }
+        long deserializationTime = System.nanoTime() - deserializeStartTime;
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO,
+            deserializationTime);
         RpcInternalContext context = null;
         if (invokeContext != null) {
             // 客户端异步调用的情况下，上下文会放在InvokeContext中传递
@@ -509,6 +511,10 @@ public class SofaRpcSerialization extends DefaultCustomSerializer {
         }
         if (context == null) {
             context = RpcInternalContext.getContext();
+        }
+        Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_RESP_DESERIALIZE_TIME_NANO, deserializationTime);
+        if (!RpcInternalContext.isAttachmentEnable()) {
+            return;
         }
         int cost = context.getStopWatch().tick().read();
         int respSize = RpcProtocol.getResponseHeaderLength()

@@ -33,6 +33,7 @@
         <module>codec</module>
         <module>remoting</module>
         <module>tracer</module>
+        <module>profile</module>
         <module>metrics</module>
         <module>config</module>
         <module>fault</module>
@@ -328,6 +329,10 @@
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <configuration>
                     <skip>${module.jacoco.skip}</skip>
+                    <!-- JDK 8 JFR会重转换Event子类，排除纯事件载体以避免JaCoCo重复插桩。 -->
+                    <excludes>
+                        <exclude>com/alipay/sofa/rpc/profile/jfr/event/*</exclude>
+                    </excludes>
                 </configuration>
                 <executions>
                     <execution>

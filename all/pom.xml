@@ -290,6 +290,11 @@
             <artifactId>sofa-rpc-tracer-opentracing-triple</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-profile-jfr</artifactId>
+            <version>${project.version}</version>
+        </dependency>
        <dependency>
             <groupId>com.alipay.sofa</groupId>
             <artifactId>sofa-rpc-metrics-micrometer</artifactId>
@@ -574,6 +579,7 @@
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-resteasy</include>
                                     <include>com.alipay.sofa:sofa-rpc-tracer-opentracing-triple</include>
+                                    <include>com.alipay.sofa:sofa-rpc-profile-jfr</include>
                                     <include>com.alipay.sofa:sofa-rpc-config-apollo</include>
                                     <include>com.alipay.sofa:sofa-rpc-config-zk</include>
                                     <include>com.alipay.sofa:sofa-rpc-config-nacos</include>

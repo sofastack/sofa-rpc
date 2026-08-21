@@ -58,6 +58,7 @@ import com.alipay.sofa.rpc.message.ResponseFuture;
 import com.alipay.sofa.rpc.message.bolt.BoltFutureInvokeCallback;
 import com.alipay.sofa.rpc.message.bolt.BoltInvokerCallback;
 import com.alipay.sofa.rpc.message.bolt.BoltResponseFuture;
+import com.alipay.sofa.rpc.profile.Profiles;
 import com.alipay.sofa.rpc.transport.AbstractChannel;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 import com.alipay.sofa.rpc.transport.ClientTransportConfig;
@@ -460,8 +461,10 @@ public class BoltClientTransport extends ClientTransport {
         Long connStartTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_START_IN_NANO);
         Long connEndTime = invokeContext.get(InvokeContext.CLIENT_CONN_CREATE_END_IN_NANO);
         if (connStartTime != null && connEndTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO,
-                connEndTime - connStartTime);
+            long connectionTime = connEndTime - connStartTime;
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, connectionTime);
+            RpcInternalContext context = invokeContext.get(RemotingConstants.INVOKE_CTX_RPC_CTX);
+            Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, connectionTime);
         }
     }
 

@@ -54,6 +54,7 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.ResponseFuture;
+import com.alipay.sofa.rpc.profile.Profiles;
 import com.alipay.sofa.rpc.transport.ClientTransport;
 
 import java.lang.reflect.Method;
@@ -406,7 +407,9 @@ public abstract class AbstractCluster extends Cluster {
         List<ProviderInfo> providerInfos = routerChain.route(message, null);
         RpcInternalContext context = RpcInternalContext.peekContext();
         RpcInvokeContext rpcInvokeContext = RpcInvokeContext.getContext();
-        rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, System.nanoTime()-routerStartTime);
+        long routerTime = System.nanoTime() - routerStartTime;
+        rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, routerTime);
+        Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_CLIENT_ROUTER_TIME_NANO, routerTime);
         //保存一下原始地址,为了打印
         List<ProviderInfo> originalProviderInfos;
 
@@ -459,7 +462,10 @@ public abstract class AbstractCluster extends Cluster {
                 // 再进行负载均衡筛选
                 long loadBalanceStartTime = System.nanoTime();
                 providerInfo = loadBalancer.select(message, providerInfos);
-                rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, System.nanoTime()-loadBalanceStartTime);
+                long loadBalancerTime = System.nanoTime() - loadBalanceStartTime;
+                rpcInvokeContext.put(RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO, loadBalancerTime);
+                Profiles.recordPhase(context, RpcConstants.INTERNAL_KEY_CLIENT_BALANCER_TIME_NANO,
+                    loadBalancerTime);
 
                 ClientTransport transport = selectByProvider(message, providerInfo);
                 if (transport != null) {
@@ -578,8 +584,9 @@ public abstract class AbstractCluster extends Cluster {
         Long invokerEndTime = (Long) RpcInvokeContext.getContext().get(
             RpcConstants.INTERNAL_KEY_CONSUMER_INVOKE_END_TIME_NANO);
         if (filterStartTime != null && filterEndTime != null && invokerStartTime != null && invokerEndTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO,
-                filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime));
+            long filterTime = filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime);
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO, filterTime);
+            Profiles.recordPhase(RpcConstants.INTERNAL_KEY_CLIENT_FILTER_TIME_NANO, filterTime);
         }
     }
 
@@ -587,7 +594,9 @@ public abstract class AbstractCluster extends Cluster {
     public SofaResponse sendMsg(ProviderInfo providerInfo, SofaRequest request) throws SofaRpcException {
         long start = System.nanoTime();
         ClientTransport clientTransport = connectionHolder.getAvailableClientTransport(providerInfo);
-        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, System.nanoTime() - start);
+        long connectionTime = System.nanoTime() - start;
+        RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, connectionTime);
+        Profiles.recordPhase(RpcConstants.INTERNAL_KEY_CONN_CREATE_TIME_NANO, connectionTime);
         if (clientTransport != null && clientTransport.isAvailable()) {
             return doSendMsg(providerInfo, clientTransport, request);
         } else {

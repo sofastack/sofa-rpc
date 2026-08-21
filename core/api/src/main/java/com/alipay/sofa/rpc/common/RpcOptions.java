@@ -123,6 +123,10 @@ public class RpcOptions {
      */
     public static final String DEFAULT_TRACER                           = "default.tracer";
     /**
+     * 默认Profile实现
+     */
+    public static final String DEFAULT_PROFILE                          = "default.profile";
+    /**
      * 默认filter实现
      */
     public static final String DEFAULT_FILTERS                          = "default.filters";

@@ -18,6 +18,7 @@ package com.alipay.sofa.rpc.server;
 
 import com.alipay.sofa.rpc.common.RpcConstants;
 import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.context.RpcInternalContext;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.exception.SofaRpcException;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
@@ -25,6 +26,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.filter.FilterChain;
 import com.alipay.sofa.rpc.filter.ProviderInvoker;
 import com.alipay.sofa.rpc.invoke.Invoker;
+import com.alipay.sofa.rpc.profile.Profiles;
 
 /**
  * 服务端调用链入口
@@ -82,8 +84,10 @@ public class ProviderProxyInvoker implements Invoker {
         Long invokerEndTime = (Long) RpcInvokeContext.getContext().get(
             RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO);
         if (filterStartTime != null && filterEndTime != null && invokerStartTime != null && invokerEndTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
-                filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime));
+            long filterTime = filterEndTime - filterStartTime - (invokerEndTime - invokerStartTime);
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO, filterTime);
+            Profiles.recordPhase(RpcInternalContext.peekContext(), RpcConstants.INTERNAL_KEY_SERVER_FILTER_TIME_NANO,
+                filterTime);
         }
     }
 
