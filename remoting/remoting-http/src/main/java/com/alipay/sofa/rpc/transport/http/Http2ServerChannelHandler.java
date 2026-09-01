@@ -37,9 +37,11 @@ import io.netty.handler.codec.http.HttpScheme;
 import io.netty.handler.codec.http.HttpServerUpgradeHandler;
 import io.netty.handler.codec.http2.DefaultHttp2Headers;
 import io.netty.handler.codec.http2.Http2Connection;
+import io.netty.handler.codec.http2.Http2ConnectionAdapter;
 import io.netty.handler.codec.http2.Http2ConnectionDecoder;
 import io.netty.handler.codec.http2.Http2ConnectionEncoder;
 import io.netty.handler.codec.http2.Http2ConnectionHandler;
+import io.netty.handler.codec.http2.Http2Error;
 import io.netty.handler.codec.http2.Http2Flags;
 import io.netty.handler.codec.http2.Http2FrameListener;
 import io.netty.handler.codec.http2.Http2Headers;
@@ -67,13 +69,35 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
 
     private final HttpServerHandler           serverHandler;
 
+    /**
+     * HTTP/2 请求体的最大累积长度（字节），与 HTTP/1.1 的 {@code HttpObjectAggregator} 一致，
+     * 取自 {@code ServerTransportConfig.getPayload()}。超出则重置对应 stream，避免恶意客户端
+     * 持续发送 DATA 帧但不发送 END_STREAM 导致堆耗尽。
+     */
+    private final int                         maxContentLength;
+
     private boolean                           isUpgradeH2cMode = false;
 
-    Http2ServerChannelHandler(HttpServerHandler serverHandler, Http2ConnectionDecoder decoder,
-                              Http2ConnectionEncoder encoder,
+    Http2ServerChannelHandler(HttpServerHandler serverHandler, int maxContentLength,
+                              Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder,
                               Http2Settings initialSettings) {
         super(decoder, encoder, initialSettings);
         this.serverHandler = serverHandler;
+        this.maxContentLength = maxContentLength;
+        // stream 关闭时（连接断开 / RST_STREAM / 正常结束）清理尚未消费的累积 ByteBuf，避免内存泄漏
+        connection().addListener(new Http2ConnectionAdapter() {
+            @Override
+            public void onStreamClosed(Http2Stream stream) {
+                ByteBuf buffer = stream.getProperty(messageKey);
+                if (buffer != null) {
+                    stream.removeProperty(messageKey);
+                    if (buffer.refCnt() > 0) {
+                        buffer.release();
+                    }
+                }
+                stream.removeProperty(headerKey);
+            }
+        });
     }
 
     private static Http2Headers http1HeadersToHttp2Headers(FullHttpRequest request) {
@@ -118,17 +142,45 @@ public final class Http2ServerChannelHandler extends Http2ConnectionHandler impl
 
         Http2Stream http2Stream = connection().stream(streamId);
         ByteBuf msg = http2Stream.getProperty(messageKey);
+        final int dataReadableBytes = data.readableBytes();
+
+        // 写入前校验累计长度，防止恶意客户端不发 END_STREAM 持续累积数据导致堆耗尽
+        if (dataReadableBytes > 0) {
+            int accumulated = msg == null ? 0 : msg.readableBytes();
+            if ((long) accumulated + dataReadableBytes > maxContentLength) {
+                if (msg != null) {
+                    msg.release();
+                    http2Stream.removeProperty(messageKey);
+                }
+                if (LOGGER.isWarnEnabled()) {
+                    LOGGER.warn("HTTP/2 request body exceeded max payload {} bytes, reset stream {} from {}",
+                        maxContentLength, streamId, NetUtils.channelToString(ctx.channel().remoteAddress(),
+                            ctx.channel().localAddress()));
+                }
+                // 重置该 stream，不进入 handleRequest；返回已消费字节数以推进流控窗口
+                encoder().writeRstStream(ctx, streamId, Http2Error.PROTOCOL_ERROR.code(), ctx.newPromise());
+                return processed;
+            }
+        }
+
         if (msg == null) {
             msg = ctx.alloc().buffer();
             http2Stream.setProperty(messageKey, msg);
         }
-        final int dataReadableBytes = data.readableBytes();
         msg.writeBytes(data, data.readerIndex(), dataReadableBytes);
 
         if (endOfStream) {
             // read cached http2 header from stream
             Http2Headers headers = http2Stream.getProperty(headerKey);
-            handleRequest(ctx, streamId, headers, msg);
+            try {
+                handleRequest(ctx, streamId, headers, msg);
+            } finally {
+                // 请求已同步处理完毕（反序列化+调用+响应已写出），释放累积缓冲并清理缓存
+                http2Stream.removeProperty(messageKey);
+                if (msg.refCnt() > 0) {
+                    msg.release();
+                }
+            }
         }
         return processed;
     }

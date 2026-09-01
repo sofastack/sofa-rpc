@@ -16,6 +16,8 @@
  */
 package com.alipay.sofa.rpc.transport.http;
 
+import com.alipay.sofa.rpc.common.RpcConfigs;
+import com.alipay.sofa.rpc.common.RpcOptions;
 import com.alipay.sofa.rpc.server.http.HttpServerHandler;
 import io.netty.handler.codec.http2.AbstractHttp2ConnectionHandlerBuilder;
 import io.netty.handler.codec.http2.Http2ConnectionDecoder;
@@ -36,9 +38,23 @@ public final class Http2ChannelHandlerBuilder
 
     private final HttpServerHandler       serverHandler;
 
-    public Http2ChannelHandlerBuilder(HttpServerHandler serverHandler) {
+    /**
+     * HTTP/2 请求体的最大累计长度（字节），透传给 {@link Http2ServerChannelHandler} 做请求体大小限制。
+     */
+    private final int                     maxContentLength;
+
+    public Http2ChannelHandlerBuilder(HttpServerHandler serverHandler, int maxContentLength) {
         frameLogger(LOGGER);
         this.serverHandler = serverHandler;
+        this.maxContentLength = maxContentLength;
+    }
+
+    /**
+     * 兼容旧版本的单参数构造方法：使用默认 payload 上限（{@code transport.payload.max}）。
+     * 保留此重载以维持对外 API 的二进制/源码兼容性。
+     */
+    public Http2ChannelHandlerBuilder(HttpServerHandler serverHandler) {
+        this(serverHandler, RpcConfigs.getIntValue(RpcOptions.TRANSPORT_PAYLOAD_MAX));
     }
 
     @Override
@@ -49,8 +65,8 @@ public final class Http2ChannelHandlerBuilder
     @Override
     protected Http2ServerChannelHandler build(Http2ConnectionDecoder decoder, Http2ConnectionEncoder encoder,
                                               Http2Settings initialSettings) {
-        Http2ServerChannelHandler handler = new Http2ServerChannelHandler(serverHandler, decoder, encoder,
-            initialSettings);
+        Http2ServerChannelHandler handler = new Http2ServerChannelHandler(serverHandler, maxContentLength, decoder,
+            encoder, initialSettings);
         frameListener(handler);
         return handler;
     }

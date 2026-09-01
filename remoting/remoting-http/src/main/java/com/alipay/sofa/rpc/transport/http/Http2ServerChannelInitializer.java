@@ -93,7 +93,7 @@ public class Http2ServerChannelInitializer extends ChannelInitializer<SocketChan
             protected void configurePipeline(ChannelHandlerContext ctx, String protocol) throws Exception {
                 if (ApplicationProtocolNames.HTTP_2.equals(protocol)) {
                     ctx.pipeline().addLast(bizGroup, "Http2ChannelHandler",
-                        new Http2ChannelHandlerBuilder(serverHandler).build());
+                        new Http2ChannelHandlerBuilder(serverHandler, maxHttpContentLength).build());
                     return;
                 }
 
@@ -121,7 +121,8 @@ public class Http2ServerChannelInitializer extends ChannelInitializer<SocketChan
                 @Override
                 public HttpServerUpgradeHandler.UpgradeCodec newUpgradeCodec(CharSequence protocol) {
                     if (AsciiString.contentEquals(Http2CodecUtil.HTTP_UPGRADE_PROTOCOL_NAME, protocol)) {
-                        return new Http2ServerUpgradeCodec(new Http2ChannelHandlerBuilder(serverHandler).build());
+                        return new Http2ServerUpgradeCodec(
+                            new Http2ChannelHandlerBuilder(serverHandler, maxHttpContentLength).build());
                     } else {
                         return null;
                     }
@@ -129,7 +130,7 @@ public class Http2ServerChannelInitializer extends ChannelInitializer<SocketChan
             });
         final Http2ServerUpgradeHandler cleartextHttp2ServerUpgradeHandler =
                 new Http2ServerUpgradeHandler(bizGroup, sourceCodec, upgradeHandler,
-                    new Http2ChannelHandlerBuilder(serverHandler).build());
+                    new Http2ChannelHandlerBuilder(serverHandler, maxHttpContentLength).build());
 
         // 先通过 HTTP Upgrade 协商版本
         p.addLast("Http2ServerUpgradeHandler", cleartextHttp2ServerUpgradeHandler);
