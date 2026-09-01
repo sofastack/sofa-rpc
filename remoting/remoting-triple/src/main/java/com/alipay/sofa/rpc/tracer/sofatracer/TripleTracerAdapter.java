@@ -39,6 +39,7 @@ import com.alipay.sofa.rpc.event.ServerReceiveEvent;
 import com.alipay.sofa.rpc.event.ServerSendEvent;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.profile.ProfileConstants;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
 import com.alipay.sofa.rpc.tracer.sofatracer.log.tags.RpcSpanTags;
@@ -64,6 +65,7 @@ import static com.alipay.sofa.rpc.server.triple.TripleHeadKeys.HEAD_KEY_UNIT_INF
  *
  * @author <a href="mailto:lw111072@antfin.com">LiWei.Liangen</a>
  * @author <a href="mailto:chpengzh@foxmail.com">Chen.Pengzhi</a>
+ * @author <a href="mailto:13622993145@163.com">weilhaung</a>
  */
 public class TripleTracerAdapter {
 
@@ -272,6 +274,11 @@ public class TripleTracerAdapter {
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_INVOKE_TYPE)) {
                 sofaRequest.addRequestProp(RemotingConstants.HEAD_INVOKE_TYPE,
                     requestHeaders.get(TripleHeadKeys.HEAD_KEY_INVOKE_TYPE));
+            }
+
+            Metadata.Key<String> profileIdKey = TripleHeadKeys.getKey(ProfileConstants.PROFILE_ID_KEY);
+            if (requestHeaders.containsKey(profileIdKey)) {
+                sofaRequest.addRequestProp(ProfileConstants.PROFILE_ID_KEY, requestHeaders.get(profileIdKey));
             }
 
             if (requestHeaders.containsKey(TripleHeadKeys.HEAD_KEY_BIZ_BAGGAGE_TYPE)) {

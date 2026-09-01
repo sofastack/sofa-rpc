@@ -30,6 +30,7 @@ import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
+import com.alipay.sofa.rpc.profile.Profiles;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -138,8 +139,9 @@ public class ProviderInvoker<T> extends FilterInvoker {
                 RpcInternalContext.getContext().setAttachment(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE,
                     endTime - startTime);
             }
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO,
-                System.nanoTime() - bizStartTime);
+            long businessTime = System.nanoTime() - bizStartTime;
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO, businessTime);
+            Profiles.recordPhase(RpcConstants.INTERNAL_KEY_IMPL_ELAPSE_NANO, businessTime);
 
             RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROVIDER_INVOKE_END_TIME_NANO,
                 System.nanoTime());

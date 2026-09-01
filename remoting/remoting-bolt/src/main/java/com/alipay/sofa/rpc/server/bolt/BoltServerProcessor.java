@@ -48,6 +48,7 @@ import com.alipay.sofa.rpc.log.LogCodes;
 import com.alipay.sofa.rpc.log.Logger;
 import com.alipay.sofa.rpc.log.LoggerFactory;
 import com.alipay.sofa.rpc.message.MessageBuilder;
+import com.alipay.sofa.rpc.profile.Profiles;
 import com.alipay.sofa.rpc.server.ProviderProxyInvoker;
 
 import java.lang.reflect.Method;
@@ -59,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Bolt server processor of bolt server.
  *
  * @author <a href="mailto:zhanggeng.zg@antfin.com">GengZhang</a>
+ * @author <a href="mailto:13622993145@163.com">weilhaung</a>
  */
 public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
@@ -115,6 +117,7 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
 
             context.setRemoteAddress(bizCtx.getRemoteHost(), bizCtx.getRemotePort()); // 远程地址
             context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_CONTEXT, asyncCtx); // 远程返回的通道
+            context.setAttachment(RpcConstants.HIDDEN_KEY_ASYNC_REQUEST, request); // 异步回包关联原始请求
 
             InvokeContext boltInvokeCtx = bizCtx.getInvokeContext();
             if (RpcInternalContext.isAttachmentEnable()) {
@@ -248,16 +251,18 @@ public class BoltServerProcessor extends AsyncUserProcessor<SofaRequest> {
         Long enterQueueTime = invokeContext.get(InvokeContext.BOLT_PROCESS_BEFORE_DISPATCH_IN_NANO);
         Long processStartTime = invokeContext.get(InvokeContext.BOLT_PROCESS_START_PROCESS_IN_NANO);
         if (enterQueueTime != null && processStartTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO,
-                processStartTime - enterQueueTime);
+            long waitTime = processStartTime - enterQueueTime;
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO, waitTime);
+            Profiles.recordPhase(RpcConstants.INTERNAL_KEY_PROCESS_WAIT_TIME_NANO, waitTime);
         }
 
         // R11：Server net wait
         Long headArriveTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_HEADER_IN_NANO);
         Long bodyReceivedTime = invokeContext.get(InvokeContext.BOLT_PROCESS_ARRIVE_BODY_IN_NANO);
         if (headArriveTime != null && bodyReceivedTime != null) {
-            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_NET_WAIT_NANO,
-                bodyReceivedTime - headArriveTime);
+            long networkWaitTime = bodyReceivedTime - headArriveTime;
+            RpcInvokeContext.getContext().put(RpcConstants.INTERNAL_KEY_SERVER_NET_WAIT_NANO, networkWaitTime);
+            Profiles.recordPhase(RpcConstants.INTERNAL_KEY_SERVER_NET_WAIT_NANO, networkWaitTime);
         }
 
     }

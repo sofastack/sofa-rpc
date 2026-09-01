@@ -192,6 +192,11 @@
             <artifactId>sofa-rpc-tracer-opentracing-triple</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.alipay.sofa</groupId>
+            <artifactId>sofa-rpc-profile-jfr</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.alipay.sofa</groupId>

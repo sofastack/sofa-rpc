@@ -20,6 +20,7 @@ import com.alipay.sofa.rpc.common.RemotingConstants;
 import com.alipay.sofa.rpc.config.ConsumerConfig;
 import com.alipay.sofa.rpc.context.RpcInvokeContext;
 import com.alipay.sofa.rpc.core.request.SofaRequest;
+import com.alipay.sofa.rpc.profile.ProfileConstants;
 import com.alipay.sofa.rpc.server.triple.TripleHeadKeys;
 import io.grpc.Attributes;
 import io.grpc.Metadata;
@@ -34,6 +35,7 @@ import org.mockito.Mockito;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_TARGET_SERVICE;
 
@@ -43,11 +45,14 @@ import static com.alipay.sofa.rpc.common.RemotingConstants.HEAD_TARGET_SERVICE;
  */
 public class TripleTracerAdapterTest {
 
+    private static final String PROFILE_ID = UUID.randomUUID().toString();
+
     @Test
     public void testBeforeSend() {
         SofaRequest sofaRequest = new SofaRequest();
         sofaRequest.setTargetServiceUniqueName("targetService1");
         sofaRequest.addRequestProp("triple.header.key", "triple.header.value");
+        sofaRequest.addRequestProp(ProfileConstants.PROFILE_ID_KEY, PROFILE_ID);
         Map map = new HashMap<String, String>();
         map.put("key1", "value1");
         map.put("key2", "value2");
@@ -58,6 +63,7 @@ public class TripleTracerAdapterTest {
         TripleTracerAdapter.beforeSend(sofaRequest, consumerConfig, metadata, null);
         Assert.assertEquals("targetService2", metadata.get(TripleHeadKeys.getKey(HEAD_TARGET_SERVICE)));
         Assert.assertEquals("triple.header.value", metadata.get(TripleHeadKeys.getKey("triple.header.key")));
+        Assert.assertEquals(PROFILE_ID, metadata.get(TripleHeadKeys.getKey(ProfileConstants.PROFILE_ID_KEY)));
         Assert.assertEquals("value1", metadata.get(TripleHeadKeys.getKey("triple.header.object.key1")));
         Assert.assertEquals("value2", metadata.get(TripleHeadKeys.getKey("triple.header.object.key2")));
     }
@@ -78,6 +84,7 @@ public class TripleTracerAdapterTest {
             requestHeaders.put(TripleHeadKeys.getKey(baggagePrefix + "key1"), "value1");
             requestHeaders.put(TripleHeadKeys.getKey(baggagePrefix + "key2"), "value2");
             requestHeaders.put(TripleHeadKeys.HEAD_KEY_TARGET_SERVICE, "com.test.TestService");
+            requestHeaders.put(TripleHeadKeys.getKey(ProfileConstants.PROFILE_ID_KEY), PROFILE_ID);
 
             // Mock ServerCall
             ServerCall<Object, Object> serverCall = Mockito.mock(ServerCall.class);
@@ -105,6 +112,7 @@ public class TripleTracerAdapterTest {
             Assert.assertEquals("value1", baggage.get("key1"));
             Assert.assertEquals("value2", baggage.get("key2"));
             Assert.assertEquals(2, baggage.size());
+            Assert.assertEquals(PROFILE_ID, sofaRequest.getRequestProp(ProfileConstants.PROFILE_ID_KEY));
         } finally {
             baggageField.set(null, originEnable);
             RpcInvokeContext.removeContext();

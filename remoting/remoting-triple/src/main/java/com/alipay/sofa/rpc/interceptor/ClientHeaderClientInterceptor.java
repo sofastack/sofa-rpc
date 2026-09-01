@@ -29,6 +29,7 @@ import com.alipay.sofa.rpc.core.request.SofaRequest;
 import com.alipay.sofa.rpc.core.response.SofaResponse;
 import com.alipay.sofa.rpc.event.ClientAsyncReceiveEvent;
 import com.alipay.sofa.rpc.event.EventBus;
+import com.alipay.sofa.rpc.profile.Profiles;
 import com.alipay.sofa.rpc.server.triple.TripleContants;
 import com.alipay.sofa.rpc.tracer.sofatracer.TripleTracerAdapter;
 import com.alipay.sofa.rpc.tracer.sofatracer.code.TracerResultCode;
@@ -109,8 +110,10 @@ public class ClientHeaderClientInterceptor implements ClientInterceptor {
                         try {
                             int messageId = receiveId.incrementAndGet();
                             if (messageId == 1) {
-                                context.put(INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO, System.nanoTime() -
-                                    startTimeNano);
+                                long firstResponseTime = System.nanoTime() - startTimeNano;
+                                context.put(INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO, firstResponseTime);
+                                Profiles.recordPhase(internalContext, INTERNAL_KEY_CLIENT_FIRST_STREAM_RESP_NANO,
+                                    firstResponseTime);
                             }
                             int messageSize = 0;
                             if (message instanceof GeneratedMessageV3) {
