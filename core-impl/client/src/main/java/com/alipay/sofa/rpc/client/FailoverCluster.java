@@ -67,6 +67,15 @@ public class FailoverCluster extends AbstractCluster {
                 providerInfo = select(request, invokedProviderInfos);
                 SofaResponse response = filterChain(providerInfo, request);
                 if (response != null) {
+                    // 检查是否是用户自定义的可重试异常
+                    Object appResponse = response.getAppResponse();
+                    if (appResponse instanceof SofaRpcException) {
+                        if (((SofaRpcException) appResponse).getErrorType() == RpcErrorType.CUSTOMER_RETRY_ERROR) {
+                            time++;
+                            throwable = (SofaRpcException) appResponse;
+                            continue;
+                        }
+                    }
                     if (throwable != null) {
                         if (LOGGER.isWarnEnabled(consumerConfig.getAppName())) {
                             LOGGER.warnWithApp(consumerConfig.getAppName(),
