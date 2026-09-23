@@ -291,6 +291,21 @@ public class RegistryUtils {
         return host;
     }
 
+    /**
+     * Get the effective port that should be registered to registry.
+     * Prefer virtualPort if configured, fallback to port.
+     *
+     * @param server the server config
+     * @return the effective port
+     */
+    public static int getServerPort(ServerConfig server) {
+        Integer port = server.getVirtualPort();
+        if (port == null) {
+            port = server.getPort();
+        }
+        return port;
+    }
+
     public static String buildUniqueName(AbstractInterfaceConfig config, String protocol) {
         if (RpcConstants.PROTOCOL_TYPE_BOLT.equals(protocol) || RpcConstants.PROTOCOL_TYPE_TR.equals(protocol)) {
             return ConfigUniqueNameGenerator.getUniqueName(config) + "@DEFAULT";

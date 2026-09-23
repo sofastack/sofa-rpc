@@ -20,9 +20,13 @@ import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoService;
 import com.alipay.sofa.rpc.bootstrap.dubbo.demo.DemoServiceImpl;
 import com.alipay.sofa.rpc.config.ApplicationConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
+import com.alipay.sofa.rpc.config.ServerConfig;
+import org.apache.dubbo.config.ProtocolConfig;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.lang.reflect.Method;
 
 /**
  * @author <a href=mailto:taobaorun@gmail.com>taobaorun</a>
@@ -49,5 +53,73 @@ public class DubboProviderBootstrapTest {
     @Test
     public void test_dubbo_service_version() {
         Assert.assertEquals("1.0.1", dubboProviderBootstrap.getProviderConfig().getParameter("version"));
+    }
+
+    @Test
+    public void testCopyServerFields_withVirtualHostAndPort() throws Exception {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.1")
+            .setVirtualPort(80);
+
+        ProtocolConfig protocolConfig = new ProtocolConfig();
+        invokeCopyServerFields(serverConfig, protocolConfig);
+
+        Assert.assertEquals("10.0.0.1", protocolConfig.getHost());
+        Assert.assertEquals(Integer.valueOf(80), protocolConfig.getPort());
+    }
+
+    @Test
+    public void testCopyServerFields_withoutVirtualHostAndPort() throws Exception {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("192.168.1.1")
+            .setPort(12200);
+
+        ProtocolConfig protocolConfig = new ProtocolConfig();
+        invokeCopyServerFields(serverConfig, protocolConfig);
+
+        Assert.assertEquals("192.168.1.1", protocolConfig.getHost());
+        Assert.assertEquals(Integer.valueOf(12200), protocolConfig.getPort());
+    }
+
+    @Test
+    public void testCopyServerFields_withVirtualHostOnly() throws Exception {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("0.0.0.0")
+            .setPort(12200)
+            .setVirtualHost("10.0.0.1");
+
+        ProtocolConfig protocolConfig = new ProtocolConfig();
+        invokeCopyServerFields(serverConfig, protocolConfig);
+
+        Assert.assertEquals("10.0.0.1", protocolConfig.getHost());
+        Assert.assertEquals(Integer.valueOf(12200), protocolConfig.getPort());
+    }
+
+    @Test
+    public void testCopyServerFields_withVirtualPortOnly() throws Exception {
+        ServerConfig serverConfig = new ServerConfig()
+            .setProtocol("dubbo")
+            .setHost("192.168.1.1")
+            .setPort(12200)
+            .setVirtualPort(80);
+
+        ProtocolConfig protocolConfig = new ProtocolConfig();
+        invokeCopyServerFields(serverConfig, protocolConfig);
+
+        Assert.assertEquals("192.168.1.1", protocolConfig.getHost());
+        Assert.assertEquals(Integer.valueOf(80), protocolConfig.getPort());
+    }
+
+    private void invokeCopyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig)
+        throws Exception {
+        Method method = DubboProviderBootstrap.class.getDeclaredMethod(
+            "copyServerFields", ServerConfig.class, ProtocolConfig.class);
+        method.setAccessible(true);
+        method.invoke(dubboProviderBootstrap, serverConfig, protocolConfig);
     }
 }
