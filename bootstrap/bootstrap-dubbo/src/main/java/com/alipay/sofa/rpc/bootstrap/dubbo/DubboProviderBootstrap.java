@@ -28,6 +28,7 @@ import com.alipay.sofa.rpc.config.MethodConfig;
 import com.alipay.sofa.rpc.config.ProviderConfig;
 import com.alipay.sofa.rpc.config.ServerConfig;
 import com.alipay.sofa.rpc.ext.Extension;
+import com.alipay.sofa.rpc.registry.utils.RegistryUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -116,8 +117,8 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
     private void copyServerFields(ServerConfig serverConfig, ProtocolConfig protocolConfig) {
         protocolConfig.setId(serverConfig.getId());
         protocolConfig.setName(serverConfig.getProtocol());
-        protocolConfig.setHost(serverConfig.getHost());
-        protocolConfig.setPort(serverConfig.getPort());
+        protocolConfig.setHost(RegistryUtils.getServerHost(serverConfig));
+        protocolConfig.setPort(RegistryUtils.getServerPort(serverConfig));
         protocolConfig.setAccepts(serverConfig.getAccepts());
         protocolConfig.setSerialization(serverConfig.getSerialization());
         if (!StringUtils.CONTEXT_SEP.equals(serverConfig.getContextPath())) {
@@ -194,8 +195,8 @@ public class DubboProviderBootstrap<T> extends ProviderBootstrap<T> {
                 List<String> urls = new ArrayList<String>();
                 for (ServerConfig server : servers) {
                     StringBuilder sb = new StringBuilder(200);
-                    sb.append(server.getProtocol()).append("://").append(server.getHost())
-                        .append(":").append(server.getPort()).append(server.getContextPath())
+                    sb.append(server.getProtocol()).append("://").append(RegistryUtils.getServerHost(server))
+                        .append(":").append(RegistryUtils.getServerPort(server)).append(server.getContextPath())
                         .append(providerConfig.getInterfaceId())
                         .append("?uniqueId=").append(providerConfig.getUniqueId())
                         .append(getKeyPairs("version", "1.0"))
